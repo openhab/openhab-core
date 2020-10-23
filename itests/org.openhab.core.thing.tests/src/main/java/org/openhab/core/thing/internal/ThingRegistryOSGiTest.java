@@ -38,6 +38,7 @@ import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingProvider;
 import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.BaseThingHandler;
@@ -146,6 +147,11 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
             public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
                 changedParameters = configurationParameters;
             }
+
+            @Override
+            public void initialize() {
+                updateStatus(ThingStatus.ONLINE);
+            }
         };
 
         thing.setHandler(thingHandler);
@@ -187,10 +193,10 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatCreateThingDelegatesToRegisteredThingHandlerFactory() {
         ThingTypeUID expectedThingTypeUID = THING_TYPE_UID;
-        ThingUID expectedThingUID = new ThingUID(THING_TYPE_UID, THING1_ID);
-        Configuration expectedConfiguration = new Configuration();
         ThingUID expectedBridgeUID = new ThingUID(THING_TYPE_UID, THING2_ID);
+        ThingUID expectedThingUID = new ThingUID(THING_TYPE_UID, expectedBridgeUID, THING1_ID);
         String expectedLabel = "Test Thing";
+        Configuration expectedConfiguration = new Configuration();
 
         AtomicReference<Thing> thingResultWrapper = new AtomicReference<>();
 

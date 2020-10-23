@@ -105,28 +105,15 @@ public class SseBroadcaster<@NonNull I> implements Closeable {
                 return;
             }
 
-            sink.send(event).exceptionally(th -> {
+            sink.send(event).exceptionally(throwable -> {
+                logger.debug("Sending event to sink failed", throwable);
+
                 close(sink);
 
                 // We are using a concurrent collection, so we are allowed to modify the collection asynchronous (we
                 // don't know if there is currently an iteration in progress or not, but it does not matter).
                 handleRemoval(sink);
 
-                final String thClass = th.getClass().toString();
-                final String message = th.getMessage();
-
-                if (thClass.equals("class org.eclipse.jetty.io.EofException")) {
-                    // The peer terminates the connection.
-                } else if (th instanceof IllegalStateException && message != null
-                        && (message.equals("The sink is already closed, unable to queue SSE event for send") //
-                                || message.equals("The sink has been already closed") //
-                                || message.equals("AsyncContext completed and/or Request lifecycle recycled"))) {
-                    // java.lang.IllegalStateException: The sink is already closed, unable to queue SSE event for send
-                    // java.lang.IllegalStateException: The sink has been already closed
-                    // java.lang.IllegalStateException: AsyncContext completed and/or Request lifecycle recycled
-                } else {
-                    logger.warn("failure", th);
-                }
                 return null;
             });
         });
@@ -145,10 +132,16 @@ public class SseBroadcaster<@NonNull I> implements Closeable {
     }
 
     private void close(final SseEventSink sink) {
+        if (sink.isClosed()) {
+            logger.debug("SSE event sink is already closed");
+            return;
+        }
+
         try {
+            logger.debug("Closing SSE event sink");
             sink.close();
         } catch (final RuntimeException ex) {
-            logger.debug("Closing a SSE event sink failed. Nothing we can do here...", ex);
+            logger.debug("Closing SSE event sink failed. Nothing we can do here...", ex);
         }
     }
 
@@ -158,8 +151,6 @@ public class SseBroadcaster<@NonNull I> implements Closeable {
     }
 
     private void notifyAboutRemoval(final SseEventSink sink, I info) {
-        listeners.forEach(listener -> {
-            listener.sseEventSinkRemoved(sink, info);
-        });
+        listeners.forEach(listener -> listener.sseEventSinkRemoved(sink, info));
     }
 }

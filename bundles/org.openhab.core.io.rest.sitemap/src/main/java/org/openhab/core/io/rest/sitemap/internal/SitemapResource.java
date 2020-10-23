@@ -185,6 +185,7 @@ public class SitemapResource
         this.subscriptions = subscriptions;
 
         broadcaster = new SseBroadcaster<>();
+        broadcaster.addListener(this);
 
         // The clean SSE subscriptions job sends an ALIVE event to all subscribers. This will trigger
         // an exception when the subscriber is dead, leading to the release of the SSE subscription
@@ -195,7 +196,7 @@ public class SitemapResource
         cleanSubscriptionsJob = scheduler.scheduleAtFixedRate(() -> {
             logger.debug("Run clean SSE subscriptions job");
             subscriptions.checkAliveClients();
-        }, 1, 5, TimeUnit.MINUTES);
+        }, 1, 2, TimeUnit.MINUTES);
     }
 
     @Deactivate
@@ -206,6 +207,7 @@ public class SitemapResource
             job.cancel(true);
             cleanSubscriptionsJob = null;
         }
+        broadcaster.removeListener(this);
         broadcaster.close();
     }
 

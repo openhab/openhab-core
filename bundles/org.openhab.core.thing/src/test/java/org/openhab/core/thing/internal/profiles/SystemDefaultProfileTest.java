@@ -42,15 +42,6 @@ public class SystemDefaultProfileTest {
     }
 
     @Test
-    public void testOnUpdate() {
-        SystemDefaultProfile profile = new SystemDefaultProfile(mockCallback);
-        profile.onStateUpdateFromItem(OnOffType.ON);
-
-        verify(mockCallback).handleUpdate(eq(OnOffType.ON));
-        verifyNoMoreInteractions(mockCallback);
-    }
-
-    @Test
     public void testStateUpdated() {
         SystemDefaultProfile profile = new SystemDefaultProfile(mockCallback);
         profile.onStateUpdateFromHandler(OnOffType.ON);

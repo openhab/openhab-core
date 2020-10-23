@@ -15,7 +15,6 @@ package org.openhab.core.model.lsp.internal;
 import java.io.File;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -53,26 +52,6 @@ public class MappingUriExtensions extends UriExtensions {
         Path absoluteConfigPath = configPath.toAbsolutePath();
         java.net.URI configPathURI = absoluteConfigPath.toUri();
         return removeTrailingSlash(configPathURI.toString());
-    }
-
-    @Override
-    public String toPath(URI uri) {
-        return toPath(java.net.URI.create(uri.toString()));
-    }
-
-    @Override
-    public String toPath(java.net.URI uri) {
-        java.net.URI ret = uri;
-        try {
-            ret = Paths.get(uri).toUri();
-        } catch (FileSystemNotFoundException e) {
-            // fall-back to the argument
-        }
-        String clientPath = removeTrailingSlash(ret.toASCIIString());
-        if (clientLocation != null) {
-            clientPath = clientPath.replace(serverLocation, clientLocation);
-        }
-        return clientPath;
     }
 
     @Override

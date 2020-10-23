@@ -96,7 +96,11 @@ public class I18nConfigOptionsProvider implements ConfigOptionProvider {
 
     private Collection<ParameterOption> getAvailable(@Nullable Locale locale,
             Function<Locale, ParameterOption> mapFunction) {
-        return Arrays.stream(Locale.getAvailableLocales()).map(l -> mapFunction.apply(l)).distinct()
-                .sorted(Comparator.comparing(a -> a.getLabel())).collect(Collectors.toList());
+        return Arrays.stream(Locale.getAvailableLocales()) //
+                .map(mapFunction) //
+                .distinct() //
+                .filter(po -> !po.getValue().isEmpty()) //
+                .sorted(Comparator.comparing(a -> a.getLabel())) //
+                .collect(Collectors.toList());
     }
 }

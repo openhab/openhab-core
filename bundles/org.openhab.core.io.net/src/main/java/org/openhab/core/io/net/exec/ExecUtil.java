@@ -14,12 +14,20 @@ package org.openhab.core.io.net.exec;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.lang.ProcessBuilder.Redirect;
+import java.time.Duration;
 import java.util.Arrays;
-import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.ThreadPoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,87 +36,112 @@ import org.slf4j.LoggerFactory;
  *
  * @author Pauli Anttila - Initial contribution
  * @author Kai Kreuzer - added exception logging
+ * @author Connor Petty - replaced delimiter usage with argument array
  */
+@NonNullByDefault
 public class ExecUtil {
 
     private static Logger logger = LoggerFactory.getLogger(ExecUtil.class);
 
-    /**
-     * Use this to separate between command and parameter, and also between parameters.
-     */
-    public static final String CMD_LINE_DELIMITER = "@@";
+    private static ExecutorService executor = ThreadPoolManager.getPool("ExecUtil");
 
     /**
      * <p>
-     * Executes <code>commandLine</code>. Sometimes (especially observed on MacOS) the commandLine isn't executed
-     * properly. In that cases another exec-method is to be used. To accomplish this please use the special delimiter
-     * '<code>@@</code>'. If <code>commandLine</code> contains this delimiter it is split into a String list and the
-     * special exec-method is used.
+     * Executes <code>commandLine</code>.
      *
      * <p>
      * A possible {@link IOException} gets logged but no further processing is done.
      *
      * @param commandLine the command line to execute
      */
-    public static void executeCommandLine(String commandLine) {
-        internalExecute(commandLine);
+    public static void executeCommandLine(String... commandLine) {
+        try {
+            new ProcessBuilder(commandLine).redirectError(Redirect.DISCARD).redirectOutput(Redirect.DISCARD).start();
+        } catch (IOException e) {
+            logger.warn("Error occurred when executing commandLine '{}'", commandLine, e);
+        }
     }
 
     /**
      * <p>
-     * Executes <code>commandLine</code> and return its result. Sometimes (especially observed on MacOS) the commandLine
-     * isn't executed properly. In that cases another exec-method is to be used. To accomplish this please use the
-     * special delimiter '<code>@@</code>'. If <code>commandLine</code> contains this delimiter it is split into a
-     * String list and the special exec-method is used.
+     * Executes <code>commandLine</code> and return its result.
      *
      * <p>
      * A possible {@link IOException} gets logged but no further processing is done.
      *
+     * @param timeout the max time to wait for a process to finish, null to wait indefinitely
      * @param commandLine the command line to execute
-     * @param timeout timeout for execution in milliseconds
-     * @return response data from executed command line or <code>null</code> if an error occurred
+     * @return response data from executed command line or <code>null</code> if a timeout or error occurred
      */
-    public static String executeCommandLineAndWaitResponse(String commandLine, int timeout) {
-        final Process process = internalExecute(commandLine);
-        if (process != null) {
-            try {
-                process.waitFor(timeout, TimeUnit.MILLISECONDS);
-                int exitCode = process.exitValue();
-                final StringBuilder result = new StringBuilder();
-                try (final BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(process.getInputStream()))) {
-                    String line = "";
-                    while ((line = reader.readLine()) != null) {
-                        result.append(line).append("\n");
-                    }
+    public static @Nullable String executeCommandLineAndWaitResponse(@Nullable Duration timeout,
+            String... commandLine) {
+
+        Process processTemp = null;
+        Future<String> outputFuture = null;
+        Future<String> errorFuture = null;
+        cleanup: try {
+            Process process = processTemp = new ProcessBuilder(commandLine).start();
+
+            outputFuture = executor.submit(() -> {
+                try (InputStream inputStream = process.getInputStream();
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                    StringWriter output = new StringWriter();
+                    reader.transferTo(output);
+                    return output.toString();
                 }
-                logger.debug("exit code '{}', result '{}'", exitCode, result);
-                return result.toString();
-            } catch (IOException e) {
-                logger.debug("I/O exception occurred when executing commandLine '{}'", commandLine, e);
-            } catch (InterruptedException e) {
-                logger.warn("Timeout occurred when executing commandLine '{}'", commandLine);
-                logger.debug("{}", e.getMessage(), e);
+            });
+
+            errorFuture = executor.submit(() -> {
+                try (InputStream inputStream = process.getErrorStream();
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                    StringWriter output = new StringWriter();
+                    reader.transferTo(output);
+                    return output.toString();
+                }
+            });
+            int exitCode;
+            if (timeout == null) {
+                exitCode = process.waitFor();
+            } else if (process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+                exitCode = process.exitValue();
+            } else {
+                logger.warn("Timeout occurred when executing commandLine '{}'", Arrays.toString(commandLine));
+                break cleanup;
             }
+            if (exitCode == 0) {
+                return outputFuture.get();
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("exit code '{}', result '{}', errors '{}'", exitCode, outputFuture.get(),
+                            errorFuture.get());
+                }
+                return null;
+            }
+        } catch (ExecutionException e) {
+            if (logger.isDebugEnabled()) {
+                logger.warn("Error occurred when executing commandLine '{}'", Arrays.toString(commandLine),
+                        e.getCause());
+            } else {
+                logger.warn("Error occurred when executing commandLine '{}'", Arrays.toString(commandLine));
+            }
+        } catch (InterruptedException e) {
+            logger.debug("commandLine '{}' was interrupted", Arrays.toString(commandLine), e);
+        } catch (IOException e) {
+            if (logger.isDebugEnabled()) {
+                logger.warn("Failed to execute commandLine '{}'", Arrays.toString(commandLine), e);
+            } else {
+                logger.warn("Failed to execute commandLine '{}'", Arrays.toString(commandLine));
+            }
+        }
+        if (processTemp != null && processTemp.isAlive()) {
+            processTemp.destroyForcibly();
+        }
+        if (outputFuture != null) {
+            outputFuture.cancel(true);
+        }
+        if (errorFuture != null) {
+            errorFuture.cancel(true);
         }
         return null;
-    }
-
-    private static @Nullable Process internalExecute(String commandLine) {
-        final Process process;
-        try {
-            if (commandLine.contains(CMD_LINE_DELIMITER)) {
-                final List<String> cmdArray = Arrays.asList(commandLine.split(CMD_LINE_DELIMITER));
-                process = new ProcessBuilder(cmdArray).start();
-                logger.debug("executed commandLine '{}'", cmdArray);
-            } else {
-                process = new ProcessBuilder(commandLine).start();
-                logger.debug("executed commandLine '{}'", commandLine);
-            }
-        } catch (IOException e) {
-            logger.debug("couldn't execute commandLine '{}'", commandLine, e);
-            return null;
-        }
-        return process;
     }
 }

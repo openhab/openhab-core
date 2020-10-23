@@ -60,27 +60,32 @@ public class Ephemeris {
         return EphemerisActionService.ephemerisManager.isInDayset(daysetName, day);
     }
 
-    @ActionDoc(text = "checks if today is bank holiday")
+    @ActionDoc(text = "checks if today is a bank holiday")
     public static boolean isBankHoliday() {
         return isBankHoliday(0);
     }
 
-    @ActionDoc(text = "checks if today plus or minus a given offset is bank holiday")
+    @ActionDoc(text = "checks if today plus or minus a given offset is a bank holiday")
     public static boolean isBankHoliday(int offset) {
         return isBankHoliday(ZonedDateTime.now().plusDays(offset));
     }
 
-    @ActionDoc(text = "checks a given day is bank holiday")
+    @ActionDoc(text = "checks a given day is a bank holiday")
     public static boolean isBankHoliday(ZonedDateTime day) {
         return EphemerisActionService.ephemerisManager.isBankHoliday(day);
     }
 
-    @ActionDoc(text = "checks if today plus or minus a given offset is bank holiday from a given userfile")
+    @ActionDoc(text = "checks if today is a bank holiday from a given userfile")
+    public static boolean isBankHoliday(String filename) {
+        return isBankHoliday(0, filename);
+    }
+
+    @ActionDoc(text = "checks if today plus or minus a given offset is a bank holiday from a given userfile")
     public static boolean isBankHoliday(int offset, String filename) {
         return isBankHoliday(ZonedDateTime.now().plusDays(offset), filename);
     }
 
-    @ActionDoc(text = "checks a given day is bank holiday from a given userfile")
+    @ActionDoc(text = "checks a given day is a bank holiday from a given userfile")
     public static boolean isBankHoliday(ZonedDateTime day, String filename) {
         try {
             return EphemerisActionService.ephemerisManager.isBankHoliday(day, filename);

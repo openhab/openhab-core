@@ -97,38 +97,6 @@ public class ProfileCallbackImpl implements ProfileCallback {
     }
 
     @Override
-    public void handleUpdate(State state) {
-        Thing thing = thingProvider.apply(link.getLinkedUID().getThingUID());
-        if (thing != null) {
-            final ThingHandler handler = thing.getHandler();
-            if (handler != null) {
-                if (ThingHandlerHelper.isHandlerInitialized(thing)) {
-                    logger.debug("Delegating update '{}' for item '{}' to handler for channel '{}'", state,
-                            link.getItemName(), link.getLinkedUID());
-                    safeCaller.create(handler, ThingHandler.class)
-                            .withTimeout(CommunicationManager.THINGHANDLER_EVENT_TIMEOUT).onTimeout(() -> {
-                                logger.warn("Handler for thing '{}' takes more than {}ms for handling an update",
-                                        handler.getThing().getUID(), CommunicationManager.THINGHANDLER_EVENT_TIMEOUT);
-                            }).build().handleUpdate(link.getLinkedUID(), state);
-                } else {
-                    logger.debug("Not delegating update '{}' for item '{}' to handler for channel '{}', "
-                            + "because handler is not initialized (thing must be in status UNKNOWN, ONLINE or OFFLINE but was {}).",
-                            state, link.getItemName(), link.getLinkedUID(), thing.getStatus());
-                }
-            } else {
-                logger.warn("Cannot delegate update '{}' for item '{}' to handler for channel '{}', "
-                        + "because no handler is assigned. Maybe the binding is not installed or not "
-                        + "propertly initialized.", state, link.getItemName(), link.getLinkedUID());
-            }
-        } else {
-            logger.warn(
-                    "Cannot delegate update '{}' for item '{}' to handler for channel '{}', "
-                            + "because no thing with the UID '{}' could be found.",
-                    state, link.getItemName(), link.getLinkedUID(), link.getLinkedUID().getThingUID());
-        }
-    }
-
-    @Override
     public void sendCommand(Command command) {
         eventPublisher
                 .post(ItemEventFactory.createCommandEvent(link.getItemName(), command, link.getLinkedUID().toString()));

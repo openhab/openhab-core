@@ -12,6 +12,9 @@
  */
 package org.openhab.core.automation.module.media.internal;
 
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
+
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -25,7 +28,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.audio.AudioManager;
-import org.openhab.core.audio.AudioSink;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.ModuleType;
@@ -89,14 +91,14 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
         ConfigDescriptionParameter param1 = ConfigDescriptionParameterBuilder
                 .create(PlayActionHandler.PARAM_SOUND, Type.TEXT).withRequired(true).withLabel("Sound")
                 .withDescription("the sound to play").withOptions(getSoundOptions()).withLimitToOptions(true).build();
-        return Stream.of(param1, getAudioSinkConfigDescParam(locale)).collect(Collectors.toList());
+        return List.of(param1, getAudioSinkConfigDescParam(locale));
     }
 
     private List<ConfigDescriptionParameter> getConfigSayDesc(@Nullable Locale locale) {
         ConfigDescriptionParameter param1 = ConfigDescriptionParameterBuilder
                 .create(SayActionHandler.PARAM_TEXT, Type.TEXT).withRequired(true).withLabel("Text")
                 .withDescription("the text to speak").build();
-        return Stream.of(param1, getAudioSinkConfigDescParam(locale)).collect(Collectors.toList());
+        return List.of(param1, getAudioSinkConfigDescParam(locale));
     }
 
     private ConfigDescriptionParameter getAudioSinkConfigDescParam(@Nullable Locale locale) {
@@ -125,6 +127,7 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
                     options.add(new ParameterOption(fileName, capitalizedSoundName));
                 }
             }
+            options.sort(comparing(o -> o.getLabel()));
         }
         return options;
     }
@@ -135,12 +138,9 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
      * @return a list of parameter options representing the audio sinks
      */
     private List<ParameterOption> getSinkOptions(@Nullable Locale locale) {
-        List<ParameterOption> options = new ArrayList<>();
-
-        for (AudioSink sink : audioManager.getAllSinks()) {
-            options.add(new ParameterOption(sink.getId(), sink.getLabel(locale)));
-        }
-        return options;
+        final Locale safeLocale = locale != null ? locale : Locale.getDefault();
+        return audioManager.getAllSinks().stream().sorted(comparing(s -> s.getLabel(safeLocale)))
+                .map(s -> new ParameterOption(s.getId(), s.getLabel(safeLocale))).collect(toList());
     }
 
     @Override

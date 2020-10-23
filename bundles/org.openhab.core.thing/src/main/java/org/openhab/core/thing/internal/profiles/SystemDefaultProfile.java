@@ -60,6 +60,5 @@ public class SystemDefaultProfile implements StateProfile {
 
     @Override
     public void onStateUpdateFromItem(State state) {
-        callback.handleUpdate(state);
     }
 }
