@@ -20,6 +20,7 @@
 
 		<feature>scr</feature>
 		<feature>eventadmin</feature>
+		<feature prerequisite=true>wrap</feature>.
 
 		<!-- Apache Commons -->
 		<bundle dependency="true">mvn:commons-codec/commons-codec/1.6</bundle>
@@ -28,7 +29,7 @@
 
 		<!-- Measurement -->
 		<bundle dependency="true">mvn:javax.measure/unit-api/2.0</bundle>
-		<bundle dependency="true">mvn:si.uom/si-units/2.0.1</bundle>
+		<bundle dependency="true">wrap:mvn:si.uom/si-units/2.0.1</bundle>
 		<bundle dependency="true">mvn:tech.units/indriya/2.0.4</bundle>
 
 		<!-- TODO: Unbundled libraries -->
