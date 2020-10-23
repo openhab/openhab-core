@@ -20,7 +20,7 @@
 
 		<feature>scr</feature>
 		<feature>eventadmin</feature>
-		<feature prerequisite=true>wrap</feature>
+		<feature prerequisite="true">wrap</feature>
 
 		<!-- Apache Commons -->
 		<bundle dependency="true">mvn:commons-codec/commons-codec/1.6</bundle>
