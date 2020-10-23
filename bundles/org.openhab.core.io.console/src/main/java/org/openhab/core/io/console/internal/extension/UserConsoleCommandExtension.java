@@ -135,7 +135,6 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                                     .filter(t -> args[2].equals(t.getName())).findAny();
                             if (userApiToken.isEmpty()) {
                                 String tokenString = userRegistry.addUserApiToken(user, args[2], args[3]);
-                                // inform the user that the token will not be printed again, and they should save it?
                                 console.println(tokenString);
                             } else {
                                 console.println("Cannot create API token: another one with the same name was found.");

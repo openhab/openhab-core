@@ -44,7 +44,7 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * responsible for their secure storage (for instance by hashing the password).
      *
      * @param username the username of the existing user
-     * @param password the new password
+     * @param newPassword the new password
      */
     public void changePassword(User user, String newPassword);
 

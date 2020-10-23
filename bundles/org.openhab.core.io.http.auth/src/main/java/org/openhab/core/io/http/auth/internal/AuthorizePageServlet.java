@@ -79,8 +79,8 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
 
         try {
             String message = "";
-            String scope = (params.containsKey("scope")) ? params.get("scope")[0] : "";
-            String clientId = (params.containsKey("client_id")) ? params.get("client_id")[0] : "";
+            String scope = params.containsKey("scope") ? params.get("scope")[0] : "";
+            String clientId = params.containsKey("client_id") ? params.get("client_id")[0] : "";
 
             // Basic sanity check
             if (scope.contains("<") || clientId.contains("<")) {
@@ -137,7 +137,7 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
             String clientId = params.get("redirect_uri")[0];
             String scope = params.get("scope")[0];
 
-            if (!("code".equals(responseType))) {
+            if (!"code".equals(responseType)) {
                 throw new AuthenticationException("unsupported_response_type");
             }
 
@@ -170,8 +170,8 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
             String authorizationCode = UUID.randomUUID().toString().replace("-", "");
 
             if (user instanceof ManagedUser) {
-                String codeChallenge = (params.containsKey("code_challenge")) ? params.get("code_challenge")[0] : null;
-                String codeChallengeMethod = (params.containsKey("code_challenge_method"))
+                String codeChallenge = params.containsKey("code_challenge") ? params.get("code_challenge")[0] : null;
+                String codeChallengeMethod = params.containsKey("code_challenge_method")
                         ? params.get("code_challenge_method")[0]
                         : null;
                 ManagedUser managedUser = (ManagedUser) user;
@@ -205,8 +205,8 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
     @Override
     protected String getPageBody(Map<String, String[]> params, String message, boolean hideForm) {
         String responseBody = pageTemplate.replace("{form_fields}", getFormFields(params));
-        String repeatPasswordFieldType = (isSignupMode()) ? "password" : "hidden";
-        String buttonLabel = (isSignupMode()) ? "Create Account" : "Sign In"; // TODO: i18n
+        String repeatPasswordFieldType = isSignupMode() ? "password" : "hidden";
+        String buttonLabel = isSignupMode() ? "Create Account" : "Sign In"; // TODO: i18n
         responseBody = responseBody.replace("{message}", message);
         responseBody = responseBody.replace("{formAction}", "/auth");
         responseBody = responseBody.replace("{formClass}", "show");
@@ -223,16 +223,16 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
     protected String getFormFields(Map<String, String[]> params) {
         String hiddenFormFields = "";
 
-        if (!params.containsKey(("redirect_uri"))) {
+        if (!params.containsKey("redirect_uri")) {
             throw new IllegalArgumentException("invalid_request");
         }
-        if (!params.containsKey(("response_type"))) {
+        if (!params.containsKey("response_type")) {
             throw new IllegalArgumentException("unsupported_response_type");
         }
-        if (!params.containsKey(("client_id"))) {
+        if (!params.containsKey("client_id")) {
             throw new IllegalArgumentException("unauthorized_client");
         }
-        if (!params.containsKey(("scope"))) {
+        if (!params.containsKey("scope")) {
             throw new IllegalArgumentException("invalid_scope");
         }
         String csrfToken = addCsrfToken();
@@ -240,9 +240,9 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
         String responseType = params.get("response_type")[0];
         String clientId = params.get("client_id")[0];
         String scope = params.get("scope")[0];
-        String state = (params.containsKey("state")) ? params.get("state")[0] : null;
-        String codeChallenge = (params.containsKey("code_challenge")) ? params.get("code_challenge")[0] : null;
-        String codeChallengeMethod = (params.containsKey("code_challenge_method"))
+        String state = params.containsKey("state") ? params.get("state")[0] : null;
+        String codeChallenge = params.containsKey("code_challenge") ? params.get("code_challenge")[0] : null;
+        String codeChallengeMethod = params.containsKey("code_challenge_method")
                 ? params.get("code_challenge_method")[0]
                 : null;
         hiddenFormFields += "<input type=\"hidden\" name=\"csrf_token\" value=\"" + csrfToken + "\">";

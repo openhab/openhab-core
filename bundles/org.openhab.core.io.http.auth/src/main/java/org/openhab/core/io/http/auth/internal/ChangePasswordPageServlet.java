@@ -81,50 +81,48 @@ public class ChangePasswordPageServlet extends AbstractAuthPageServlet {
     @Override
     protected void doPost(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
             throws ServletException, IOException {
-        if (req != null && resp != null) {
-            Map<String, String[]> params = req.getParameterMap();
-            try {
-                if (!params.containsKey("username")) {
-                    throw new AuthenticationException("no username");
-                }
-                if (!params.containsKey("password")) {
-                    throw new AuthenticationException("no password");
-                }
-                if (!params.containsKey("new_password")) {
-                    throw new AuthenticationException("no new password");
-                }
-                if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
-                    throw new AuthenticationException("CSRF check failed");
-                }
-
-                removeCsrfToken(params.get("csrf_token")[0]);
-
-                String username = params.get("username")[0];
-                String password = params.get("password")[0];
-                String newPassword = params.get("new_password")[0];
-
-                if (!params.containsKey("password_repeat") || !newPassword.equals(params.get("password_repeat")[0])) {
-                    resp.setContentType("text/html;charset=UTF-8");
-                    // TODO: i18n
-                    resp.getWriter().append(getPageBody(params, "Passwords don't match, please try again.", false));
-                    resp.getWriter().close();
-                    return;
-                }
-
-                User user = login(username, password);
-
-                if (user instanceof ManagedUser) {
-                    userRegistry.changePassword(user, newPassword);
-                } else {
-                    throw new AuthenticationException("User is not managed");
-                }
-
-                resp.setContentType("text/html;charset=UTF-8");
-                resp.getWriter().append(getResultPageBody(params, "Password changed.")); // TODO: i18n
-                resp.getWriter().close();
-            } catch (AuthenticationException e) {
-                processFailedLogin(resp, params, e.getMessage());
+        Map<String, String[]> params = req.getParameterMap();
+        try {
+            if (!params.containsKey("username")) {
+                throw new AuthenticationException("no username");
             }
+            if (!params.containsKey("password")) {
+                throw new AuthenticationException("no password");
+            }
+            if (!params.containsKey("new_password")) {
+                throw new AuthenticationException("no new password");
+            }
+            if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
+                throw new AuthenticationException("CSRF check failed");
+            }
+
+            removeCsrfToken(params.get("csrf_token")[0]);
+
+            String username = params.get("username")[0];
+            String password = params.get("password")[0];
+            String newPassword = params.get("new_password")[0];
+
+            if (!params.containsKey("password_repeat") || !newPassword.equals(params.get("password_repeat")[0])) {
+                resp.setContentType("text/html;charset=UTF-8");
+                // TODO: i18n
+                resp.getWriter().append(getPageBody(params, "Passwords don't match, please try again.", false));
+                resp.getWriter().close();
+                return;
+            }
+
+            User user = login(username, password);
+
+            if (user instanceof ManagedUser) {
+                userRegistry.changePassword(user, newPassword);
+            } else {
+                throw new AuthenticationException("User is not managed");
+            }
+
+            resp.setContentType("text/html;charset=UTF-8");
+            resp.getWriter().append(getResultPageBody(params, "Password changed.")); // TODO: i18n
+            resp.getWriter().close();
+        } catch (AuthenticationException e) {
+            processFailedLogin(resp, params, e.getMessage());
         }
     }
 

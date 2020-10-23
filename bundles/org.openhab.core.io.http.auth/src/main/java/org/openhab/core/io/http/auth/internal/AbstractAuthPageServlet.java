@@ -75,7 +75,7 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
             try (InputStream stream = resource.openStream()) {
                 pageTemplate = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
             } catch (IOException e) {
-                throw new UncheckedIOException(e);
+                throw new UncheckedIOException("Cannot load page template", e);
             }
         }
     }

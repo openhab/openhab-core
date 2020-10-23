@@ -71,7 +71,7 @@ public class ManagedUser implements User {
     /**
      * Alters the password hash.
      *
-     * @param the new password hash
+     * @param passwordHash the new password hash
      */
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;

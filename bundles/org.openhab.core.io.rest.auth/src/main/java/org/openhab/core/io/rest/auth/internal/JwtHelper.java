@@ -150,8 +150,7 @@ public class JwtHelper {
             String username = jwtClaims.getSubject();
             List<String> roles = jwtClaims.getStringListClaimValue("role");
             String scope = jwtClaims.getStringClaimValue("scope");
-            Authentication auth = new Authentication(username, roles.toArray(new String[roles.size()]), scope);
-            return auth;
+            return new Authentication(username, roles.toArray(new String[roles.size()]), scope);
         } catch (InvalidJwtException | MalformedClaimException e) {
             throw new AuthenticationException("Error while processing JWT token", e);
         }
