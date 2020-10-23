@@ -210,7 +210,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
         }
 
         ManagedUser managedUser = (ManagedUser) user;
-        managedUser.getSessions().add(session);
+        managedUser.getSessions().remove(session);
         update(user);
     }
 
