@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.internal.commands;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This class is base for all automation commands. It defines common functionality for an automation command. Each class
  * of commands is responsible for a group of commands, that are equivalent but each of them is related to a different
@@ -19,6 +21,7 @@ package org.openhab.core.automation.internal.commands;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public abstract class AutomationCommand {
 
     /**

@@ -14,12 +14,10 @@ package org.openhab.core.automation.internal.commands;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Rule;
@@ -84,96 +82,41 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
     /**
      * This field holds the reference to the {@code RuleRegistry} providing the {@code Rule} automation objects.
      */
-    protected @NonNullByDefault({}) RuleRegistry ruleRegistry;
+    protected final RuleRegistry ruleRegistry;
 
     /**
      * This field holds the reference to the {@code RuleManager}.
      */
-    protected @NonNullByDefault({}) RuleManager ruleManager;
+    protected final RuleManager ruleManager;
 
     /**
      * This field holds the reference to the {@code TemplateRegistry} providing the {@code Template} automation objects.
      */
-    protected @NonNullByDefault({}) TemplateRegistry<@NonNull RuleTemplate> templateRegistry;
+    protected final TemplateRegistry<RuleTemplate> templateRegistry;
 
     /**
      * This field holds the reference to the {@code ModuleTypeRegistry} providing the {@code ModuleType} automation
      * objects.
      */
-    protected @NonNullByDefault({}) ModuleTypeRegistry moduleTypeRegistry;
+    protected final ModuleTypeRegistry moduleTypeRegistry;
 
-    /**
-     * Activating this component - called from DS.
-     *
-     * @param componentContext
-     */
     @Activate
-    protected void activate(ComponentContext componentContext) {
-        super.initialize(componentContext.getBundleContext(), moduleTypeRegistry, templateRegistry, ruleRegistry);
+    public AutomationCommandsPluggable(ComponentContext componentContext, //
+            final @Reference RuleRegistry ruleRegistry, //
+            final @Reference ModuleTypeRegistry moduleTypeRegistry, //
+            final @Reference TemplateRegistry<RuleTemplate> templateRegistry, //
+            final @Reference RuleManager ruleManager) {
+        this.ruleRegistry = ruleRegistry;
+        this.moduleTypeRegistry = moduleTypeRegistry;
+        this.templateRegistry = templateRegistry;
+        this.ruleManager = ruleManager;
+
+        initialize(componentContext.getBundleContext(), moduleTypeRegistry, templateRegistry, ruleRegistry);
     }
 
-    /**
-     * Deactivating this component - called from DS.
-     */
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         super.dispose();
-    }
-
-    /**
-     * Bind the {@link RuleRegistry} service - called from DS.
-     *
-     * @param ruleRegistry ruleRegistry service.
-     */
-    @Reference
-    protected void setRuleRegistry(RuleRegistry ruleRegistry) {
-        this.ruleRegistry = ruleRegistry;
-    }
-
-    /**
-     * Bind the {@link ModuleTypeRegistry} service - called from DS.
-     *
-     * @param moduleTypeRegistry moduleTypeRegistry service.
-     */
-    @Reference
-    protected void setModuleTypeRegistry(ModuleTypeRegistry moduleTypeRegistry) {
-        this.moduleTypeRegistry = moduleTypeRegistry;
-    }
-
-    /**
-     * Bind the {@link TemplateRegistry} service - called from DS.
-     *
-     * @param templateRegistry templateRegistry service.
-     */
-    @Reference
-    protected void setTemplateRegistry(TemplateRegistry<RuleTemplate> templateRegistry) {
-        this.templateRegistry = templateRegistry;
-    }
-
-    /**
-     * Bind the {@link RuleManager} service - called from DS.
-     *
-     * @param ruleManager RuleManager service.
-     */
-    @Reference
-    protected void setRuleManager(RuleManager ruleManager) {
-        this.ruleManager = ruleManager;
-    }
-
-    protected void unsetRuleRegistry(RuleRegistry ruleRegistry) {
-        this.ruleRegistry = null;
-    }
-
-    protected void unsetModuleTypeRegistry(ModuleTypeRegistry moduleTypeRegistry) {
-        this.moduleTypeRegistry = null;
-    }
-
-    protected void unsetTemplateRegistry(TemplateRegistry<RuleTemplate> templateRegistry) {
-        this.templateRegistry = null;
-    }
-
-    protected void unsetRuleManager(RuleManager ruleManager) {
-        this.ruleManager = null;
     }
 
     @Override
@@ -247,86 +190,59 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
 
     @Override
     public @Nullable Rule getRule(String uid) {
-        if (ruleRegistry != null) {
-            return ruleRegistry.get(uid);
-        }
-        return null;
+        return ruleRegistry.get(uid);
     }
 
     @Override
     public @Nullable RuleTemplate getTemplate(String templateUID, @Nullable Locale locale) {
-        if (templateRegistry != null) {
-            return templateRegistry.get(templateUID, locale);
-        }
-        return null;
+        return templateRegistry.get(templateUID, locale);
     }
 
     @Override
     public Collection<RuleTemplate> getTemplates(@Nullable Locale locale) {
-        if (templateRegistry != null) {
-            return templateRegistry.getAll(locale);
-        }
-        return Collections.emptyList();
+        return templateRegistry.getAll(locale);
     }
 
     @Override
     public @Nullable ModuleType getModuleType(String typeUID, @Nullable Locale locale) {
-        if (moduleTypeRegistry != null) {
-            return moduleTypeRegistry.get(typeUID, locale);
-        }
-        return null;
+        return moduleTypeRegistry.get(typeUID, locale);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<TriggerType> getTriggers(@Nullable Locale locale) {
-        if (moduleTypeRegistry != null) {
-            return moduleTypeRegistry.getTriggers(locale);
-        }
-        return Collections.emptyList();
+        return moduleTypeRegistry.getTriggers(locale);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<ConditionType> getConditions(@Nullable Locale locale) {
-        if (moduleTypeRegistry != null) {
-            return moduleTypeRegistry.getConditions(locale);
-        }
-        return Collections.emptyList();
+        return moduleTypeRegistry.getConditions(locale);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<ActionType> getActions(@Nullable Locale locale) {
-        if (moduleTypeRegistry != null) {
-            return moduleTypeRegistry.getActions(locale);
-        }
-        return Collections.emptyList();
+        return moduleTypeRegistry.getActions(locale);
     }
 
     @Override
     public String removeRule(String uid) {
-        if (ruleRegistry != null) {
-            if (ruleRegistry.remove(uid) != null) {
-                return AutomationCommand.SUCCESS;
-            } else {
-                return String.format("Rule with id '%s' does not exist.", uid);
-            }
+        if (ruleRegistry.remove(uid) != null) {
+            return AutomationCommand.SUCCESS;
+        } else {
+            return String.format("Rule with id '%s' does not exist.", uid);
         }
-        return String.format("%s! RuleRegistry not available!", AutomationCommand.FAIL);
     }
 
     @Override
     public String removeRules(String ruleFilter) {
-        if (ruleRegistry != null) {
-            for (Rule r : ruleRegistry.getAll()) {
-                if (r.getUID().contains(ruleFilter)) {
-                    ruleRegistry.remove(r.getUID());
-                }
+        for (Rule r : ruleRegistry.getAll()) {
+            if (r.getUID().contains(ruleFilter)) {
+                ruleRegistry.remove(r.getUID());
             }
-            return AutomationCommand.SUCCESS;
         }
-        return String.format("%s! RuleRegistry not available!", AutomationCommand.FAIL);
+        return AutomationCommand.SUCCESS;
     }
 
     @Override
@@ -408,11 +324,7 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
 
     @Override
     public Collection<Rule> getRules() {
-        if (ruleRegistry != null) {
-            return ruleRegistry.getAll();
-        } else {
-            return Collections.emptyList();
-        }
+        return ruleRegistry.getAll();
     }
 
     @Override
