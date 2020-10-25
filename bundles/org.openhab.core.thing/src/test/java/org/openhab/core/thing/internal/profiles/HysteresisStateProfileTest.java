@@ -51,6 +51,11 @@ import org.openhab.core.types.UnDefType;
  */
 public class HysteresisStateProfileTest {
 
+    private static final BigDecimal BIGDECIMAL_TEN = BigDecimal.valueOf(10);
+    private static final BigDecimal BIGDECIMAL_FOURTY = BigDecimal.valueOf(40);
+    private static final PercentType PERCENT_TYPE_TEN = new PercentType(BIGDECIMAL_TEN);
+    private static final PercentType PERCENT_TYPE_TWENTY_FIVE = new PercentType(BigDecimal.valueOf(25));
+
     @NonNullByDefault
     public static class ParameterSet {
         public final List<State> states;
@@ -77,58 +82,50 @@ public class HysteresisStateProfileTest {
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][] { //
                 // lower bound = upper bound = 10, one state update / command
-                { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.OFF), BigDecimal.valueOf(10),
-                        null) }, //
-                { new ParameterSet(List.of(new PercentType(BigDecimal.valueOf(25))), List.of(OnOffType.OFF),
-                        BigDecimal.valueOf(10), null) }, //
-                { new ParameterSet(List.of(new PercentType(BigDecimal.valueOf(10))), List.of(OnOffType.ON),
-                        BigDecimal.valueOf(10), null) }, //
-                { new ParameterSet(List.of(PercentType.ZERO), List.of(OnOffType.ON), BigDecimal.valueOf(10), null) }, //
+                { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.ON), BIGDECIMAL_TEN, null) }, //
+                { new ParameterSet(List.of(PERCENT_TYPE_TWENTY_FIVE), List.of(OnOffType.ON), BIGDECIMAL_TEN, null) }, //
+                { new ParameterSet(List.of(PERCENT_TYPE_TEN), List.of(OnOffType.OFF), BIGDECIMAL_TEN, null) }, //
+                { new ParameterSet(List.of(PercentType.ZERO), List.of(OnOffType.OFF), BIGDECIMAL_TEN, null) }, //
                 // lower bound = upper bound = 40, one state update / command
-                { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.OFF), BigDecimal.valueOf(40),
+                { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.ON), BIGDECIMAL_FOURTY, null) }, //
+                { new ParameterSet(List.of(new PercentType(BIGDECIMAL_FOURTY)), List.of(OnOffType.OFF),
+                        BIGDECIMAL_FOURTY, null) }, //
+                { new ParameterSet(List.of(PERCENT_TYPE_TWENTY_FIVE), List.of(OnOffType.OFF), BIGDECIMAL_FOURTY,
                         null) }, //
-                { new ParameterSet(List.of(new PercentType(BigDecimal.valueOf(40))), List.of(OnOffType.ON),
-                        BigDecimal.valueOf(40), null) }, //
-                { new ParameterSet(List.of(new PercentType(BigDecimal.valueOf(25))), List.of(OnOffType.ON),
-                        BigDecimal.valueOf(40), null) }, //
-                { new ParameterSet(List.of(PercentType.ZERO), List.of(OnOffType.ON), BigDecimal.valueOf(40), null) }, //
+                { new ParameterSet(List.of(PercentType.ZERO), List.of(OnOffType.OFF), BIGDECIMAL_FOURTY, null) }, //
                 // lower bound = 10; upper bound = 40, one state update / command
-                { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.OFF), BigDecimal.valueOf(10),
-                        BigDecimal.valueOf(40)) }, //
-                { new ParameterSet(List.of(new PercentType(BigDecimal.valueOf(25))), List.of(UnDefType.UNDEF),
-                        BigDecimal.valueOf(10), BigDecimal.valueOf(40)) }, //
-                { new ParameterSet(List.of(PercentType.ZERO), List.of(OnOffType.ON), BigDecimal.valueOf(10),
-                        BigDecimal.valueOf(40)) }, //
+                { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.ON), BIGDECIMAL_TEN,
+                        BIGDECIMAL_FOURTY) }, //
+                { new ParameterSet(List.of(PERCENT_TYPE_TWENTY_FIVE), List.of(UnDefType.UNDEF), BIGDECIMAL_TEN,
+                        BIGDECIMAL_FOURTY) }, //
+                { new ParameterSet(List.of(PercentType.ZERO), List.of(OnOffType.OFF), BIGDECIMAL_TEN,
+                        BIGDECIMAL_FOURTY) }, //
                 // lower bound = 10; upper bound = 40, two state updates / commands results in changes
                 { new ParameterSet(List.of(PercentType.HUNDRED, PercentType.HUNDRED),
-                        List.of(OnOffType.OFF, OnOffType.OFF), BigDecimal.valueOf(10), BigDecimal.valueOf(40)) }, //
-                { new ParameterSet(List.of(PercentType.HUNDRED, new PercentType(BigDecimal.valueOf(25))),
-                        List.of(OnOffType.OFF, OnOffType.OFF), BigDecimal.valueOf(10), BigDecimal.valueOf(40)) }, //
-                { new ParameterSet(List.of(PercentType.HUNDRED, PercentType.ZERO), List.of(OnOffType.OFF, OnOffType.ON),
-                        BigDecimal.valueOf(10), BigDecimal.valueOf(40)) }, //
+                        List.of(OnOffType.ON, OnOffType.ON), BIGDECIMAL_TEN, BIGDECIMAL_FOURTY) }, //
+                { new ParameterSet(List.of(PercentType.HUNDRED, PERCENT_TYPE_TWENTY_FIVE),
+                        List.of(OnOffType.ON, OnOffType.ON), BIGDECIMAL_TEN, BIGDECIMAL_FOURTY) }, //
+                { new ParameterSet(List.of(PercentType.HUNDRED, PercentType.ZERO), List.of(OnOffType.ON, OnOffType.OFF),
+                        BIGDECIMAL_TEN, BIGDECIMAL_FOURTY) }, //
                 // lower bound = 10; upper bound = 40, two state updates / commands results in changes
-                { new ParameterSet(List.of(new PercentType(BigDecimal.valueOf(25)), PercentType.HUNDRED),
-                        List.of(UnDefType.UNDEF, OnOffType.OFF), BigDecimal.valueOf(10), BigDecimal.valueOf(40)) }, //
-                { new ParameterSet(
-                        List.of(new PercentType(BigDecimal.valueOf(25)), new PercentType(BigDecimal.valueOf(25))),
-                        List.of(UnDefType.UNDEF, UnDefType.UNDEF), BigDecimal.valueOf(10), BigDecimal.valueOf(40)) }, //
-                { new ParameterSet(List.of(new PercentType(BigDecimal.valueOf(25)), PercentType.ZERO),
-                        List.of(UnDefType.UNDEF, OnOffType.ON), BigDecimal.valueOf(10), BigDecimal.valueOf(40)) }, //
+                { new ParameterSet(List.of(PERCENT_TYPE_TWENTY_FIVE, PercentType.HUNDRED),
+                        List.of(UnDefType.UNDEF, OnOffType.ON), BIGDECIMAL_TEN, BIGDECIMAL_FOURTY) }, //
+                { new ParameterSet(List.of(PERCENT_TYPE_TWENTY_FIVE, PERCENT_TYPE_TWENTY_FIVE),
+                        List.of(UnDefType.UNDEF, UnDefType.UNDEF), BIGDECIMAL_TEN, BIGDECIMAL_FOURTY) }, //
+                { new ParameterSet(List.of(PERCENT_TYPE_TWENTY_FIVE, PercentType.ZERO),
+                        List.of(UnDefType.UNDEF, OnOffType.OFF), BIGDECIMAL_TEN, BIGDECIMAL_FOURTY) }, //
                 // lower bound = 10; upper bound = 40, two state updates / commands results in changes
-                { new ParameterSet(List.of(PercentType.ZERO, PercentType.HUNDRED), List.of(OnOffType.ON, OnOffType.OFF),
-                        BigDecimal.valueOf(10), BigDecimal.valueOf(40)) }, //
-                { new ParameterSet(List.of(PercentType.ZERO, new PercentType(BigDecimal.valueOf(25))),
-                        List.of(OnOffType.ON, OnOffType.ON), BigDecimal.valueOf(10), BigDecimal.valueOf(40)) }, //
-                { new ParameterSet(List.of(PercentType.ZERO, PercentType.ZERO), List.of(OnOffType.ON, OnOffType.ON),
-                        BigDecimal.valueOf(10), BigDecimal.valueOf(40)) }, //
+                { new ParameterSet(List.of(PercentType.ZERO, PercentType.HUNDRED), List.of(OnOffType.OFF, OnOffType.ON),
+                        BIGDECIMAL_TEN, BIGDECIMAL_FOURTY) }, //
+                { new ParameterSet(List.of(PercentType.ZERO, PERCENT_TYPE_TWENTY_FIVE),
+                        List.of(OnOffType.OFF, OnOffType.OFF), BIGDECIMAL_TEN, BIGDECIMAL_FOURTY) }, //
+                { new ParameterSet(List.of(PercentType.ZERO, PercentType.ZERO), List.of(OnOffType.OFF, OnOffType.OFF),
+                        BIGDECIMAL_TEN, BIGDECIMAL_FOURTY) }, //
                 // lower bound = 10; upper bound = 40, three state updates / commands -> anti-flapping
-                { new ParameterSet(
-                        List.of(PercentType.HUNDRED, new PercentType(BigDecimal.valueOf(25)), PercentType.HUNDRED),
-                        List.of(OnOffType.OFF, OnOffType.OFF, OnOffType.OFF), BigDecimal.valueOf(10),
-                        BigDecimal.valueOf(40)) }, //
-                { new ParameterSet(List.of(PercentType.ZERO, new PercentType(BigDecimal.valueOf(25)), PercentType.ZERO),
-                        List.of(OnOffType.ON, OnOffType.ON, OnOffType.ON), BigDecimal.valueOf(10),
-                        BigDecimal.valueOf(40)) } //
+                { new ParameterSet(List.of(PercentType.HUNDRED, PERCENT_TYPE_TWENTY_FIVE, PercentType.HUNDRED),
+                        List.of(OnOffType.ON, OnOffType.ON, OnOffType.ON), BIGDECIMAL_TEN, BIGDECIMAL_FOURTY) }, //
+                { new ParameterSet(List.of(PercentType.ZERO, PERCENT_TYPE_TWENTY_FIVE, PercentType.ZERO),
+                        List.of(OnOffType.OFF, OnOffType.OFF, OnOffType.OFF), BIGDECIMAL_TEN, BIGDECIMAL_FOURTY) } //
         });
     }
 
@@ -189,9 +186,9 @@ public class HysteresisStateProfileTest {
         }
     }
 
-    private void verifySendUpdate(StateProfile profile, State state, State result) {
+    private void verifySendUpdate(StateProfile profile, State state, State expectedState) {
         reset(mockCallback);
         profile.onStateUpdateFromHandler(state);
-        verify(mockCallback, times(1)).sendUpdate(eq(result));
+        verify(mockCallback, times(1)).sendUpdate(eq(expectedState));
     }
 }

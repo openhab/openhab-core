@@ -12,8 +12,6 @@
  */
 package org.openhab.core.thing.internal.profiles;
 
-import static org.openhab.core.thing.profiles.SystemProfiles.HYSTERESIS;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.thing.internal.profiles.config.HysteresisStateProfileConfig;
@@ -21,6 +19,7 @@ import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.StateProfile;
+import org.openhab.core.thing.profiles.SystemProfiles;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
@@ -60,7 +59,7 @@ public class HysteresisStateProfile implements StateProfile {
 
     @Override
     public ProfileTypeUID getProfileTypeUID() {
-        return HYSTERESIS;
+        return SystemProfiles.HYSTERESIS;
     }
 
     @Override
@@ -96,12 +95,9 @@ public class HysteresisStateProfile implements StateProfile {
         if (value instanceof Number) {
             double theValue = ((Number) value).doubleValue();
             if (theValue <= lower) {
-                newType = OnOffType.ON;
+                newType = previousType = OnOffType.OFF;
             } else if (theValue >= upper) {
-                newType = OnOffType.OFF;
-            }
-            if (newType != previousType) {
-                previousType = newType;
+                newType = previousType = OnOffType.ON;
             }
         }
         return newType;
