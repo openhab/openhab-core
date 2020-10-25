@@ -28,7 +28,7 @@ import org.openhab.core.auth.GenericUser;
  * @author Yannick Schaus - initial contribution
  */
 @NonNullByDefault
-public class JwtSecurityContext implements SecurityContext {
+public class JwtSecurityContext implements AuthenticationSecurityContext {
 
     Authentication authentication;
 
@@ -54,5 +54,10 @@ public class JwtSecurityContext implements SecurityContext {
     @Override
     public String getAuthenticationScheme() {
         return "JWT";
+    }
+
+    @Override
+    public Authentication getAuthentication() {
+        return authentication;
     }
 }

@@ -13,18 +13,11 @@
 package org.openhab.core.io.http.auth.internal;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
@@ -32,7 +25,6 @@ import javax.ws.rs.core.HttpHeaders;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.http.HttpStatus;
-import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationProvider;
 import org.openhab.core.auth.ManagedUser;
@@ -40,7 +32,6 @@ import org.openhab.core.auth.PendingToken;
 import org.openhab.core.auth.Role;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
-import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -64,72 +55,146 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(immediate = true)
-public class AuthorizePageServlet extends HttpServlet {
+public class AuthorizePageServlet extends AbstractAuthPageServlet {
 
     private static final long serialVersionUID = 5340598701104679843L;
 
     private final Logger logger = LoggerFactory.getLogger(AuthorizePageServlet.class);
 
-    private HashMap<String, Instant> csrfTokens = new HashMap<>();
-
-    private HttpService httpService;
-    private UserRegistry userRegistry;
-    private AuthenticationProvider authProvider;
-    @Nullable
-    private Instant lastAuthenticationFailure;
-    private int authenticationFailureCount = 0;
-
-    private String pageTemplate;
-
     @Activate
     public AuthorizePageServlet(BundleContext bundleContext, @Reference HttpService httpService,
             @Reference UserRegistry userRegistry, @Reference AuthenticationProvider authProvider) {
-        this.httpService = httpService;
-        this.userRegistry = userRegistry;
-        this.authProvider = authProvider;
-
-        pageTemplate = "";
+        super(bundleContext, httpService, userRegistry, authProvider);
         try {
-            URL resource = bundleContext.getBundle().getResource("pages/authorize.html");
-            if (resource != null) {
-                try {
-                    pageTemplate = new String(resource.openStream().readAllBytes(), StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-                httpService.registerServlet("/auth", this, null, null);
-            }
+            httpService.registerServlet("/auth", this, null, null);
         } catch (NamespaceException | ServletException e) {
             logger.error("Error during authorization page registration: {}", e.getMessage());
         }
     }
 
     @Override
-    protected void doGet(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
+    protected void doGet(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
             throws ServletException, IOException {
-        if (req != null && resp != null) {
-            Map<String, String[]> params = req.getParameterMap();
+        Map<String, String[]> params = req.getParameterMap();
 
-            try {
-                String message = "";
-                String scope = (params.containsKey("scope")) ? params.get("scope")[0] : "";
-                String clientId = (params.containsKey("client_id")) ? params.get("client_id")[0] : "";
+        try {
+            String message = "";
+            String scope = params.containsKey("scope") ? params.get("scope")[0] : "";
+            String clientId = params.containsKey("client_id") ? params.get("client_id")[0] : "";
 
-                // Basic sanity check
-                if (scope.contains("<") || clientId.contains("<")) {
-                    throw new IllegalArgumentException("invalid_request");
+            // Basic sanity check
+            if (scope.contains("<") || clientId.contains("<")) {
+                throw new IllegalArgumentException("invalid_request");
+            }
+
+            // TODO: i18n
+            if (isSignupMode()) {
+                message = "Create a first administrator account to continue.";
+            } else {
+                message = String.format("Sign in to grant <b>%s</b> access to <b>%s</b>:", scope, clientId);
+            }
+            resp.setContentType("text/html;charset=UTF-8");
+            resp.getWriter().append(getPageBody(params, message, false));
+            resp.getWriter().close();
+        } catch (Exception e) {
+            resp.setContentType("text/plain;charset=UTF-8");
+            resp.getWriter().append(e.getMessage());
+            resp.getWriter().close();
+        }
+    }
+
+    @Override
+    protected void doPost(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
+            throws ServletException, IOException {
+        Map<String, String[]> params = req.getParameterMap();
+        try {
+            if (!params.containsKey("username")) {
+                throw new AuthenticationException("no username");
+            }
+            if (!params.containsKey("password")) {
+                throw new AuthenticationException("no password");
+            }
+            if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
+                throw new AuthenticationException("CSRF check failed");
+            }
+            if (!params.containsKey("redirect_uri")) {
+                throw new IllegalArgumentException("invalid_request");
+            }
+            if (!params.containsKey("response_type")) {
+                throw new IllegalArgumentException("unsupported_response_type");
+            }
+            if (!params.containsKey("client_id")) {
+                throw new IllegalArgumentException("unauthorized_client");
+            }
+            if (!params.containsKey("scope")) {
+                throw new IllegalArgumentException("invalid_scope");
+            }
+
+            removeCsrfToken(params.get("csrf_token")[0]);
+
+            String baseRedirectUri = params.get("redirect_uri")[0];
+            String responseType = params.get("response_type")[0];
+            String clientId = params.get("redirect_uri")[0];
+            String scope = params.get("scope")[0];
+
+            if (!"code".equals(responseType)) {
+                throw new AuthenticationException("unsupported_response_type");
+            }
+
+            if (!clientId.equals(baseRedirectUri)) {
+                throw new IllegalArgumentException("unauthorized_client");
+            }
+
+            String username = params.get("username")[0];
+            String password = params.get("password")[0];
+
+            User user;
+            if (isSignupMode()) {
+                // Create a first administrator account with the supplied credentials
+
+                // first verify the password confirmation and bail out if necessary
+                if (!params.containsKey("password_repeat") || !password.equals(params.get("password_repeat")[0])) {
+                    resp.setContentType("text/html;charset=UTF-8");
+                    // TODO: i18n
+                    resp.getWriter().append(getPageBody(params, "Passwords don't match, please try again.", false));
+                    resp.getWriter().close();
+                    return;
                 }
 
-                // TODO: i18n
-                if (isSignupMode()) {
-                    message = "Create a first administrator account to continue.";
-                } else {
-                    message = String.format("Sign in to grant <b>%s</b> access to <b>%s</b>:", scope, clientId);
-                }
-                resp.setContentType("text/html;charset=UTF-8");
-                resp.getWriter().append(getPageBody(params, message));
-                resp.getWriter().close();
-            } catch (Exception e) {
+                user = userRegistry.register(username, password, Set.of(Role.ADMIN));
+                logger.info("First user account created: {}", username);
+            } else {
+                user = login(username, password);
+            }
+
+            String authorizationCode = UUID.randomUUID().toString().replace("-", "");
+
+            if (user instanceof ManagedUser) {
+                String codeChallenge = params.containsKey("code_challenge") ? params.get("code_challenge")[0] : null;
+                String codeChallengeMethod = params.containsKey("code_challenge_method")
+                        ? params.get("code_challenge_method")[0]
+                        : null;
+                ManagedUser managedUser = (ManagedUser) user;
+                PendingToken pendingToken = new PendingToken(authorizationCode, clientId, baseRedirectUri, scope,
+                        codeChallenge, codeChallengeMethod);
+                managedUser.setPendingToken(pendingToken);
+                userRegistry.update(managedUser);
+            }
+
+            String state = params.containsKey("state") ? params.get("state")[0] : null;
+            resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, authorizationCode, null, state));
+            resp.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
+        } catch (AuthenticationException e) {
+            processFailedLogin(resp, params, e.getMessage());
+        } catch (IllegalArgumentException e) {
+            @Nullable
+            String baseRedirectUri = params.containsKey("redirect_uri") ? params.get("redirect_uri")[0] : null;
+            @Nullable
+            String state = params.containsKey("state") ? params.get("state")[0] : null;
+            if (baseRedirectUri != null) {
+                resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, null, e.getMessage(), state));
+                resp.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
+            } else {
                 resp.setContentType("text/plain;charset=UTF-8");
                 resp.getWriter().append(e.getMessage());
                 resp.getWriter().close();
@@ -138,148 +203,36 @@ public class AuthorizePageServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
-            throws ServletException, IOException {
-        if (req != null && resp != null) {
-            Map<String, String[]> params = req.getParameterMap();
-            try {
-                if (!params.containsKey(("username"))) {
-                    throw new AuthenticationException("no username");
-                }
-                if (!params.containsKey(("password"))) {
-                    throw new AuthenticationException("no password");
-                }
-                if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
-                    throw new AuthenticationException("CSRF check failed");
-                }
-                if (!params.containsKey(("redirect_uri"))) {
-                    throw new IllegalArgumentException("invalid_request");
-                }
-                if (!params.containsKey(("response_type"))) {
-                    throw new IllegalArgumentException("unsupported_response_type");
-                }
-                if (!params.containsKey(("client_id"))) {
-                    throw new IllegalArgumentException("unauthorized_client");
-                }
-                if (!params.containsKey(("scope"))) {
-                    throw new IllegalArgumentException("invalid_scope");
-                }
-
-                csrfTokens.remove(params.get("csrf_token")[0]);
-
-                String baseRedirectUri = params.get("redirect_uri")[0];
-                String responseType = params.get("response_type")[0];
-                String clientId = params.get("redirect_uri")[0];
-                String scope = params.get("scope")[0];
-
-                if (!("code".equals(responseType))) {
-                    throw new AuthenticationException("unsupported_response_type");
-                }
-
-                if (!clientId.equals(baseRedirectUri)) {
-                    throw new IllegalArgumentException("unauthorized_client");
-                }
-
-                String username = params.get("username")[0];
-                String password = params.get("password")[0];
-
-                User user;
-                if (isSignupMode()) {
-                    // Create a first administrator account with the supplied credentials
-
-                    // first verify the password confirmation and bail out if necessary
-                    if (!params.containsKey("password_repeat") || !password.equals(params.get("password_repeat")[0])) {
-                        resp.setContentType("text/html;charset=UTF-8");
-                        // TODO: i18n
-                        resp.getWriter().append(getPageBody(params, "Passwords don't match, please try again."));
-                        resp.getWriter().close();
-                        return;
-                    }
-
-                    user = userRegistry.register(username, password, Set.of(Role.ADMIN));
-                    logger.info("First user account created: {}", username);
-                } else {
-                    // Enforce a dynamic cooldown period after a failed authentication attempt: the number of
-                    // consecutive failures in seconds
-                    if (lastAuthenticationFailure != null && lastAuthenticationFailure
-                            .isAfter(Instant.now().minus(Duration.ofSeconds(authenticationFailureCount)))) {
-                        throw new AuthenticationException("Too many consecutive login attempts");
-                    }
-
-                    // Authenticate the user with the supplied credentials
-                    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
-                    Authentication auth = authProvider.authenticate(credentials);
-                    logger.debug("Login successful: {}", auth.getUsername());
-                    lastAuthenticationFailure = null;
-                    authenticationFailureCount = 0;
-                    user = userRegistry.get(auth.getUsername());
-                }
-
-                String authorizationCode = UUID.randomUUID().toString().replace("-", "");
-
-                if (user instanceof ManagedUser) {
-                    String codeChallenge = (params.containsKey("code_challenge")) ? params.get("code_challenge")[0]
-                            : null;
-                    String codeChallengeMethod = (params.containsKey("code_challenge_method"))
-                            ? params.get("code_challenge_method")[0]
-                            : null;
-                    ManagedUser managedUser = (ManagedUser) user;
-                    PendingToken pendingToken = new PendingToken(authorizationCode, clientId, baseRedirectUri, scope,
-                            codeChallenge, codeChallengeMethod);
-                    managedUser.setPendingToken(pendingToken);
-                    userRegistry.update(managedUser);
-                }
-
-                String state = params.containsKey("state") ? params.get("state")[0] : null;
-                resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, authorizationCode, null, state));
-                resp.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
-            } catch (AuthenticationException e) {
-                lastAuthenticationFailure = Instant.now();
-                authenticationFailureCount += 1;
-                resp.setContentType("text/html;charset=UTF-8");
-                logger.warn("Authentication failed: {}", e.getMessage());
-                resp.getWriter().append(getPageBody(params, "Please try again.")); // TODO: i18n
-                resp.getWriter().close();
-            } catch (IllegalArgumentException e) {
-                @Nullable
-                String baseRedirectUri = params.containsKey("redirect_uri") ? params.get("redirect_uri")[0] : null;
-                @Nullable
-                String state = params.containsKey("state") ? params.get("state")[0] : null;
-                if (baseRedirectUri != null) {
-                    resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, null, e.getMessage(), state));
-                    resp.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
-                } else {
-                    resp.setContentType("text/plain;charset=UTF-8");
-                    resp.getWriter().append(e.getMessage());
-                    resp.getWriter().close();
-                }
-            }
-        }
-    }
-
-    private String getPageBody(Map<String, String[]> params, String message) {
+    protected String getPageBody(Map<String, String[]> params, String message, boolean hideForm) {
         String responseBody = pageTemplate.replace("{form_fields}", getFormFields(params));
-        String repeatPasswordFieldType = (isSignupMode()) ? "password" : "hidden";
-        String buttonLabel = (isSignupMode()) ? "Create Account" : "Sign In"; // TODO: i18n
+        String repeatPasswordFieldType = isSignupMode() ? "password" : "hidden";
+        String buttonLabel = isSignupMode() ? "Create Account" : "Sign In"; // TODO: i18n
         responseBody = responseBody.replace("{message}", message);
+        responseBody = responseBody.replace("{formAction}", "/auth");
+        responseBody = responseBody.replace("{formClass}", "show");
         responseBody = responseBody.replace("{repeatPasswordFieldType}", repeatPasswordFieldType);
+        responseBody = responseBody.replace("{newPasswordFieldType}", "hidden");
+        responseBody = responseBody.replace("{tokenNameFieldType}", "hidden");
+        responseBody = responseBody.replace("{tokenScopeFieldType}", "hidden");
         responseBody = responseBody.replace("{buttonLabel}", buttonLabel);
+        responseBody = responseBody.replace("{resultClass}", "");
         return responseBody;
     }
 
-    private String getFormFields(Map<String, String[]> params) {
+    @Override
+    protected String getFormFields(Map<String, String[]> params) {
         String hiddenFormFields = "";
 
-        if (!params.containsKey(("redirect_uri"))) {
+        if (!params.containsKey("redirect_uri")) {
             throw new IllegalArgumentException("invalid_request");
         }
-        if (!params.containsKey(("response_type"))) {
+        if (!params.containsKey("response_type")) {
             throw new IllegalArgumentException("unsupported_response_type");
         }
-        if (!params.containsKey(("client_id"))) {
+        if (!params.containsKey("client_id")) {
             throw new IllegalArgumentException("unauthorized_client");
         }
-        if (!params.containsKey(("scope"))) {
+        if (!params.containsKey("scope")) {
             throw new IllegalArgumentException("invalid_scope");
         }
         String csrfToken = addCsrfToken();
@@ -287,9 +240,9 @@ public class AuthorizePageServlet extends HttpServlet {
         String responseType = params.get("response_type")[0];
         String clientId = params.get("client_id")[0];
         String scope = params.get("scope")[0];
-        String state = (params.containsKey("state")) ? params.get("state")[0] : null;
-        String codeChallenge = (params.containsKey("code_challenge")) ? params.get("code_challenge")[0] : null;
-        String codeChallengeMethod = (params.containsKey("code_challenge_method"))
+        String state = params.containsKey("state") ? params.get("state")[0] : null;
+        String codeChallenge = params.containsKey("code_challenge") ? params.get("code_challenge")[0] : null;
+        String codeChallengeMethod = params.containsKey("code_challenge_method")
                 ? params.get("code_challenge_method")[0]
                 : null;
         hiddenFormFields += "<input type=\"hidden\" name=\"csrf_token\" value=\"" + csrfToken + "\">";
@@ -324,14 +277,6 @@ public class AuthorizePageServlet extends HttpServlet {
         }
 
         return redirectUri;
-    }
-
-    private String addCsrfToken() {
-        String csrfToken = UUID.randomUUID().toString().replace("-", "");
-        csrfTokens.put(csrfToken, Instant.now());
-        // remove old tokens (created earlier than 10 minutes ago) - this gives users a 10-minute window to sign in
-        csrfTokens.entrySet().removeIf(e -> e.getValue().isBefore(Instant.now().minus(Duration.ofMinutes(10))));
-        return csrfToken;
     }
 
     private boolean isSignupMode() {
