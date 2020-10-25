@@ -1279,7 +1279,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public @Nullable State convertStateToLabelUnit(QuantityType<?> state, String label) {
-        String labelUnit = label.lastIndexOf(" ") > 0 ? label.substring(label.lastIndexOf(" ")) : null;
+        int index = label.lastIndexOf(" ");
+        String labelUnit = index > 0 ? label.substring(index) : null;
         if (labelUnit != null && !state.getUnit().toString().equals(labelUnit)) {
             return state.toUnit(labelUnit);
         }
