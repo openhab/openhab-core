@@ -12,8 +12,6 @@
  */
 package org.openhab.core.library.items;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -47,21 +45,13 @@ import org.openhab.core.types.util.UnitUtils;
 @NonNullByDefault
 public class NumberItem extends GenericItem {
 
-    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
-    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
+    private static final List<Class<? extends State>> ACCEPTED_DATA_TYPES = List.of(DecimalType.class,
+            QuantityType.class, UnDefType.class);
+    private static final List<Class<? extends Command>> ACCEPTED_COMMAND_TYPES = List.of(DecimalType.class,
+            QuantityType.class, RefreshType.class);
 
     @Nullable
     private Class<? extends Quantity<?>> dimension;
-
-    static {
-        acceptedDataTypes.add(DecimalType.class);
-        acceptedDataTypes.add(QuantityType.class);
-        acceptedDataTypes.add(UnDefType.class);
-
-        acceptedCommandTypes.add(DecimalType.class);
-        acceptedCommandTypes.add(QuantityType.class);
-        acceptedCommandTypes.add(RefreshType.class);
-    }
 
     public NumberItem(String name) {
         this(CoreItemFactory.NUMBER, name);
@@ -78,12 +68,12 @@ public class NumberItem extends GenericItem {
 
     @Override
     public List<Class<? extends State>> getAcceptedDataTypes() {
-        return Collections.unmodifiableList(acceptedDataTypes);
+        return ACCEPTED_DATA_TYPES;
     }
 
     @Override
     public List<Class<? extends Command>> getAcceptedCommandTypes() {
-        return Collections.unmodifiableList(acceptedCommandTypes);
+        return ACCEPTED_COMMAND_TYPES;
     }
 
     public void send(DecimalType command) {
@@ -93,13 +83,14 @@ public class NumberItem extends GenericItem {
     @Override
     public @Nullable StateDescription getStateDescription(@Nullable Locale locale) {
         StateDescription stateDescription = super.getStateDescription(locale);
-        if (getDimension() == null && stateDescription != null && stateDescription.getPattern() != null
-                && stateDescription.getPattern().contains(UnitUtils.UNIT_PLACEHOLDER)) {
-            return StateDescriptionFragmentBuilder.create(stateDescription)
-                    .withPattern(stateDescription.getPattern().replaceAll(UnitUtils.UNIT_PLACEHOLDER, "").trim())
-                    .build().toStateDescription();
+        if (getDimension() == null && stateDescription != null) {
+            String pattern = stateDescription.getPattern();
+            if (pattern != null && pattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
+                return StateDescriptionFragmentBuilder.create(stateDescription)
+                        .withPattern(pattern.replaceAll(UnitUtils.UNIT_PLACEHOLDER, "").trim()).build()
+                        .toStateDescription();
+            }
         }
-
         return stateDescription;
     }
 
@@ -140,7 +131,7 @@ public class NumberItem extends GenericItem {
             }
         }
 
-        if (isAcceptedState(acceptedDataTypes, state)) {
+        if (isAcceptedState(ACCEPTED_DATA_TYPES, state)) {
             super.setState(state);
         } else {
             logSetTypeError(state);
