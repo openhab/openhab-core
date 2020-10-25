@@ -50,7 +50,7 @@ public class ByteArrayFileCacheTest {
     private static final String MP3_FILE_NAME = SERVICE_CACHE_FOLDER.getAbsolutePath() + "doorbell.mp3";
     private static final String TXT_FILE_NAME = SERVICE_CACHE_FOLDER.getAbsolutePath() + "doorbell.txt";
 
-    private static @Nullable File txt_file;
+    private static @Nullable File txtFile;
 
     private final Logger logger = LoggerFactory.getLogger(ByteArrayFileCacheTest.class);
 
@@ -59,7 +59,7 @@ public class ByteArrayFileCacheTest {
     @BeforeAll
     public static void init() throws IOException {
         // create temporary file
-        txt_file = createTempFile();
+        txtFile = createTempTxtFile();
     }
 
     @BeforeEach
@@ -118,7 +118,7 @@ public class ByteArrayFileCacheTest {
 
     @Test
     public void testPut() throws IOException {
-        byte[] buffer = readTempFile();
+        byte[] buffer = readTempTxtFile();
         subject.put(TXT_FILE_NAME, buffer);
 
         assertThat(subject.get(TXT_FILE_NAME), is(equalTo(buffer)));
@@ -126,7 +126,7 @@ public class ByteArrayFileCacheTest {
 
     @Test
     public void testPutIfAbsentAddsANewFile() throws IOException {
-        byte[] buffer = readTempFile();
+        byte[] buffer = readTempTxtFile();
         subject.putIfAbsent(TXT_FILE_NAME, buffer);
 
         assertThat(subject.get(TXT_FILE_NAME), is(equalTo(buffer)));
@@ -134,7 +134,7 @@ public class ByteArrayFileCacheTest {
 
     @Test
     public void testPutIfAbsentDoesNotOverwriteExistingFile() throws IOException {
-        byte[] buffer = readTempFile();
+        byte[] buffer = readTempTxtFile();
         subject.putIfAbsent(TXT_FILE_NAME, buffer);
         subject.putIfAbsent(TXT_FILE_NAME, TXT_FILE_NAME.getBytes());
 
@@ -143,14 +143,14 @@ public class ByteArrayFileCacheTest {
 
     @Test
     public void testPutIfAbsentAndGetAddsANewFile() throws IOException {
-        byte[] buffer = readTempFile();
+        byte[] buffer = readTempTxtFile();
 
         assertThat(subject.putIfAbsentAndGet(TXT_FILE_NAME, buffer), is(equalTo(buffer)));
     }
 
     @Test
     public void testPutIfAbsentAndGetDoesNotOverwriteExistingFile() throws IOException {
-        byte[] buffer = readTempFile();
+        byte[] buffer = readTempTxtFile();
 
         subject.putIfAbsentAndGet(TXT_FILE_NAME, buffer);
         assertThat(subject.putIfAbsentAndGet(TXT_FILE_NAME, TXT_FILE_NAME.getBytes()), is(equalTo(buffer)));
@@ -160,14 +160,14 @@ public class ByteArrayFileCacheTest {
     public void testContainsKey() {
         assertThat(subject.containsKey(TXT_FILE_NAME), is(false));
 
-        subject.put(TXT_FILE_NAME, readTempFile());
+        subject.put(TXT_FILE_NAME, readTempTxtFile());
 
         assertThat(subject.containsKey(TXT_FILE_NAME), is(true));
     }
 
     @Test
     public void testRemove() {
-        subject.put(TXT_FILE_NAME, readTempFile());
+        subject.put(TXT_FILE_NAME, readTempTxtFile());
         subject.remove(TXT_FILE_NAME);
 
         assertThrows(FileNotFoundException.class, () -> subject.get(TXT_FILE_NAME));
@@ -175,7 +175,7 @@ public class ByteArrayFileCacheTest {
 
     @Test
     public void testClear() {
-        subject.put(TXT_FILE_NAME, readTempFile());
+        subject.put(TXT_FILE_NAME, readTempTxtFile());
         subject.clear();
 
         assertThrows(FileNotFoundException.class, () -> subject.get(TXT_FILE_NAME));
@@ -183,7 +183,7 @@ public class ByteArrayFileCacheTest {
 
     @Test
     public void clearExpiredClearsNothingIfExpiryNotSet() throws IOException {
-        byte[] buffer = readTempFile();
+        byte[] buffer = readTempTxtFile();
         subject.put(TXT_FILE_NAME, buffer);
         subject.clearExpired();
 
@@ -194,7 +194,7 @@ public class ByteArrayFileCacheTest {
     public void clearExpiredClearsNothingIfNotExpired() throws IOException {
         subject = new ByteArrayFileCache(SERVICE_PID, Duration.ofSeconds(5));
 
-        byte[] buffer = readTempFile();
+        byte[] buffer = readTempTxtFile();
         subject.put(TXT_FILE_NAME, buffer);
         subject.clearExpired();
 
@@ -206,7 +206,7 @@ public class ByteArrayFileCacheTest {
         Duration expiry = Duration.ofSeconds(5);
         subject = new ByteArrayFileCache(SERVICE_PID, expiry);
 
-        subject.put(TXT_FILE_NAME, readTempFile());
+        subject.put(TXT_FILE_NAME, readTempTxtFile());
 
         // manipulate time of last use
         File fileInCache = subject.getUniqueFile(TXT_FILE_NAME);
@@ -217,16 +217,16 @@ public class ByteArrayFileCacheTest {
         assertThrows(FileNotFoundException.class, () -> subject.get(TXT_FILE_NAME));
     }
 
-    private static File createTempFile() throws IOException {
+    private static File createTempTxtFile() throws IOException {
         final File file = File.createTempFile("doorbell", "txt");
         file.deleteOnExit();
         return file;
     }
 
-    private byte[] readTempFile() {
-        if (txt_file != null) {
+    private byte[] readTempTxtFile() {
+        if (txtFile != null) {
             try {
-                return Files.readAllBytes(txt_file.toPath());
+                return Files.readAllBytes(txtFile.toPath());
             } catch (IOException e) {
                 logger.error("Error while reading temp file");
             }

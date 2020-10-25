@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a simple file based cache implementation.
+ * This is a simple file based cache implementation. It is not thread-safe.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
@@ -43,7 +43,7 @@ public class ByteArrayFileCache {
 
     private final File cacheFolder;
 
-    private final long expiry;
+    private final Duration expiry;
     private final Map<String, File> filesInCache = new ConcurrentHashMap<>();
 
     /**
@@ -54,18 +54,6 @@ public class ByteArrayFileCache {
      */
     public ByteArrayFileCache(String servicePID) {
         this(servicePID, Duration.ZERO);
-    }
-
-    /**
-     * Creates a new {@link ByteArrayFileCache} instance for a service. Creates a <code>cache</code> folder under
-     * <code>$OPENHAB_USERDATA/cache/$servicePID/</code>.
-     *
-     * @param servicePID PID of the service
-     * @param expiry the duration for how long the files stay valid in the cache. Must be positive. 0 to
-     *            disable this functionality.
-     */
-    public ByteArrayFileCache(String servicePID, long expiry) {
-        this(servicePID, Duration.ofDays(expiry));
     }
 
     /**
@@ -89,7 +77,7 @@ public class ByteArrayFileCache {
         if (expiry.isNegative()) {
             throw new IllegalArgumentException("Cache expiration time must be greater than or equal to 0");
         }
-        this.expiry = expiry.toMillis();
+        this.expiry = expiry;
     }
 
     /**
@@ -198,7 +186,7 @@ public class ByteArrayFileCache {
      */
     public void clearExpired() {
         // exit if expiry is set to 0 (disabled)
-        if (expiry <= 0) {
+        if (expiry.isZero() || expiry.isNegative()) {
             return;
         }
         File[] filesInCache = cacheFolder.listFiles();
@@ -216,10 +204,8 @@ public class ByteArrayFileCache {
      */
     private boolean isExpired(File fileInCache) {
         // exit if expiry is set to 0 (disabled)
-        if (expiry <= 0) {
-            return false;
-        }
-        return expiry < System.currentTimeMillis() - fileInCache.lastModified();
+        long expiryInMillis = expiry.toMillis();
+        return 0 < expiryInMillis && expiryInMillis < System.currentTimeMillis() - fileInCache.lastModified();
     }
 
     /**
