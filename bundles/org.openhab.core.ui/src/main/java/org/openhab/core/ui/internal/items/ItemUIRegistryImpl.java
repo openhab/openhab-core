@@ -242,13 +242,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         } else if (NumberItem.class.isAssignableFrom(itemType) //
                 || StringItem.class.equals(itemType)) {
             boolean isReadOnly = isReadOnly(itemName);
-            if (!isReadOnly && hasStateOptions(itemName)) {
-                return SitemapFactory.eINSTANCE.createSelection();
-            }
             int commandOptionsSize = getCommandOptionsSize(itemName);
             if (!isReadOnly && commandOptionsSize > 0) {
                 return commandOptionsSize <= MAX_BUTTONS ? SitemapFactory.eINSTANCE.createSwitch()
                         : SitemapFactory.eINSTANCE.createSelection();
+            }
+            if (!isReadOnly && hasStateOptions(itemName)) {
+                return SitemapFactory.eINSTANCE.createSelection();
             } else {
                 return SitemapFactory.eINSTANCE.createText();
             }
