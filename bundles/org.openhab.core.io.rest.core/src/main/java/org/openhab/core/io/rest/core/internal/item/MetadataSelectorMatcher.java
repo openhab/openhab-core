@@ -74,8 +74,7 @@ public class MetadataSelectorMatcher {
 
             Set<String> metadataNamespaces = allMetadataNamespaces.stream() //
                     .filter(n -> !metadataRegistry.isInternalNamespace(n)) //
-                    .filter(pattern.asPredicate())
-                    .collect(toSet());
+                    .filter(pattern.asPredicate()).collect(toSet());
 
             // merge metadata namespaces and namespaces from the namespace selector:
             Set<String> result = new HashSet<>(originalNamespaces);
