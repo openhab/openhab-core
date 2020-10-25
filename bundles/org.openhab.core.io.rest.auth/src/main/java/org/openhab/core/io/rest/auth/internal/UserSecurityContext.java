@@ -18,6 +18,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.User;
 
 /**
@@ -27,19 +28,22 @@ import org.openhab.core.auth.User;
  * @author Yannick Schaus - initial contribution
  */
 @NonNullByDefault
-public class UserSecurityContext implements SecurityContext {
+public class UserSecurityContext implements AuthenticationSecurityContext {
 
     private User user;
+    private Authentication authentication;
     private String authenticationScheme;
 
     /**
      * Constructs a security context from an instance of {@link User}
      *
      * @param user the user
+     * @param the related {@link Authentication}
      * @param authenticationScheme the scheme that was used to authenticate the user, e.g. "Basic"
      */
-    public UserSecurityContext(User user, String authenticationScheme) {
+    public UserSecurityContext(User user, Authentication authentication, String authenticationScheme) {
         this.user = user;
+        this.authentication = authentication;
         this.authenticationScheme = authenticationScheme;
     }
 
@@ -61,5 +65,10 @@ public class UserSecurityContext implements SecurityContext {
     @Override
     public String getAuthenticationScheme() {
         return authenticationScheme;
+    }
+
+    @Override
+    public Authentication getAuthentication() {
+        return authentication;
     }
 }

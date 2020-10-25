@@ -17,7 +17,6 @@ import java.util.Base64;
 import java.util.Map;
 
 import javax.annotation.Priority;
-import javax.security.sasl.AuthenticationException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -29,7 +28,9 @@ import javax.ws.rs.ext.Provider;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Authentication;
+import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.User;
+import org.openhab.core.auth.UserApiTokenCredentials;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.openhab.core.config.core.ConfigurableService;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yannick Schaus - initial contribution
  * @author Yannick Schaus - Allow basic authentication
+ * @author Yannick Schaus - Add support for API tokens
  */
 @PreMatching
 @Component(configurationPid = "org.openhab.restauth", property = Constants.SERVICE_PID + "=org.openhab.restauth")
@@ -64,6 +66,7 @@ public class AuthFilter implements ContainerRequestFilter {
     private final Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
     private static final String ALT_AUTH_HEADER = "X-OPENHAB-TOKEN";
+    private static final String API_TOKEN_PREFIX = "oh.";
 
     protected static final String CONFIG_URI = "system:restauth";
     private static final String CONFIG_ALLOW_BASIC_AUTH = "allowBasicAuth";
@@ -93,48 +96,74 @@ public class AuthFilter implements ContainerRequestFilter {
         }
     }
 
+    private SecurityContext authenticateBearerToken(String token) throws AuthenticationException {
+        if (token.startsWith(API_TOKEN_PREFIX)) {
+            UserApiTokenCredentials credentials = new UserApiTokenCredentials(token);
+            Authentication auth = userRegistry.authenticate(credentials);
+            User user = userRegistry.get(auth.getUsername());
+            if (user == null) {
+                throw new AuthenticationException("User not found in registry");
+            }
+            return new UserSecurityContext(user, auth, "ApiToken");
+        } else {
+            Authentication auth = jwtHelper.verifyAndParseJwtAccessToken(token);
+            return new JwtSecurityContext(auth);
+        }
+    }
+
+    private SecurityContext authenticateUsernamePassword(String username, String password)
+            throws AuthenticationException {
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+        Authentication auth = userRegistry.authenticate(credentials);
+        User user = userRegistry.get(auth.getUsername());
+        if (user == null) {
+            throw new AuthenticationException("User not found in registry");
+        }
+        return new UserSecurityContext(user, auth, "Basic");
+    }
+
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         try {
+            String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
+            if (altTokenHeader != null) {
+                requestContext.setSecurityContext(authenticateBearerToken(altTokenHeader));
+                return;
+            }
+
             String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
             if (authHeader != null) {
                 String[] authParts = authHeader.split(" ");
                 if (authParts.length == 2) {
                     if ("Bearer".equalsIgnoreCase(authParts[0])) {
-                        Authentication auth = jwtHelper.verifyAndParseJwtAccessToken(authParts[1]);
-                        requestContext.setSecurityContext(new JwtSecurityContext(auth));
+                        requestContext.setSecurityContext(authenticateBearerToken(authParts[1]));
                         return;
                     } else if ("Basic".equalsIgnoreCase(authParts[0])) {
-                        if (!allowBasicAuth) {
-                            throw new AuthenticationException("Basic authentication is not allowed");
-                        }
                         try {
                             String[] decodedCredentials = new String(Base64.getDecoder().decode(authParts[1]), "UTF-8")
                                     .split(":");
-                            if (decodedCredentials.length != 2) {
+                            if (decodedCredentials.length > 2) {
                                 throw new AuthenticationException("Invalid Basic authentication credential format");
                             }
-                            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
-                                    decodedCredentials[0], decodedCredentials[1]);
-                            Authentication auth = userRegistry.authenticate(credentials);
-                            User user = userRegistry.get(auth.getUsername());
-                            if (user == null) {
-                                throw new org.openhab.core.auth.AuthenticationException("User not found in registry");
+                            switch (decodedCredentials.length) {
+                                case 1:
+                                    requestContext.setSecurityContext(authenticateBearerToken(decodedCredentials[0]));
+                                    break;
+                                case 2:
+                                    if (!allowBasicAuth) {
+                                        throw new AuthenticationException(
+                                                "Basic authentication with username/password is not allowed");
+                                    }
+                                    requestContext.setSecurityContext(
+                                            authenticateUsernamePassword(decodedCredentials[0], decodedCredentials[1]));
                             }
-                            requestContext.setSecurityContext(new UserSecurityContext(user, "Basic"));
+
                             return;
-                        } catch (org.openhab.core.auth.AuthenticationException e) {
+                        } catch (AuthenticationException e) {
                             throw new AuthenticationException("Invalid Basic authentication credentials", e);
                         }
                     }
                 }
-            }
-
-            String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
-            if (altTokenHeader != null) {
-                Authentication auth = jwtHelper.verifyAndParseJwtAccessToken(altTokenHeader);
-                requestContext.setSecurityContext(new JwtSecurityContext(auth));
-                return;
             }
 
             if (implicitUserRole) {
