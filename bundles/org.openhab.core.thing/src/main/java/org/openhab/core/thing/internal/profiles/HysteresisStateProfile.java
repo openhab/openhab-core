@@ -12,42 +12,55 @@
  */
 package org.openhab.core.thing.internal.profiles;
 
+import static org.openhab.core.thing.profiles.SystemProfiles.HYSTERESIS;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.library.types.OnOffType;
-import org.openhab.core.thing.internal.profiles.config.BatteryLowStateProfileConfig;
+import org.openhab.core.thing.internal.profiles.config.HysteresisStateProfileConfig;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.StateProfile;
-import org.openhab.core.thing.profiles.SystemProfiles;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * This is the default implementation for a {@link BatteryLowStateProfile}}. Triggers ON/OFF behavior when being linked
- * to a Switch item if value is below threshold (default: 10).
+ * This is the default implementation for a {@link HysteresisStateProfile}}.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
 @NonNullByDefault
-public class BatteryLowStateProfile implements StateProfile {
+public class HysteresisStateProfile implements StateProfile {
 
-    private final Logger logger = LoggerFactory.getLogger(BatteryLowStateProfile.class);
+    private static final String PARAM_LOWER = "lower";
+
+    private final Logger logger = LoggerFactory.getLogger(HysteresisStateProfile.class);
 
     private final ProfileCallback callback;
-    private final BatteryLowStateProfileConfig config;
+    private final double lower;
+    private final double upper;
 
-    public BatteryLowStateProfile(ProfileCallback callback, ProfileContext context) {
+    private Type previousType = UnDefType.UNDEF;
+
+    public HysteresisStateProfile(ProfileCallback callback, ProfileContext context) {
         this.callback = callback;
-        this.config = context.getConfiguration().as(BatteryLowStateProfileConfig.class);
+
+        HysteresisStateProfileConfig config = context.getConfiguration().as(HysteresisStateProfileConfig.class);
+        if (!(config.lower instanceof Number)) {
+            throw new IllegalArgumentException(
+                    String.format("Parameter '%s' is not a Number value, using default value: 10", PARAM_LOWER));
+        }
+        lower = config.lower.doubleValue();
+        upper = config.upper != null ? config.upper.doubleValue() : lower;
     }
 
     @Override
     public ProfileTypeUID getProfileTypeUID() {
-        return SystemProfiles.BATTERY_LOW;
+        return HYSTERESIS;
     }
 
     @Override
@@ -59,7 +72,9 @@ public class BatteryLowStateProfile implements StateProfile {
     public void onCommandFromHandler(Command command) {
         final Type mappedCommand = mapValue(command);
         logger.trace("Mapped command from '{}' to command '{}'.", command, mappedCommand);
-        callback.sendCommand((Command) mappedCommand);
+        if (mappedCommand instanceof Command) {
+            callback.sendCommand((Command) mappedCommand);
+        }
     }
 
     @Override
@@ -71,13 +86,24 @@ public class BatteryLowStateProfile implements StateProfile {
     public void onStateUpdateFromHandler(State state) {
         final Type mappedState = mapValue(state);
         logger.trace("Mapped state from '{}' to state '{}'.", state, mappedState);
-        callback.sendUpdate((State) mappedState);
+        if (mappedState instanceof State) {
+            callback.sendUpdate((State) mappedState);
+        }
     }
 
     private Type mapValue(Type value) {
+        Type newType = previousType;
         if (value instanceof Number) {
-            return ((Number) value).intValue() <= config.threshold ? OnOffType.ON : OnOffType.OFF;
+            double theValue = ((Number) value).doubleValue();
+            if (theValue <= lower) {
+                newType = OnOffType.ON;
+            } else if (theValue >= upper) {
+                newType = OnOffType.OFF;
+            }
+            if (newType != previousType) {
+                previousType = newType;
+            }
         }
-        return OnOffType.OFF;
+        return newType;
     }
 }

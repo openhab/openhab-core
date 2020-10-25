@@ -12,14 +12,18 @@
  */
 package org.openhab.core.thing.internal.profiles.config;
 
+import java.math.BigDecimal;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Configuration for {@link BatteryLowStateProfile}.
+ * Configuration for {@link HysteresisStateProfile}.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
 @NonNullByDefault
-public class BatteryLowStateProfileConfig {
-    public int threshold = 10;
+public class HysteresisStateProfileConfig {
+    public @NonNullByDefault({}) BigDecimal lower;
+    public @Nullable BigDecimal upper;
 }
