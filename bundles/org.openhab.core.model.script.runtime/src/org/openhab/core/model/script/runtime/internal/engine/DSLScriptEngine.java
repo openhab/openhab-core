@@ -88,8 +88,9 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
                 String contextString = script.stripLeading().substring(
                         DSLScriptContextProvider.CONTEXT_IDENTIFIER.length(), script.stripLeading().indexOf('\n'));
                 if (contextString.contains("-")) {
-                    modelName = contextString.substring(0, contextString.lastIndexOf('-'));
-                    String ruleIndex = contextString.substring(contextString.lastIndexOf('-') + 1);
+                    int indexLastDash = contextString.lastIndexOf('-');
+                    modelName = contextString.substring(0, indexLastDash);
+                    String ruleIndex = contextString.substring(indexLastDash + 1);
                     if (contextProvider != null) {
                         DSLScriptContextProvider cp = contextProvider;
                         logger.debug("Script uses context '{}'.", contextString);
