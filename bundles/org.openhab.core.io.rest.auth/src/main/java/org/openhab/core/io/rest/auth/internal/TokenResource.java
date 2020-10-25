@@ -120,7 +120,8 @@ public class TokenResource implements RESTResource {
     public Response getToken(@FormParam("grant_type") String grantType, @FormParam("code") String code,
             @FormParam("redirect_uri") String redirectUri, @FormParam("client_id") String clientId,
             @FormParam("refresh_token") String refreshToken, @FormParam("code_verifier") String codeVerifier,
-            @QueryParam("useCookie") boolean useCookie, @CookieParam(SESSIONID_COOKIE_NAME) Cookie sessionCookie) {
+            @QueryParam("useCookie") boolean useCookie,
+            @Nullable @CookieParam(SESSIONID_COOKIE_NAME) Cookie sessionCookie) {
         try {
             switch (grantType) {
                 case "authorization_code":
@@ -217,7 +218,8 @@ public class TokenResource implements RESTResource {
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User or refresh token not found") })
     public Response deleteSession(@Nullable @FormParam("refresh_token") String refreshToken,
-            @Nullable @FormParam("id") String id, @Context SecurityContext securityContext) {
+            @Nullable @FormParam("id") String id, @Nullable @CookieParam(SESSIONID_COOKIE_NAME) Cookie sessionCookie,
+            @Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
@@ -241,12 +243,12 @@ public class TokenResource implements RESTResource {
 
         ResponseBuilder response = Response.ok();
 
-        if (session.get().hasSessionCookie()) {
+        if (sessionCookie != null && sessionCookie.getValue().equals(session.get().getSessionId())) {
             URI domainUri;
             try {
                 domainUri = new URI(session.get().getRedirectUri());
-                NewCookie newCookie = new NewCookie(SESSIONID_COOKIE_NAME, "", "/", domainUri.getHost(), null, 0, false,
-                        true);
+                NewCookie newCookie = new NewCookie(SESSIONID_COOKIE_NAME, null, "/", domainUri.getHost(), null, 0,
+                        false, true);
                 response.cookie(newCookie);
             } catch (Exception e) {
             }
