@@ -23,6 +23,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +36,8 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 
 /**
@@ -53,21 +56,21 @@ public class MetadataSelectorMatcherTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        when(configDescriptionRegistry.getConfigDescriptions(null)).thenReturn(mockConfigDescriptions());
+        when(metadataRegistry.getAll()).thenReturn(mockMetadata());
         when(metadataRegistry.isInternalNamespace(anyString())).thenReturn(false);
 
-        matcher = new MetadataSelectorMatcher(metadataRegistry, configDescriptionRegistry);
+        matcher = new MetadataSelectorMatcher(metadataRegistry);
     }
 
-    private Collection<ConfigDescription> mockConfigDescriptions() throws Exception {
-        List<ConfigDescription> configDescriptions = new ArrayList<>();
+    private Collection<Metadata> mockMetadata() throws Exception {
+        List<Metadata> metadata = new ArrayList<>();
 
-        configDescriptions.add(ConfigDescriptionBuilder.create(new URI("metadata:magic")).build());
-        configDescriptions.add(ConfigDescriptionBuilder.create(new URI("metadata:magic2")).build());
-        configDescriptions.add(ConfigDescriptionBuilder.create(new URI("metadata:homekit")).build());
-        configDescriptions.add(ConfigDescriptionBuilder.create(new URI("metadata:alexa")).build());
+        metadata.add(new Metadata(new MetadataKey("magic", "test_item"), "test", new HashMap<String, Object>()));
+        metadata.add(new Metadata(new MetadataKey("magic2", "test_item"), "test", new HashMap<String, Object>()));
+        metadata.add(new Metadata(new MetadataKey("homekit", "test_item"), "test", new HashMap<String, Object>()));
+        metadata.add(new Metadata(new MetadataKey("alexa", "test_item"), "test", new HashMap<String, Object>()));
 
-        return configDescriptions;
+        return metadata;
     }
 
     @Test
