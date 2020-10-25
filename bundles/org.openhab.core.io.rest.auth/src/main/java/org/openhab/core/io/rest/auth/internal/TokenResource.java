@@ -41,6 +41,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jose4j.base64url.Base64Url;
 import org.openhab.core.auth.ManagedUser;
 import org.openhab.core.auth.PendingToken;
@@ -215,8 +216,8 @@ public class TokenResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User or refresh token not found") })
-    public Response deleteSession(@FormParam("refresh_token") String refreshToken, @FormParam("id") String id,
-            @Context SecurityContext securityContext) {
+    public Response deleteSession(@Nullable @FormParam("refresh_token") String refreshToken,
+            @Nullable @FormParam("id") String id, @Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
@@ -268,10 +269,14 @@ public class TokenResource implements RESTResource {
     }
 
     private Response processAuthorizationCodeGrant(String code, String redirectUri, String clientId,
-            String codeVerifier, boolean useCookie) throws TokenEndpointException, NoSuchAlgorithmException {
-        // find an user with the authorization code pending
-        Optional<User> user = userRegistry.getAll().stream().filter(u -> ((ManagedUser) u).getPendingToken() != null
-                && ((ManagedUser) u).getPendingToken().getAuthorizationCode().equals(code)).findAny();
+            @Nullable String codeVerifier, boolean useCookie) throws TokenEndpointException, NoSuchAlgorithmException {
+        // find a user with the authorization code pending
+        Optional<User> user = userRegistry.getAll().stream().filter(u -> {
+            ManagedUser managedUser = (ManagedUser) u;
+            @Nullable
+            PendingToken pendingToken = managedUser.getPendingToken();
+            return (pendingToken != null && pendingToken.getAuthorizationCode().equals(code));
+        }).findAny();
 
         if (!user.isPresent()) {
             logger.warn("Couldn't find a user with the provided authentication code pending");
@@ -367,8 +372,8 @@ public class TokenResource implements RESTResource {
         return response.build();
     }
 
-    private Response processRefreshTokenGrant(String clientId, String refreshToken, Cookie sessionCookie)
-            throws TokenEndpointException {
+    private Response processRefreshTokenGrant(String clientId, @Nullable String refreshToken,
+            @Nullable Cookie sessionCookie) throws TokenEndpointException {
         if (refreshToken == null) {
             throw new TokenEndpointException(ErrorType.INVALID_REQUEST);
         }
