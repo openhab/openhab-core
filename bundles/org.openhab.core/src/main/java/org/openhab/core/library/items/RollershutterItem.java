@@ -12,8 +12,6 @@
  */
 package org.openhab.core.library.items;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -37,20 +35,10 @@ import org.openhab.core.types.UnDefType;
 @NonNullByDefault
 public class RollershutterItem extends GenericItem {
 
-    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
-    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
-
-    static {
-        acceptedDataTypes.add(PercentType.class);
-        acceptedDataTypes.add(UpDownType.class);
-        acceptedDataTypes.add(UnDefType.class);
-
-        acceptedCommandTypes.add(UpDownType.class);
-        acceptedCommandTypes.add(StopMoveType.class);
-        acceptedCommandTypes.add(PercentType.class);
-
-        acceptedCommandTypes.add(RefreshType.class);
-    }
+    private static final List<Class<? extends State>> ACCEPTED_DATA_TYPES = List.of(PercentType.class, UpDownType.class,
+            UnDefType.class);
+    private static final List<Class<? extends Command>> ACCEPTED_COMMAND_TYPES = List.of(PercentType.class,
+            UpDownType.class, StopMoveType.class, RefreshType.class);
 
     public RollershutterItem(String name) {
         super(CoreItemFactory.ROLLERSHUTTER, name);
@@ -58,12 +46,12 @@ public class RollershutterItem extends GenericItem {
 
     @Override
     public List<Class<? extends State>> getAcceptedDataTypes() {
-        return Collections.unmodifiableList(acceptedDataTypes);
+        return ACCEPTED_DATA_TYPES;
     }
 
     @Override
     public List<Class<? extends Command>> getAcceptedCommandTypes() {
-        return Collections.unmodifiableList(acceptedCommandTypes);
+        return ACCEPTED_COMMAND_TYPES;
     }
 
     public void send(UpDownType command) {
@@ -80,7 +68,7 @@ public class RollershutterItem extends GenericItem {
 
     @Override
     public void setState(State state) {
-        if (isAcceptedState(acceptedDataTypes, state)) {
+        if (isAcceptedState(ACCEPTED_DATA_TYPES, state)) {
             // try conversion
             State convertedState = state.as(PercentType.class);
             if (convertedState != null) {
