@@ -20,22 +20,22 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
 
 /**
- * The {@link TrustAllTrustMananger} is a "trust all" implementation of {@link X509ExtendedTrustManager}.
+ * The {@link TrustAllTrustManager} is a "trust all" implementation of {@link X509ExtendedTrustManager}.
  *
  * @author Matthew Bowman - Initial contribution
  */
-public final class TrustAllTrustMananger extends X509ExtendedTrustManager {
+public final class TrustAllTrustManager extends X509ExtendedTrustManager {
 
-    private static TrustAllTrustMananger instance = new TrustAllTrustMananger();
+    private static TrustAllTrustManager instance = new TrustAllTrustManager();
 
-    public static TrustAllTrustMananger getInstance() {
+    public static TrustAllTrustManager getInstance() {
         return instance;
     }
 
     /**
      * private construction - singleton
      */
-    private TrustAllTrustMananger() {
+    private TrustAllTrustManager() {
     }
 
     @Override
