@@ -43,10 +43,8 @@ public final class TypeParser {
             Class<?> stateClass = Class.forName(CORE_LIBRARY_PACKAGE + typeName);
             Method valueOfMethod = stateClass.getMethod("valueOf", String.class);
             return (Type) valueOfMethod.invoke(stateClass, input);
-        } catch (ClassNotFoundException e) {
-        } catch (NoSuchMethodException e) {
-        } catch (IllegalAccessException e) {
-        } catch (InvocationTargetException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException
+                | InvocationTargetException e) {
         }
         return null;
     }
@@ -55,7 +53,7 @@ public final class TypeParser {
      * <p>
      * Determines a state from a string. Possible state types are passed as a parameter. Note that the order matters
      * here; the first type that accepts the string as a valid value, will be used for the state.
-     * 
+     *
      * <p>
      * Example: The type list is OnOffType.class,StringType.class. The string "ON" is now accepted by the OnOffType and
      * thus OnOffType.ON will be returned (and not a StringType with value "ON").
@@ -65,17 +63,15 @@ public final class TypeParser {
      * @return the corresponding State instance or <code>null</code>
      */
     public static State parseState(List<Class<? extends State>> types, String s) {
-        for (Class<? extends Type> type : types) {
+        for (Class<? extends State> type : types) {
             try {
                 Method valueOf = type.getMethod("valueOf", String.class);
                 State state = (State) valueOf.invoke(type, s);
                 if (state != null) {
                     return state;
                 }
-            } catch (NoSuchMethodException e) {
-            } catch (IllegalArgumentException e) {
-            } catch (IllegalAccessException e) {
-            } catch (InvocationTargetException e) {
+            } catch (NoSuchMethodException | IllegalArgumentException | IllegalAccessException
+                    | InvocationTargetException e) {
             }
         }
         return null;
@@ -85,7 +81,7 @@ public final class TypeParser {
      * <p>
      * Determines a command from a string. Possible command types are passed as a parameter. Note that the order matters
      * here; the first type that accepts the string as a valid value, will be used for the command.
-     * 
+     *
      * <p>
      * Example: The type list is OnOffType.class,StringType.class. The string "ON" is now accepted by the OnOffType and
      * thus OnOffType.ON will be returned (and not a StringType with value "ON").
@@ -102,10 +98,8 @@ public final class TypeParser {
                 if (value != null) {
                     return value;
                 }
-            } catch (NoSuchMethodException e) {
-            } catch (IllegalArgumentException e) {
-            } catch (IllegalAccessException e) {
-            } catch (InvocationTargetException e) {
+            } catch (NoSuchMethodException | IllegalArgumentException | IllegalAccessException
+                    | InvocationTargetException e) {
             }
         }
         return null;
