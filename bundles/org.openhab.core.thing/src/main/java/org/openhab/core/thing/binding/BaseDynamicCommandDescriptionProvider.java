@@ -48,7 +48,7 @@ public abstract class BaseDynamicCommandDescriptionProvider implements DynamicCo
     private @NonNullByDefault({}) BundleContext bundleContext;
     protected @NonNullByDefault({}) ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
 
-    protected final Map<ChannelUID, @Nullable List<CommandOption>> channelOptionsMap = new ConcurrentHashMap<>();
+    protected final Map<ChannelUID, List<CommandOption>> channelOptionsMap = new ConcurrentHashMap<>();
 
     /**
      * For a given channel UID, set a {@link List} of {@link CommandOption}s that should be used for the channel,

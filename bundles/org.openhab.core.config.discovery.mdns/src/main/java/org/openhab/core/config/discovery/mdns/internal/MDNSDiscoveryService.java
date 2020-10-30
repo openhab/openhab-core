@@ -62,7 +62,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     private final MDNSClient mdnsClient;
 
     @Activate
-    public MDNSDiscoveryService(final @Nullable Map<String, @Nullable Object> configProperties,
+    public MDNSDiscoveryService(final @Nullable Map<String, Object> configProperties,
             final @Reference MDNSClient mdnsClient) {
         super(5);
 
@@ -89,7 +89,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Modified
     @Override
-    protected void modified(@Nullable Map<String, @Nullable Object> configProperties) {
+    protected void modified(@Nullable Map<String, Object> configProperties) {
         super.modified(configProperties);
     }
 
