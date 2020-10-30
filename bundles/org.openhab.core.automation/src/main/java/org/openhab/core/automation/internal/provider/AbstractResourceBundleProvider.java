@@ -265,11 +265,11 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
     }
 
     @SuppressWarnings("unchecked")
-    protected void removeUninstalledObjects(@Nullable List<String> previousPortfolio, List<String> newPortfolio) {
-        if (previousPortfolio != null && !previousPortfolio.isEmpty()) {
-            for (String uid : previousPortfolio) {
-                if (!newPortfolio.contains(uid)) {
-                    E removedObject = providedObjectsHolder.remove(uid);
+    protected void removeUninstalledObjects(List<String> previousPortfolio, List<String> newPortfolio) {
+        for (String uid : previousPortfolio) {
+            if (!newPortfolio.contains(uid)) {
+                final @Nullable E removedObject = providedObjectsHolder.remove(uid);
+                if (removedObject != null) {
                     List<ProviderChangeListener<E>> snapshot = null;
                     synchronized (listeners) {
                         snapshot = new LinkedList<>(listeners);
@@ -287,11 +287,12 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
         if (portfolio == null) {
             for (Vendor v : providerPortfolio.keySet()) {
                 if (v.getVendorSymbolicName().equals(vendor.getVendorSymbolicName())) {
-                    return providerPortfolio.remove(v);
+                    List<String> vendorPortfolio = providerPortfolio.remove(v);
+                    return vendorPortfolio == null ? List.of() : vendorPortfolio;
                 }
             }
         }
-        return portfolio;
+        return portfolio == null ? List.of() : portfolio;
     }
 
     protected void putNewPortfolio(Vendor vendor, List<String> portfolio) {
@@ -330,13 +331,15 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
         List<String> portfolio = providerPortfolio.remove(vendor);
         if (portfolio != null && !portfolio.isEmpty()) {
             for (String uid : portfolio) {
-                E removedObject = providedObjectsHolder.remove(uid);
-                List<ProviderChangeListener<E>> snapshot = null;
-                synchronized (listeners) {
-                    snapshot = new LinkedList<>(listeners);
-                }
-                for (ProviderChangeListener<E> listener : snapshot) {
-                    listener.removed((Provider<E>) this, removedObject);
+                final @Nullable E removedObject = providedObjectsHolder.remove(uid);
+                if (removedObject != null) {
+                    List<ProviderChangeListener<E>> snapshot = null;
+                    synchronized (listeners) {
+                        snapshot = new LinkedList<>(listeners);
+                    }
+                    for (ProviderChangeListener<E> listener : snapshot) {
+                        listener.removed((Provider<E>) this, removedObject);
+                    }
                 }
             }
         }
@@ -435,7 +438,7 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
         }
         for (E parsedObject : parsedObjects) {
             String uid = getUID(parsedObject);
-            E oldElement = providedObjectsHolder.get(uid);
+            final @Nullable E oldElement = providedObjectsHolder.get(uid);
             if (oldElement != null && !previousPortfolio.contains(uid)) {
                 logger.warn("{} with UID '{}' already exists! Failed to add a second with the same UID!",
                         parsedObject.getClass().getName(), uid);

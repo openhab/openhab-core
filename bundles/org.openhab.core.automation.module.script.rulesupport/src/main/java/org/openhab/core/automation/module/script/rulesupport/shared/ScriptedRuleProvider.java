@@ -60,7 +60,10 @@ public class ScriptedRuleProvider implements RuleProvider {
     }
 
     public void removeRule(String ruleUID) {
-        removeRule(rules.get(ruleUID));
+        Rule rule = rules.get(ruleUID);
+        if (rule != null) {
+            removeRule(rule);
+        }
     }
 
     public void removeRule(Rule rule) {

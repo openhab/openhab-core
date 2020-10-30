@@ -50,7 +50,10 @@ public class ConfigDescriptionReader extends XmlDocumentReader<List<ConfigDescri
      * The default constructor of this class.
      */
     public ConfigDescriptionReader() {
-        super.setClassLoader(ConfigDescriptionReader.class.getClassLoader());
+        ClassLoader classLoader = ConfigDescriptionReader.class.getClassLoader();
+        if (classLoader != null) {
+            super.setClassLoader(classLoader);
+        }
     }
 
     @Override

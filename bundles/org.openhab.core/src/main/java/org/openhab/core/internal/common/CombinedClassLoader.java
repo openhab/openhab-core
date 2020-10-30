@@ -27,6 +27,8 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class CombinedClassLoader extends ClassLoader {
 
     private final Logger logger = LoggerFactory.getLogger(CombinedClassLoader.class);
@@ -47,16 +50,19 @@ public class CombinedClassLoader extends ClassLoader {
     public static CombinedClassLoader fromClasses(final ClassLoader parent, final Stream<Class<?>> delegateClasses) {
         final Map<ClassLoader, Set<Class<?>>> cls = new HashMap<>();
         delegateClasses.forEach(clazz -> {
-            cls.compute(clazz.getClassLoader(), (k, v) -> {
-                if (v == null) {
-                    final Set<Class<?>> set = new HashSet<>();
-                    set.add(clazz);
-                    return set;
-                } else {
-                    v.add(clazz);
-                    return v;
-                }
-            });
+            ClassLoader classLoader = clazz.getClassLoader();
+            if (classLoader != null) {
+                cls.compute(classLoader, (k, v) -> {
+                    if (v == null) {
+                        final Set<Class<?>> set = new HashSet<>();
+                        set.add(clazz);
+                        return set;
+                    } else {
+                        v.add(clazz);
+                        return v;
+                    }
+                });
+            }
         });
         return new CombinedClassLoader(parent, cls);
     }
@@ -78,7 +84,11 @@ public class CombinedClassLoader extends ClassLoader {
     }
 
     @Override
-    protected Class<?> findClass(String name) throws ClassNotFoundException {
+    protected Class<?> findClass(@Nullable String name) throws ClassNotFoundException {
+        if (name == null) {
+            throw new ClassNotFoundException("Cannot load class with null name");
+        }
+
         for (final Entry<ClassLoader, Set<Class<?>>> entry : delegateClassLoaders.entrySet()) {
             try {
                 final Class<?> clazz = entry.getKey().loadClass(name);
@@ -89,11 +99,14 @@ public class CombinedClassLoader extends ClassLoader {
             } catch (final ClassNotFoundException ex) {
             }
         }
-        throw new ClassNotFoundException(name);
+        throw new ClassNotFoundException("Delegates cannot load class with name: " + name);
     }
 
     @Override
-    protected URL findResource(String name) {
+    protected @Nullable URL findResource(@Nullable String name) {
+        if (name == null) {
+            return null;
+        }
         // Try to get the resource from one of the delegate class loaders.
         // Return the first found one.
         // If no delegate class loader can get the resource, return null.
@@ -102,7 +115,10 @@ public class CombinedClassLoader extends ClassLoader {
     }
 
     @Override
-    protected Enumeration<URL> findResources(String name) throws IOException {
+    protected Enumeration<URL> findResources(@Nullable String name) throws IOException {
+        if (name == null) {
+            return Collections.emptyEnumeration();
+        }
         final Vector<URL> vector = new Vector<>();
         for (final ClassLoader delegate : delegateClassLoaders.keySet()) {
             final Enumeration<URL> enumeration = delegate.getResources(name);
