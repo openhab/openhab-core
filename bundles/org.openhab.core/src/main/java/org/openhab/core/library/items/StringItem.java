@@ -38,8 +38,8 @@ public class StringItem extends GenericItem {
 
     // UnDefType has to come before StringType, because otherwise every UNDEF state sent as a string would be
     // interpreted as a StringType
-    private static final List<Class<? extends State>> ACCEPTED_DATA_TYPES = List.of(UnDefType.class, DateTimeType.class,
-            StringType.class);
+    private static final List<Class<? extends State>> ACCEPTED_DATA_TYPES = List.of(UnDefType.class, StringType.class,
+            DateTimeType.class);
     private static final List<Class<? extends Command>> ACCEPTED_COMMAND_TYPES = List.of(StringType.class,
             RefreshType.class);
 
