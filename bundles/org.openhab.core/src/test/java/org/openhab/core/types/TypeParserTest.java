@@ -12,14 +12,17 @@
  */
 package org.openhab.core.types;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.items.StringItem;
-import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.StringType;
 
 /**
@@ -32,27 +35,29 @@ class TypeParserTest {
 
     private final GenericItem stringItem = new StringItem("Test");
 
-    @Test
-    void testThatUNDEFAsStringIsParsedToUnDefType() {
-        State subject = TypeParser.parseState(stringItem.getAcceptedDataTypes(), "UNDEF");
-        assertThat(subject instanceof UnDefType, is(true));
+    public static class ParameterSet {
+        public final String state;
+        public final Class<? extends State> expectedDataType;
+
+        public ParameterSet(String state, Class<? extends State> expectedDataType) {
+            this.state = state;
+            this.expectedDataType = expectedDataType;
+        }
     }
 
-    @Test
-    void testThatANumberAsStringIsParsedDateTimeType() {
-        State subject = TypeParser.parseState(stringItem.getAcceptedDataTypes(), "123");
-        assertThat(subject instanceof DateTimeType, is(true));
+    public static Collection<Object[]> stringItemParameters() {
+        return Arrays.asList(new Object[][] { //
+                { new ParameterSet("UNDEF", UnDefType.class) }, //
+                { new ParameterSet("ABC", StringType.class) }, //
+                { new ParameterSet("123", StringType.class) }, //
+                { new ParameterSet("2014-03-30T10:58:47.033+0000", StringType.class) } //
+        });
     }
 
-    @Test
-    void testThatADateAsStringIsParsedDateTimeType() {
-        State subject = TypeParser.parseState(stringItem.getAcceptedDataTypes(), "2014-03-30T10:58:47.033+0000");
-        assertThat(subject instanceof DateTimeType, is(true));
-    }
-
-    @Test
-    void testThatAStringIsParsedToStringType() {
-        State subject = TypeParser.parseState(stringItem.getAcceptedDataTypes(), "ABC");
-        assertThat(subject instanceof StringType, is(true));
+    @ParameterizedTest
+    @MethodSource("stringItemParameters")
+    public void testAllDataTypes(ParameterSet parameterSet) {
+        State subject = TypeParser.parseState(stringItem.getAcceptedDataTypes(), parameterSet.state);
+        assertThat(subject, instanceOf(parameterSet.expectedDataType));
     }
 }
