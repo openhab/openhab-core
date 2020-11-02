@@ -39,6 +39,7 @@ import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
@@ -262,6 +263,8 @@ public class DefaultChartProvider implements ChartProvider {
     double convertData(State state) {
         if (state instanceof DecimalType) {
             return ((DecimalType) state).doubleValue();
+        } else if (state instanceof QuantityType) {
+            return ((QuantityType<?>) state).doubleValue();
         } else if (state instanceof OnOffType) {
             return (state == OnOffType.OFF) ? 0 : 1;
         } else if (state instanceof OpenClosedType) {
