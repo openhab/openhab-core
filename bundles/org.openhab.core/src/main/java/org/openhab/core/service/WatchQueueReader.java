@@ -43,7 +43,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +67,7 @@ public class WatchQueueReader implements Runnable {
     private final Map<WatchKey, Path> registeredKeys = new HashMap<>();
     private final Map<WatchKey, AbstractWatchService> keyToService = new HashMap<>();
     private final Map<AbstractWatchService, Map<Path, byte[]>> hashes = new HashMap<>();
-    private final Map<WatchKey, @Nullable Map<Path, @Nullable ScheduledFuture<?>>> futures = new ConcurrentHashMap<>();
+    private final Map<WatchKey, Map<Path, ScheduledFuture<?>>> futures = new ConcurrentHashMap<>();
 
     private Thread qr;
 
@@ -192,7 +191,7 @@ public class WatchQueueReader implements Runnable {
                     keyToService.remove(key);
                     registeredKeys.remove(key);
                     hashes.remove(service);
-                    Map<Path, @Nullable ScheduledFuture<?>> keyFutures = futures.remove(key);
+                    Map<Path, ScheduledFuture<?>> keyFutures = futures.remove(key);
                     if (keyFutures != null) {
                         keyFutures.values().forEach(future -> future.cancel(true));
                     }
@@ -259,7 +258,7 @@ public class WatchQueueReader implements Runnable {
                                         toCancel.cancel();
                                     }
                                     forgetChecksum(service, resolvedPath);
-                                    Map<Path, @Nullable ScheduledFuture<?>> keyFutures = futures.get(key);
+                                    Map<Path, ScheduledFuture<?>> keyFutures = futures.get(key);
                                     if (keyFutures != null) {
                                         ScheduledFuture<?> future = keyFutures.remove(resolvedPath);
                                         if (future != null) {
@@ -403,8 +402,8 @@ public class WatchQueueReader implements Runnable {
         }
     }
 
-    private Map<Path, @Nullable ScheduledFuture<?>> getKeyFutures(WatchKey key) {
-        Map<Path, @Nullable ScheduledFuture<?>> keyFutures = futures.get(key);
+    private Map<Path, ScheduledFuture<?>> getKeyFutures(WatchKey key) {
+        Map<Path, ScheduledFuture<?>> keyFutures = futures.get(key);
         if (keyFutures == null) {
             keyFutures = new ConcurrentHashMap<>();
             futures.put(key, keyFutures);
@@ -413,12 +412,12 @@ public class WatchQueueReader implements Runnable {
     }
 
     private ScheduledFuture<?> removeScheduledJob(WatchKey key, Path resolvedPath) {
-        Map<Path, @Nullable ScheduledFuture<?>> keyFutures = getKeyFutures(key);
+        Map<Path, ScheduledFuture<?>> keyFutures = getKeyFutures(key);
         return keyFutures.remove(resolvedPath);
     }
 
     private void rememberScheduledJob(WatchKey key, Path resolvedPath, ScheduledFuture<?> future) {
-        Map<Path, @Nullable ScheduledFuture<?>> keyFutures = getKeyFutures(key);
+        Map<Path, ScheduledFuture<?>> keyFutures = getKeyFutures(key);
         keyFutures.put(resolvedPath, future);
     }
 }

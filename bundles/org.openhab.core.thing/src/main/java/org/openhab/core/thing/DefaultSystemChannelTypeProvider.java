@@ -284,7 +284,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             SYSTEM_MEDIA_ARTIST, SYSTEM_WIND_DIRECTION, SYSTEM_WIND_SPEED, SYSTEM_OUTDOOR_TEMPERATURE,
             SYSTEM_ATMOSPHERIC_HUMIDITY, SYSTEM_BAROMETRIC_PRESSURE);
 
-    private final Map<LocalizedKey, @Nullable ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
+    private final Map<LocalizedKey, ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
 
     private final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
     private final BundleResolver bundleResolver;
