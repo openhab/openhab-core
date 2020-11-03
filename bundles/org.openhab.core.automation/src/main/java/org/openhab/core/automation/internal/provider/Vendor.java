@@ -14,6 +14,9 @@ package org.openhab.core.automation.internal.provider;
 
 import java.util.StringTokenizer;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This class is designed to serves as a holder of most significant information for a bundle that provides resources
  * for automation objects - bundle ID and bundle version. These two features of the bundle, define it uniquely and
@@ -21,6 +24,7 @@ import java.util.StringTokenizer;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public class Vendor {
 
     private static final String DELIMITER = ";";
@@ -115,7 +119,7 @@ public class Vendor {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj instanceof Vendor) {
             Vendor other = (Vendor) obj;
             return vendorSymbolicName.equals(other.vendorSymbolicName) && vendorVersion.equals(other.vendorVersion);
