@@ -156,14 +156,12 @@ public class MqttWillAndTestament {
 
     @Override
     public String toString() {
+        byte[] localPayload = this.payload;
+
         StringBuilder sb = new StringBuilder();
         sb.append("[").append(getClass());
         sb.append("] Send '");
-        if (payload != null) {
-            sb.append(new String(payload));
-        } else {
-            sb.append(payload);
-        }
+        sb.append(localPayload == null ? localPayload : new String(localPayload));
         sb.append("' to topic '");
         sb.append(topic);
         sb.append("'");

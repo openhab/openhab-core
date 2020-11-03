@@ -101,7 +101,7 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
         if (urlEnum != null) {
             while (urlEnum.hasMoreElements()) {
                 URL url = urlEnum.nextElement();
-                if (getPreviousPortfolio(vendor) != null
+                if (!getPreviousPortfolio(vendor).isEmpty()
                         && (waitingProviders.get(bundle) == null || !waitingProviders.get(bundle).contains(url))) {
                     return;
                 }
@@ -147,11 +147,12 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
         if (portfolio == null) {
             for (Vendor v : providerPortfolio.keySet()) {
                 if (v.getVendorSymbolicName().equals(vendor.getVendorSymbolicName())) {
-                    return providerPortfolio.get(v);
+                    List<String> vendorPortfolio = providerPortfolio.get(v);
+                    return vendorPortfolio == null ? List.of() : vendorPortfolio;
                 }
             }
         }
-        return portfolio;
+        return portfolio == null ? List.of() : portfolio;
     }
 
     @Override

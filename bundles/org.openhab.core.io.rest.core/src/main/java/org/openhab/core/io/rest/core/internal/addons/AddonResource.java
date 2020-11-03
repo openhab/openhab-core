@@ -214,7 +214,7 @@ public class AddonResource implements RESTResource {
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 
-    private void postFailureEvent(String addonId, String msg) {
+    private void postFailureEvent(String addonId, @Nullable String msg) {
         Event event = AddonEventFactory.createAddonFailureEvent(addonId, msg);
         eventPublisher.post(event);
     }

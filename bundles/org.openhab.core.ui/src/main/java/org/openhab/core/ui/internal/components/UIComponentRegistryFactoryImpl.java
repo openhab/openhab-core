@@ -35,12 +35,11 @@ public class UIComponentRegistryFactoryImpl implements UIComponentRegistryFactor
 
     @Override
     public UIComponentRegistryImpl getRegistry(String namespace) {
-        if (registries.containsKey(namespace)) {
-            return registries.get(namespace);
-        } else {
-            UIComponentRegistryImpl registry = new UIComponentRegistryImpl(namespace, storageService);
+        UIComponentRegistryImpl registry = registries.get(namespace);
+        if (registry == null) {
+            registry = new UIComponentRegistryImpl(namespace, storageService);
             registries.put(namespace, registry);
-            return registry;
         }
+        return registry;
     }
 }

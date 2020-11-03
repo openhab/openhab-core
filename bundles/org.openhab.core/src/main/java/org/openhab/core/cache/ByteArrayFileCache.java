@@ -253,15 +253,14 @@ public class ByteArrayFileCache {
      */
     File getUniqueFile(String key) {
         String uniqueFileName = getUniqueFileName(key);
-        if (filesInCache.containsKey(uniqueFileName)) {
-            return filesInCache.get(uniqueFileName);
-        } else {
+        File fileInCache = filesInCache.get(uniqueFileName);
+        if (fileInCache == null) {
             String fileExtension = getFileExtension(key);
-            File fileInCache = new File(cacheFolder,
+            fileInCache = new File(cacheFolder,
                     uniqueFileName + (fileExtension == null ? "" : EXTENSION_SEPARATOR + fileExtension));
             filesInCache.put(uniqueFileName, fileInCache);
-            return fileInCache;
         }
+        return fileInCache;
     }
 
     /**
