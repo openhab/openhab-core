@@ -28,6 +28,7 @@ import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.link.AbstractLink;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.osgi.service.component.annotations.Activate;
@@ -89,7 +90,8 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
                         ChannelUID channelUID = new ChannelUID(args[2]);
                         addChannelLink(console, itemName, channelUID);
                     } else {
-                        console.println("Specify item name and channel UID to link: link <itemName> <channelUID>");
+                        console.println(
+                                "Specify item name and channel UID to link: addChannelLink <itemName> <channelUID>");
                     }
                     return;
                 case SUBCMD_CL_REMOVE:
@@ -98,7 +100,8 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
                         ChannelUID channelUID = new ChannelUID(args[2]);
                         removeChannelLink(console, itemName, channelUID);
                     } else {
-                        console.println("Specify item name and channel UID to unlink: link <itemName> <channelUID>");
+                        console.println(
+                                "Specify item name and channel UID to unlink: removeChannelLink <itemName> <channelUID>");
                     }
                     return;
                 case SUBCMD_CLEAR:
@@ -122,14 +125,16 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
 
         itemChannelLinks.forEach(itemChannelLink -> {
             if (!channelUIDS.contains(itemChannelLink.getLinkedUID())) {
-                console.println("Thing channel missing: " + itemChannelLink.toString());
+                console.println("Thing channel missing: " + itemChannelLink.toString() + " "
+                        + itemChannelLink.getConfiguration().toString());
                 if (action.equals("purge")) {
-                    removeChannelLink(console, itemChannelLink.getItemName(), itemChannelLink.getLinkedUID());
+                    removeChannelLink(console, itemChannelLink.getUID());
                 }
             } else if (!itemNames.contains(itemChannelLink.getItemName())) {
-                console.println("Item missing: " + itemChannelLink.toString());
+                console.println("Item missing: " + itemChannelLink.toString() + " "
+                        + itemChannelLink.getConfiguration().toString());
                 if (action.equals("purge")) {
-                    removeChannelLink(console, itemChannelLink.getItemName(), itemChannelLink.getLinkedUID());
+                    removeChannelLink(console, itemChannelLink.getUID());
                 }
             }
         });
@@ -160,17 +165,20 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
 
     private void list(Console console, Collection<ItemChannelLink> itemChannelLinks) {
         for (ItemChannelLink itemChannelLink : itemChannelLinks) {
-            console.println(itemChannelLink.toString());
+            console.println(itemChannelLink.toString() + " " + itemChannelLink.getConfiguration().toString());
         }
     }
 
     private void removeChannelLink(Console console, String itemName, ChannelUID channelUID) {
-        ItemChannelLink itemChannelLink = new ItemChannelLink(itemName, channelUID);
-        ItemChannelLink removedItemChannelLink = itemChannelLinkRegistry.remove(itemChannelLink.getUID());
+        removeChannelLink(console, AbstractLink.getIDFor(itemName, channelUID));
+    }
+
+    private void removeChannelLink(Console console, String linkId) {
+        ItemChannelLink removedItemChannelLink = itemChannelLinkRegistry.remove(linkId);
         if (removedItemChannelLink != null) {
-            console.println("Link " + itemChannelLink.toString() + "successfully removed.");
+            console.println("Link " + linkId + " successfully removed.");
         } else {
-            console.println("Could not remove link " + itemChannelLink.toString() + ".");
+            console.println("Could not remove link " + linkId + ".");
         }
     }
 }

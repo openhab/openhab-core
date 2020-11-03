@@ -72,6 +72,12 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Returns a set of bound items for the given channel UID.
+     *
+     * @param uid channel UID
+     * @return an unmodifiable set of bound items for the given channel UID
+     */
     public Set<Item> getLinkedItems(final UID uid) {
         return ((Stream<Item>) super.getLinkedItemNames(uid).parallelStream()
                 .map(itemName -> itemRegistry.get(itemName)).filter(Objects::nonNull)).collect(Collectors.toSet());
