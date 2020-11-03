@@ -541,7 +541,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
     }
 
     protected void unsetManagedProvider(ManagedProvider<E, K> provider) {
-        if (managedProvider.equals(provider)) {
+        if (managedProvider.isPresent() && managedProvider.get().equals(provider)) {
             managedProvider = Optional.empty();
         }
     }
