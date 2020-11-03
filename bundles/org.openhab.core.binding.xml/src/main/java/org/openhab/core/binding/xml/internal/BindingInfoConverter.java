@@ -85,7 +85,11 @@ public class BindingInfoConverter extends GenericUnmarshaller<BindingInfoXmlResu
 
         // read attributes
         Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);
+
         String id = attributes.get("id");
+        if (id == null) {
+            throw new ConversionException("Binding id attribute is null");
+        }
 
         // set automatically extracted URI for a possible 'config-description' section
         context.put("config-description.uri", "binding:" + id);

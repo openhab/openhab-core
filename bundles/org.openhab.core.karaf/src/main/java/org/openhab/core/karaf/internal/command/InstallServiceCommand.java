@@ -100,8 +100,13 @@ public class InstallServiceCommand implements Action {
         String karafBase = System.getProperty("karaf.base");
         String karafHome = System.getProperty("karaf.home");
 
-        // can we install to karaf.home?
-        if (!new File(karafHome).canWrite()) {
+        if (karafBase == null) {
+            System.out.println("System property karaf.base is not set. Install aborted.");
+            return null;
+        } else if (karafHome == null) {
+            System.out.println("System property karaf.home is not set. Install aborted.");
+            return null;
+        } else if (!new File(karafHome).canWrite()) {
             System.out.println("Cannot write to " + karafHome + ". Install aborted.");
             return null;
         }

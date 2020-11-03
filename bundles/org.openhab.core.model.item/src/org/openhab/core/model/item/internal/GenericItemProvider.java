@@ -393,8 +393,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
                     Map<String, Item> newItems = toItemMap(getItemsFromModel(modelName));
                     itemsMap.put(modelName, newItems.values());
                     for (Item newItem : newItems.values()) {
-                        if (oldItems.containsKey(newItem.getName())) {
-                            Item oldItem = oldItems.get(newItem.getName());
+                        Item oldItem = oldItems.get(newItem.getName());
+                        if (oldItem != null) {
                             if (hasItemChanged(oldItem, newItem)) {
                                 notifyListenersAboutUpdatedElement(oldItem, newItem);
                             }
@@ -473,7 +473,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
         return !(sameBaseItemClass && sameFunction);
     }
 
-    private Map<String, Item> toItemMap(Collection<Item> items) {
+    private Map<String, Item> toItemMap(@Nullable Collection<Item> items) {
         if (items == null || items.isEmpty()) {
             return Collections.emptyMap();
         }

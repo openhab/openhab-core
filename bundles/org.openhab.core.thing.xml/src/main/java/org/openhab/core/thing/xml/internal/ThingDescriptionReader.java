@@ -56,7 +56,10 @@ public class ThingDescriptionReader extends XmlDocumentReader<List<?>> {
      * The default constructor of this class.
      */
     public ThingDescriptionReader() {
-        super.setClassLoader(ThingDescriptionReader.class.getClassLoader());
+        ClassLoader classLoader = ThingDescriptionReader.class.getClassLoader();
+        if (classLoader != null) {
+            super.setClassLoader(classLoader);
+        }
     }
 
     @Override

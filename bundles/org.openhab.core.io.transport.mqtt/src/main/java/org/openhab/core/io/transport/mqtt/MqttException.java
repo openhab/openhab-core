@@ -13,6 +13,7 @@
 package org.openhab.core.io.transport.mqtt;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Thrown if an error occurs communicating with the server. The exception contains a reason code. The semantic of the
@@ -51,7 +52,7 @@ public class MqttException extends Exception {
      *         which may be <code>null</code>.
      */
     @Override
-    public Throwable getCause() {
+    public @Nullable Throwable getCause() {
         return cause;
     }
 
@@ -59,7 +60,7 @@ public class MqttException extends Exception {
      * Returns the detail message for this exception. May be null.
      */
     @Override
-    public String getMessage() {
+    public @Nullable String getMessage() {
         return cause.getMessage();
     }
 

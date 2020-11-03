@@ -12,8 +12,11 @@
  */
 package org.openhab.core.thing.xml.internal;
 
+import static org.eclipse.jdt.annotation.Checks.requireNonNull;
+
 import java.net.URL;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -23,14 +26,15 @@ import org.junit.jupiter.api.Test;
  *
  * @author Michael Grammling - Initial contribution
  */
+@NonNullByDefault
 public class Example {
 
-    @SuppressWarnings("unchecked")
     @Test
     public void test() throws Exception {
-        URL channelsURL = Example.class.getClassLoader().getResource("/example/example.xml");
+        ClassLoader classLoader = requireNonNull(Example.class.getClassLoader());
+        URL channelsURL = requireNonNull(classLoader.getResource("/example/example.xml"));
 
         ThingDescriptionReader reader = new ThingDescriptionReader();
-        ThingDescriptionList thingList = (ThingDescriptionList) reader.readFromXML(channelsURL);
+        reader.readFromXML(channelsURL);
     }
 }

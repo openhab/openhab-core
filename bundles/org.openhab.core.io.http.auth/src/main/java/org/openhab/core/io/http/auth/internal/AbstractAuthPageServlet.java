@@ -117,7 +117,7 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
         return user;
     }
 
-    protected void processFailedLogin(HttpServletResponse resp, Map<String, String[]> params, String message)
+    protected void processFailedLogin(HttpServletResponse resp, Map<String, String[]> params, @Nullable String message)
             throws IOException {
         lastAuthenticationFailure = Instant.now();
         authenticationFailureCount += 1;
