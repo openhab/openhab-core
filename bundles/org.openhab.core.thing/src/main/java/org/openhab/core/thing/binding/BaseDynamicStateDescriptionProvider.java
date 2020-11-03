@@ -49,8 +49,8 @@ public abstract class BaseDynamicStateDescriptionProvider implements DynamicStat
     private @NonNullByDefault({}) BundleContext bundleContext;
     protected @NonNullByDefault({}) ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
 
-    protected final Map<ChannelUID, @Nullable String> channelPatternMap = new ConcurrentHashMap<>();
-    protected final Map<ChannelUID, @Nullable List<StateOption>> channelOptionsMap = new ConcurrentHashMap<>();
+    protected final Map<ChannelUID, String> channelPatternMap = new ConcurrentHashMap<>();
+    protected final Map<ChannelUID, List<StateOption>> channelOptionsMap = new ConcurrentHashMap<>();
 
     /**
      * For a given channel UID, set a pattern that should be used for the channel, instead of the one defined statically

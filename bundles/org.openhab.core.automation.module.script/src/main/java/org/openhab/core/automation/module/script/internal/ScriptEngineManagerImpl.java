@@ -44,9 +44,9 @@ import org.slf4j.LoggerFactory;
 public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineManagerImpl.class);
-    private final Map<String, @Nullable ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
-    private final Map<String, @Nullable ScriptEngineFactory> customSupport = new HashMap<>();
-    private final Map<String, @Nullable ScriptEngineFactory> genericSupport = new HashMap<>();
+    private final Map<String, ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
+    private final Map<String, ScriptEngineFactory> customSupport = new HashMap<>();
+    private final Map<String, ScriptEngineFactory> genericSupport = new HashMap<>();
     private final ScriptExtensionManager scriptExtensionManager;
 
     @Activate

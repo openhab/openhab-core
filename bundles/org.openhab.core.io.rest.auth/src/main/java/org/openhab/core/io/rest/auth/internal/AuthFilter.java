@@ -87,7 +87,7 @@ public class AuthFilter implements ContainerRequestFilter {
     }
 
     @Modified
-    protected void modified(@Nullable Map<String, @Nullable Object> properties) {
+    protected void modified(@Nullable Map<String, Object> properties) {
         if (properties != null) {
             Object value = properties.get(CONFIG_ALLOW_BASIC_AUTH);
             allowBasicAuth = value != null && "true".equals(value.toString());

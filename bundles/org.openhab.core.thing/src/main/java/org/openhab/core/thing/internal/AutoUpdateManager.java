@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
@@ -106,7 +105,7 @@ public class AutoUpdateManager {
     }
 
     @Activate
-    public AutoUpdateManager(Map<String, @Nullable Object> configuration,
+    public AutoUpdateManager(Map<String, Object> configuration,
             final @Reference ChannelTypeRegistry channelTypeRegistry, //
             final @Reference EventPublisher eventPublisher,
             final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
@@ -122,7 +121,7 @@ public class AutoUpdateManager {
     }
 
     @Modified
-    protected void modified(Map<String, @Nullable Object> configuration) {
+    protected void modified(Map<String, Object> configuration) {
         Object valueEnabled = configuration.get(PROPERTY_ENABLED);
         if (valueEnabled != null) {
             enabled = Boolean.parseBoolean(valueEnabled.toString());

@@ -38,9 +38,9 @@ public class SafeCallManagerImpl implements SafeCallManager {
 
     private final Logger logger = LoggerFactory.getLogger(SafeCallManagerImpl.class);
 
-    private final Map<Object, @Nullable Queue<Invocation>> queues = new HashMap<>();
-    private final Map<Object, @Nullable Invocation> activeIdentifiers = new HashMap<>();
-    private final Map<Object, @Nullable Invocation> activeAsyncInvocations = new HashMap<>();
+    private final Map<Object, Queue<Invocation>> queues = new HashMap<>();
+    private final Map<Object, Invocation> activeIdentifiers = new HashMap<>();
+    private final Map<Object, Invocation> activeAsyncInvocations = new HashMap<>();
 
     private final ScheduledExecutorService watcher;
     private final ExecutorService scheduler;

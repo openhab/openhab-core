@@ -137,8 +137,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private final Set<ProfileAdvisor> profileAdvisors = new CopyOnWriteArraySet<>();
 
-    private final Map<String, @Nullable List<Class<? extends Command>>> acceptedCommandTypeMap = new ConcurrentHashMap<>();
-    private final Map<String, @Nullable List<Class<? extends State>>> acceptedStateTypeMap = new ConcurrentHashMap<>();
+    private final Map<String, List<Class<? extends Command>>> acceptedCommandTypeMap = new ConcurrentHashMap<>();
+    private final Map<String, List<Class<? extends State>>> acceptedStateTypeMap = new ConcurrentHashMap<>();
 
     @Override
     public Set<String> getSubscribedEventTypes() {

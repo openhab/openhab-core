@@ -360,7 +360,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *
      * @param configProperties configuration properties
      */
-    protected void activate(@Nullable Map<String, @Nullable Object> configProperties) {
+    protected void activate(@Nullable Map<String, Object> configProperties) {
         if (configProperties != null) {
             Object property = configProperties.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY);
             if (property != null) {
@@ -383,7 +383,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *
      * @param configProperties configuration properties
      */
-    protected void modified(@Nullable Map<String, @Nullable Object> configProperties) {
+    protected void modified(@Nullable Map<String, Object> configProperties) {
         if (configProperties != null) {
             Object property = configProperties.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY);
             if (property != null) {
