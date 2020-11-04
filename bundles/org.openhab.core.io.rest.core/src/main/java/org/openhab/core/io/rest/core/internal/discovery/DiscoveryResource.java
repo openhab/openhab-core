@@ -89,7 +89,7 @@ public class DiscoveryResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets all bindings that support discovery.", responses = {
+    @Operation(operationId = "getBindingsWithDiscoverySupport", summary = "Gets all bindings that support discovery.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class), uniqueItems = true))) })
     public Response getDiscoveryServices() {
         Collection<String> supportedBindings = discoveryServiceRegistry.getSupportedBindings();
@@ -99,7 +99,7 @@ public class DiscoveryResource implements RESTResource {
     @POST
     @Path("/bindings/{bindingId}/scan")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(summary = "Starts asynchronous discovery process for a binding and returns the timeout in seconds of the discovery operation.", responses = {
+    @Operation(operationId = "scan", summary = "Starts asynchronous discovery process for a binding and returns the timeout in seconds of the discovery operation.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integer.class))) })
     public Response scan(@PathParam("bindingId") @Parameter(description = "bindingId") final String bindingId) {
         discoveryServiceRegistry.startScan(bindingId, new ScanListener() {

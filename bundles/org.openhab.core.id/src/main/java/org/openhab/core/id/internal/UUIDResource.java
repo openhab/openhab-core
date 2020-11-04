@@ -59,7 +59,7 @@ public class UUIDResource implements RESTResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(summary = "A unified unique id.", responses = {
+    @Operation(operationId = "getUUID", summary = "A unified unique id.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))) })
     public Response getInstanceUUID() {
         return Response.ok(InstanceUUID.get()).build();

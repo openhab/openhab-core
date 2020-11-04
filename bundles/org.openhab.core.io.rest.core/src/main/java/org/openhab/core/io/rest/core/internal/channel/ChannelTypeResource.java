@@ -114,7 +114,7 @@ public class ChannelTypeResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets all available channel types.", responses = {
+    @Operation(operationId = "getChannelTypes", summary = "Gets all available channel types.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ChannelTypeDTO.class), uniqueItems = true))) })
     public Response getAll(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
@@ -138,7 +138,7 @@ public class ChannelTypeResource implements RESTResource {
     @GET
     @Path("/{channelTypeUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets channel type by UID.", responses = {
+    @Operation(operationId = "getChannelTypeByUID", summary = "Gets channel type by UID.", responses = {
             @ApiResponse(responseCode = "200", description = "Channel type with provided channelTypeUID does not exist.", content = @Content(schema = @Schema(implementation = ChannelTypeDTO.class))),
             @ApiResponse(responseCode = "404", description = "No content") })
     public Response getByUID(
@@ -156,7 +156,7 @@ public class ChannelTypeResource implements RESTResource {
     @GET
     @Path("/{channelTypeUID}/linkableItemTypes")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets the item types the given trigger channel type UID can be linked to.", responses = {
+    @Operation(operationId = "getLinkableItemTypesByChannelTypeUID", summary = "Gets the item types the given trigger channel type UID can be linked to.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class), uniqueItems = true))),
             @ApiResponse(responseCode = "204", description = "No content: channel type has no linkable items or is no trigger channel."),
             @ApiResponse(responseCode = "404", description = "Given channel type UID not found.") })
