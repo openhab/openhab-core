@@ -89,7 +89,7 @@ public class UIResource implements RESTResource {
     @GET
     @Path("/tiles")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Get all registered UI tiles.", responses = {
+    @Operation(operationId = "getUITiles", summary = "Get all registered UI tiles.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TileDTO.class)))) })
     public Response getAll() {
         Stream<TileDTO> tiles = tileProvider.getTiles().map(this::toTileDTO);
@@ -99,7 +99,7 @@ public class UIResource implements RESTResource {
     @GET
     @Path("/components/{namespace}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Get all registered UI components in the specified namespace.", responses = {
+    @Operation(operationId = "getRegisterUIComponentsInNamespace", summary = "Get all registered UI components in the specified namespace.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RootUIComponent.class)))) })
     public Response getAllComponents(@PathParam("namespace") String namespace) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
@@ -110,7 +110,7 @@ public class UIResource implements RESTResource {
     @GET
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Get a specific UI component in the specified namespace.", responses = {
+    @Operation(operationId = "getUIComponentInNamespace", summary = "Get a specific UI component in the specified namespace.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))),
             @ApiResponse(responseCode = "404", description = "Component not found") })
     public Response getComponentByUID(@PathParam("namespace") String namespace,
@@ -127,7 +127,7 @@ public class UIResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Add an UI component in the specified namespace.", security = {
+    @Operation(operationId = "addUIComponentToNamespace", summary = "Add an UI component in the specified namespace.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))) })
     public Response addComponent(@PathParam("namespace") String namespace, RootUIComponent component) {
@@ -141,7 +141,7 @@ public class UIResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a specific UI component in the specified namespace.", security = {
+    @Operation(operationId = "updateUIComponentInNamespace", summary = "Update a specific UI component in the specified namespace.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))),
                     @ApiResponse(responseCode = "404", description = "Component not found") })
@@ -165,7 +165,7 @@ public class UIResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Remove a specific UI component in the specified namespace.", security = {
+    @Operation(operationId = "removeUIComponentFromNamespace", summary = "Remove a specific UI component in the specified namespace.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Component not found") })

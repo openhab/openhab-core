@@ -181,7 +181,7 @@ public class RuleResource implements RESTResource {
     @GET
     @Path("/{ruleUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getRuleByUID", summary = "Gets the rule corresponding to the given UID.", responses = {
+    @Operation(operationId = "getRuleById", summary = "Gets the rule corresponding to the given UID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedRuleDTO.class))),
             @ApiResponse(responseCode = "404", description = "Rule not found") })
     public Response getByUID(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {

@@ -131,7 +131,7 @@ public class PersistenceResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Gets a list of persistence services.", security = {
+    @Operation(operationId = "getPersistenceServices", summary = "Gets a list of persistence services.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))) })
     public Response httpGetPersistenceServices(@Context HttpHeaders headers,
@@ -146,7 +146,7 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Gets a list of items available via a specific persistence service.", security = {
+    @Operation(operationId = "getItemsForPersistenceService", summary = "Gets a list of items available via a specific persistence service.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))) })
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
@@ -158,7 +158,7 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Gets item persistence data from the persistence service.", responses = {
+    @Operation(operationId = "getItemDataFromPersistenceService", summary = "Gets item persistence data from the persistence service.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ItemHistoryDTO.class))),
             @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service") })
     public Response httpGetPersistenceItemData(@Context HttpHeaders headers,
@@ -179,7 +179,7 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete item data from a specific persistence service.", security = {
+    @Operation(operationId = "deleteItemFromPersistenceService", summary = "Delete item data from a specific persistence service.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))),
                     @ApiResponse(responseCode = "400", description = "Invalid filter parameters"),
@@ -198,7 +198,7 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Stores item persistence data into the persistence service.", responses = {
+    @Operation(operationId = "storeItemDataInPersistenceService", summary = "Stores item persistence data into the persistence service.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ItemHistoryDTO.class))),
             @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service") })
     public Response httpPutPersistenceItemData(@Context HttpHeaders headers,

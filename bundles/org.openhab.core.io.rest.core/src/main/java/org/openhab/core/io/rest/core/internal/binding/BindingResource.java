@@ -115,7 +115,7 @@ public class BindingResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getAllBindings", summary = "Get all bindings.", responses = {
+    @Operation(operationId = "getBindings", summary = "Get all bindings.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BindingInfoDTO.class), uniqueItems = true))) })
     public Response getAll(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {

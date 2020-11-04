@@ -220,7 +220,7 @@ public class SitemapResource
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get all available sitemaps.", responses = {
+    @Operation(operationId = "getSitemaps", summary = "Get all available sitemaps.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SitemapDTO.class)))) })
     public Response getSitemaps() {
         logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
@@ -231,7 +231,7 @@ public class SitemapResource
     @GET
     @Path("/{sitemapname: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get sitemap by name.", responses = {
+    @Operation(operationId = "getSitemapsByName", summary = "Get sitemap by name.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SitemapDTO.class))) })
     public Response getSitemapData(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
@@ -249,7 +249,7 @@ public class SitemapResource
     @GET
     @Path("/{sitemapname: [a-zA-Z_0-9]+}/{pageid: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Polls the data for a sitemap.", responses = {
+    @Operation(operationId = "pollDataForSitemap", summary = "Polls the data for a sitemap.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PageDTO.class))),
             @ApiResponse(responseCode = "404", description = "Sitemap with requested name does not exist or page does not exist, or page refers to a non-linkable widget"),
             @ApiResponse(responseCode = "400", description = "Invalid subscription id has been provided.") })
@@ -292,7 +292,7 @@ public class SitemapResource
     @POST
     @Path(SEGMENT_EVENTS + "/subscribe")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Creates a sitemap event subscription.", responses = {
+    @Operation(operationId = "createSitemapEventSubscription", summary = "Creates a sitemap event subscription.", responses = {
             @ApiResponse(responseCode = "201", description = "Subscription created."),
             @ApiResponse(responseCode = "503", description = "Subscriptions limit reached.") })
     public Object createEventSubscription() {
@@ -321,7 +321,7 @@ public class SitemapResource
     @GET
     @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}")
     @Produces(MediaType.SERVER_SENT_EVENTS)
-    @Operation(summary = "Get sitemap events.", responses = { @ApiResponse(responseCode = "200", description = "OK"),
+    @Operation(operationId = "getSitemapEvents", summary = "Get sitemap events.", responses = { @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Page not linked to the subscription."),
             @ApiResponse(responseCode = "404", description = "Subscription not found.") })
     public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,

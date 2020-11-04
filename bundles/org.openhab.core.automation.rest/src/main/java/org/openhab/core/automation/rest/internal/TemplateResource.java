@@ -99,7 +99,7 @@ public class TemplateResource implements RESTResource {
     @GET
     @Path("/{templateUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getTemplateByUID", summary = "Gets a template corresponding to the given UID.", responses = {
+    @Operation(operationId = "getTemplateById", summary = "Gets a template corresponding to the given UID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Template.class))),
             @ApiResponse(responseCode = "404", description = "Template corresponding to the given UID does not found.") })
     public Response getByUID(

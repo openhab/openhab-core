@@ -119,7 +119,7 @@ public class AddonResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "GetAddons", summary = "Get all add-ons.", responses = {
+    @Operation(operationId = "getAddons", summary = "Get all add-ons.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))) })
     public Response getAddon(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
@@ -131,7 +131,7 @@ public class AddonResource implements RESTResource {
     @GET
     @Path("/types")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "GetAddonTypes", summary = "Get all add-on types.", responses = {
+    @Operation(operationId = "getAddonTypes", summary = "Get all add-on types.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))) })
     public Response getTypes(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
@@ -144,7 +144,7 @@ public class AddonResource implements RESTResource {
     @GET
     @Path("/{addonId: [a-zA-Z_0-9-:]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "GetAddonById",summary = "Get add-on with given ID.", responses = {
+    @Operation(operationId = "getAddonById",summary = "Get add-on with given ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Not found") })
     public Response getById(
@@ -163,7 +163,7 @@ public class AddonResource implements RESTResource {
 
     @POST
     @Path("/{addonId: [a-zA-Z_0-9-:]+}/install")
-    @Operation(operationId = "InstallAddonById", summary = "Installs the add-on with the given ID.", responses = {
+    @Operation(operationId = "installAddonById", summary = "Installs the add-on with the given ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
     public Response installAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId) {
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
@@ -180,7 +180,7 @@ public class AddonResource implements RESTResource {
 
     @POST
     @Path("/url/{url}/install")
-    @Operation(operationId = "InstallAddonFromURL", summary = "Installs the add-on from the given URL.", responses = {
+    @Operation(operationId = "installAddonFromURL", summary = "Installs the add-on from the given URL.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "The given URL is malformed or not valid.") })
     public Response installAddonByURL(
@@ -199,7 +199,7 @@ public class AddonResource implements RESTResource {
 
     @POST
     @Path("/{addonId: [a-zA-Z_0-9-:]+}/uninstall")
-    @Operation(operationId = "UninstallAddon", summary = "Uninstalls the add-on with the given ID.", responses = {
+    @Operation(operationId = "uninstallAddon", summary = "Uninstalls the add-on with the given ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
     public Response uninstallAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId) {
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {

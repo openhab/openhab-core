@@ -109,7 +109,7 @@ public class TokenResource implements RESTResource {
     @Path("/token")
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-    @Operation(operationId = "GetOAuthToken",summary = "Get access and refresh tokens.", responses = {
+    @Operation(operationId = "getOAuthToken",summary = "Get access and refresh tokens.", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
     public Response getToken(@FormParam("grant_type") String grantType, @FormParam("code") String code,
             @FormParam("redirect_uri") String redirectUri, @FormParam("client_id") String clientId,
@@ -137,7 +137,7 @@ public class TokenResource implements RESTResource {
 
     @GET
     @Path("/sessions")
-    @Operation(operationId = "GetSessionsForCurrentUser",summary = "List the sessions associated to the authenticated user.", responses = {
+    @Operation(operationId = "getSessionsForCurrentUser",summary = "List the sessions associated to the authenticated user.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserSessionDTO.class))) })
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getSessions(@Context SecurityContext securityContext) {
@@ -157,7 +157,7 @@ public class TokenResource implements RESTResource {
     @POST
     @Path("/logout")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-    @Operation(operationId = "DeleteSession",summary = "Delete the session associated with a refresh token.", responses = {
+    @Operation(operationId = "deleteSession",summary = "Delete the session associated with a refresh token.", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
     public Response deleteSession(@FormParam("refresh_token") String refreshToken, @FormParam("id") String id,
             @Context SecurityContext securityContext) {
