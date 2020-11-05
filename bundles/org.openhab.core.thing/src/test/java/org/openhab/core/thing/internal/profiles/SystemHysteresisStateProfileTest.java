@@ -36,6 +36,7 @@ import org.mockito.Mock;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.StateProfile;
@@ -45,14 +46,18 @@ import org.openhab.core.types.Type;
 import org.openhab.core.types.UnDefType;
 
 /**
- * Basic unit tests for {@link HysteresisStateProfile}.
+ * Basic unit tests for {@link SystemHysteresisStateProfile}.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
-public class HysteresisStateProfileTest {
+public class SystemHysteresisStateProfileTest {
 
-    private static final BigDecimal BIGDECIMAL_TEN = BigDecimal.valueOf(10);
-    private static final BigDecimal BIGDECIMAL_FOURTY = BigDecimal.valueOf(40);
+    private static final String STRING_TEN = "10";
+    private static final String STRING_FOURTY = "40";
+    private static final String QUANTITY_STRING_TEN = "10 %";
+    private static final String QUANTITY_STRING_FOURTY = "40 %";
+    private static final BigDecimal BIGDECIMAL_TEN = new BigDecimal(STRING_TEN);
+    private static final BigDecimal BIGDECIMAL_FOURTY = new BigDecimal(STRING_FOURTY);
     private static final PercentType PERCENT_TYPE_TEN = new PercentType(BIGDECIMAL_TEN);
     private static final PercentType PERCENT_TYPE_TWENTY_FIVE = new PercentType(BigDecimal.valueOf(25));
 
@@ -62,11 +67,11 @@ public class HysteresisStateProfileTest {
         public final List<State> resultingStates;
         public final List<Command> commands;
         public final List<@Nullable Command> resultingCommands;
-        public final BigDecimal lower;
-        public final @Nullable BigDecimal upper;
+        public final Object lower;
+        public final @Nullable Object upper;
 
-        public ParameterSet(List<? extends Type> sources, List<? extends Type> results, BigDecimal lower,
-                @Nullable BigDecimal upper) {
+        public ParameterSet(List<? extends Type> sources, List<? extends Type> results, Object lower,
+                @Nullable Object upper) {
             this.states = (List<State>) sources;
             this.resultingStates = (List<State>) results;
             this.commands = (List<Command>) sources;
@@ -81,11 +86,35 @@ public class HysteresisStateProfileTest {
 
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][] { //
-                // lower bound = upper bound = 10, one state update / command
+                // lower bound = upper bound = 10, one state update / command (PercentType)
                 { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.ON), BIGDECIMAL_TEN, null) }, //
                 { new ParameterSet(List.of(PERCENT_TYPE_TWENTY_FIVE), List.of(OnOffType.ON), BIGDECIMAL_TEN, null) }, //
                 { new ParameterSet(List.of(PERCENT_TYPE_TEN), List.of(OnOffType.OFF), BIGDECIMAL_TEN, null) }, //
                 { new ParameterSet(List.of(PercentType.ZERO), List.of(OnOffType.OFF), BIGDECIMAL_TEN, null) }, //
+                // lower bound = upper bound = 10 (as BigDecimal), one state update / command (QuantityType)
+                { new ParameterSet(List.of(QuantityType.valueOf("100 %")), List.of(OnOffType.ON), BIGDECIMAL_TEN,
+                        null) }, //
+                { new ParameterSet(List.of(QuantityType.valueOf("25 %")), List.of(OnOffType.ON), BIGDECIMAL_TEN,
+                        null) }, //
+                { new ParameterSet(List.of(QuantityType.valueOf(QUANTITY_STRING_TEN)), List.of(OnOffType.OFF),
+                        BIGDECIMAL_TEN, null) }, //
+                { new ParameterSet(List.of(QuantityType.valueOf("0 %")), List.of(OnOffType.OFF), BIGDECIMAL_TEN,
+                        null) }, //
+                // lower bound = upper bound = 10 (as QuantityType), one state update / command (QuantityType)
+                { new ParameterSet(List.of(QuantityType.valueOf("100 %")), List.of(OnOffType.ON), QUANTITY_STRING_TEN,
+                        null) }, //
+                { new ParameterSet(List.of(QuantityType.valueOf("25 %")), List.of(OnOffType.ON), QUANTITY_STRING_TEN,
+                        null) }, //
+                { new ParameterSet(List.of(QuantityType.valueOf(QUANTITY_STRING_TEN)), List.of(OnOffType.OFF),
+                        QUANTITY_STRING_TEN, null) }, //
+                { new ParameterSet(List.of(QuantityType.valueOf("0 %")), List.of(OnOffType.OFF), QUANTITY_STRING_TEN,
+                        null) }, //
+                // lower bound = upper bound = 10 (as QuantityType), one state update / command (QuantityType) -> values
+                // are converted to the same unit
+                { new ParameterSet(List.of(QuantityType.valueOf("10 m")), List.of(OnOffType.ON), "25 cm", null) }, //
+                // lower bound = upper bound = 10 (as QuantityType), one state update / command (QuantityType) ->
+                // incompatible units cannot be compared
+                { new ParameterSet(List.of(QuantityType.valueOf("10 m")), List.of(UnDefType.UNDEF), "25 °C", null) }, //
                 // lower bound = upper bound = 40, one state update / command
                 { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.ON), BIGDECIMAL_FOURTY, null) }, //
                 { new ParameterSet(List.of(new PercentType(BIGDECIMAL_FOURTY)), List.of(OnOffType.OFF),
@@ -93,13 +122,25 @@ public class HysteresisStateProfileTest {
                 { new ParameterSet(List.of(PERCENT_TYPE_TWENTY_FIVE), List.of(OnOffType.OFF), BIGDECIMAL_FOURTY,
                         null) }, //
                 { new ParameterSet(List.of(PercentType.ZERO), List.of(OnOffType.OFF), BIGDECIMAL_FOURTY, null) }, //
-                // lower bound = 10; upper bound = 40, one state update / command
+                // lower bound = 10; upper bound = 40 (as BigDecimal), one state update / command
                 { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.ON), BIGDECIMAL_TEN,
                         BIGDECIMAL_FOURTY) }, //
                 { new ParameterSet(List.of(PERCENT_TYPE_TWENTY_FIVE), List.of(UnDefType.UNDEF), BIGDECIMAL_TEN,
                         BIGDECIMAL_FOURTY) }, //
                 { new ParameterSet(List.of(PercentType.ZERO), List.of(OnOffType.OFF), BIGDECIMAL_TEN,
                         BIGDECIMAL_FOURTY) }, //
+                // lower bound = 10; upper bound = 40 (as String), one state update / command
+                { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.ON), STRING_TEN, STRING_FOURTY) }, //
+                { new ParameterSet(List.of(PERCENT_TYPE_TWENTY_FIVE), List.of(UnDefType.UNDEF), STRING_TEN,
+                        STRING_FOURTY) }, //
+                { new ParameterSet(List.of(PercentType.ZERO), List.of(OnOffType.OFF), STRING_TEN, STRING_FOURTY) }, //
+                // lower bound = 10; upper bound = 40 (as QuantityType), one state update / command
+                { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.ON), QUANTITY_STRING_TEN,
+                        QUANTITY_STRING_FOURTY) }, //
+                { new ParameterSet(List.of(PERCENT_TYPE_TWENTY_FIVE), List.of(UnDefType.UNDEF), QUANTITY_STRING_TEN,
+                        QUANTITY_STRING_FOURTY) }, //
+                { new ParameterSet(List.of(PercentType.ZERO), List.of(OnOffType.OFF), QUANTITY_STRING_TEN,
+                        QUANTITY_STRING_FOURTY) }, //
                 // lower bound = 10; upper bound = 40, two state updates / commands results in changes
                 { new ParameterSet(List.of(PercentType.HUNDRED, PercentType.HUNDRED),
                         List.of(OnOffType.ON, OnOffType.ON), BIGDECIMAL_TEN, BIGDECIMAL_FOURTY) }, //
@@ -149,6 +190,11 @@ public class HysteresisStateProfileTest {
         assertThrows(IllegalArgumentException.class, () -> initProfile(null, null));
     }
 
+    @Test
+    public void testWrongParameterUnits() {
+        assertThrows(IllegalArgumentException.class, () -> initProfile(QUANTITY_STRING_TEN, "5 °C"));
+    }
+
     @ParameterizedTest
     @MethodSource("parameters")
     public void testOnCommandFromHandler(ParameterSet parameterSet) {
@@ -167,12 +213,12 @@ public class HysteresisStateProfileTest {
         }
     }
 
-    private StateProfile initProfile(BigDecimal lower, @Nullable BigDecimal upper) {
+    private StateProfile initProfile(Object lower, @Nullable Object upper) {
         final Map<String, @Nullable Object> properties = new HashMap<>(2);
         properties.put("lower", lower);
         properties.put("upper", upper);
         when(mockContext.getConfiguration()).thenReturn(new Configuration(properties));
-        return new HysteresisStateProfile(mockCallback, mockContext);
+        return new SystemHysteresisStateProfile(mockCallback, mockContext);
     }
 
     private void verifySendCommand(StateProfile profile, Command command, @Nullable Command expectedCommand) {

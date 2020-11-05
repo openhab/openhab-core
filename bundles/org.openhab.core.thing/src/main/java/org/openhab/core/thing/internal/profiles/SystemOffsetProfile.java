@@ -53,15 +53,13 @@ public class SystemOffsetProfile implements StateProfile {
     private final Logger logger = LoggerFactory.getLogger(SystemOffsetProfile.class);
 
     private final ProfileCallback callback;
-    private final ProfileContext context;
 
-    private QuantityType<?> offset = new QuantityType<>("0");
+    private QuantityType<?> offset = QuantityType.ONE;
 
     public SystemOffsetProfile(ProfileCallback callback, ProfileContext context) {
         this.callback = callback;
-        this.context = context;
 
-        Object paramValue = this.context.getConfiguration().get(OFFSET_PARAM);
+        Object paramValue = context.getConfiguration().get(OFFSET_PARAM);
         logger.debug("Configuring profile with {} parameter '{}'", OFFSET_PARAM, paramValue);
         if (paramValue instanceof String) {
             try {
