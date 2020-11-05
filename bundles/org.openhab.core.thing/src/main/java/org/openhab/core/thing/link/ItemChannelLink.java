@@ -13,6 +13,7 @@
 package org.openhab.core.thing.link;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.Item;
 import org.openhab.core.thing.ChannelUID;
@@ -52,10 +53,24 @@ public class ItemChannelLink extends AbstractLink {
 
     @Override
     public ChannelUID getLinkedUID() {
-        return this.channelUID;
+        return channelUID;
     }
 
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof ItemChannelLink) {
+            ItemChannelLink link = (ItemChannelLink) obj;
+            return super.equals(obj) && configuration.equals(link.getConfiguration());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() * configuration.hashCode();
     }
 }
