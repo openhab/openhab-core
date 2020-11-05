@@ -180,8 +180,7 @@ public class ItemChannelLinkResource implements RESTResource {
             return JSONResponse.createResponse(Status.NOT_FOUND, null, message);
         }
 
-        ItemChannelLink result = itemChannelLinkRegistry
-                .remove(AbstractLink.getIDFor(itemName, new ChannelUID(channelUid)));
+        ItemChannelLink result = itemChannelLinkRegistry.remove(linkId);
         if (result != null) {
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } else {
