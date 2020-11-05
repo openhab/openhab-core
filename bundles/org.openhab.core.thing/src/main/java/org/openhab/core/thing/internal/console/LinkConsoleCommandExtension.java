@@ -49,8 +49,8 @@ import org.osgi.service.component.annotations.Reference;
 public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String SUBCMD_LIST = "list";
-    private static final String SUBCMD_CL_ADD = "addChannelLink";
-    private static final String SUBCMD_CL_REMOVE = "removeChannelLink";
+    private static final String SUBCMD_LINK = "link";
+    private static final String SUBCMD_UNLINK = "unlink";
     private static final String SUBCMD_CLEAR = "clear";
     private static final String SUBCMD_ORPHAN = "orphan";
 
@@ -84,24 +84,24 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
                         console.println("Specify action 'list' or 'purge' to be executed: orphan <list|purge>");
                     }
                     return;
-                case SUBCMD_CL_ADD:
+                case SUBCMD_LINK:
                     if (args.length > 2) {
                         String itemName = args[1];
                         ChannelUID channelUID = new ChannelUID(args[2]);
                         addChannelLink(console, itemName, channelUID);
                     } else {
-                        console.println(
-                                "Specify item name and channel UID to link: addChannelLink <itemName> <channelUID>");
+                        console.println("Specify item name and channel UID to link: " + SUBCMD_LINK
+                                + " <itemName> <channelUID>");
                     }
                     return;
-                case SUBCMD_CL_REMOVE:
+                case SUBCMD_UNLINK:
                     if (args.length > 2) {
                         String itemName = args[1];
                         ChannelUID channelUID = new ChannelUID(args[2]);
                         removeChannelLink(console, itemName, channelUID);
                     } else {
-                        console.println(
-                                "Specify item name and channel UID to unlink: removeChannelLink <itemName> <channelUID>");
+                        console.println("Specify item name and channel UID to unlink: " + SUBCMD_UNLINK
+                                + " <itemName> <channelUID>");
                     }
                     return;
                 case SUBCMD_CLEAR:
@@ -143,8 +143,8 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
     @Override
     public List<String> getUsages() {
         return Arrays.asList(new String[] { buildCommandUsage(SUBCMD_LIST, "lists all links"),
-                buildCommandUsage(SUBCMD_CL_ADD + " <itemName> <channelUID>", "links an item with a channel"),
-                buildCommandUsage(SUBCMD_CL_REMOVE + " <itemName> <thingUID>", "unlinks an item with a channel"),
+                buildCommandUsage(SUBCMD_LINK + " <itemName> <channelUID>", "links an item with a channel"),
+                buildCommandUsage(SUBCMD_UNLINK + " <itemName> <thingUID>", "unlinks an item with a channel"),
                 buildCommandUsage(SUBCMD_CLEAR, "removes all managed links"),
                 buildCommandUsage(SUBCMD_ORPHAN, "<list|purge> lists/purges all links with one missing element") });
     }
