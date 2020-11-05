@@ -7,11 +7,11 @@
 	<config-description uri="profile:system:hysteresis">
 		<parameter name="lower" type="decimal" required="true">
 			<label>Lower Bound</label>
-			<description>Maps to ON if value is below lower bound.</description>
+			<description>Maps to OFF if value is below lower bound.</description>
 		</parameter>
 		<parameter name="upper" type="decimal">
 			<label>Upper Bound</label>
-			<description>Maps to OFF if value is above upper bound.</description>
+			<description>Maps to ON if value is above upper bound.</description>
 		</parameter>
 	</config-description>
 </config-description:config-descriptions>
