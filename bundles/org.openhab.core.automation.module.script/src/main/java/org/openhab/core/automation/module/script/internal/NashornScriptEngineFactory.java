@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.module.script.internal;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -48,9 +47,6 @@ public class NashornScriptEngineFactory extends AbstractScriptEngineFactory {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private static final String SCRIPT_TYPE = "js";
-
-    @Nullable
-    Object nashornScriptEngineFactory = null;
 
     @Override
     public List<String> getScriptTypes() {
@@ -88,20 +84,19 @@ public class NashornScriptEngineFactory extends AbstractScriptEngineFactory {
     @Override
     public @Nullable ScriptEngine createScriptEngine(String scriptType) {
         try {
-            if (nashornScriptEngineFactory == null) {
-                Class<?> clazz = Class.forName("jdk.nashorn.api.scripting.NashornScriptEngineFactory");
-                Constructor<?> ctor = clazz.getConstructor();
-                nashornScriptEngineFactory = ctor.newInstance();
-            }
-            if (nashornScriptEngineFactory != null) {
-                Method method = nashornScriptEngineFactory.getClass().getMethod("getScriptEngine", ClassLoader.class);
-                return (ScriptEngine) method.invoke(nashornScriptEngineFactory,
-                        NashornScriptEngineFactory.class.getClassLoader());
+            for (javax.script.ScriptEngineFactory f : ENGINE_MANAGER.getEngineFactories()) {
+                List<String> mimeTypes = f.getMimeTypes();
+                List<String> extensions = f.getExtensions();
+
+                if (mimeTypes.contains(scriptType) || extensions.contains(scriptType)) {
+                    Method method = f.getClass().getMethod("getScriptEngine", ClassLoader.class);
+                    return (ScriptEngine) method.invoke(f, NashornScriptEngineFactory.class.getClassLoader());
+                }
             }
 
-            throw new InstantiationException();
+            return null;
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-                | SecurityException | ClassNotFoundException | InstantiationException e) {
+                | SecurityException e) {
             logger.error("Unable to create Nashorn script engine", e);
             return null;
         }
