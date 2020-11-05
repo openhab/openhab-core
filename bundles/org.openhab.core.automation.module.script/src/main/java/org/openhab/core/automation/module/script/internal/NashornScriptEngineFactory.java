@@ -12,6 +12,9 @@
  */
 package org.openhab.core.automation.module.script.internal;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,6 +31,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.AbstractScriptEngineFactory;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An implementation of {@link ScriptEngineFactory} with customizations for Nashorn ScriptEngines.
@@ -40,15 +45,12 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = ScriptEngineFactory.class)
 public class NashornScriptEngineFactory extends AbstractScriptEngineFactory {
 
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
     private static final String SCRIPT_TYPE = "js";
 
-    @SuppressWarnings("removal")
-    jdk.nashorn.api.scripting.NashornScriptEngineFactory nashornScriptEngineFactory;
-
-    @SuppressWarnings({ "deprecation", "removal" })
-    public NashornScriptEngineFactory() {
-        nashornScriptEngineFactory = new jdk.nashorn.api.scripting.NashornScriptEngineFactory();
-    }
+    @Nullable
+    Object nashornScriptEngineFactory = null;
 
     @Override
     public List<String> getScriptTypes() {
@@ -83,9 +85,25 @@ public class NashornScriptEngineFactory extends AbstractScriptEngineFactory {
         }
     }
 
-    @SuppressWarnings({ "deprecation" })
     @Override
     public @Nullable ScriptEngine createScriptEngine(String scriptType) {
-        return nashornScriptEngineFactory.getScriptEngine(NashornScriptEngineFactory.class.getClassLoader());
+        try {
+            if (nashornScriptEngineFactory == null) {
+                Class<?> clazz = Class.forName("jdk.nashorn.api.scripting.NashornScriptEngineFactory");
+                Constructor<?> ctor = clazz.getConstructor();
+                nashornScriptEngineFactory = ctor.newInstance();
+            }
+            if (nashornScriptEngineFactory != null) {
+                Method method = nashornScriptEngineFactory.getClass().getMethod("getScriptEngine", ClassLoader.class);
+                return (ScriptEngine) method.invoke(nashornScriptEngineFactory,
+                        NashornScriptEngineFactory.class.getClassLoader());
+            }
+
+            throw new InstantiationException();
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+                | SecurityException | ClassNotFoundException | InstantiationException e) {
+            logger.error("Unable to create Nashorn script engine", e);
+            return null;
+        }
     }
 }
