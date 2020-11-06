@@ -45,7 +45,8 @@ import org.openhab.core.thing.type.ChannelType;
  */
 public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
 
-    private final Map<String, Object> properties = Map.of(SystemOffsetProfile.OFFSET_PARAM, BigDecimal.ZERO);
+    private final Map<String, Object> properties = Map.of(SystemOffsetProfile.OFFSET_PARAM, BigDecimal.ZERO,
+            SystemHysteresisStateProfile.LOWER_PARAM, BigDecimal.TEN);
 
     private SystemProfileFactory profileFactory;
 

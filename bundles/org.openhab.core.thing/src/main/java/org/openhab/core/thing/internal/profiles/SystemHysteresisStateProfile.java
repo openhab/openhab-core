@@ -42,7 +42,7 @@ import tec.uom.se.AbstractUnit;
 @NonNullByDefault
 public class SystemHysteresisStateProfile implements StateProfile {
 
-    private static final String LOWER_PARAM = "lower";
+    static final String LOWER_PARAM = "lower";
     private static final String UPPER_PARAM = "upper";
     private static final String INVERTED_PARAM = "inverted";
 
@@ -60,23 +60,24 @@ public class SystemHysteresisStateProfile implements StateProfile {
     public SystemHysteresisStateProfile(ProfileCallback callback, ProfileContext context) {
         this.callback = callback;
 
-        QuantityType<?> lowerParam = getParam(context, LOWER_PARAM);
+        final QuantityType<?> lowerParam = getParam(context, LOWER_PARAM);
         if (lowerParam == null) {
-            throw new IllegalArgumentException(
-                    String.format("Parameter '%s' is not a Number value, using default value: 10", LOWER_PARAM));
+            throw new IllegalArgumentException(String.format("Parameter '%s' is not a Number value.", LOWER_PARAM));
         }
-        lower = lowerParam;
-        QuantityType<?> upperParam = getParam(context, UPPER_PARAM);
-        QuantityType<?> convertedUpperParam = upperParam == null ? lower : upperParam.toUnit(lower.getUnit());
+        this.lower = lowerParam;
+        final QuantityType<?> upperParam = getParam(context, UPPER_PARAM);
+        final QuantityType<?> convertedUpperParam = upperParam == null ? lower : upperParam.toUnit(lower.getUnit());
         if (convertedUpperParam == null) {
             throw new IllegalArgumentException(
                     String.format("Units of parameters '%s' and '%s' are not compatible: %s != %s", LOWER_PARAM,
                             UPPER_PARAM, lower, upperParam));
         }
-        upper = convertedUpperParam;
-        boolean inverted = Boolean.valueOf(context.getConfiguration().get(INVERTED_PARAM).toString());
-        low = inverted ? OnOffType.ON : OnOffType.OFF;
-        high = inverted ? OnOffType.OFF : OnOffType.ON;
+        this.upper = convertedUpperParam;
+
+        final Object paramValue = context.getConfiguration().get(INVERTED_PARAM);
+        final boolean inverted = paramValue == null ? false : Boolean.valueOf(paramValue.toString());
+        this.low = inverted ? OnOffType.ON : OnOffType.OFF;
+        this.high = inverted ? OnOffType.OFF : OnOffType.ON;
     }
 
     private @Nullable QuantityType<?> getParam(ProfileContext context, String param) {
@@ -130,7 +131,7 @@ public class SystemHysteresisStateProfile implements StateProfile {
 
     private Type mapValue(Type value) {
         if (value instanceof QuantityType) {
-            QuantityType<?> qtState = (QuantityType<?>) value;
+            final QuantityType<?> qtState = (QuantityType<?>) value;
             final QuantityType<?> finalLower;
             final QuantityType<?> finalUpper;
             if (lower.getUnit() == SmartHomeUnits.ONE && upper.getUnit() == SmartHomeUnits.ONE) {
