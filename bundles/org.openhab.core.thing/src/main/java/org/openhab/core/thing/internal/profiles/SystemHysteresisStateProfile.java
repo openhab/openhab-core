@@ -44,6 +44,7 @@ public class SystemHysteresisStateProfile implements StateProfile {
 
     private static final String LOWER_PARAM = "lower";
     private static final String UPPER_PARAM = "upper";
+    private static final String INVERTED_PARAM = "inverted";
 
     private final Logger logger = LoggerFactory.getLogger(SystemHysteresisStateProfile.class);
 
@@ -51,6 +52,8 @@ public class SystemHysteresisStateProfile implements StateProfile {
 
     private final QuantityType<?> lower;
     private final QuantityType<?> upper;
+    private final OnOffType low;
+    private final OnOffType high;
 
     private Type previousType = UnDefType.UNDEF;
 
@@ -71,6 +74,9 @@ public class SystemHysteresisStateProfile implements StateProfile {
                             UPPER_PARAM, lower, upperParam));
         }
         upper = convertedUpperParam;
+        boolean inverted = Boolean.valueOf(context.getConfiguration().get(INVERTED_PARAM).toString());
+        low = inverted ? OnOffType.ON : OnOffType.OFF;
+        high = inverted ? OnOffType.OFF : OnOffType.ON;
     }
 
     private @Nullable QuantityType<?> getParam(ProfileContext context, String param) {
@@ -155,9 +161,9 @@ public class SystemHysteresisStateProfile implements StateProfile {
 
     private Type mapValue(double lower, double upper, double value) {
         if (value <= lower) {
-            return OnOffType.OFF;
+            return low;
         } else if (value >= upper) {
-            return OnOffType.ON;
+            return high;
         }
         return previousType;
     }

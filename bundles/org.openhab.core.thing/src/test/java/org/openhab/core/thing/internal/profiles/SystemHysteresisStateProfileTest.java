@@ -195,6 +195,15 @@ public class SystemHysteresisStateProfileTest {
         assertThrows(IllegalArgumentException.class, () -> initProfile(QUANTITY_STRING_TEN, "5 °C"));
     }
 
+    @Test
+    public void testInvertedParameter() {
+        final StateProfile profile = initProfile(BIGDECIMAL_TEN, null, true);
+        verifySendCommand(profile, PercentType.HUNDRED, OnOffType.OFF);
+        verifySendCommand(profile, PercentType.ZERO, OnOffType.ON);
+        verifySendUpdate(profile, PercentType.HUNDRED, OnOffType.OFF);
+        verifySendUpdate(profile, PercentType.ZERO, OnOffType.ON);
+    }
+
     @ParameterizedTest
     @MethodSource("parameters")
     public void testOnCommandFromHandler(ParameterSet parameterSet) {
@@ -214,9 +223,14 @@ public class SystemHysteresisStateProfileTest {
     }
 
     private StateProfile initProfile(Object lower, @Nullable Object upper) {
+        return initProfile(lower, upper, false);
+    }
+
+    private StateProfile initProfile(Object lower, @Nullable Object upper, boolean inverted) {
         final Map<String, @Nullable Object> properties = new HashMap<>(2);
         properties.put("lower", lower);
         properties.put("upper", upper);
+        properties.put("inverted", inverted);
         when(mockContext.getConfiguration()).thenReturn(new Configuration(properties));
         return new SystemHysteresisStateProfile(mockCallback, mockContext);
     }

@@ -13,5 +13,10 @@
 			<label>Upper Bound</label>
 			<description>Maps to ON if value is above upper bound.</description>
 		</parameter>
+		<parameter name="inverted" type="boolean">
+			<label>Inverted</label>
+			<description>Inverts resulting mapping of ON / OFF, if true.</description>
+			<default>false</default>
+		</parameter>
 	</config-description>
 </config-description:config-descriptions>
