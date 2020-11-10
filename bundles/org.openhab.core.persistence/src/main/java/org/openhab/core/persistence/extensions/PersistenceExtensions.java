@@ -269,9 +269,8 @@ public class PersistenceExtensions {
         DecimalType maximum = item.getStateAs(DecimalType.class);
         while (it.hasNext()) {
             HistoricItem historicItem = it.next();
-            State state = historicItem.getState();
-            if (state instanceof DecimalType) {
-                DecimalType value = (DecimalType) state;
+            DecimalType value = historicItem.getState().as(DecimalType.class);
+            if (value != null) {
                 if (maximum == null || value.compareTo(maximum) > 0) {
                     maximum = value;
                     maximumHistoricItem = historicItem;
@@ -280,9 +279,7 @@ public class PersistenceExtensions {
         }
         if (maximumHistoricItem == null && maximum != null) {
             // the maximum state is the current one, so construct a historic item on the fly
-            final DecimalType state = maximum;
             return new HistoricItem() {
-
                 @Override
                 public ZonedDateTime getTimestamp() {
                     return ZonedDateTime.now();
@@ -290,7 +287,7 @@ public class PersistenceExtensions {
 
                 @Override
                 public State getState() {
-                    return state;
+                    return item.getState();
                 }
 
                 @Override
@@ -335,9 +332,8 @@ public class PersistenceExtensions {
         DecimalType minimum = item.getStateAs(DecimalType.class);
         while (it.hasNext()) {
             HistoricItem historicItem = it.next();
-            State state = historicItem.getState();
-            if (state instanceof DecimalType) {
-                DecimalType value = (DecimalType) state;
+            DecimalType value = historicItem.getState().as(DecimalType.class);
+            if (value != null) {
                 if (minimum == null || value.compareTo(minimum) < 0) {
                     minimum = value;
                     minimumHistoricItem = historicItem;
@@ -346,9 +342,7 @@ public class PersistenceExtensions {
         }
         if (minimumHistoricItem == null && minimum != null) {
             // the minimal state is the current one, so construct a historic item on the fly
-            final DecimalType state = minimum;
             return new HistoricItem() {
-
                 @Override
                 public ZonedDateTime getTimestamp() {
                     return ZonedDateTime.now();
@@ -356,7 +350,7 @@ public class PersistenceExtensions {
 
                 @Override
                 public State getState() {
-                    return state;
+                    return item.getState();
                 }
 
                 @Override
@@ -499,24 +493,21 @@ public class PersistenceExtensions {
     private static DecimalType internalAverageSince(Item item, Iterator<HistoricItem> it) {
         BigDecimal total = BigDecimal.ZERO;
 
-        BigDecimal avgValue, timeSpan;
         DecimalType lastState = null, thisState;
         BigDecimal firstTimestamp = null, lastTimestamp = null, thisTimestamp = null;
 
         while (it.hasNext()) {
             HistoricItem thisItem = it.next();
-            State state = thisItem.getState();
-
-            if (state instanceof DecimalType) {
-                thisState = (DecimalType) state;
+            thisState = thisItem.getState().as(DecimalType.class);
+            if (thisState != null) {
                 thisTimestamp = BigDecimal.valueOf(thisItem.getTimestamp().toInstant().toEpochMilli());
                 if (firstTimestamp == null || lastState == null) {
                     firstTimestamp = thisTimestamp;
                 } else {
-                    avgValue = thisState.toBigDecimal().add(lastState.toBigDecimal()).divide(BIG_DECIMAL_TWO,
+                    BigDecimal average = thisState.toBigDecimal().add(lastState.toBigDecimal()).divide(BIG_DECIMAL_TWO,
                             MathContext.DECIMAL64);
-                    timeSpan = thisTimestamp.subtract(lastTimestamp, MathContext.DECIMAL64);
-                    total = total.add(avgValue.multiply(timeSpan, MathContext.DECIMAL64));
+                    BigDecimal timeSpan = thisTimestamp.subtract(lastTimestamp, MathContext.DECIMAL64);
+                    total = total.add(average.multiply(timeSpan, MathContext.DECIMAL64));
                 }
                 lastTimestamp = thisTimestamp;
                 lastState = thisState;
@@ -527,15 +518,15 @@ public class PersistenceExtensions {
             thisState = item.getStateAs(DecimalType.class);
             if (thisState != null) {
                 thisTimestamp = BigDecimal.valueOf(Instant.now().toEpochMilli());
-                avgValue = thisState.toBigDecimal().add(lastState.toBigDecimal()).divide(BIG_DECIMAL_TWO,
+                BigDecimal average = thisState.toBigDecimal().add(lastState.toBigDecimal()).divide(BIG_DECIMAL_TWO,
                         MathContext.DECIMAL64);
-                timeSpan = thisTimestamp.subtract(lastTimestamp, MathContext.DECIMAL64);
-                total = total.add(avgValue.multiply(timeSpan, MathContext.DECIMAL64));
+                BigDecimal timeSpan = thisTimestamp.subtract(lastTimestamp, MathContext.DECIMAL64);
+                total = total.add(average.multiply(timeSpan, MathContext.DECIMAL64));
             }
         }
 
         if (thisTimestamp != null) {
-            timeSpan = thisTimestamp.subtract(firstTimestamp, MathContext.DECIMAL64);
+            BigDecimal timeSpan = thisTimestamp.subtract(firstTimestamp, MathContext.DECIMAL64);
             // avoid ArithmeticException if timeSpan is zero
             if (!BigDecimal.ZERO.equals(timeSpan)) {
                 BigDecimal average = total.divide(timeSpan, MathContext.DECIMAL64);

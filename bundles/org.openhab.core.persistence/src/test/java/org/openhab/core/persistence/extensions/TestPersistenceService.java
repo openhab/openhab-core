@@ -14,6 +14,7 @@ package org.openhab.core.persistence.extensions;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
@@ -57,49 +59,90 @@ public class TestPersistenceService implements QueryablePersistenceService {
 
     @Override
     public Iterable<HistoricItem> query(FilterCriteria filter) {
-        int startValue = 1950;
-        int endValue = 2012;
+        if (PersistenceExtensionsTest.TEST_SWITCH.equals(filter.getItemName())) {
+            ZonedDateTime now = ZonedDateTime.now().truncatedTo(ChronoUnit.MINUTES),
+                    nowMinusFifteenHours = now.minusHours(15),
+                    beginDate = filter.getBeginDate() != null ? filter.getBeginDate() : nowMinusFifteenHours,
+                    endDate = filter.getEndDate() != null ? filter.getEndDate() : now;
+            if (endDate.isBefore(beginDate)) {
+                return List.of();
+            }
 
-        if (filter.getBeginDate() != null) {
-            startValue = filter.getBeginDate().getYear();
-        }
-        if (filter.getEndDate() != null) {
-            endValue = filter.getEndDate().getYear();
-        }
+            List<HistoricItem> results = new ArrayList<>(16);
+            for (int i = 0; i <= 15; i++) {
+                final int hours = i;
+                final ZonedDateTime theDate = nowMinusFifteenHours.plusHours(hours);
+                if (theDate.isBefore(beginDate) || theDate.isAfter(endDate)) {
+                } else {
+                    results.add(new HistoricItem() {
+                        @Override
+                        public ZonedDateTime getTimestamp() {
+                            return theDate;
+                        }
 
-        if (endValue <= startValue || startValue < 1950) {
-            return Collections.emptyList();
-        }
+                        @Override
+                        public State getState() {
+                            return hours < 5 || hours > 10 ? OnOffType.ON : OnOffType.OFF;
+                        }
 
-        List<HistoricItem> results = new ArrayList<>(endValue - startValue);
-        for (int i = startValue; i <= endValue; i++) {
-            final int year = i;
-            results.add(new HistoricItem() {
-                @Override
-                public ZonedDateTime getTimestamp() {
-                    return ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+                        @Override
+                        public String getName() {
+                            return filter.getItemName();
+                        }
+                    });
                 }
+            }
+            if (filter.getOrdering() == Ordering.DESCENDING) {
+                Collections.reverse(results);
+            }
+            return results;
+        } else
 
-                @Override
-                public State getState() {
-                    return new DecimalType(year);
-                }
+        {
+            int startValue = 1950;
+            int endValue = 2012;
 
-                @Override
-                public String getName() {
-                    return "Test";
-                }
-            });
+            if (filter.getBeginDate() != null) {
+                startValue = filter.getBeginDate().getYear();
+            }
+            if (filter.getEndDate() != null) {
+                endValue = filter.getEndDate().getYear();
+            }
+
+            if (endValue <= startValue || startValue < 1950) {
+                return List.of();
+            }
+
+            List<HistoricItem> results = new ArrayList<>(endValue - startValue);
+            for (int i = startValue; i <= endValue; i++) {
+                final int year = i;
+                results.add(new HistoricItem() {
+                    @Override
+                    public ZonedDateTime getTimestamp() {
+                        return ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+                    }
+
+                    @Override
+                    public State getState() {
+                        return new DecimalType(year);
+                    }
+
+                    @Override
+                    public String getName() {
+                        return filter.getItemName();
+                    }
+                });
+            }
+            if (filter.getOrdering() == Ordering.DESCENDING) {
+                Collections.reverse(results);
+            }
+            return results;
         }
-        if (filter.getOrdering() == Ordering.DESCENDING) {
-            Collections.reverse(results);
-        }
-        return results;
     }
 
     @Override
     public Set<PersistenceItemInfo> getItemInfo() {
-        return Collections.emptySet();
+        return Set.of();
     }
 
     @Override
@@ -109,6 +152,6 @@ public class TestPersistenceService implements QueryablePersistenceService {
 
     @Override
     public List<PersistenceStrategy> getDefaultStrategies() {
-        return Collections.emptyList();
+        return List.of();
     }
 }
