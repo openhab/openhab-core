@@ -109,6 +109,9 @@ public class MqttBrokerConnection {
     protected @Nullable ScheduledExecutorService timeoutExecutor;
     private int timeout = 1200; /* Connection timeout in milliseconds */
 
+    // Server quirk flags
+    private boolean unsubscribeOnStop = true;
+
     /**
      * Create a listener object for being used as a callback for a connection attempt.
      * The callback will interact with the {@link AbstractReconnectStrategy} as well as inform registered
@@ -398,6 +401,18 @@ public class MqttBrokerConnection {
      */
     public void setLastWill(@Nullable MqttWillAndTestament lastWill) {
         this.lastWill = lastWill;
+    }
+
+    /**
+     * Enable / disable sending Unsubscribe command when the connection is closed
+     * Some servers can be quirky, then do not handle Usubscribe request properly.
+     * In this case we have to omit sending it. Example: iRobot built-in MQTT server.
+     * By default this behavior is set to true.
+     *
+     * @param unsubscribeOnStop Enable or disable flag.
+     */
+    public void setUnsubscribeOnStop(boolean unsubscribeOnStop) {
+        this.unsubscribeOnStop = unsubscribeOnStop;
     }
 
     /**
@@ -723,20 +738,24 @@ public class MqttBrokerConnection {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         // Close connection
         if (client.getState().isConnected()) {
-            unsubscribeAll().thenRun(() -> {
-                client.disconnect().whenComplete((m, t) -> {
-                    if (t == null) {
-                        future.complete(true);
-                    } else {
-                        future.complete(false);
-                    }
+            if (unsubscribeOnStop) {
+                unsubscribeAll().thenRun(() -> {
+                    doDisconnect(future);
                 });
-            });
+            } else {
+                doDisconnect(future);
+            }
         } else {
             future.complete(true);
         }
 
         return future.thenApply(this::finalizeStopAfterDisconnect);
+    }
+
+    private void doDisconnect(CompletableFuture<Boolean> future) {
+        client.disconnect().whenComplete((m, t) -> {
+            future.complete(t == null);
+        });
     }
 
     /**
