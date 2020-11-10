@@ -86,8 +86,12 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
      */
     @Override
     protected void processAutomationProvider(Bundle bundle) {
-        Vendor vendor = new Vendor(bundle.getSymbolicName(), bundle.getVersion().toString());
-        logger.debug("Parse rules from bundle '{}' ", bundle.getSymbolicName());
+        String bsn = bundle.getSymbolicName();
+        if (bsn == null) {
+            bsn = String.format("@bundleId@0x%x", bundle.getBundleId());
+        }
+        Vendor vendor = new Vendor(bsn, bundle.getVersion().toString());
+        logger.debug("Parse rules from bundle '{}' ", bsn);
         Enumeration<URL> urlEnum = null;
         try {
             if (bundle.getState() != Bundle.UNINSTALLED) {
@@ -157,7 +161,11 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
 
     @Override
     protected void processAutomationProviderUninstalled(Bundle bundle) {
-        Vendor vendor = new Vendor(bundle.getSymbolicName(), bundle.getVersion().toString());
+        String bsn = bundle.getSymbolicName();
+        if (bsn == null) {
+            bsn = String.format("@bundleId@0x%x", bundle.getBundleId());
+        }
+        Vendor vendor = new Vendor(bsn, bundle.getVersion().toString());
         waitingProviders.remove(bundle);
         providerPortfolio.remove(vendor);
     }

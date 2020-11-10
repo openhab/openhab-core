@@ -240,7 +240,11 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
                     bundle.getBundleId(), e);
             processAutomationProviderUninstalled(bundle);
         }
-        Vendor vendor = new Vendor(bundle.getSymbolicName(), bundle.getVersion().toString());
+        String bsn = bundle.getSymbolicName();
+        if (bsn == null) {
+            bsn = String.format("@bundleId@0x%x", bundle.getBundleId());
+        }
+        Vendor vendor = new Vendor(bsn, bundle.getVersion().toString());
         List<String> previousPortfolio = getPreviousPortfolio(vendor);
         List<String> newPortfolio = new LinkedList<>();
         if (urlEnum != null) {
@@ -327,7 +331,11 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
     @SuppressWarnings("unchecked")
     protected void processAutomationProviderUninstalled(Bundle bundle) {
         waitingProviders.remove(bundle);
-        Vendor vendor = new Vendor(bundle.getSymbolicName(), bundle.getVersion().toString());
+        String bsn = bundle.getSymbolicName();
+        if (bsn == null) {
+            bsn = String.format("@bundleId@0x%x", bundle.getBundleId());
+        }
+        Vendor vendor = new Vendor(bsn, bundle.getVersion().toString());
         List<String> portfolio = providerPortfolio.remove(vendor);
         if (portfolio != null && !portfolio.isEmpty()) {
             for (String uid : portfolio) {
@@ -363,7 +371,7 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
         if (symbolicName != null) {
             Bundle[] bundles = bundleContext.getBundles();
             for (Bundle bundle : bundles) {
-                if (bundle.getSymbolicName().equals(symbolicName)) {
+                if (symbolicName.equals(bundle.getSymbolicName())) {
                     return bundle;
                 }
             }
