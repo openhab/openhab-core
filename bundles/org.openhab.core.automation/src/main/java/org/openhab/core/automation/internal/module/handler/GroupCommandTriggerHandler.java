@@ -48,7 +48,7 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
     private final Logger logger = LoggerFactory.getLogger(GroupCommandTriggerHandler.class);
 
     private final String groupName;
-    private final String command;
+    private final @Nullable String command;
     private final String topic;
 
     private final Set<String> types;
@@ -98,10 +98,10 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
                 if (itemRegistry != null) {
                     Item item = itemRegistry.get(itemName);
                     if (item != null && item.getGroupNames().contains(groupName)) {
-                        Command command = icEvent.getItemCommand();
-                        if (this.command.equals(command.toFullString())) {
+                        Command itemCommand = icEvent.getItemCommand();
+                        if (command == null || command.equals(itemCommand.toFullString())) {
                             values.put("triggeringItem", item);
-                            values.put("command", command);
+                            values.put("command", itemCommand);
                             values.put("event", event);
                             cb.triggered(this.module, values);
                         }
