@@ -192,6 +192,10 @@ public class NumberItem extends GenericItem {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private @Nullable Unit<? extends Quantity<?>> getUnit(@Nullable Class<? extends Quantity<?>> dimension) {
+        if (dimension == null) {
+            // if it is a plain number without dimension, we do not have a unit.
+            return null;
+        }
         StateDescription stateDescription = getStateDescription();
         if (stateDescription != null) {
             String pattern = stateDescription.getPattern();
@@ -203,7 +207,7 @@ public class NumberItem extends GenericItem {
             }
         }
 
-        if (dimension != null && unitProvider != null) {
+        if (unitProvider != null) {
             // explicit cast to Class<? extends Quantity> as JDK compiler complains
             return unitProvider.getUnit((Class<? extends Quantity>) dimension);
         }
