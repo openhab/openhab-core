@@ -12,8 +12,6 @@
  */
 package org.openhab.core.automation.module.script.internal;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -30,8 +28,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.AbstractScriptEngineFactory;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.osgi.service.component.annotations.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An implementation of {@link ScriptEngineFactory} with customizations for Nashorn ScriptEngines.
@@ -43,8 +39,6 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(service = ScriptEngineFactory.class)
 public class NashornScriptEngineFactory extends AbstractScriptEngineFactory {
-
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private static final String SCRIPT_TYPE = "js";
 
@@ -83,22 +77,10 @@ public class NashornScriptEngineFactory extends AbstractScriptEngineFactory {
 
     @Override
     public @Nullable ScriptEngine createScriptEngine(String scriptType) {
-        try {
-            for (javax.script.ScriptEngineFactory f : ENGINE_MANAGER.getEngineFactories()) {
-                List<String> mimeTypes = f.getMimeTypes();
-                List<String> extensions = f.getExtensions();
-
-                if (mimeTypes.contains(scriptType) || extensions.contains(scriptType)) {
-                    Method method = f.getClass().getMethod("getScriptEngine", ClassLoader.class);
-                    return (ScriptEngine) method.invoke(f, NashornScriptEngineFactory.class.getClassLoader());
-                }
-            }
-
-            return null;
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-                | SecurityException e) {
-            logger.error("Unable to create Nashorn script engine", e);
-            return null;
-        }
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(NashornScriptEngineFactory.class.getClassLoader());
+        ScriptEngine scriptEngine = super.createScriptEngine(scriptType);
+        Thread.currentThread().setContextClassLoader(originalClassLoader);
+        return scriptEngine;
     }
 }
