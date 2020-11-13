@@ -17,11 +17,11 @@ import org.openhab.core.semantics.model.Equipment;
 import org.openhab.core.semantics.model.TagInfo;
 
 /**
- * This class defines a Screen.
+ * This class defines a Voice Assistant.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Screen", label = "Screen", synonyms = "Screens", description = "")
-public interface Screen extends Equipment {
+@TagInfo(id = "Equipment_VoiceAssistant", label = "Voice Assistant", synonyms = "Voice Assistants", description = "")
+public interface VoiceAssistant extends Equipment {
 }

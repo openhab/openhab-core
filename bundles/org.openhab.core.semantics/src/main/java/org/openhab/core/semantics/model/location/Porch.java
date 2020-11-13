@@ -10,18 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.semantics.model.equipment;
+package org.openhab.core.semantics.model.location;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.semantics.model.Equipment;
 import org.openhab.core.semantics.model.TagInfo;
 
 /**
- * This class defines a Screen.
+ * This class defines a Porch.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Screen", label = "Screen", synonyms = "Screens", description = "")
-public interface Screen extends Equipment {
+@TagInfo(id = "Location_Outdoor_Porch", label = "Porch", synonyms = "Proches", description = "")
+public interface Porch extends Outdoor {
 }
