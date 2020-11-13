@@ -13,15 +13,14 @@
 package org.openhab.core.semantics.model.equipment;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.semantics.model.Equipment;
 import org.openhab.core.semantics.model.TagInfo;
 
 /**
- * This class defines a Screen.
+ * This class defines a Television.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Screen", label = "Screen", synonyms = "Screens", description = "")
-public interface Screen extends Equipment {
+@TagInfo(id = "Equipment_Screen_Television", label = "Television", synonyms = "Televisions, TV, TVs", description = "")
+public interface Television extends Screen {
 }

@@ -21,6 +21,6 @@ import org.openhab.core.semantics.model.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Location_Indoor_Floor_Basement", label = "Basement", synonyms = "Basements, Cellar, Cellars", description = "")
+@TagInfo(id = "Location_Indoor_Floor_Basement", label = "Basement", synonyms = "Basements", description = "")
 public interface Basement extends Floor {
 }

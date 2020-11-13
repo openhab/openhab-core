@@ -13,15 +13,14 @@
 package org.openhab.core.semantics.model.equipment;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.semantics.model.Equipment;
 import org.openhab.core.semantics.model.TagInfo;
 
 /**
- * This class defines a Screen.
+ * This class defines a Cellar Door.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Screen", label = "Screen", synonyms = "Screens", description = "")
-public interface Screen extends Equipment {
+@TagInfo(id = "Equipment_Door_CellarDoor", label = "Cellar Door", synonyms = "Cellar Doors", description = "")
+public interface CellarDoor extends Door {
 }
