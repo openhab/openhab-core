@@ -54,7 +54,8 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
     public static final String MIMETYPE_OPENHAB_DSL_RULE = "application/vnd.openhab.dsl.rule";
 
     private static final Map<String, String> implicitVars = Map.of("command", "receivedCommand", "event",
-            "receivedEvent", "newState", "newState", "oldState", "previousState", "triggeringItem", "triggeringItem");
+            "receivedEvent", "state", "newState", "newState", "newState", "oldState", "previousState", "triggeringItem",
+            "triggeringItem");
 
     private final Logger logger = LoggerFactory.getLogger(DSLScriptEngine.class);
 
