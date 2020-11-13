@@ -77,11 +77,13 @@ public class RulesRefresher implements ReadyTracker {
     private final ItemRegistryChangeListener itemRegistryChangeListener = new ItemRegistryChangeListener() {
         @Override
         public void added(Item element) {
+            logger.debug("Item \"{}\" added => rules are going to be refreshed", element.getName());
             scheduleRuleRefresh();
         }
 
         @Override
         public void removed(Item element) {
+            logger.debug("Item \"{}\" removed => rules are going to be refreshed", element.getName());
             scheduleRuleRefresh();
         }
 
@@ -91,6 +93,7 @@ public class RulesRefresher implements ReadyTracker {
 
         @Override
         public void allItemsChanged(Collection<String> oldItemNames) {
+            logger.debug("All items changed => rules are going to be refreshed");
             scheduleRuleRefresh();
         }
     };
@@ -98,11 +101,13 @@ public class RulesRefresher implements ReadyTracker {
     private final ThingRegistryChangeListener thingRegistryChangeListener = new ThingRegistryChangeListener() {
         @Override
         public void added(Thing element) {
+            logger.debug("Thing \"{}\" added => rules are going to be refreshed", element.getUID().getAsString());
             scheduleRuleRefresh();
         }
 
         @Override
         public void removed(Thing element) {
+            logger.debug("Thing \"{}\" removed => rules are going to be refreshed", element.getUID().getAsString());
             scheduleRuleRefresh();
         }
 
@@ -130,12 +135,14 @@ public class RulesRefresher implements ReadyTracker {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addActionService(ActionService actionService) {
         if (started) {
+            logger.debug("Script action added => rules are going to be refreshed");
             scheduleRuleRefresh();
         }
     }
 
     protected void removeActionService(ActionService actionService) {
         if (started) {
+            logger.debug("Script action removed => rules are going to be refreshed");
             scheduleRuleRefresh();
         }
     }
@@ -143,12 +150,14 @@ public class RulesRefresher implements ReadyTracker {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addThingActions(ThingActions thingActions) {
         if (started) {
+            logger.debug("Thing automation action added => rules are going to be refreshed");
             scheduleRuleRefresh();
         }
     }
 
     protected void removeThingActions(ThingActions thingActions) {
         if (started) {
+            logger.debug("Thing automation action removed => rules are going to be refreshed");
             scheduleRuleRefresh();
         }
     }
