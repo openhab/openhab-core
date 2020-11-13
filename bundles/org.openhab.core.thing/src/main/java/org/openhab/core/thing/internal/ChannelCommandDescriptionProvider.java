@@ -90,7 +90,7 @@ public class ChannelCommandDescriptionProvider implements CommandDescriptionProv
                 CommandDescription dynamicCommandDescription = dynamicCommandDescriptionProvider
                         .getCommandDescription(channel, originalCommandDescription, locale);
                 if (dynamicCommandDescription != null) {
-                    if (dynamicCommandDescription.equals(originalCommandDescription)) {
+                    if (dynamicCommandDescription == originalCommandDescription) {
                         logger.error(
                                 "Dynamic command description matches original command description. DynamicCommandDescriptionProvider implementations must never return the original command description. {} has to be fixed.",
                                 dynamicCommandDescription.getClass());
