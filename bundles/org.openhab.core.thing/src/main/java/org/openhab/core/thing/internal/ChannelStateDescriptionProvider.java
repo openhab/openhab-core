@@ -131,7 +131,8 @@ public class ChannelStateDescriptionProvider implements StateDescriptionFragment
     private @Nullable StateDescription getDynamicStateDescription(Channel channel,
             @Nullable StateDescription originalStateDescription, @Nullable Locale locale) {
         for (DynamicStateDescriptionProvider provider : dynamicStateDescriptionProviders) {
-            StateDescription dynamicStateDescription = provider.getStateDescription(channel, originalStateDescription, locale);
+            StateDescription dynamicStateDescription = provider.getStateDescription(channel, originalStateDescription,
+                    locale);
             if (dynamicStateDescription != null) {
                 if (dynamicStateDescription == originalStateDescription) {
                     logger.error(
