@@ -37,8 +37,6 @@ public class DSLScriptEngineFactory implements ScriptEngineFactory {
 
     private static final String SCRIPT_TYPE = "dsl";
 
-    private @NonNullByDefault({}) DSLScriptEngine dslScriptEngine;
-
     private final ScriptEngine scriptEngine;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policyOption = ReferencePolicyOption.GREEDY)
@@ -47,11 +45,6 @@ public class DSLScriptEngineFactory implements ScriptEngineFactory {
     @Activate
     public DSLScriptEngineFactory(@Reference ScriptEngine scriptEngine) {
         this.scriptEngine = scriptEngine;
-    }
-
-    @Activate
-    protected void activate() {
-        dslScriptEngine = new DSLScriptEngine(scriptEngine, contextProvider);
     }
 
     @Override
@@ -65,7 +58,7 @@ public class DSLScriptEngineFactory implements ScriptEngineFactory {
 
     @Override
     public javax.script.@Nullable ScriptEngine createScriptEngine(String scriptType) {
-        return dslScriptEngine;
+        return new DSLScriptEngine(scriptEngine, contextProvider);
     }
 
 }
