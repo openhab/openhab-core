@@ -250,7 +250,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         }
     }
 
-    private class ExpireConfig {
+    class ExpireConfig {
 
         protected static final String COMMAND_PREFIX = "command=";
         protected static final String STATE_PREFIX = "state=";
