@@ -100,12 +100,12 @@ public class ChannelStateDescriptionProvider implements StateDescriptionFragment
                 ChannelType channelType = thingTypeRegistry.getChannelType(channel, locale);
                 if (channelType != null) {
                     stateDescription = channelType.getState();
-                    if ((channelType.getItemType() != null)
-                            && ((stateDescription == null) || (stateDescription.getPattern() == null))) {
+                    String itemType = channelType.getItemType();
+                    if (itemType != null && (stateDescription == null || stateDescription.getPattern() == null)) {
                         String pattern = null;
-                        if (CoreItemFactory.STRING.equalsIgnoreCase(channelType.getItemType())) {
+                        if (CoreItemFactory.STRING.equalsIgnoreCase(itemType)) {
                             pattern = "%s";
-                        } else if (channelType.getItemType().startsWith(CoreItemFactory.NUMBER)) {
+                        } else if (itemType.startsWith(CoreItemFactory.NUMBER)) {
                             pattern = "%.0f";
                         }
                         if (pattern != null) {
@@ -131,14 +131,15 @@ public class ChannelStateDescriptionProvider implements StateDescriptionFragment
     private @Nullable StateDescription getDynamicStateDescription(Channel channel,
             @Nullable StateDescription originalStateDescription, @Nullable Locale locale) {
         for (DynamicStateDescriptionProvider provider : dynamicStateDescriptionProviders) {
-            StateDescription stateDescription = provider.getStateDescription(channel, originalStateDescription, locale);
-            if (stateDescription != null) {
-                if (stateDescription.equals(originalStateDescription)) {
+            StateDescription dynamicStateDescription = provider.getStateDescription(channel, originalStateDescription,
+                    locale);
+            if (dynamicStateDescription != null) {
+                if (dynamicStateDescription == originalStateDescription) {
                     logger.error(
                             "Dynamic state description matches original state description. DynamicStateDescriptionProvider implementations must never return the original state description. {} has to be fixed.",
                             provider.getClass());
                 } else {
-                    return stateDescription;
+                    return dynamicStateDescription;
                 }
             }
         }
