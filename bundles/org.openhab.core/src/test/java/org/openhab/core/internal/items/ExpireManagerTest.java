@@ -38,9 +38,11 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.UnDefType;
 
 /**
@@ -172,6 +174,22 @@ class ExpireManagerTest {
         cfg = expireManager.new ExpireConfig(testItem, "1h,15 °C");
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(new QuantityType<Temperature>("15 °C"), cfg.expireState);
+        assertEquals(null, cfg.expireCommand);
+
+        testItem = new StringItem(ITEMNAME);
+        cfg = expireManager.new ExpireConfig(testItem, "1h,NULL");
+        assertEquals(Duration.ofHours(1), cfg.duration);
+        assertEquals(UnDefType.NULL, cfg.expireState);
+        assertEquals(null, cfg.expireCommand);
+
+        cfg = expireManager.new ExpireConfig(testItem, "1h,'NULL'");
+        assertEquals(Duration.ofHours(1), cfg.duration);
+        assertEquals(new StringType("NULL"), cfg.expireState);
+        assertEquals(null, cfg.expireCommand);
+
+        cfg = expireManager.new ExpireConfig(testItem, "1h,'UNDEF'");
+        assertEquals(Duration.ofHours(1), cfg.duration);
+        assertEquals(new StringType("UNDEF"), cfg.expireState);
         assertEquals(null, cfg.expireCommand);
     }
 

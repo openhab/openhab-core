@@ -40,6 +40,7 @@ import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
@@ -301,7 +302,15 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                         stateOrCommand = stateOrCommand.substring(STATE_PREFIX.length());
                     }
                     String stateString = stateOrCommand;
-                    expireState = TypeParser.parseState(item.getAcceptedDataTypes(), stateString);
+                    State state = TypeParser.parseState(item.getAcceptedDataTypes(), stateString);
+                    // do special handling to allow NULL and UNDEF as strings when being put in single quotes
+                    if (new StringType("'NULL'").equals(state)) {
+                        expireState = new StringType("NULL");
+                    } else if (new StringType("'UNDEF'").equals(state)) {
+                        expireState = new StringType("UNDEF");
+                    } else {
+                        expireState = state;
+                    }
                     expireCommand = null;
                     if (expireState == null) {
                         throw new IllegalArgumentException("The string '" + stateString
