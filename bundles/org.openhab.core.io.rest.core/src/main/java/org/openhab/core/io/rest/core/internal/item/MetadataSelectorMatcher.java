@@ -12,10 +12,7 @@
  */
 package org.openhab.core.io.rest.core.internal.item;
 
-import static java.util.stream.Collectors.toSet;
-
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
@@ -26,8 +23,6 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.AbstractUID;
-import org.openhab.core.config.core.ConfigDescription;
-import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.items.MetadataRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -42,17 +37,11 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class MetadataSelectorMatcher {
 
-    private static final String METADATA_SCHEME = "metadata";
-    private static final String METADATA_SCHEME_PREFIX = METADATA_SCHEME + ":";
-
     private final MetadataRegistry metadataRegistry;
-    private final ConfigDescriptionRegistry configDescriptionRegistry;
 
     @Activate
-    public MetadataSelectorMatcher(final @Reference MetadataRegistry metadataRegistry,
-            final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
+    public MetadataSelectorMatcher(final @Reference MetadataRegistry metadataRegistry) {
         this.metadataRegistry = metadataRegistry;
-        this.configDescriptionRegistry = configDescriptionRegistry;
     }
 
     /**
@@ -72,22 +61,26 @@ public class MetadataSelectorMatcher {
                     .map(n -> n.trim()) //
                     .collect(Collectors.toSet());
 
+            Set<String> allMetadataNamespaces = metadataRegistry.getAll().stream() //
+                    .map(metadata -> metadata.getUID().getNamespace()) //
+                    .distinct() //
+                    .collect(Collectors.toSet());
+
             String namespacePattern = originalNamespaces.stream().collect(Collectors.joining("|"));
 
-            Pattern pattern = Pattern.compile(METADATA_SCHEME_PREFIX + "(" + namespacePattern + ")$");
-            Collection<ConfigDescription> configDescriptions = configDescriptionRegistry.getConfigDescriptions(locale);
+            Pattern pattern = Pattern.compile("(" + namespacePattern + ")$");
 
-            Set<String> configNamespaces = configDescriptions.stream()
-                    .filter(cd -> METADATA_SCHEME.equals(cd.getUID().getScheme())).map(cd -> cd.getUID().toString())
-                    .filter(pattern.asPredicate()).map(uri -> uri.substring(METADATA_SCHEME_PREFIX.length()))
-                    .collect(toSet());
+            Set<String> metadataNamespaces = allMetadataNamespaces.stream() //
+                    .filter(n -> !metadataRegistry.isInternalNamespace(n)) //
+                    .filter(pattern.asPredicate()).collect(Collectors.toSet());
 
-            // merge configDescription namespaces and namespaces from the namespace selector:
+            // merge metadata namespaces and namespaces from the namespace selector:
             Set<String> result = new HashSet<>(originalNamespaces);
-            result.addAll(configNamespaces);
+            result.addAll(metadataNamespaces);
 
             // filter all name spaces which do not match the UID segment pattern (this will be the regex tokens):
-            return result.stream().filter(namespace -> namespace.matches(AbstractUID.SEGMENT_PATTERN)).collect(toSet());
+            return result.stream().filter(namespace -> namespace.matches(AbstractUID.SEGMENT_PATTERN))
+                    .collect(Collectors.toSet());
         }
     }
 }
