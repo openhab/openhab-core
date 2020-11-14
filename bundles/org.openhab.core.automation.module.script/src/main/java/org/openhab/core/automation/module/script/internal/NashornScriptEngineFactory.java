@@ -24,6 +24,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.AbstractScriptEngineFactory;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.osgi.service.component.annotations.Component;
@@ -33,6 +34,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Scott Rushworth - removed default methods provided by ScriptEngineFactory
+ * @author Yannick Schaus - create script engines with the bundle's class loader as "app" class loader
  */
 @NonNullByDefault
 @Component(service = ScriptEngineFactory.class)
@@ -71,5 +73,14 @@ public class NashornScriptEngineFactory extends AbstractScriptEngineFactory {
         } catch (ScriptException ex) {
             logger.error("ScriptException while importing scope: {}", ex.getMessage());
         }
+    }
+
+    @Override
+    public @Nullable ScriptEngine createScriptEngine(String scriptType) {
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(NashornScriptEngineFactory.class.getClassLoader());
+        ScriptEngine scriptEngine = super.createScriptEngine(scriptType);
+        Thread.currentThread().setContextClassLoader(originalClassLoader);
+        return scriptEngine;
     }
 }
