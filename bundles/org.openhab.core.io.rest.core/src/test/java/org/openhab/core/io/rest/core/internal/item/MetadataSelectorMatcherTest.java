@@ -19,8 +19,6 @@ import static org.hamcrest.core.IsIterableContaining.hasItem;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +30,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
@@ -48,26 +45,18 @@ public class MetadataSelectorMatcherTest {
 
     private MetadataSelectorMatcher matcher;
 
-    private @Mock ConfigDescriptionRegistry configDescriptionRegistry;
     private @Mock MetadataRegistry metadataRegistry;
 
     @BeforeEach
     public void setup() throws Exception {
-        when(metadataRegistry.getAll()).thenReturn(mockMetadata());
+        when(metadataRegistry.getAll()).thenReturn(
+                List.of(new Metadata(new MetadataKey("magic", "test_item"), "test", new HashMap<String, Object>()),
+                        new Metadata(new MetadataKey("magic2", "test_item"), "test", new HashMap<String, Object>()),
+                        new Metadata(new MetadataKey("homekit", "test_item"), "test", new HashMap<String, Object>()),
+                        new Metadata(new MetadataKey("alexa", "test_item"), "test", new HashMap<String, Object>())));
         when(metadataRegistry.isInternalNamespace(anyString())).thenReturn(false);
 
         matcher = new MetadataSelectorMatcher(metadataRegistry);
-    }
-
-    private Collection<Metadata> mockMetadata() throws Exception {
-        List<Metadata> metadata = new ArrayList<>();
-
-        metadata.add(new Metadata(new MetadataKey("magic", "test_item"), "test", new HashMap<String, Object>()));
-        metadata.add(new Metadata(new MetadataKey("magic2", "test_item"), "test", new HashMap<String, Object>()));
-        metadata.add(new Metadata(new MetadataKey("homekit", "test_item"), "test", new HashMap<String, Object>()));
-        metadata.add(new Metadata(new MetadataKey("alexa", "test_item"), "test", new HashMap<String, Object>()));
-
-        return metadata;
     }
 
     @Test

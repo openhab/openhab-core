@@ -12,8 +12,6 @@
  */
 package org.openhab.core.io.rest.core.internal.item;
 
-import static java.util.stream.Collectors.toSet;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -74,14 +72,15 @@ public class MetadataSelectorMatcher {
 
             Set<String> metadataNamespaces = allMetadataNamespaces.stream() //
                     .filter(n -> !metadataRegistry.isInternalNamespace(n)) //
-                    .filter(pattern.asPredicate()).collect(toSet());
+                    .filter(pattern.asPredicate()).collect(Collectors.toSet());
 
             // merge metadata namespaces and namespaces from the namespace selector:
             Set<String> result = new HashSet<>(originalNamespaces);
             result.addAll(metadataNamespaces);
 
             // filter all name spaces which do not match the UID segment pattern (this will be the regex tokens):
-            return result.stream().filter(namespace -> namespace.matches(AbstractUID.SEGMENT_PATTERN)).collect(toSet());
+            return result.stream().filter(namespace -> namespace.matches(AbstractUID.SEGMENT_PATTERN))
+                    .collect(Collectors.toSet());
         }
     }
 }
