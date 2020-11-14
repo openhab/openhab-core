@@ -20,8 +20,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,11 +49,11 @@ public class MetadataSelectorMatcherTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        when(metadataRegistry.getAll()).thenReturn(
-                List.of(new Metadata(new MetadataKey("magic", "test_item"), "test", new HashMap<String, Object>()),
-                        new Metadata(new MetadataKey("magic2", "test_item"), "test", new HashMap<String, Object>()),
-                        new Metadata(new MetadataKey("homekit", "test_item"), "test", new HashMap<String, Object>()),
-                        new Metadata(new MetadataKey("alexa", "test_item"), "test", new HashMap<String, Object>())));
+        when(metadataRegistry.getAll())
+                .thenReturn(List.of(new Metadata(new MetadataKey("magic", "test_item"), "test", Map.of()),
+                        new Metadata(new MetadataKey("magic2", "test_item"), "test", Map.of()),
+                        new Metadata(new MetadataKey("homekit", "test_item"), "test", Map.of()),
+                        new Metadata(new MetadataKey("alexa", "test_item"), "test", Map.of())));
         when(metadataRegistry.isInternalNamespace(anyString())).thenReturn(false);
 
         matcher = new MetadataSelectorMatcher(metadataRegistry);
