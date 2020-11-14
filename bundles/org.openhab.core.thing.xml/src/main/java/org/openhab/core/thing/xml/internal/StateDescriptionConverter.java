@@ -102,8 +102,7 @@ public class StateDescriptionConverter extends GenericUnmarshaller<StateDescript
     }
 
     @Override
-    public final @Nullable Object unmarshal(@NonNullByDefault({}) HierarchicalStreamReader reader,
-            @NonNullByDefault({}) UnmarshallingContext context) {
+    public final @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);
 
         boolean readOnly = toBoolean(attributes, "readOnly", false);

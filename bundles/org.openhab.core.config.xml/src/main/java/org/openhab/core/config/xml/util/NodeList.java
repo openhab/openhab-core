@@ -16,6 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.thoughtworks.xstream.converters.ConversionException;
 
 /**
@@ -28,6 +32,7 @@ import com.thoughtworks.xstream.converters.ConversionException;
  *
  * @author Michael Grammling - Initial contribution
  */
+@NonNullByDefault
 public class NodeList implements NodeName {
 
     private String nodeName;
@@ -37,14 +42,15 @@ public class NodeList implements NodeName {
     /**
      * Creates a new instance of this class with the specified parameters.
      *
-     * @param nodeName the name of the node this object belongs to (must neither be null, nor empty)
-     * @param attributes all attributes of the node this object belongs to (could be null or empty)
-     * @param list the list of the node this object belongs to (could be null or empty)
-     * @throws IllegalArgumentException if the name of the node is null or empty
+     * @param nodeName the name of the node this object belongs to (must not be empty)
+     * @param attributes all attributes of the node this object belongs to (could be empty)
+     * @param list the list of the node this object belongs to (could be empty)
+     * @throws IllegalArgumentException if the name of the node is empty
      */
-    public NodeList(String nodeName, Map<String, String> attributes, List<?> list) throws IllegalArgumentException {
-        if ((nodeName == null) || (nodeName.isEmpty())) {
-            throw new IllegalArgumentException("The name of the node must neither be null nor empty!");
+    public NodeList(String nodeName, Map<String, String> attributes, List<@NonNull ?> list)
+            throws IllegalArgumentException {
+        if (nodeName.isEmpty()) {
+            throw new IllegalArgumentException("The name of the node must not be empty!");
         }
 
         this.attributes = attributes;
@@ -63,7 +69,7 @@ public class NodeList implements NodeName {
      * @return the attributes of the node as key-value map (could be null or empty).
      */
     public Map<String, String> getAttributes() {
-        return this.attributes;
+        return attributes;
     }
 
     /**
@@ -71,8 +77,8 @@ public class NodeList implements NodeName {
      *
      * @return the list of values of the node (could be null or empty).
      */
-    public List<?> getList() {
-        return this.list;
+    public List<@NonNull ?> getList() {
+        return list;
     }
 
     /**
@@ -96,31 +102,26 @@ public class NodeList implements NodeName {
      * @throws ConversionException if the attribute could not be found in the specified node
      */
     @SuppressWarnings("unchecked")
-    public List<String> getAttributes(String nodeName, String attributeName, String formattedText)
+    public List<String> getAttributes(String nodeName, String attributeName, @Nullable String formattedText)
             throws ConversionException {
-        List<String> attributes = null;
+        List<String> attributes = new ArrayList<>(list.size());
 
-        if (this.list != null) {
-            attributes = new ArrayList<>(this.list.size());
+        String format = formattedText;
+        if (format == null || format.isEmpty()) {
+            format = "%s";
+        }
 
-            String format = formattedText;
-            if ((format == null) || (format.isEmpty())) {
-                format = "%s";
-            }
+        for (NodeAttributes node : (List<NodeAttributes>) this.list) {
+            if (nodeName.equals(node.getNodeName())) {
+                String attributeValue = node.getAttribute(attributeName);
 
-            for (NodeAttributes node : (List<NodeAttributes>) this.list) {
-                if (nodeName.equals(node.getNodeName())) {
-                    String attributeValue = node.getAttribute(attributeName);
-
-                    if (attributeValue != null) {
-                        attributes.add(String.format(format, attributeValue));
-                    } else {
-                        throw new ConversionException(
-                                "Missing attribute '" + attributeName + "' in '" + nodeName + "'!");
-                    }
+                if (attributeValue != null) {
+                    attributes.add(String.format(format, attributeValue));
                 } else {
-                    throw new ConversionException("Invalid attribute in '" + nodeName + "'!");
+                    throw new ConversionException("Missing attribute '" + attributeName + "' in '" + nodeName + "'!");
                 }
+            } else {
+                throw new ConversionException("Invalid attribute in '" + nodeName + "'!");
             }
         }
 

@@ -14,6 +14,7 @@ package org.openhab.core.config.xml.util;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -39,6 +40,6 @@ public class NodeListConverter extends GenericUnmarshaller<NodeList> {
         String nodeName = reader.getNodeName();
         List<?> values = (List<?>) context.convertAnother(context, List.class);
 
-        return new NodeList(nodeName, attributes, values);
+        return new NodeList(nodeName, attributes, Objects.requireNonNullElse(values, List.of()));
     }
 }

@@ -61,8 +61,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
     }
 
     @Override
-    protected void doGet(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, String[]> params = req.getParameterMap();
 
         try {
@@ -80,8 +79,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
     }
 
     @Override
-    protected void doPost(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, String[]> params = req.getParameterMap();
         try {
             if (!params.containsKey("username")) {
