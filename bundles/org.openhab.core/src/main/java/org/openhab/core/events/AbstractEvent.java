@@ -102,5 +102,4 @@ public abstract class AbstractEvent implements Event {
         }
         return true;
     }
-
 }
