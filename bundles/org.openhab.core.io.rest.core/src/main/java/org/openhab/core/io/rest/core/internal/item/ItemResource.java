@@ -590,29 +590,35 @@ public class ItemResource implements RESTResource {
             return Response.status(Status.BAD_REQUEST).build();
         }
 
-        Item newItem = ItemDTOMapper.map(item, itemBuilderFactory);
-        if (newItem == null) {
-            logger.warn("Received HTTP PUT request at '{}' with an invalid item type '{}'.", uriInfo.getPath(),
-                    item.type);
-            return Response.status(Status.BAD_REQUEST).build();
-        }
+        try {
+            Item newItem = ItemDTOMapper.map(item, itemBuilderFactory);
+            if (newItem == null) {
+                logger.warn("Received HTTP PUT request at '{}' with an invalid item type '{}'.", uriInfo.getPath(),
+                        item.type);
+                return Response.status(Status.BAD_REQUEST).build();
+            }
 
-        // Save the item
-        if (getItem(itemname) == null) {
-            // item does not yet exist, create it
-            managedItemProvider.add(newItem);
-            return getItemResponse(uriBuilder(uriInfo, httpHeaders), Status.CREATED, itemRegistry.get(itemname), locale,
-                    null);
-        } else if (managedItemProvider.get(itemname) != null) {
-            // item already exists as a managed item, update it
-            managedItemProvider.update(newItem);
-            return getItemResponse(uriBuilder(uriInfo, httpHeaders), Status.OK, itemRegistry.get(itemname), locale,
-                    null);
-        } else {
-            // Item exists but cannot be updated
-            logger.warn("Cannot update existing item '{}', because is not managed.", itemname);
-            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
-                    "Cannot update non-managed Item " + itemname);
+            // Save the item
+            if (getItem(itemname) == null) {
+                // item does not yet exist, create it
+                managedItemProvider.add(newItem);
+                return getItemResponse(uriBuilder(uriInfo, httpHeaders), Status.CREATED, itemRegistry.get(itemname),
+                        locale, null);
+            } else if (managedItemProvider.get(itemname) != null) {
+                // item already exists as a managed item, update it
+                managedItemProvider.update(newItem);
+                return getItemResponse(uriBuilder(uriInfo, httpHeaders), Status.OK, itemRegistry.get(itemname), locale,
+                        null);
+            } else {
+                // Item exists but cannot be updated
+                logger.warn("Cannot update existing item '{}', because is not managed.", itemname);
+                return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
+                        "Cannot update non-managed Item " + itemname);
+            }
+        } catch (IllegalArgumentException e) {
+            logger.warn("Received HTTP PUT request at '{}' with an invalid item name '{}'.", uriInfo.getPath(),
+                    item.name);
+            return Response.status(Status.BAD_REQUEST).build();
         }
     }
 
@@ -641,12 +647,17 @@ public class ItemResource implements RESTResource {
         Map<String, Collection<String>> tagMap = new HashMap<>();
 
         for (GroupItemDTO item : items) {
-            Item newItem = ItemDTOMapper.map(item, itemBuilderFactory);
-            if (newItem == null) {
-                wrongTypes.add(item);
-                tagMap.put(item.name, item.tags);
-            } else {
-                activeItems.add(newItem);
+            try {
+                Item newItem = ItemDTOMapper.map(item, itemBuilderFactory);
+                if (newItem == null) {
+                    wrongTypes.add(item);
+                    tagMap.put(item.name, item.tags);
+                } else {
+                    activeItems.add(newItem);
+                }
+            } catch (IllegalArgumentException e) {
+                logger.warn("Received HTTP PUT request with an invalid item name '{}'.", item.name);
+                return Response.status(Status.BAD_REQUEST).build();
             }
         }
 

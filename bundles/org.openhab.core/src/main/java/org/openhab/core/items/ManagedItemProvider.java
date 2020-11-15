@@ -84,7 +84,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     }
 
     /**
-     * Removes an item and it´s member if recursive flag is set to true.
+     * Removes an item and its member if recursive flag is set to true.
      *
      * @param itemName item name to remove
      * @param recursive if set to true all members of the item will be removed, too.
@@ -103,6 +103,14 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         } else {
             return null;
         }
+    }
+
+    @Override
+    public void add(Item element) {
+        if (!ItemUtil.isValidItemName(element.getName())) {
+            throw new IllegalArgumentException("The item name `" + element.getName() + "` is invalid.");
+        }
+        super.add(element);
     }
 
     private List<String> getMemberNamesRecursively(GroupItem groupItem, Collection<Item> allItems) {

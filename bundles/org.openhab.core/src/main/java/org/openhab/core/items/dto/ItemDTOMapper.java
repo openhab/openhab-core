@@ -23,6 +23,7 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemBuilder;
 import org.openhab.core.items.ItemBuilderFactory;
+import org.openhab.core.items.ItemUtil;
 import org.openhab.core.types.State;
 
 /**
@@ -50,6 +51,10 @@ public class ItemDTOMapper {
         }
         if (itemBuilderFactory == null) {
             throw new IllegalArgumentException("The argument 'itemBuilderFactory' must no be null.");
+        }
+
+        if (!ItemUtil.isValidItemName(itemDTO.name)) {
+            throw new IllegalArgumentException("The item name `" + itemDTO.name + "` is invalid.");
         }
 
         if (itemDTO.type != null) {
