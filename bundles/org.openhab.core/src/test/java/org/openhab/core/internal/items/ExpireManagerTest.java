@@ -129,6 +129,30 @@ class ExpireManagerTest {
     }
 
     @Test
+    void testMetadataChange() throws InterruptedException, ItemNotFoundException {
+        Metadata md = new Metadata(METADATA_KEY, "1s", null);
+        when(metadataRegistry.get(METADATA_KEY)).thenReturn(md);
+
+        Event event = ItemEventFactory.createCommandEvent(ITEMNAME, OnOffType.ON);
+        expireManager.receive(event);
+
+        verify(eventPublisher, never()).post(any());
+        Thread.sleep(2500L);
+        verify(eventPublisher)
+                .post(eq(ItemEventFactory.createStateEvent(ITEMNAME, UnDefType.UNDEF, ExpireManager.EVENT_SOURCE)));
+
+        when(metadataRegistry.get(METADATA_KEY)).thenReturn(null);
+        expireManager.metadataChangeListener.removed(md);
+        reset(eventPublisher);
+
+        event = ItemEventFactory.createCommandEvent(ITEMNAME, OnOffType.ON);
+        expireManager.receive(event);
+        verify(eventPublisher, never()).post(any());
+        Thread.sleep(2500L);
+        verify(eventPublisher, never()).post(any());
+    }
+
+    @Test
     void testExpireConfig() {
         Item testItem = new SwitchItem(ITEMNAME);
         ExpireConfig cfg = expireManager.new ExpireConfig(testItem, "1s");

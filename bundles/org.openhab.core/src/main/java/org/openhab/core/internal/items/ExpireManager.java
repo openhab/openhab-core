@@ -73,7 +73,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
 
     private final Logger logger = LoggerFactory.getLogger(ExpireManager.class);
 
-    private Map<String, @Nullable ExpireConfig> itemExpireConfig = new ConcurrentHashMap<>();
+    private Map<String, @Nullable Optional<ExpireConfig>> itemExpireConfig = new ConcurrentHashMap<>();
     private Map<String, Instant> itemExpireMap = new ConcurrentHashMap<>();
 
     private ScheduledExecutorService threadPool = ThreadPoolManager
@@ -82,6 +82,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
     private final EventPublisher eventPublisher;
     private final MetadataRegistry metadataRegistry;
     private final ItemRegistry itemRegistry;
+    /* default */ final MetadataChangeListener metadataChangeListener = new MetadataChangeListener();
 
     private boolean enabled = true;
 
@@ -116,8 +117,10 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                 }, 1, 1, TimeUnit.SECONDS);
             }
             itemRegistry.addRegistryChangeListener(this);
+            metadataRegistry.addRegistryChangeListener(metadataChangeListener);
         } else {
             itemRegistry.removeRegistryChangeListener(this);
+            metadataRegistry.removeRegistryChangeListener(metadataChangeListener);
             if (expireJob != null) {
                 expireJob.cancel(true);
                 expireJob = null;
@@ -257,6 +260,40 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         }
     }
 
+    @Override
+    public void added(Item item) {
+        itemExpireConfig.remove(item.getName());
+    }
+
+    @Override
+    public void removed(Item item) {
+        itemExpireConfig.remove(item.getName());
+    }
+
+    @Override
+    public void updated(Item oldItem, Item item) {
+        itemExpireConfig.remove(item.getName());
+    }
+
+    class MetadataChangeListener implements RegistryChangeListener<Metadata> {
+
+        @Override
+        public void added(Metadata element) {
+            itemExpireConfig.remove(element.getUID().getItemName());
+        }
+
+        @Override
+        public void removed(Metadata element) {
+            itemExpireConfig.remove(element.getUID().getItemName());
+        }
+
+        @Override
+        public void updated(Metadata oldElement, Metadata element) {
+            itemExpireConfig.remove(element.getUID().getItemName());
+        }
+
+    }
+
     class ExpireConfig {
 
         protected static final String COMMAND_PREFIX = "command=";
@@ -355,20 +392,5 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             return "duration='" + durationString + "', s=" + duration.toSeconds() + ", state='" + expireState
                     + "', command='" + expireCommand + "'";
         }
-    }
-
-    @Override
-    public void added(Item item) {
-        itemExpireConfig.remove(item.getName());
-    }
-
-    @Override
-    public void removed(Item item) {
-        itemExpireConfig.remove(item.getName());
-    }
-
-    @Override
-    public void updated(Item oldItem, Item item) {
-        itemExpireConfig.remove(item.getName());
     }
 }
