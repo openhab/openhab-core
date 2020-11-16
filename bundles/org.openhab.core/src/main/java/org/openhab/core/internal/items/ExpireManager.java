@@ -72,7 +72,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
 
     private final Logger logger = LoggerFactory.getLogger(ExpireManager.class);
 
-    private Map<String, ExpireConfig> itemExpireConfig = new ConcurrentHashMap<>();
+    private Map<String, @Nullable ExpireConfig> itemExpireConfig = new ConcurrentHashMap<>();
     private Map<String, Instant> itemExpireMap = new ConcurrentHashMap<>();
 
     private ScheduledExecutorService threadPool = ThreadPoolManager
@@ -195,6 +195,8 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                     logger.debug("Item '{}' does not exist.", itemName);
                 }
             }
+            // also fill the map when there is no config, so that we do not retry to find one
+            itemExpireConfig.put(itemName, null);
             return null;
         }
     }
@@ -356,6 +358,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
 
     @Override
     public void added(Item item) {
+        itemExpireConfig.remove(item.getName());
     }
 
     @Override
