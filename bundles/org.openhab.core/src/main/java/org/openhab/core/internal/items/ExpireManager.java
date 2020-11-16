@@ -244,6 +244,9 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
 
     @Override
     public void receive(Event event) {
+        if (!enabled) {
+            return;
+        }
         if (event instanceof ItemStateEvent) {
             receiveUpdate((ItemStateEvent) event);
         } else if (event instanceof ItemCommandEvent) {
