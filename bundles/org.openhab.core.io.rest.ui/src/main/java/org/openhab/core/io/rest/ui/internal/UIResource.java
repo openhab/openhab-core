@@ -13,6 +13,8 @@
 package org.openhab.core.io.rest.ui.internal;
 
 import java.security.InvalidParameterException;
+import java.util.Date;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -23,11 +25,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
@@ -48,6 +52,7 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -101,9 +106,26 @@ public class UIResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Get all registered UI components in the specified namespace.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RootUIComponent.class)))) })
-    public Response getAllComponents(@PathParam("namespace") String namespace) {
+    public Response getAllComponents(@PathParam("namespace") String namespace,
+            @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         Stream<RootUIComponent> components = registry.getAll().stream();
+        if (summary != null && summary == true) {
+            components = components.map(c -> {
+                RootUIComponent component = new RootUIComponent(c.getUID(), c.getType());
+                @Nullable
+                Set<String> tags = c.getTags();
+                if (tags != null) {
+                    component.addTags(c.getTags());
+                }
+                @Nullable
+                Date timestamp = c.getTimestamp();
+                if (timestamp != null) {
+                    component.setTimestamp(timestamp);
+                }
+                return component;
+            });
+        }
         return Response.ok(new Stream2JSONInputStream(components)).build();
     }
 

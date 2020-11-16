@@ -56,6 +56,7 @@ import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.status.ConfigStatusInfo;
 import org.openhab.core.config.core.status.ConfigStatusService;
 import org.openhab.core.config.core.validation.ConfigValidationException;
+import org.openhab.core.io.rest.DTOMapper;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
@@ -148,6 +149,7 @@ public class ThingResource implements RESTResource {
     /** The URI path to this resource */
     public static final String PATH_THINGS = "things";
 
+    private final DTOMapper dtoMapper;
     private final ChannelTypeRegistry channelTypeRegistry;
     private final ConfigStatusService configStatusService;
     private final ConfigDescriptionRegistry configDescRegistry;
@@ -169,7 +171,7 @@ public class ThingResource implements RESTResource {
 
     @Activate
     public ThingResource( //
-            final @Reference ChannelTypeRegistry channelTypeRegistry,
+            final @Reference DTOMapper dtoMapper, final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference ConfigStatusService configStatusService,
             final @Reference ConfigDescriptionRegistry configDescRegistry,
             final @Reference FirmwareRegistry firmwareRegistry,
@@ -185,6 +187,7 @@ public class ThingResource implements RESTResource {
             final @Reference ThingRegistry thingRegistry,
             final @Reference ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService,
             final @Reference ThingTypeRegistry thingTypeRegistry) {
+        this.dtoMapper = dtoMapper;
         this.channelTypeRegistry = channelTypeRegistry;
         this.configStatusService = configStatusService;
         this.configDescRegistry = configDescRegistry;
@@ -294,11 +297,16 @@ public class ThingResource implements RESTResource {
     @Operation(summary = "Get all available things.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedThingDTO.class), uniqueItems = true))) })
     public Response getAll(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary) {
         final Locale locale = localeService.getLocale(language);
 
         Stream<EnrichedThingDTO> thingStream = thingRegistry.stream().map(t -> convertToEnrichedThingDTO(t, locale))
                 .distinct();
+        if (summary != null && summary == true) {
+            thingStream = dtoMapper.limitToFields(thingStream,
+                    "UID,label,bridgeUID,thingTypeUID,statusInfo,location,editable");
+        }
         return Response.ok(new Stream2JSONInputStream(thingStream)).build();
     }
 

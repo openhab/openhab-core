@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -65,9 +65,11 @@ import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.rest.DTOMapper;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -114,6 +116,7 @@ public class RuleResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(RuleResource.class);
 
+    private final DTOMapper dtoMapper;
     private final RuleManager ruleManager;
     private final RuleRegistry ruleRegistry;
     private final ManagedRuleProvider managedRuleProvider;
@@ -122,9 +125,11 @@ public class RuleResource implements RESTResource {
 
     @Activate
     public RuleResource( //
+            final @Reference DTOMapper dtoMapper, //
             final @Reference RuleManager ruleManager, //
             final @Reference RuleRegistry ruleRegistry, //
             final @Reference ManagedRuleProvider managedRuleProvider) {
+        this.dtoMapper = dtoMapper;
         this.ruleManager = ruleManager;
         this.ruleRegistry = ruleRegistry;
         this.managedRuleProvider = managedRuleProvider;
@@ -135,7 +140,8 @@ public class RuleResource implements RESTResource {
     @Operation(summary = "Get available rules, optionally filtered by tags and/or prefix.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedRuleDTO.class)))) })
     public Response get(@QueryParam("prefix") final @Nullable String prefix,
-            @QueryParam("tags") final @Nullable List<String> tags) {
+            @QueryParam("tags") final @Nullable List<String> tags,
+            @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary) {
         // match all
         Predicate<Rule> p = r -> true;
 
@@ -149,10 +155,13 @@ public class RuleResource implements RESTResource {
         // if tags is null or empty list returns all rules
         p = p.and(hasAllTags(tags));
 
-        final Collection<EnrichedRuleDTO> rules = ruleRegistry.stream().filter(p) // filter according to Predicates
-                .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider)) // map matching rules
-                .collect(Collectors.toList());
-        return Response.ok(rules).build();
+        Stream<EnrichedRuleDTO> rules = ruleRegistry.stream().filter(p) // filter according to Predicates
+                .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider)); // map matching rules
+        if (summary != null && summary == true) {
+            rules = dtoMapper.limitToFields(rules, "uid,templateUID,name,visibility,description,status,tags,editable");
+        }
+
+        return Response.ok(new Stream2JSONInputStream(rules)).build();
     }
 
     @POST
