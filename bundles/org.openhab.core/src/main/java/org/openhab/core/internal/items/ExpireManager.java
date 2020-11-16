@@ -15,6 +15,7 @@ package org.openhab.core.internal.items;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -175,9 +176,9 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
     }
 
     private @Nullable ExpireConfig getExpireConfig(String itemName) {
-        // the value might be null, so we explicitly check if an entry for that key exists
-        if (itemExpireConfig.containsKey(itemName)) {
-            return itemExpireConfig.get(itemName);
+        Optional<ExpireConfig> itemConfig = itemExpireConfig.get(itemName);
+        if (itemConfig != null) {
+            return itemConfig.isPresent() ? itemConfig.get() : null;
         } else {
             Metadata metadata = metadataRegistry.get(new MetadataKey(METADATA_NAMESPACE, itemName));
             if (metadata != null) {
@@ -185,7 +186,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                     Item item = itemRegistry.getItem(itemName);
                     try {
                         ExpireConfig cfg = new ExpireConfig(item, metadata.getValue());
-                        itemExpireConfig.put(itemName, cfg);
+                        itemExpireConfig.put(itemName, Optional.of(cfg));
                         return cfg;
                     } catch (IllegalArgumentException e) {
                         logger.warn("Expire config '{}' of item '{}' is invalid: {}", metadata.getValue(), itemName,
@@ -196,7 +197,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                 }
             }
             // also fill the map when there is no config, so that we do not retry to find one
-            itemExpireConfig.put(itemName, null);
+            itemExpireConfig.put(itemName, Optional.empty());
             return null;
         }
     }
@@ -216,19 +217,19 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
 
     private void expire(String itemName) {
         itemExpireMap.remove(itemName); // disable expire trigger until next update or command
-        ExpireConfig expireConfig = itemExpireConfig.get(itemName);
+        Optional<ExpireConfig> expireConfig = itemExpireConfig.get(itemName);
 
-        if (expireConfig != null) {
-            Command expireCommand = expireConfig.expireCommand;
-            State expireState = expireConfig.expireState;
+        if (expireConfig != null && expireConfig.isPresent()) {
+            Command expireCommand = expireConfig.get().expireCommand;
+            State expireState = expireConfig.get().expireState;
 
             if (expireCommand != null) {
                 logger.debug("Item {} received no command or update for {} - posting command '{}'", itemName,
-                        expireConfig.duration, expireCommand);
+                        expireConfig.get().duration, expireCommand);
                 postCommand(itemName, expireCommand);
             } else if (expireState != null) {
                 logger.debug("Item {} received no command or update for {} - posting state '{}'", itemName,
-                        expireConfig.duration, expireState);
+                        expireConfig.get().duration, expireState);
                 postUpdate(itemName, expireState);
             }
         }
