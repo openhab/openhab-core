@@ -17,7 +17,7 @@
 
   <properties>
     <jackson.version>2.10.3</jackson.version>
-    <jetty.version>9.4.20.v20190813</jetty.version>
+    <jetty.version>9.4.34.v20201102</jetty.version>
     <pax.web.version>7.2.19</pax.web.version>
     <swagger.version>2.1.0</swagger.version>
   </properties>
