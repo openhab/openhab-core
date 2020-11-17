@@ -277,9 +277,10 @@ public class ChartServlet extends SmartHomeServlet {
 
         // Read out the parameter 'dpi'
         Integer dpi = null;
-        if (req.getParameter("dpi") != null) {
+        String dpiString = req.getParameter("dpi");
+        if (dpiString != null) {
             try {
-                dpi = Integer.valueOf(req.getParameter("dpi"));
+                dpi = Integer.valueOf(dpiString);
             } catch (NumberFormatException e) {
                 res.sendError(HttpServletResponse.SC_BAD_REQUEST, "dpi parameter is invalid");
                 return;

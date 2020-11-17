@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -223,7 +224,7 @@ public class ConfigUtil {
         for (int i = configDescriptions.size() - 1; i >= 0; i--) {
             configParams.putAll(configDescriptions.get(i).toParametersMap());
         }
-        for (Entry<String, ?> parameter : configuration.entrySet()) {
+        for (Entry<String, Object> parameter : configuration.entrySet()) {
             String name = parameter.getKey();
             Object value = parameter.getValue();
             if (!isOSGiConfigParameter(name)) {
@@ -254,7 +255,8 @@ public class ConfigUtil {
      * @return a collection that contains the normalized entries
      * @throws IllegalArgumentException if the type of the normalized values differ or an invalid type has been given
      */
-    private static Collection<Object> normalizeCollection(Collection<?> collection) throws IllegalArgumentException {
+    private static Collection<Object> normalizeCollection(Collection<@NonNull ?> collection)
+            throws IllegalArgumentException {
         if (collection.isEmpty()) {
             return Collections.emptyList();
         } else {

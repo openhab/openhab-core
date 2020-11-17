@@ -227,12 +227,15 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     }
 
     private HolidayManager getHolidayManager(Object managerKey) {
-        return holidayManagers.computeIfAbsent(managerKey, key -> {
+        HolidayManager holidayManager = holidayManagers.get(managerKey);
+        if (holidayManager == null) {
             final ManagerParameter parameters = managerKey.getClass() == String.class
                     ? ManagerParameters.create((String) managerKey)
                     : ManagerParameters.create((URL) managerKey);
-            return HolidayManager.getInstance(parameters);
-        });
+            holidayManager = HolidayManager.getInstance(parameters);
+            holidayManagers.put(managerKey, holidayManager);
+        }
+        return holidayManager;
     }
 
     private List<Holiday> getHolidays(ZonedDateTime from, int span, HolidayManager holidayManager) {
