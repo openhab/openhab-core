@@ -367,6 +367,9 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
 
         assertThat(itemProvider.getAll().size(), is(3));
 
+        assertThat(item1.getGroupNames().size(), is(1));
+        assertThat(item2.getGroupNames().size(), is(1));
+
         Item oldItem = itemProvider.remove(group.getName());
 
         assertThat(oldItem, is(group));
