@@ -291,7 +291,6 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         public void updated(Metadata oldElement, Metadata element) {
             itemExpireConfig.remove(element.getUID().getItemName());
         }
-
     }
 
     class ExpireConfig {
