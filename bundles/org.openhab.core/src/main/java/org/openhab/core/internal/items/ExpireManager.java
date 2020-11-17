@@ -44,11 +44,13 @@ import org.openhab.core.items.events.ItemStateEvent;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
 import org.openhab.core.types.TypeParser;
 import org.openhab.core.types.UnDefType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -105,7 +107,8 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             enabled = Boolean.parseBoolean(valueEnabled.toString());
         }
         if (enabled) {
-            if (expireJob == null) {
+            ScheduledFuture<?> localExpireJob = expireJob;
+            if (localExpireJob == null) {
                 expireJob = threadPool.scheduleWithFixedDelay(() -> {
                     if (!itemExpireMap.isEmpty()) {
                         for (String itemName : itemExpireConfig.keySet()) {
@@ -119,56 +122,36 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             itemRegistry.addRegistryChangeListener(this);
             metadataRegistry.addRegistryChangeListener(metadataChangeListener);
         } else {
-            itemRegistry.removeRegistryChangeListener(this);
-            metadataRegistry.removeRegistryChangeListener(metadataChangeListener);
-            if (expireJob != null) {
-                expireJob.cancel(true);
-                expireJob = null;
-            }
+            deactivate();
         }
     }
 
-    public void receiveCommand(ItemCommandEvent commandEvent) {
-        Command command = commandEvent.getItemCommand();
-        String itemName = commandEvent.getItemName();
-        logger.trace("Received command '{}' for item {}", command, itemName);
+    @Deactivate
+    protected void deactivate() {
+        ScheduledFuture<?> localExpireJob = expireJob;
+        if (localExpireJob != null) {
+            localExpireJob.cancel(true);
+            expireJob = null;
+        }
+        itemRegistry.removeRegistryChangeListener(this);
+        metadataRegistry.removeRegistryChangeListener(metadataChangeListener);
+        itemExpireMap.clear();
+    }
+
+    private void processEvent(String itemName, Type type) {
+        logger.trace("Received '{}' for item {}", type, itemName);
         ExpireConfig expireConfig = getExpireConfig(itemName);
         if (expireConfig != null) {
             Command expireCommand = expireConfig.expireCommand;
             State expireState = expireConfig.expireState;
 
-            if ((expireCommand != null && expireCommand.equals(command))
-                    || (expireState != null && expireState.equals(command))) {
-                // New command is expired command or state -> no further action needed
+            if ((expireCommand != null && expireCommand.equals(type))
+                    || (expireState != null && expireState.equals(type))) {
+                // New event is expired command or state -> no further action needed
                 itemExpireMap.remove(itemName); // remove expire trigger until next update or command
-                logger.debug("Item {} received command '{}'; stopping any future expiration.", itemName, command);
+                logger.debug("Item {} received '{}'; stopping any future expiration.", itemName, type);
             } else {
-                // New command is not the expired command or state, so add the trigger to the map
-                Duration duration = expireConfig.duration;
-                itemExpireMap.put(itemName, Instant.now().plus(duration));
-                logger.debug("Item {} will expire (with '{}' {}) in {} ms", itemName,
-                        expireCommand == null ? expireState : expireCommand,
-                        expireCommand == null ? "state" : "command", duration);
-            }
-        }
-    }
-
-    protected void receiveUpdate(ItemStateEvent stateEvent) {
-        State state = stateEvent.getItemState();
-        String itemName = stateEvent.getItemName();
-        logger.trace("Received update '{}' for item {}", state, itemName);
-        ExpireConfig expireConfig = getExpireConfig(itemName);
-        if (expireConfig != null) {
-            Command expireCommand = expireConfig.expireCommand;
-            State expireState = expireConfig.expireState;
-
-            if ((expireCommand != null && expireCommand.equals(state))
-                    || (expireState != null && expireState.equals(state))) {
-                // New state is expired command or state -> no further action needed
-                itemExpireMap.remove(itemName); // remove expire trigger until next update or command
-                logger.debug("Item {} received update '{}'; stopping any future expiration.", itemName, state);
-            } else {
-                // New state is not the expired command or state, so add the trigger to the map
+                // New event is not the expired command or state, so add the trigger to the map
                 Duration duration = expireConfig.duration;
                 itemExpireMap.put(itemName, Instant.now().plus(duration));
                 logger.debug("Item {} will expire (with '{}' {}) in {} ms", itemName,
@@ -254,9 +237,11 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             return;
         }
         if (event instanceof ItemStateEvent) {
-            receiveUpdate((ItemStateEvent) event);
+            ItemStateEvent isEvent = (ItemStateEvent) event;
+            processEvent(isEvent.getItemName(), isEvent.getItemState());
         } else if (event instanceof ItemCommandEvent) {
-            receiveCommand((ItemCommandEvent) event);
+            ItemCommandEvent icEvent = (ItemCommandEvent) event;
+            processEvent(icEvent.getItemName(), icEvent.getItemCommand());
         }
     }
 
@@ -293,13 +278,18 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         }
     }
 
-    class ExpireConfig {
+    static class ExpireConfig {
+
+        private static final StringType STRING_TYPE_NULL_HYPHEN = new StringType("'NULL'");
+        private static final StringType STRING_TYPE_NULL = new StringType("NULL");
+        private static final StringType STRING_TYPE_UNDEF_HYPHEN = new StringType("'UNDEF'");
+        private static final StringType STRING_TYPE_UNDEF = new StringType("UNDEF");
 
         protected static final String COMMAND_PREFIX = "command=";
         protected static final String STATE_PREFIX = "state=";
 
-        protected final Pattern durationPattern = Pattern.compile("(?:([0-9]+)H)?\\s*(?:([0-9]+)M)?\\s*(?:([0-9]+)S)?",
-                Pattern.CASE_INSENSITIVE);
+        protected static final Pattern durationPattern = Pattern
+                .compile("(?:([0-9]+)H)?\\s*(?:([0-9]+)M)?\\s*(?:([0-9]+)S)?", Pattern.CASE_INSENSITIVE);
 
         @Nullable
         final Command expireCommand;
@@ -346,10 +336,10 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                     String stateString = stateOrCommand;
                     State state = TypeParser.parseState(item.getAcceptedDataTypes(), stateString);
                     // do special handling to allow NULL and UNDEF as strings when being put in single quotes
-                    if (new StringType("'NULL'").equals(state)) {
-                        expireState = new StringType("NULL");
-                    } else if (new StringType("'UNDEF'").equals(state)) {
-                        expireState = new StringType("UNDEF");
+                    if (STRING_TYPE_NULL_HYPHEN.equals(state)) {
+                        expireState = STRING_TYPE_NULL;
+                    } else if (STRING_TYPE_UNDEF_HYPHEN.equals(state)) {
+                        expireState = STRING_TYPE_UNDEF;
                     } else {
                         expireState = state;
                     }

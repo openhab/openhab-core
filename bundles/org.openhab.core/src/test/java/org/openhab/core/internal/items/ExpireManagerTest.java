@@ -155,63 +155,63 @@ class ExpireManagerTest {
     @Test
     void testExpireConfig() {
         Item testItem = new SwitchItem(ITEMNAME);
-        ExpireConfig cfg = expireManager.new ExpireConfig(testItem, "1s");
+        ExpireConfig cfg = new ExpireManager.ExpireConfig(testItem, "1s");
         assertEquals(Duration.ofSeconds(1), cfg.duration);
         assertEquals(UnDefType.UNDEF, cfg.expireState);
         assertEquals(null, cfg.expireCommand);
 
-        cfg = expireManager.new ExpireConfig(testItem, "5h 3m 2s");
+        cfg = new ExpireManager.ExpireConfig(testItem, "5h 3m 2s");
         assertEquals(Duration.ofHours(5).plusMinutes(3).plusSeconds(2), cfg.duration);
         assertEquals(UnDefType.UNDEF, cfg.expireState);
         assertEquals(null, cfg.expireCommand);
 
-        cfg = expireManager.new ExpireConfig(testItem, "1h,OFF");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,OFF");
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(OnOffType.OFF, cfg.expireState);
         assertEquals(null, cfg.expireCommand);
 
-        cfg = expireManager.new ExpireConfig(testItem, "1h,state=OFF");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,state=OFF");
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(OnOffType.OFF, cfg.expireState);
         assertEquals(null, cfg.expireCommand);
 
-        cfg = expireManager.new ExpireConfig(testItem, "1h,command=OFF");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=OFF");
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(null, cfg.expireState);
         assertEquals(OnOffType.OFF, cfg.expireCommand);
 
         try {
-            cfg = expireManager.new ExpireConfig(testItem, "1h,command=OPEN");
+            cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=OPEN");
             fail();
         } catch (IllegalArgumentException e) {
             // expected as command is invalid
         }
 
         try {
-            cfg = expireManager.new ExpireConfig(testItem, "1h,OPEN");
+            cfg = new ExpireManager.ExpireConfig(testItem, "1h,OPEN");
             fail();
         } catch (IllegalArgumentException e) {
             // expected as state is invalid
         }
 
         testItem = new NumberItem("Number:Temperature", ITEMNAME);
-        cfg = expireManager.new ExpireConfig(testItem, "1h,15 °C");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,15 °C");
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(new QuantityType<Temperature>("15 °C"), cfg.expireState);
         assertEquals(null, cfg.expireCommand);
 
         testItem = new StringItem(ITEMNAME);
-        cfg = expireManager.new ExpireConfig(testItem, "1h,NULL");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,NULL");
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(UnDefType.NULL, cfg.expireState);
         assertEquals(null, cfg.expireCommand);
 
-        cfg = expireManager.new ExpireConfig(testItem, "1h,'NULL'");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,'NULL'");
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(new StringType("NULL"), cfg.expireState);
         assertEquals(null, cfg.expireCommand);
 
-        cfg = expireManager.new ExpireConfig(testItem, "1h,'UNDEF'");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,'UNDEF'");
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(new StringType("UNDEF"), cfg.expireState);
         assertEquals(null, cfg.expireCommand);
