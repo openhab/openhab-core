@@ -132,15 +132,20 @@ public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
     }
 
     @Override
-    protected void doGet(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         removeTimedOutStreams();
 
-        final String streamId = substringBefore(substringAfterLast(req.getRequestURI(), "/"), ".");
+        String requestURI = req.getRequestURI();
+        if (requestURI == null) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "requestURI is null");
+            return;
+        }
+
+        final String streamId = substringBefore(substringAfterLast(requestURI, "/"), ".");
 
         try (final InputStream stream = prepareInputStream(streamId, resp)) {
             if (stream == null) {
-                logger.debug("Received request for invalid stream id at {}", req.getRequestURI());
+                logger.debug("Received request for invalid stream id at {}", requestURI);
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             } else {
                 stream.transferTo(resp.getOutputStream());

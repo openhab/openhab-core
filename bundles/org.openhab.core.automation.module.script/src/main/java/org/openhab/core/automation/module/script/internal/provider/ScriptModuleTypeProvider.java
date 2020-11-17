@@ -17,7 +17,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.script.ScriptEngine;
 
@@ -115,7 +118,10 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
 
     @Override
     public Collection<ModuleType> getModuleTypes(@Nullable Locale locale) {
-        return (Collection<ModuleType>) List.of(getScriptActionType(locale), getScriptConditionType(locale));
+        return Stream
+                .of(Optional.ofNullable(getScriptActionType(locale)),
+                        Optional.ofNullable(getScriptConditionType(locale)))
+                .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toUnmodifiableList());
     }
 
     @Override
