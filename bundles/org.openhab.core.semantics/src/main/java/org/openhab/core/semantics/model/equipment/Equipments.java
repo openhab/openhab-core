@@ -32,12 +32,14 @@ public class Equipments {
     static {
         EQUIPMENTS.add(Equipment.class);
         EQUIPMENTS.add(AlarmSystem.class);
+        EQUIPMENTS.add(BackDoor.class);
         EQUIPMENTS.add(Battery.class);
         EQUIPMENTS.add(Blinds.class);
         EQUIPMENTS.add(Boiler.class);
         EQUIPMENTS.add(Camera.class);
         EQUIPMENTS.add(Car.class);
         EQUIPMENTS.add(CeilingFan.class);
+        EQUIPMENTS.add(CellarDoor.class);
         EQUIPMENTS.add(CleaningRobot.class);
         EQUIPMENTS.add(Dishwasher.class);
         EQUIPMENTS.add(Door.class);
@@ -49,9 +51,11 @@ public class Equipments {
         EQUIPMENTS.add(GarageDoor.class);
         EQUIPMENTS.add(Gate.class);
         EQUIPMENTS.add(HVAC.class);
+        EQUIPMENTS.add(InnerDoor.class);
         EQUIPMENTS.add(Inverter.class);
         EQUIPMENTS.add(KitchenHood.class);
         EQUIPMENTS.add(LawnMower.class);
+        EQUIPMENTS.add(LightStripe.class);
         EQUIPMENTS.add(Lightbulb.class);
         EQUIPMENTS.add(Lock.class);
         EQUIPMENTS.add(MotionDetector.class);
@@ -66,7 +70,9 @@ public class Equipments {
         EQUIPMENTS.add(RemoteControl.class);
         EQUIPMENTS.add(Screen.class);
         EQUIPMENTS.add(Sensor.class);
+        EQUIPMENTS.add(SideDoor.class);
         EQUIPMENTS.add(Siren.class);
+        EQUIPMENTS.add(Smartphone.class);
         EQUIPMENTS.add(SmokeDetector.class);
         EQUIPMENTS.add(Speaker.class);
         EQUIPMENTS.add(Television.class);
