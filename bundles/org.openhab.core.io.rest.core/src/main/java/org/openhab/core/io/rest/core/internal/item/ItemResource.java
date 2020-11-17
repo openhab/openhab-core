@@ -576,8 +576,8 @@ public class ItemResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "201", description = "Item created."),
-                    @ApiResponse(responseCode = "400", description = "Item null."),
-                    @ApiResponse(responseCode = "404", description = "Item not found."),
+                    @ApiResponse(responseCode = "400", description = "Payload invalid."),
+                    @ApiResponse(responseCode = "404", description = "Item not found or name in path invalid."),
                     @ApiResponse(responseCode = "405", description = "Item not editable.") })
     public Response createOrUpdateItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
@@ -587,6 +587,11 @@ public class ItemResource implements RESTResource {
 
         // If we didn't get an item bean, then return!
         if (item == null) {
+            return Response.status(Status.BAD_REQUEST).build();
+        } else if (!itemname.equalsIgnoreCase((item.name))) {
+            logger.warn(
+                    "Received HTTP PUT request at '{}' with an item name '{}' that does not match the one in the url.",
+                    uriInfo.getPath(), item.name);
             return Response.status(Status.BAD_REQUEST).build();
         }
 
@@ -634,7 +639,7 @@ public class ItemResource implements RESTResource {
     @Operation(summary = "Adds a list of items to the registry or updates the existing items.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "400", description = "Item list is null.") })
+                    @ApiResponse(responseCode = "400", description = "Payload is invalid.") })
     public Response createOrUpdateItems(
             @Parameter(description = "array of item data", required = true) GroupItemDTO @Nullable [] items) {
         // If we didn't get an item list bean, then return!

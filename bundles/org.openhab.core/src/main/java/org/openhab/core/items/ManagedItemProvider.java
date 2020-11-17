@@ -108,7 +108,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     @Override
     public void add(Item element) {
         if (!ItemUtil.isValidItemName(element.getName())) {
-            throw new IllegalArgumentException("The item name `" + element.getName() + "` is invalid.");
+            throw new IllegalArgumentException("The item name '" + element.getName() + "' is invalid.");
         }
         super.add(element);
     }

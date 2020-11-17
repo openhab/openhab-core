@@ -54,7 +54,7 @@ public class ItemDTOMapper {
         }
 
         if (!ItemUtil.isValidItemName(itemDTO.name)) {
-            throw new IllegalArgumentException("The item name `" + itemDTO.name + "` is invalid.");
+            throw new IllegalArgumentException("The item name '" + itemDTO.name + "' is invalid.");
         }
 
         if (itemDTO.type != null) {
