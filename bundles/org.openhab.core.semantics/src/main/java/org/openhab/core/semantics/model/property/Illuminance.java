@@ -17,11 +17,11 @@ import org.openhab.core.semantics.model.Property;
 import org.openhab.core.semantics.model.TagInfo;
 
 /**
- * This class defines a Luminance.
+ * This class defines a Illuminance.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Property_Luminance", label = "Luminance", synonyms = "", description = "")
-public interface Luminance extends Property {
+@TagInfo(id = "Property_Illuminance", label = "Illuminance", synonyms = "", description = "")
+public interface Illuminance extends Property {
 }
