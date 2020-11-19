@@ -34,6 +34,7 @@ import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.unit.BinaryPrefix;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.SmartHomeUnits;
@@ -328,12 +329,24 @@ public class QuantityTypeTest {
         QuantityType<DataAmount> amount = new QuantityType<>("8 bit");
         QuantityType<DataAmount> octet = amount.toUnit(SmartHomeUnits.BYTE);
         assertEquals(1, octet.byteValue());
+        QuantityType<DataAmount> bytes = new QuantityType<>("1 B");
+        assertEquals("1 B", bytes.toString());
+        QuantityType<DataAmount> bits = bytes.toUnit(SmartHomeUnits.BIT);
+        assertEquals(8, bits.byteValue());
+        bytes = new QuantityType<>("1 MB");
+        assertEquals("1 MB", bytes.toString());
+        bytes = new QuantityType<DataAmount>(1, MetricPrefix.MEGA(SmartHomeUnits.BYTE));
+        assertEquals("1 MB", bytes.toString());
+        bytes = new QuantityType<>("1 GiB");
+        assertEquals("1 GiB", bytes.toString());
+        bytes = new QuantityType<DataAmount>(1, BinaryPrefix.GIBI(SmartHomeUnits.BYTE));
+        assertEquals("1 GiB", bytes.toString());
         QuantityType<DataAmount> bigAmount = new QuantityType<>("1 Kio");
         QuantityType<DataAmount> octets = bigAmount.toUnit(SmartHomeUnits.OCTET);
         assertEquals(1024, octets.intValue());
         QuantityType<DataAmount> hugeAmount = new QuantityType<>("1024Gio");
         QuantityType<DataAmount> lotOfOctets = hugeAmount.toUnit(SmartHomeUnits.OCTET);
-        assertEquals("1099511627776 o", lotOfOctets.toString());
+        assertEquals("1099511627776 o", lotOfOctets.format("%d o"));
     }
 
     @Test
