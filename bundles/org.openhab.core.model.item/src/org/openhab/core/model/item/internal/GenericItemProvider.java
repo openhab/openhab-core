@@ -300,7 +300,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
             if (model != null) {
                 for (ModelItem modelItem : model.getItems()) {
                     for (String itemType : itemTypes) {
-                        if (itemType.equals(ItemUtil.getMainItemType(modelItem.getType()))) {
+                        String type = modelItem.getType();
+                        if (type != null && itemType.equals(ItemUtil.getMainItemType(type))) {
                             Item item = createItemFromModelItem(modelItem);
                             if (item != null) {
                                 internalDispatchBindings(reader, modelName, item, modelItem.getBindings());
