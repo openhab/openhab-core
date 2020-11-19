@@ -36,6 +36,7 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemProvider;
+import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.dto.GroupFunctionDTO;
 import org.openhab.core.items.dto.ItemDTOMapper;
 import org.openhab.core.model.core.EventType;
@@ -299,7 +300,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
             if (model != null) {
                 for (ModelItem modelItem : model.getItems()) {
                     for (String itemType : itemTypes) {
-                        if (itemType.equals(modelItem.getType())) {
+                        if (itemType.equals(ItemUtil.getMainItemType(modelItem.getType()))) {
                             Item item = createItemFromModelItem(modelItem);
                             if (item != null) {
                                 internalDispatchBindings(reader, modelName, item, modelItem.getBindings());
