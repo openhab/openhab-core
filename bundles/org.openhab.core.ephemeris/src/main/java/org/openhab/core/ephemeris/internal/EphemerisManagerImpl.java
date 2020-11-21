@@ -27,6 +27,7 @@ import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -112,10 +113,19 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
             final Properties properties = new Properties();
             properties.load(stream);
             properties.forEach(this::parseProperty);
+
+            sortByLabel(countries);
+            regions.values().forEach(this::sortByLabel);
+            cities.values().forEach(this::sortByLabel);
         } catch (IllegalArgumentException | IllegalStateException | IOException e) {
             logger.warn("The resource '{}' could not be loaded properly! ConfigDescription options are not available.",
                     JOLLYDAY_COUNTRY_DESCRIPTIONS, e);
         }
+    }
+
+    private void sortByLabel(List<ParameterOption> parameterOptions) {
+        Collections.sort(parameterOptions,
+                (ParameterOption po1, ParameterOption po2) -> po1.getLabel().compareTo(po2.getLabel()));
     }
 
     @Activate
@@ -217,12 +227,15 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     }
 
     private HolidayManager getHolidayManager(Object managerKey) {
-        return holidayManagers.computeIfAbsent(managerKey, key -> {
+        HolidayManager holidayManager = holidayManagers.get(managerKey);
+        if (holidayManager == null) {
             final ManagerParameter parameters = managerKey.getClass() == String.class
                     ? ManagerParameters.create((String) managerKey)
                     : ManagerParameters.create((URL) managerKey);
-            return HolidayManager.getInstance(parameters);
-        });
+            holidayManager = HolidayManager.getInstance(parameters);
+            holidayManagers.put(managerKey, holidayManager);
+        }
+        return holidayManager;
     }
 
     private List<Holiday> getHolidays(ZonedDateTime from, int span, HolidayManager holidayManager) {

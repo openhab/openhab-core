@@ -58,7 +58,7 @@ public abstract class AbstractLink implements Identifiable<String> {
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof AbstractLink) {
             AbstractLink link = (AbstractLink) obj;
-            return this.getUID().equals(link.getUID());
+            return getUID().equals(link.getUID());
         }
         return false;
     }
@@ -91,7 +91,7 @@ public abstract class AbstractLink implements Identifiable<String> {
 
     @Override
     public int hashCode() {
-        return this.itemName.hashCode() * this.getLinkedUID().hashCode();
+        return itemName.hashCode() * getLinkedUID().hashCode();
     }
 
     @Override

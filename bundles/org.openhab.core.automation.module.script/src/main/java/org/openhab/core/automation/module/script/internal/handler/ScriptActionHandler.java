@@ -62,7 +62,8 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
                 Object result = scriptEngine.eval(script);
                 resultMap.put("result", result);
             } catch (ScriptException e) {
-                logger.error("Script execution failed: {}", e.getMessage());
+                logger.error("Script execution of rule with UID '{}' failed: {}", ruleUID, e.getMessage(),
+                        logger.isDebugEnabled() ? e : null);
             }
         });
 

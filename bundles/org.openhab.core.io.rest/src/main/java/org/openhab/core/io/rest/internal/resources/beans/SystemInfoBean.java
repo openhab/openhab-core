@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.internal.resources.beans;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 
 /**
@@ -28,13 +29,13 @@ public class SystemInfoBean {
     public static class SystemInfo {
         public final String configFolder = OpenHAB.getConfigFolder();
         public final String userdataFolder = OpenHAB.getUserDataFolder();
-        public final String logFolder = System.getProperty("openhab.logdir");
-        public final String javaVersion = System.getProperty("java.version");
-        public final String javaVendor = System.getProperty("java.vendor");
-        public final String javaVendorVersion = System.getProperty("java.vendor.version");
-        public final String osName = System.getProperty("os.name");
-        public final String osVersion = System.getProperty("os.version");
-        public final String osArchitecture = System.getProperty("os.arch");
+        public final @Nullable String logFolder = System.getProperty("openhab.logdir");
+        public final @Nullable String javaVersion = System.getProperty("java.version");
+        public final @Nullable String javaVendor = System.getProperty("java.vendor");
+        public final @Nullable String javaVendorVersion = System.getProperty("java.vendor.version");
+        public final @Nullable String osName = System.getProperty("os.name");
+        public final @Nullable String osVersion = System.getProperty("os.version");
+        public final @Nullable String osArchitecture = System.getProperty("os.arch");
         public final int availableProcessors = Runtime.getRuntime().availableProcessors();
         public final long freeMemory = Runtime.getRuntime().freeMemory();
         public final long totalMemory = Runtime.getRuntime().totalMemory();

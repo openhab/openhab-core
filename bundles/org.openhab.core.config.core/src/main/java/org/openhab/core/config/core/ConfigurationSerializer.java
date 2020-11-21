@@ -14,7 +14,6 @@ package org.openhab.core.config.core;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Set;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -35,23 +34,17 @@ public class ConfigurationSerializer implements JsonSerializer<Configuration> {
     @SuppressWarnings("unchecked")
     @Override
     public JsonElement serialize(Configuration src, Type typeOfSrc, JsonSerializationContext context) {
-        JsonObject result = null;
-        if (src != null) {
-            Set<String> keys = src.keySet();
-            if (!keys.isEmpty()) {
-                result = new JsonObject();
-                for (String propName : keys) {
-                    Object value = src.get(propName);
-                    if (value instanceof List) {
-                        JsonArray array = new JsonArray();
-                        for (Object element : (List<Object>) value) {
-                            array.add(serializePrimitive(element));
-                        }
-                        result.add(propName, array);
-                    } else {
-                        result.add(propName, serializePrimitive(value));
-                    }
+        JsonObject result = new JsonObject();
+        for (String propName : src.keySet()) {
+            Object value = src.get(propName);
+            if (value instanceof List) {
+                JsonArray array = new JsonArray();
+                for (Object element : (List<Object>) value) {
+                    array.add(serializePrimitive(element));
                 }
+                result.add(propName, array);
+            } else {
+                result.add(propName, serializePrimitive(value));
             }
         }
         return result;

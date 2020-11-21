@@ -193,10 +193,10 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatCreateThingDelegatesToRegisteredThingHandlerFactory() {
         ThingTypeUID expectedThingTypeUID = THING_TYPE_UID;
-        ThingUID expectedThingUID = new ThingUID(THING_TYPE_UID, THING1_ID);
-        Configuration expectedConfiguration = new Configuration();
         ThingUID expectedBridgeUID = new ThingUID(THING_TYPE_UID, THING2_ID);
+        ThingUID expectedThingUID = new ThingUID(THING_TYPE_UID, expectedBridgeUID, THING1_ID);
         String expectedLabel = "Test Thing";
+        Configuration expectedConfiguration = new Configuration();
 
         AtomicReference<Thing> thingResultWrapper = new AtomicReference<>();
 

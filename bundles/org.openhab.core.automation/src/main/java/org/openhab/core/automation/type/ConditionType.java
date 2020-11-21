@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Visibility;
@@ -31,6 +32,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
  * @author Ana Dimova - Initial contribution
  * @author Vasil Ilchev - Initial contribution
  */
+@NonNullByDefault
 public class ConditionType extends ModuleType {
 
     private final List<Input> inputs;
@@ -47,8 +49,7 @@ public class ConditionType extends ModuleType {
      */
     public ConditionType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable List<Input> inputs) {
-        super(UID, configDescriptions);
-        this.inputs = inputs != null ? Collections.unmodifiableList(inputs) : Collections.emptyList();
+        this(UID, configDescriptions, null, null, null, null, inputs);
     }
 
     /**
@@ -72,7 +73,7 @@ public class ConditionType extends ModuleType {
             @Nullable String label, @Nullable String description, @Nullable Set<String> tags,
             @Nullable Visibility visibility, @Nullable List<Input> inputs) {
         super(UID, configDescriptions, label, description, tags, visibility);
-        this.inputs = inputs != null ? Collections.unmodifiableList(inputs) : Collections.emptyList();
+        this.inputs = inputs != null ? Collections.unmodifiableList(inputs) : List.of();
     }
 
     /**

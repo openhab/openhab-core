@@ -67,7 +67,6 @@
     <module>org.openhab.core.io.rest.swagger</module>
     <module>org.openhab.core.io.rest.ui</module>
     <module>org.openhab.core.io.rest.voice</module>
-    <module>org.openhab.core.io.transport.dbus</module>
     <module>org.openhab.core.io.transport.mdns</module>
     <module>org.openhab.core.io.transport.mqtt</module>
     <module>org.openhab.core.io.transport.serial</module>
@@ -103,6 +102,10 @@
     <module>org.openhab.core.ui</module>
     <module>org.openhab.core.ui.icon</module>
   </modules>
+
+  <properties>
+    <m2e.jdt.annotationpath>target/dependency</m2e.jdt.annotationpath>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -147,6 +150,29 @@
             <goals>
               <goal>jar-no-fork</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>unpack-eea</id>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.lastnpe.eea</groupId>
+                  <artifactId>eea-all</artifactId>
+                  <version>${eea.version}</version>
+                  <overWrite>true</overWrite>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
           </execution>
         </executions>
       </plugin>

@@ -1120,11 +1120,12 @@ public class ThingManagerImpl
     }
 
     private synchronized Lock getLockForThing(ThingUID thingUID) {
-        if (thingLocks.get(thingUID) == null) {
-            Lock lock = new ReentrantLock();
+        Lock lock = thingLocks.get(thingUID);
+        if (lock == null) {
+            lock = new ReentrantLock();
             thingLocks.put(thingUID, lock);
         }
-        return thingLocks.get(thingUID);
+        return lock;
     }
 
     private ThingStatusInfo buildStatusInfo(ThingStatus thingStatus, ThingStatusDetail thingStatusDetail,

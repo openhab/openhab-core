@@ -147,13 +147,15 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
         registerService(createFirmwareUpdateHandler(hwVersionTwoHighFwVersionThing));
 
         // Define restrictions for the hardware versions
-        FirmwareRestriction hwVersion1Restriction = thg -> Integer
-                .parseInt(thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION)) < 14
-                || FW_VERSION_32.equals(thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION));
+        FirmwareRestriction hwVersion1Restriction = thg -> {
+            String version = thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION);
+            return version != null && (Integer.parseInt(version) < 14 || FW_VERSION_32.equals(version));
+        };
 
-        FirmwareRestriction hwVersion2Restriction = thg -> Integer
-                .parseInt(thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION)) >= 14
-                && !FW_VERSION_32.equals(thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION));
+        FirmwareRestriction hwVersion2Restriction = thg -> {
+            String version = thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION);
+            return version != null && (Integer.parseInt(version) >= 14 && !FW_VERSION_32.equals(version));
+        };
 
         // Build firmwares
         Firmware fw38 = FirmwareBuilder.create(thingTypeUID, FW_VERSION_38)

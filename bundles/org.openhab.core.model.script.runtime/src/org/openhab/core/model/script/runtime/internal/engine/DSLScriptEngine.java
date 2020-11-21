@@ -23,11 +23,15 @@ import javax.script.ScriptEngineFactory;
 import javax.script.ScriptException;
 import javax.script.SimpleScriptContext;
 
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.naming.QualifiedName;
+import org.eclipse.xtext.resource.IResourceServiceProvider;
+import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationContext;
+import org.openhab.core.model.script.engine.Script;
 import org.openhab.core.model.script.engine.ScriptExecutionException;
 import org.openhab.core.model.script.engine.ScriptParsingException;
 import org.openhab.core.model.script.runtime.DSLScriptContextProvider;
@@ -50,7 +54,8 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
     public static final String MIMETYPE_OPENHAB_DSL_RULE = "application/vnd.openhab.dsl.rule";
 
     private static final Map<String, String> implicitVars = Map.of("command", "receivedCommand", "event",
-            "receivedEvent", "newState", "newState", "oldState", "previousState", "triggeringItem", "triggeringItem");
+            "receivedEvent", "state", "newState", "newState", "newState", "oldState", "previousState", "triggeringItem",
+            "triggeringItem");
 
     private final Logger logger = LoggerFactory.getLogger(DSLScriptEngine.class);
 
@@ -83,10 +88,10 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             if (script.stripLeading().startsWith(DSLScriptContextProvider.CONTEXT_IDENTIFIER)) {
                 String contextString = script.stripLeading().substring(
                         DSLScriptContextProvider.CONTEXT_IDENTIFIER.length(), script.stripLeading().indexOf('\n'));
-                String[] segments = contextString.split("-");
-                if (segments.length == 2) {
-                    modelName = segments[0];
-                    String ruleIndex = segments[1];
+                if (contextString.contains("-")) {
+                    int indexLastDash = contextString.lastIndexOf('-');
+                    modelName = contextString.substring(0, indexLastDash);
+                    String ruleIndex = contextString.substring(indexLastDash + 1);
                     if (contextProvider != null) {
                         DSLScriptContextProvider cp = contextProvider;
                         logger.debug("Script uses context '{}'.", contextString);
@@ -110,7 +115,7 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             } else {
                 s = scriptEngine.newScriptFromString(script);
             }
-            IEvaluationContext evalContext = createEvaluationContext(specificContext);
+            IEvaluationContext evalContext = createEvaluationContext(s, specificContext);
             s.execute(evalContext);
         } catch (ScriptExecutionException | ScriptParsingException e) {
             throw new ScriptException(e.getMessage(), modelName, -1);
@@ -118,8 +123,20 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
         return null;
     }
 
-    private DefaultEvaluationContext createEvaluationContext(IEvaluationContext specificContext) {
-        DefaultEvaluationContext evalContext = new DefaultEvaluationContext(specificContext);
+    private DefaultEvaluationContext createEvaluationContext(Script script, IEvaluationContext specificContext) {
+        IEvaluationContext parentContext = specificContext;
+        if (specificContext == null && script instanceof ScriptImpl) {
+            XExpression xExpression = ((ScriptImpl) script).getXExpression();
+            if (xExpression != null) {
+                Resource resource = xExpression.eResource();
+                IEvaluationContext evaluationContext = null;
+                if (resource instanceof XtextResource) {
+                    IResourceServiceProvider provider = ((XtextResource) resource).getResourceServiceProvider();
+                    parentContext = provider.get(IEvaluationContext.class);
+                }
+            }
+        }
+        DefaultEvaluationContext evalContext = new DefaultEvaluationContext(parentContext);
         for (Map.Entry<String, String> entry : implicitVars.entrySet()) {
             Object value = context.getAttribute(entry.getKey());
             if (value != null) {

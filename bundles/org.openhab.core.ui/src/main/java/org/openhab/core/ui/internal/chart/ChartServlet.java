@@ -66,7 +66,7 @@ import org.osgi.service.http.HttpService;
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  */
 @Component(immediate = true, service = ChartServlet.class, configurationPid = "org.openhab.chart", //
-        property = Constants.SERVICE_PID + "=org.openhab.core.chart")
+        property = Constants.SERVICE_PID + "=org.openhab.chart")
 @ConfigurableService(category = "system", label = "Charts", description_uri = ChartServlet.CONFIG_URI)
 public class ChartServlet extends SmartHomeServlet {
 
@@ -277,9 +277,10 @@ public class ChartServlet extends SmartHomeServlet {
 
         // Read out the parameter 'dpi'
         Integer dpi = null;
-        if (req.getParameter("dpi") != null) {
+        String dpiString = req.getParameter("dpi");
+        if (dpiString != null) {
             try {
-                dpi = Integer.valueOf(req.getParameter("dpi"));
+                dpi = Integer.valueOf(dpiString);
             } catch (NumberFormatException e) {
                 res.sendError(HttpServletResponse.SC_BAD_REQUEST, "dpi parameter is invalid");
                 return;

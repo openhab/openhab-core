@@ -74,21 +74,32 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
         if (metadata != null) {
             try {
                 StateDescriptionFragmentBuilder builder = StateDescriptionFragmentBuilder.create();
-                if (metadata.getConfiguration().containsKey("pattern")) {
-                    builder.withPattern((String) metadata.getConfiguration().get("pattern"));
+
+                Object pattern = metadata.getConfiguration().get("pattern");
+                if (pattern != null) {
+                    builder.withPattern((String) pattern);
                 }
-                if (metadata.getConfiguration().containsKey("min")) {
-                    builder.withMinimum(getBigDecimal(metadata.getConfiguration().get("min")));
+
+                Object min = metadata.getConfiguration().get("min");
+                if (min != null) {
+                    builder.withMinimum(getBigDecimal(min));
                 }
-                if (metadata.getConfiguration().containsKey("max")) {
-                    builder.withMaximum(getBigDecimal(metadata.getConfiguration().get("max")));
+
+                Object max = metadata.getConfiguration().get("max");
+                if (max != null) {
+                    builder.withMaximum(getBigDecimal(max));
                 }
-                if (metadata.getConfiguration().containsKey("step")) {
-                    builder.withStep(getBigDecimal(metadata.getConfiguration().get("step")));
+
+                Object step = metadata.getConfiguration().get("step");
+                if (step != null) {
+                    builder.withStep(getBigDecimal(step));
                 }
-                if (metadata.getConfiguration().containsKey("readOnly")) {
-                    builder.withReadOnly(getBoolean(metadata.getConfiguration().get("readOnly")));
+
+                Object readOnly = metadata.getConfiguration().get("readOnly");
+                if (readOnly != null) {
+                    builder.withReadOnly(getBoolean(readOnly));
                 }
+
                 if (metadata.getConfiguration().containsKey("options")) {
                     List<StateOption> stateOptions = Stream
                             .of(metadata.getConfiguration().get("options").toString().split(",")).map(o -> {

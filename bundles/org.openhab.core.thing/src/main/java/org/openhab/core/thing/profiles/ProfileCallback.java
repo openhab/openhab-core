@@ -32,13 +32,6 @@ public interface ProfileCallback {
     void handleCommand(Command command);
 
     /**
-     * Forward the given state update to the respective thing handler.
-     *
-     * @param state
-     */
-    void handleUpdate(State state);
-
-    /**
      * Send a command to the framework.
      *
      * @param command

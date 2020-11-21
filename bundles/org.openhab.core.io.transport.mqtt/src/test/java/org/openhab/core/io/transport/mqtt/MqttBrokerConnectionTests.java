@@ -46,6 +46,12 @@ import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
  */
 @NonNullByDefault
 public class MqttBrokerConnectionTests extends JavaTest {
+    private static final byte[] HELLO_BYTES = "hello".getBytes();
+
+    private static byte[] eqHelloBytes() {
+        return eq(HELLO_BYTES);
+    }
+
     @Test
     public void subscribeBeforeOnlineThenConnect()
             throws ConfigurationException, MqttException, InterruptedException, ExecutionException, TimeoutException {
@@ -60,11 +66,11 @@ public class MqttBrokerConnectionTests extends JavaTest {
         assertTrue(connection.hasSubscribers());
         assertThat(connection.connectionState(), is(MqttConnectionState.CONNECTED));
 
-        Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("homie/device123/$name").payload("hello".getBytes())
+        Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("homie/device123/$name").payload(HELLO_BYTES)
                 .build();
         // Test if subscription is active
         connection.getSubscribers().get("homie/device123/$name").messageArrived(publishMessage);
-        verify(subscriber).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
+        verify(subscriber).processMessage(eq("homie/device123/$name"), eqHelloBytes());
     }
 
     @Test
@@ -87,15 +93,15 @@ public class MqttBrokerConnectionTests extends JavaTest {
         assertTrue(connection.hasSubscribers());
         assertThat(connection.connectionState(), is(MqttConnectionState.CONNECTED));
 
-        Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("homie/device123/$name").payload("hello".getBytes())
+        Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("homie/device123/$name").payload(HELLO_BYTES)
                 .build();
         connection.getSubscribers().get("homie/device123/+").messageArrived(publishMessage);
         connection.getSubscribers().get("#").messageArrived(publishMessage);
         connection.getSubscribers().get("homie/#").messageArrived(publishMessage);
 
-        verify(subscriber).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
-        verify(subscriber2).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
-        verify(subscriber3).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
+        verify(subscriber).processMessage(eq("homie/device123/$name"), eqHelloBytes());
+        verify(subscriber2).processMessage(eq("homie/device123/$name"), eqHelloBytes());
+        verify(subscriber3).processMessage(eq("homie/device123/$name"), eqHelloBytes());
     }
 
     @Test
@@ -309,10 +315,6 @@ public class MqttBrokerConnectionTests extends JavaTest {
         assertEquals(MqttBrokerConnection.DEFAULT_KEEPALIVE_INTERVAL, connection.getKeepAliveInterval());
         connection.setKeepAliveInterval(80);
         assertEquals(80, connection.getKeepAliveInterval());
-
-        assertFalse(connection.isRetain());
-        connection.setRetain(true);
-        assertTrue(connection.isRetain());
 
         assertEquals(MqttBrokerConnection.DEFAULT_QOS, connection.getQos());
         connection.setQos(2);

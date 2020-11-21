@@ -50,11 +50,14 @@ public class ConfigDescriptionReader extends XmlDocumentReader<List<ConfigDescri
      * The default constructor of this class.
      */
     public ConfigDescriptionReader() {
-        super.setClassLoader(ConfigDescriptionReader.class.getClassLoader());
+        ClassLoader classLoader = ConfigDescriptionReader.class.getClassLoader();
+        if (classLoader != null) {
+            super.setClassLoader(classLoader);
+        }
     }
 
     @Override
-    public void registerConverters(XStream xstream) {
+    protected void registerConverters(XStream xstream) {
         xstream.registerConverter(new NodeValueConverter());
         xstream.registerConverter(new NodeListConverter());
         xstream.registerConverter(new NodeAttributesConverter());
@@ -65,7 +68,7 @@ public class ConfigDescriptionReader extends XmlDocumentReader<List<ConfigDescri
     }
 
     @Override
-    public void registerAliases(XStream xstream) {
+    protected void registerAliases(XStream xstream) {
         xstream.alias("config-descriptions", List.class);
         xstream.alias("config-description", ConfigDescription.class);
         xstream.alias("config-description-ref", NodeAttributes.class);

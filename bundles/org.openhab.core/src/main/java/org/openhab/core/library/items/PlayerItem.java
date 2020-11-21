@@ -12,8 +12,6 @@
  */
 package org.openhab.core.library.items;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -35,19 +33,10 @@ import org.openhab.core.types.UnDefType;
 @NonNullByDefault
 public class PlayerItem extends GenericItem {
 
-    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
-    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
-
-    static {
-        acceptedDataTypes.add(PlayPauseType.class);
-        acceptedDataTypes.add(RewindFastforwardType.class);
-        acceptedDataTypes.add(UnDefType.class);
-
-        acceptedCommandTypes.add(PlayPauseType.class);
-        acceptedCommandTypes.add(RewindFastforwardType.class);
-        acceptedCommandTypes.add(NextPreviousType.class);
-        acceptedCommandTypes.add(RefreshType.class);
-    }
+    private static final List<Class<? extends State>> ACCEPTED_DATA_TYPES = List.of(PlayPauseType.class,
+            RewindFastforwardType.class, UnDefType.class);
+    private static final List<Class<? extends Command>> ACCEPTED_COMMAND_TYPES = List.of(PlayPauseType.class,
+            RewindFastforwardType.class, NextPreviousType.class, RefreshType.class);
 
     public PlayerItem(String name) {
         super(CoreItemFactory.PLAYER, name);
@@ -59,12 +48,12 @@ public class PlayerItem extends GenericItem {
 
     @Override
     public List<Class<? extends State>> getAcceptedDataTypes() {
-        return Collections.unmodifiableList(acceptedDataTypes);
+        return ACCEPTED_DATA_TYPES;
     }
 
     @Override
     public List<Class<? extends Command>> getAcceptedCommandTypes() {
-        return Collections.unmodifiableList(acceptedCommandTypes);
+        return ACCEPTED_COMMAND_TYPES;
     }
 
     public void send(PlayPauseType command) {
@@ -81,7 +70,7 @@ public class PlayerItem extends GenericItem {
 
     @Override
     public void setState(State state) {
-        if (isAcceptedState(acceptedDataTypes, state)) {
+        if (isAcceptedState(ACCEPTED_DATA_TYPES, state)) {
             super.setState(state);
         } else {
             logSetTypeError(state);

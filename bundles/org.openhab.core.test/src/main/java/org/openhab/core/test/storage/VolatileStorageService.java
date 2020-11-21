@@ -32,10 +32,12 @@ public class VolatileStorageService implements StorageService {
     @Override
     @SuppressWarnings("unchecked")
     public synchronized <T> Storage<T> getStorage(String name) {
-        if (!storages.containsKey(name)) {
-            storages.put(name, new VolatileStorage<>());
+        Storage<T> storage = storages.get(name);
+        if (storage == null) {
+            storage = new VolatileStorage<>();
+            storages.put(name, storage);
         }
-        return storages.get(name);
+        return storage;
     }
 
     @Override

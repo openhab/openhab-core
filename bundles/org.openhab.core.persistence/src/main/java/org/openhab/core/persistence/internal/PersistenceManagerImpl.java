@@ -12,7 +12,7 @@
  */
 package org.openhab.core.persistence.internal;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -291,7 +291,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
                                             genericItem.addStateChangeListener(this);
                                             if (logger.isDebugEnabled()) {
                                                 logger.debug("Restored item state from '{}' for item '{}' -> '{}'",
-                                                        DateFormat.getDateTimeInstance()
+                                                        DateTimeFormatter.ISO_ZONED_DATE_TIME
                                                                 .format(historicItem.getTimestamp()),
                                                         item.getName(), historicItem.getState());
                                             }
@@ -387,8 +387,9 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
     public void removeConfig(final String dbId) {
         synchronized (persistenceServiceConfigs) {
             stopEventHandling(dbId);
-            if (persistenceServices.containsKey(dbId)) {
-                persistenceServiceConfigs.put(dbId, getDefaultConfig(persistenceServices.get(dbId)));
+            PersistenceService persistenceService = persistenceServices.get(dbId);
+            if (persistenceService != null) {
+                persistenceServiceConfigs.put(dbId, getDefaultConfig(persistenceService));
                 startEventHandling(dbId);
             } else {
                 persistenceServiceConfigs.remove(dbId);

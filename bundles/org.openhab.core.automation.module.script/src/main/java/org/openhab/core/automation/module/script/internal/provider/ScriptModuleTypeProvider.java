@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -77,7 +78,6 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
             return null;
         } else {
             List<Output> outputs = new ArrayList<>();
-
             Output result = new Output("result", "java.lang.Object", "result", "the script result", null, null, null);
             outputs.add(result);
             return new ActionType(ScriptActionHandler.TYPE_ID, getConfigDescriptions(locale), "execute a given script",
@@ -113,13 +113,15 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
         final ConfigDescriptionParameter script = ConfigDescriptionParameterBuilder.create("script", Type.TEXT)
                 .withRequired(true).withReadOnly(false).withMultiple(false).withLabel("Script").withContext("script")
                 .withDescription("the script to execute").build();
-        return Stream.of(scriptType, script).collect(Collectors.toList());
+        return List.of(scriptType, script);
     }
 
     @Override
     public Collection<ModuleType> getModuleTypes(@Nullable Locale locale) {
-        return (Collection<ModuleType>) Stream.of(getScriptActionType(locale), getScriptConditionType(locale))
-                .collect(Collectors.toList());
+        return Stream
+                .of(Optional.ofNullable(getScriptActionType(locale)),
+                        Optional.ofNullable(getScriptConditionType(locale)))
+                .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toUnmodifiableList());
     }
 
     @Override
@@ -143,28 +145,46 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
      */
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void setScriptEngineFactory(ScriptEngineFactory engineFactory) {
-        ScriptEngine scriptEngine = engineFactory.createScriptEngine(engineFactory.getScriptTypes().get(0));
-        if (scriptEngine != null) {
-            List<String> mimeTypes = new ArrayList<>();
-
-            javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
-            String languageName = String.format("%s (%s)",
-                    factory.getLanguageName().substring(0, 1).toUpperCase() + factory.getLanguageName().substring(1),
-                    factory.getLanguageVersion());
-            mimeTypes.addAll(factory.getMimeTypes());
-            String preferredMimeType = mimeTypes.get(0);
-            mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || mimeType.contains("x-"));
-            if (!mimeTypes.isEmpty()) {
-                preferredMimeType = mimeTypes.get(0);
+        List<String> scriptTypes = engineFactory.getScriptTypes();
+        if (!scriptTypes.isEmpty()) {
+            ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
+            if (scriptEngine != null) {
+                javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
+                parameterOptions.put(getPreferredMimeType(factory), getLanguageName(factory));
+                logger.trace("ParameterOptions: {}", parameterOptions);
+            } else {
+                logger.trace("setScriptEngineFactory: engine was null");
             }
-            parameterOptions.put(preferredMimeType, languageName);
-            logger.trace("ParameterOptions: {}", parameterOptions);
         } else {
-            logger.trace("setScriptEngineFactory: engine was null");
+            logger.trace("addScriptEngineFactory: scriptTypes was empty");
         }
     }
 
-    public void unsetScriptEngineFactory(ScriptEngineFactory scriptEngineFactory) {
-        parameterOptions.clear();
+    public void unsetScriptEngineFactory(ScriptEngineFactory engineFactory) {
+        List<String> scriptTypes = engineFactory.getScriptTypes();
+        if (!scriptTypes.isEmpty()) {
+            ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
+            if (scriptEngine != null) {
+                javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
+                parameterOptions.remove(getPreferredMimeType(factory));
+                logger.trace("ParameterOptions: {}", parameterOptions);
+            } else {
+                logger.trace("unsetScriptEngineFactory: engine was null");
+            }
+        } else {
+            logger.trace("unsetScriptEngineFactory: scriptTypes was empty");
+        }
+    }
+
+    private String getPreferredMimeType(javax.script.ScriptEngineFactory factory) {
+        List<String> mimeTypes = new ArrayList<>(factory.getMimeTypes());
+        mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || mimeType.contains("x-"));
+        return mimeTypes.isEmpty() ? factory.getMimeTypes().get(0) : mimeTypes.get(0);
+    }
+
+    private String getLanguageName(javax.script.ScriptEngineFactory factory) {
+        return String.format("%s (%s)",
+                factory.getLanguageName().substring(0, 1).toUpperCase() + factory.getLanguageName().substring(1),
+                factory.getLanguageVersion());
     }
 }

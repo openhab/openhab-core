@@ -107,12 +107,14 @@ public class Printer {
         for (int i = 1; i <= ruleUIDs.size(); i++) {
             String id = String.valueOf(i);
             String uid = ruleUIDs.get(id);
-            columnValues.set(0, id);
-            columnValues.set(1, uid);
-            Rule rule = autoCommands.getRule(uid);
-            columnValues.set(2, rule.getName());
-            columnValues.set(3, autoCommands.getRuleStatus(uid).toString());
-            rulesRows.add(Utils.getRow(columnWidths, columnValues));
+            if (uid != null) {
+                columnValues.set(0, id);
+                columnValues.set(1, uid);
+                Rule rule = autoCommands.getRule(uid);
+                columnValues.set(2, rule.getName());
+                columnValues.set(3, autoCommands.getRuleStatus(uid).toString());
+                rulesRows.add(Utils.getRow(columnWidths, columnValues));
+            }
         }
         return Utils.getTableContent(TABLE_WIDTH, columnWidths, rulesRows, titleRow);
     }

@@ -56,6 +56,7 @@ public class MetadataRegistryImplTest {
         registry = new MetadataRegistryImpl();
         registry.setManagedProvider(managedProvider);
         registry.activate(bundleContext);
+        registry.waitForCompletedAsyncActivationTasks();
 
         ArgumentCaptor<ServiceListener> captor = ArgumentCaptor.forClass(ServiceListener.class);
         verify(bundleContext).addServiceListener(captor.capture(), any());

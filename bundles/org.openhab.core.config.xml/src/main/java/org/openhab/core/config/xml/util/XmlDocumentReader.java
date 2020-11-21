@@ -30,19 +30,28 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
  * This class uses {@code XStream} and {@code StAX} to parse and convert the XML document.
  *
  * @author Michael Grammling - Initial contribution
+ * @author Wouter Born - Configure XStream security
  *
  * @param <T> the result type of the conversion
  */
 @NonNullByDefault
 public abstract class XmlDocumentReader<@NonNull T> {
 
+    protected static final String[] DEFAULT_ALLOWED_TYPES_WILDCARD = new String[] { "org.openhab.core.**" };
+
     private final XStream xstream = new XStream(new StaxDriver());
 
     /**
-     * The default constructor of this class initializes the {@code XStream} object, and calls
-     * the abstract methods {@link #registerConverters()} and {@link #registerAliases()}.
+     * The default constructor of this class initializes the {@code XStream} object by calling:
+     *
+     * <ol>
+     * <li>{@link #configureSecurity()}</li>
+     * <li>{@link #registerConverters()}</li>
+     * <li>{@link #registerAliases()}</li>
+     * </ol>
      */
     public XmlDocumentReader() {
+        configureSecurity(xstream);
         registerConverters(xstream);
         registerAliases(xstream);
     }
@@ -52,8 +61,20 @@ public abstract class XmlDocumentReader<@NonNull T> {
      *
      * @param classLoader the classloader to set (must not be null)
      */
-    public void setClassLoader(ClassLoader classLoader) {
+    protected void setClassLoader(ClassLoader classLoader) {
         xstream.setClassLoader(classLoader);
+    }
+
+    /**
+     * Configures the security of the {@link XStream} instance to protect against vulnerabilities.
+     *
+     * @param xstream the XStream object to be configured
+     *
+     * @see https://x-stream.github.io/security.html
+     */
+    protected void configureSecurity(XStream xstream) {
+        XStream.setupDefaultSecurity(xstream);
+        xstream.allowTypesByWildcard(DEFAULT_ALLOWED_TYPES_WILDCARD);
     }
 
     /**
@@ -61,14 +82,14 @@ public abstract class XmlDocumentReader<@NonNull T> {
      *
      * @param xstream the XStream object to be configured
      */
-    public abstract void registerConverters(XStream xstream);
+    protected abstract void registerConverters(XStream xstream);
 
     /**
      * Registers any aliases at the {@link XStream} instance.
      *
      * @param xstream the XStream object to be configured
      */
-    public abstract void registerAliases(XStream xstream);
+    protected abstract void registerAliases(XStream xstream);
 
     /**
      * Reads the XML document containing a specific XML tag from the specified {@link URL} and converts it to the

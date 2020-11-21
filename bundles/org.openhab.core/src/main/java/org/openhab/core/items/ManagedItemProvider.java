@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -74,16 +73,18 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
 
     private final Logger logger = LoggerFactory.getLogger(ManagedItemProvider.class);
 
-    private final Collection<ItemFactory> itemFactories = new CopyOnWriteArrayList<>();
+    private final ItemBuilderFactory itemBuilderFactory;
     private final Map<String, PersistedItem> failedToCreate = new ConcurrentHashMap<>();
 
     @Activate
-    public ManagedItemProvider(final @Reference StorageService storageService) {
+    public ManagedItemProvider(final @Reference StorageService storageService,
+            final @Reference ItemBuilderFactory itemBuilderFactory) {
         super(storageService);
+        this.itemBuilderFactory = itemBuilderFactory;
     }
 
     /**
-     * Removes an item and it´s member if recursive flag is set to true.
+     * Removes an item and its member if recursive flag is set to true.
      *
      * @param itemName item name to remove
      * @param recursive if set to true all members of the item will be removed, too.
@@ -104,6 +105,14 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         }
     }
 
+    @Override
+    public void add(Item element) {
+        if (!ItemUtil.isValidItemName(element.getName())) {
+            throw new IllegalArgumentException("The item name '" + element.getName() + "' is invalid.");
+        }
+        super.add(element);
+    }
+
     private List<String> getMemberNamesRecursively(GroupItem groupItem, Collection<Item> allItems) {
         List<String> memberNames = new ArrayList<>();
         for (Item item : allItems) {
@@ -118,16 +127,13 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     }
 
     private @Nullable Item createItem(String itemType, String itemName) {
-        for (ItemFactory factory : itemFactories) {
-            Item item = factory.createItem(itemType, itemName);
-            if (item != null) {
-                return item;
-            }
+        try {
+            Item item = itemBuilderFactory.newItemBuilder(itemType, itemName).build();
+            return item;
+        } catch (IllegalStateException e) {
+            logger.debug("Couldn't create item '{}' of type '{}'", itemName, itemType);
+            return null;
         }
-
-        logger.debug("Couldn't find ItemFactory for item '{}' of type '{}'", itemName, itemType);
-
-        return null;
     }
 
     /**
@@ -143,8 +149,6 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addItemFactory(ItemFactory itemFactory) {
-        itemFactories.add(itemFactory);
-
         if (!failedToCreate.isEmpty()) {
             // retry failed creation attempts
             Iterator<Entry<String, PersistedItem>> iterator = failedToCreate.entrySet().iterator();
@@ -153,9 +157,9 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
                 String itemName = entry.getKey();
                 PersistedItem persistedItem = entry.getValue();
                 Item item = itemFactory.createItem(persistedItem.itemType, itemName);
-                if (item != null && item instanceof ActiveItem) {
+                if (item != null && item instanceof GenericItem) {
                     iterator.remove();
-                    configureItem(persistedItem, (ActiveItem) item);
+                    configureItem(persistedItem, (GenericItem) item);
                     notifyListenersAboutAddedElement(item);
                 } else {
                     logger.debug("The added item factory '{}' still could not instantiate item '{}'.", itemFactory,
@@ -169,6 +173,9 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         }
     }
 
+    protected void removeItemFactory(ItemFactory itemFactory) {
+    }
+
     @Override
     protected String getStorageName() {
         return Item.class.getName();
@@ -177,10 +184,6 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     @Override
     protected String keyToString(String key) {
         return key;
-    }
-
-    protected void removeItemFactory(ItemFactory itemFactory) {
-        itemFactories.remove(itemFactory);
     }
 
     @Override
@@ -204,8 +207,8 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
             item = createItem(persistedItem.itemType, itemName);
         }
 
-        if (item != null && item instanceof ActiveItem) {
-            configureItem(persistedItem, (ActiveItem) item);
+        if (item != null && item instanceof GenericItem) {
+            configureItem(persistedItem, (GenericItem) item);
         }
 
         if (item == null) {
@@ -226,7 +229,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         return ItemDTOMapper.mapFunction(baseItem, functionDTO);
     }
 
-    private void configureItem(PersistedItem persistedItem, ActiveItem item) {
+    private void configureItem(PersistedItem persistedItem, GenericItem item) {
         List<String> groupNames = persistedItem.groupNames;
         if (groupNames != null) {
             for (String groupName : groupNames) {

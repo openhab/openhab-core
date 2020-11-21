@@ -106,9 +106,7 @@ public class OpenHAB {
 
     /**
      * Returns the user data folder path name. The main user data folder <code>&lt;openhab-home&gt;/userdata</code> can
-     * be
-     * overwritten by setting
-     * the System property <code>openhab.userdata</code>.
+     * be overwritten by setting the System property <code>openhab.userdata</code>.
      *
      * @return the user data folder path name
      */

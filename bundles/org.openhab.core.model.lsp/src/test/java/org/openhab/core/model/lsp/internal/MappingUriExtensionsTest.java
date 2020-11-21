@@ -99,17 +99,6 @@ public class MappingUriExtensionsTest {
         assertEquals(confFolder.toPath().toUri().toString() + expectedUriPath, clientPath.toString());
     }
 
-    @ParameterizedTest
-    @MethodSource("data")
-    public void testToPathEmfURI(String conf, String request, String expectedClientPath, String expectedUriPath) {
-        MappingUriExtensions mapper = createMapper(conf);
-        mapper.toUri(request);
-
-        URI uri = URI.createURI(confFolder.toPath().toUri().toString() + expectedUriPath);
-        String res = mapper.toPath(uri);
-        assertEquals(request, res);
-    }
-
     private MappingUriExtensions createMapper(String conf) {
         return new MappingUriExtensions(conf) {
             @Override

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.types.util;
 
+import static org.eclipse.jdt.annotation.Checks.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
@@ -64,11 +65,10 @@ public class UnitUtilsTest {
 
     @Test
     public void whenValidDimensionIsGivenShouldCreateQuantityClass() {
-        Class<? extends Quantity<?>> temperature = UnitUtils.parseDimension("Temperature");
-        assertNotNull(temperature);
+        Class<? extends Quantity<?>> temperature = requireNonNull(UnitUtils.parseDimension("Temperature"));
         assertTrue(Temperature.class.isAssignableFrom(temperature));
 
-        Class<? extends Quantity<?>> intensity = UnitUtils.parseDimension("RadiantIntensity");
+        Class<? extends Quantity<?>> intensity = requireNonNull(UnitUtils.parseDimension("RadiantIntensity"));
         assertNotNull(intensity);
         assertTrue(RadiantIntensity.class.isAssignableFrom(intensity));
     }
