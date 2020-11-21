@@ -264,8 +264,13 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<DataAmount> GIGABIT = addUnit("Gbit", MetricPrefix.GIGA(BIT));
     public static final Unit<DataAmount> TERABIT = addUnit("Tbit", MetricPrefix.TERA(BIT));
     public static final Unit<DataAmount> PETABIT = addUnit("Pbit", MetricPrefix.PETA(BIT));
-    public static final Unit<DataAmount> BYTE = addUnit("B", BIT.multiply(8));
     public static final Unit<DataAmount> OCTET = addUnit("o", BIT.multiply(8));
+    public static final Unit<DataAmount> KIBIOCTET = addUnit("Kio", BinaryPrefix.KIBI(OCTET));
+    public static final Unit<DataAmount> MEBIOCTET = addUnit("Mio", BinaryPrefix.MEBI(OCTET));
+    public static final Unit<DataAmount> GIBIOCTET = addUnit("Gio", BinaryPrefix.GIBI(OCTET));
+    public static final Unit<DataAmount> TEBIOCTET = addUnit("Tio", BinaryPrefix.TEBI(OCTET));
+    public static final Unit<DataAmount> PEBIOCTET = addUnit("Pio", BinaryPrefix.PEBI(OCTET));
+    public static final Unit<DataAmount> BYTE = addUnit("B", BIT.multiply(8));
     public static final Unit<DataAmount> KILOBYTE = addUnit("KB", MetricPrefix.KILO(BYTE));
     public static final Unit<DataAmount> MEGABYTE = addUnit("MB", MetricPrefix.MEGA(BYTE));
     public static final Unit<DataAmount> GIGABYTE = addUnit("GB", MetricPrefix.GIGA(BYTE));
@@ -276,11 +281,6 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<DataAmount> GIBIBYTE = addUnit("GiB", BinaryPrefix.GIBI(BYTE));
     public static final Unit<DataAmount> TEBIBYTE = addUnit("TiB", BinaryPrefix.TEBI(BYTE));
     public static final Unit<DataAmount> PEBIBYTE = addUnit("PiB", BinaryPrefix.PEBI(BYTE));
-    public static final Unit<DataAmount> KIBIOCTET = addUnit("Kio", BinaryPrefix.KIBI(OCTET));
-    public static final Unit<DataAmount> MEBIOCTET = addUnit("Mio", BinaryPrefix.MEBI(OCTET));
-    public static final Unit<DataAmount> GIBIOCTET = addUnit("Gio", BinaryPrefix.GIBI(OCTET));
-    public static final Unit<DataAmount> TEBIOCTET = addUnit("Tio", BinaryPrefix.TEBI(OCTET));
-    public static final Unit<DataAmount> PEBIOCTET = addUnit("Pio", BinaryPrefix.PEBI(OCTET));
     public static final Unit<DataTransferRate> BIT_PER_SECOND = addUnit(
             new ProductUnit<DataTransferRate>(BIT.divide(Units.SECOND)));
     public static final Unit<DataTransferRate> KILOBIT_PER_SECOND = addUnit("kbit/s",
@@ -297,6 +297,7 @@ public final class SmartHomeUnits extends CustomUnits {
      */
     static {
         INSTANCE.quantityToUnit.put(DynamicViscosity.class, PASCAL_SECOND);
+        INSTANCE.quantityToUnit.put(DataAmount.class, BYTE);
         INSTANCE.quantityToUnit.put(Energy.class, WATT_HOUR);
         INSTANCE.quantityToUnit.put(ElectricCharge.class, AMPERE_HOUR);
         INSTANCE.quantityToUnit.put(ElectricChargeDensity.class, COULOMB_PER_CUBIC_METRE);
