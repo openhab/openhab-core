@@ -85,9 +85,9 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
 
     @Override
     public @Nullable Item remove(String key) {
-        Item item = this.get(key);
+        Item item = get(key);
         if (item instanceof GroupItem) {
-            this.removeGroupNameFromMembers((GroupItem) item);
+            removeGroupNameFromMembers((GroupItem) item);
         }
 
         return super.remove(key);
