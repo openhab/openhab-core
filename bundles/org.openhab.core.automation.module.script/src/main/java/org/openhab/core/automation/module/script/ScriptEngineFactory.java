@@ -28,11 +28,17 @@ import org.openhab.core.automation.module.script.internal.provider.ScriptModuleT
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Scott Rushworth - added/changed methods and parameters when implementing {@link ScriptModuleTypeProvider}
+ * @author Jonathan Gilbert - added context keys
  */
 @NonNullByDefault
 public interface ScriptEngineFactory {
 
     static final ScriptEngineManager ENGINE_MANAGER = new ScriptEngineManager();
+
+    /**
+     * Key to access engine identifier in script context.
+     */
+    String CONTEXT_KEY_ENGINE_IDENTIFIER = "oh.engine-identifier";
 
     /**
      * This method returns a list of file extensions and MimeTypes that are supported by the ScriptEngine, e.g. py,
