@@ -83,6 +83,16 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         this.itemBuilderFactory = itemBuilderFactory;
     }
 
+    @Override
+    public @Nullable Item remove(String key) {
+        Item item = get(key);
+        if (item instanceof GroupItem) {
+            removeGroupNameFromMembers((GroupItem) item);
+        }
+
+        return super.remove(key);
+    }
+
     /**
      * Removes an item and its member if recursive flag is set to true.
      *
@@ -126,6 +136,16 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         return memberNames;
     }
 
+    private Set<Item> getMembers(GroupItem groupItem, Collection<Item> allItems) {
+        Set<Item> members = new HashSet<>();
+        for (Item item : allItems) {
+            if (item.getGroupNames().contains(groupItem.getName())) {
+                members.add(item);
+            }
+        }
+        return members;
+    }
+
     private @Nullable Item createItem(String itemType, String itemName) {
         try {
             Item item = itemBuilderFactory.newItemBuilder(itemType, itemName).build();
@@ -133,6 +153,16 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         } catch (IllegalStateException e) {
             logger.debug("Couldn't create item '{}' of type '{}'", itemName, itemType);
             return null;
+        }
+    }
+
+    private void removeGroupNameFromMembers(GroupItem groupItem) {
+        Set<Item> members = getMembers(groupItem, getAll());
+        for (Item member : members) {
+            if (member instanceof GenericItem) {
+                ((GenericItem) member).removeGroupName(groupItem.getUID());
+                update(member);
+            }
         }
     }
 

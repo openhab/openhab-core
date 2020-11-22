@@ -349,4 +349,40 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
 
         assertThat(itemProvider.getAll().size(), is(0));
     }
+
+    @Test
+    public void assertRemoveGroupnameFromMembersOnGroupitemRemoval() {
+        assertThat(itemProvider.getAll().size(), is(0));
+
+        GroupItem group = new GroupItem("group");
+
+        GenericItem item1 = new SwitchItem("SwitchItem1");
+        item1.addGroupName(group.getName());
+        GenericItem item2 = new SwitchItem("SwitchItem2");
+        item2.addGroupName(group.getName());
+
+        itemProvider.add(group);
+        itemProvider.add(item1);
+        itemProvider.add(item2);
+
+        assertThat(itemProvider.getAll().size(), is(3));
+
+        assertThat(item1.getGroupNames().size(), is(1));
+        assertThat(item2.getGroupNames().size(), is(1));
+
+        Item oldItem = itemProvider.remove(group.getName());
+
+        assertThat(oldItem, is(group));
+
+        item1 = (GenericItem) itemProvider.get("SwitchItem1");
+        item2 = (GenericItem) itemProvider.get("SwitchItem2");
+
+        assertNotNull(item1);
+        assertNotNull(item2);
+        if (item1 != null && item2 != null) {
+            assertThat(item1.getGroupNames().size(), is(0));
+            assertThat(item2.getGroupNames().size(), is(0));
+        }
+        assertThat(itemProvider.getAll().size(), is(2));
+    }
 }
