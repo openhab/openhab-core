@@ -12,14 +12,18 @@
  */
 package org.openhab.core.automation.module.script.internal;
 
+import static org.openhab.core.automation.module.script.ScriptEngineFactory.CONTEXT_KEY_ENGINE_IDENTIFIER;
+
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import javax.script.SimpleScriptContext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -38,6 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Scott Rushworth - replaced GenericScriptEngineFactory with a service and cleaned up logging
+ * @author Jonathan Gilbert - included passing of context to script engines
  */
 @NonNullByDefault
 @Component(service = ScriptEngineManager.class)
@@ -129,6 +134,16 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     loadedScriptEngineInstances.put(engineIdentifier, result);
                     logger.debug("Added ScriptEngine for language '{}' with identifier: {}", scriptType,
                             engineIdentifier);
+
+                    ScriptContext scriptContext = engine.getContext();
+
+                    if (scriptContext == null) {
+                        scriptContext = new SimpleScriptContext();
+                        engine.setContext(scriptContext);
+                    }
+
+                    scriptContext.setAttribute(CONTEXT_KEY_ENGINE_IDENTIFIER, engineIdentifier,
+                            ScriptContext.ENGINE_SCOPE);
                 } else {
                     logger.error("ScriptEngine for language '{}' could not be created for identifier: {}", scriptType,
                             engineIdentifier);
