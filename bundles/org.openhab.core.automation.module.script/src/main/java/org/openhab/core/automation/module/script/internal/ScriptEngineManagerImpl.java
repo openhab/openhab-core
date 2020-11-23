@@ -13,6 +13,7 @@
 package org.openhab.core.automation.module.script.internal;
 
 import static org.openhab.core.automation.module.script.ScriptEngineFactory.CONTEXT_KEY_ENGINE_IDENTIFIER;
+import static org.openhab.core.automation.module.script.ScriptEngineFactory.CONTEXT_KEY_EXTENSION_ACCESSOR;
 
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -143,6 +144,8 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     }
 
                     scriptContext.setAttribute(CONTEXT_KEY_ENGINE_IDENTIFIER, engineIdentifier,
+                            ScriptContext.ENGINE_SCOPE);
+                    scriptContext.setAttribute(CONTEXT_KEY_EXTENSION_ACCESSOR, scriptExtensionManager,
                             ScriptContext.ENGINE_SCOPE);
                 } else {
                     logger.error("ScriptEngine for language '{}' could not be created for identifier: {}", scriptType,

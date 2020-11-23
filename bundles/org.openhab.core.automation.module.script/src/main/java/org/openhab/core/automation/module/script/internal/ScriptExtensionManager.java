@@ -24,6 +24,7 @@ import javax.script.ScriptEngine;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
+import org.openhab.core.automation.module.script.ScriptExtensionAccessor;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -37,7 +38,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  */
 @Component(service = ScriptExtensionManager.class)
 @NonNullByDefault
-public class ScriptExtensionManager {
+public class ScriptExtensionManager implements ScriptExtensionAccessor {
 
     private final Set<ScriptExtensionProvider> scriptExtensionProviders = new CopyOnWriteArraySet<>();
 
@@ -100,19 +101,36 @@ public class ScriptExtensionManager {
 
     public void importDefaultPresets(ScriptEngineFactory engineProvider, ScriptEngine scriptEngine,
             String scriptIdentifier) {
-        for (String preset : getDefaultPresets()) {
-            importPreset(preset, engineProvider, scriptEngine, scriptIdentifier);
-        }
+
+        engineProvider.scopeValues(scriptEngine, findDefaultPresets(scriptIdentifier));
     }
 
     public Map<String, Object> importPreset(String preset, ScriptEngineFactory engineProvider,
             ScriptEngine scriptEngine, String scriptIdentifier) {
+
+        Map<String, Object> rv = findPreset(preset, scriptIdentifier);
+
+        engineProvider.scopeValues(scriptEngine, rv);
+
+        return rv;
+    }
+
+    public Map<String, Object> findDefaultPresets(String scriptIdentifier) {
+        Map<String, Object> allValues = new HashMap<>();
+
+        for (String preset : getDefaultPresets()) {
+            allValues.putAll(findPreset(preset, scriptIdentifier));
+        }
+
+        return allValues;
+    }
+
+    public Map<String, Object> findPreset(String preset, String scriptIdentifier) {
         Map<String, Object> allValues = new HashMap<>();
         for (ScriptExtensionProvider provider : scriptExtensionProviders) {
             if (provider.getPresets().contains(preset)) {
                 Map<String, Object> scopeValues = provider.importPreset(scriptIdentifier, preset);
 
-                engineProvider.scopeValues(scriptEngine, scopeValues);
                 allValues.putAll(scopeValues);
             }
         }
