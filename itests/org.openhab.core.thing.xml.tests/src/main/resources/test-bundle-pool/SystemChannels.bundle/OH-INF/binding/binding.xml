@@ -6,6 +6,5 @@
 
 	<name>SystemChannels Test Binding</name>
 	<description>Used to test System Wide Channels. Provides definitions of system channels.</description>
-	<author>Deutsche Telekom AG</author>
 
 </binding:binding>

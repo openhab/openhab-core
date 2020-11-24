@@ -7,6 +7,5 @@
 	<name>SystemChannelsNoThingTypes Test Binding</name>
 	<description>Used to test System Wide Channels. Defines system channels
 		without thing types.</description>
-	<author>Deutsche Telekom AG</author>
 
 </binding:binding>
