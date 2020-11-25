@@ -88,6 +88,7 @@ import org.slf4j.LoggerFactory;
  * @author Dennis Nobel - Added persistence support
  * @author Andre Fuechsel - Added removeOlderResults
  * @author Christoph Knauf - Added removeThingsForBridge and getPropsAndConfigParams
+ * @author Laurent Garnier - Added parameter newThingId to method approve
  */
 @Component(immediate = true, service = Inbox.class)
 @NonNullByDefault
@@ -174,7 +175,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     }
 
     @Override
-    public @Nullable Thing approve(ThingUID thingUID, @Nullable String label) {
+    public @Nullable Thing approve(ThingUID thingUID, @Nullable String label, @Nullable String newThingId) {
         if (thingUID == null) {
             throw new IllegalArgumentException("Thing UID must not be null");
         }
@@ -188,7 +189,16 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         getPropsAndConfigParams(result, properties, configParams);
         final Configuration config = new Configuration(configParams);
         ThingTypeUID thingTypeUID = result.getThingTypeUID();
-        Thing newThing = ThingFactory.createThing(thingUID, config, properties, result.getBridgeUID(), thingTypeUID,
+        ThingUID newThingUID = thingUID;
+        if (newThingId != null) {
+            try {
+                newThingUID = new ThingUID(thingTypeUID, newThingId);
+            } catch (IllegalArgumentException e) {
+                logger.warn("Cannot create thing: {}", e.getMessage());
+                return null;
+            }
+        }
+        Thing newThing = ThingFactory.createThing(newThingUID, config, properties, result.getBridgeUID(), thingTypeUID,
                 thingHandlerFactories);
         if (newThing == null) {
             logger.warn("Cannot create thing. No binding found that supports creating a thing of type {}.",

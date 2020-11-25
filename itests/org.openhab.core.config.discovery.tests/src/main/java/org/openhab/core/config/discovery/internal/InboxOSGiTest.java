@@ -136,6 +136,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
     private final ThingUID testUID = new ThingUID("binding:type:id");
     private final ThingTypeUID testTypeUID = new ThingTypeUID("binding:type");
     private final Thing testThing = ThingBuilder.create(testTypeUID, testUID).build();
+    private String testId2 = "myId";
+    private final Thing test2Thing = ThingBuilder.create(testTypeUID, testId2).build();
     private final String discoveryResultLabel = "MyLabel";
 
     @SuppressWarnings("serial")
@@ -855,13 +857,13 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertThatApproveThrowsIllegalArgumentExceptionIfNoDiscoveryResultForGivenThingUIDisAvailable() {
-        assertThrows(IllegalArgumentException.class, () -> inbox.approve(new ThingUID("1234"), "label"));
+        assertThrows(IllegalArgumentException.class, () -> inbox.approve(new ThingUID("1234"), "label", null));
     }
 
     @Test
     public void assertThatApproveAddsAllPropertiesOfDiscoveryResultToThingPropertiesIfNoConfigDescriptionParametersForTheThingTypeAreAvailable() {
         inbox.add(testDiscoveryResult);
-        Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel);
+        Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel, null);
         Thing addedThing = registry.get(testThing.getUID());
 
         assertFalse(addedThing == null);
@@ -880,7 +882,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @SuppressWarnings("null")
     public void assertThatApproveSetsTheExplicitlyGivenLabel() {
         inbox.add(testDiscoveryResult);
-        Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel);
+        Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel, null);
         Thing addedThing = registry.get(testThing.getUID());
 
         assertThat(approvedThing.getLabel(), is(testThingLabel));
@@ -891,11 +893,23 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @SuppressWarnings("null")
     public void assertThatApproveSetsTheDiscoveredLabelIfNoOtherIsGiven() {
         inbox.add(testDiscoveryResult);
-        Thing approvedThing = inbox.approve(testThing.getUID(), null);
+        Thing approvedThing = inbox.approve(testThing.getUID(), null, null);
         Thing addedThing = registry.get(testThing.getUID());
 
         assertThat(approvedThing.getLabel(), is(discoveryResultLabel));
         assertThat(addedThing.getLabel(), is(discoveryResultLabel));
+    }
+
+    @Test
+    @SuppressWarnings("null")
+    public void assertThatApproveSetsTheExplicitlyGivenThingId() {
+        inbox.add(testDiscoveryResult);
+        Thing approvedThing = inbox.approve(testThing.getUID(), null, testId2);
+        Thing addedThing = registry.get(test2Thing.getUID());
+
+        assertFalse(addedThing == null);
+        assertFalse(approvedThing == null);
+        assertTrue(approvedThing.equals(addedThing));
     }
 
     @Test
@@ -938,7 +952,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         waitForAssert(
                 () -> assertNotNull(configDescriptionRegistry.getConfigDescription(testConfigDescription.getUID())));
 
-        Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel);
+        Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel, null);
         Thing addedThing = registry.get(testThing.getUID());
         assertTrue(approvedThing.equals(addedThing));
         assertFalse(addedThing == null);
