@@ -60,13 +60,17 @@ import org.openhab.core.thing.type.ThingTypeRegistry;
 
 /**
  * @author Simon Kaufmann - Initial contribution
+ * @author Laurent Garnier - Added tests testApproveWithThingId and testApproveWithInvalidThingId
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
 public class PersistentInboxTest {
 
+    private static final String THING_OTHER_ID = "other";
+
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("test", "test");
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "test");
+    private static final ThingUID THING_OTHER_UID = new ThingUID(THING_TYPE_UID, THING_OTHER_ID);
 
     private PersistentInbox inbox;
     private Thing lastAddedThing = null;
@@ -87,6 +91,9 @@ public class PersistentInboxTest {
         when(thingHandlerFactory.supportsThingType(eq(THING_TYPE_UID))).thenReturn(true);
         when(thingHandlerFactory.createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_UID), any()))
                 .then(invocation -> ThingBuilder.create(THING_TYPE_UID, "test")
+                        .withConfiguration((Configuration) invocation.getArguments()[1]).build());
+        when(thingHandlerFactory.createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_OTHER_UID), any()))
+                .then(invocation -> ThingBuilder.create(THING_TYPE_UID, THING_OTHER_ID)
                         .withConfiguration((Configuration) invocation.getArguments()[1]).build());
 
         inbox = new PersistentInbox(storageService, mock(DiscoveryServiceRegistry.class), thingRegistry, thingProvider,
@@ -137,10 +144,35 @@ public class PersistentInboxTest {
         when(storage.getValues()).thenReturn(List.of(result));
 
         inbox.activate();
-        inbox.approve(THING_UID, "Test");
+        inbox.approve(THING_UID, "Test", null);
 
+        assertEquals(THING_UID, lastAddedThing.getUID());
         assertTrue(lastAddedThing.getConfiguration().get("foo") instanceof String);
         assertEquals("3", lastAddedThing.getConfiguration().get("foo"));
+    }
+
+    @Test
+    public void testApproveWithThingId() throws URISyntaxException {
+        DiscoveryResult result = DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build();
+        configureConfigDescriptionRegistryMock("foo", Type.TEXT);
+        when(storage.getValues()).thenReturn(List.of(result));
+
+        inbox.activate();
+        inbox.approve(THING_UID, "Test", THING_OTHER_ID);
+
+        assertEquals(THING_OTHER_UID, lastAddedThing.getUID());
+        assertTrue(lastAddedThing.getConfiguration().get("foo") instanceof String);
+        assertEquals("3", lastAddedThing.getConfiguration().get("foo"));
+    }
+
+    @Test
+    public void testApproveWithInvalidThingId() throws URISyntaxException {
+        DiscoveryResult result = DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build();
+        configureConfigDescriptionRegistryMock("foo", Type.TEXT);
+        when(storage.getValues()).thenReturn(List.of(result));
+
+        inbox.activate();
+        assertNull(inbox.approve(THING_UID, "Test", "invalid:id"));
     }
 
     @Test

@@ -71,6 +71,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Laurent Garnier - Added optional parameter newThingId to approve API
  */
 @Component(service = { RESTResource.class, InboxResource.class })
 @JaxrsResource
@@ -105,12 +106,14 @@ public class InboxResource implements RESTResource {
     public Response approve(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
-            @Parameter(description = "thing label") @Nullable String label) {
+            @Parameter(description = "thing label") @Nullable String label,
+            @Parameter(description = "new thing ID") @Nullable String newThingId) {
         ThingUID thingUIDObject = new ThingUID(thingUID);
         String notEmptyLabel = label != null && !label.isEmpty() ? label : null;
+        String notEmptyNewThingId = newThingId != null && !newThingId.isEmpty() ? newThingId : null;
         Thing thing = null;
         try {
-            thing = inbox.approve(thingUIDObject, notEmptyLabel);
+            thing = inbox.approve(thingUIDObject, notEmptyLabel, notEmptyNewThingId);
         } catch (IllegalArgumentException e) {
             logger.error("Thing {} unable to be approved: {}", thingUID, e.getLocalizedMessage());
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Thing unable to be approved.");
