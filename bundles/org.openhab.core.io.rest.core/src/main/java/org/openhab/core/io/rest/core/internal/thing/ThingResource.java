@@ -292,7 +292,7 @@ public class ThingResource implements RESTResource {
     }
 
     @GET
-    @RolesAllowed({ Role.USER, Role.ADMIN })
+    @RolesAllowed({ Role.ADMIN })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get all available things.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedThingDTO.class), uniqueItems = true))) })
@@ -518,7 +518,7 @@ public class ThingResource implements RESTResource {
     }
 
     @GET
-    @RolesAllowed({ Role.USER, Role.ADMIN })
+    @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/status")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Gets thing status.", security = {
