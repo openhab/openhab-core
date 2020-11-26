@@ -67,17 +67,17 @@ public class InboxResourceOSGITest extends JavaOSGiTest {
 
     @Test
     public void assertThatApproveApprovesThingsWhichAreInTheInbox() {
-        when(inbox.approve(any(), any())).thenReturn(testThing);
+        when(inbox.approve(any(), any(), any())).thenReturn(testThing);
 
-        Response reponse = resource.approve(null, testThing.getUID().toString(), testThingLabel);
+        Response reponse = resource.approve(null, testThing.getUID().toString(), testThingLabel, null);
         assertTrue(reponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode());
     }
 
     @Test
     public void assertThatApproveDoesntApproveThingsWhichAreNotInTheInbox() {
-        when(inbox.approve(any(), any())).thenThrow(new IllegalArgumentException());
+        when(inbox.approve(any(), any(), any())).thenThrow(new IllegalArgumentException());
 
-        Response reponse = resource.approve(null, testThing.getUID().toString(), testThingLabel);
+        Response reponse = resource.approve(null, testThing.getUID().toString(), testThingLabel, null);
         assertTrue(reponse.getStatusInfo().getStatusCode() == Status.NOT_FOUND.getStatusCode());
     }
 }

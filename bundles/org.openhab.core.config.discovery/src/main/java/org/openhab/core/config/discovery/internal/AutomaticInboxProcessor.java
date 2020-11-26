@@ -166,7 +166,7 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
             }
         }
         if (alwaysAutoApprove || isToBeAutoApproved(result)) {
-            inbox.approve(result.getThingUID(), result.getLabel());
+            inbox.approve(result.getThingUID(), result.getLabel(), null);
         }
     }
 
@@ -265,7 +265,7 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
         for (DiscoveryResult result : inbox.getAll()) {
             if (DiscoveryResultFlag.NEW.equals(result.getFlag())) {
                 if (alwaysAutoApprove || isToBeAutoApproved(result)) {
-                    inbox.approve(result.getThingUID(), result.getLabel());
+                    inbox.approve(result.getThingUID(), result.getLabel(), null);
                 }
             }
         }
@@ -280,7 +280,7 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
         inboxAutoApprovePredicates.add(inboxAutoApprovePredicate);
         for (DiscoveryResult result : inbox.getAll()) {
             if (DiscoveryResultFlag.NEW.equals(result.getFlag()) && inboxAutoApprovePredicate.test(result)) {
-                inbox.approve(result.getThingUID(), result.getLabel());
+                inbox.approve(result.getThingUID(), result.getLabel(), null);
             }
         }
     }

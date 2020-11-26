@@ -37,6 +37,7 @@ import org.osgi.service.component.annotations.Reference;
  * This class provides console commands around the inbox functionality.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - New optional parameter for command approve
  */
 @Component(immediate = true, service = ConsoleCommandExtension.class)
 @NonNullByDefault
@@ -65,6 +66,10 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 case SUBCMD_APPROVE:
                     if (args.length > 2) {
                         String label = args[2];
+                        String newThingId = null;
+                        if (args.length > 3) {
+                            newThingId = args[3];
+                        }
                         try {
                             ThingUID thingUID = new ThingUID(args[1]);
                             List<DiscoveryResult> results = inbox.stream().filter(forThingUID(thingUID))
@@ -73,12 +78,12 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
                                 console.println("No matching inbox entry could be found.");
                                 return;
                             }
-                            inbox.approve(thingUID, label);
+                            inbox.approve(thingUID, label, newThingId);
                         } catch (IllegalArgumentException e) {
                             console.println(e.getMessage());
                         }
                     } else {
-                        console.println("Specify thing id to approve: inbox approve <thingUID> <label>");
+                        console.println("Specify thing id to approve: inbox approve <thingUID> <label> [<newThingID>]");
                     }
                     break;
                 case SUBCMD_IGNORE:
@@ -194,7 +199,8 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
     public List<String> getUsages() {
         return List.of(buildCommandUsage(SUBCMD_LIST, "lists all current inbox entries"),
                 buildCommandUsage(SUBCMD_LIST_IGNORED, "lists all ignored inbox entries"),
-                buildCommandUsage(SUBCMD_APPROVE + " <thingUID> <label>", "creates a thing for an inbox entry"),
+                buildCommandUsage(SUBCMD_APPROVE + " <thingUID> <label> [<newThingID>]",
+                        "creates a thing for an inbox entry"),
                 buildCommandUsage(SUBCMD_CLEAR, "clears all current inbox entries"),
                 buildCommandUsage(SUBCMD_REMOVE + " [<thingUID>|<thingTypeUID>]",
                         "remove the inbox entries of a given thing id or thing type"),
