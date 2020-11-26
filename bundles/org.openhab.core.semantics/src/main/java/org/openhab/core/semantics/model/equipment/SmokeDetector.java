@@ -13,7 +13,6 @@
 package org.openhab.core.semantics.model.equipment;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.semantics.model.Equipment;
 import org.openhab.core.semantics.model.TagInfo;
 
 /**
@@ -22,6 +21,6 @@ import org.openhab.core.semantics.model.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_SmokeDetector", label = "Smoke Detector", synonyms = "Smoke Detectors", description = "")
-public interface SmokeDetector extends Equipment {
+@TagInfo(id = "Equipment_Sensor_SmokeDetector", label = "Smoke Detector", synonyms = "Smoke Detectors", description = "")
+public interface SmokeDetector extends Sensor {
 }

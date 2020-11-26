@@ -31,24 +31,42 @@ public class Locations {
 
     static {
         LOCATIONS.add(Location.class);
+        LOCATIONS.add(Apartment.class);
         LOCATIONS.add(Attic.class);
         LOCATIONS.add(Basement.class);
         LOCATIONS.add(Bathroom.class);
         LOCATIONS.add(Bedroom.class);
+        LOCATIONS.add(BoilerRoom.class);
         LOCATIONS.add(Building.class);
         LOCATIONS.add(Carport.class);
+        LOCATIONS.add(Cellar.class);
         LOCATIONS.add(Corridor.class);
+        LOCATIONS.add(DiningRoom.class);
+        LOCATIONS.add(Driveway.class);
+        LOCATIONS.add(Entry.class);
+        LOCATIONS.add(FamilyRoom.class);
         LOCATIONS.add(FirstFloor.class);
         LOCATIONS.add(Floor.class);
         LOCATIONS.add(Garage.class);
         LOCATIONS.add(Garden.class);
         LOCATIONS.add(GroundFloor.class);
+        LOCATIONS.add(GuestRoom.class);
+        LOCATIONS.add(House.class);
         LOCATIONS.add(Indoor.class);
         LOCATIONS.add(Kitchen.class);
+        LOCATIONS.add(LaundryRoom.class);
         LOCATIONS.add(LivingRoom.class);
+        LOCATIONS.add(Office.class);
         LOCATIONS.add(Outdoor.class);
+        LOCATIONS.add(Patio.class);
+        LOCATIONS.add(Porch.class);
         LOCATIONS.add(Room.class);
+        LOCATIONS.add(SecondFloor.class);
+        LOCATIONS.add(Shed.class);
+        LOCATIONS.add(SummerHouse.class);
         LOCATIONS.add(Terrace.class);
+        LOCATIONS.add(ThirdFloor.class);
+        LOCATIONS.add(Veranda.class);
     }
 
     public static Stream<Class<? extends Location>> stream() {
