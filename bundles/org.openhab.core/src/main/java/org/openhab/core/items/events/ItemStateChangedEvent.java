@@ -12,7 +12,7 @@
  */
 package org.openhab.core.items.events;
 
-import org.openhab.core.events.AbstractEvent;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.types.State;
 
 /**
@@ -22,14 +22,13 @@ import org.openhab.core.types.State;
  *
  * @author Dennis Nobel - Initial contribution
  */
-public class ItemStateChangedEvent extends AbstractEvent {
+@NonNullByDefault
+public class ItemStateChangedEvent extends ItemEvent {
 
     /**
      * The item state changed event type.
      */
     public static final String TYPE = ItemStateChangedEvent.class.getSimpleName();
-
-    protected final String itemName;
 
     protected final State itemState;
 
@@ -46,8 +45,7 @@ public class ItemStateChangedEvent extends AbstractEvent {
      */
     protected ItemStateChangedEvent(String topic, String payload, String itemName, State newItemState,
             State oldItemState) {
-        super(topic, payload, null);
-        this.itemName = itemName;
+        super(topic, payload, itemName, null);
         this.itemState = newItemState;
         this.oldItemState = oldItemState;
     }
@@ -62,6 +60,7 @@ public class ItemStateChangedEvent extends AbstractEvent {
      *
      * @return the item name
      */
+    @Override
     public String getItemName() {
         return itemName;
     }

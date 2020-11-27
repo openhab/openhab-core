@@ -12,7 +12,7 @@
  */
 package org.openhab.core.items.events;
 
-import org.openhab.core.events.AbstractEvent;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.types.State;
 
 /**
@@ -26,14 +26,14 @@ import org.openhab.core.types.State;
  *
  * @author Simon Kaufmann - Initial contribution
  */
-public class ItemStatePredictedEvent extends AbstractEvent {
+@NonNullByDefault
+public class ItemStatePredictedEvent extends ItemEvent {
 
     /**
      * The item state predicted event type.
      */
     public static final String TYPE = ItemStatePredictedEvent.class.getSimpleName();
 
-    protected final String itemName;
     protected final State predictedState;
     protected final boolean isConfirmation;
 
@@ -48,8 +48,7 @@ public class ItemStatePredictedEvent extends AbstractEvent {
      */
     public ItemStatePredictedEvent(String topic, String payload, String itemName, State predictedState,
             boolean isConfirmation) {
-        super(topic, payload, null);
-        this.itemName = itemName;
+        super(topic, payload, itemName, null);
         this.predictedState = predictedState;
         this.isConfirmation = isConfirmation;
     }
@@ -64,6 +63,7 @@ public class ItemStatePredictedEvent extends AbstractEvent {
      *
      * @return the item name
      */
+    @Override
     public String getItemName() {
         return itemName;
     }

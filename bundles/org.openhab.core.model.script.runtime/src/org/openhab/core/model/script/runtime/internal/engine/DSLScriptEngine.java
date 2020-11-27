@@ -31,10 +31,13 @@ import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationContext;
+import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.model.script.engine.Script;
 import org.openhab.core.model.script.engine.ScriptExecutionException;
 import org.openhab.core.model.script.engine.ScriptParsingException;
+import org.openhab.core.model.script.jvmmodel.ScriptJvmModelInferrer;
 import org.openhab.core.model.script.runtime.DSLScriptContextProvider;
+import org.openhab.core.thing.events.ChannelTriggeredEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,11 +54,14 @@ import org.slf4j.LoggerFactory;
  */
 public class DSLScriptEngine implements javax.script.ScriptEngine {
 
+    private static final String OUTPUT_EVENT = "event";
+
     public static final String MIMETYPE_OPENHAB_DSL_RULE = "application/vnd.openhab.dsl.rule";
 
-    private static final Map<String, String> implicitVars = Map.of("command", "receivedCommand", "event",
-            "receivedEvent", "state", "newState", "newState", "newState", "oldState", "previousState", "triggeringItem",
-            "triggeringItem");
+    private static final Map<String, String> IMPLICIT_VARS = Map.of("command",
+            ScriptJvmModelInferrer.VAR_RECEIVED_COMMAND, "state", ScriptJvmModelInferrer.VAR_NEW_STATE, "newState",
+            ScriptJvmModelInferrer.VAR_NEW_STATE, "oldState", ScriptJvmModelInferrer.VAR_PREVIOUS_STATE,
+            "triggeringItem", ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM);
 
     private final Logger logger = LoggerFactory.getLogger(DSLScriptEngine.class);
 
@@ -137,12 +143,24 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             }
         }
         DefaultEvaluationContext evalContext = new DefaultEvaluationContext(parentContext);
-        for (Map.Entry<String, String> entry : implicitVars.entrySet()) {
+        for (Map.Entry<String, String> entry : IMPLICIT_VARS.entrySet()) {
             Object value = context.getAttribute(entry.getKey());
             if (value != null) {
                 evalContext.newValue(QualifiedName.create(entry.getValue()), value);
             }
         }
+        // now add specific implicit vars, where we have to map the right content
+        Object value = context.getAttribute(OUTPUT_EVENT);
+        if (value instanceof ChannelTriggeredEvent) {
+            ChannelTriggeredEvent event = (ChannelTriggeredEvent) value;
+            evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_RECEIVED_EVENT), event.getEvent());
+        }
+        if (value instanceof ItemEvent) {
+            ItemEvent event = (ItemEvent) value;
+            evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM_NAME),
+                    event.getItemName());
+        }
+
         return evalContext;
     }
 

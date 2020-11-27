@@ -77,7 +77,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         } else if (ItemStateEvent.TYPE.equals(eventType)) {
             return createStateEvent(topic, payload, source);
         } else if (ItemStatePredictedEvent.TYPE.equals(eventType)) {
-            return createStatePredictedEvent(topic, payload, source);
+            return createStatePredictedEvent(topic, payload);
         } else if (ItemStateChangedEvent.TYPE.equals(eventType)) {
             return createStateChangedEvent(topic, payload);
         } else if (ItemAddedEvent.TYPE.equals(eventType)) {
@@ -115,7 +115,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         return new ItemStateEvent(topic, payload, itemName, state, source);
     }
 
-    private Event createStatePredictedEvent(String topic, String payload, String source) {
+    private Event createStatePredictedEvent(String topic, String payload) {
         String itemName = getItemName(topic);
         ItemStatePredictedEventPayloadBean bean = deserializePayload(payload, ItemStatePredictedEventPayloadBean.class);
         State state = getState(bean.getPredictedType(), bean.getPredictedValue());
@@ -262,7 +262,7 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @return the created item state event
      * @throws IllegalArgumentException if itemName or state is null
      */
-    public static ItemStateEvent createStateEvent(String itemName, State state) {
+    public static ItemEvent createStateEvent(String itemName, State state) {
         return createStateEvent(itemName, state, null);
     }
 
