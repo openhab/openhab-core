@@ -141,4 +141,15 @@
 		<label>Image</label>
 	</channel-type>
 
+	<channel-type id="trigger">
+		<kind>trigger</kind>
+		<label>Trigger</label>
+		<event>
+			<options>
+				<option value="ON">Switched on</option>
+				<option value="OFF">Switched off</option>
+			</options>
+		</event>
+	</channel-type>
+
 </thing:thing-descriptions>
