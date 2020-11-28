@@ -12,12 +12,16 @@
  */
 package org.openhab.core.automation.module.media.internal;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
+import org.openhab.core.library.types.PercentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,27 +30,38 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class PlayActionHandler extends BaseActionModuleHandler {
 
     public static final String TYPE_ID = "media.PlayAction";
+    public static final String VOLUME_TYPE_ID = "media.PlayActionWithVolume";
     public static final String PARAM_SOUND = "sound";
     public static final String PARAM_SINK = "sink";
+    public static final String PARAM_VOLUME = "volume";
 
     private final Logger logger = LoggerFactory.getLogger(PlayActionHandler.class);
 
     private final AudioManager audioManager;
 
+    private final String sound;
+    private final String sink;
+    private final @Nullable PercentType volume;
+
     public PlayActionHandler(Action module, AudioManager audioManager) {
         super(module);
         this.audioManager = audioManager;
+
+        this.sound = module.getConfiguration().get(PARAM_SOUND).toString();
+        this.sink = module.getConfiguration().get(PARAM_SINK).toString();
+
+        Object volumeParam = module.getConfiguration().get(PARAM_VOLUME);
+        this.volume = volumeParam instanceof BigDecimal ? new PercentType((BigDecimal) volumeParam) : null;
     }
 
     @Override
-    public Map<String, Object> execute(Map<String, Object> context) {
-        String sound = module.getConfiguration().get(PARAM_SOUND).toString();
-        String sink = (String) module.getConfiguration().get(PARAM_SINK);
+    public @Nullable Map<String, Object> execute(Map<String, Object> context) {
         try {
-            audioManager.playFile(sound, sink);
+            audioManager.playFile(sound, sink, volume);
         } catch (AudioException e) {
             logger.error("Error playing sound '{}': {}", sound, e.getMessage());
         }
