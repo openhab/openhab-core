@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="profile:system:hysteresis">
+		<parameter name="lower" type="decimal" required="true">
+			<label>Lower Bound</label>
+			<description>Maps to OFF if value is below lower bound.</description>
+		</parameter>
+		<parameter name="upper" type="decimal">
+			<label>Upper Bound</label>
+			<description>Maps to ON if value is above upper bound.</description>
+		</parameter>
+		<parameter name="inverted" type="boolean">
+			<label>Inverted</label>
+			<description>Inverts resulting mapping of ON / OFF, if true.</description>
+			<default>false</default>
+		</parameter>
+	</config-description>
+</config-description:config-descriptions>
