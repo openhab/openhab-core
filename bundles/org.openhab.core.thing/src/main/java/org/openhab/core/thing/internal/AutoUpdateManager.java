@@ -192,9 +192,7 @@ public class AutoUpdateManager {
         Recommendation ret = Recommendation.REQUIRED;
 
         // check if the item is a group item
-        if (item instanceof GroupItem && ((GroupItem) item).getMembers().size() != 0) {
-            // each member of the group receives a command
-            // the group item can track these and react correctly
+        if (item instanceof GroupItem) {
             return Recommendation.DONT;
         }
 

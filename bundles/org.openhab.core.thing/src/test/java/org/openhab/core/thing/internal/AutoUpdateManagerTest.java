@@ -357,14 +357,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdateDisabledForGroupItemsWithNoMembers() {
-        aum.receiveCommand(groupEvent, groupItem);
-
-        assertStateEvent("AFTER", AutoUpdateManager.EVENT_SOURCE);
-    }
-
-    @Test
-    public void testAutoUpdateDisabledForGroupItemsWithMembers() {
+    public void testAutoUpdateDisabledForGroupItems() {
         groupItem.addMember(item);
         aum.receiveCommand(groupEvent, groupItem);
         groupItem.removeMember(item);
