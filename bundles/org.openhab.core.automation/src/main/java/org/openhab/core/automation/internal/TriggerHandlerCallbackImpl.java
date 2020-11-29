@@ -45,7 +45,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     protected TriggerHandlerCallbackImpl(RuleEngineImpl re, String ruleUID) {
         this.re = re;
         this.ruleUID = ruleUID;
-        executor = ThreadPoolManager.getPool(AUTOMATION_THREADPOOL_NAME);
+        executor = ThreadPoolManager.getScheduledPool(AUTOMATION_THREADPOOL_NAME);
     }
 
     @Override
