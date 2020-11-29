@@ -26,12 +26,12 @@ import org.openhab.core.voice.VoiceManager;
  * This is an ModuleHandler implementation for Actions that trigger a TTS output through "say".
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Christoph Weitkamp - Added parameter volume
  */
 @NonNullByDefault
 public class SayActionHandler extends BaseActionModuleHandler {
 
     public static final String TYPE_ID = "media.SayAction";
-    public static final String VOLUME_TYPE_ID = "media.SayActionWithVolume";
     public static final String PARAM_TEXT = "text";
     public static final String PARAM_SINK = "sink";
     public static final String PARAM_VOLUME = "volume";

@@ -32,13 +32,13 @@ import org.osgi.service.component.annotations.Reference;
 /**
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Christoph Weitkamp - Added parameter volume
  */
 @NonNullByDefault
 @Component(service = ModuleHandlerFactory.class)
 public class MediaModuleHandlerFactory extends BaseModuleHandlerFactory {
 
-    private static final Collection<String> TYPES = List.of(SayActionHandler.TYPE_ID, SayActionHandler.VOLUME_TYPE_ID,
-            PlayActionHandler.TYPE_ID, PlayActionHandler.VOLUME_TYPE_ID);
+    private static final Collection<String> TYPES = List.of(SayActionHandler.TYPE_ID, PlayActionHandler.TYPE_ID);
     private final VoiceManager voiceManager;
     private final AudioManager audioManager;
 
@@ -65,10 +65,8 @@ public class MediaModuleHandlerFactory extends BaseModuleHandlerFactory {
         if (module instanceof Action) {
             switch (module.getTypeUID()) {
                 case SayActionHandler.TYPE_ID:
-                case SayActionHandler.VOLUME_TYPE_ID:
                     return new SayActionHandler((Action) module, voiceManager);
                 case PlayActionHandler.TYPE_ID:
-                case PlayActionHandler.VOLUME_TYPE_ID:
                     return new PlayActionHandler((Action) module, audioManager);
                 default:
                     break;

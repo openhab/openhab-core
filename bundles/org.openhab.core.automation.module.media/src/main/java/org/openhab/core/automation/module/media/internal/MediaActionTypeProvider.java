@@ -46,6 +46,7 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Kaufmann - added "say" action
+ * @author Christoph Weitkamp - Added parameter volume
  */
 @NonNullByDefault
 @Component(service = ModuleTypeProvider.class)
@@ -64,12 +65,8 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
         switch (UID) {
             case PlayActionHandler.TYPE_ID:
                 return getPlayActionType(locale);
-            case PlayActionHandler.VOLUME_TYPE_ID:
-                return getPlayWithVolumeActionType(locale);
             case SayActionHandler.TYPE_ID:
                 return getSayActionType(locale);
-            case SayActionHandler.VOLUME_TYPE_ID:
-                return getSayWithVolumeActionType(locale);
             default:
                 return null;
         }
@@ -77,53 +74,33 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
 
     @Override
     public Collection<ModuleType> getModuleTypes(@Nullable Locale locale) {
-        return List.of(getPlayActionType(locale), getPlayWithVolumeActionType(locale), getSayActionType(locale),
-                getSayWithVolumeActionType(locale));
+        return List.of(getPlayActionType(locale), getSayActionType(locale));
     }
 
     private ModuleType getPlayActionType(@Nullable Locale locale) {
-        return new ActionType(PlayActionHandler.TYPE_ID, getConfigPlayDesc(locale, false), "play a sound",
-                "Plays a sound file.", null, Visibility.VISIBLE, null, null);
-    }
-
-    private ModuleType getPlayWithVolumeActionType(@Nullable Locale locale) {
-        return new ActionType(PlayActionHandler.VOLUME_TYPE_ID, getConfigPlayDesc(locale, true),
-                "play a sound and set the volume", "Plays a sound file and sets the volume.", null, Visibility.VISIBLE,
-                null, null);
+        return new ActionType(PlayActionHandler.TYPE_ID, getConfigPlayDesc(locale), "play a sound",
+                "Plays a sound file. Optionally set the volume.", null, Visibility.VISIBLE, null, null);
     }
 
     private ModuleType getSayActionType(@Nullable Locale locale) {
-        return new ActionType(SayActionHandler.TYPE_ID, getConfigSayDesc(locale, false), "say something",
-                "Speaks a given text through a natural voice.", null, Visibility.VISIBLE, null, null);
+        return new ActionType(SayActionHandler.TYPE_ID, getConfigSayDesc(locale), "say something",
+                "Speaks a given text through a natural voice. Optionally set the volume.", null, Visibility.VISIBLE,
+                null, null);
     }
 
-    private ModuleType getSayWithVolumeActionType(@Nullable Locale locale) {
-        return new ActionType(SayActionHandler.VOLUME_TYPE_ID, getConfigSayDesc(locale, true),
-                "say something and set the volume", "Speaks a given text through a natural voice and sets the volume.",
-                null, Visibility.VISIBLE, null, null);
+    private List<ConfigDescriptionParameter> getConfigPlayDesc(@Nullable Locale locale) {
+        return List.of(
+                ConfigDescriptionParameterBuilder.create(PlayActionHandler.PARAM_SOUND, Type.TEXT).withRequired(true)
+                        .withLabel("Sound").withDescription("the sound to play").withOptions(getSoundOptions())
+                        .withLimitToOptions(true).build(),
+                getAudioSinkConfigDescParam(locale), getVolumeConfigDescParam(locale));
     }
 
-    private List<ConfigDescriptionParameter> getConfigPlayDesc(@Nullable Locale locale, boolean withVolume) {
-        List<ConfigDescriptionParameter> params = new ArrayList<>();
-        params.add(ConfigDescriptionParameterBuilder.create(PlayActionHandler.PARAM_SOUND, Type.TEXT).withRequired(true)
-                .withLabel("Sound").withDescription("the sound to play").withOptions(getSoundOptions())
-                .withLimitToOptions(true).build());
-        params.add(getAudioSinkConfigDescParam(locale));
-        if (withVolume) {
-            params.add(getVolumeConfigDescParam(locale));
-        }
-        return params;
-    }
-
-    private List<ConfigDescriptionParameter> getConfigSayDesc(@Nullable Locale locale, boolean withVolume) {
-        List<ConfigDescriptionParameter> params = new ArrayList<>();
-        params.add(ConfigDescriptionParameterBuilder.create(SayActionHandler.PARAM_TEXT, Type.TEXT).withRequired(true)
-                .withLabel("Text").withDescription("the text to speak").build());
-        params.add(getAudioSinkConfigDescParam(locale));
-        if (withVolume) {
-            params.add(getVolumeConfigDescParam(locale));
-        }
-        return params;
+    private List<ConfigDescriptionParameter> getConfigSayDesc(@Nullable Locale locale) {
+        return List.of(
+                ConfigDescriptionParameterBuilder.create(SayActionHandler.PARAM_TEXT, Type.TEXT).withRequired(true)
+                        .withLabel("Text").withDescription("the text to speak").build(),
+                getAudioSinkConfigDescParam(locale), getVolumeConfigDescParam(locale));
     }
 
     private ConfigDescriptionParameter getAudioSinkConfigDescParam(@Nullable Locale locale) {

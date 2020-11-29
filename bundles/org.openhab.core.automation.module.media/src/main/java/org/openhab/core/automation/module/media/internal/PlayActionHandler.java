@@ -29,12 +29,12 @@ import org.slf4j.LoggerFactory;
  * This is an ModuleHandler implementation for Actions that play a sound file from the file system.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Christoph Weitkamp - Added parameter volume
  */
 @NonNullByDefault
 public class PlayActionHandler extends BaseActionModuleHandler {
 
     public static final String TYPE_ID = "media.PlayAction";
-    public static final String VOLUME_TYPE_ID = "media.PlayActionWithVolume";
     public static final String PARAM_SOUND = "sound";
     public static final String PARAM_SINK = "sink";
     public static final String PARAM_VOLUME = "volume";
