@@ -48,9 +48,8 @@ public class EventHandler implements AutoCloseable {
     private final Map<String, EventFactory> typedEventFactories;
 
     private final ScheduledExecutorService watcher = Executors
-            .newSingleThreadScheduledExecutor(new NamedThreadFactory("EventHandlerWatcher"));
-    private final ExecutorService executor = Executors
-            .newSingleThreadExecutor(new NamedThreadFactory("EventHandlerExecutor"));
+            .newSingleThreadScheduledExecutor(new NamedThreadFactory("eventwatcher"));
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("eventexecutor"));
 
     /**
      * Create a new event handler.
