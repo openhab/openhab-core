@@ -124,7 +124,6 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
                 notifyListenersAboutRemovedElement(removedMd);
             }
         }
-
     }
 
     /**
