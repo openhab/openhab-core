@@ -12,30 +12,27 @@
  */
 package org.openhab.core.automation.internal;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
+import org.openhab.core.common.ThreadPoolManager;
 
 /**
  * This class is implementation of {@link TriggerHandlerCallback} used by the {@link Trigger}s to notify rule engine
- * about
- * appearing of new triggered data. There is one and only one {@link TriggerHandlerCallback} per RuleImpl and it is used
- * by
- * all
- * rule's {@link Trigger}s.
+ * about appearing of new triggered data. There is one and only one {@link TriggerHandlerCallback} per RuleImpl and
+ * it is used by all rule's {@link Trigger}s.
  *
  * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - improved stability
  */
 public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
+
+    private static final String AUTOMATION_THREADPOOL_NAME = "automation";
 
     private final String ruleUID;
 
@@ -48,7 +45,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     protected TriggerHandlerCallbackImpl(RuleEngineImpl re, String ruleUID) {
         this.re = re;
         this.ruleUID = ruleUID;
-        executor = Executors.newSingleThreadExecutor();
+        executor = ThreadPoolManager.getPool(AUTOMATION_THREADPOOL_NAME);
     }
 
     @Override
@@ -93,13 +90,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     }
 
     public void dispose() {
-        synchronized (this) {
-            AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-                executor.shutdownNow();
-                return null;
-            });
-            executor = null;
-        }
+        executor = null;
     }
 
     @Override
