@@ -14,13 +14,13 @@ package org.openhab.core.model.rule.runtime.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EObject;
@@ -88,9 +88,9 @@ public class DSLRuleProvider
 
     private final Logger logger = LoggerFactory.getLogger(DSLRuleProvider.class);
     private final Collection<ProviderChangeListener<Rule>> listeners = new ArrayList<>();
-    private final Map<String, Rule> rules = new HashMap<>();
-    private final Map<String, IEvaluationContext> contexts = new HashMap<>();
-    private final Map<String, XExpression> xExpressions = new HashMap<>();
+    private final Map<String, Rule> rules = new ConcurrentHashMap<>();
+    private final Map<String, IEvaluationContext> contexts = new ConcurrentHashMap<>();
+    private final Map<String, XExpression> xExpressions = new ConcurrentHashMap<>();
     private int triggerId = 0;
     private Set<String> markers = new HashSet<>();
 
