@@ -104,7 +104,6 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
      *
      * @param item the item to update the metadata for
      */
-    @SuppressWarnings({ "null", "unused" })
     private void processItem(Item item) {
         MetadataKey key = new MetadataKey(NAMESPACE, item.getName());
         Map<String, Object> configuration = new HashMap<>();
@@ -119,7 +118,13 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
             } else {
                 notifyListenersAboutUpdatedElement(oldMd, md);
             }
+        } else {
+            Metadata removedMd = semantics.remove(item.getName());
+            if (removedMd != null) {
+                notifyListenersAboutRemovedElement(removedMd);
+            }
         }
+
     }
 
     /**
@@ -242,7 +247,6 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         processItem(item);
     }
 
-    @SuppressWarnings("null")
     @Override
     public void removed(Item item) {
         Metadata removedMd = semantics.remove(item.getName());
