@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -119,21 +120,21 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
 
     @Override
     public void stopConfigurationUpdate(String context) {
-        if (previousItemNames != null) {
-            for (String itemName : previousItemNames) {
-                // we remove all binding configurations that were not processed
-                Set<ItemChannelLink> links = itemChannelLinkMap.remove(itemName);
-                if (links != null) {
-                    for (ItemChannelLink removedItemChannelLink : links) {
-                        notifyListenersAboutRemovedElement(removedItemChannelLink);
-                    }
+        final Set<String> previousItemNames = this.previousItemNames;
+        this.previousItemNames = null;
+        if (previousItemNames == null) {
+            return;
+        }
+        for (String itemName : previousItemNames) {
+            // we remove all binding configurations that were not processed
+            Set<ItemChannelLink> links = itemChannelLinkMap.remove(itemName);
+            if (links != null) {
+                for (ItemChannelLink removedItemChannelLink : links) {
+                    notifyListenersAboutRemovedElement(removedItemChannelLink);
                 }
             }
-            if (contextMap.get(context) != null) {
-                contextMap.get(context).removeAll(previousItemNames);
-            }
-            previousItemNames = null;
         }
+        Optional.ofNullable(contextMap.get(context)).ifPresent(ctx -> ctx.removeAll(previousItemNames));
     }
 
     @Override

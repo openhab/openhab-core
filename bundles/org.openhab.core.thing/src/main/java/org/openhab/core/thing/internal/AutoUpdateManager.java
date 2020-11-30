@@ -147,7 +147,7 @@ public class AutoUpdateManager {
             // consider user-override via item meta-data
             MetadataKey key = new MetadataKey(AUTOUPDATE_KEY, itemName);
             Metadata metadata = metadataRegistry.get(key);
-            if (metadata != null && !metadata.getValue().trim().isEmpty()) {
+            if (metadata != null && !metadata.getValue().isBlank()) {
                 boolean override = Boolean.parseBoolean(metadata.getValue());
                 if (override) {
                     logger.trace("Auto update strategy {} overriden by item metadata to REQUIRED", autoUpdate);
@@ -189,10 +189,8 @@ public class AutoUpdateManager {
         Recommendation ret = Recommendation.REQUIRED;
 
         List<ChannelUID> linkedChannelUIDs = new ArrayList<>();
-        for (ItemChannelLink link : itemChannelLinkRegistry.getAll()) {
-            if (link.getItemName().equals(itemName)) {
-                linkedChannelUIDs.add(link.getLinkedUID());
-            }
+        for (ItemChannelLink link : itemChannelLinkRegistry.getLinks(itemName)) {
+            linkedChannelUIDs.add(link.getLinkedUID());
         }
 
         // check if there is any channel ONLINE

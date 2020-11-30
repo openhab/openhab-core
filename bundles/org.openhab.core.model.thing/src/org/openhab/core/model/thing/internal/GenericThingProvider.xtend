@@ -74,7 +74,7 @@ import org.slf4j.LoggerFactory
  * @author Markus Rathgeb - Add locale provider support
  */
 @Component(immediate=true, service=ThingProvider)
-class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvider, ModelRepositoryChangeListener, ReadyService.ReadyTracker {
+class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implements ThingProvider, ModelRepositoryChangeListener, ReadyService.ReadyTracker {
 
     private static final String XML_THING_TYPE = "esh.xmlThingTypes";
 
@@ -371,10 +371,11 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
                             label = resolvedChannelType.label
                         }
                         autoUpdatePolicy = resolvedChannelType.autoUpdatePolicy
-                        if (resolvedChannelType.configDescriptionURI !== null) {
+                        val cfgDescUriOfresolvedChannelType = resolvedChannelType.configDescriptionURI
+                        if (cfgDescUriOfresolvedChannelType !== null) {
                             ConfigUtil.applyDefaultConfiguration(configuration,
                                 configDescriptionRegistry.getConfigDescription(
-                                resolvedChannelType.configDescriptionURI))
+                                cfgDescUriOfresolvedChannelType))
                         }
                     } else {
                         logger.error("Channel type {} could not be resolved.", channelTypeUID.asString)
