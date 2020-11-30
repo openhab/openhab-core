@@ -151,7 +151,7 @@ public class VoiceResource implements RESTResource {
     @POST
     @Path("/interpreters")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "interpretTextByDefaultIntpreter", summary = "Sends a text to the default human language interpreter.", responses = {
+    @Operation(operationId = "interpretTextByDefaultInterpreter", summary = "Sends a text to the default human language interpreter.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "No human language interpreter was found."),
             @ApiResponse(responseCode = "400", description = "interpretation exception occurs") })
