@@ -133,7 +133,7 @@ public class ItemChannelLinkResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName}/{channelUID}")
-    @Operation(operationId = "linksItemToChannel", summary = "Links item to a channel.", security = {
+    @Operation(operationId = "linkItemToChannel", summary = "Links item to a channel.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "400", description = "Content does not match the path"),
