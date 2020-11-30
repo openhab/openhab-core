@@ -101,7 +101,7 @@ public class InboxResource implements RESTResource {
     @POST
     @Path("/{thingUID}/approve")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "aproveInboxItemById", summary = "Approves the discovery result by adding the thing to the registry.", responses = {
+    @Operation(operationId = "approveInboxItemById", summary = "Approves the discovery result by adding the thing to the registry.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Thing unable to be approved."),
             @ApiResponse(responseCode = "409", description = "No binding found that supports this thing.") })
