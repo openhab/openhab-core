@@ -661,7 +661,7 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/firmwares")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getAvailableForThing", summary = "Get all available firmwares for provided thing UID", security = {
+    @Operation(operationId = "getAvailableFirmwaresForThing", summary = "Get all available firmwares for provided thing UID", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = FirmwareDTO.class), uniqueItems = true))),
                     @ApiResponse(responseCode = "204", description = "No firmwares found.") })
