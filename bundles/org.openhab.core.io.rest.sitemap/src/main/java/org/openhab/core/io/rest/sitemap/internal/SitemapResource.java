@@ -233,7 +233,7 @@ public class SitemapResource
     @GET
     @Path("/{sitemapname: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getSitemapsByName", summary = "Get sitemap by name.", responses = {
+    @Operation(operationId = "getSitemapByName", summary = "Get sitemap by name.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SitemapDTO.class))) })
     public Response getSitemapData(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
