@@ -215,7 +215,7 @@ public class ThingResource implements RESTResource {
     @POST
     @RolesAllowed({ Role.ADMIN })
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "CreateThingInRegistry", summary = "Creates a new thing and adds it to the registry.", security = {
+    @Operation(operationId = "createThingInRegistry", summary = "Creates a new thing and adds it to the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "201", description = "Created", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Thing uid does not match bridge uid."),
