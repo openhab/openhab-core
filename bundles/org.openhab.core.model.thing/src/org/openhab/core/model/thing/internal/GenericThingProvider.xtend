@@ -371,10 +371,11 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
                             label = resolvedChannelType.label
                         }
                         autoUpdatePolicy = resolvedChannelType.autoUpdatePolicy
-                        if (resolvedChannelType.configDescriptionURI !== null) {
+                        val cfgDescUriOfresolvedChannelType = resolvedChannelType.configDescriptionURI
+                        if (cfgDescUriOfresolvedChannelType !== null) {
                             ConfigUtil.applyDefaultConfiguration(configuration,
                                 configDescriptionRegistry.getConfigDescription(
-                                resolvedChannelType.configDescriptionURI))
+                                cfgDescUriOfresolvedChannelType))
                         }
                     } else {
                         logger.error("Channel type {} could not be resolved.", channelTypeUID.asString)
