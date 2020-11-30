@@ -314,7 +314,7 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "GetThingById", summary = "Gets thing by UID.", security = {
+    @Operation(operationId = "getThingById", summary = "Gets thing by UID.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ThingDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Thing not found.") })
