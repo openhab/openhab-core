@@ -28,6 +28,3 @@ userdata/
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
-
-### Generated Files or Code ###
-.project

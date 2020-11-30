@@ -105,7 +105,7 @@ public class AudioResource implements RESTResource {
     @GET
     @Path("/defaultsource")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getAudioDefaultSource",  summary = "Get the default source if defined or the first available source.", responses = {
+    @Operation(operationId = "getAudioDefaultSource", summary = "Get the default source if defined or the first available source.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AudioSourceDTO.class))),
             @ApiResponse(responseCode = "404", description = "Source not found") })
     public Response getDefaultSource(
@@ -122,7 +122,7 @@ public class AudioResource implements RESTResource {
     @GET
     @Path("/sinks")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getAudioSinks",  summary = "Get the list of all sinks.", responses = {
+    @Operation(operationId = "getAudioSinks", summary = "Get the list of all sinks.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AudioSinkDTO.class)))) })
     public Response getSinks(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
