@@ -104,7 +104,7 @@ public class UIResource implements RESTResource {
     @GET
     @Path("/components/{namespace}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "getRegisterUIComponentsInNamespace", summary = "Get all registered UI components in the specified namespace.", responses = {
+    @Operation(operationId = "getRegisteredUIComponentsInNamespace", summary = "Get all registered UI components in the specified namespace.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RootUIComponent.class)))) })
     public Response getAllComponents(@PathParam("namespace") String namespace,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary) {
