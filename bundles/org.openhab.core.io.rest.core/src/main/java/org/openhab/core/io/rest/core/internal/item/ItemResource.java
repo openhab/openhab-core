@@ -395,7 +395,7 @@ public class ItemResource implements RESTResource {
     @DELETE
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName: [a-zA-Z_0-9]+}/members/{memberItemName: [a-zA-Z_0-9]+}")
-    @Operation(operationId = "removeMemberToGroupItem", summary = "Removes an existing member from a group item.", security = {
+    @Operation(operationId = "removeMemberFromGroupItem", summary = "Removes an existing member from a group item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item or member item not found or item is not of type group item."),
