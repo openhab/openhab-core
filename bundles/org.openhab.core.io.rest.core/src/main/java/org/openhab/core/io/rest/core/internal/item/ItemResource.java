@@ -636,7 +636,7 @@ public class ItemResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(operationId =  "addsOrUpdatesItemsInRegistry", summary = "Adds a list of items to the registry or updates the existing items.", security = {
+    @Operation(operationId =  "addOrUpdateItemsInRegistry", summary = "Adds a list of items to the registry or updates the existing items.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Payload is invalid.") })
