@@ -12,12 +12,6 @@
  */
 package org.openhab.core.io.rest.auth.internal;
 
-import java.net.URI;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
@@ -33,22 +27,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.jose4j.base64url.Base64Url;
 import org.openhab.core.auth.ManagedUser;
-import org.openhab.core.auth.PendingToken;
-import org.openhab.core.auth.User;
-import org.openhab.core.auth.UserApiToken;
 import org.openhab.core.auth.UserRegistry;
-import org.openhab.core.auth.UserSession;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
