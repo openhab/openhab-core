@@ -5,13 +5,13 @@
 	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="profile:system:hysteresis">
-		<parameter name="lower" type="decimal" required="true">
+		<parameter name="lower" type="text" required="true">
 			<label>Lower Bound</label>
-			<description>Maps to OFF if value is below lower bound.</description>
+			<description>Maps to OFF if value is below lower bound (plain number or number with unit).</description>
 		</parameter>
-		<parameter name="upper" type="decimal">
+		<parameter name="upper" type="text">
 			<label>Upper Bound</label>
-			<description>Maps to ON if value is above upper bound.</description>
+			<description>Maps to ON if value is above upper bound (plain number or number with unit).</description>
 		</parameter>
 		<parameter name="inverted" type="boolean">
 			<label>Inverted</label>
