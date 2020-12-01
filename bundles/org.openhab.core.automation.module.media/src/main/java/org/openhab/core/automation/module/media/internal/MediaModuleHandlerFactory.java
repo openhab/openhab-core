@@ -15,6 +15,8 @@ package org.openhab.core.automation.module.media.internal;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Module;
@@ -22,6 +24,7 @@ import org.openhab.core.automation.handler.BaseModuleHandlerFactory;
 import org.openhab.core.automation.handler.ModuleHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
 import org.openhab.core.voice.VoiceManager;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
@@ -29,13 +32,22 @@ import org.osgi.service.component.annotations.Reference;
 /**
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Christoph Weitkamp - Added parameter volume
  */
+@NonNullByDefault
 @Component(service = ModuleHandlerFactory.class)
 public class MediaModuleHandlerFactory extends BaseModuleHandlerFactory {
 
     private static final Collection<String> TYPES = List.of(SayActionHandler.TYPE_ID, PlayActionHandler.TYPE_ID);
-    private VoiceManager voiceManager;
-    private AudioManager audioManager;
+    private final VoiceManager voiceManager;
+    private final AudioManager audioManager;
+
+    @Activate
+    public MediaModuleHandlerFactory(final @Reference AudioManager audioManager,
+            final @Reference VoiceManager voiceManager) {
+        this.audioManager = audioManager;
+        this.voiceManager = voiceManager;
+    }
 
     @Override
     @Deactivate
@@ -49,7 +61,7 @@ public class MediaModuleHandlerFactory extends BaseModuleHandlerFactory {
     }
 
     @Override
-    protected ModuleHandler internalCreate(Module module, String ruleUID) {
+    protected @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
         if (module instanceof Action) {
             switch (module.getTypeUID()) {
                 case SayActionHandler.TYPE_ID:
@@ -61,23 +73,5 @@ public class MediaModuleHandlerFactory extends BaseModuleHandlerFactory {
             }
         }
         return null;
-    }
-
-    @Reference
-    protected void setAudioManager(AudioManager audioManager) {
-        this.audioManager = audioManager;
-    }
-
-    protected void unsetAudioManager(AudioManager audioManager) {
-        this.audioManager = null;
-    }
-
-    @Reference
-    protected void setVoiceManager(VoiceManager voiceManager) {
-        this.voiceManager = voiceManager;
-    }
-
-    protected void unsetVoiceManager(VoiceManager voiceManager) {
-        this.voiceManager = null;
     }
 }

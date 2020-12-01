@@ -12,35 +12,50 @@
  */
 package org.openhab.core.automation.module.media.internal;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
+import org.openhab.core.library.types.PercentType;
 import org.openhab.core.voice.VoiceManager;
 
 /**
  * This is an ModuleHandler implementation for Actions that trigger a TTS output through "say".
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Christoph Weitkamp - Added parameter volume
  */
+@NonNullByDefault
 public class SayActionHandler extends BaseActionModuleHandler {
 
     public static final String TYPE_ID = "media.SayAction";
     public static final String PARAM_TEXT = "text";
     public static final String PARAM_SINK = "sink";
+    public static final String PARAM_VOLUME = "volume";
 
     private final VoiceManager voiceManager;
+
+    private final String text;
+    private final String sink;
+    private final @Nullable PercentType volume;
 
     public SayActionHandler(Action module, VoiceManager voiceManager) {
         super(module);
         this.voiceManager = voiceManager;
+
+        text = module.getConfiguration().get(PARAM_TEXT).toString();
+        sink = module.getConfiguration().get(PARAM_SINK).toString();
+
+        Object volumeParam = module.getConfiguration().get(PARAM_VOLUME);
+        this.volume = volumeParam instanceof BigDecimal ? new PercentType((BigDecimal) volumeParam) : null;
     }
 
     @Override
-    public Map<String, Object> execute(Map<String, Object> context) {
-        String text = module.getConfiguration().get(PARAM_TEXT).toString();
-        String sink = (String) module.getConfiguration().get(PARAM_SINK);
-        voiceManager.say(text, null, sink);
+    public @Nullable Map<String, Object> execute(Map<String, Object> context) {
+        voiceManager.say(text, null, sink, volume);
         return null;
     }
 }
