@@ -84,7 +84,7 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
 
     private ModuleType getSayActionType(@Nullable Locale locale) {
         return new ActionType(SayActionHandler.TYPE_ID, getConfigSayDesc(locale), "say something",
-                "Speaks a given text through a natural voice. Optionally set the volume.", null, Visibility.VISIBLE,
+                "Speaks a given text through a natural voice. Optionally sets the volume.", null, Visibility.VISIBLE,
                 null, null);
     }
 
