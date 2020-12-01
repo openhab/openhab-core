@@ -12,7 +12,8 @@
  */
 package org.openhab.core.items.events;
 
-import org.openhab.core.events.AbstractEvent;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.Command;
 
 /**
@@ -21,14 +22,13 @@ import org.openhab.core.types.Command;
  *
  * @author Stefan Bußweiler - Initial contribution
  */
-public class ItemCommandEvent extends AbstractEvent {
+@NonNullByDefault
+public class ItemCommandEvent extends ItemEvent {
 
     /**
      * The item command event type.
      */
     public static final String TYPE = ItemCommandEvent.class.getSimpleName();
-
-    private final String itemName;
 
     private final Command command;
 
@@ -41,24 +41,15 @@ public class ItemCommandEvent extends AbstractEvent {
      * @param command the command
      * @param source the source, can be null
      */
-    protected ItemCommandEvent(String topic, String payload, String itemName, Command command, String source) {
-        super(topic, payload, source);
-        this.itemName = itemName;
+    protected ItemCommandEvent(String topic, String payload, String itemName, Command command,
+            @Nullable String source) {
+        super(topic, payload, itemName, source);
         this.command = command;
     }
 
     @Override
     public String getType() {
         return TYPE;
-    }
-
-    /**
-     * Gets the item name.
-     *
-     * @return the item name
-     */
-    public String getItemName() {
-        return itemName;
     }
 
     /**

@@ -40,6 +40,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.eclipse.xtext.common.types.JvmFormalParameter
 import org.eclipse.emf.common.util.EList
+import org.openhab.core.events.Event
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -132,6 +133,8 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                     if ((containsCommandTrigger(rule)) || (containsStateChangeTrigger(rule)) || (containsStateUpdateTrigger(rule))) {
                         val itemTypeRef = ruleModel.newTypeRef(Item)
                         parameters += rule.toParameter(VAR_TRIGGERING_ITEM, itemTypeRef)
+                        val itemNameRef = ruleModel.newTypeRef(String)
+                        parameters += rule.toParameter(VAR_TRIGGERING_ITEM_NAME, itemNameRef)
                     }
                     if (containsCommandTrigger(rule)) {
                         val commandTypeRef = ruleModel.newTypeRef(Command)
@@ -142,7 +145,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                         parameters += rule.toParameter(VAR_PREVIOUS_STATE, stateTypeRef)
                     }
                     if (containsEventTrigger(rule)) {
-                        val eventTypeRef = ruleModel.newTypeRef(ChannelTriggeredEvent)
+                        val eventTypeRef = ruleModel.newTypeRef(String)
                         parameters += rule.toParameter(VAR_RECEIVED_EVENT, eventTypeRef)
                     }
                     if (containsThingStateChangedEventTrigger(rule) && !containsParam(parameters, VAR_PREVIOUS_STATE)) {
