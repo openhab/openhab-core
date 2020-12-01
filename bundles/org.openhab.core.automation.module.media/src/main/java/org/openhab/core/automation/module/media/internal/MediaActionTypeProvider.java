@@ -79,7 +79,7 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
 
     private ModuleType getPlayActionType(@Nullable Locale locale) {
         return new ActionType(PlayActionHandler.TYPE_ID, getConfigPlayDesc(locale), "play a sound",
-                "Plays a sound file. Optionally set the volume.", null, Visibility.VISIBLE, null, null);
+                "Plays a sound file. Optionally sets the volume.", null, Visibility.VISIBLE, null, null);
     }
 
     private ModuleType getSayActionType(@Nullable Locale locale) {
