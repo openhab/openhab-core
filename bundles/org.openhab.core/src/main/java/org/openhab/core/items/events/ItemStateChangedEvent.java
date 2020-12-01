@@ -56,16 +56,6 @@ public class ItemStateChangedEvent extends ItemEvent {
     }
 
     /**
-     * Gets the item name.
-     *
-     * @return the item name
-     */
-    @Override
-    public String getItemName() {
-        return itemName;
-    }
-
-    /**
      * Gets the item state.
      *
      * @return the item state

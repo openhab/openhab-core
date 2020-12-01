@@ -59,16 +59,6 @@ public class ItemStatePredictedEvent extends ItemEvent {
     }
 
     /**
-     * Gets the item name.
-     *
-     * @return the item name
-     */
-    @Override
-    public String getItemName() {
-        return itemName;
-    }
-
-    /**
      * Gets the predicted item state.
      *
      * @return the predicted item state

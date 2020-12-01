@@ -53,16 +53,6 @@ public class ItemCommandEvent extends ItemEvent {
     }
 
     /**
-     * Gets the item name.
-     *
-     * @return the item name
-     */
-    @Override
-    public String getItemName() {
-        return itemName;
-    }
-
-    /**
      * Gets the item command.
      *
      * @return the item command
