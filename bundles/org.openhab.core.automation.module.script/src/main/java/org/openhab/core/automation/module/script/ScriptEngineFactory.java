@@ -46,6 +46,11 @@ public interface ScriptEngineFactory {
     String CONTEXT_KEY_EXTENSION_ACCESSOR = "oh.extension-accessor";
 
     /**
+     * Key to access Dependency Listener {@link ScriptDependencyListener}
+     */
+    String CONTEXT_KEY_DEPENDENCY_LISTENER = "oh.dependency-listener";
+
+    /**
      * This method returns a list of file extensions and MimeTypes that are supported by the ScriptEngine, e.g. py,
      * application/python, js, application/javascript, etc.
      *
