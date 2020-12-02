@@ -356,7 +356,7 @@ public class ItemResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName: [a-zA-Z_0-9]+}/members/{memberItemName: [a-zA-Z_0-9]+}")
-    @Operation(operationId = "addMemberToGroupItem" ,summary = "Adds a new member to a group item.", security = {
+    @Operation(operationId = "addMemberToGroupItem", summary = "Adds a new member to a group item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item or member item not found or item is not of type group item."),
@@ -501,7 +501,7 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/{namespace}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation( operationId = "addMetadataToItem", summary = "Adds metadata to an item.", security = {
+    @Operation(operationId = "addMetadataToItem", summary = "Adds metadata to an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = { //
                     @ApiResponse(responseCode = "200", description = "OK"), //
                     @ApiResponse(responseCode = "201", description = "Created"), //
@@ -536,7 +536,7 @@ public class ItemResource implements RESTResource {
     @DELETE
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/{namespace}")
-    @Operation(operationId = "removeMetadataFromItem", summary =  "Removes metadata from an item.", security = {
+    @Operation(operationId = "removeMetadataFromItem", summary = "Removes metadata from an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item not found."),
@@ -636,7 +636,7 @@ public class ItemResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(operationId =  "addOrUpdateItemsInRegistry", summary = "Adds a list of items to the registry or updates the existing items.", security = {
+    @Operation(operationId = "addOrUpdateItemsInRegistry", summary = "Adds a list of items to the registry or updates the existing items.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Payload is invalid.") })

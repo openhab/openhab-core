@@ -323,7 +323,8 @@ public class SitemapResource
     @GET
     @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}")
     @Produces(MediaType.SERVER_SENT_EVENTS)
-    @Operation(operationId = "getSitemapEvents", summary = "Get sitemap events.", responses = { @ApiResponse(responseCode = "200", description = "OK"),
+    @Operation(operationId = "getSitemapEvents", summary = "Get sitemap events.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Page not linked to the subscription."),
             @ApiResponse(responseCode = "404", description = "Subscription not found.") })
     public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,

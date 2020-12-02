@@ -95,7 +95,7 @@ public class ModuleTypeResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId ="getModuleTypes", summary = "Get all available module types.", responses = {
+    @Operation(operationId = "getModuleTypes", summary = "Get all available module types.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ModuleTypeDTO.class)))) })
     public Response getAll(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,

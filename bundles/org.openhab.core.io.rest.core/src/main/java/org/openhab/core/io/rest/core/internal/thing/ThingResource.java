@@ -604,7 +604,7 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/firmware/{firmwareVersion}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "updateThingFirmware" , summary = "Update thing firmware.", security = {
+    @Operation(operationId = "updateThingFirmware", summary = "Update thing firmware.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "400", description = "Firmware update preconditions not satisfied."),

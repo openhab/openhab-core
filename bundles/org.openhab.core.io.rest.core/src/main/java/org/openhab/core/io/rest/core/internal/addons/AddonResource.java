@@ -144,7 +144,7 @@ public class AddonResource implements RESTResource {
     @GET
     @Path("/{addonId: [a-zA-Z_0-9-:]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getAddonById",summary = "Get add-on with given ID.", responses = {
+    @Operation(operationId = "getAddonById", summary = "Get add-on with given ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Not found") })
     public Response getById(

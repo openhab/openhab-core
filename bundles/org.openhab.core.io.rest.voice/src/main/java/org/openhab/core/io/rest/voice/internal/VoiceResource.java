@@ -180,7 +180,7 @@ public class VoiceResource implements RESTResource {
     public Response getVoices() {
         List<VoiceDTO> dtos = voiceManager.getAllVoices().stream().map(VoiceMapper::map).collect(Collectors.toList());
         return Response.ok(dtos).build();
-    g
+    }
 
     @GET
     @Path("/defaultvoice")
@@ -201,7 +201,7 @@ public class VoiceResource implements RESTResource {
     @POST
     @Path("/say")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "textToSpeech",summary = "Speaks a given text with a given voice through the given audio sink.", responses = {
+    @Operation(operationId = "textToSpeech", summary = "Speaks a given text with a given voice through the given audio sink.", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
     public Response say(@Parameter(description = "text to speak", required = true) String text,
             @QueryParam("voiceid") @Parameter(description = "voice id") @Nullable String voiceId,

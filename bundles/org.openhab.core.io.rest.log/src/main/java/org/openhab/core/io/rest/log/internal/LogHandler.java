@@ -130,7 +130,7 @@ public class LogHandler implements RESTResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(operationId =  "logMessageToBackend", summary = "Log a frontend log message to the backend.", responses = {
+    @Operation(operationId = "logMessageToBackend", summary = "Log a frontend log message to the backend.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "403", description = LogConstants.LOG_SEVERITY_IS_NOT_SUPPORTED) })
     public Response log(

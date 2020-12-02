@@ -213,7 +213,7 @@ public class TokenResource implements RESTResource {
     @POST
     @Path("/logout")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-    @Operation((operationId = "deleteSession", summary = "Delete the session associated with a refresh token.", responses = {
+    @Operation(operationId = "deleteSession", summary = "Delete the session associated with a refresh token.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User or refresh token not found") })
