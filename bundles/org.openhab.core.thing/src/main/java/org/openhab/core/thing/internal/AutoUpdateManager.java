@@ -294,14 +294,9 @@ public class AutoUpdateManager {
                         isAccepted = true;
                         break;
                     }
-                } catch (InstantiationException e) {
-                    logger.warn("InstantiationException on {}", e.getMessage(), e); // Should never happen
-                } catch (IllegalAccessException e) {
-                    logger.warn("IllegalAccessException on {}", e.getMessage(), e); // Should never happen
-                } catch (NoSuchMethodException e) {
-                    logger.warn("NoSuchMethodException on {}", e.getMessage(), e); // Should never happen
-                } catch (InvocationTargetException e) {
-                    logger.warn("InvocationTargetException on {}", e.getMessage(), e); // Should never happen
+                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+                        | InvocationTargetException e) {
+                    logger.warn("Exception on {}", e.getMessage(), e); // Should never happen
                 }
             }
         }
