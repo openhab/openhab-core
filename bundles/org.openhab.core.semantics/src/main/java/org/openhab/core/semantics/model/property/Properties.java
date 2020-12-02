@@ -40,7 +40,6 @@ public class Properties {
         PROPERTIES.add(Frequency.class);
         PROPERTIES.add(Gas.class);
         PROPERTIES.add(Humidity.class);
-        PROPERTIES.add(Illuminance.class);
         PROPERTIES.add(Level.class);
         PROPERTIES.add(Light.class);
         PROPERTIES.add(Noise.class);
