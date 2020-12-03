@@ -57,6 +57,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.script.ScriptEngine;
+import javax.ws.rs.HEAD;
 
 /**
  * The {@link ScriptFileWatcher} watches the jsr223 directory for files. If a new/modified file is detected, the script
