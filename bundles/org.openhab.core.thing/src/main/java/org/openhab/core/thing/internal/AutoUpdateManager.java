@@ -12,12 +12,14 @@
  */
 package org.openhab.core.thing.internal;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
@@ -142,7 +144,7 @@ public class AutoUpdateManager {
         if (command instanceof State) {
             final State state = (State) command;
 
-            Recommendation autoUpdate = shouldAutoUpdate(itemName);
+            Recommendation autoUpdate = shouldAutoUpdate(item);
 
             // consider user-override via item meta-data
             MetadataKey key = new MetadataKey(AUTOUPDATE_KEY, itemName);
@@ -185,8 +187,14 @@ public class AutoUpdateManager {
         }
     }
 
-    private Recommendation shouldAutoUpdate(String itemName) {
+    private Recommendation shouldAutoUpdate(Item item) {
+        String itemName = item.getName();
         Recommendation ret = Recommendation.REQUIRED;
+
+        // check if the item is a group item
+        if (item instanceof GroupItem) {
+            return Recommendation.DONT;
+        }
 
         List<ChannelUID> linkedChannelUIDs = new ArrayList<>();
         for (ItemChannelLink link : itemChannelLinkRegistry.getLinks(itemName)) {
@@ -279,14 +287,14 @@ public class AutoUpdateManager {
             // Look for class hierarchy
             for (Class<?> state : item.getAcceptedDataTypes()) {
                 try {
-                    if (!state.isEnum() && state.newInstance().getClass().isAssignableFrom(newState.getClass())) {
+                    if (!state.isEnum() && state.getDeclaredConstructor().newInstance().getClass()
+                            .isAssignableFrom(newState.getClass())) {
                         isAccepted = true;
                         break;
                     }
-                } catch (InstantiationException e) {
-                    logger.warn("InstantiationException on {}", e.getMessage(), e); // Should never happen
-                } catch (IllegalAccessException e) {
-                    logger.warn("IllegalAccessException on {}", e.getMessage(), e); // Should never happen
+                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+                        | InvocationTargetException e) {
+                    logger.warn("Exception on {}", e.getMessage(), e); // Should never happen
                 }
             }
         }
