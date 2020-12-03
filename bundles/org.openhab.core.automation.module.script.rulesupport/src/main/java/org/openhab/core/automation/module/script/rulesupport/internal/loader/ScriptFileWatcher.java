@@ -188,6 +188,7 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
                                 getScriptIdentifier(url));
 
                         if (container != null) {
+                            container.getScriptEngine().put("javax.script.filename", fileName);
                             manager.loadScript(container.getIdentifier(), reader);
                             loaded.add(url);
                             logger.debug("Script loaded: {}", fileName);
