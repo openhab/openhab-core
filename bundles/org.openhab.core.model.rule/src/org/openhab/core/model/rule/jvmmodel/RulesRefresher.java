@@ -13,13 +13,14 @@
 package org.openhab.core.model.rule.jvmmodel;
 
 import java.util.Collection;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.system.StartlevelEvent;
 import org.openhab.core.events.system.SystemEventFactory;
@@ -58,13 +59,13 @@ public class RulesRefresher implements ReadyTracker {
     // delay in seconds before rule resources are refreshed after items or services have changed
     private static final long REFRESH_DELAY = 5;
 
-    private static final String POOL_NAME = "automation";
     public static final String RULES_REFRESH = "rules_refresh";
 
     private final Logger logger = LoggerFactory.getLogger(RulesRefresher.class);
 
     private @Nullable ScheduledFuture<?> job;
-    private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(POOL_NAME);
+    private final ScheduledExecutorService scheduler = Executors
+            .newSingleThreadScheduledExecutor(new NamedThreadFactory("rulesRefresher"));
     private boolean started;
     private final ReadyMarker marker = new ReadyMarker("dsl", RULES_REFRESH);
 

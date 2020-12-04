@@ -963,12 +963,11 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @param td {@link TriggerData} object containing new values for {@link Trigger}'s {@link Output}s
      */
     protected void runRule(String ruleUID, TriggerHandlerCallbackImpl.TriggerData td) {
-        TriggerHandlerCallbackImpl callback = thCallbacks.get(ruleUID);
-        if (callback == null) {
+        if (thCallbacks.get(ruleUID) == null) {
             // the rule was unregistered
             return;
         }
-        synchronized (callback) {
+        synchronized (this) {
             final RuleStatus ruleStatus = getRuleStatus(ruleUID);
             if (ruleStatus != null && ruleStatus != RuleStatus.IDLE) {
                 logger.error("Failed to execute rule ‘{}' with status '{}'", ruleUID, ruleStatus.name());
@@ -976,28 +975,29 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             }
             // change state to RUNNING
             setStatus(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING));
-            try {
-                clearContext(ruleUID);
-                setTriggerOutputs(ruleUID, td);
-                final WrappedRule rule = managedRules.get(ruleUID);
-                if (rule != null) {
-                    boolean isSatisfied = calculateConditions(rule);
-                    if (isSatisfied) {
-                        executeActions(rule, true);
-                        logger.debug("The rule '{}' is executed.", ruleUID);
-                    } else {
-                        logger.debug("The rule '{}' is NOT executed, since it has unsatisfied conditions.", ruleUID);
-                    }
+        }
+        try {
+            clearContext(ruleUID);
+
+            setTriggerOutputs(ruleUID, td);
+            final WrappedRule rule = managedRules.get(ruleUID);
+            if (rule != null) {
+                boolean isSatisfied = calculateConditions(rule);
+                if (isSatisfied) {
+                    executeActions(rule, true);
+                    logger.debug("The rule '{}' is executed.", ruleUID);
+                } else {
+                    logger.debug("The rule '{}' is NOT executed, since it has unsatisfied conditions.", ruleUID);
                 }
-            } catch (Throwable t) {
-                logger.error("Failed to execute rule '{}': {}", ruleUID, t.getMessage());
-                logger.debug("", t);
             }
-            // change state to IDLE only if the rule has not been DISABLED.
-            synchronized (this) {
-                if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
-                    setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
-                }
+        } catch (Throwable t) {
+            logger.error("Failed to execute rule '{}': {}", ruleUID, t.getMessage());
+            logger.debug("", t);
+        }
+        // change state to IDLE only if the rule has not been DISABLED.
+        synchronized (this) {
+            if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
+                setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
             }
         }
     }
