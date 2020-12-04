@@ -73,7 +73,6 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
             Arrays.asList("txt", "old", "example", "backup", "md", "swp", "tmp", "bak"));
     private static final String FILE_DIRECTORY = "automation" + File.separator + "jsr223";
     private static final long RECHECK_INTERVAL = 20;
-    private static final String SCRIPT_FILENAME_PROPERTY = "javax.script.filename";
 
     private boolean started = false;
 
