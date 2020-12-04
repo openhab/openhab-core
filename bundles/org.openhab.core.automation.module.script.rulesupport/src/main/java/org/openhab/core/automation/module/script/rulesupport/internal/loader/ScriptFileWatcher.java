@@ -70,6 +70,7 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
             Arrays.asList("txt", "old", "example", "backup", "md", "swp", "tmp", "bak"));
     private static final String FILE_DIRECTORY = "automation" + File.separator + "jsr223";
     private static final long RECHECK_INTERVAL = 20;
+    private static final String SCRIPT_FILENAME_PROPERTY = "javax.script.filename";
 
     private boolean started = false;
 
@@ -188,7 +189,7 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
                                 getScriptIdentifier(url));
 
                         if (container != null) {
-                            container.getScriptEngine().put("javax.script.filename", fileName);
+                            container.getScriptEngine().put(SCRIPT_FILENAME_PROPERTY, fileName);
                             manager.loadScript(container.getIdentifier(), reader);
                             loaded.add(url);
                             logger.debug("Script loaded: {}", fileName);
