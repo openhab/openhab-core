@@ -14,8 +14,6 @@ package org.openhab.core.auth.oauth2client.internal;
 
 import java.lang.reflect.Type;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 
 import com.google.gson.Gson;
@@ -32,15 +30,11 @@ import com.google.gson.JsonPrimitive;
  *
  * @author Gaël L'hopital - Initial contribution
  */
-@NonNullByDefault
 public class AccessTokenDeserializer implements JsonDeserializer<AccessTokenResponse> {
 
     @Override
-    public AccessTokenResponse deserialize(@Nullable JsonElement json, @Nullable Type typeOfT,
-            @Nullable JsonDeserializationContext context) throws JsonParseException {
-        if (json == null) {
-            throw new JsonParseException("Could not deserialized null JsonElement");
-        }
+    public AccessTokenResponse deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
 
         final JsonObject accessToken = json.getAsJsonObject();
         final JsonElement scope = accessToken.get(Keyword.SCOPE);
