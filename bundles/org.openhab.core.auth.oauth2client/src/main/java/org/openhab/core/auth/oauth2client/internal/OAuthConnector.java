@@ -67,7 +67,8 @@ public class OAuthConnector {
 
     public OAuthConnector(HttpClientFactory httpClientFactory) {
         this.httpClientFactory = httpClientFactory;
-        gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+        gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .registerTypeAdapter(AccessTokenResponse.class, new AccessTokenDeserializer()).create();
     }
 
     /**
