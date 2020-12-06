@@ -69,13 +69,15 @@ public class OAuthConnector {
     public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable String deserializerClassName) {
         this.httpClientFactory = httpClientFactory;
         GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
-        if (deserializerClass != null) {
+        if (deserializerClassName != null) {
             try {
+                Class<?> deserializerClass = Class.forName(deserializerClassName);
                 gsonBuilder = gsonBuilder.registerTypeAdapter(AccessTokenResponse.class,
                         deserializerClass.getConstructor().newInstance());
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                    | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                logger.error("Unable to construct custom deserializer {}", deserializerClass.getName(), e);
+                    | InvocationTargetException | NoSuchMethodException | SecurityException
+                    | ClassNotFoundException e) {
+                logger.error("Unable to construct custom deserializer '{}'", deserializerClassName, e);
             }
         }
         gson = gsonBuilder.create();
