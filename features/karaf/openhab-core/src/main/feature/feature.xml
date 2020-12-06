@@ -194,7 +194,9 @@
 
 	<feature name="openhab-core-io-transport-modbus" version="${project.version}">
 		<feature>openhab-core-base</feature>
+		<feature>openhab-transport-serial</feature>
 
+		<bundle dependency="true">mvn:org.apache.commons/commons-pool2/2.8.1</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.modbus/${project.version}</bundle>
 	</feature>
 
@@ -440,6 +442,10 @@
 
 	<feature name="openhab-transport-mdns" description="mDNS Transport" version="${project.version}">
 		<feature>openhab-core-io-transport-mdns</feature>
+	</feature>
+
+	<feature name="openhab-transport-modbus" description="Modbus Transport" version="${project.version}">
+		<feature>openhab-core-io-transport-modbus</feature>
 	</feature>
 
 	<feature name="openhab-transport-mqtt" description="MQTT Transport" version="${project.version}">
