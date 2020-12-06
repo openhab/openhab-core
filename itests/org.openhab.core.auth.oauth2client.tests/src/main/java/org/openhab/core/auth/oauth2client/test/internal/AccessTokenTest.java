@@ -50,5 +50,4 @@ public class AccessTokenTest {
         jsonResponse = gson.fromJson(SCOPE_AS_ARRAY_ANSWER, AccessTokenResponse.class);
         assertEquals(DESERIALIZED_SCOPE, jsonResponse.getScope(), "Scope should be desirialized as expected");
     }
-
 }
