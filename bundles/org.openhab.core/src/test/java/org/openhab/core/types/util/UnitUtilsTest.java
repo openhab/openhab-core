@@ -72,12 +72,9 @@ public class UnitUtilsTest {
 
     @Test
     public void testConversionOfUnit() {
-        assertThat(Units.DECIBEL_MILLIWATTS.getConverterTo(Units.WATT).convert(50),
-                closeTo(100, 0.001));
-        assertThat(Units.WATT.getConverterTo(Units.DECIBEL_MILLIWATTS).convert(0.1),
-                closeTo(20, 0.0001));
-        assertThat(
-                Units.METRE_PER_SQUARE_SECOND.getConverterTo(Units.STANDARD_GRAVITY).convert(9.8065),
+        assertThat(Units.DECIBEL_MILLIWATTS.getConverterTo(Units.WATT).convert(50), closeTo(100, 0.001));
+        assertThat(Units.WATT.getConverterTo(Units.DECIBEL_MILLIWATTS).convert(0.1), closeTo(20, 0.0001));
+        assertThat(Units.METRE_PER_SQUARE_SECOND.getConverterTo(Units.STANDARD_GRAVITY).convert(9.8065),
                 closeTo(1.0, 0.0001));
     }
 
