@@ -23,7 +23,7 @@ import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
@@ -45,9 +45,9 @@ import org.slf4j.LoggerFactory;
 public class SystemOffsetProfile implements StateProfile {
 
     private static final @Nullable QuantityType<Temperature> ZERO_CELSIUS_IN_KELVIN = new QuantityType<>(0,
-            SIUnits.CELSIUS).toUnit(SmartHomeUnits.KELVIN);
+            SIUnits.CELSIUS).toUnit(Units.KELVIN);
     private static final @Nullable QuantityType<Temperature> ZERO_FAHRENHEIT_IN_KELVIN = new QuantityType<>(0,
-            ImperialUnits.FAHRENHEIT).toUnit(SmartHomeUnits.KELVIN);
+            ImperialUnits.FAHRENHEIT).toUnit(Units.KELVIN);
     static final String OFFSET_PARAM = "offset";
 
     private final Logger logger = LoggerFactory.getLogger(SystemOffsetProfile.class);
@@ -115,7 +115,7 @@ public class SystemOffsetProfile implements StateProfile {
         if (state instanceof QuantityType) {
             QuantityType qtState = (QuantityType) state;
             try {
-                if (finalOffset.getUnit() == SmartHomeUnits.ONE) {
+                if (finalOffset.getUnit() == Units.ONE) {
                     // allow offsets without unit -> implicitly assume its the same as the one from the state, but warn
                     // the user
                     finalOffset = new QuantityType<>(finalOffset.toBigDecimal(), qtState.getUnit());
@@ -124,7 +124,7 @@ public class SystemOffsetProfile implements StateProfile {
                             state, offset);
                 }
                 // take care of temperatures because they start at offset -273°C = 0K
-                if (SmartHomeUnits.KELVIN.equals(qtState.getUnit().getSystemUnit())) {
+                if (Units.KELVIN.equals(qtState.getUnit().getSystemUnit())) {
                     QuantityType<Temperature> tmp = handleTemperature(qtState, finalOffset);
                     if (tmp != null) {
                         result = tmp;
@@ -135,7 +135,7 @@ public class SystemOffsetProfile implements StateProfile {
             } catch (UnconvertibleException e) {
                 logger.warn("Cannot apply offset '{}' to state '{}' because types do not match.", finalOffset, qtState);
             }
-        } else if (state instanceof DecimalType && finalOffset.getUnit() == SmartHomeUnits.ONE) {
+        } else if (state instanceof DecimalType && finalOffset.getUnit() == Units.ONE) {
             DecimalType decState = (DecimalType) state;
             result = new DecimalType(decState.toBigDecimal().add(finalOffset.toBigDecimal()));
         } else {
@@ -150,8 +150,8 @@ public class SystemOffsetProfile implements StateProfile {
     private @Nullable QuantityType<Temperature> handleTemperature(QuantityType<Temperature> qtState,
             QuantityType<Temperature> offset) {
         // do the math in Kelvin and afterwards convert it back to the unit of the state
-        final QuantityType<Temperature> kelvinState = qtState.toUnit(SmartHomeUnits.KELVIN);
-        final QuantityType<Temperature> kelvinOffset = offset.toUnit(SmartHomeUnits.KELVIN);
+        final QuantityType<Temperature> kelvinState = qtState.toUnit(Units.KELVIN);
+        final QuantityType<Temperature> kelvinOffset = offset.toUnit(Units.KELVIN);
         if (kelvinState == null || kelvinOffset == null) {
             return null;
         }

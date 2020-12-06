@@ -23,14 +23,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.util.UnitUtils;
 
 import tec.uom.se.ComparableQuantity;
 import tec.uom.se.quantity.Quantities;
 
 /**
- * Test for volumentric flow rate constants defined in {@link SmartHomeUnits}.
+ * Test for volumentric flow rate constants defined in {@link Units}.
  *
  * @author Łukasz Dywicki - Initial contribution
  */
@@ -40,7 +40,7 @@ public class VolumetricFlowRateTest {
     /**
      * While its not SI base unit it produces nice and fairly rounded numbers (si base is m3/s).
      */
-    private static final Unit<VolumetricFlowRate> BASE_UNIT = SmartHomeUnits.CUBICMETRE_PER_HOUR;
+    private static final Unit<VolumetricFlowRate> BASE_UNIT = Units.CUBICMETRE_PER_HOUR;
 
     /**
      * An additional test which converts given test quantity into base unit and then compares it with expected value.
@@ -72,10 +72,10 @@ public class VolumetricFlowRateTest {
     }
 
     private static Stream<Arguments> arguments() {
-        return Stream.of(Arguments.of(SmartHomeUnits.LITRE_PER_MINUTE, "l/min", 100.0, 6.0),
-                Arguments.of(SmartHomeUnits.CUBICMETRE_PER_SECOND, "m³/s", 100.0, 360000.0),
-                Arguments.of(SmartHomeUnits.CUBICMETRE_PER_MINUTE, "m³/min", 100.0, 6000.0),
-                Arguments.of(SmartHomeUnits.CUBICMETRE_PER_HOUR, "m³/h", 100.0, 100.0),
-                Arguments.of(SmartHomeUnits.CUBICMETRE_PER_DAY, "m³/d", 100.0, 4.166666666666667));
+        return Stream.of(Arguments.of(Units.LITRE_PER_MINUTE, "l/min", 100.0, 6.0),
+                Arguments.of(Units.CUBICMETRE_PER_SECOND, "m³/s", 100.0, 360000.0),
+                Arguments.of(Units.CUBICMETRE_PER_MINUTE, "m³/min", 100.0, 6000.0),
+                Arguments.of(Units.CUBICMETRE_PER_HOUR, "m³/h", 100.0, 100.0),
+                Arguments.of(Units.CUBICMETRE_PER_DAY, "m³/d", 100.0, 4.166666666666667));
     }
 }

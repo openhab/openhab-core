@@ -33,17 +33,17 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.http.HttpContext;
 
 /**
- * Default http context implementation which groups all Smart Home related http elements into one logical application.
+ * Default HTTP context implementation which groups all openHAB related HTTP elements into one logical application.
  *
- * Additionally to standard http context, this one provides its own implementation of
- * {@link #handleSecurity(HttpServletRequest, HttpServletResponse)} method which is based on injected list of generic
- * handlers.
+ * Additionally to the standard HTTP context, this class provides its own implementation of the
+ * {@link #handleSecurity(HttpServletRequest, HttpServletResponse)} method which is based on the injected list of
+ * {@link Handler}s.
  *
  * @author Łukasz Dywicki - Initial contribution
  */
 @Component(service = { HttpContext.class, WrappingHttpContext.class }, property = {
         "httpContext.id:String=oh-dfl-http-ctx" })
-public class SmartHomeHttpContext implements WrappingHttpContext {
+public class OpenHABHttpContext implements WrappingHttpContext {
 
     /**
      * Sorted list of handlers, where handler with priority 0 is first.

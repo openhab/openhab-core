@@ -17,7 +17,7 @@ import java.math.RoundingMode;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.State;
 
 /**
@@ -87,7 +87,7 @@ public class PercentType extends DecimalType {
         } else if (target == HSBType.class) {
             return target.cast(new HSBType(DecimalType.ZERO, PercentType.ZERO, this));
         } else if (target == QuantityType.class) {
-            return target.cast(new QuantityType<>(toBigDecimal().doubleValue(), SmartHomeUnits.PERCENT));
+            return target.cast(new QuantityType<>(toBigDecimal().doubleValue(), Units.PERCENT));
         } else {
             return defaultConversion(target);
         }

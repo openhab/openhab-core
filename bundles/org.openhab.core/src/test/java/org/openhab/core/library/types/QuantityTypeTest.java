@@ -37,11 +37,10 @@ import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.unit.BinaryPrefix;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.util.UnitUtils;
 
 import tec.uom.se.quantity.QuantityDimension;
-import tec.uom.se.unit.Units;
 
 /**
  * @author Gaël L'hopital - Initial contribution
@@ -125,9 +124,9 @@ public class QuantityTypeTest {
 
     @Test
     public void testFormats() {
-        QuantityType<Time> seconds = new QuantityType<>(80, SmartHomeUnits.SECOND);
-        QuantityType<Time> millis = seconds.toUnit(MetricPrefix.MILLI(SmartHomeUnits.SECOND));
-        QuantityType<Time> minutes = seconds.toUnit(SmartHomeUnits.MINUTE);
+        QuantityType<Time> seconds = new QuantityType<>(80, Units.SECOND);
+        QuantityType<Time> millis = seconds.toUnit(MetricPrefix.MILLI(Units.SECOND));
+        QuantityType<Time> minutes = seconds.toUnit(Units.MINUTE);
 
         assertThat(seconds.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80" + SEP + "0 s"));
         assertThat(millis.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80000" + SEP + "0 ms"));
@@ -152,7 +151,7 @@ public class QuantityTypeTest {
         assertTrue(dt2.equals(dt3));
 
         QuantityType<?> tempInC = new QuantityType<>("22 °C");
-        QuantityType<?> tempInK = tempInC.toUnit(SmartHomeUnits.KELVIN);
+        QuantityType<?> tempInK = tempInC.toUnit(Units.KELVIN);
         assertTrue(tempInC.equals(tempInK));
         tempInK = tempInC.toUnit("K");
         assertTrue(tempInC.equals(tempInK));
@@ -284,12 +283,12 @@ public class QuantityTypeTest {
     public void testIntensity() {
         QuantityType<Intensity> density = new QuantityType<>("10 W/m²");
         assertEquals(10, density.doubleValue(), 1E-5);
-        assertEquals(SmartHomeUnits.IRRADIANCE.toString(), density.getUnit().toString());
+        assertEquals(Units.IRRADIANCE.toString(), density.getUnit().toString());
 
         density = density.toUnit("W/cm²");
         assertEquals("0.001 W/cm²", density.toString());
 
-        density = new QuantityType<>(2, SmartHomeUnits.IRRADIANCE);
+        density = new QuantityType<>(2, Units.IRRADIANCE);
         assertEquals(2, density.doubleValue(), 1E-5);
         assertEquals("2 W/m²", density.toString());
 
@@ -327,36 +326,35 @@ public class QuantityTypeTest {
     @Test
     public void testDataAmount() {
         QuantityType<DataAmount> amount = new QuantityType<>("8 bit");
-        QuantityType<DataAmount> octet = amount.toUnit(SmartHomeUnits.BYTE);
+        QuantityType<DataAmount> octet = amount.toUnit(Units.BYTE);
         assertEquals(1, octet.byteValue());
         QuantityType<DataAmount> bytes = new QuantityType<>("1 B");
         assertEquals("1 B", bytes.toString());
-        QuantityType<DataAmount> bits = bytes.toUnit(SmartHomeUnits.BIT);
+        QuantityType<DataAmount> bits = bytes.toUnit(Units.BIT);
         assertEquals(8, bits.byteValue());
         bytes = new QuantityType<>("1 MB");
         assertEquals("1 MB", bytes.toString());
-        bytes = new QuantityType<DataAmount>(1, MetricPrefix.MEGA(SmartHomeUnits.BYTE));
+        bytes = new QuantityType<DataAmount>(1, MetricPrefix.MEGA(Units.BYTE));
         assertEquals("1 MB", bytes.toString());
         bytes = new QuantityType<>("1 GiB");
         assertEquals("1 GiB", bytes.toString());
-        bytes = new QuantityType<DataAmount>(1, BinaryPrefix.GIBI(SmartHomeUnits.BYTE));
+        bytes = new QuantityType<DataAmount>(1, BinaryPrefix.GIBI(Units.BYTE));
         assertEquals("1 GiB", bytes.toString());
         QuantityType<DataAmount> bigAmount = new QuantityType<>("1 Kio");
-        QuantityType<DataAmount> octets = bigAmount.toUnit(SmartHomeUnits.OCTET);
+        QuantityType<DataAmount> octets = bigAmount.toUnit(Units.OCTET);
         assertEquals(1024, octets.intValue());
         QuantityType<DataAmount> hugeAmount = new QuantityType<>("1024Gio");
-        QuantityType<DataAmount> lotOfOctets = hugeAmount.toUnit(SmartHomeUnits.OCTET);
+        QuantityType<DataAmount> lotOfOctets = hugeAmount.toUnit(Units.OCTET);
         assertEquals("1099511627776 o", lotOfOctets.format("%d o"));
     }
 
     @Test
     public void testDataTransferRate() {
         QuantityType<DataTransferRate> speed = new QuantityType<>("1024 bit/s");
-        QuantityType<DataTransferRate> octet = speed.toUnit(SmartHomeUnits.OCTET.divide(Units.SECOND));
+        QuantityType<DataTransferRate> octet = speed.toUnit(Units.OCTET.divide(Units.SECOND));
         assertEquals(128, octet.intValue());
         QuantityType<DataTransferRate> gsm2G = new QuantityType<>("115 Mbit/s");
-        QuantityType<DataTransferRate> octets = gsm2G
-                .toUnit(MetricPrefix.KILO(SmartHomeUnits.OCTET).divide(Units.SECOND));
+        QuantityType<DataTransferRate> octets = gsm2G.toUnit(MetricPrefix.KILO(Units.OCTET).divide(Units.SECOND));
         assertEquals(14375, octets.intValue());
     }
 }

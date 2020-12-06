@@ -24,7 +24,7 @@ import org.openhab.core.library.unit.BinaryPrefix;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.model.script.actions.BusEvent;
 import org.openhab.core.model.script.actions.Exec;
 import org.openhab.core.model.script.actions.HTTP;
@@ -96,7 +96,7 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(ImperialUnits.class);
         result.add(MetricPrefix.class);
         result.add(SIUnits.class);
-        result.add(SmartHomeUnits.class);
+        result.add(Units.class);
         result.add(BinaryPrefix.class);
 
         // date time static functions

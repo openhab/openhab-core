@@ -14,7 +14,7 @@ package org.openhab.core.internal.library.unit;
 
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 
 /**
  * Make sure static blocks from {@link SIUnits} & {@link ImperialUnits} are executed to initialize the unit parser.
@@ -24,7 +24,7 @@ import org.openhab.core.library.unit.SmartHomeUnits;
 public class UnitInitializer {
 
     static {
-        SmartHomeUnits.getInstance();
+        Units.getInstance();
         SIUnits.getInstance();
         ImperialUnits.getInstance();
     }

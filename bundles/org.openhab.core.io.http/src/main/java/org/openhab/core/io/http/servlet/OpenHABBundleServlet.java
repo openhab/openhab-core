@@ -25,11 +25,11 @@ import org.osgi.service.http.HttpService;
  * @author Łukasz Dywicki - Initial contribution
  */
 @NonNullByDefault
-public abstract class SmartHomeBundleServlet extends BaseSmartHomeServlet {
+public abstract class OpenHABBundleServlet extends BaseOpenHABServlet {
 
     protected final HttpContextFactoryService httpContextFactoryService;
 
-    public SmartHomeBundleServlet(HttpService httpService, HttpContextFactoryService httpContextFactoryService) {
+    public OpenHABBundleServlet(HttpService httpService, HttpContextFactoryService httpContextFactoryService) {
         super(httpService);
         this.httpContextFactoryService = httpContextFactoryService;
     }
