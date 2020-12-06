@@ -40,7 +40,7 @@ import org.openhab.core.i18n.LocationProvider;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.i18n.UnitProvider;
-import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.dimension.Irradiance;
 import org.openhab.core.library.types.PointType;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
@@ -364,9 +364,9 @@ public class I18nProviderImpl
         dimensionMap.put(Length.class, lengthMap);
 
         Map<SystemOfUnits, Unit<? extends Quantity<?>>> intensityMap = new HashMap<>();
-        intensityMap.put(SIUnits.getInstance(), SmartHomeUnits.IRRADIANCE);
-        intensityMap.put(ImperialUnits.getInstance(), SmartHomeUnits.IRRADIANCE);
-        dimensionMap.put(Intensity.class, intensityMap);
+        intensityMap.put(SIUnits.getInstance(), SmartHomeUnits.WATT_PER_SQUARE_METRE);
+        intensityMap.put(ImperialUnits.getInstance(), SmartHomeUnits.WATT_PER_SQUARE_METRE);
+        dimensionMap.put(Irradiance.class, intensityMap);
 
         Map<SystemOfUnits, Unit<? extends Quantity<?>>> percentMap = new HashMap<>();
         percentMap.put(SIUnits.getInstance(), SmartHomeUnits.ONE);

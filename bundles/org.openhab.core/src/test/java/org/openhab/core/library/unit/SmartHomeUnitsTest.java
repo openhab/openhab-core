@@ -31,7 +31,7 @@ import javax.measure.quantity.Temperature;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.dimension.ArealDensity;
 import org.openhab.core.library.dimension.Density;
-import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.dimension.Irradiance;
 import org.openhab.core.library.types.QuantityType;
 
 import tec.uom.se.quantity.Quantities;
@@ -325,8 +325,8 @@ public class SmartHomeUnitsTest {
 
     @Test
     public void testMicrowattPerSquareCentimetre2KilogramPerSquareCentiMetre() {
-        Quantity<Intensity> oneMwCm2 = Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.IRRADIANCE);
-        Quantity<Intensity> converted = oneMwCm2.to(SmartHomeUnits.MICROWATT_PER_SQUARE_CENTIMETRE);
+        Quantity<Irradiance> oneMwCm2 = Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.WATT_PER_SQUARE_METRE);
+        Quantity<Irradiance> converted = oneMwCm2.to(SmartHomeUnits.MICROWATT_PER_SQUARE_CENTIMETRE);
         assertThat(converted.getValue().doubleValue(), is(100d));
     }
 
