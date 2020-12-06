@@ -150,7 +150,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing client ID");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClass);
+        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClassName);
         return connector.getAuthorizationUrl(authorizationUrl, clientId, redirectURI, persistedParams.state,
                 scopeToUse);
     }

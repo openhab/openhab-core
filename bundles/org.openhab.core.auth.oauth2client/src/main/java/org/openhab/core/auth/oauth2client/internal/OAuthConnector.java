@@ -66,7 +66,7 @@ public class OAuthConnector {
     private final Logger logger = LoggerFactory.getLogger(OAuthConnector.class);
     private final Gson gson;
 
-    public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable Class<?> deserializerClass) {
+    public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable String deserializerClassName) {
         this.httpClientFactory = httpClientFactory;
         GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
         if (deserializerClass != null) {

@@ -32,7 +32,7 @@ class PersistedParams {
     String state;
     String redirectUri;
     int tokenExpiresInSeconds = 60;
-    Class<?> deserializerClass;
+    String deserializerClassName;
 
     /**
      * Default constructor needed for json serialization.
@@ -61,7 +61,7 @@ class PersistedParams {
      */
     public PersistedParams(String handle, String tokenUrl, String authorizationUrl, String clientId,
             String clientSecret, String scope, Boolean supportsBasicAuth, int tokenExpiresInSeconds,
-            @Nullable Class<?> deserializerClass) {
+            @Nullable String deserializerClassName) {
         this.handle = handle;
         this.tokenUrl = tokenUrl;
         this.authorizationUrl = authorizationUrl;
@@ -70,7 +70,7 @@ class PersistedParams {
         this.scope = scope;
         this.supportsBasicAuth = supportsBasicAuth;
         this.tokenExpiresInSeconds = tokenExpiresInSeconds;
-        this.deserializerClass = deserializerClass;
+        this.deserializerClassName = deserializerClassName;
     }
 
     @Override
@@ -87,7 +87,7 @@ class PersistedParams {
         result = prime * result + ((supportsBasicAuth == null) ? 0 : supportsBasicAuth.hashCode());
         result = prime * result + tokenExpiresInSeconds;
         result = prime * result + ((tokenUrl == null) ? 0 : tokenUrl.hashCode());
-        result = prime * result + ((deserializerClass == null) ? 0 : deserializerClass.hashCode());
+        result = prime * result + ((deserializerClassName == null) ? 0 : deserializerClassName.hashCode());
         return result;
     }
 
@@ -166,11 +166,11 @@ class PersistedParams {
         } else if (!tokenUrl.equals(other.tokenUrl)) {
             return false;
         }
-        if (deserializerClass == null) {
-            if (other.deserializerClass != null) {
+        if (deserializerClassName == null) {
+            if (other.deserializerClassName != null) {
                 return false;
             }
-        } else if (!deserializerClass.equals(other.deserializerClass)) {
+        } else if (!deserializerClassName.equals(other.deserializerClassName)) {
             return false;
         }
 

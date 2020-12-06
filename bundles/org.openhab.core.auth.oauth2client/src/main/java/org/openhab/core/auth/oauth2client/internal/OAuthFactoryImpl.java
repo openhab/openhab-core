@@ -80,7 +80,8 @@ public class OAuthFactoryImpl implements OAuthFactory {
             @Nullable Boolean supportsBasicAuth, @Nullable Class<T> deserializerClass) {
         PersistedParams params = oAuthStoreHandler.loadPersistedParams(handle);
         PersistedParams newParams = new PersistedParams(handle, tokenUrl, authorizationUrl, clientId, clientSecret,
-                scope, supportsBasicAuth, tokenExpiresInBuffer, deserializerClass);
+                scope, supportsBasicAuth, tokenExpiresInBuffer,
+                deserializerClass != null ? deserializerClass.getName() : null);
         OAuthClientService clientImpl = null;
 
         // If parameters in storage and parameters are the same as arguments passed get the client from storage
