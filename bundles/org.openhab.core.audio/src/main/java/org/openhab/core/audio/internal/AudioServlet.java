@@ -34,7 +34,7 @@ import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioHTTPServer;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.FixedLengthAudioStream;
-import org.openhab.core.io.http.servlet.SmartHomeServlet;
+import org.openhab.core.io.http.servlet.OpenHABServlet;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -49,7 +49,7 @@ import org.osgi.service.http.HttpService;
  */
 @NonNullByDefault
 @Component
-public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
+public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
 
     private static final long serialVersionUID = -3364664035854567854L;
 

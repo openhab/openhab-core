@@ -22,7 +22,7 @@ import org.osgi.service.http.HttpService;
  * @author Łukasz Dywicki - Initial contribution
  */
 @NonNullByDefault
-public abstract class SmartHomeServlet extends BaseSmartHomeServlet {
+public abstract class OpenHABServlet extends BaseOpenHABServlet {
 
     private static final long serialVersionUID = 6854521240046714164L;
 
@@ -31,7 +31,7 @@ public abstract class SmartHomeServlet extends BaseSmartHomeServlet {
      */
     protected final HttpContext httpContext;
 
-    public SmartHomeServlet(HttpService httpService, HttpContext httpContext) {
+    public OpenHABServlet(HttpService httpService, HttpContext httpContext) {
         super(httpService);
         this.httpContext = httpContext;
     }
