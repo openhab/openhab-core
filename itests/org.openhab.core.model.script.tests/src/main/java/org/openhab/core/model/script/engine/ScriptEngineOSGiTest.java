@@ -38,7 +38,7 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.types.State;
@@ -299,9 +299,9 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testToUnitQuantityType3() throws ScriptParsingException, ScriptExecutionException {
-        assertThat(runScript("new QuantityType(1, KELVIN)"), is(new QuantityType<>(1, SmartHomeUnits.KELVIN)));
+        assertThat(runScript("new QuantityType(1, KELVIN)"), is(new QuantityType<>(1, Units.KELVIN)));
         assertThat(runScript("new QuantityType(1, MICRO(KELVIN))"),
-                is(new QuantityType<>(1, MetricPrefix.MICRO(SmartHomeUnits.KELVIN))));
+                is(new QuantityType<>(1, MetricPrefix.MICRO(Units.KELVIN))));
     }
 
     @Test
