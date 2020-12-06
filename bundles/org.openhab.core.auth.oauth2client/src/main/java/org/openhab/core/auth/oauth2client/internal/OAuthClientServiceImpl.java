@@ -150,7 +150,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing client ID");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory);
+        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClass);
         return connector.getAuthorizationUrl(authorizationUrl, clientId, redirectURI, persistedParams.state,
                 scopeToUse);
     }
@@ -204,7 +204,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing client ID");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory);
+        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClass);
         AccessTokenResponse accessTokenResponse = connector.grantTypeAuthorizationCode(tokenUrl, authorizationCode,
                 clientId, persistedParams.clientSecret, redirectURI,
                 Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -236,7 +236,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing token url");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory);
+        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClass);
         AccessTokenResponse accessTokenResponse = connector.grantTypePassword(tokenUrl, username, password,
                 persistedParams.clientId, persistedParams.clientSecret, scope,
                 Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -261,7 +261,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing client ID");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory);
+        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClass);
         // depending on usage, cannot guarantee every parameter is not null at the beginning
         AccessTokenResponse accessTokenResponse = connector.grantTypeClientCredentials(tokenUrl, clientId,
                 persistedParams.clientSecret, scope, Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -295,7 +295,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("tokenUrl is required but null");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory);
+        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClass);
         AccessTokenResponse accessTokenResponse = connector.grantTypeRefreshToken(tokenUrl,
                 lastAccessToken.getRefreshToken(), persistedParams.clientId, persistedParams.clientSecret,
                 persistedParams.scope, Boolean.TRUE.equals(persistedParams.supportsBasicAuth));

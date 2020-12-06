@@ -32,6 +32,7 @@ class PersistedParams {
     String state;
     String redirectUri;
     int tokenExpiresInSeconds = 60;
+    Class<?> deserializerClass;
 
     /**
      * Default constructor needed for json serialization.
@@ -56,9 +57,11 @@ class PersistedParams {
      *            of the access tokens. This allows the access token to expire earlier than the
      *            official stated expiry time; thus prevents the caller obtaining a valid token at the time of invoke,
      *            only to find the token immediately expired.
+     * @param deserializerClass
      */
     public PersistedParams(String handle, String tokenUrl, String authorizationUrl, String clientId,
-            String clientSecret, String scope, Boolean supportsBasicAuth, int tokenExpiresInSeconds) {
+            String clientSecret, String scope, Boolean supportsBasicAuth, int tokenExpiresInSeconds,
+            @Nullable Class<?> deserializerClass) {
         this.handle = handle;
         this.tokenUrl = tokenUrl;
         this.authorizationUrl = authorizationUrl;
@@ -67,6 +70,7 @@ class PersistedParams {
         this.scope = scope;
         this.supportsBasicAuth = supportsBasicAuth;
         this.tokenExpiresInSeconds = tokenExpiresInSeconds;
+        this.deserializerClass = deserializerClass;
     }
 
     @Override
@@ -83,6 +87,7 @@ class PersistedParams {
         result = prime * result + ((supportsBasicAuth == null) ? 0 : supportsBasicAuth.hashCode());
         result = prime * result + tokenExpiresInSeconds;
         result = prime * result + ((tokenUrl == null) ? 0 : tokenUrl.hashCode());
+        result = prime * result + ((deserializerClass == null) ? 0 : deserializerClass.hashCode());
         return result;
     }
 
@@ -161,6 +166,14 @@ class PersistedParams {
         } else if (!tokenUrl.equals(other.tokenUrl)) {
             return false;
         }
+        if (deserializerClass == null) {
+            if (other.deserializerClass != null) {
+                return false;
+            }
+        } else if (!deserializerClass.equals(other.deserializerClass)) {
+            return false;
+        }
+
         return true;
     }
 }

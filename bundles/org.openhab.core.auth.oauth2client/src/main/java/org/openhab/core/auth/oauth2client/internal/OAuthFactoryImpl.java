@@ -28,6 +28,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonDeserializer;
+
 /**
  * Implementation of {@link OAuthFactory}.
  *
@@ -68,9 +70,17 @@ public class OAuthFactoryImpl implements OAuthFactory {
     public OAuthClientService createOAuthClientService(String handle, String tokenUrl,
             @Nullable String authorizationUrl, String clientId, @Nullable String clientSecret, @Nullable String scope,
             @Nullable Boolean supportsBasicAuth) {
+        return createOAuthClientService(handle, tokenUrl, authorizationUrl, clientId, clientSecret, scope,
+                supportsBasicAuth, null);
+    }
+
+    @Override
+    public <T extends JsonDeserializer<?>> OAuthClientService createOAuthClientService(String handle, String tokenUrl,
+            @Nullable String authorizationUrl, String clientId, @Nullable String clientSecret, @Nullable String scope,
+            @Nullable Boolean supportsBasicAuth, @Nullable Class<T> deserializerClass) {
         PersistedParams params = oAuthStoreHandler.loadPersistedParams(handle);
         PersistedParams newParams = new PersistedParams(handle, tokenUrl, authorizationUrl, clientId, clientSecret,
-                scope, supportsBasicAuth, tokenExpiresInBuffer);
+                scope, supportsBasicAuth, tokenExpiresInBuffer, deserializerClass);
         OAuthClientService clientImpl = null;
 
         // If parameters in storage and parameters are the same as arguments passed get the client from storage
@@ -138,4 +148,5 @@ public class OAuthFactoryImpl implements OAuthFactory {
     public void setTokenExpiresInBuffer(int bufferInSeconds) {
         tokenExpiresInBuffer = bufferInSeconds;
     }
+
 }

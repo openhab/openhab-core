@@ -15,6 +15,7 @@ package org.openhab.core.auth.oauth2client.internal;
 import static org.openhab.core.auth.oauth2client.internal.Keyword.*;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
@@ -65,10 +66,19 @@ public class OAuthConnector {
     private final Logger logger = LoggerFactory.getLogger(OAuthConnector.class);
     private final Gson gson;
 
-    public OAuthConnector(HttpClientFactory httpClientFactory) {
+    public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable Class<?> deserializerClass) {
         this.httpClientFactory = httpClientFactory;
-        gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .registerTypeAdapter(AccessTokenResponse.class, new AccessTokenDeserializer()).create();
+        GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+        if (deserializerClass != null) {
+            try {
+                gsonBuilder = gsonBuilder.registerTypeAdapter(AccessTokenResponse.class,
+                        deserializerClass.getConstructor().newInstance());
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                    | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                logger.error("Unable to construct custom deserializer {}", deserializerClass.getName(), e);
+            }
+        }
+        gson = gsonBuilder.create();
     }
 
     /**
