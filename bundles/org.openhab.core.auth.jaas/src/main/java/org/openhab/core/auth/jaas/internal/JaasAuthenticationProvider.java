@@ -43,8 +43,7 @@ import org.osgi.service.component.annotations.Modified;
 /**
  * Implementation of authentication provider which is backed by JAAS realm.
  *
- * Real authentication logic is embedded in login modules implemented by 3rd party, this code is just for bridging it to
- * smarthome platform.
+ * Real authentication logic is embedded in login modules implemented by 3rd party, this code is just for bridging it.
  *
  * @author Łukasz Dywicki - Initial contribution
  * @author Kai Kreuzer - Removed ManagedService and used DS configuration instead

@@ -44,8 +44,7 @@ public class SseUtil {
     }
 
     /**
-     * Creates a new {@link OutboundSseEvent} object containing an {@link EventDTO} created for the given Eclipse
-     * SmartHome {@link Event}.
+     * Creates a new {@link OutboundSseEvent} object containing an {@link EventDTO} created for the given {@link Event}.
      *
      * @param eventBuilder the builder that should be used
      * @param event the event data transfer object

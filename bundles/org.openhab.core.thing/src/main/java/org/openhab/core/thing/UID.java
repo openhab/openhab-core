@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.AbstractUID;
 
 /**
- * Base class for binding related unique identifiers within the SmartHome framework.
+ * Base class for binding related unique identifiers.
  * <p>
  * A UID must always start with a binding ID.
  *

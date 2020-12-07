@@ -100,13 +100,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link ThingManagerImpl} tracks all things in the {@link ThingRegistry} and
- * mediates the communication between the {@link Thing} and the {@link ThingHandler} from the binding. Therefore it
- * tracks {@link ThingHandlerFactory}s and calls {@link ThingHandlerFactory#registerHandler(Thing)} for each thing, that
- * was added to the {@link ThingRegistry}. In addition the {@link ThingManagerImpl} acts
- * as an {@link EventHandler} and subscribes to smarthome update and command
- * events. Finally the {@link ThingManagerImpl} implement the {@link ThingTypeMigrationService} to offer
- * a way to change the thing type of a {@link Thing}.
+ * {@link ThingManagerImpl} tracks all things in the {@link ThingRegistry} and mediates the communication between the
+ * {@link Thing} and the {@link ThingHandler} from the binding. Therefore it tracks {@link ThingHandlerFactory}s and
+ * calls {@link ThingHandlerFactory#registerHandler(Thing)} for each thing, that was added to the {@link ThingRegistry}.
+ * In addition the {@link ThingManagerImpl} acts as an {@link EventHandler} and subscribes to update and command events.
+ * Finally the {@link ThingManagerImpl} implement the {@link ThingTypeMigrationService} to offer a way to change the
+ * thing type of a {@link Thing}.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Michael Grammling - Added dynamic configuration update

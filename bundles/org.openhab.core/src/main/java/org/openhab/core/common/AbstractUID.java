@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * A non specific base class for unique identifiers within the SmartHome framework.
+ * A non specific base class for unique identifiers.
  *
  * @author Markus Rathgeb - Initial contribution
  */
