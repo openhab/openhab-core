@@ -165,7 +165,7 @@ public class TokenResource implements RESTResource {
 
     @GET
     @Path("/apitokens")
-    @Operation(summary = "List the API tokens associated to the authenticated user.", responses = {
+    @Operation(operationId = "getApiToken", summary = "List the API tokens associated to the authenticated user.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserApiTokenDTO.class))),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User not found") })
@@ -186,7 +186,7 @@ public class TokenResource implements RESTResource {
 
     @DELETE
     @Path("/apitokens/{name}")
-    @Operation(summary = "Revoke a specified API token associated to the authenticated user.", responses = {
+    @Operation(operationId = "removeApiToken", summary = "Revoke a specified API token associated to the authenticated user.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User or API token not found") })
