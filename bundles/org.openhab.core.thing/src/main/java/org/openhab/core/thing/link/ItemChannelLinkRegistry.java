@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
@@ -108,6 +109,17 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     protected void setEventPublisher(final EventPublisher eventPublisher) {
         super.setEventPublisher(eventPublisher);
+    }
+
+    @Override
+    @Reference
+    protected void setReadyService(ReadyService readyService) {
+        super.setReadyService(readyService);
+    }
+
+    @Override
+    protected void unsetReadyService(ReadyService readyService) {
+        super.unsetReadyService(readyService);
     }
 
     @Override

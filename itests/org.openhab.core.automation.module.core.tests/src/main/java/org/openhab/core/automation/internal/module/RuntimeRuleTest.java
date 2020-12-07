@@ -36,6 +36,7 @@ import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusDetail;
 import org.openhab.core.automation.events.RuleStatusInfoEvent;
+import org.openhab.core.automation.internal.RuleEngineImpl;
 import org.openhab.core.automation.internal.module.handler.CompareConditionHandler;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.util.ModuleBuilder;
@@ -54,6 +55,7 @@ import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.test.storage.VolatileStorageService;
 import org.openhab.core.types.TypeParser;
@@ -94,6 +96,9 @@ public class RuntimeRuleTest extends JavaOSGiTest {
             }
         });
         registerService(volatileStorageService);
+
+        // start rule engine
+        ((RuleEngineImpl) getService(RuleManager.class)).onReadyMarkerAdded(new ReadyMarker("", ""));
     }
 
     @Test

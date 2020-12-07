@@ -29,6 +29,7 @@ import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.events.system.StartlevelEvent;
+import org.openhab.core.service.StartLevelService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -51,6 +52,8 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
     private final Integer startlevel;
     private final Set<String> types;
     private final BundleContext bundleContext;
+
+    private boolean triggered = false;
 
     private ServiceRegistration<?> eventSubscriberRegistration;
 
@@ -82,20 +85,20 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
 
     @Override
     public void receive(Event event) {
-        final ModuleHandlerCallback callback = this.callback;
-        if (!(callback instanceof TriggerHandlerCallback)) {
+        if (triggered) {
+            // this trigger only works once
             return;
         }
-
-        TriggerHandlerCallback thCallback = (TriggerHandlerCallback) callback;
         logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(), event.getTopic(),
                 event.getType(), event.getPayload());
-        Map<String, Object> values = new HashMap<>();
         if (event instanceof StartlevelEvent && STARTLEVEL_MODULE_TYPE_ID.equals(module.getTypeUID())) {
             Integer sl = ((StartlevelEvent) event).getStartlevel();
-            if (startlevel.equals(sl)) {
-                values.put(OUT_STARTLEVEL, sl);
-                thCallback.triggered(module, values);
+            if (startlevel <= sl) {
+                if (sl > StartLevelService.STARTLEVEL_RULEENGINE) {
+                    // only execute rules if their start level is higher than the rule engine activation level, since
+                    // otherwise the rule engine takes care of the execution already
+                    trigger();
+                }
             }
         }
     }
@@ -112,5 +115,18 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
     @Override
     public boolean apply(Event event) {
         return true;
+    }
+
+    public void trigger() {
+        final ModuleHandlerCallback callback = this.callback;
+        if (!(callback instanceof TriggerHandlerCallback)) {
+            return;
+        }
+
+        TriggerHandlerCallback thCallback = (TriggerHandlerCallback) callback;
+        Map<String, Object> values = new HashMap<>();
+        values.put(OUT_STARTLEVEL, startlevel);
+        thCallback.triggered(module, values);
+        triggered = true;
     }
 }

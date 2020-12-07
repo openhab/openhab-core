@@ -39,11 +39,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
+import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.service.AbstractWatchService;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyMarkerFilter;
+import org.openhab.core.service.ReadyService;
+import org.openhab.core.service.ReadyService.ReadyTracker;
+import org.openhab.core.service.StartLevelService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -57,40 +64,41 @@ import org.osgi.service.component.annotations.Reference;
  * @author Kai Kreuzer - improved logging and removed thread pool
  */
 @Component(immediate = true)
-public class ScriptFileWatcher extends AbstractWatchService {
+public class ScriptFileWatcher extends AbstractWatchService implements ReadyTracker {
+
     private static final Set<String> EXCLUDED_FILE_EXTENSIONS = new HashSet<>(
             Arrays.asList("txt", "old", "example", "backup", "md", "swp", "tmp", "bak"));
     private static final String FILE_DIRECTORY = "automation" + File.separator + "jsr223";
-    private static final long INITIAL_DELAY = 25;
     private static final long RECHECK_INTERVAL = 20;
 
-    private final long earliestStart = System.currentTimeMillis() + INITIAL_DELAY * 1000;
+    private boolean started = false;
 
     private final ScriptEngineManager manager;
+    private final ReadyService readyService;
     private @Nullable ScheduledExecutorService scheduler;
 
     private final Map<String, Set<URL>> urlsByScriptExtension = new ConcurrentHashMap<>();
     private final Set<URL> loaded = new HashSet<>();
 
     @Activate
-    public ScriptFileWatcher(final @Reference ScriptEngineManager manager) {
+    public ScriptFileWatcher(final @Reference ScriptEngineManager manager, final @Reference ReadyService readyService) {
         super(OpenHAB.getConfigFolder() + File.separator + FILE_DIRECTORY);
         this.manager = manager;
+        this.readyService = readyService;
     }
 
-    @SuppressWarnings("null")
     @Activate
     @Override
     public void activate() {
         super.activate();
-        importResources(new File(pathToWatch));
-        scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.scheduleWithFixedDelay(this::checkFiles, INITIAL_DELAY, RECHECK_INTERVAL, TimeUnit.SECONDS);
+        readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
+                .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_MODEL)));
     }
 
     @Deactivate
     @Override
     public void deactivate() {
+        readyService.unregisterTracker(this);
         ScheduledExecutorService localScheduler = scheduler;
         if (localScheduler != null) {
             localScheduler.shutdownNow();
@@ -168,7 +176,7 @@ public class ScriptFileWatcher extends AbstractWatchService {
 
         String scriptType = getScriptType(url);
         if (scriptType != null) {
-            if (System.currentTimeMillis() < earliestStart) {
+            if (!started) {
                 enqueueUrl(url, scriptType);
             } else {
                 if (manager.isSupported(scriptType)) {
@@ -288,5 +296,18 @@ public class ScriptFileWatcher extends AbstractWatchService {
         for (URL url : reimportUrls) {
             importFile(url);
         }
+    }
+
+    @Override
+    public void onReadyMarkerAdded(@NonNull ReadyMarker readyMarker) {
+        started = true;
+        importResources(new File(pathToWatch));
+        scheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("scriptwatcher"));
+        scheduler.scheduleWithFixedDelay(this::checkFiles, RECHECK_INTERVAL, RECHECK_INTERVAL, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void onReadyMarkerRemoved(@NonNull ReadyMarker readyMarker) {
+        started = false;
     }
 }

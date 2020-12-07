@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
@@ -280,6 +281,17 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
     @Override
     protected void unsetEventPublisher(EventPublisher eventPublisher) {
         super.unsetEventPublisher(eventPublisher);
+    }
+
+    @Override
+    @Reference
+    protected void setReadyService(ReadyService readyService) {
+        super.setReadyService(readyService);
+    }
+
+    @Override
+    protected void unsetReadyService(ReadyService readyService) {
+        super.unsetReadyService(readyService);
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, name = "ManagedThingProvider")
