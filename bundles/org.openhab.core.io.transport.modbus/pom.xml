@@ -43,30 +43,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-maven-plugin</artifactId>
-        <version>${bnd.version}</version>
-        <configuration>
-          <bnd><![CDATA[Bundle-SymbolicName: ${project.artifactId}
-Automatic-Module-Name: ${def;bsn}
-Import-Package: \\
-  org.eclipse.jdt.annotation.*;resolution:=optional,\\
-  org.openhab.*;version=!,\\
-  !net.sf.cglib.proxy,\\
-  gnu.io;version="[3.12,6)",\\
-  *
--sources: false
--contract: *]]></bnd>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>bnd-process</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>3.1.1</version>
