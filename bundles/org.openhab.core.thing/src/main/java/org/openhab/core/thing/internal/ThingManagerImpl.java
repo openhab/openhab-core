@@ -125,7 +125,7 @@ import org.slf4j.LoggerFactory;
 public class ThingManagerImpl
         implements ThingManager, ThingTracker, ThingTypeMigrationService, ReadyService.ReadyTracker {
 
-    static final String XML_THING_TYPE = "esh.xmlThingTypes";
+    static final String XML_THING_TYPE = "openhab.xmlThingTypes";
 
     private static final String THING_STATUS_STORAGE_NAME = "thing_status_storage";
     private static final String FORCEREMOVE_THREADPOOL_NAME = "forceRemove";

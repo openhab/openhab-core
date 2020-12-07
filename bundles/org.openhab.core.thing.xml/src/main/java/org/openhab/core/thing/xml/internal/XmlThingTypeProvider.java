@@ -56,12 +56,12 @@ import org.osgi.service.component.annotations.Reference;
  * @author Simon Kaufmann - factored out common aspects into {@link AbstractXmlBasedProvider}
  */
 @NonNullByDefault
-@Component(property = { "esh.scope=core.xml.thing" })
+@Component(property = { "openhab.scope=core.xml.thing" })
 public class XmlThingTypeProvider extends AbstractXmlBasedProvider<UID, ThingType>
         implements ThingTypeProvider, XmlDocumentProviderFactory<List<?>> {
 
     private static final String XML_DIRECTORY = "/OH-INF/thing/";
-    public static final String READY_MARKER = "esh.xmlThingTypes";
+    public static final String READY_MARKER = "openhab.xmlThingTypes";
 
     private final ThingTypeI18nLocalizationService thingTypeI18nLocalizationService;
     private final XmlChannelTypeProvider channelTypeProvider;
@@ -75,9 +75,9 @@ public class XmlThingTypeProvider extends AbstractXmlBasedProvider<UID, ThingTyp
 
     @Activate
     public XmlThingTypeProvider(
-            final @Reference(target = "(esh.scope=core.xml.channelGroups)") ChannelGroupTypeProvider channelGroupTypeProvider,
-            final @Reference(target = "(esh.scope=core.xml.channels)") ChannelTypeProvider channelTypeProvider,
-            final @Reference(target = "(esh.scope=core.xml.thing)") ConfigDescriptionProvider configDescriptionProvider,
+            final @Reference(target = "(openhab.scope=core.xml.channelGroups)") ChannelGroupTypeProvider channelGroupTypeProvider,
+            final @Reference(target = "(openhab.scope=core.xml.channels)") ChannelTypeProvider channelTypeProvider,
+            final @Reference(target = "(openhab.scope=core.xml.thing)") ConfigDescriptionProvider configDescriptionProvider,
             final @Reference ReadyService readyService,
             final @Reference ThingTypeI18nLocalizationService thingTypeI18nLocalizationService) {
         this.channelGroupTypeProvider = (XmlChannelGroupTypeProvider) channelGroupTypeProvider;
