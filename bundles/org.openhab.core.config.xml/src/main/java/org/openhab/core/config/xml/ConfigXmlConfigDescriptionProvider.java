@@ -41,13 +41,13 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Simon Kaufmann - Initial contribution
  */
-@Component(service = ConfigDescriptionProvider.class, immediate = true, property = { "esh.scope=core.xml.config" })
+@Component(service = ConfigDescriptionProvider.class, immediate = true, property = { "openhab.scope=core.xml.config" })
 @NonNullByDefault
 public class ConfigXmlConfigDescriptionProvider extends AbstractXmlConfigDescriptionProvider
         implements XmlDocumentProviderFactory<List<ConfigDescription>> {
 
     private static final String XML_DIRECTORY = "/OH-INF/config/";
-    public static final String READY_MARKER = "esh.xmlConfig";
+    public static final String READY_MARKER = "openhab.xmlConfig";
 
     private final ConfigI18nLocalizationService configI18nService;
     private @Nullable XmlDocumentBundleTracker<List<ConfigDescription>> configDescriptionTracker;

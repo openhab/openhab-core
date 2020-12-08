@@ -41,16 +41,16 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
     private static final String HELLO_WORLD_EN = "Hello World!";
     private static final String HELLO_WORLD_FR = "Bonjour le monde!";
 
-    private static final String[] NAMES = new String[] { "esh", "thing", "rule" };
+    private static final String[] NAMES = new String[] { "openHAB", "thing", "rule" };
     private static final String DEFAULT_SINGLE_NAME_TEXT = "Hi {0}!";
 
-    private static final String HELLO_SINGLE_NAME_DEFAULT = "Hallo esh!";
-    private static final String HELLO_SINGLE_NAME_EN = "Hello esh!";
-    private static final String HELLO_SINGLE_NAME_FR = "Bonjour esh!";
+    private static final String HELLO_SINGLE_NAME_DEFAULT = "Hallo openHAB!";
+    private static final String HELLO_SINGLE_NAME_EN = "Hello openHAB!";
+    private static final String HELLO_SINGLE_NAME_FR = "Bonjour openHAB!";
 
-    private static final String HELLO_MULTIPLE_NAMES_DEFAULT = "Hallo esh, Hallo thing, Hallo rule!";
-    private static final String HELLO_MULTIPLE_NAMES_EN = "Hello esh, Hello thing, Hello rule!";
-    private static final String HELLO_MULTIPLE_NAMES_FR = "Bonjour esh, Bonjour thing, Bonjour rule!";
+    private static final String HELLO_MULTIPLE_NAMES_DEFAULT = "Hallo openHAB, Hallo thing, Hallo rule!";
+    private static final String HELLO_MULTIPLE_NAMES_EN = "Hello openHAB, Hello thing, Hello rule!";
+    private static final String HELLO_MULTIPLE_NAMES_FR = "Bonjour openHAB, Bonjour thing, Bonjour rule!";
 
     private static final String BYE_DEFAULT = "Tschuess!";
 
@@ -169,7 +169,7 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
 
         text = translationProvider.getText(bundle, null, DEFAULT_SINGLE_NAME_TEXT, null, (Object[]) NAMES);
         assertThat(text, is(notNullValue()));
-        assertThat(text, is(equalTo("Hi esh!")));
+        assertThat(text, is(equalTo("Hi openHAB!")));
 
         text = translationProvider.getText(bundle, null, DEFAULT_SINGLE_NAME_TEXT, null, (Object[]) null);
         assertThat(text, is(notNullValue()));
@@ -200,12 +200,12 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
         assertThat(text, is(equalTo(HELLO_MULTIPLE_NAMES_FR)));
 
         text = translationProvider.getText(bundle, KEY_HELLO_MULTIPLE_NAMES, null, null,
-                (Object[]) new String[] { "esh", "thing", "rule", "config" });
+                (Object[]) new String[] { "openHAB", "thing", "rule", "config" });
         assertThat(text, is(notNullValue()));
         assertThat(text, is(equalTo(HELLO_MULTIPLE_NAMES_DEFAULT)));
 
         text = translationProvider.getText(bundle, null, "Hallo {2}, Hallo {1}, Hallo {0}!", null, (Object[]) NAMES);
         assertThat(text, is(notNullValue()));
-        assertThat(text, is(equalTo("Hallo rule, Hallo thing, Hallo esh!")));
+        assertThat(text, is(equalTo("Hallo rule, Hallo thing, Hallo openHAB!")));
     }
 }

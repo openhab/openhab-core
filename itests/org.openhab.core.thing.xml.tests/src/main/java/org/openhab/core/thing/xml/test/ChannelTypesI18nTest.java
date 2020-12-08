@@ -50,11 +50,11 @@ public class ChannelTypesI18nTest extends JavaOSGiTest {
     public void setUp() {
         // get ONLY the XMLChannelTypeProvider
         channelTypeProvider = getService(ChannelTypeProvider.class,
-                serviceReference -> "core.xml.channels".equals(serviceReference.getProperty("esh.scope")));
+                serviceReference -> "core.xml.channels".equals(serviceReference.getProperty("openhab.scope")));
 
         assertThat(channelTypeProvider, is(notNullValue()));
         channelGroupTypeProvider = getService(ChannelGroupTypeProvider.class,
-                serviceReference -> "core.xml.channelGroups".equals(serviceReference.getProperty("esh.scope")));
+                serviceReference -> "core.xml.channelGroups".equals(serviceReference.getProperty("openhab.scope")));
 
         assertThat(channelGroupTypeProvider, is(notNullValue()));
         thingTypeProvider = getService(ThingTypeProvider.class);

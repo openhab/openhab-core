@@ -62,7 +62,7 @@ public class MDNSAnnouncer {
             if (mdnsService != null) {
                 mdnsName = bundleContext.getProperty("mdnsName");
                 if (mdnsName == null) {
-                    mdnsName = "smarthome";
+                    mdnsName = "openhab";
                 }
                 try {
                     httpPort = HttpServiceUtil.getHttpServicePort(bundleContext);

@@ -55,7 +55,7 @@ public class XmlBindingInfoProvider extends AbstractXmlBasedProvider<String, Bin
         implements BindingInfoProvider, XmlDocumentProviderFactory<BindingInfoXmlResult> {
 
     private static final String XML_DIRECTORY = "/OH-INF/binding/";
-    public static final String READY_MARKER = "esh.xmlBindingInfo";
+    public static final String READY_MARKER = "openhab.xmlBindingInfo";
 
     private final BindingI18nLocalizationService bindingI18nService;
     private AbstractXmlConfigDescriptionProvider configDescriptionProvider;
@@ -67,7 +67,7 @@ public class XmlBindingInfoProvider extends AbstractXmlBasedProvider<String, Bin
 
     @Activate
     public XmlBindingInfoProvider(final @Reference BindingI18nLocalizationService bindingI18nService,
-            final @Reference(target = "(esh.scope=core.xml.binding)") ConfigDescriptionProvider configDescriptionProvider,
+            final @Reference(target = "(openhab.scope=core.xml.binding)") ConfigDescriptionProvider configDescriptionProvider,
             final @Reference ReadyService readyService) {
         this.bindingI18nService = bindingI18nService;
         this.configDescriptionProvider = (AbstractXmlConfigDescriptionProvider) configDescriptionProvider;

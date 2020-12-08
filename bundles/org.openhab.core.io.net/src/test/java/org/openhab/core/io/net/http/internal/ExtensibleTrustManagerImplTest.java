@@ -77,7 +77,7 @@ public class ExtensibleTrustManagerImplTest {
     @Test
     public void shouldForwardCallsToMockForMatchingCN() throws CertificateException {
         when(topOfChain.getSubjectX500Principal())
-                .thenReturn(new X500Principal("CN=example.org, OU=Smarthome, O=Eclipse, C=DE"));
+                .thenReturn(new X500Principal("CN=example.org, OU=Core, O=openHAB, C=DE"));
 
         subject.checkServerTrusted(chain, "just");
 
@@ -99,7 +99,7 @@ public class ExtensibleTrustManagerImplTest {
     @Test
     public void shouldForwardCallsToMockForMatchingAlternativeNames() throws CertificateException {
         when(topOfChain.getSubjectX500Principal())
-                .thenReturn(new X500Principal("CN=example.com, OU=Smarthome, O=Eclipse, C=DE"));
+                .thenReturn(new X500Principal("CN=example.com, OU=Core, O=openHAB, C=DE"));
         when(topOfChain.getSubjectAlternativeNames())
                 .thenReturn(constructAlternativeNames("example1.com", "example.org"));
 
@@ -115,7 +115,7 @@ public class ExtensibleTrustManagerImplTest {
         writeField(subject, "defaultTrustManager", defaultTrustManager, true);
 
         when(topOfChain.getSubjectX500Principal())
-                .thenReturn(new X500Principal("CN=example.com, OU=Smarthome, O=Eclipse, C=DE"));
+                .thenReturn(new X500Principal("CN=example.com, OU=Core, O=openHAB, C=DE"));
         when(topOfChain.getSubjectAlternativeNames()).thenReturn(null);
 
         subject.checkClientTrusted(chain, "just");
@@ -129,7 +129,7 @@ public class ExtensibleTrustManagerImplTest {
             NoSuchFieldException, SecurityException, IllegalArgumentException {
         writeField(subject, "defaultTrustManager", defaultTrustManager, true);
 
-        when(topOfChain.getSubjectX500Principal()).thenReturn(new X500Principal("OU=Smarthome, O=Eclipse, C=DE"));
+        when(topOfChain.getSubjectX500Principal()).thenReturn(new X500Principal("OU=Core, O=openHAB, C=DE"));
 
         subject.checkClientTrusted(chain, "just");
 
@@ -143,7 +143,7 @@ public class ExtensibleTrustManagerImplTest {
         writeField(subject, "defaultTrustManager", defaultTrustManager, true);
 
         when(topOfChain.getSubjectX500Principal())
-                .thenReturn(new X500Principal("CN=example.com, OU=Smarthome, O=Eclipse, C=DE"));
+                .thenReturn(new X500Principal("CN=example.com, OU=Core, O=openHAB, C=DE"));
         when(topOfChain.getSubjectAlternativeNames())
                 .thenThrow(new CertificateParsingException("Invalid certificate!!!"));
 
@@ -157,9 +157,9 @@ public class ExtensibleTrustManagerImplTest {
     public void shouldNotForwardCallsToMockForDifferentCN() throws CertificateException, IllegalAccessException,
             NoSuchFieldException, SecurityException, IllegalArgumentException {
         writeField(subject, "defaultTrustManager", defaultTrustManager, true);
-        mockSubjectForCertificate(topOfChain, "CN=example.com, OU=Smarthome, O=Eclipse, C=DE");
-        mockIssuerForCertificate(topOfChain, "CN=Eclipse, OU=Smarthome, O=Eclipse, C=DE");
-        mockSubjectForCertificate(bottomOfChain, "CN=Eclipse, OU=Smarthome, O=Eclipse, C=DE");
+        mockSubjectForCertificate(topOfChain, "CN=example.com, OU=Core, O=openHAB, C=DE");
+        mockIssuerForCertificate(topOfChain, "CN=openHAB, OU=Core, O=openHAB, C=DE");
+        mockSubjectForCertificate(bottomOfChain, "CN=openHAB, OU=Core, O=openHAB, C=DE");
         mockIssuerForCertificate(bottomOfChain, "");
         when(topOfChain.getEncoded()).thenReturn(new byte[0]);
 

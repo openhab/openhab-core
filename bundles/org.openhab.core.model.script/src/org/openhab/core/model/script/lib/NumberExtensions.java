@@ -172,7 +172,7 @@ public class NumberExtensions {
         }
     }
 
-    // Comparison operators between ESH types and numbers
+    // Comparison operators between types and numbers
 
     public static boolean operator_equals(Type type, Number x) {
         if (type instanceof QuantityType && x instanceof QuantityType) {
