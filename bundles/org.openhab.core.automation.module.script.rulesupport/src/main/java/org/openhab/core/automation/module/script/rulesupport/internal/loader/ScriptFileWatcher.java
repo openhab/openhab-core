@@ -56,6 +56,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
+import javax.script.ScriptEngine;
+
 /**
  * The {@link ScriptFileWatcher} watches the jsr223 directory for files. If a new/modified file is detected, the script
  * is read and passed to the {@link ScriptEngineManager}.
@@ -189,7 +191,7 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
                                 getScriptIdentifier(url));
 
                         if (container != null) {
-                            container.getScriptEngine().put(SCRIPT_FILENAME_PROPERTY, fileName);
+                            container.getScriptEngine().put(ScriptEngine.FILENAME, fileName);
                             manager.loadScript(container.getIdentifier(), reader);
                             loaded.add(url);
                             logger.debug("Script loaded: {}", fileName);
