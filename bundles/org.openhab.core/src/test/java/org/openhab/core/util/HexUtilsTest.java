@@ -12,7 +12,7 @@
  */
 package org.openhab.core.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
@@ -61,5 +61,13 @@ public class HexUtilsTest {
     public void testHexToBytesWithMultiCharDelimiter() {
         byte[] result = HexUtils.hexToBytes("41-:-42-:-43-:-44", "-:-");
         assertEquals("ABCD", new String(result));
+    }
+
+    @Test
+    public void testEmptyByteArray() {
+        final byte[] input = new byte[0];
+        final String str = HexUtils.bytesToHex(input);
+        final byte[] output = HexUtils.hexToBytes(str);
+        assertArrayEquals(input, output);
     }
 }

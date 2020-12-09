@@ -92,6 +92,10 @@ public class HexUtils {
      * @return the corresponding byte array
      */
     public static byte[] hexToBytes(String hexString, String delimiter) {
+        if (hexString.isEmpty()) {
+            return new byte[0];
+        }
+
         // first convert to upper case to ease the rest
         String ucHexString = hexString.toUpperCase();
 
