@@ -12,7 +12,6 @@
  */
 package org.openhab.core.common;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -31,12 +30,13 @@ public abstract class AbstractUID {
     public static final String SEGMENT_PATTERN = "[\\w-]*";
     public static final String SEPARATOR = ":";
     private final List<String> segments;
+    private String uid = "";
 
     /**
      * Constructor must be public, otherwise it can not be called by subclasses from another package.
      */
     public AbstractUID() {
-        this.segments = Collections.emptyList();
+        segments = Collections.emptyList();
     }
 
     /**
@@ -47,6 +47,7 @@ public abstract class AbstractUID {
      */
     public AbstractUID(String uid) {
         this(splitToSegments(uid));
+        this.uid = uid;
     }
 
     /**
@@ -74,7 +75,7 @@ public abstract class AbstractUID {
             String segment = segments.get(i);
             validateSegment(segment, i, numberOfSegments);
         }
-        this.segments = Collections.unmodifiableList(new ArrayList<>(segments));
+        this.segments = List.copyOf(segments);
     }
 
     /**
@@ -106,7 +107,10 @@ public abstract class AbstractUID {
     }
 
     public String getAsString() {
-        return String.join(SEPARATOR, segments);
+        if (uid.isEmpty()) {
+            uid = String.join(SEPARATOR, segments);
+        }
+        return uid;
     }
 
     private static List<String> splitToSegments(final String id) {
