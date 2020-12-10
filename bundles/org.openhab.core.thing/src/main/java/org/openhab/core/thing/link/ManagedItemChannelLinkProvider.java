@@ -52,7 +52,7 @@ public class ManagedItemChannelLinkProvider extends DefaultAbstractManagedProvid
         Collection<ItemChannelLink> itemChannelLinks = getAll();
         for (ItemChannelLink itemChannelLink : itemChannelLinks) {
             if (itemChannelLink.getLinkedUID().getThingUID().equals(thingUID)) {
-                this.remove(itemChannelLink.getUID());
+                remove(itemChannelLink.getUID());
             }
         }
     }
