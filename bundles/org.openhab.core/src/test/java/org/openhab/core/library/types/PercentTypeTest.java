@@ -15,7 +15,7 @@ package org.openhab.core.library.types;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 
 /**
  * @author Kai Kreuzer - Initial contribution
@@ -75,7 +75,7 @@ public class PercentTypeTest {
     public void testConversionToQuantityType() {
         assertEquals(new QuantityType<>("100 %"), PercentType.HUNDRED.as(QuantityType.class));
         assertEquals(new QuantityType<>("1 one"),
-                ((QuantityType<?>) PercentType.HUNDRED.as(QuantityType.class)).toUnit(SmartHomeUnits.ONE));
+                ((QuantityType<?>) PercentType.HUNDRED.as(QuantityType.class)).toUnit(Units.ONE));
     }
 
     @Test

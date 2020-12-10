@@ -67,7 +67,6 @@ import tec.uom.se.function.RationalConverter;
 import tec.uom.se.unit.AlternateUnit;
 import tec.uom.se.unit.ProductUnit;
 import tec.uom.se.unit.TransformedUnit;
-import tec.uom.se.unit.Units;
 
 /**
  * Delegate common units to {@link Units} to hide this dependency from the rest of openHAB.
@@ -77,108 +76,115 @@ import tec.uom.se.unit.Units;
  * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
-public final class SmartHomeUnits extends CustomUnits {
+public final class Units extends CustomUnits {
 
-    private static final SmartHomeUnits INSTANCE = new SmartHomeUnits();
+    private static final Units INSTANCE = new Units();
 
     // Alphabetical ordered by Unit.
-    public static final Unit<Acceleration> METRE_PER_SQUARE_SECOND = addUnit(Units.METRE_PER_SQUARE_SECOND);
+    public static final Unit<Acceleration> METRE_PER_SQUARE_SECOND = addUnit(
+            tec.uom.se.unit.Units.METRE_PER_SQUARE_SECOND);
     public static final Unit<Acceleration> STANDARD_GRAVITY = addUnit(METRE_PER_SQUARE_SECOND.multiply(9.80665));
-    public static final Unit<AmountOfSubstance> MOLE = addUnit(Units.MOLE);
+    public static final Unit<AmountOfSubstance> MOLE = addUnit(tec.uom.se.unit.Units.MOLE);
     @SuppressWarnings("unchecked")
     public static final Unit<AmountOfSubstance> DEUTSCHE_HAERTE = addUnit(
-            new TransformedUnit<>("°dH", (Unit<AmountOfSubstance>) MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE),
-                    RationalConverter.of(5.6, 1)));
-    public static final Unit<Angle> DEGREE_ANGLE = addUnit(new TransformedUnit<>(Units.RADIAN,
+            new TransformedUnit<>("°dH", (Unit<AmountOfSubstance>) MetricPrefix.MILLI(tec.uom.se.unit.Units.MOLE)
+                    .divide(tec.uom.se.unit.Units.LITRE), RationalConverter.of(5.6, 1)));
+    public static final Unit<Angle> DEGREE_ANGLE = addUnit(new TransformedUnit<>(tec.uom.se.unit.Units.RADIAN,
             new PiMultiplierConverter().concatenate(new RationalConverter(BigInteger.ONE, BigInteger.valueOf(180)))));
-    public static final Unit<Angle> RADIAN = addUnit(Units.RADIAN);
-    public static final Unit<ArealDensity> DOBSON_UNIT = addUnit(
-            new ProductUnit<ArealDensity>(MetricPrefix.MILLI(Units.MOLE).multiply(0.4462).divide(Units.SQUARE_METRE)));
-    public static final Unit<CatalyticActivity> KATAL = addUnit(Units.KATAL);
+    public static final Unit<Angle> RADIAN = addUnit(tec.uom.se.unit.Units.RADIAN);
+    public static final Unit<ArealDensity> DOBSON_UNIT = addUnit(new ProductUnit<ArealDensity>(MetricPrefix
+            .MILLI(tec.uom.se.unit.Units.MOLE).multiply(0.4462).divide(tec.uom.se.unit.Units.SQUARE_METRE)));
+    public static final Unit<CatalyticActivity> KATAL = addUnit(tec.uom.se.unit.Units.KATAL);
     public static final Unit<Density> KILOGRAM_PER_CUBICMETRE = addUnit(
-            new ProductUnit<Density>(Units.KILOGRAM.divide(Units.CUBIC_METRE)));
+            new ProductUnit<Density>(tec.uom.se.unit.Units.KILOGRAM.divide(tec.uom.se.unit.Units.CUBIC_METRE)));
     public static final Unit<Density> MICROGRAM_PER_CUBICMETRE = addUnit(new TransformedUnit<>(KILOGRAM_PER_CUBICMETRE,
             new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000000))));
     public static final Unit<Dimensionless> ONE = addUnit(AbstractUnit.ONE);
-    public static final Unit<Dimensionless> PERCENT = addUnit(Units.PERCENT);
+    public static final Unit<Dimensionless> PERCENT = addUnit(tec.uom.se.unit.Units.PERCENT);
     public static final Unit<Dimensionless> PARTS_PER_BILLION = addUnit(
             new TransformedUnit<>(ONE, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000000))));
     public static final Unit<Dimensionless> PARTS_PER_MILLION = addUnit(
             new TransformedUnit<>(ONE, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000))));
     public static final Unit<Dimensionless> DECIBEL = addUnit(ONE.transform(
             new LogConverter(10).inverse().concatenate(new RationalConverter(BigInteger.ONE, BigInteger.TEN))));
-    public static final Unit<ElectricCurrent> AMPERE = addUnit(Units.AMPERE);
-    public static final Unit<ElectricCapacitance> FARAD = addUnit(Units.FARAD);
-    public static final Unit<ElectricCharge> COULOMB = addUnit(Units.COULOMB);
-    public static final Unit<ElectricCharge> AMPERE_HOUR = addUnit(Units.COULOMB.multiply(3600));
+    public static final Unit<ElectricCurrent> AMPERE = addUnit(tec.uom.se.unit.Units.AMPERE);
+    public static final Unit<ElectricCapacitance> FARAD = addUnit(tec.uom.se.unit.Units.FARAD);
+    public static final Unit<ElectricCharge> COULOMB = addUnit(tec.uom.se.unit.Units.COULOMB);
+    public static final Unit<ElectricCharge> AMPERE_HOUR = addUnit(tec.uom.se.unit.Units.COULOMB.multiply(3600));
     public static final Unit<ElectricCharge> MILLIAMPERE_HOUR = addUnit(MetricPrefix.MILLI(AMPERE_HOUR));
-    public static final Unit<ElectricConductance> SIEMENS = addUnit(Units.SIEMENS);
+    public static final Unit<ElectricConductance> SIEMENS = addUnit(tec.uom.se.unit.Units.SIEMENS);
     public static final Unit<ElectricConductivity> SIEMENS_PER_METRE = addUnit(
-            new ProductUnit<ElectricConductivity>(Units.SIEMENS.divide(Units.METRE)));
-    public static final Unit<ElectricInductance> HENRY = addUnit(Units.HENRY);
-    public static final Unit<ElectricPotential> VOLT = addUnit(Units.VOLT);
-    public static final Unit<ElectricResistance> OHM = addUnit(Units.OHM);
-    public static final Unit<Energy> JOULE = addUnit(Units.JOULE);
-    public static final Unit<Energy> WATT_SECOND = addUnit(new ProductUnit<>(Units.WATT.multiply(Units.SECOND)));
-    public static final Unit<Energy> WATT_HOUR = addUnit(new ProductUnit<>(Units.WATT.multiply(Units.HOUR)));
+            new ProductUnit<ElectricConductivity>(tec.uom.se.unit.Units.SIEMENS.divide(tec.uom.se.unit.Units.METRE)));
+    public static final Unit<ElectricInductance> HENRY = addUnit(tec.uom.se.unit.Units.HENRY);
+    public static final Unit<ElectricPotential> VOLT = addUnit(tec.uom.se.unit.Units.VOLT);
+    public static final Unit<ElectricResistance> OHM = addUnit(tec.uom.se.unit.Units.OHM);
+    public static final Unit<Energy> JOULE = addUnit(tec.uom.se.unit.Units.JOULE);
+    public static final Unit<Energy> WATT_SECOND = addUnit(
+            new ProductUnit<>(tec.uom.se.unit.Units.WATT.multiply(tec.uom.se.unit.Units.SECOND)));
+    public static final Unit<Energy> WATT_HOUR = addUnit(
+            new ProductUnit<>(tec.uom.se.unit.Units.WATT.multiply(tec.uom.se.unit.Units.HOUR)));
     public static final Unit<Energy> KILOWATT_HOUR = addUnit(MetricPrefix.KILO(WATT_HOUR));
     public static final Unit<Energy> MEGAWATT_HOUR = addUnit(MetricPrefix.MEGA(WATT_HOUR));
-    public static final Unit<Power> VAR = addUnit(new AlternateUnit<>(Units.WATT, "var"));
+    public static final Unit<Power> VAR = addUnit(new AlternateUnit<>(tec.uom.se.unit.Units.WATT, "var"));
     public static final Unit<Power> KILOVAR = addUnit(MetricPrefix.KILO(VAR));
-    public static final Unit<Energy> VAR_HOUR = addUnit(new ProductUnit<>(VAR.multiply(Units.HOUR)), Energy.class);
-    public static final Unit<Energy> KILOVAR_HOUR = addUnit(MetricPrefix.KILO(VAR_HOUR));
-    public static final Unit<Power> VOLT_AMPERE = addUnit(new AlternateUnit<>(Units.WATT, "VA"));
-    public static final Unit<Energy> VOLT_AMPERE_HOUR = addUnit(new ProductUnit<>(VOLT_AMPERE.multiply(Units.HOUR)),
+    public static final Unit<Energy> VAR_HOUR = addUnit(new ProductUnit<>(VAR.multiply(tec.uom.se.unit.Units.HOUR)),
             Energy.class);
-    public static final Unit<Force> NEWTON = addUnit(Units.NEWTON);
-    public static final Unit<Frequency> HERTZ = addUnit(Units.HERTZ);
-    public static final Unit<Intensity> IRRADIANCE = addUnit(new ProductUnit<>(Units.WATT.divide(Units.SQUARE_METRE)));
+    public static final Unit<Energy> KILOVAR_HOUR = addUnit(MetricPrefix.KILO(VAR_HOUR));
+    public static final Unit<Power> VOLT_AMPERE = addUnit(new AlternateUnit<>(tec.uom.se.unit.Units.WATT, "VA"));
+    public static final Unit<Energy> VOLT_AMPERE_HOUR = addUnit(
+            new ProductUnit<>(VOLT_AMPERE.multiply(tec.uom.se.unit.Units.HOUR)), Energy.class);
+    public static final Unit<Force> NEWTON = addUnit(tec.uom.se.unit.Units.NEWTON);
+    public static final Unit<Frequency> HERTZ = addUnit(tec.uom.se.unit.Units.HERTZ);
+    public static final Unit<Intensity> IRRADIANCE = addUnit(
+            new ProductUnit<>(tec.uom.se.unit.Units.WATT.divide(tec.uom.se.unit.Units.SQUARE_METRE)));
     public static final Unit<Intensity> MICROWATT_PER_SQUARE_CENTIMETRE = addUnit(
             new TransformedUnit<>(IRRADIANCE, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(100))));
-    public static final Unit<Illuminance> LUX = addUnit(Units.LUX);
-    public static final Unit<LuminousFlux> LUMEN = addUnit(Units.LUMEN);
-    public static final Unit<LuminousIntensity> CANDELA = addUnit(Units.CANDELA);
-    public static final Unit<MagneticFlux> WEBER = addUnit(Units.WEBER);
-    public static final Unit<MagneticFluxDensity> TESLA = addUnit(Units.TESLA);
-    public static final Unit<Power> WATT = addUnit(Units.WATT);
+    public static final Unit<Illuminance> LUX = addUnit(tec.uom.se.unit.Units.LUX);
+    public static final Unit<LuminousFlux> LUMEN = addUnit(tec.uom.se.unit.Units.LUMEN);
+    public static final Unit<LuminousIntensity> CANDELA = addUnit(tec.uom.se.unit.Units.CANDELA);
+    public static final Unit<MagneticFlux> WEBER = addUnit(tec.uom.se.unit.Units.WEBER);
+    public static final Unit<MagneticFluxDensity> TESLA = addUnit(tec.uom.se.unit.Units.TESLA);
+    public static final Unit<Power> WATT = addUnit(tec.uom.se.unit.Units.WATT);
     public static final Unit<Power> DECIBEL_MILLIWATTS = new TransformedUnit<>("dBm", MetricPrefix.MILLI(WATT),
             new ExpConverter(10.0).concatenate(new MultiplyConverter(0.1)));
-    public static final Unit<Pressure> MILLIMETRE_OF_MERCURY = addUnit(new TransformedUnit<>("mmHg", Units.PASCAL,
-            new RationalConverter(BigInteger.valueOf(133322368), BigInteger.valueOf(1000000))));
-    public static final Unit<Pressure> BAR = addUnit(new TransformedUnit<>("bar", Units.PASCAL,
+    public static final Unit<Pressure> MILLIMETRE_OF_MERCURY = addUnit(
+            new TransformedUnit<>("mmHg", tec.uom.se.unit.Units.PASCAL,
+                    new RationalConverter(BigInteger.valueOf(133322368), BigInteger.valueOf(1000000))));
+    public static final Unit<Pressure> BAR = addUnit(new TransformedUnit<>("bar", tec.uom.se.unit.Units.PASCAL,
             new RationalConverter(BigInteger.valueOf(100000), BigInteger.ONE)));
     public static final Unit<Pressure> MILLIBAR = addUnit(MetricPrefix.MILLI(BAR));
-    public static final Unit<Radioactivity> BECQUEREL = addUnit(Units.BECQUEREL);
+    public static final Unit<Radioactivity> BECQUEREL = addUnit(tec.uom.se.unit.Units.BECQUEREL);
     public static final Unit<Density> BECQUEREL_PER_CUBIC_METRE = addUnit(
-            new ProductUnit<>(Units.BECQUEREL.divide(Units.CUBIC_METRE)));
-    public static final Unit<RadiationDoseAbsorbed> GRAY = addUnit(Units.GRAY);
-    public static final Unit<RadiationDoseEffective> SIEVERT = addUnit(Units.SIEVERT);
-    public static final Unit<Speed> MILLIMETRE_PER_HOUR = addUnit(new TransformedUnit<>("mm/h",
-            Units.KILOMETRE_PER_HOUR, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000))));
+            new ProductUnit<>(tec.uom.se.unit.Units.BECQUEREL.divide(tec.uom.se.unit.Units.CUBIC_METRE)));
+    public static final Unit<RadiationDoseAbsorbed> GRAY = addUnit(tec.uom.se.unit.Units.GRAY);
+    public static final Unit<RadiationDoseEffective> SIEVERT = addUnit(tec.uom.se.unit.Units.SIEVERT);
+    public static final Unit<Speed> MILLIMETRE_PER_HOUR = addUnit(
+            new TransformedUnit<>("mm/h", tec.uom.se.unit.Units.KILOMETRE_PER_HOUR,
+                    new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000))));
     public static final Unit<Speed> INCHES_PER_HOUR = addUnit(new TransformedUnit<>("in/h",
             ImperialUnits.MILES_PER_HOUR, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(63360))));
-    public static final Unit<Speed> METRE_PER_SECOND = addUnit(Units.METRE_PER_SECOND);
-    public static final Unit<Speed> KNOT = addUnit(new TransformedUnit<>("kn", Units.KILOMETRE_PER_HOUR,
+    public static final Unit<Speed> METRE_PER_SECOND = addUnit(tec.uom.se.unit.Units.METRE_PER_SECOND);
+    public static final Unit<Speed> KNOT = addUnit(new TransformedUnit<>("kn", tec.uom.se.unit.Units.KILOMETRE_PER_HOUR,
             new RationalConverter(BigInteger.valueOf(1852), BigInteger.valueOf(1000))));
-    public static final Unit<SolidAngle> STERADIAN = addUnit(Units.STERADIAN);
-    public static final Unit<Temperature> KELVIN = addUnit(Units.KELVIN);
-    public static final Unit<Time> SECOND = addUnit(Units.SECOND);
-    public static final Unit<Time> MINUTE = addUnit(Units.MINUTE);
-    public static final Unit<Time> HOUR = addUnit(Units.HOUR);
-    public static final Unit<Time> DAY = addUnit(Units.DAY);
-    public static final Unit<Time> WEEK = addUnit(Units.WEEK);
-    public static final Unit<Time> YEAR = addUnit(Units.YEAR);
-    public static final Unit<Volume> LITRE = addUnit(Units.LITRE);
+    public static final Unit<SolidAngle> STERADIAN = addUnit(tec.uom.se.unit.Units.STERADIAN);
+    public static final Unit<Temperature> KELVIN = addUnit(tec.uom.se.unit.Units.KELVIN);
+    public static final Unit<Time> SECOND = addUnit(tec.uom.se.unit.Units.SECOND);
+    public static final Unit<Time> MINUTE = addUnit(tec.uom.se.unit.Units.MINUTE);
+    public static final Unit<Time> HOUR = addUnit(tec.uom.se.unit.Units.HOUR);
+    public static final Unit<Time> DAY = addUnit(tec.uom.se.unit.Units.DAY);
+    public static final Unit<Time> WEEK = addUnit(tec.uom.se.unit.Units.WEEK);
+    public static final Unit<Time> YEAR = addUnit(tec.uom.se.unit.Units.YEAR);
+    public static final Unit<Volume> LITRE = addUnit(tec.uom.se.unit.Units.LITRE);
     public static final Unit<VolumetricFlowRate> LITRE_PER_MINUTE = addUnit(
-            new ProductUnit<VolumetricFlowRate>(Units.LITRE.divide(Units.MINUTE)));
-    public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_SECOND = addUnit(
-            new ProductUnit<VolumetricFlowRate>(Units.CUBIC_METRE.divide(Units.SECOND)));
-    public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_MINUTE = addUnit(
-            new ProductUnit<VolumetricFlowRate>(Units.CUBIC_METRE.divide(Units.MINUTE)));
+            new ProductUnit<VolumetricFlowRate>(tec.uom.se.unit.Units.LITRE.divide(tec.uom.se.unit.Units.MINUTE)));
+    public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_SECOND = addUnit(new ProductUnit<VolumetricFlowRate>(
+            tec.uom.se.unit.Units.CUBIC_METRE.divide(tec.uom.se.unit.Units.SECOND)));
+    public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_MINUTE = addUnit(new ProductUnit<VolumetricFlowRate>(
+            tec.uom.se.unit.Units.CUBIC_METRE.divide(tec.uom.se.unit.Units.MINUTE)));
     public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_HOUR = addUnit(
-            new ProductUnit<VolumetricFlowRate>(Units.CUBIC_METRE.divide(Units.HOUR)));
+            new ProductUnit<VolumetricFlowRate>(tec.uom.se.unit.Units.CUBIC_METRE.divide(tec.uom.se.unit.Units.HOUR)));
     public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_DAY = addUnit(
-            new ProductUnit<VolumetricFlowRate>(Units.CUBIC_METRE.divide(Units.DAY)));
+            new ProductUnit<VolumetricFlowRate>(tec.uom.se.unit.Units.CUBIC_METRE.divide(tec.uom.se.unit.Units.DAY)));
     public static final Unit<DataAmount> BIT = addUnit(new AlternateUnit<>(ONE, "bit"));
     public static final Unit<DataAmount> KILOBIT = addUnit(MetricPrefix.KILO(BIT));
     public static final Unit<DataAmount> MEGABIT = addUnit(MetricPrefix.MEGA(BIT));
@@ -203,7 +209,7 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<DataAmount> TEBIOCTET = addUnit(BinaryPrefix.TEBI(OCTET));
     public static final Unit<DataAmount> PEBIOCTET = addUnit(BinaryPrefix.PEBI(OCTET));
     public static final Unit<DataTransferRate> BIT_PER_SECOND = addUnit(
-            new ProductUnit<DataTransferRate>(BIT.divide(Units.SECOND)));
+            new ProductUnit<DataTransferRate>(BIT.divide(tec.uom.se.unit.Units.SECOND)));
     public static final Unit<DataTransferRate> KILOBIT_PER_SECOND = addUnit(MetricPrefix.KILO(BIT_PER_SECOND));
     public static final Unit<DataTransferRate> MEGABIT_PER_SECOND = addUnit(MetricPrefix.MEGA(BIT_PER_SECOND));
     public static final Unit<DataTransferRate> GIGABIT_PER_SECOND = addUnit(MetricPrefix.GIGA(BIT_PER_SECOND));
@@ -278,7 +284,7 @@ public final class SmartHomeUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(WATT_SECOND, "Ws");
     }
 
-    private SmartHomeUnits() {
+    private Units() {
         // avoid external instantiation
     }
 

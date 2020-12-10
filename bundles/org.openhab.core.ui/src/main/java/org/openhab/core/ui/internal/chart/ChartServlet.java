@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.openhab.core.config.core.ConfigurableService;
-import org.openhab.core.io.http.servlet.SmartHomeServlet;
+import org.openhab.core.io.http.servlet.OpenHABServlet;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.ui.chart.ChartProvider;
 import org.osgi.framework.Constants;
@@ -68,7 +68,7 @@ import org.osgi.service.http.HttpService;
 @Component(immediate = true, service = ChartServlet.class, configurationPid = "org.openhab.chart", //
         property = Constants.SERVICE_PID + "=org.openhab.chart")
 @ConfigurableService(category = "system", label = "Charts", description_uri = ChartServlet.CONFIG_URI)
-public class ChartServlet extends SmartHomeServlet {
+public class ChartServlet extends OpenHABServlet {
 
     private static final long serialVersionUID = 7700873790924746422L;
 

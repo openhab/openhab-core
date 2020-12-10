@@ -53,7 +53,7 @@ public class EventLogger implements EventSubscriber {
     }
 
     private Logger getLogger(String eventType) {
-        String loggerName = "smarthome.event." + eventType;
+        String loggerName = "openhab.event." + eventType;
         Logger logger = eventLoggers.get(loggerName);
         if (logger == null) {
             logger = LoggerFactory.getLogger(loggerName);

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.types.State;
 
 /**
@@ -21,6 +22,7 @@ import org.openhab.core.types.State;
  *
  * @author Christoph Knauf - Initial contribution
  */
+@NonNullByDefault
 public class GroupItemStateChangedEvent extends ItemStateChangedEvent {
 
     /**

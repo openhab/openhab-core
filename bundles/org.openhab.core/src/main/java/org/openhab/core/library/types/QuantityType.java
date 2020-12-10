@@ -33,7 +33,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.library.unit.UnitInitializer;
 import org.openhab.core.library.unit.MetricPrefix;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
 import org.openhab.core.types.State;
@@ -238,15 +238,15 @@ public class QuantityType<T extends Quantity<T>> extends Number
         final String formatPattern;
 
         if (unitPlaceholder) {
-            String unitSymbol = getUnit().equals(SmartHomeUnits.PERCENT) ? "%%" : getUnit().toString();
+            String unitSymbol = getUnit().equals(Units.PERCENT) ? "%%" : getUnit().toString();
             formatPattern = pattern.replace(UnitUtils.UNIT_PLACEHOLDER, unitSymbol);
         } else {
             formatPattern = pattern;
         }
 
         // The dimension could be a time value thus we want to support patterns to format datetime
-        if (quantity.getUnit().isCompatible(SmartHomeUnits.SECOND) && !unitPlaceholder) {
-            QuantityType<T> millis = toUnit(MetricPrefix.MILLI(SmartHomeUnits.SECOND));
+        if (quantity.getUnit().isCompatible(Units.SECOND) && !unitPlaceholder) {
+            QuantityType<T> millis = toUnit(MetricPrefix.MILLI(Units.SECOND));
             if (millis != null) {
                 try {
                     return String.format(formatPattern,
@@ -309,7 +309,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
         if (target == OnOffType.class) {
             if (intValue() == 0) {
                 return target.cast(OnOffType.OFF);
-            } else if (SmartHomeUnits.PERCENT.equals(getUnit())) {
+            } else if (Units.PERCENT.equals(getUnit())) {
                 return target.cast(toBigDecimal().compareTo(BigDecimal.ZERO) > 0 ? OnOffType.ON : OnOffType.OFF);
             } else if (toBigDecimal().compareTo(BigDecimal.ONE) == 0) {
                 return target.cast(OnOffType.ON);
@@ -336,7 +336,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
             return target.cast(
                     new HSBType(DecimalType.ZERO, PercentType.ZERO, new PercentType(toBigDecimal().multiply(HUNDRED))));
         } else if (target == PercentType.class) {
-            if (SmartHomeUnits.PERCENT.equals(getUnit())) {
+            if (Units.PERCENT.equals(getUnit())) {
                 return target.cast(new PercentType(toBigDecimal()));
             }
             return target.cast(new PercentType(toBigDecimal().multiply(HUNDRED)));

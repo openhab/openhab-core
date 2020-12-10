@@ -63,9 +63,9 @@ public class SyntheticBundleInstaller {
     private static final int WAIT_TIMOUT = 30; // [seconds]
     private static final String BUNDLE_POOL_PATH = "/test-bundle-pool";
 
-    private static final String XML_THING_TYPE = "esh.xmlThingTypes";
-    private static final String XML_BINDING_INFO = "esh.xmlBindingInfo";
-    private static final String XML_CONFIG = "esh.xmlConfig";
+    private static final String XML_THING_TYPE = "openhab.xmlThingTypes";
+    private static final String XML_BINDING_INFO = "openhab.xmlBindingInfo";
+    private static final String XML_CONFIG = "openhab.xmlConfig";
 
     /**
      * A list of default extensions to be included in the synthetic bundle.

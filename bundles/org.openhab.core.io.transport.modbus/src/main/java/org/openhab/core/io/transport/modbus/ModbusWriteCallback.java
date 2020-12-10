@@ -10,18 +10,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.semantics.model.property;
+package org.openhab.core.io.transport.modbus;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.semantics.model.Property;
-import org.openhab.core.semantics.model.TagInfo;
 
 /**
- * This class defines a Illuminance.
+ * Interface for write callbacks
  *
- * @author Generated from generateTagClasses.groovy - Initial contribution
+ * @author Sami Salonen - Initial contribution
  */
+@FunctionalInterface
 @NonNullByDefault
-@TagInfo(id = "Property_Illuminance", label = "Illuminance", synonyms = "", description = "")
-public interface Illuminance extends Property {
+public interface ModbusWriteCallback extends ModbusResultCallback {
+
+    /**
+     * Callback handling response data
+     *
+     * @param asyncModbusWriteResult result of the write operation
+     */
+    void handle(AsyncModbusWriteResult result);
 }

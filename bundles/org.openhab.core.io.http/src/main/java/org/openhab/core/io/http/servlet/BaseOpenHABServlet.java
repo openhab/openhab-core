@@ -30,21 +30,21 @@ import org.slf4j.LoggerFactory;
  * @author Łukasz Dywicki - Initial contribution
  */
 @NonNullByDefault
-public abstract class BaseSmartHomeServlet extends HttpServlet {
+public abstract class BaseOpenHABServlet extends HttpServlet {
 
     private static final long serialVersionUID = 6020752826735599455L;
 
     /**
      * Logger bound to child class.
      */
-    protected final Logger logger = LoggerFactory.getLogger(BaseSmartHomeServlet.class);
+    protected final Logger logger = LoggerFactory.getLogger(BaseOpenHABServlet.class);
 
     /**
      * Http service.
      */
     protected final HttpService httpService;
 
-    public BaseSmartHomeServlet(HttpService httpService) {
+    public BaseOpenHABServlet(HttpService httpService) {
         this.httpService = httpService;
     }
 

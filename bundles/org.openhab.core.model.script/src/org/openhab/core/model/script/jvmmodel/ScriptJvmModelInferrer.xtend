@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory
 import org.openhab.core.items.Item
 import org.openhab.core.types.Command
 import org.openhab.core.types.State
-import org.openhab.core.thing.events.ChannelTriggeredEvent
+import org.openhab.core.events.Event
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -42,6 +42,9 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
     /** Variable name for the item in a "state triggered" or "command triggered" rule */
     public static final String VAR_TRIGGERING_ITEM = "triggeringItem";
+
+    /** Variable name for the item in a "state triggered" or "command triggered" rule */
+    public static final String VAR_TRIGGERING_ITEM_NAME = "triggeringItemName";
 
     /** Variable name for the previous state of an item in a "changed state triggered" rule */
     public static final String VAR_PREVIOUS_STATE = "previousState";
@@ -108,11 +111,13 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
                 static = true
                 val itemTypeRef = script.newTypeRef(Item)
                 parameters += script.toParameter(VAR_TRIGGERING_ITEM, itemTypeRef)
+                val itemNameRef = script.newTypeRef(String)
+                parameters += script.toParameter(VAR_TRIGGERING_ITEM_NAME, itemNameRef)
                 val commandTypeRef = script.newTypeRef(Command)
                 parameters += script.toParameter(VAR_RECEIVED_COMMAND, commandTypeRef)
                 val stateTypeRef = script.newTypeRef(State)
                 parameters += script.toParameter(VAR_PREVIOUS_STATE, stateTypeRef)
-                val eventTypeRef = script.newTypeRef(ChannelTriggeredEvent)
+                val eventTypeRef = script.newTypeRef(String)
                 parameters += script.toParameter(VAR_RECEIVED_EVENT, eventTypeRef)
                 val stateTypeRef2 = script.newTypeRef(State)
                 parameters += script.toParameter(VAR_NEW_STATE, stateTypeRef2)

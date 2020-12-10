@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.io.http.servlet.SmartHomeServlet;
+import org.openhab.core.io.http.servlet.OpenHABServlet;
 import org.openhab.core.ui.icon.IconProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
 import org.osgi.service.component.annotations.Activate;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component
 @NonNullByDefault
-public class IconServlet extends SmartHomeServlet {
+public class IconServlet extends OpenHABServlet {
 
     private static final long serialVersionUID = 2880642275858634578L;
 

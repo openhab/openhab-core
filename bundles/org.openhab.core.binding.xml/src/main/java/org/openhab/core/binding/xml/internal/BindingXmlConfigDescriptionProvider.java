@@ -26,7 +26,7 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Simon Kaufmann - Initial contribution
  */
-@Component(service = ConfigDescriptionProvider.class, immediate = true, property = { "esh.scope=core.xml.binding" })
+@Component(service = ConfigDescriptionProvider.class, immediate = true, property = { "openhab.scope=core.xml.binding" })
 @NonNullByDefault
 public class BindingXmlConfigDescriptionProvider extends AbstractXmlConfigDescriptionProvider {
 

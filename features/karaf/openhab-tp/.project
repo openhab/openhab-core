@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.openhab.core.features.karaf.esh-tp</name>
+	<name>org.openhab.core.features.karaf.openhab-tp</name>
 	<comment></comment>
 	<projects>
 	</projects>
