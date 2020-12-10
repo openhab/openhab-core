@@ -77,10 +77,7 @@ public class ChannelLinkNotifier implements RegistryChangeListener<ItemChannelLi
         ChannelUID channelUID = element.getLinkedUID();
         ThingUID thingUID = channelUID.getThingUID();
 
-        boolean channelLinked = itemChannelLinkRegistry.stream()
-                .anyMatch(itemChannelLink -> channelUID.equals(itemChannelLink.getLinkedUID()));
-
-        if (!channelLinked) {
+        if (!itemChannelLinkRegistry.isLinked(channelUID)) {
             call(thingUID, handler -> handler.channelUnlinked(channelUID), "channelUnlinked");
         }
     }
