@@ -20,8 +20,8 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * A caller may use it to identify which action or process is completed or to which completion it wants to listen to.
  * Thereby the {@code type} denotes the category of readyness, the {@code identifier}, e.g.
- * {@code new ReadyMarker("xmlProcessing", "o.e.sh.binding.sample")} would denote that the "sample binding" has finished
- * processing some xmls.
+ * {@code new ReadyMarker("xmlProcessing", "org.openhab.binding.sample")} would denote that the "sample binding" has
+ * finished processing some XML files.
  * <p>
  * When the action or process is being marked as "ready" or removed from the "ready" state, a registered tracker will be
  * notified by the ReadyService.
