@@ -14,11 +14,13 @@ package org.openhab.core.thing.internal.link;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
@@ -37,6 +39,7 @@ import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
 import org.openhab.core.thing.profiles.StateProfileType;
 import org.openhab.core.thing.profiles.TriggerProfileType;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -46,25 +49,35 @@ import org.osgi.service.component.annotations.Reference;
  * @author Simon Kaufmann - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescriptionProvider {
 
     private static final String SCHEME = "link";
-
     public static final String PARAM_PROFILE = "profile";
 
-    private ProfileTypeRegistry profileTypeRegistry;
+    private final ProfileTypeRegistry profileTypeRegistry;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final ItemRegistry itemRegistry;
+    private final ThingRegistry thingRegistry;
 
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private ItemRegistry itemRegistry;
-    private ThingRegistry thingRegistry;
-
-    @Override
-    public Collection<ConfigDescription> getConfigDescriptions(Locale locale) {
-        return Collections.emptySet();
+    @Activate
+    public ItemChannelLinkConfigDescriptionProvider(final @Reference ProfileTypeRegistry profileTypeRegistry, //
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry, //
+            final @Reference ItemRegistry itemRegistry, //
+            final @Reference ThingRegistry thingRegistry) {
+        this.profileTypeRegistry = profileTypeRegistry;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+        this.itemRegistry = itemRegistry;
+        this.thingRegistry = thingRegistry;
     }
 
     @Override
-    public ConfigDescription getConfigDescription(URI uri, Locale locale) {
+    public Collection<ConfigDescription> getConfigDescriptions(@Nullable Locale locale) {
+        return Set.of();
+    }
+
+    @Override
+    public @Nullable ConfigDescription getConfigDescription(URI uri, @Nullable Locale locale) {
         if (SCHEME.equals(uri.getScheme())) {
             ItemChannelLink link = itemChannelLinkRegistry.get(uri.getSchemeSpecificPart());
             if (link == null) {
@@ -84,13 +97,14 @@ public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescripti
             }
             ConfigDescriptionParameter paramProfile = ConfigDescriptionParameterBuilder.create(PARAM_PROFILE, Type.TEXT)
                     .withLabel("Profile").withDescription("the profile to use").withRequired(false)
-                    .withLimitToOptions(true).withOptions(getOptions(link, item, channel, locale)).build();
+                    .withOptions(getOptions(link, item, channel, locale)).build();
             return ConfigDescriptionBuilder.create(uri).withParameter(paramProfile).build();
         }
         return null;
     }
 
-    private List<ParameterOption> getOptions(ItemChannelLink link, Item item, Channel channel, Locale locale) {
+    private List<ParameterOption> getOptions(ItemChannelLink link, Item item, Channel channel,
+            @Nullable Locale locale) {
         Collection<ProfileType> profileTypes = profileTypeRegistry.getProfileTypes(locale);
         return profileTypes.stream().filter(profileType -> {
             switch (channel.getKind()) {
@@ -114,41 +128,5 @@ public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescripti
     private boolean isSupportedChannelType(TriggerProfileType profileType, Channel channel) {
         return profileType.getSupportedChannelTypeUIDs().isEmpty()
                 || profileType.getSupportedChannelTypeUIDs().contains(channel.getChannelTypeUID());
-    }
-
-    @Reference
-    public void setProfileTypeRegistry(ProfileTypeRegistry profileTypeRegistry) {
-        this.profileTypeRegistry = profileTypeRegistry;
-    }
-
-    public void unsetProfileTypeRegistry(ProfileTypeRegistry profileTypeRegistry) {
-        this.profileTypeRegistry = null;
-    }
-
-    @Reference
-    public void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-    }
-
-    public void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = null;
-    }
-
-    @Reference
-    public void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    public void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    public void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    public void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
     }
 }
