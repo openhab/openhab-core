@@ -97,7 +97,7 @@ public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescripti
             }
             ConfigDescriptionParameter paramProfile = ConfigDescriptionParameterBuilder.create(PARAM_PROFILE, Type.TEXT)
                     .withLabel("Profile").withDescription("the profile to use").withRequired(false)
-                    .withLimitToOptions(true).withOptions(getOptions(link, item, channel, locale)).build();
+                    .withOptions(getOptions(link, item, channel, locale)).build();
             return ConfigDescriptionBuilder.create(uri).withParameter(paramProfile).build();
         }
         return null;
