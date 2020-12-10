@@ -25,6 +25,7 @@ import org.openhab.core.auth.AuthenticationProvider;
 import org.openhab.core.auth.ManagedUser;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
+import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -51,8 +52,9 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
 
     @Activate
     public CreateAPITokenPageServlet(BundleContext bundleContext, @Reference HttpService httpService,
-            @Reference UserRegistry userRegistry, @Reference AuthenticationProvider authProvider) {
-        super(bundleContext, httpService, userRegistry, authProvider);
+            @Reference UserRegistry userRegistry, @Reference AuthenticationProvider authProvider,
+            @Reference LocaleProvider localeProvider) {
+        super(bundleContext, httpService, userRegistry, authProvider, localeProvider);
         try {
             httpService.registerServlet("/createApiToken", this, null, null);
         } catch (NamespaceException | ServletException e) {
@@ -65,9 +67,8 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
         Map<String, String[]> params = req.getParameterMap();
 
         try {
-            String message = "Create a new API token to authorize external services.";
+            String message = getLocalizedMessage("auth.createapitoken.prompt");
 
-            // TODO: i18n
             resp.setContentType("text/html;charset=UTF-8");
             resp.getWriter().append(getPageBody(params, message, false));
             resp.getWriter().close();
@@ -112,18 +113,16 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
                 if (((ManagedUser) user).getApiTokens().stream()
                         .anyMatch(apiToken -> apiToken.getName().equals(tokenName))) {
                     resp.setContentType("text/html;charset=UTF-8");
-                    // TODO: i18n
                     resp.getWriter().append(
-                            getPageBody(params, "A token with the same name already exists, please try again.", false));
+                            getPageBody(params, getLocalizedMessage("auth.createapitoken.name.unique.fail"), false));
                     resp.getWriter().close();
                     return;
                 }
 
                 if (!tokenName.matches("[a-zA-Z0-9]*")) {
                     resp.setContentType("text/html;charset=UTF-8");
-                    // TODO: i18n
                     resp.getWriter().append(
-                            getPageBody(params, "Invalid token name, please use alphanumeric characters only.", false));
+                            getPageBody(params, getLocalizedMessage("auth.createapitoken.name.format.fail"), false));
                     resp.getWriter().close();
                     return;
                 }
@@ -132,11 +131,12 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
                 throw new AuthenticationException("User is not managed");
             }
 
-            // TODO: i18n
-            String resultMessage = "New token created:<br /><br /><code>" + newApiToken + "</code>";
-            resultMessage += "<br /><br /><small>Please copy it now, it will not be shown again.</small>";
+            String resultMessage = getLocalizedMessage("auth.createapitoken.success") + "<br /><br /><code>"
+                    + newApiToken + "</code>";
+            resultMessage += "<br /><br /><small>" + getLocalizedMessage("auth.createapitoken.success.footer")
+                    + "</small>";
             resp.setContentType("text/html;charset=UTF-8");
-            resp.getWriter().append(getResultPageBody(params, resultMessage)); // TODO: i18n
+            resp.getWriter().append(getResultPageBody(params, resultMessage));
             resp.getWriter().close();
         } catch (AuthenticationException e) {
             processFailedLogin(resp, params, e.getMessage());
@@ -145,8 +145,8 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
 
     @Override
     protected String getPageBody(Map<String, String[]> params, String message, boolean hideForm) {
-        String responseBody = pageTemplate.replace("{form_fields}", getFormFields(params));
-        String buttonLabel = "Create API Token"; // TODO: i18n
+        String responseBody = getPageTemplate().replace("{form_fields}", getFormFields(params));
+        String buttonLabel = getLocalizedMessage("auth.button.createapitoken");
         responseBody = responseBody.replace("{message}", message);
         responseBody = responseBody.replace("{formAction}", "/createApiToken");
         responseBody = responseBody.replace("{formClass}", hideForm ? "hide" : "show");
@@ -160,7 +160,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
     }
 
     protected String getResultPageBody(Map<String, String[]> params, String message) {
-        String responseBody = pageTemplate.replace("{form_fields}", "");
+        String responseBody = getPageTemplate().replace("{form_fields}", "");
         responseBody = responseBody.replace("{message}", message);
         responseBody = responseBody.replace("{formAction}", "/createApiToken");
         responseBody = responseBody.replace("{formClass}", "hide");

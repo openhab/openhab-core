@@ -32,6 +32,7 @@ import org.openhab.core.auth.PendingToken;
 import org.openhab.core.auth.Role;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
+import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -63,8 +64,9 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
 
     @Activate
     public AuthorizePageServlet(BundleContext bundleContext, @Reference HttpService httpService,
-            @Reference UserRegistry userRegistry, @Reference AuthenticationProvider authProvider) {
-        super(bundleContext, httpService, userRegistry, authProvider);
+            @Reference UserRegistry userRegistry, @Reference AuthenticationProvider authProvider,
+            @Reference LocaleProvider localeProvider) {
+        super(bundleContext, httpService, userRegistry, authProvider, localeProvider);
         try {
             httpService.registerServlet("/auth", this, null, null);
         } catch (NamespaceException | ServletException e) {
@@ -86,11 +88,10 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
                 throw new IllegalArgumentException("invalid_request");
             }
 
-            // TODO: i18n
             if (isSignupMode()) {
-                message = "Create a first administrator account to continue.";
+                message = getLocalizedMessage("auth.createaccount.prompt");
             } else {
-                message = String.format("Sign in to grant <b>%s</b> access to <b>%s</b>:", scope, clientId);
+                message = String.format(getLocalizedMessage("auth.login.prompt"), scope, clientId);
             }
             resp.setContentType("text/html;charset=UTF-8");
             resp.getWriter().append(getPageBody(params, message, false));
@@ -153,8 +154,8 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
                 // first verify the password confirmation and bail out if necessary
                 if (!params.containsKey("password_repeat") || !password.equals(params.get("password_repeat")[0])) {
                     resp.setContentType("text/html;charset=UTF-8");
-                    // TODO: i18n
-                    resp.getWriter().append(getPageBody(params, "Passwords don't match, please try again.", false));
+                    resp.getWriter()
+                            .append(getPageBody(params, getLocalizedMessage("auth.password.confirm.fail"), false));
                     resp.getWriter().close();
                     return;
                 }
@@ -202,9 +203,9 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
 
     @Override
     protected String getPageBody(Map<String, String[]> params, String message, boolean hideForm) {
-        String responseBody = pageTemplate.replace("{form_fields}", getFormFields(params));
+        String responseBody = getPageTemplate().replace("{form_fields}", getFormFields(params));
         String repeatPasswordFieldType = isSignupMode() ? "password" : "hidden";
-        String buttonLabel = isSignupMode() ? "Create Account" : "Sign In"; // TODO: i18n
+        String buttonLabel = getLocalizedMessage(isSignupMode() ? "auth.button.createaccount" : "auth.button.signin");
         responseBody = responseBody.replace("{message}", message);
         responseBody = responseBody.replace("{formAction}", "/auth");
         responseBody = responseBody.replace("{formClass}", "show");

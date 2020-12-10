@@ -21,6 +21,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.ResourceBundle.Control;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServlet;
@@ -34,6 +36,7 @@ import org.openhab.core.auth.AuthenticationProvider;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UsernamePasswordCredentials;
+import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.HttpService;
@@ -51,11 +54,14 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
 
     protected static final long serialVersionUID = 5340598701104679840L;
 
+    private static final String MESSAGES_BUNDLE_NAME = "messages";
+
     private final Logger logger = LoggerFactory.getLogger(AbstractAuthPageServlet.class);
 
     protected HttpService httpService;
     protected UserRegistry userRegistry;
     protected AuthenticationProvider authProvider;
+    protected LocaleProvider localeProvider;
     protected @Nullable Instant lastAuthenticationFailure;
     protected int authenticationFailureCount = 0;
 
@@ -64,10 +70,12 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
     protected String pageTemplate;
 
     public AbstractAuthPageServlet(BundleContext bundleContext, @Reference HttpService httpService,
-            @Reference UserRegistry userRegistry, @Reference AuthenticationProvider authProvider) {
+            @Reference UserRegistry userRegistry, @Reference AuthenticationProvider authProvider,
+            @Reference LocaleProvider localeProvider) {
         this.httpService = httpService;
         this.userRegistry = userRegistry;
         this.authProvider = authProvider;
+        this.localeProvider = localeProvider;
 
         pageTemplate = "";
         URL resource = bundleContext.getBundle().getResource("pages/authorize.html");
@@ -78,6 +86,23 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
                 throw new UncheckedIOException("Cannot load page template", e);
             }
         }
+    }
+
+    protected String getPageTemplate() {
+        String template = pageTemplate;
+        for (String[] replace : new String[][] { //
+                { "{usernamePlaceholder}", "auth.placeholder.username" },
+                { "{passwordPlaceholder}", "auth.placeholder.password" },
+                { "{newPasswordPlaceholder}", "auth.placeholder.newpassword" },
+                { "{repeatPasswordPlaceholder}", "auth.placeholder.repeatpassword" },
+                { "{tokenNamePlaceholder}", "auth.placeholder.tokenname" },
+                { "{tokenScopePlaceholder}", "auth.placeholder.tokenscope" },
+                { "{returnButtonLabel}", "auth.button.return" } //
+        }) {
+            template = template.replace(replace[0], getLocalizedMessage(replace[1]));
+        }
+
+        return template;
     }
 
     protected abstract String getPageBody(Map<String, String[]> params, String message, boolean hideForm);
@@ -123,7 +148,13 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
         authenticationFailureCount += 1;
         resp.setContentType("text/html;charset=UTF-8");
         logger.warn("Authentication failed: {}", message);
-        resp.getWriter().append(getPageBody(params, "Please try again.", false)); // TODO: i18n
+        resp.getWriter().append(getPageBody(params, getLocalizedMessage("auth.login.fail"), false));
         resp.getWriter().close();
+    }
+
+    protected String getLocalizedMessage(String messageKey) {
+        ResourceBundle rb = ResourceBundle.getBundle(MESSAGES_BUNDLE_NAME, localeProvider.getLocale(),
+                Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
+        return rb.getString(messageKey);
     }
 }
