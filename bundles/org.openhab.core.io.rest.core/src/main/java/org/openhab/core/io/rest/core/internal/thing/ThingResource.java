@@ -215,7 +215,7 @@ public class ThingResource implements RESTResource {
     @POST
     @RolesAllowed({ Role.ADMIN })
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Creates a new thing and adds it to the registry.", security = {
+    @Operation(operationId = "createThingInRegistry", summary = "Creates a new thing and adds it to the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "201", description = "Created", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Thing uid does not match bridge uid."),
@@ -294,7 +294,7 @@ public class ThingResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get all available things.", responses = {
+    @Operation(operationId = "getThings", summary = "Get all available things.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedThingDTO.class), uniqueItems = true))) })
     public Response getAll(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
@@ -314,7 +314,7 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets thing by UID.", security = {
+    @Operation(operationId = "getThingById", summary = "Gets thing by UID.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ThingDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Thing not found.") })
@@ -345,7 +345,7 @@ public class ThingResource implements RESTResource {
     @DELETE
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}")
-    @Operation(summary = "Removes a thing from the registry. Set \'force\' to __true__ if you want the thing to be removed immediately.", security = {
+    @Operation(operationId = "removeThingById", summary = "Removes a thing from the registry. Set \'force\' to __true__ if you want the thing to be removed immediately.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK, was deleted."),
                     @ApiResponse(responseCode = "202", description = "ACCEPTED for asynchronous deletion."),
@@ -404,7 +404,7 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Updates a thing.", security = {
+    @Operation(operationId = "updateThing", summary = "Updates a thing.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ThingDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Thing not found."),
@@ -464,7 +464,7 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/config")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Updates thing's configuration.", security = {
+    @Operation(operationId = "updateThingConfig", summary = "Updates thing's configuration.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ThingDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Configuration of the thing is not valid."),
@@ -521,7 +521,7 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/status")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets thing status.", security = {
+    @Operation(operationId = "getThingStatus", summary = "Gets thing status.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "404", description = "Thing not found.") })
@@ -546,7 +546,7 @@ public class ThingResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/enable")
-    @Operation(summary = "Sets the thing enabled status.", security = {
+    @Operation(operationId = "enableThing", summary = "Sets the thing enabled status.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "404", description = "Thing not found.") })
@@ -576,7 +576,7 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/config/status")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets thing config status.", security = {
+    @Operation(operationId = "getThingConfigStatus", summary = "Gets thing config status.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "404", description = "Thing not found.") })
@@ -604,7 +604,7 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/firmware/{firmwareVersion}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Update thing firmware.", security = {
+    @Operation(operationId = "updateThingFirmware", summary = "Update thing firmware.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "400", description = "Firmware update preconditions not satisfied."),
@@ -641,7 +641,7 @@ public class ThingResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/firmware/status")
-    @Operation(summary = "Gets thing's firmware status.", security = {
+    @Operation(operationId = "getThingFirmwareStatus", summary = "Gets thing's firmware status.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "204", description = "No firmware status provided by this Thing.") })
@@ -661,7 +661,7 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/firmwares")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get all available firmwares for provided thing UID", security = {
+    @Operation(operationId = "getAvailableFirmwaresForThing", summary = "Get all available firmwares for provided thing UID", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = FirmwareDTO.class), uniqueItems = true))),
                     @ApiResponse(responseCode = "204", description = "No firmwares found.") })

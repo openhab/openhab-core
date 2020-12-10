@@ -137,7 +137,7 @@ public class RuleResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get available rules, optionally filtered by tags and/or prefix.", responses = {
+    @Operation(operationId = "getRules", summary = "Get available rules, optionally filtered by tags and/or prefix.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedRuleDTO.class)))) })
     public Response get(@QueryParam("prefix") final @Nullable String prefix,
             @QueryParam("tags") final @Nullable List<String> tags,
@@ -167,7 +167,7 @@ public class RuleResource implements RESTResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Creates a rule.", responses = {
+    @Operation(operationId = "createRule", summary = "Creates a rule.", responses = {
             @ApiResponse(responseCode = "201", description = "Created", headers = @Header(name = "Location", description = "Newly created Rule")),
             @ApiResponse(responseCode = "409", description = "Creation of the rule is refused. Rule with the same UID already exists."),
             @ApiResponse(responseCode = "400", description = "Creation of the rule is refused. Missing required parameter.") })
@@ -190,7 +190,7 @@ public class RuleResource implements RESTResource {
     @GET
     @Path("/{ruleUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets the rule corresponding to the given UID.", responses = {
+    @Operation(operationId = "getRuleById", summary = "Gets the rule corresponding to the given UID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedRuleDTO.class))),
             @ApiResponse(responseCode = "404", description = "Rule not found") })
     public Response getByUID(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
@@ -205,7 +205,7 @@ public class RuleResource implements RESTResource {
     @DELETE
     @Path("/{ruleUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Removes an existing rule corresponding to the given UID.", responses = {
+    @Operation(operationId = "deleteRule", summary = "Removes an existing rule corresponding to the given UID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
     public Response remove(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
@@ -221,7 +221,7 @@ public class RuleResource implements RESTResource {
     @PUT
     @Path("/{ruleUID}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Updates an existing rule corresponding to the given UID.", responses = {
+    @Operation(operationId = "updateRule", summary = "Updates an existing rule corresponding to the given UID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
     public Response update(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
@@ -240,7 +240,7 @@ public class RuleResource implements RESTResource {
     @GET
     @Path("/{ruleUID}/config")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets the rule configuration values.", responses = {
+    @Operation(operationId = "getRuleConfiguration", summary = "Gets the rule configuration values.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
     public Response getConfiguration(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID)
@@ -258,7 +258,7 @@ public class RuleResource implements RESTResource {
     @PUT
     @Path("/{ruleUID}/config")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Sets the rule configuration values.", responses = {
+    @Operation(operationId = "updateRuleConfiguration", summary = "Sets the rule configuration values.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
     public Response updateConfiguration(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
@@ -280,7 +280,7 @@ public class RuleResource implements RESTResource {
     @POST
     @Path("/{ruleUID}/enable")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(summary = "Sets the rule enabled status.", responses = {
+    @Operation(operationId = "enableRule", summary = "Sets the rule enabled status.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
     public Response enableRule(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
@@ -300,7 +300,7 @@ public class RuleResource implements RESTResource {
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{ruleUID}/runnow")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(summary = "Executes actions of the rule.", responses = {
+    @Operation(operationId = "runRuleNow", summary = "Executes actions of the rule.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
     public Response runNow(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID)
@@ -319,7 +319,7 @@ public class RuleResource implements RESTResource {
     @GET
     @Path("/{ruleUID}/triggers")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets the rule triggers.", responses = {
+    @Operation(operationId = "getRuleTriggers", summary = "Gets the rule triggers.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TriggerDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
     public Response getTriggers(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
@@ -334,7 +334,7 @@ public class RuleResource implements RESTResource {
     @GET
     @Path("/{ruleUID}/conditions")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets the rule conditions.", responses = {
+    @Operation(operationId = "getRuleConditions", summary = "Gets the rule conditions.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConditionDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
     public Response getConditions(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
@@ -349,7 +349,7 @@ public class RuleResource implements RESTResource {
     @GET
     @Path("/{ruleUID}/actions")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets the rule actions.", responses = {
+    @Operation(operationId = "getRuleActions", summary = "Gets the rule actions.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ActionDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
     public Response getActions(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
@@ -364,7 +364,7 @@ public class RuleResource implements RESTResource {
     @GET
     @Path("/{ruleUID}/{moduleCategory}/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets the rule's module corresponding to the given Category and ID.", responses = {
+    @Operation(operationId = "getRuleModuleById", summary = "Gets the rule's module corresponding to the given Category and ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ModuleDTO.class))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found or does not have a module with such Category and ID.") })
     public Response getModuleById(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
@@ -383,7 +383,7 @@ public class RuleResource implements RESTResource {
     @GET
     @Path("/{ruleUID}/{moduleCategory}/{id}/config")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets the module's configuration.", responses = {
+    @Operation(operationId = "getRuleModuleConfig", summary = "Gets the module's configuration.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found or does not have a module with such Category and ID.") })
     public Response getModuleConfig(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
@@ -402,7 +402,7 @@ public class RuleResource implements RESTResource {
     @GET
     @Path("/{ruleUID}/{moduleCategory}/{id}/config/{param}")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(summary = "Gets the module's configuration parameter.", responses = {
+    @Operation(operationId = "getRuleModuleConfigParameter", summary = "Gets the module's configuration parameter.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found or does not have a module with such Category and ID.") })
     public Response getModuleConfigParam(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
@@ -421,7 +421,7 @@ public class RuleResource implements RESTResource {
 
     @PUT
     @Path("/{ruleUID}/{moduleCategory}/{id}/config/{param}")
-    @Operation(summary = "Sets the module's configuration parameter value.", responses = {
+    @Operation(operationId = "setRuleModuleConfigParameter", summary = "Sets the module's configuration parameter value.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found or does not have a module with such Category and ID.") })
     @Consumes(MediaType.TEXT_PLAIN)

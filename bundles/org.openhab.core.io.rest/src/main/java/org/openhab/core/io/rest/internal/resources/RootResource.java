@@ -95,7 +95,7 @@ public class RootResource implements RESTResource {
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets information about the runtime, the API version and links to resources.", responses = {
+    @Operation(operationId = "getRoot", summary = "Gets information about the runtime, the API version and links to resources.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootBean.class))) })
     public Response getRoot(@Context UriInfo uriInfo) {
         // key: path, value: name (this way we could ensure that ever path is added only once).

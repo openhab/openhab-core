@@ -76,8 +76,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * {@link ConfigurableServiceResource} provides access to configurable services. It lists the available services and
- * allows to get, update and delete the configuration for a service ID. See also {@link ConfigurableService}.
+ * {@link ConfigurableServiceResource} provides access to configurable services.
+ * It lists the available services and allows to get, update and delete the
+ * configuration for a service ID. See also {@link ConfigurableService}.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Franck Dechavanne - Added DTOs to ApiResponses
@@ -117,7 +118,7 @@ public class ConfigurableServiceResource implements RESTResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Get all configurable services.", responses = {
+    @Operation(operationId = "getServices", summary = "Get all configurable services.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigurableServiceDTO.class)))) })
     public List<ConfigurableServiceDTO> getAll() {
         List<ConfigurableServiceDTO> services = getConfigurableServices();
@@ -127,7 +128,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @GET
     @Path("/{serviceId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Get configurable service for given service ID.", responses = {
+    @Operation(operationId = "getServicesById", summary = "Get configurable service for given service ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigurableServiceDTO.class))),
             @ApiResponse(responseCode = "404", description = "Not found") })
     public Response getById(@PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
@@ -167,7 +168,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @GET
     @Path("/{serviceId}/contexts")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Get existing multiple context service configurations for the given factory PID.", responses = {
+    @Operation(operationId = "getServiceContext", summary = "Get existing multiple context service configurations for the given factory PID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigurableServiceDTO.class)))) })
     public List<ConfigurableServiceDTO> getMultiConfigServicesByFactoryPid(
             @PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
@@ -183,7 +184,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @GET
     @Path("/{serviceId}/config")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Get service configuration for given service ID.", responses = {
+    @Operation(operationId = "getServiceConfig", summary = "Get service configuration for given service ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Configuration can not be read due to internal error") })
     public Response getConfiguration(@PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
@@ -201,7 +202,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @Path("/{serviceId}/config")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Updates a service configuration for given service ID and returns the old configuration.", responses = {
+    @Operation(operationId = "updateServiceConfig", summary = "Updates a service configuration for given service ID and returns the old configuration.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "204", description = "No old configuration"),
             @ApiResponse(responseCode = "500", description = "Configuration can not be updated due to internal error") })
@@ -248,7 +249,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @DELETE
     @Path("/{serviceId}/config")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Deletes a service configuration for given service ID and returns the old configuration.", responses = {
+    @Operation(operationId = "deleteServiceConfig", summary = "Deletes a service configuration for given service ID and returns the old configuration.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "204", description = "No old configuration"),
             @ApiResponse(responseCode = "500", description = "Configuration can not be deleted due to internal error") })

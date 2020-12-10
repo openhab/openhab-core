@@ -115,7 +115,7 @@ public class BindingResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getAllBindings", summary = "Get all bindings.", responses = {
+    @Operation(operationId = "getBindings", summary = "Get all bindings.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BindingInfoDTO.class), uniqueItems = true))) })
     public Response getAll(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
@@ -153,7 +153,7 @@ public class BindingResource implements RESTResource {
     @Path("/{bindingId}/config")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Updates a binding configuration for given binding ID and returns the old configuration.", responses = {
+    @Operation(operationId = "updateBindingConfiguration", summary = "Updates a binding configuration for given binding ID and returns the old configuration.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "204", description = "No old configuration"),
             @ApiResponse(responseCode = "404", description = "Binding does not exist"),

@@ -114,7 +114,7 @@ public class TokenResource implements RESTResource {
     @Path("/token")
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-    @Operation(summary = "Get access and refresh tokens.", responses = {
+    @Operation(operationId = "getOAuthToken", summary = "Get access and refresh tokens.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters") })
     public Response getToken(@FormParam("grant_type") String grantType, @FormParam("code") String code,
@@ -144,7 +144,7 @@ public class TokenResource implements RESTResource {
 
     @GET
     @Path("/sessions")
-    @Operation(summary = "List the sessions associated to the authenticated user.", responses = {
+    @Operation(operationId = "getSessionsForCurrentUser", summary = "List the sessions associated to the authenticated user.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserSessionDTO.class))),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User not found") })
@@ -165,7 +165,7 @@ public class TokenResource implements RESTResource {
 
     @GET
     @Path("/apitokens")
-    @Operation(summary = "List the API tokens associated to the authenticated user.", responses = {
+    @Operation(operationId = "getApiToken", summary = "List the API tokens associated to the authenticated user.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserApiTokenDTO.class))),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User not found") })
@@ -186,7 +186,7 @@ public class TokenResource implements RESTResource {
 
     @DELETE
     @Path("/apitokens/{name}")
-    @Operation(summary = "Revoke a specified API token associated to the authenticated user.", responses = {
+    @Operation(operationId = "removeApiToken", summary = "Revoke a specified API token associated to the authenticated user.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User or API token not found") })
@@ -213,7 +213,7 @@ public class TokenResource implements RESTResource {
     @POST
     @Path("/logout")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-    @Operation(summary = "Delete the session associated with a refresh token.", responses = {
+    @Operation(operationId = "deleteSession", summary = "Delete the session associated with a refresh token.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User or refresh token not found") })

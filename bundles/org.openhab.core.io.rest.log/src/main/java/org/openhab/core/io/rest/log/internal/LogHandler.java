@@ -91,14 +91,14 @@ public class LogHandler implements RESTResource {
 
     @GET
     @Path("/levels")
-    @Operation(summary = "Get log severities, which are logged by the current logger settings.", responses = {
+    @Operation(operationId = "getLogLevels", summary = "Get log severities, which are logged by the current logger settings.", responses = {
             @ApiResponse(responseCode = "200", description = "This depends on the current log settings at the backend.") })
     public Response getLogLevels() {
         return Response.ok(createLogLevelsMap()).build();
     }
 
     @GET
-    @Operation(summary = "Returns the last logged frontend messages. The amount is limited to the "
+    @Operation(operationId = "getLastLogMessagesForFrontend", summary = "Returns the last logged frontend messages. The amount is limited to the "
             + LogConstants.LOG_BUFFER_LIMIT + " last entries.")
 
     public Response getLastLogs(@DefaultValue(LogConstants.LOG_BUFFER_LIMIT
@@ -130,7 +130,7 @@ public class LogHandler implements RESTResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Log a frontend log message to the backend.", responses = {
+    @Operation(operationId = "logMessageToBackend", summary = "Log a frontend log message to the backend.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "403", description = LogConstants.LOG_SEVERITY_IS_NOT_SUPPORTED) })
     public Response log(

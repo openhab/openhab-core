@@ -94,7 +94,7 @@ public class VoiceResource implements RESTResource {
     @GET
     @Path("/interpreters")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get the list of all interpreters.", responses = {
+    @Operation(operationId = "getVoiceInterpreters", summary = "Get the list of all interpreters.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = HumanLanguageInterpreterDTO.class)))) })
     public Response getInterpreters(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
@@ -107,7 +107,7 @@ public class VoiceResource implements RESTResource {
     @GET
     @Path("/interpreters/{id: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets a single interpreter.", responses = {
+    @Operation(operationId = "getVoiceInterpreterByUID", summary = "Gets a single interpreter.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = HumanLanguageInterpreterDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Interpreter not found") })
     public Response getInterpreter(
@@ -126,7 +126,7 @@ public class VoiceResource implements RESTResource {
     @POST
     @Path("/interpreters/{id: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(summary = "Sends a text to a given human language interpreter.", responses = {
+    @Operation(operationId = "interpretText", summary = "Sends a text to a given human language interpreter.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "No human language interpreter was found."),
             @ApiResponse(responseCode = "400", description = "interpretation exception occurs") })
@@ -151,7 +151,7 @@ public class VoiceResource implements RESTResource {
     @POST
     @Path("/interpreters")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(summary = "Sends a text to the default human language interpreter.", responses = {
+    @Operation(operationId = "interpretTextByDefaultInterpreter", summary = "Sends a text to the default human language interpreter.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "No human language interpreter was found."),
             @ApiResponse(responseCode = "400", description = "interpretation exception occurs") })
@@ -175,7 +175,7 @@ public class VoiceResource implements RESTResource {
     @GET
     @Path("/voices")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get the list of all voices.", responses = {
+    @Operation(operationId = "getVoices", summary = "Get the list of all voices.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = VoiceDTO.class)))) })
     public Response getVoices() {
         List<VoiceDTO> dtos = voiceManager.getAllVoices().stream().map(VoiceMapper::map).collect(Collectors.toList());
@@ -185,7 +185,7 @@ public class VoiceResource implements RESTResource {
     @GET
     @Path("/defaultvoice")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets the default voice.", responses = {
+    @Operation(operationId = "getDefaultVoice", summary = "Gets the default voice.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = VoiceDTO.class))),
             @ApiResponse(responseCode = "404", description = "No default voice was found.") })
     public Response getDefaultVoice() {
@@ -201,7 +201,7 @@ public class VoiceResource implements RESTResource {
     @POST
     @Path("/say")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(summary = "Speaks a given text with a given voice through the given audio sink.", responses = {
+    @Operation(operationId = "textToSpeech", summary = "Speaks a given text with a given voice through the given audio sink.", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
     public Response say(@Parameter(description = "text to speak", required = true) String text,
             @QueryParam("voiceid") @Parameter(description = "voice id") @Nullable String voiceId,

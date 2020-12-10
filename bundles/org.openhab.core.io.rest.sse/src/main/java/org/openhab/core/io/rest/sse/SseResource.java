@@ -152,7 +152,8 @@ public class SseResource implements RESTResource, SsePublisher {
 
     @GET
     @Produces(MediaType.SERVER_SENT_EVENTS)
-    @Operation(summary = "Get all events.", responses = { @ApiResponse(responseCode = "200", description = "OK"),
+    @Operation(operationId = "getEvents", summary = "Get all events.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Topic is empty or contains invalid characters") })
     public void listen(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
             @QueryParam("topics") @Parameter(description = "topics") String eventFilter) {
@@ -182,7 +183,7 @@ public class SseResource implements RESTResource, SsePublisher {
     @GET
     @Path("/states")
     @Produces(MediaType.SERVER_SENT_EVENTS)
-    @Operation(summary = "Initiates a new item state tracker connection", responses = {
+    @Operation(operationId = "initNewStateTacker", summary = "Initiates a new item state tracker connection", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
     public void getStateEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response) {
         final SseSinkItemInfo sinkItemInfo = new SseSinkItemInfo();
@@ -203,7 +204,7 @@ public class SseResource implements RESTResource, SsePublisher {
      */
     @POST
     @Path("/states/{connectionId}")
-    @Operation(summary = "Changes the list of items a SSE connection will receive state updates to.", responses = {
+    @Operation(operationId = "updateItemListForStateUpdates", summary = "Changes the list of items a SSE connection will receive state updates to.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Unknown connectionId") })
     public Object updateTrackedItems(@PathParam("connectionId") String connectionId,

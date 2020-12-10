@@ -95,7 +95,7 @@ public class ModuleTypeResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get all available module types.", responses = {
+    @Operation(operationId = "getModuleTypes", summary = "Get all available module types.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ModuleTypeDTO.class)))) })
     public Response getAll(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
@@ -120,7 +120,7 @@ public class ModuleTypeResource implements RESTResource {
     @GET
     @Path("/{moduleTypeUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets a module type corresponding to the given UID.", responses = {
+    @Operation(operationId = "getModuleTypeById", summary = "Gets a module type corresponding to the given UID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ModuleTypeDTO.class))),
             @ApiResponse(responseCode = "404", description = "Module Type corresponding to the given UID does not found.") })
     public Response getByUID(

@@ -89,7 +89,7 @@ public class AudioResource implements RESTResource {
     @GET
     @Path("/sources")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get the list of all sources.", responses = {
+    @Operation(operationId = "getAudioSources", summary = "Get the list of all sources.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AudioSourceDTO.class)))) })
     public Response getSources(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
@@ -105,7 +105,7 @@ public class AudioResource implements RESTResource {
     @GET
     @Path("/defaultsource")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get the default source if defined or the first available source.", responses = {
+    @Operation(operationId = "getAudioDefaultSource", summary = "Get the default source if defined or the first available source.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AudioSourceDTO.class))),
             @ApiResponse(responseCode = "404", description = "Source not found") })
     public Response getDefaultSource(
@@ -122,7 +122,7 @@ public class AudioResource implements RESTResource {
     @GET
     @Path("/sinks")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get the list of all sinks.", responses = {
+    @Operation(operationId = "getAudioSinks", summary = "Get the list of all sinks.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AudioSinkDTO.class)))) })
     public Response getSinks(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
@@ -138,7 +138,7 @@ public class AudioResource implements RESTResource {
     @GET
     @Path("/defaultsink")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get the default sink if defined or the first available sink.", responses = {
+    @Operation(operationId = "getAudioDefaultSink", summary = "Get the default sink if defined or the first available sink.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AudioSinkDTO.class))),
             @ApiResponse(responseCode = "404", description = "Sink not found") })
     public Response getDefaultSink(

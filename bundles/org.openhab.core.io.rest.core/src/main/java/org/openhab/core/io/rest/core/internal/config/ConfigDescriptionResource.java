@@ -95,7 +95,7 @@ public class ConfigDescriptionResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getAllConfigDescriptions", summary = "Gets all available config descriptions.", responses = {
+    @Operation(operationId = "getConfigDescriptions", summary = "Gets all available config descriptions.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigDescriptionDTO.class)))) })
     public Response getAll(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language, //
@@ -110,7 +110,7 @@ public class ConfigDescriptionResource implements RESTResource {
     @GET
     @Path("/{uri}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets a config description by URI.", responses = {
+    @Operation(operationId = "getConfigDescriptionByURI", summary = "Gets a config description by URI.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigDescriptionDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid URI syntax"),
             @ApiResponse(responseCode = "404", description = "Not found") })

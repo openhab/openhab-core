@@ -94,7 +94,7 @@ public class ItemChannelLinkResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets all available links.", responses = {
+    @Operation(operationId = "getItemLinks", summary = "Gets all available links.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ItemChannelLinkDTO.class)))) })
     public Response getAll(
             @QueryParam("channelUID") @Parameter(description = "filter by channel UID") @Nullable String channelUID,
@@ -113,7 +113,7 @@ public class ItemChannelLinkResource implements RESTResource {
 
     @GET
     @Path("/{itemName}/{channelUID}")
-    @Operation(summary = "Retrieves an individual link.", responses = {
+    @Operation(operationId = "getItemLink", summary = "Retrieves an individual link.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Content does not match the path") })
     public Response getLink(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
@@ -133,7 +133,7 @@ public class ItemChannelLinkResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName}/{channelUID}")
-    @Operation(summary = "Links item to a channel.", security = {
+    @Operation(operationId = "linkItemToChannel", summary = "Links item to a channel.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "400", description = "Content does not match the path"),
@@ -167,7 +167,7 @@ public class ItemChannelLinkResource implements RESTResource {
     @DELETE
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName}/{channelUID}")
-    @Operation(summary = "Unlinks item from a channel.", security = {
+    @Operation(operationId = "unlinkItemFromChannel", summary = "Unlinks item from a channel.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Link not found."),

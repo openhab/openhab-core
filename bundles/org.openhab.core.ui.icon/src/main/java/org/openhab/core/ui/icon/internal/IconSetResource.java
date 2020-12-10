@@ -86,7 +86,8 @@ public class IconSetResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Gets all icon sets.", responses = { @ApiResponse(responseCode = "200", description = "OK") })
+    @Operation(operationId = "getIconSets", summary = "Gets all icon sets.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
     public Response getAll(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
