@@ -76,31 +76,31 @@ public abstract class UID extends AbstractUID {
     }
 
     @Override
-    // Avoid subclasses to require importing the o.e.sh.core.common package
+    // Avoid subclasses to require importing the org.openhab.core.common package
     protected List<String> getAllSegments() {
         return super.getAllSegments();
     }
 
     @Override
-    // Avoid bindings to require importing the o.e.sh.core.common package
+    // Avoid bindings to require importing the org.openhab.core.common package
     public String toString() {
         return super.toString();
     }
 
     @Override
-    // Avoid bindings to require importing the o.e.sh.core.common package
+    // Avoid bindings to require importing the org.openhab.core.common package
     public String getAsString() {
         return super.getAsString();
     }
 
     @Override
-    // Avoid bindings to require importing the o.e.sh.core.common package
+    // Avoid bindings to require importing the org.openhab.core.common package
     public int hashCode() {
         return super.hashCode();
     }
 
     @Override
-    // Avoid bindings to require importing the o.e.sh.core.common package
+    // Avoid bindings to require importing the org.openhab.core.common package
     public boolean equals(@Nullable Object obj) {
         return super.equals(obj);
     }
