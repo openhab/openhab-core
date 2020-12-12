@@ -1440,6 +1440,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                             Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES)));
             started = true;
             readyService.markReady(MARKER);
+            logger.info("Rule engine started.");
         });
     }
 

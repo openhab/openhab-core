@@ -251,6 +251,7 @@ public class StartLevelService {
         scheduler.submit(() -> {
             StartlevelEvent startlevelEvent = SystemEventFactory.createStartlevelEvent(level);
             eventPublisher.post(startlevelEvent);
+            logger.debug("Reached start level {}", level);
         });
     }
 }
