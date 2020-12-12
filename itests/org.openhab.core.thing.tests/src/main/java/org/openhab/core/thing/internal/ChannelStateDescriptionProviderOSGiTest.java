@@ -133,8 +133,8 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
                 .state(new ChannelTypeUID("hue:color"), "Color", CoreItemFactory.COLOR).withCategory("ColorLight")
                 .build();
         final ChannelType channelType5 = ChannelTypeBuilder
-                .state(new ChannelTypeUID("hue:brightness"), "Brightness", CoreItemFactory.DIMMER)
-                .withCategory("DimmableLight").build();
+                .state(new ChannelTypeUID("hue:brightness"), "Brightness", CoreItemFactory.DIMMER).withCategory("Light")
+                .build();
         final ChannelType channelType6 = ChannelTypeBuilder
                 .state(new ChannelTypeUID("hue:switch"), "Switch", CoreItemFactory.SWITCH).withCategory("Light")
                 .build();
