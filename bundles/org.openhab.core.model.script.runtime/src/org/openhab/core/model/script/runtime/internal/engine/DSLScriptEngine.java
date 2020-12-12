@@ -146,7 +146,12 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
         for (Map.Entry<String, String> entry : IMPLICIT_VARS.entrySet()) {
             Object value = context.getAttribute(entry.getKey());
             if (value != null) {
-                evalContext.newValue(QualifiedName.create(entry.getValue()), value);
+                QualifiedName qn = QualifiedName.create(entry.getValue());
+                if (evalContext.getValue(qn) == null) {
+                    evalContext.newValue(qn, value);
+                } else {
+                    evalContext.assignValue(qn, value);
+                }
             }
         }
         // now add specific implicit vars, where we have to map the right content
