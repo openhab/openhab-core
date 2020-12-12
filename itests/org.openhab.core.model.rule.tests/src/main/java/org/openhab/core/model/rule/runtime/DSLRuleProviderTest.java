@@ -21,7 +21,6 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.xtext.naming.QualifiedName;
@@ -81,9 +80,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         readyService = getService(ReadyService.class);
         assertThat(readyService, is(notNullValue()));
-        for (String id : Set.of("items", "things", "rules", RulesRefresher.RULES_REFRESH)) {
-            readyService.markReady(new ReadyMarker("dsl", id));
-        }
+        readyService.markReady(new ReadyMarker("rules", RulesRefresher.RULES_REFRESH));
     }
 
     @AfterEach
