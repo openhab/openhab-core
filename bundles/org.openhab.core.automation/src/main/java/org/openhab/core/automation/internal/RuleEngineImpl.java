@@ -27,7 +27,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -901,7 +900,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                     return;
                 }
                 setRule(managedRule);
-            }, TimeUnit.MILLISECONDS));
+            }));
         }
     }
 
