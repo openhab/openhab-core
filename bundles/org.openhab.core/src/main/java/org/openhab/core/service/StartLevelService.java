@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This service combines different {@link ReadyMarker}s into a new start level ready marker and thus
- * let's other services depend on those, without having to know about the single markers.
+ * lets other services depend on those, without having to know about the single markers.
  * This brings an important decoupling, since the set of markers for a certain start level might
  * depend on the individual set up-
  * The start level service is therefore configurable, so that users have a chance to adapt the

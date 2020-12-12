@@ -1,6 +1,7 @@
 -include: ../itest-common.bndrun
 
 Bundle-SymbolicName: ${project.artifactId}
+Fragment-Host: org.openhab.core.automation
 
 -runrequires: bnd.identity;id='org.openhab.core.automation.integration.tests'
 
