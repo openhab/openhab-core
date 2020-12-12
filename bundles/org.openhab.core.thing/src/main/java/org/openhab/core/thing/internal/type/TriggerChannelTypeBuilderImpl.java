@@ -12,8 +12,12 @@
  */
 package org.openhab.core.thing.internal.type;
 
+import java.net.URI;
+import java.util.Set;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.TriggerChannelTypeBuilder;
@@ -28,6 +32,15 @@ import org.openhab.core.types.EventDescription;
 public class TriggerChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<TriggerChannelTypeBuilder>
         implements TriggerChannelTypeBuilder {
 
+    private class TriggerChannelTypeImpl extends ChannelType {
+        TriggerChannelTypeImpl(ChannelTypeUID uid, boolean advanced, String label, @Nullable String description,
+                @Nullable String category, @Nullable Set<String> tags, @Nullable EventDescription event,
+                @Nullable URI configDescriptionURI) throws IllegalArgumentException {
+            super(uid, advanced, null, ChannelKind.TRIGGER, label, description, category, tags, null, null, event,
+                    configDescriptionURI, null);
+        }
+    }
+
     private @Nullable EventDescription eventDescription;
 
     public TriggerChannelTypeBuilderImpl(ChannelTypeUID channelTypeUID, String label) {
@@ -40,10 +53,9 @@ public class TriggerChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Tr
         return this;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public ChannelType build() {
-        return new ChannelType(channelTypeUID, advanced, label, description, category, tags, eventDescription,
-                configDescriptionURI);
+        return new TriggerChannelTypeImpl(channelTypeUID, advanced, label, description, category, tags,
+                eventDescription, configDescriptionURI);
     }
 }

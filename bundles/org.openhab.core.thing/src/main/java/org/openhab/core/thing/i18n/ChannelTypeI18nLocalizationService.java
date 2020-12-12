@@ -78,20 +78,6 @@ public class ChannelTypeI18nLocalizationService {
         return localizedOptions;
     }
 
-    /**
-     * @deprecated use
-     *             {@link ChannelTypeI18nLocalizationService#createLocalizedStateDescriptionFragment(Bundle, StateDescription, ChannelTypeUID, Locale)}
-     *             instead.
-     */
-    @Deprecated
-    public @Nullable StateDescription createLocalizedStateDescription(final Bundle bundle,
-            final @Nullable StateDescription state, final ChannelTypeUID channelTypeUID,
-            final @Nullable Locale locale) {
-        StateDescriptionFragment stateDescriptionFragment = createLocalizedStateDescriptionFragment(bundle, state,
-                channelTypeUID, locale);
-        return stateDescriptionFragment == null ? null : stateDescriptionFragment.toStateDescription();
-    }
-
     public @Nullable StateDescriptionFragment createLocalizedStateDescriptionFragment(final Bundle bundle,
             final @Nullable StateDescription state, final ChannelTypeUID channelTypeUID,
             final @Nullable Locale locale) {
