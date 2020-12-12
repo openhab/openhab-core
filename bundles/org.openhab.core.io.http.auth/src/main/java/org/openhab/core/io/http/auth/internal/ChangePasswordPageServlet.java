@@ -25,6 +25,7 @@ import org.openhab.core.auth.AuthenticationProvider;
 import org.openhab.core.auth.ManagedUser;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
+import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -51,8 +52,9 @@ public class ChangePasswordPageServlet extends AbstractAuthPageServlet {
 
     @Activate
     public ChangePasswordPageServlet(BundleContext bundleContext, @Reference HttpService httpService,
-            @Reference UserRegistry userRegistry, @Reference AuthenticationProvider authProvider) {
-        super(bundleContext, httpService, userRegistry, authProvider);
+            @Reference UserRegistry userRegistry, @Reference AuthenticationProvider authProvider,
+            @Reference LocaleProvider localeProvider) {
+        super(bundleContext, httpService, userRegistry, authProvider, localeProvider);
         try {
             httpService.registerServlet("/changePassword", this, null, null);
         } catch (NamespaceException | ServletException e) {
@@ -102,8 +104,7 @@ public class ChangePasswordPageServlet extends AbstractAuthPageServlet {
 
             if (!params.containsKey("password_repeat") || !newPassword.equals(params.get("password_repeat")[0])) {
                 resp.setContentType("text/html;charset=UTF-8");
-                // TODO: i18n
-                resp.getWriter().append(getPageBody(params, "Passwords don't match, please try again.", false));
+                resp.getWriter().append(getPageBody(params, getLocalizedMessage("auth.password.confirm.fail"), false));
                 resp.getWriter().close();
                 return;
             }
@@ -117,7 +118,7 @@ public class ChangePasswordPageServlet extends AbstractAuthPageServlet {
             }
 
             resp.setContentType("text/html;charset=UTF-8");
-            resp.getWriter().append(getResultPageBody(params, "Password changed.")); // TODO: i18n
+            resp.getWriter().append(getResultPageBody(params, getLocalizedMessage("auth.changepassword.success")));
             resp.getWriter().close();
         } catch (AuthenticationException e) {
             processFailedLogin(resp, params, e.getMessage());
@@ -126,8 +127,8 @@ public class ChangePasswordPageServlet extends AbstractAuthPageServlet {
 
     @Override
     protected String getPageBody(Map<String, String[]> params, String message, boolean hideForm) {
-        String responseBody = pageTemplate.replace("{form_fields}", getFormFields(params));
-        String buttonLabel = "Change Password"; // TODO: i18n
+        String responseBody = getPageTemplate().replace("{form_fields}", getFormFields(params));
+        String buttonLabel = getLocalizedMessage("auth.button.changepassword");
         responseBody = responseBody.replace("{message}", message);
         responseBody = responseBody.replace("{formAction}", "/changePassword");
         responseBody = responseBody.replace("{formClass}", hideForm ? "hide" : "show");
@@ -141,7 +142,7 @@ public class ChangePasswordPageServlet extends AbstractAuthPageServlet {
     }
 
     protected String getResultPageBody(Map<String, String[]> params, String message) {
-        String responseBody = pageTemplate.replace("{form_fields}", "");
+        String responseBody = getPageTemplate().replace("{form_fields}", "");
         responseBody = responseBody.replace("{message}", message);
         responseBody = responseBody.replace("{formAction}", "/changePassword");
         responseBody = responseBody.replace("{formClass}", "hide");

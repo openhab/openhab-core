@@ -102,29 +102,29 @@ input.submit:hover {
 	<form class="{formClass}" method="POST" action="{formAction}">
 		{form_fields}
 		<div>
-			<input class="field" autocomplete="off" type="text" placeholder="User name" name="username" required autofocus />
+			<input class="field" autocomplete="off" type="text" placeholder="{usernamePlaceholder}" name="username" required autofocus />
 		</div>
 		<div>
-			<input class="field" type="password" placeholder="Password" name="password" required />
+			<input class="field" type="password" placeholder="{passwordPlaceholder}" name="password" required />
 		</div>
 		<div>
-			<input class="field" type="{newPasswordFieldType}" placeholder="New Password" name="new_password" />
+			<input class="field" type="{newPasswordFieldType}" placeholder="{newPasswordPlaceholder}" name="new_password" />
 		</div>
 		<div>
-			<input class="field" type="{repeatPasswordFieldType}" placeholder="Confirm New Password" name="password_repeat" />
+			<input class="field" type="{repeatPasswordFieldType}" placeholder="{repeatPasswordPlaceholder}" name="password_repeat" />
 		</div>
 		<div>
-			<input class="field" type="{tokenNameFieldType}" placeholder="Token Name" name="token_name" />
+			<input class="field" type="{tokenNameFieldType}" placeholder="{tokenNamePlaceholder}" name="token_name" />
 		</div>
 		<div>
-			<input class="field" type="{tokenScopeFieldType}" placeholder="Token Scope (optional)" name="token_scope" />
+			<input class="field" type="{tokenScopeFieldType}" placeholder="{tokenScopePlaceholder}" name="token_scope" />
 		</div>
 		<div>
 			<input class="submit" type="Submit" value="{buttonLabel}" />
 		</div>
 	</form>
 	<div class="result{resultClass}">
-		<a class="submit" type="button" href="/">Return Home</a>
+		<a class="submit" type="button" href="/">{returnButtonLabel}</a>
 	</div>
 </body>
 </html>
