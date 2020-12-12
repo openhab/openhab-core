@@ -27,9 +27,8 @@ import org.openhab.core.common.NamedThreadFactory;
 
 /**
  * This class is implementation of {@link TriggerHandlerCallback} used by the {@link Trigger}s to notify rule engine
- * about
- * appearing of new triggered data. There is one and only one {@link TriggerHandlerCallback} per RuleImpl and it is used
- * by all rule's {@link Trigger}s.
+ * about appearing of new triggered data. There is one and only one {@link TriggerHandlerCallback} per Rule and
+ * it is used by all rule's {@link Trigger}s.
  *
  * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - improved stability

@@ -22,9 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
@@ -48,6 +51,11 @@ import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.scheduler.CronScheduler;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyMarkerFilter;
+import org.openhab.core.service.ReadyService;
+import org.openhab.core.service.ReadyService.ReadyTracker;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 import org.osgi.service.component.annotations.Activate;
@@ -67,14 +75,18 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true, service = PersistenceManager.class)
 @NonNullByDefault
-public class PersistenceManagerImpl implements ItemRegistryChangeListener, PersistenceManager, StateChangeListener {
+public class PersistenceManagerImpl
+        implements ItemRegistryChangeListener, PersistenceManager, StateChangeListener, ReadyTracker {
 
     private final Logger logger = LoggerFactory.getLogger(PersistenceManagerImpl.class);
+
+    private final ReadyMarker marker = new ReadyMarker("persistence", "restore");
 
     // the scheduler used for timer events
     private final CronScheduler scheduler;
     private final ItemRegistry itemRegistry;
     private final SafeCaller safeCaller;
+    private final ReadyService readyService;
     private volatile boolean started = false;
 
     final Map<String, PersistenceService> persistenceServices = new HashMap<>();
@@ -83,17 +95,17 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
 
     @Activate
     public PersistenceManagerImpl(final @Reference CronScheduler scheduler, final @Reference ItemRegistry itemRegistry,
-            final @Reference SafeCaller safeCaller) {
+            final @Reference SafeCaller safeCaller, final @Reference ReadyService readyService) {
         this.scheduler = scheduler;
         this.itemRegistry = itemRegistry;
         this.safeCaller = safeCaller;
+        this.readyService = readyService;
     }
 
     @Activate
     protected void activate() {
-        allItemsChanged(Collections.emptySet());
-        started = true;
-        itemRegistry.addRegistryChangeListener(this);
+        readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
+                .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_MODEL)));
     }
 
     @Deactivate
@@ -373,11 +385,11 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
     @Override
     public void addConfig(final String dbId, final PersistenceServiceConfiguration config) {
         synchronized (persistenceServiceConfigs) {
-            if (persistenceServiceConfigs.containsKey(dbId)) {
+            if (started && persistenceServiceConfigs.containsKey(dbId)) {
                 stopEventHandling(dbId);
             }
             persistenceServiceConfigs.put(dbId, config);
-            if (persistenceServices.containsKey(dbId)) {
+            if (started && persistenceServices.containsKey(dbId)) {
                 startEventHandling(dbId);
             }
         }
@@ -464,5 +476,25 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
     @Override
     public void stateUpdated(Item item, State state) {
         handleStateEvent(item, false);
+    }
+
+    @Override
+    public void onReadyMarkerAdded(ReadyMarker readyMarker) {
+        ExecutorService scheduler = Executors.newSingleThreadExecutor(new NamedThreadFactory("persistenceManager"));
+        scheduler.submit(() -> {
+            allItemsChanged(Collections.emptySet());
+            for (String dbId : persistenceServices.keySet()) {
+                startEventHandling(dbId);
+            }
+            started = true;
+            readyService.markReady(marker);
+            itemRegistry.addRegistryChangeListener(this);
+        });
+        scheduler.shutdown();
+    }
+
+    @Override
+    public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
+        readyService.unmarkReady(marker);
     }
 }

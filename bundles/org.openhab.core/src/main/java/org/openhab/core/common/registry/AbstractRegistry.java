@@ -32,6 +32,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -82,6 +84,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
     private Optional<ManagedProvider<E, K>> managedProvider = Optional.empty();
 
     private @Nullable EventPublisher eventPublisher;
+    private @Nullable ReadyService readyService;
 
     /**
      * Constructor.
@@ -427,6 +430,11 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
             elementWriteLock.unlock();
         }
         elementsAdded.forEach(this::notifyListenersAboutAddedElement);
+
+        if (provider instanceof ManagedProvider && readyService != null) {
+            readyService.markReady(
+                    new ReadyMarker("managed", providerClazz.getSimpleName().replace("Provider", "").toLowerCase()));
+        }
         logger.debug("Provider \"{}\" has been added.", provider.getClass().getName());
     }
 
@@ -652,6 +660,14 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
 
     protected void unsetEventPublisher(EventPublisher eventPublisher) {
         this.eventPublisher = null;
+    }
+
+    protected void setReadyService(ReadyService readyService) {
+        this.readyService = readyService;
+    }
+
+    protected void unsetReadyService(ReadyService readyService) {
+        this.readyService = null;
     }
 
     /**

@@ -14,12 +14,10 @@ package org.openhab.core.model.rule.runtime.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -81,9 +79,6 @@ import org.slf4j.LoggerFactory;
 public class DSLRuleProvider
         implements RuleProvider, ModelRepositoryChangeListener, DSLScriptContextProvider, ReadyTracker {
 
-    private static final String RULES_MODEL_NAME = "rules";
-    private static final String ITEMS_MODEL_NAME = "items";
-    private static final String THINGS_MODEL_NAME = "things";
     static final String MIMETYPE_OPENHAB_DSL_RULE = "application/vnd.openhab.dsl.rule";
 
     private final Logger logger = LoggerFactory.getLogger(DSLRuleProvider.class);
@@ -91,8 +86,8 @@ public class DSLRuleProvider
     private final Map<String, Rule> rules = new ConcurrentHashMap<>();
     private final Map<String, IEvaluationContext> contexts = new ConcurrentHashMap<>();
     private final Map<String, XExpression> xExpressions = new ConcurrentHashMap<>();
+    private final ReadyMarker marker = new ReadyMarker("rules", "dslprovider");
     private int triggerId = 0;
-    private Set<String> markers = new HashSet<>();
 
     private final ModelRepository modelRepository;
     private final ReadyService readyService;
@@ -105,7 +100,8 @@ public class DSLRuleProvider
 
     @Activate
     protected void activate() {
-        readyService.registerTracker(this, new ReadyMarkerFilter().withType("dsl"));
+        readyService.registerTracker(this, new ReadyMarkerFilter().withType(RulesRefresher.RULES_REFRESH_MARKER_TYPE)
+                .withIdentifier(RulesRefresher.RULES_REFRESH));
     }
 
     @Deactivate
@@ -114,7 +110,6 @@ public class DSLRuleProvider
         rules.clear();
         contexts.clear();
         xExpressions.clear();
-        markers.clear();
     }
 
     @Override
@@ -400,35 +395,28 @@ public class DSLRuleProvider
         }
     }
 
-    private boolean isReady() {
-        return markers.containsAll(
-                Set.of(ITEMS_MODEL_NAME, THINGS_MODEL_NAME, RULES_MODEL_NAME, RulesRefresher.RULES_REFRESH));
-    }
-
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-        markers.add(readyMarker.getIdentifier());
-        if (isReady()) {
-            for (String ruleFileName : modelRepository.getAllModelNamesOfType(RULES_MODEL_NAME)) {
-                EObject model = modelRepository.getModel(ruleFileName);
-                String ruleModelName = ruleFileName.substring(0, ruleFileName.indexOf("."));
-                if (model instanceof RuleModel) {
-                    RuleModel ruleModel = (RuleModel) model;
-                    int index = 1;
-                    for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                        addRule(toRule(ruleModelName, rule, index));
-                        xExpressions.put(ruleModelName + "-" + index, rule.getScript());
-                        index++;
-                    }
-                    handleVarDeclarations(ruleModelName, ruleModel);
+        for (String ruleFileName : modelRepository.getAllModelNamesOfType("rules")) {
+            EObject model = modelRepository.getModel(ruleFileName);
+            String ruleModelName = ruleFileName.substring(0, ruleFileName.indexOf("."));
+            if (model instanceof RuleModel) {
+                RuleModel ruleModel = (RuleModel) model;
+                int index = 1;
+                for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
+                    addRule(toRule(ruleModelName, rule, index));
+                    xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                    index++;
                 }
+                handleVarDeclarations(ruleModelName, ruleModel);
             }
-            modelRepository.addModelRepositoryChangeListener(this);
         }
+        modelRepository.addModelRepositoryChangeListener(this);
+        readyService.markReady(marker);
     }
 
     @Override
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
-        markers.remove(readyMarker.getIdentifier());
+        readyService.unmarkReady(marker);
     }
 }

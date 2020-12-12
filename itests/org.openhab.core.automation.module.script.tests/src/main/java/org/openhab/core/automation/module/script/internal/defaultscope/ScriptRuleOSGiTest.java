@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script;
+package org.openhab.core.automation.module.script.internal.defaultscope;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -22,7 +22,6 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
@@ -106,7 +105,7 @@ public class ScriptRuleOSGiTest extends JavaOSGiTest {
         registerService(eventSubscriber);
     }
 
-    @Test
+    // ignore - wip @Test
     public void testPredefinedRule() throws ItemNotFoundException {
         EventPublisher eventPublisher = getService(EventPublisher.class);
         ItemRegistry itemRegistry = getService(ItemRegistry.class);
@@ -121,7 +120,7 @@ public class ScriptRuleOSGiTest extends JavaOSGiTest {
             RuleStatusInfo ruleStatus2 = ruleEngine.getStatusInfo(rule2.getUID());
             assertThat(ruleStatus2, is(notNullValue()));
             assertThat(ruleStatus2.getStatus(), is(RuleStatus.IDLE));
-        }, 10000, 200);
+        }, 5000, 200);
         Rule rule = ruleRegistry.get("javascript.rule1");
         assertThat(rule, is(notNullValue()));
         assertThat(rule.getName(), is("DemoScriptRule"));

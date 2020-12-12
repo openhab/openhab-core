@@ -48,6 +48,7 @@ import org.openhab.core.automation.events.RuleAddedEvent;
 import org.openhab.core.automation.events.RuleRemovedEvent;
 import org.openhab.core.automation.events.RuleStatusInfoEvent;
 import org.openhab.core.automation.events.RuleUpdatedEvent;
+import org.openhab.core.automation.internal.RuleEngineImpl;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.RuleTemplateProvider;
 import org.openhab.core.automation.template.Template;
@@ -75,6 +76,7 @@ import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.slf4j.Logger;
@@ -164,6 +166,10 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             assertThat(templateRegistry, is(notNullValue()));
             assertThat(managedRuleProvider, is(notNullValue()));
         }, 9000, 1000);
+
+        // start rule engine
+        ((RuleEngineImpl) ruleEngine).onReadyMarkerAdded(new ReadyMarker("", ""));
+
         logger.info("@Before.finish");
     }
 
