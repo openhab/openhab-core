@@ -160,7 +160,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_BRIGHTNESS = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "brightness"), "Brightness", "Dimmer")
-            .withDescription("Controls the brightness and switches the light on and off").withCategory("DimmableLight")
+            .withDescription("Controls the brightness and switches the light on and off").withCategory("Light")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(100)).withPattern("%d %%").build())
             .build();

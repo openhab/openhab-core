@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
  * resource without a state postfix.
  * If a specific resource for a state is available, it will be used. If not, the default icon without a state postfix is
  * used. If the state is a decimal number between 0 and 100, the implementation will look for a resource with the next
- * smaller state postfix available. Example: For category "DimmableLight" and state 84, it will check for the resources
- * dimmablelight-82.png, dimmablelight-81.png, dimmablelight-80.png and return the first one it can find.
+ * smaller state postfix available. Example: For category "Light" and state 84, it will check for the resources
+ * light-82.png, light-81.png, light-80.png and return the first one it can find.
  *
  * @author Kai Kreuzer - Initial contribution
  */
