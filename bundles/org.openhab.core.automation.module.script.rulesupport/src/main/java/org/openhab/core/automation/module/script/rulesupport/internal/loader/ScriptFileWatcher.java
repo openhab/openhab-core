@@ -301,9 +301,12 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
     @Override
     public void onReadyMarkerAdded(@NonNull ReadyMarker readyMarker) {
         started = true;
-        importResources(new File(pathToWatch));
-        scheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("scriptwatcher"));
-        scheduler.scheduleWithFixedDelay(this::checkFiles, RECHECK_INTERVAL, RECHECK_INTERVAL, TimeUnit.SECONDS);
+
+        ScheduledExecutorService localScheduler = Executors
+                .newSingleThreadScheduledExecutor(new NamedThreadFactory("scriptwatcher"));
+        scheduler = localScheduler;
+        localScheduler.submit(() -> importResources(new File(pathToWatch)));
+        localScheduler.scheduleWithFixedDelay(this::checkFiles, RECHECK_INTERVAL, RECHECK_INTERVAL, TimeUnit.SECONDS);
     }
 
     @Override
