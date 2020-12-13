@@ -14,9 +14,10 @@ package org.openhab.core.thing.factory;
 
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -29,9 +30,9 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.Configuration;
@@ -80,7 +81,7 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ProviderChangeListener<@NonNull Thing> thingChangeListener;
     private @NonNullByDefault({}) ThingManager thingManager;
 
-    @Before
+    @BeforeEach
     public void setup() {
         ThingTypeProvider thingTypeProvider = mock(ThingTypeProvider.class);
         when(thingTypeProvider.getThingType(any(), any())).thenAnswer(invocation -> {
@@ -101,7 +102,7 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
         unregisterCurrentThingsChangeListener();
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         unregisterCurrentThingsChangeListener();
         managedThingProvider.getAll().forEach(t -> managedThingProvider.remove(t.getUID()));
@@ -136,12 +137,12 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
         assertTrue(things.contains(thing2));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatTwiceAddedThingThrowsException() {
         Thing thing1 = ThingBuilder.create(THING_TYPE_UID, THING1_ID).build();
         Thing thing2 = ThingBuilder.create(THING_TYPE_UID, THING1_ID).build();
         managedThingProvider.add(thing1);
-        managedThingProvider.add(thing2);
+        assertThrows(IllegalArgumentException.class, () -> managedThingProvider.add(thing2));
     }
 
     @Test

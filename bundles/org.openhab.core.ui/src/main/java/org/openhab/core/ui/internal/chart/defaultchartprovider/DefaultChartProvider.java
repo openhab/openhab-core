@@ -17,9 +17,9 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,6 +39,7 @@ import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
@@ -262,6 +263,8 @@ public class DefaultChartProvider implements ChartProvider {
     double convertData(State state) {
         if (state instanceof DecimalType) {
             return ((DecimalType) state).doubleValue();
+        } else if (state instanceof QuantityType) {
+            return ((QuantityType<?>) state).doubleValue();
         } else if (state instanceof OnOffType) {
             return (state == OnOffType.OFF) ? 0 : 1;
         } else if (state instanceof OpenClosedType) {
@@ -328,15 +331,12 @@ public class DefaultChartProvider implements ChartProvider {
             // For 'binary' states, we need to replicate the data
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(historicItem.getTimestamp());
-                cal.add(Calendar.MILLISECOND, -1);
-                xData.add(cal.getTime());
+                xData.add(Date.from(historicItem.getTimestamp().toInstant().minus(1, ChronoUnit.MILLIS)));
                 yData.add(convertData(state));
             }
 
             state = historicItem.getState();
-            xData.add(historicItem.getTimestamp());
+            xData.add(Date.from(historicItem.getTimestamp().toInstant()));
             yData.add(convertData(state));
         }
 

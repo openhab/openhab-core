@@ -14,7 +14,7 @@ package org.openhab.core.magic.binding.internal;
 
 import static org.openhab.core.magic.binding.MagicBindingConstants.THING_TYPE_CONFIG_THING;
 
-import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -36,7 +36,7 @@ import org.osgi.service.component.annotations.Component;
 public class MagicDiscoveryService extends AbstractDiscoveryService {
 
     public MagicDiscoveryService() throws IllegalArgumentException {
-        super(Collections.singleton(THING_TYPE_CONFIG_THING), 0);
+        super(Set.of(THING_TYPE_CONFIG_THING), 0);
     }
 
     @Override

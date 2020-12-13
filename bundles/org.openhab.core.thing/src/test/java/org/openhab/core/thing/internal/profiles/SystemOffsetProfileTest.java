@@ -13,15 +13,16 @@
 package org.openhab.core.thing.internal.profiles;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Temperature;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.types.DecimalType;
@@ -40,7 +41,7 @@ import org.openhab.core.types.State;
  */
 public class SystemOffsetProfileTest {
 
-    @Before
+    @BeforeEach
     public void setup() {
         // initialize parser with ImperialUnits, otherwise units like °F are unknown
         @SuppressWarnings("unused")
@@ -64,22 +65,6 @@ public class SystemOffsetProfileTest {
     }
 
     @Test
-    public void testDecimalTypeOnStateUpdateFromItem() {
-        ProfileCallback callback = mock(ProfileCallback.class);
-        SystemOffsetProfile offsetProfile = createProfile(callback, "3");
-
-        State state = new DecimalType(23);
-        offsetProfile.onStateUpdateFromItem(state);
-
-        ArgumentCaptor<State> capture = ArgumentCaptor.forClass(State.class);
-        verify(callback, times(1)).handleUpdate(capture.capture());
-
-        State result = capture.getValue();
-        DecimalType decResult = (DecimalType) result;
-        assertEquals(20, decResult.intValue());
-    }
-
-    @Test
     public void testQuantityTypeOnCommandFromItem() {
         ProfileCallback callback = mock(ProfileCallback.class);
         SystemOffsetProfile offsetProfile = createProfile(callback, "3°C");
@@ -91,24 +76,6 @@ public class SystemOffsetProfileTest {
         verify(callback, times(1)).handleCommand(capture.capture());
 
         Command result = capture.getValue();
-        @SuppressWarnings("unchecked")
-        QuantityType<Temperature> decResult = (QuantityType<Temperature>) result;
-        assertEquals(20, decResult.intValue());
-        assertEquals(SIUnits.CELSIUS, decResult.getUnit());
-    }
-
-    @Test
-    public void testQuantityTypeOnStateUpdateFromItem() {
-        ProfileCallback callback = mock(ProfileCallback.class);
-        SystemOffsetProfile offsetProfile = createProfile(callback, "3°C");
-
-        State state = new QuantityType<>("23°C");
-        offsetProfile.onStateUpdateFromItem(state);
-
-        ArgumentCaptor<State> capture = ArgumentCaptor.forClass(State.class);
-        verify(callback, times(1)).handleUpdate(capture.capture());
-
-        State result = capture.getValue();
         @SuppressWarnings("unchecked")
         QuantityType<Temperature> decResult = (QuantityType<Temperature>) result;
         assertEquals(20, decResult.intValue());

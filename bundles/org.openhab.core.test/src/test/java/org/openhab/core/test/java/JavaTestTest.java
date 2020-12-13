@@ -12,11 +12,11 @@
  */
 package org.openhab.core.test.java;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Testing the test. Test suite for the JavaTest base test class.
@@ -27,7 +27,7 @@ public class JavaTestTest {
 
     private JavaTest javaTest;
 
-    @Before
+    @BeforeEach
     public void setup() {
         javaTest = new JavaTest();
     }
@@ -49,10 +49,10 @@ public class JavaTestTest {
         verify(afterLastCall, times(1)).run();
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void waitForAssertShouldNotCatchNPE() {
-        javaTest.waitForAssert(() -> {
-            getObject().getClass();
+        assertThrows(NullPointerException.class, () -> {
+            javaTest.waitForAssert(() -> getObject().getClass());
         });
     }
 

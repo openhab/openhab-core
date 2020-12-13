@@ -32,13 +32,14 @@ import org.slf4j.LoggerFactory;
  */
 public class GenericCronTriggerHandler extends BaseTriggerModuleHandler implements SchedulerRunnable {
 
-    private final Logger logger = LoggerFactory.getLogger(GenericCronTriggerHandler.class);
-
     public static final String MODULE_TYPE_ID = "timer.GenericCronTrigger";
     public static final String CALLBACK_CONTEXT_NAME = "CALLBACK";
     public static final String MODULE_CONTEXT_NAME = "MODULE";
 
-    private static final String CFG_CRON_EXPRESSION = "cronExpression";
+    public static final String CFG_CRON_EXPRESSION = "cronExpression";
+
+    private final Logger logger = LoggerFactory.getLogger(GenericCronTriggerHandler.class);
+
     private final CronScheduler scheduler;
     private final String expression;
     private ScheduledCompletableFuture<?> schedule;
@@ -72,6 +73,10 @@ public class GenericCronTriggerHandler extends BaseTriggerModuleHandler implemen
 
     @Override
     public void run() {
-        ((TriggerHandlerCallback) callback).triggered(module, null);
+        if (callback != null) {
+            ((TriggerHandlerCallback) callback).triggered(module, null);
+        } else {
+            logger.debug("Tried to trigger, but callback isn't available!");
+        }
     }
 }

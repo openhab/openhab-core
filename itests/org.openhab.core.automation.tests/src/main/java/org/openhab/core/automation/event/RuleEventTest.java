@@ -12,15 +12,13 @@
  */
 package org.openhab.core.automation.event;
 
+import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,8 +27,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleManager;
@@ -41,6 +39,7 @@ import org.openhab.core.automation.events.RuleAddedEvent;
 import org.openhab.core.automation.events.RuleRemovedEvent;
 import org.openhab.core.automation.events.RuleStatusInfoEvent;
 import org.openhab.core.automation.events.RuleUpdatedEvent;
+import org.openhab.core.automation.internal.RuleEngineImpl;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.common.registry.ProviderChangeListener;
@@ -57,6 +56,7 @@ import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +78,7 @@ public class RuleEventTest extends JavaOSGiTest {
     public RuleEventTest() {
     }
 
-    @Before
+    @BeforeEach
     public void before() {
         ItemProvider itemProvider = new ItemProvider() {
 
@@ -88,9 +88,9 @@ public class RuleEventTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                return Arrays.asList(new Item[] { new SwitchItem("myMotionItem"), new SwitchItem("myPresenceItem"),
+                return List.of(new SwitchItem("myMotionItem"), new SwitchItem("myPresenceItem"),
                         new SwitchItem("myLampItem"), new SwitchItem("myMotionItem2"),
-                        new SwitchItem("myPresenceItem2"), new SwitchItem("myLampItem2") });
+                        new SwitchItem("myPresenceItem2"), new SwitchItem("myLampItem2"));
             }
 
             @Override
@@ -99,6 +99,9 @@ public class RuleEventTest extends JavaOSGiTest {
         };
         registerService(itemProvider);
         registerVolatileStorageService();
+
+        // start rule engine
+        ((RuleEngineImpl) getService(RuleManager.class)).onReadyMarkerAdded(new ReadyMarker("", ""));
     }
 
     @Test
@@ -109,12 +112,8 @@ public class RuleEventTest extends JavaOSGiTest {
         EventSubscriber ruleEventHandler = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                Set<String> types = new HashSet<>();
-                types.add(RuleAddedEvent.TYPE);
-                types.add(RuleRemovedEvent.TYPE);
-                types.add(RuleStatusInfoEvent.TYPE);
-                types.add(RuleUpdatedEvent.TYPE);
-                return types;
+                return Set.of(RuleAddedEvent.TYPE, RuleRemovedEvent.TYPE, RuleStatusInfoEvent.TYPE,
+                        RuleUpdatedEvent.TYPE);
             }
 
             @Override
@@ -131,21 +130,15 @@ public class RuleEventTest extends JavaOSGiTest {
         registerService(ruleEventHandler);
 
         // Creation of RULE
-        Map<String, Object> triggerCfgEntries = new HashMap<>();
-        triggerCfgEntries.put("eventSource", "myMotionItem2");
-        triggerCfgEntries.put("eventTopic", "smarthome/*");
-        triggerCfgEntries.put("eventTypes", "ItemStateEvent");
-        Configuration triggerConfig = new Configuration(triggerCfgEntries);
+        Configuration triggerConfig = new Configuration(Map.ofEntries(entry("eventSource", "myMotionItem2"),
+                entry("eventTopic", "openhab/*"), entry("eventTypes", "ItemStateEvent")));
 
-        Map<String, Object> actionCfgEntries = new HashMap<>();
-        actionCfgEntries.put("itemName", "myLampItem2");
-        actionCfgEntries.put("command", "ON");
-        Configuration actionConfig = new Configuration(actionCfgEntries);
+        Configuration actionConfig = new Configuration(
+                Map.ofEntries(entry("itemName", "myLampItem2"), entry("command", "ON")));
 
-        List<Trigger> triggers = Collections
-                .singletonList(ModuleBuilder.createTrigger().withId("ItemStateChangeTrigger2")
-                        .withTypeUID("core.GenericEventTrigger").withConfiguration(triggerConfig).build());
-        List<Action> actions = Collections.singletonList(ModuleBuilder.createAction().withId("ItemPostCommandAction2")
+        List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId("ItemStateChangeTrigger2")
+                .withTypeUID("core.GenericEventTrigger").withConfiguration(triggerConfig).build());
+        List<Action> actions = List.of(ModuleBuilder.createAction().withId("ItemPostCommandAction2")
                 .withTypeUID("core.ItemCommandAction").withConfiguration(actionConfig).build());
 
         Rule rule = RuleBuilder.create("myRule21").withTriggers(triggers).withActions(actions)
@@ -182,7 +175,7 @@ public class RuleEventTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemCommandEvent.TYPE);
+                return Set.of(ItemCommandEvent.TYPE);
             }
 
             @Override
@@ -193,14 +186,14 @@ public class RuleEventTest extends JavaOSGiTest {
         registerService(itemEventHandler);
         eventPublisher.post(ItemEventFactory.createStateEvent("myMotionItem2", OnOffType.ON));
         waitForAssert(() -> assertThat(itemEvent, is(notNullValue())));
-        assertThat(itemEvent.getTopic(), is(equalTo("smarthome/items/myLampItem2/command")));
+        assertThat(itemEvent.getTopic(), is(equalTo("openhab/items/myLampItem2/command")));
         assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
         assertThat(ruleEvents.size(), is(not(0)));
-        assertThat(ruleEvents.stream().filter(e -> "smarthome/rules/myRule21/added".equals(e.getTopic())).findFirst()
+        assertThat(ruleEvents.stream().filter(e -> "openhab/rules/myRule21/added".equals(e.getTopic())).findFirst()
                 .isPresent(), is(true));
-        assertThat(ruleEvents.stream().filter(e -> "smarthome/rules/myRule21/state".equals(e.getTopic())).findFirst()
+        assertThat(ruleEvents.stream().filter(e -> "openhab/rules/myRule21/state".equals(e.getTopic())).findFirst()
                 .isPresent(), is(true));
-        List<Event> stateEvents = ruleEvents.stream().filter(e -> "smarthome/rules/myRule21/state".equals(e.getTopic()))
+        List<Event> stateEvents = ruleEvents.stream().filter(e -> "openhab/rules/myRule21/state".equals(e.getTopic()))
                 .collect(Collectors.toList());
         assertThat(stateEvents, is(notNullValue()));
         Optional<Event> runningEvent = stateEvents.stream()
@@ -211,7 +204,7 @@ public class RuleEventTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(RuleRemovedEvent.TYPE);
+                return Set.of(RuleRemovedEvent.TYPE);
             }
 
             @Override
@@ -230,7 +223,7 @@ public class RuleEventTest extends JavaOSGiTest {
         ruleRegistry.remove("myRule21");
         waitForAssert(() -> {
             assertThat(ruleRemovedEvent, is(notNullValue()));
-            assertThat(ruleRemovedEvent.getTopic(), is(equalTo("smarthome/rules/myRule21/removed")));
+            assertThat(ruleRemovedEvent.getTopic(), is(equalTo("openhab/rules/myRule21/removed")));
         });
     }
 }

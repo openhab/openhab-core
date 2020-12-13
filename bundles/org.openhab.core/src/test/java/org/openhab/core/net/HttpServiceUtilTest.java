@@ -13,16 +13,19 @@
 package org.openhab.core.net;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -31,19 +34,18 @@ import org.osgi.framework.ServiceReference;
 /**
  * @author Henning Treu - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class HttpServiceUtilTest {
 
     private static final String ORG_OSGI_SERVICE_HTTP_SERVICE = "org.osgi.service.http.HttpService";
     private static final String HTTP_PORT = "org.osgi.service.http.port";
     private static final String HTTP_PORT_SECURE = "org.osgi.service.http.port.secure";
 
-    @Mock
-    private BundleContext bundleContext;
+    private @Mock BundleContext bundleContext;
 
-    @Before
+    @BeforeEach
     public void setup() throws InvalidSyntaxException {
-        initMocks(this);
-
         ServiceReference<?>[] httpServiceReferences = getHttpServiceReferences();
         ServiceReference<?>[] secureHttpServiceReferences = getSecureHttpServiceReferences();
 

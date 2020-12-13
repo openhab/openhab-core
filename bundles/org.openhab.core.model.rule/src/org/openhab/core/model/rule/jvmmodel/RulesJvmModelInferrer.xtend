@@ -40,6 +40,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.eclipse.xtext.common.types.JvmFormalParameter
 import org.eclipse.emf.common.util.EList
+import org.openhab.core.events.Event
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -53,21 +54,6 @@ import org.eclipse.emf.common.util.EList
 class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
 
     private final Logger logger = LoggerFactory.getLogger(RulesJvmModelInferrer)
-
-    /** Variable name for the item in a "state triggered" or "command triggered" rule */
-    public static final String VAR_TRIGGERING_ITEM = "triggeringItem";
-
-    /** Variable name for the previous state of an item in a "changed state triggered" rule */
-    public static final String VAR_PREVIOUS_STATE = "previousState";
-
-    /** Variable name for the new state of an item in a "changed state triggered" or "updated state triggered" rule */
-    public static final String VAR_NEW_STATE = "newState";
-
-    /** Variable name for the received command in a "command triggered" rule */
-    public static final String VAR_RECEIVED_COMMAND = "receivedCommand";
-
-    /** Variable name for the received event in a "trigger event" rule */
-    public static final String VAR_RECEIVED_EVENT = "receivedEvent";
 
     /**
      * conveninence API to build and initialize JvmTypes and their members.
@@ -147,6 +133,8 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                     if ((containsCommandTrigger(rule)) || (containsStateChangeTrigger(rule)) || (containsStateUpdateTrigger(rule))) {
                         val itemTypeRef = ruleModel.newTypeRef(Item)
                         parameters += rule.toParameter(VAR_TRIGGERING_ITEM, itemTypeRef)
+                        val itemNameRef = ruleModel.newTypeRef(String)
+                        parameters += rule.toParameter(VAR_TRIGGERING_ITEM_NAME, itemNameRef)
                     }
                     if (containsCommandTrigger(rule)) {
                         val commandTypeRef = ruleModel.newTypeRef(Command)
@@ -157,7 +145,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                         parameters += rule.toParameter(VAR_PREVIOUS_STATE, stateTypeRef)
                     }
                     if (containsEventTrigger(rule)) {
-                        val eventTypeRef = ruleModel.newTypeRef(ChannelTriggeredEvent)
+                        val eventTypeRef = ruleModel.newTypeRef(String)
                         parameters += rule.toParameter(VAR_RECEIVED_EVENT, eventTypeRef)
                     }
                     if (containsThingStateChangedEventTrigger(rule) && !containsParam(parameters, VAR_PREVIOUS_STATE)) {

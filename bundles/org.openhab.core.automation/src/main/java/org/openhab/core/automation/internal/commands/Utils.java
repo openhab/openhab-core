@@ -42,7 +42,7 @@ public class Utils {
     static Map<String, String> putInHastable(String[] strings) {
         Hashtable<String, String> sorted = new Hashtable<>();
         for (int i = 0; i < strings.length; i++) {
-            sorted.put(new Integer(i + 1).toString(), strings[i]);
+            sorted.put(String.valueOf(i + 1), strings[i]);
         }
         return sorted;
     }

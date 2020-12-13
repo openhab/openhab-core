@@ -12,23 +12,27 @@
  */
 package org.openhab.core.config.discovery.internal;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -56,45 +60,40 @@ import org.openhab.core.thing.type.ThingTypeRegistry;
 
 /**
  * @author Simon Kaufmann - Initial contribution
+ * @author Laurent Garnier - Added tests testApproveWithThingId and testApproveWithInvalidThingId
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class PersistentInboxTest {
+
+    private static final String THING_OTHER_ID = "other";
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("test", "test");
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "test");
+    private static final ThingUID THING_OTHER_UID = new ThingUID(THING_TYPE_UID, THING_OTHER_ID);
 
     private PersistentInbox inbox;
-
-    @Mock
-    private ThingRegistry thingRegistry;
     private Thing lastAddedThing = null;
 
-    @Mock
-    private StorageService storageService;
+    private @Mock ThingRegistry thingRegistry;
+    private @Mock StorageService storageService;
+    private @Mock Storage<Object> storage;
+    private @Mock ManagedThingProvider thingProvider;
+    private @Mock ThingTypeRegistry thingTypeRegistry;
+    private @Mock ConfigDescriptionRegistry configDescriptionRegistry;
+    private @Mock ThingHandlerFactory thingHandlerFactory;
 
-    @Mock
-    private Storage<Object> storage;
-
-    @Mock
-    private ManagedThingProvider thingProvider;
-
-    @Mock
-    private ThingTypeRegistry thingTypeRegistry;
-
-    @Mock
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-
-    @Mock
-    private ThingHandlerFactory thingHandlerFactory;
-
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
         when(storageService.getStorage(any(String.class), any(ClassLoader.class))).thenReturn(storage);
         doAnswer(invocation -> lastAddedThing = (Thing) invocation.getArguments()[0]).when(thingRegistry)
                 .add(any(Thing.class));
         when(thingHandlerFactory.supportsThingType(eq(THING_TYPE_UID))).thenReturn(true);
         when(thingHandlerFactory.createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_UID), any()))
                 .then(invocation -> ThingBuilder.create(THING_TYPE_UID, "test")
+                        .withConfiguration((Configuration) invocation.getArguments()[1]).build());
+        when(thingHandlerFactory.createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_OTHER_UID), any()))
+                .then(invocation -> ThingBuilder.create(THING_TYPE_UID, THING_OTHER_ID)
                         .withConfiguration((Configuration) invocation.getArguments()[1]).build());
 
         inbox = new PersistentInbox(storageService, mock(DiscoveryServiceRegistry.class), thingRegistry, thingProvider,
@@ -121,7 +120,7 @@ public class PersistentInboxTest {
     }
 
     @Test
-    public void testConfigUpdateNormalizationWithConfigDescription() throws Exception {
+    public void testConfigUpdateNormalizationWithConfigDescription() throws URISyntaxException {
         Map<String, Object> props = new HashMap<>();
         props.put("foo", "1");
         Configuration config = new Configuration(props);
@@ -139,16 +138,41 @@ public class PersistentInboxTest {
     }
 
     @Test
-    public void testApproveNormalization() throws Exception {
+    public void testApproveNormalization() throws URISyntaxException {
         DiscoveryResult result = DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
-        when(storage.getValues()).thenReturn(Collections.singletonList(result));
+        when(storage.getValues()).thenReturn(List.of(result));
 
         inbox.activate();
-        inbox.approve(THING_UID, "Test");
+        inbox.approve(THING_UID, "Test", null);
 
+        assertEquals(THING_UID, lastAddedThing.getUID());
         assertTrue(lastAddedThing.getConfiguration().get("foo") instanceof String);
         assertEquals("3", lastAddedThing.getConfiguration().get("foo"));
+    }
+
+    @Test
+    public void testApproveWithThingId() throws URISyntaxException {
+        DiscoveryResult result = DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build();
+        configureConfigDescriptionRegistryMock("foo", Type.TEXT);
+        when(storage.getValues()).thenReturn(List.of(result));
+
+        inbox.activate();
+        inbox.approve(THING_UID, "Test", THING_OTHER_ID);
+
+        assertEquals(THING_OTHER_UID, lastAddedThing.getUID());
+        assertTrue(lastAddedThing.getConfiguration().get("foo") instanceof String);
+        assertEquals("3", lastAddedThing.getConfiguration().get("foo"));
+    }
+
+    @Test
+    public void testApproveWithInvalidThingId() throws URISyntaxException {
+        DiscoveryResult result = DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build();
+        configureConfigDescriptionRegistryMock("foo", Type.TEXT);
+        when(storage.getValues()).thenReturn(List.of(result));
+
+        inbox.activate();
+        assertNull(inbox.approve(THING_UID, "Test", "invalid:id"));
     }
 
     @Test

@@ -12,20 +12,23 @@
  */
 package org.openhab.core.config.core.internal.metadata;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.openhab.core.config.core.internal.metadata.MetadataConfigDescriptionProviderImpl.*;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -38,6 +41,8 @@ import org.openhab.core.test.java.JavaTest;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
 
     private static final String LIBERAL = "liberal";
@@ -53,18 +58,17 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
 
     private MetadataConfigDescriptionProviderImpl service;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
         service = new MetadataConfigDescriptionProviderImpl();
 
         when(mockProviderRestricted.getNamespace()).thenReturn(RESTRICTED);
         when(mockProviderRestricted.getDescription(any())).thenReturn("Restricted");
-        when(mockProviderRestricted.getParameterOptions(any())).thenReturn(Arrays.asList( //
+        when(mockProviderRestricted.getParameterOptions(any())).thenReturn(List.of( //
                 new ParameterOption("dimmer", "Dimmer"), //
                 new ParameterOption("switch", "Switch") //
         ));
-        when(mockProviderRestricted.getParameters(eq("dimmer"), any())).thenReturn(Arrays.asList( //
+        when(mockProviderRestricted.getParameters(eq("dimmer"), any())).thenReturn(List.of( //
                 ConfigDescriptionParameterBuilder.create("width", Type.INTEGER).build(), //
                 ConfigDescriptionParameterBuilder.create("height", Type.INTEGER).build() //
         ));

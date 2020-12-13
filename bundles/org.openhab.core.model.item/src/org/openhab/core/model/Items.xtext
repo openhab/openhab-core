@@ -9,11 +9,11 @@ import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
 generate items "https://openhab.org/model/Items"
 
-ItemModel :
+ItemModel:
 	{ItemModel} (items+=ModelItem)*
 ;
 
-ModelItem :
+ModelItem:
 	(ModelNormalItem | ModelGroupItem) name=ID
 	(label=STRING)?
 	('<' icon=(ID|STRING) '>')?
@@ -22,28 +22,28 @@ ModelItem :
 	('{' bindings+=ModelBinding (',' bindings+=ModelBinding)* '}')? 
 ;
 
-ModelGroupItem :
+ModelGroupItem:
 	{ModelGroupItem} 'Group' (':' type=ModelItemType ( ':' function=ModelGroupFunction ('(' args+=(ID|STRING) (',' args+=(ID|STRING))* ')')?)?)?
 ;
 
-enum ModelGroupFunction :
+enum ModelGroupFunction:
 	EQUALITY='EQUALITY' | AND='AND' | OR='OR' | NAND='NAND' | NOR='NOR' | AVG='AVG' | SUM='SUM' | MAX='MAX' | MIN='MIN' | COUNT='COUNT' | LATEST='LATEST' | EARLIEST='EARLIEST'
 ;
 
-ModelNormalItem :
+ModelNormalItem:
 	type=ModelItemType
 ;
 
-ModelItemType :
+ModelItemType:
 	BaseModelItemType | ('Number' (':' ID)?)
 ;
-BaseModelItemType :
+BaseModelItemType:
 	'Switch' | 'Rollershutter' | 'String' | 'Dimmer' | 'Contact' | 'DateTime' | 'Color' | 'Player' | 'Location' | 'Call' | 'Image'
 ;
 
 ModelBinding:
-	type=ID '=' configuration=STRING   
-	('['
+    type=ID '=' configuration=STRING
+    ('['
         properties+=ModelProperty? (',' properties+=ModelProperty)*
     ']')?
 ;
@@ -61,18 +61,20 @@ BOOLEAN returns ecore::EBoolean:
 ;
 
 NUMBER returns ecore::EBigDecimal:
-    ID ('.' ID )?
+    ('-')? ID ('.' ID )?
 ;
 
-terminal ID  		: '^'?('a'..'z'|'A'..'Z'|'_'|'0'..'9') ('a'..'z'|'A'..'Z'|'_'|'-'|'0'..'9')*;
+terminal ID: '^'?('a'..'z'|'A'..'Z'|'_'|'0'..'9') ('a'..'z'|'A'..'Z'|'_'|'-'|'0'..'9')*;
 
-terminal STRING	: 
+terminal STRING:
 			'"' ( '\\' ('b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\') | !('\\'|'"') )* '"' |
 			"'" ( '\\' ('b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\') | !('\\'|"'") )* "'"
-		; 
-terminal ML_COMMENT	: '/*' -> '*/';
-terminal SL_COMMENT 	: '//' !('\n'|'\r')* ('\r'? '\n')?;
+;
 
-terminal WS			: (' '|'\t'|'\r'|'\n')+;
+terminal ML_COMMENT: '/*' -> '*/';
+
+terminal SL_COMMENT: '//' !('\n'|'\r')* ('\r'? '\n')?;
+
+terminal WS: (' '|'\t'|'\r'|'\n')+;
 
 terminal ANY_OTHER: .;

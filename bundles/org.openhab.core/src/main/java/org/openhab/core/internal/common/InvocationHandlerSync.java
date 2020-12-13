@@ -45,7 +45,7 @@ public class InvocationHandlerSync<T> extends AbstractInvocationHandler<T> imple
     }
 
     @Override
-    public @Nullable Object invoke(@Nullable Object proxy, @Nullable Method method, Object @Nullable [] args)
+    public @Nullable Object invoke(Object proxy, @Nullable Method method, @Nullable Object @Nullable [] args)
             throws Throwable {
         if (method != null) {
             Invocation invocation = new Invocation(this, method, args);

@@ -12,7 +12,7 @@
  */
 package org.openhab.core.library.items;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashSet;
 import java.util.LinkedList;

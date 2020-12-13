@@ -15,10 +15,8 @@ package org.openhab.core.automation.internal;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -54,44 +52,42 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
 
     private TriggerType createTriggerType() {
         List<Output> outputs = new ArrayList<>(3);
-        outputs.add(createOutput("out1", new String[] { "tagA" }));
-        outputs.add(createOutput("out2", new String[] { "tagB", "tagC" }));
-        outputs.add(createOutput("out3", new String[] { "tagA", "tagB", "tagC" }));
+        outputs.add(createOutput("out1", Set.of("tagA")));
+        outputs.add(createOutput("out2", Set.of("tagB", "tagC")));
+        outputs.add(createOutput("out3", Set.of("tagA", "tagB", "tagC")));
         TriggerType t = new TriggerType(TRIGGER_TYPE, null, outputs);
         return t;
     }
 
     private ConditionType createConditionType() {
         List<Input> inputs = new ArrayList<>(3);
-        inputs.add(createInput("in0", new String[] { "tagE" })); // no connection, missing condition tag
-        inputs.add(createInput("in1", new String[] { "tagA" })); // conflict in2 -> out1 or in2 -> out3
-        inputs.add(createInput("in2", new String[] { "tagA", "tagB" })); // in2 -> out3
+        inputs.add(createInput("in0", Set.of("tagE"))); // no connection, missing condition tag
+        inputs.add(createInput("in1", Set.of("tagA"))); // conflict in2 -> out1 or in2 -> out3
+        inputs.add(createInput("in2", Set.of("tagA", "tagB"))); // in2 -> out3
         ConditionType t = new ConditionType(CONDITION_TYPE, null, inputs);
         return t;
     }
 
     private ActionType createActionType() {
         List<Input> inputs = new ArrayList<>(3);
-        inputs.add(createInput("in3", new String[] { "tagD" })); // conflict in3 -> out4 or in3 -> out5
-        inputs.add(createInput("in4", new String[] { "tagD", "tagE" })); // in4 -> out5
-        inputs.add(createInput("in5", new String[] { "tagA", "tagB", "tagC" })); // in5 -> out3
-        inputs.add(createInput("in6", new String[] { "tagA", "tagB" })); // conflict in6 has user defined connection
+        inputs.add(createInput("in3", Set.of("tagD"))); // conflict in3 -> out4 or in3 -> out5
+        inputs.add(createInput("in4", Set.of("tagD", "tagE"))); // in4 -> out5
+        inputs.add(createInput("in5", Set.of("tagA", "tagB", "tagC"))); // in5 -> out3
+        inputs.add(createInput("in6", Set.of("tagA", "tagB"))); // conflict in6 has user defined connection
 
         List<Output> outputs = new ArrayList<>(3);
-        outputs.add(createOutput("out4", new String[] { "tagD" }));
-        outputs.add(createOutput("out5", new String[] { "tagD", "tagE" }));
+        outputs.add(createOutput("out4", Set.of("tagD")));
+        outputs.add(createOutput("out5", Set.of("tagD", "tagE")));
         ActionType t = new ActionType(ACTION_TYPE, null, inputs, outputs);
         return t;
     }
 
-    private Output createOutput(String name, String[] tags) {
-        Set<String> tagSet = new HashSet<>(Arrays.asList(tags));
-        return new Output(name, String.class.getName(), null, null, tagSet, null, null);
+    private Output createOutput(String name, Set<String> tags) {
+        return new Output(name, String.class.getName(), null, null, tags, null, null);
     }
 
-    private Input createInput(String name, String[] tags) {
-        Set<String> tagSet = new HashSet<>(Arrays.asList(tags));
-        return new Input(name, String.class.getName(), null, null, tagSet, false, null, null);
+    private Input createInput(String name, Set<String> tags) {
+        return new Input(name, String.class.getName(), null, null, tags, false, null, null);
     }
 
     @Override

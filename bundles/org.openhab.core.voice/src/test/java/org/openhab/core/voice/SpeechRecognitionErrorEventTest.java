@@ -12,8 +12,9 @@
  */
 package org.openhab.core.voice;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Test SpeechRecognitionErrorEvent event
@@ -28,7 +29,7 @@ public class SpeechRecognitionErrorEventTest {
     @Test
     public void testConstructor() {
         SpeechRecognitionErrorEvent sRE = new SpeechRecognitionErrorEvent("Message");
-        Assert.assertNotNull("SpeechRecognitionErrorEvent(String) constructor failed", sRE);
+        assertNotNull(sRE, "SpeechRecognitionErrorEvent(String) constructor failed");
     }
 
     /**
@@ -37,6 +38,6 @@ public class SpeechRecognitionErrorEventTest {
     @Test
     public void getMessageTest() {
         SpeechRecognitionErrorEvent sRE = new SpeechRecognitionErrorEvent("Message");
-        Assert.assertEquals("SpeechRecognitionErrorEvent.getMessage() method failed", "Message", sRE.getMessage());
+        assertEquals("Message", sRE.getMessage(), "SpeechRecognitionErrorEvent.getMessage() method failed");
     }
 }

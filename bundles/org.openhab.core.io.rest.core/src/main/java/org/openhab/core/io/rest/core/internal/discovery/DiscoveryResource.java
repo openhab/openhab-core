@@ -42,11 +42,14 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for discovery and is registered with the
@@ -58,6 +61,7 @@ import io.swagger.annotations.ApiResponses;
  * @author Ivaylo Ivanov - Added payload to the response of <code>scan</code>
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component(service = { RESTResource.class, DiscoveryResource.class })
 @JaxrsResource
@@ -66,7 +70,8 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(DiscoveryResource.PATH_DISCOVERY)
 @RolesAllowed({ Role.ADMIN })
-@Api(DiscoveryResource.PATH_DISCOVERY)
+@SecurityRequirement(name = "oauth2", scopes = { "admin" })
+@Tag(name = DiscoveryResource.PATH_DISCOVERY)
 @NonNullByDefault
 public class DiscoveryResource implements RESTResource {
 
@@ -84,9 +89,8 @@ public class DiscoveryResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets all bindings that support discovery.", response = String.class, responseContainer = "Set")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "Set") })
+    @Operation(operationId = "getBindingsWithDiscoverySupport", summary = "Gets all bindings that support discovery.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class), uniqueItems = true))) })
     public Response getDiscoveryServices() {
         Collection<String> supportedBindings = discoveryServiceRegistry.getSupportedBindings();
         return Response.ok(new LinkedHashSet<>(supportedBindings)).build();
@@ -95,9 +99,9 @@ public class DiscoveryResource implements RESTResource {
     @POST
     @Path("/bindings/{bindingId}/scan")
     @Produces(MediaType.TEXT_PLAIN)
-    @ApiOperation(value = "Starts asynchronous discovery process for a binding and returns the timeout in seconds of the discovery operation.", response = Integer.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Integer.class) })
-    public Response scan(@PathParam("bindingId") @ApiParam(value = "bindingId") final String bindingId) {
+    @Operation(operationId = "scan", summary = "Starts asynchronous discovery process for a binding and returns the timeout in seconds of the discovery operation.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integer.class))) })
+    public Response scan(@PathParam("bindingId") @Parameter(description = "bindingId") final String bindingId) {
         discoveryServiceRegistry.startScan(bindingId, new ScanListener() {
             @Override
             public void onErrorOccurred(@Nullable Exception exception) {

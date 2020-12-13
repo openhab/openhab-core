@@ -2,7 +2,7 @@
 	"triggers": [
 		{
 			"uid": "timer.GenericCronTrigger",
-			"label": "Cron Trigger",
+			"label": "cron trigger",
 			"description": "This triggers a rule based on a cron expression",
 			"configDescriptions": [
 				{

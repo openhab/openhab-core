@@ -34,6 +34,7 @@ public class MagicOnOffLightHandler extends BaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
+        triggerChannel("trigger", command.toString());
     }
 
     @Override

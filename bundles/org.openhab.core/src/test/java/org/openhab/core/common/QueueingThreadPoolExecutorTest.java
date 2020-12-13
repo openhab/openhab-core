@@ -12,13 +12,13 @@
  */
 package org.openhab.core.common;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +39,7 @@ public class QueueingThreadPoolExecutorTest {
     /**
      * We can enable logging for all test cases.
      */
-    @Before
+    @BeforeEach
     public void setUp() {
         // enable to see logging. See below how to include slf4j-simple
         // enableLogging();
@@ -68,19 +68,19 @@ public class QueueingThreadPoolExecutorTest {
     /**
      * Tests what happens when poolName == null.
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateInstanceInvalidArgsPoolNameNull() throws InterruptedException {
-        QueueingThreadPoolExecutor.createInstance(null, 1);
+        assertThrows(IllegalArgumentException.class, () -> QueueingThreadPoolExecutor.createInstance(null, 1));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateInstanceInvalidArgsPoolSize0() {
-        QueueingThreadPoolExecutor.createInstance("test", 0);
+        assertThrows(IllegalArgumentException.class, () -> QueueingThreadPoolExecutor.createInstance("test", 0));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateInstanceInvalidArgsPoolSizeMinus1() {
-        QueueingThreadPoolExecutor.createInstance("test", -1);
+        assertThrows(IllegalArgumentException.class, () -> QueueingThreadPoolExecutor.createInstance("test", -1));
     }
 
     /**
@@ -93,7 +93,7 @@ public class QueueingThreadPoolExecutorTest {
         ThreadPoolExecutor pool = QueueingThreadPoolExecutor.createInstance(poolName, 2);
 
         assertEquals(pool.getActiveCount(), 0);
-        assertEquals(pool.allowsCoreThreadTimeOut(), true);
+        assertTrue(pool.allowsCoreThreadTimeOut());
         assertEquals(pool.getCompletedTaskCount(), 0);
         assertEquals(pool.getCorePoolSize(), 1);
         assertEquals(pool.getMaximumPoolSize(), 2);
@@ -107,14 +107,14 @@ public class QueueingThreadPoolExecutorTest {
         pool.shutdown();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPoolWithBlankPoolName() throws InterruptedException {
-        basicTestForPoolName(" ");
+        assertThrows(IllegalArgumentException.class, () -> basicTestForPoolName(" "));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPoolWithEmptyPoolName() throws InterruptedException {
-        basicTestForPoolName("");
+        assertThrows(IllegalArgumentException.class, () -> basicTestForPoolName(""));
     }
 
     /**
@@ -148,7 +148,7 @@ public class QueueingThreadPoolExecutorTest {
         assertEquals(pool.getActiveCount(), 1);
         assertTrue(isPoolThreadActive(poolName, 1));
         Thread t1 = getThread(poolName + "-1");
-        assertEquals(t1.isDaemon(), false);
+        assertFalse(t1.isDaemon());
         // thread will be NORM prio or max prio of this thread group, which can
         // < than NORM
         int prio1 = Math.min(t1.getThreadGroup().getMaxPriority(), Thread.NORM_PRIORITY);
@@ -158,7 +158,7 @@ public class QueueingThreadPoolExecutorTest {
         assertEquals(pool.getActiveCount(), 2);
         assertTrue(isPoolThreadActive(poolName, 2));
         Thread t2 = getThread(poolName + "-2");
-        assertEquals(t2.isDaemon(), false);
+        assertFalse(t2.isDaemon());
         // thread will be NORM prio or max prio of this thread group, which can
         // < than NORM
         int prio2 = Math.min(t2.getThreadGroup().getMaxPriority(), Thread.NORM_PRIORITY);
@@ -189,11 +189,11 @@ public class QueueingThreadPoolExecutorTest {
     /**
      * Tests what happens when wrong rejected execution handler will be used.
      */
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testSetInvalidRejectionHandler() throws InterruptedException {
-        String poolName = "testShutdownNoEntriesIntoQueueAnymore";
-        ThreadPoolExecutor pool = QueueingThreadPoolExecutor.createInstance(poolName, 2);
-        pool.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
+        ThreadPoolExecutor pool = QueueingThreadPoolExecutor.createInstance("testShutdownNoEntriesIntoQueueAnymore", 2);
+        assertThrows(UnsupportedOperationException.class,
+                () -> pool.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy()));
     }
 
     // helper methods

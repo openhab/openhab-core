@@ -24,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 import org.openhab.core.config.core.ConfigDescriptionRegistry
 import org.openhab.core.config.core.ConfigUtil
 import org.openhab.core.config.core.Configuration
+import org.openhab.core.common.AbstractUID
 import org.openhab.core.common.registry.AbstractProvider
 import org.openhab.core.i18n.LocaleProvider
 import org.openhab.core.service.ReadyMarker
@@ -73,9 +74,9 @@ import org.slf4j.LoggerFactory
  * @author Markus Rathgeb - Add locale provider support
  */
 @Component(immediate=true, service=ThingProvider)
-class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvider, ModelRepositoryChangeListener, ReadyService.ReadyTracker {
+class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implements ThingProvider, ModelRepositoryChangeListener, ReadyService.ReadyTracker {
 
-    private static final String XML_THING_TYPE = "esh.xmlThingTypes";
+    private static final String XML_THING_TYPE = "openhab.xmlThingTypes";
 
     private LocaleProvider localeProvider
 
@@ -122,15 +123,18 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
             flattenModelThings(model.things).map [
                 // Get the ThingHandlerFactories
                 val ThingUID thingUID = constructThingUID
-                if (thingUID !== null) {
-                    val thingTypeUID = constructThingTypeUID(thingUID)
-                    return thingHandlerFactories.findFirst [
-                        supportsThingType(thingTypeUID)
-                    ]
-                } else {
+                if (thingUID === null) {
                     // ignore the Thing because its definition is broken
                     return null
                 }
+                val thingTypeUID = constructThingTypeUID(thingUID)
+                if (thingTypeUID === null) {
+                    // ignore the Thing because its definition is broken
+                    return null
+                }
+                return thingHandlerFactories.findFirst [
+                    supportsThingType(thingTypeUID)
+                ]
             ]?.filter [
                 // Drop it if there is no ThingHandlerFactory yet which can handle it 
                 it !== null
@@ -161,8 +165,12 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
         if (modelThing.thingTypeId !== null) {
             return new ThingTypeUID(thingUID.bindingId, modelThing.thingTypeId)
         } else {
-            return new ThingTypeUID(thingUID.bindingId, thingUID.thingTypeId)
+            val String[] segments = thingUID.getAsString.split(AbstractUID.SEPARATOR)
+            if (!segments.get(1).isEmpty) {
+                return new ThingTypeUID(thingUID.bindingId, segments.get(1))
+            }
         }
+        return null
     }
 
     def private Iterable<ModelThing> flattenModelThings(Iterable<ModelThing> things) {
@@ -195,6 +203,10 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
             return
         }
         val thingTypeUID = modelThing.constructThingTypeUID(thingUID)
+        if (thingTypeUID === null) {
+            // ignore the Thing because its definition is broken
+            return
+        }
 
         if (!isSupportedByThingHandlerFactory(thingTypeUID, thingHandlerFactory)) {
             // return silently, we were not asked to do anything
@@ -359,10 +371,11 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
                             label = resolvedChannelType.label
                         }
                         autoUpdatePolicy = resolvedChannelType.autoUpdatePolicy
-                        if (resolvedChannelType.configDescriptionURI !== null) {
+                        val cfgDescUriOfresolvedChannelType = resolvedChannelType.configDescriptionURI
+                        if (cfgDescUriOfresolvedChannelType !== null) {
                             ConfigUtil.applyDefaultConfiguration(configuration,
                                 configDescriptionRegistry.getConfigDescription(
-                                resolvedChannelType.configDescriptionURI))
+                                cfgDescUriOfresolvedChannelType))
                         }
                     } else {
                         logger.error("Channel type {} could not be resolved.", channelTypeUID.asString)

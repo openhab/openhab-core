@@ -253,7 +253,7 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
         }
     }
 
-    protected void notifyListeners(ModuleType oldElement, ModuleType newElement) {
+    protected void notifyListeners(@Nullable ModuleType oldElement, ModuleType newElement) {
         synchronized (listeners) {
             for (ProviderChangeListener<ModuleType> listener : listeners) {
                 if (oldElement != null) {
@@ -264,7 +264,7 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
         }
     }
 
-    protected void notifyListeners(ModuleType removedObject) {
+    protected void notifyListeners(@Nullable ModuleType removedObject) {
         if (removedObject != null) {
             synchronized (listeners) {
                 for (ProviderChangeListener<ModuleType> listener : listeners) {

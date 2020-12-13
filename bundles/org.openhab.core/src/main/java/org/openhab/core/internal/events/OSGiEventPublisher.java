@@ -67,7 +67,7 @@ public class OSGiEventPublisher implements EventPublisher {
                     if (event.getSource() != null) {
                         properties.put("source", event.getSource());
                     }
-                    eventAdmin.postEvent(new org.osgi.service.event.Event("smarthome", properties));
+                    eventAdmin.postEvent(new org.osgi.service.event.Event("openhab", properties));
                     return null;
                 }
             });

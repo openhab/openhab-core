@@ -20,6 +20,7 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataProvider;
 import org.openhab.core.items.MetadataRegistry;
+import org.openhab.core.service.ReadyService;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -69,6 +70,17 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
     @Override
     protected void unsetEventPublisher(EventPublisher eventPublisher) {
         super.unsetEventPublisher(eventPublisher);
+    }
+
+    @Override
+    @Reference
+    protected void setReadyService(ReadyService readyService) {
+        super.setReadyService(readyService);
+    }
+
+    @Override
+    protected void unsetReadyService(ReadyService readyService) {
+        super.unsetReadyService(readyService);
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)

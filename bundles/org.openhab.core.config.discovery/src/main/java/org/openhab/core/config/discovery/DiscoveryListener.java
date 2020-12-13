@@ -68,26 +68,6 @@ public interface DiscoveryListener {
      *            {@code ThingType}s will be removed; if {@code null} then
      *            {@link DiscoveryService#getSupportedThingTypes()} will be used
      *            instead
-     * @return collection of thing UIDs of all removed things
-     * @deprecated use {@link #removeOlderResults(DiscoveryService, long, Collection, ThingUID)} instead
-     */
-    @Deprecated
-    default @Nullable Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
-            @Nullable Collection<ThingTypeUID> thingTypeUIDs) {
-        return removeOlderResults(source, timestamp, thingTypeUIDs, null);
-    }
-
-    /**
-     * Removes all results belonging to one of the given types that are older
-     * than the given timestamp.
-     *
-     * @param source the discovery service which is the source of this event (not
-     *            null)
-     * @param timestamp timestamp, all <b>older</b> results will be removed
-     * @param thingTypeUIDs collection of {@code ThingType}s, only results of these
-     *            {@code ThingType}s will be removed; if {@code null} then
-     *            {@link DiscoveryService#getSupportedThingTypes()} will be used
-     *            instead
      * @param bridgeUID if not {@code null} only results of that bridge are being removed
      * @return collection of thing UIDs of all removed things
      */

@@ -37,12 +37,13 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.auth.Role;
-import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.config.core.ConfigurableServiceUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
@@ -65,19 +66,24 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * {@link ConfigurableServiceResource} provides access to configurable services. It lists the available services and
- * allows to get, update and delete the configuration for a service ID. See also {@link ConfigurableService}.
+ * {@link ConfigurableServiceResource} provides access to configurable services.
+ * It lists the available services and allows to get, update and delete the
+ * configuration for a service ID. See also {@link ConfigurableService}.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component(service = { RESTResource.class, ConfigurableServiceResource.class })
 @JaxrsResource
@@ -86,21 +92,13 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(ConfigurableServiceResource.PATH_SERVICES)
 @RolesAllowed({ Role.ADMIN })
-@Api(ConfigurableServiceResource.PATH_SERVICES)
+@SecurityRequirement(name = "oauth2", scopes = { "admin" })
+@Tag(name = ConfigurableServiceResource.PATH_SERVICES)
 @NonNullByDefault
 public class ConfigurableServiceResource implements RESTResource {
 
     /** The URI path to this resource */
     public static final String PATH_SERVICES = "services";
-
-    // all singleton services without multi-config services
-    private static final String CONFIGURABLE_SERVICE_FILTER = "(&("
-            + ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=*)(!("
-            + ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE + "=*)))";
-
-    // all multi-config services without singleton services
-    private static final String CONFIGURABLE_MULTI_CONFIG_SERVICE_FILTER = "("
-            + ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE + "=*)";
 
     private final Logger logger = LoggerFactory.getLogger(ConfigurableServiceResource.class);
 
@@ -120,9 +118,8 @@ public class ConfigurableServiceResource implements RESTResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get all configurable services.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ConfigurableServiceDTO.class, responseContainer = "List") })
+    @Operation(operationId = "getServices", summary = "Get all configurable services.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigurableServiceDTO.class)))) })
     public List<ConfigurableServiceDTO> getAll() {
         List<ConfigurableServiceDTO> services = getConfigurableServices();
         return services;
@@ -131,10 +128,10 @@ public class ConfigurableServiceResource implements RESTResource {
     @GET
     @Path("/{serviceId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get configurable service for given service ID.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ConfigurableServiceDTO.class),
-            @ApiResponse(code = 404, message = "Not found") })
-    public Response getById(@PathParam("serviceId") @ApiParam(value = "service ID") String serviceId) {
+    @Operation(operationId = "getServicesById", summary = "Get configurable service for given service ID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigurableServiceDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Not found") })
+    public Response getById(@PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         ConfigurableServiceDTO configurableService = getServiceById(serviceId);
         if (configurableService != null) {
             return Response.ok(configurableService).build();
@@ -171,11 +168,10 @@ public class ConfigurableServiceResource implements RESTResource {
     @GET
     @Path("/{serviceId}/contexts")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get existing multiple context service configurations for the given factory PID.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ConfigurableServiceDTO.class, responseContainer = "List") })
+    @Operation(operationId = "getServiceContext", summary = "Get existing multiple context service configurations for the given factory PID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigurableServiceDTO.class)))) })
     public List<ConfigurableServiceDTO> getMultiConfigServicesByFactoryPid(
-            @PathParam("serviceId") @ApiParam(value = "service ID") String serviceId) {
+            @PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         List<ConfigurableServiceDTO> services = collectServicesById(serviceId);
         return services;
     }
@@ -188,10 +184,10 @@ public class ConfigurableServiceResource implements RESTResource {
     @GET
     @Path("/{serviceId}/config")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get service configuration for given service ID.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 500, message = "Configuration can not be read due to internal error") })
-    public Response getConfiguration(@PathParam("serviceId") @ApiParam(value = "service ID") String serviceId) {
+    @Operation(operationId = "getServiceConfig", summary = "Get service configuration for given service ID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "500", description = "Configuration can not be read due to internal error") })
+    public Response getConfiguration(@PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         try {
             Configuration configuration = configurationService.get(serviceId);
             return configuration != null ? Response.ok(configuration.getProperties()).build()
@@ -206,11 +202,11 @@ public class ConfigurableServiceResource implements RESTResource {
     @Path("/{serviceId}/config")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Updates a service configuration for given service ID and returns the old configuration.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 204, message = "No old configuration"),
-            @ApiResponse(code = 500, message = "Configuration can not be updated due to internal error") })
-    public Response updateConfiguration(@PathParam("serviceId") @ApiParam(value = "service ID") String serviceId,
+    @Operation(operationId = "updateServiceConfig", summary = "Updates a service configuration for given service ID and returns the old configuration.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "204", description = "No old configuration"),
+            @ApiResponse(responseCode = "500", description = "Configuration can not be updated due to internal error") })
+    public Response updateConfiguration(@PathParam("serviceId") @Parameter(description = "service ID") String serviceId,
             @Nullable Map<String, Object> configuration) {
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);
@@ -247,17 +243,18 @@ public class ConfigurableServiceResource implements RESTResource {
             return properties;
         }
 
-        return ConfigUtil.normalizeTypes(properties, Collections.singletonList(configDesc));
+        return ConfigUtil.normalizeTypes(properties, List.of(configDesc));
     }
 
     @DELETE
     @Path("/{serviceId}/config")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Deletes a service configuration for given service ID and returns the old configuration.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 204, message = "No old configuration"),
-            @ApiResponse(code = 500, message = "Configuration can not be deleted due to internal error") })
-    public Response deleteConfiguration(@PathParam("serviceId") @ApiParam(value = "service ID") String serviceId) {
+    @Operation(operationId = "deleteServiceConfig", summary = "Deletes a service configuration for given service ID and returns the old configuration.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "204", description = "No old configuration"),
+            @ApiResponse(responseCode = "500", description = "Configuration can not be deleted due to internal error") })
+    public Response deleteConfiguration(
+            @PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);
             configurationService.delete(serviceId);
@@ -280,24 +277,24 @@ public class ConfigurableServiceResource implements RESTResource {
         if (serviceReferences != null) {
             for (ServiceReference<?> serviceReference : serviceReferences) {
                 String id = getServiceId(serviceReference);
-                String label = (String) serviceReference.getProperty(ConfigurableService.SERVICE_PROPERTY_LABEL);
-                if (label == null) { // for multi context services the label can be changed and must be read from config
-                                     // admin.
-                    label = configurationService.getProperty(id, ConfigConstants.SERVICE_CONTEXT);
-                }
-                String category = (String) serviceReference.getProperty(ConfigurableService.SERVICE_PROPERTY_CATEGORY);
-                String configDescriptionURI = (String) serviceReference
-                        .getProperty(ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI);
+                ConfigurableService configurableService = ConfigurableServiceUtil
+                        .asConfigurableService((key) -> serviceReference.getProperty(key));
 
-                if (configDescriptionURI == null) {
+                String label = configurableService.label();
+                if (label.isEmpty()) { // for multi context services the label can be changed and must be read from
+                                       // config admin.
+                    label = configurationService.getProperty(id, OpenHAB.SERVICE_CONTEXT);
+                }
+
+                String category = configurableService.category();
+
+                String configDescriptionURI = configurableService.description_uri();
+                if (configDescriptionURI.isEmpty()) {
                     String factoryPid = (String) serviceReference.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID);
                     configDescriptionURI = getConfigDescriptionByFactoryPid(factoryPid);
                 }
 
-                Object factoryProperty = serviceReference
-                        .getProperty(ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE);
-                boolean multiple = factoryProperty instanceof Boolean ? (Boolean) factoryProperty
-                        : Boolean.parseBoolean((String) factoryProperty);
+                boolean multiple = configurableService.factory();
 
                 services.add(new ConfigurableServiceDTO(id, label, category, configDescriptionURI, multiple));
             }
@@ -314,8 +311,9 @@ public class ConfigurableServiceResource implements RESTResource {
             ServiceReference<?>[] refs = bundleContext.getServiceReferences((String) null, filter);
 
             if (refs != null && refs.length > 0) {
-                configDescriptionURI = (String) refs[0]
-                        .getProperty(ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI);
+                ConfigurableService configurableService = ConfigurableServiceUtil
+                        .asConfigurableService((key) -> refs[0].getProperty(key));
+                configDescriptionURI = configurableService.description_uri();
             }
         } catch (InvalidSyntaxException e) {
             logger.error("Cannot get service references because the syntax of the filter '{}' is invalid.", filter);
@@ -326,8 +324,8 @@ public class ConfigurableServiceResource implements RESTResource {
     private List<ConfigurableServiceDTO> getConfigurableServices() {
         List<ConfigurableServiceDTO> services = new ArrayList<>();
 
-        services.addAll(getServicesByFilter(CONFIGURABLE_SERVICE_FILTER));
-        services.addAll(getServicesByFilter(CONFIGURABLE_MULTI_CONFIG_SERVICE_FILTER));
+        services.addAll(getServicesByFilter(ConfigurableServiceUtil.CONFIGURABLE_SERVICE_FILTER));
+        services.addAll(getServicesByFilter(ConfigurableServiceUtil.CONFIGURABLE_MULTI_CONFIG_SERVICE_FILTER));
 
         return services;
     }

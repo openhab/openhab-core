@@ -46,7 +46,7 @@ public class CidrAddress {
         if (prefix == 0) {
             return address.getHostAddress();
         } else {
-            return address.getHostAddress() + "/" + String.valueOf(prefix);
+            return address.getHostAddress() + "/" + prefix;
         }
     }
 

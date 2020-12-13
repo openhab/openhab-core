@@ -12,7 +12,6 @@
  */
 package org.openhab.core.common;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -21,32 +20,34 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * A non specific base class for unique identifiers within the SmartHome framework.
+ * A non specific base class for unique identifiers.
  *
  * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public abstract class AbstractUID {
 
-    public static final String SEGMENT_PATTERN = "[A-Za-z0-9_-]*";
+    public static final String SEGMENT_PATTERN = "[\\w-]*";
     public static final String SEPARATOR = ":";
     private final List<String> segments;
+    private String uid = "";
 
     /**
      * Constructor must be public, otherwise it can not be called by subclasses from another package.
      */
     public AbstractUID() {
-        this.segments = Collections.emptyList();
+        segments = Collections.emptyList();
     }
 
     /**
      * Parses a UID for a given string. The UID must be in the format
      * 'bindingId:segment:segment:...'.
      *
-     * @param uid uid in form a string (must not be null)
+     * @param uid uid in form a string
      */
     public AbstractUID(String uid) {
         this(splitToSegments(uid));
+        this.uid = uid;
     }
 
     /**
@@ -61,7 +62,7 @@ public abstract class AbstractUID {
     /**
      * Creates a UID for list of segments.
      *
-     * @param segments segments (must not be null)
+     * @param segments segments
      */
     public AbstractUID(List<String> segments) {
         int minNumberOfSegments = getMinimalNumberOfSegments();
@@ -74,7 +75,7 @@ public abstract class AbstractUID {
             String segment = segments.get(i);
             validateSegment(segment, i, numberOfSegments);
         }
-        this.segments = Collections.unmodifiableList(new ArrayList<>(segments));
+        this.segments = List.copyOf(segments);
     }
 
     /**
@@ -106,7 +107,10 @@ public abstract class AbstractUID {
     }
 
     public String getAsString() {
-        return String.join(SEPARATOR, segments);
+        if (uid.isEmpty()) {
+            uid = String.join(SEPARATOR, segments);
+        }
+        return uid;
     }
 
     private static List<String> splitToSegments(final String id) {

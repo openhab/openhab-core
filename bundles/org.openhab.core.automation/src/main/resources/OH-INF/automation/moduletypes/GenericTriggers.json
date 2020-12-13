@@ -10,9 +10,9 @@
 					"name": "eventTopic",
 					"type": "TEXT",
 					"label": "Topic",
-					"description": "This is the topic, the trigger will listen to: >>smarthome/*<<",
+					"description": "This is the topic, the trigger will listen to: >>openhab/*<<",
 					"required": true,
-					"default": "smarthome/*"
+					"default": "openhab/*"
 				},
 				{
 					"name": "eventSource",

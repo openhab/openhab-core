@@ -12,14 +12,15 @@
  */
 package org.openhab.core.internal.types;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 import java.math.BigDecimal;
-import java.util.Collections;
+import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateOption;
@@ -33,7 +34,7 @@ public class StateDescriptionFragmentImplTest {
 
     private StateDescriptionFragmentImpl source;
 
-    @Before
+    @BeforeEach
     public void setup() {
         source = new StateDescriptionFragmentImpl();
         source.setMinimum(BigDecimal.ZERO);
@@ -41,7 +42,7 @@ public class StateDescriptionFragmentImplTest {
         source.setStep(BigDecimal.ONE);
         source.setPattern("pattern");
         source.setReadOnly(Boolean.TRUE);
-        source.setOptions(Collections.emptyList());
+        source.setOptions(List.of());
     }
 
     @Test
@@ -57,14 +58,14 @@ public class StateDescriptionFragmentImplTest {
 
         // fragment with empty options should inherit new options
         StateDescriptionFragmentImpl sourceWithOptions = new StateDescriptionFragmentImpl();
-        sourceWithOptions.setOptions(Collections.singletonList(new StateOption("value1", "label1")));
+        sourceWithOptions.setOptions(List.of(new StateOption("value1", "label1")));
 
         fragment = source.merge(sourceWithOptions);
 
         assertThat(fragment.getOptions(), is(sourceWithOptions.getOptions()));
 
         // fragment with options should NOT inherit new options
-        sourceWithOptions.setOptions(Collections.singletonList(new StateOption("value2", "label2")));
+        sourceWithOptions.setOptions(List.of(new StateOption("value2", "label2")));
 
         fragment = source.merge(sourceWithOptions);
 

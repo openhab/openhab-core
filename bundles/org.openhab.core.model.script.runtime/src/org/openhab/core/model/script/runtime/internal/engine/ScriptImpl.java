@@ -13,8 +13,6 @@
 package org.openhab.core.model.script.runtime.internal.engine;
 
 import org.eclipse.emf.ecore.resource.Resource;
-import org.openhab.core.model.script.engine.Script;
-import org.openhab.core.model.script.engine.ScriptExecutionException;
 import org.eclipse.xtext.resource.IResourceServiceProvider;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.util.CancelIndicator;
@@ -22,6 +20,8 @@ import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 import org.eclipse.xtext.xbase.interpreter.IExpressionInterpreter;
+import org.openhab.core.model.script.engine.Script;
+import org.openhab.core.model.script.engine.ScriptExecutionException;
 
 import com.google.inject.Inject;
 
@@ -30,7 +30,6 @@ import com.google.inject.Inject;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@SuppressWarnings("restriction")
 public class ScriptImpl implements Script {
 
     private XExpression xExpression;

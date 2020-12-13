@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
@@ -37,7 +38,6 @@ import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
-import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ParameterOption;
@@ -175,8 +175,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     public void playFile(String fileName, @Nullable String sinkId, @Nullable PercentType volume) throws AudioException {
         Objects.requireNonNull(fileName, "File cannot be played as fileName is null.");
 
-        File file = new File(
-                ConfigConstants.getConfigFolder() + File.separator + SOUND_DIR + File.separator + fileName);
+        File file = new File(OpenHAB.getConfigFolder() + File.separator + SOUND_DIR + File.separator + fileName);
         FileAudioStream is = new FileAudioStream(file);
         play(is, sinkId, volume);
     }
@@ -287,7 +286,8 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Override
-    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
+            @Nullable Locale locale) {
         if (CONFIG_URI.equals(uri.toString())) {
             final Locale safeLocale = locale != null ? locale : Locale.getDefault();
             if (CONFIG_DEFAULT_SOURCE.equals(param)) {

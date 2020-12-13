@@ -15,10 +15,11 @@
  */
 package org.openhab.core.items.dto;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.ArithmeticGroupFunction;

@@ -13,19 +13,19 @@
 package org.openhab.core.config.core;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 
 /**
@@ -41,7 +41,7 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
     private ConfigOptionProvider configOptionsProviderMock;
     private URI dummyURI;
 
-    @Before
+    @BeforeEach
     public void setUp() throws URISyntaxException {
         // Register config registry
         configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
@@ -61,8 +61,7 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
         when(configOptionsProviderMock.getParameterOptions(any(), any(), any(), any())).thenReturn(oList1);
 
         configDescriptionProviderMock = mock(ConfigDescriptionProvider.class);
-        when(configDescriptionProviderMock.getConfigDescriptions(any()))
-                .thenReturn(Collections.singleton(configDescription));
+        when(configDescriptionProviderMock.getConfigDescriptions(any())).thenReturn(Set.of(configDescription));
         when(configDescriptionProviderMock.getConfigDescription(any(), any())).thenReturn(configDescription);
     }
 

@@ -12,18 +12,17 @@
  */
 package org.openhab.core.storage.json.internal;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.test.java.JavaTest;
 
@@ -37,7 +36,7 @@ public class JsonStorageTest extends JavaTest {
     private JsonStorage<DummyObject> objectStorage;
     private File tmpFile;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         tmpFile = File.createTempFile("storage-debug", ".json");
         tmpFile.deleteOnExit();
@@ -144,7 +143,7 @@ public class JsonStorageTest extends JavaTest {
             configuration.put("testBigDecimal", new BigDecimal(12));
             configuration.put("testBoolean", true);
             configuration.put("testString", "hello world");
-            configuration.put("multiInt", Arrays.asList(1, 2, 3));
+            configuration.put("multiInt", List.of(1, 2, 3));
 
             InnerObject inner = new InnerObject();
             inner.configuration.put("testChildLong", Long.valueOf("12"));

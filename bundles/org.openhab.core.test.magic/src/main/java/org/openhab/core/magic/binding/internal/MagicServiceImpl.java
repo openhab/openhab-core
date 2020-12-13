@@ -14,8 +14,8 @@ package org.openhab.core.magic.binding.internal;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -38,24 +38,23 @@ import org.slf4j.LoggerFactory;
  * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
-@Component(configurationPid = "org.openhab.magic", service = ConfigOptionProvider.class, immediate = true, property = {
-        Constants.SERVICE_PID + "=org.openhab.core.magic",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=test:magic",
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Magic",
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=test" })
+@Component(configurationPid = "org.openhab.magic", service = ConfigOptionProvider.class, immediate = true, //
+        property = Constants.SERVICE_PID + "=org.openhab.magic")
+@ConfigurableService(category = "test", label = "Magic", description_uri = "test:magic")
 public class MagicServiceImpl implements MagicService {
     private final Logger logger = LoggerFactory.getLogger(MagicServiceImpl.class);
 
     static final String PARAMETER_BACKEND_DECIMAL = "select_decimal_limit";
 
     @Override
-    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
+            @Nullable Locale locale) {
         if (!CONFIG_URI.equals(uri)) {
             return null;
         }
 
         if (PARAMETER_BACKEND_DECIMAL.equals(param)) {
-            return Arrays.asList(new ParameterOption(BigDecimal.ONE.toPlainString(), "1"),
+            return List.of(new ParameterOption(BigDecimal.ONE.toPlainString(), "1"),
                     new ParameterOption(BigDecimal.TEN.toPlainString(), "10"),
                     new ParameterOption(BigDecimal.valueOf(21d).toPlainString(), "21"));
         }

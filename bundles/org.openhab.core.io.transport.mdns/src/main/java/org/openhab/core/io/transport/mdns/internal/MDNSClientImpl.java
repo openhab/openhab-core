@@ -266,7 +266,7 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
 
     private void createJmDNSByAddress(InetAddress address) {
         try {
-            JmDNS jmdns = JmDNS.create(address, "JmDNS-" + address.toString());
+            JmDNS jmdns = JmDNS.create(address, null);
             jmdnsInstances.put(address, jmdns);
             logger.debug("mDNS service has been started ({} for IP {})", jmdns.getName(), address.getHostAddress());
         } catch (IOException e) {

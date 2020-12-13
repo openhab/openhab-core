@@ -13,35 +13,35 @@
 package org.openhab.core.io.rest.core.internal.channel;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
-import org.hamcrest.core.IsCollectionContaining;
-import org.junit.Before;
-import org.junit.Test;
+import org.hamcrest.core.IsIterableContaining;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.io.rest.LocaleServiceImpl;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
-import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.TriggerProfileType;
-import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeBuilder;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
  * @author Henning Treu - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class ChannelTypeResourceTest {
 
     private ChannelTypeResource channelTypeResource;
@@ -51,9 +51,8 @@ public class ChannelTypeResourceTest {
     private @Mock LocaleServiceImpl localeService;
     private @Mock ProfileTypeRegistry profileTypeRegistry;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
         channelTypeResource = new ChannelTypeResource(channelTypeRegistry, configDescriptionRegistry, localeService,
                 profileTypeRegistry);
     }
@@ -68,29 +67,22 @@ public class ChannelTypeResourceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void returnLinkableItemTypesForTriggerChannelType() throws IOException {
-        ChannelType channelType = mockChannelType("ct");
-        ChannelTypeUID uid = channelType.getUID();
-        ProfileTypeUID profileTypeUID = new ProfileTypeUID("system:profileType");
+        ChannelTypeUID channelTypeUID = new ChannelTypeUID("binding", "ct");
+        ChannelType channelType = ChannelTypeBuilder.trigger(channelTypeUID, "Label").build();
 
-        when(channelTypeRegistry.getChannelType(uid)).thenReturn(channelType);
+        when(channelTypeRegistry.getChannelType(channelTypeUID)).thenReturn(channelType);
 
         TriggerProfileType profileType = mock(TriggerProfileType.class);
-        when(profileType.getUID()).thenReturn(profileTypeUID);
-        when(profileType.getSupportedChannelTypeUIDs()).thenReturn(Collections.singletonList(uid));
-        when(profileType.getSupportedItemTypes()).thenReturn(Arrays.asList("Switch", "Dimmer"));
+        when(profileType.getSupportedChannelTypeUIDs()).thenReturn(List.of(channelTypeUID));
+        when(profileType.getSupportedItemTypes()).thenReturn(List.of("Switch", "Dimmer"));
 
-        when(profileTypeRegistry.getProfileTypes()).thenReturn(Collections.singletonList(profileType));
+        when(profileTypeRegistry.getProfileTypes()).thenReturn(List.of(profileType));
 
-        Response response = channelTypeResource.getLinkableItemTypes(uid.getAsString());
+        Response response = channelTypeResource.getLinkableItemTypes(channelTypeUID.getAsString());
 
-        verify(channelTypeRegistry).getChannelType(uid);
+        verify(channelTypeRegistry).getChannelType(channelTypeUID);
         verify(profileTypeRegistry).getProfileTypes();
         assertThat(response.getStatus(), is(200));
-        assertThat((Set<String>) response.getEntity(), IsCollectionContaining.hasItems("Switch", "Dimmer"));
-    }
-
-    private ChannelType mockChannelType(String channelId) {
-        return new ChannelType(new ChannelTypeUID("binding", channelId), false, null, ChannelKind.TRIGGER, "Label",
-                null, null, null, null, null, null);
+        assertThat((Set<String>) response.getEntity(), IsIterableContaining.hasItems("Switch", "Dimmer"));
     }
 }

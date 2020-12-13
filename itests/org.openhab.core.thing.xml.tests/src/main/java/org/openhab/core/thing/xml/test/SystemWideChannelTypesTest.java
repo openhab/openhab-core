@@ -13,14 +13,15 @@
 package org.openhab.core.thing.xml.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.DefaultSystemChannelTypeProvider;
 import org.openhab.core.thing.binding.ThingTypeProvider;
@@ -55,7 +56,7 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
     private ChannelTypeRegistry channelTypeRegistry;
     private ChannelTypeProvider systemChannelTypeProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         thingTypeProvider = getService(ThingTypeProvider.class);
         assertThat(thingTypeProvider, is(notNullValue()));

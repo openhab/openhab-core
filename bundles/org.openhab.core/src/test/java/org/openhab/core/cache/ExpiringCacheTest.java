@@ -12,32 +12,36 @@
  */
 package org.openhab.core.cache;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test class for the {@link ExpiringCache} class.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class ExpiringCacheTest {
     private static final long CACHE_EXPIRY = TimeUnit.SECONDS.toMillis(2);
-    private static final Supplier<String> CACHE_ACTION = () -> {
+
+    private static final Supplier<@Nullable String> CACHE_ACTION = () -> {
         byte[] array = new byte[8];
         new Random().nextBytes(array);
         return new String(array, StandardCharsets.UTF_8);
     };
 
-    private ExpiringCache<String> subject;
+    private @NonNullByDefault({}) ExpiringCache<String> subject;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         subject = new ExpiringCache<>(CACHE_EXPIRY, CACHE_ACTION);
     }

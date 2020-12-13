@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.io.http.servlet.SmartHomeServlet;
+import org.openhab.core.io.http.servlet.OpenHABServlet;
 import org.openhab.core.ui.icon.IconProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
 import org.osgi.service.component.annotations.Activate;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component
 @NonNullByDefault
-public class IconServlet extends SmartHomeServlet {
+public class IconServlet extends OpenHABServlet {
 
     private static final long serialVersionUID = 2880642275858634578L;
 
@@ -102,8 +102,7 @@ public class IconServlet extends SmartHomeServlet {
     }
 
     @Override
-    protected void doGet(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (req.getDateHeader("If-Modified-Since") > startupTime) {
             resp.setStatus(304);
             return;
@@ -165,7 +164,10 @@ public class IconServlet extends SmartHomeServlet {
         }
     }
 
-    private String substringAfterLast(String str, String separator) {
+    private String substringAfterLast(@Nullable String str, String separator) {
+        if (str == null) {
+            return "";
+        }
         int index = str.lastIndexOf(separator);
         return index == -1 || index == str.length() - separator.length() ? ""
                 : str.substring(index + separator.length());
@@ -185,12 +187,17 @@ public class IconServlet extends SmartHomeServlet {
     private Format getFormat(HttpServletRequest req) {
         String format = req.getParameter(PARAM_FORMAT);
         if (format == null) {
-            String filename = substringAfterLast(req.getRequestURI(), "/");
+            String requestURI = req.getRequestURI();
+            if (requestURI == null) {
+                logger.debug("null request URI in HTTP request - falling back to PNG");
+                return Format.PNG;
+            }
+
+            String filename = substringAfterLast(requestURI, "/");
             format = substringAfterLast(filename, ".");
         }
         try {
-            Format f = Format.valueOf(format.toUpperCase());
-            return f;
+            return Format.valueOf(format.toUpperCase());
         } catch (IllegalArgumentException e) {
             logger.debug("unknown format '{}' in HTTP request - falling back to PNG", format);
             return Format.PNG;

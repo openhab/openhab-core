@@ -14,7 +14,8 @@ package org.openhab.core.config.core.internal.validation;
 
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -22,14 +23,13 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.config.core.ConfigDescription;
@@ -147,7 +147,7 @@ public class ConfigDescriptionValidatorTest {
     private Map<String, Object> params;
     private ConfigDescriptionValidatorImpl configDescriptionValidator;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ConfigDescriptionRegistry configDescriptionRegistry = mock(ConfigDescriptionRegistry.class);
         when(configDescriptionRegistry.getConfigDescription(any())).thenAnswer(new Answer<ConfigDescription>() {
@@ -242,7 +242,7 @@ public class ConfigDescriptionValidatorTest {
     }
 
     void assertRequired(String parameterName) {
-        List<ConfigValidationMessage> expected = Collections.singletonList(new ConfigValidationMessage(parameterName,
+        List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(parameterName,
                 MessageKey.PARAMETER_REQUIRED.defaultMessage, MessageKey.PARAMETER_REQUIRED.key));
 
         try {
@@ -325,8 +325,8 @@ public class ConfigDescriptionValidatorTest {
     }
 
     void assertMinMax(String parameterName, Object value, MessageKey msgKey, String minMax) {
-        List<ConfigValidationMessage> expected = Collections
-                .singletonList(new ConfigValidationMessage(parameterName, msgKey.defaultMessage, msgKey.key, minMax));
+        List<ConfigValidationMessage> expected = List
+                .of(new ConfigValidationMessage(parameterName, msgKey.defaultMessage, msgKey.key, minMax));
         try {
             params.put(parameterName, value);
             configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
@@ -385,7 +385,7 @@ public class ConfigDescriptionValidatorTest {
     }
 
     void assertType(String parameterName, Type type) {
-        List<ConfigValidationMessage> expected = Collections.singletonList(new ConfigValidationMessage(parameterName,
+        List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(parameterName,
                 MessageKey.DATA_TYPE_VIOLATED.defaultMessage, MessageKey.DATA_TYPE_VIOLATED.key, type));
         try {
             params.put(parameterName, INVALID);
@@ -402,8 +402,8 @@ public class ConfigDescriptionValidatorTest {
 
     @Test
     public void assertValidationThrowsExceptionContainingMessagesForInvalidPatternForTxtConfigParameters() {
-        List<ConfigValidationMessage> expected = Collections.singletonList(
-                new ConfigValidationMessage(TXT_PATTERN_PARAM_NAME, MessageKey.PATTERN_VIOLATED.defaultMessage,
+        List<ConfigValidationMessage> expected = List
+                .of(new ConfigValidationMessage(TXT_PATTERN_PARAM_NAME, MessageKey.PATTERN_VIOLATED.defaultMessage,
                         MessageKey.PATTERN_VIOLATED.key, String.valueOf(MAX_VIOLATED), PATTERN));
         try {
             params.put(TXT_PATTERN_PARAM_NAME, String.valueOf(MAX_VIOLATED));
@@ -454,9 +454,9 @@ public class ConfigDescriptionValidatorTest {
 
     @Test
     public void assertValidationProvidesOnlyOneMessagePerParameterAlthoughMultipleViolationsOccur() {
-        List<ConfigValidationMessage> expected = Collections.singletonList(new ConfigValidationMessage(
-                TXT_MAX_PATTERN_PARAM_NAME, MessageKey.MAX_VALUE_TXT_VIOLATED.defaultMessage,
-                MessageKey.MAX_VALUE_TXT_VIOLATED.key, MAX.toString()));
+        List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(TXT_MAX_PATTERN_PARAM_NAME,
+                MessageKey.MAX_VALUE_TXT_VIOLATED.defaultMessage, MessageKey.MAX_VALUE_TXT_VIOLATED.key,
+                MAX.toString()));
         try {
             params.put(TXT_MAX_PATTERN_PARAM_NAME, String.valueOf(MAX_VIOLATED));
             configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
@@ -481,14 +481,15 @@ public class ConfigDescriptionValidatorTest {
         configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void assertValidateThrowsNPEforNullParamerters() {
-        configDescriptionValidator.validate(null, CONFIG_DESCRIPTION_URI);
+        assertThrows(NullPointerException.class,
+                () -> configDescriptionValidator.validate(null, CONFIG_DESCRIPTION_URI));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void assertValidateThrowsNPEforNullConfigDescriptionUri() {
-        configDescriptionValidator.validate(params, null);
+        assertThrows(NullPointerException.class, () -> configDescriptionValidator.validate(params, null));
     }
 
     @Test

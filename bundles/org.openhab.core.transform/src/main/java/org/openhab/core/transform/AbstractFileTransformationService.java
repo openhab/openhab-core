@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -247,10 +247,10 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
         }
     }
 
-    private @Nullable String getFileExtension(String fileName) {
+    private String getFileExtension(String fileName) {
         int extensionPos = fileName.lastIndexOf(EXTENSION_SEPARATOR);
         int lastSeparatorPos = Math.max(fileName.lastIndexOf(UNIX_SEPARATOR), fileName.lastIndexOf(WINDOWS_SEPARATOR));
-        return lastSeparatorPos > extensionPos ? null : fileName.substring(extensionPos + 1);
+        return lastSeparatorPos > extensionPos ? "" : fileName.substring(extensionPos + 1);
     }
 
     /**
@@ -262,38 +262,30 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
      */
     protected String getLocalizedProposedFilename(String filename, final WatchService watchService) {
         final File file = new File(filename);
-        String extension = getFileExtension(filename);
-        String prefix = file.getPath();
-        String result = filename;
+        if (file.getParent() != null) {
+            watchSubDirectory(file.getParent(), watchService);
+        }
 
-        if (extension == null) {
-            extension = "";
-        }
-        if (!prefix.isEmpty()) {
-            watchSubDirectory(prefix, watchService);
-        }
+        String sourcePath = getSourcePath();
+        String extension = getFileExtension(filename);
 
         // the filename may already contain locale information
         if (!filename.matches(".*_[a-z]{2}." + extension + "$")) {
-            String basename = file.getName();
-            String alternateName = prefix + basename + "_" + getLocale().getLanguage() + "." + extension;
-            String alternatePath = getSourcePath() + alternateName;
-
-            File f = new File(alternatePath);
-            if (f.exists()) {
-                result = alternateName;
+            String alternatePath = sourcePath + filename.substring(0, filename.length() - extension.length() - 1) + "_"
+                    + getLocale().getLanguage() + "." + extension;
+            if (new File(alternatePath).exists()) {
+                return alternatePath;
             }
         }
 
-        result = getSourcePath() + result;
-        return result;
+        return sourcePath + filename;
     }
 
     /**
      * Returns the path to the root of the transformation folder
      */
     protected String getSourcePath() {
-        return ConfigConstants.getConfigFolder() + File.separator + TransformationService.TRANSFORM_FOLDER_NAME
+        return OpenHAB.getConfigFolder() + File.separator + TransformationService.TRANSFORM_FOLDER_NAME
                 + File.separator;
     }
 }

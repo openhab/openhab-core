@@ -13,12 +13,12 @@
 package org.openhab.core.items;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,9 +30,10 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Temperature;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
@@ -79,15 +80,17 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
     private ItemRegistry itemRegistry;
 
-    @Mock
-    private UnitProvider unitProvider;
+    private AutoCloseable mocksCloseable;
 
-    private GroupFunctionHelper groupFunctionHelper;
+    private @Mock UnitProvider unitProvider;
+
+    private final GroupFunctionHelper groupFunctionHelper = new GroupFunctionHelper();
     private ItemStateConverter itemStateConverter;
 
-    @Before
-    public void setUp() {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
+
         registerVolatileStorageService();
         publisher = event -> events.add(event);
 
@@ -116,11 +119,15 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         when(unitProvider.getUnit(Temperature.class)).thenReturn(Units.CELSIUS);
 
-        groupFunctionHelper = new GroupFunctionHelper();
         itemStateConverter = new ItemStateConverterImpl(unitProvider);
     }
 
-    @Ignore
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
+    }
+
+    @Disabled
     @Test
     public void testItemUpdateWithItemRegistry() {
         GroupItem item = new GroupItem("mySimpleGroupItem");
@@ -426,7 +433,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGroupItemPostsEventsForChangesCorrectly() {
         // from ItemEventFactory.GROUPITEM_STATE_CHANGED_EVENT_TOPIC
-        String groupitemStateChangedEventTopic = "smarthome/items/{itemName}/{memberName}/statechanged";
+        String groupitemStateChangedEventTopic = "openhab/items/{itemName}/{memberName}/statechanged";
 
         events.clear();
         GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"), new GroupFunction.Equality());
@@ -633,7 +640,6 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(groupItem.getState(), is(OnOffType.ON));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void assertThatGroupItemChangesDoNotAffectTheGroupStatusIfnoFunctionOrBaseItemAreDefined()
             throws InterruptedException {
@@ -646,7 +652,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         State oldGroupState = groupItem.getState();
 
         // State changes -> NO change event should be fired
-        member.setState(new RawType());
+        member.setState(new RawType(new byte[0], RawType.DEFAULT_MIME_TYPE));
 
         // wait to see that the event doesn't fire
         Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
@@ -775,8 +781,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         NumberItem baseItem = createNumberItem("baseItem", Temperature.class, UnDefType.NULL);
         GroupFunctionDTO gfDTO = new GroupFunctionDTO();
         gfDTO.name = "sum";
-        GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, Collections.emptyList(),
-                Temperature.class);
+        GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, baseItem);
         GroupItem groupItem = new GroupItem("number", baseItem, function);
         groupItem.setUnitProvider(unitProvider);
 
@@ -805,8 +810,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         NumberItem baseItem = createNumberItem("baseItem", Temperature.class, UnDefType.NULL);
         GroupFunctionDTO gfDTO = new GroupFunctionDTO();
         gfDTO.name = "sum";
-        GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, Collections.emptyList(),
-                Temperature.class);
+        GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, baseItem);
         GroupItem groupItem = new GroupItem("number", baseItem, function);
         groupItem.setUnitProvider(unitProvider);
         groupItem.setItemStateConverter(itemStateConverter);

@@ -86,8 +86,12 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
      */
     @Override
     protected void processAutomationProvider(Bundle bundle) {
-        Vendor vendor = new Vendor(bundle.getSymbolicName(), bundle.getVersion().toString());
-        logger.debug("Parse rules from bundle '{}' ", bundle.getSymbolicName());
+        String bsn = bundle.getSymbolicName();
+        if (bsn == null) {
+            bsn = String.format("@bundleId@0x%x", bundle.getBundleId());
+        }
+        Vendor vendor = new Vendor(bsn, bundle.getVersion().toString());
+        logger.debug("Parse rules from bundle '{}' ", bsn);
         Enumeration<URL> urlEnum = null;
         try {
             if (bundle.getState() != Bundle.UNINSTALLED) {
@@ -101,7 +105,7 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
         if (urlEnum != null) {
             while (urlEnum.hasMoreElements()) {
                 URL url = urlEnum.nextElement();
-                if (getPreviousPortfolio(vendor) != null
+                if (!getPreviousPortfolio(vendor).isEmpty()
                         && (waitingProviders.get(bundle) == null || !waitingProviders.get(bundle).contains(url))) {
                     return;
                 }
@@ -147,16 +151,21 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
         if (portfolio == null) {
             for (Vendor v : providerPortfolio.keySet()) {
                 if (v.getVendorSymbolicName().equals(vendor.getVendorSymbolicName())) {
-                    return providerPortfolio.get(v);
+                    List<String> vendorPortfolio = providerPortfolio.get(v);
+                    return vendorPortfolio == null ? List.of() : vendorPortfolio;
                 }
             }
         }
-        return portfolio;
+        return portfolio == null ? List.of() : portfolio;
     }
 
     @Override
     protected void processAutomationProviderUninstalled(Bundle bundle) {
-        Vendor vendor = new Vendor(bundle.getSymbolicName(), bundle.getVersion().toString());
+        String bsn = bundle.getSymbolicName();
+        if (bsn == null) {
+            bsn = String.format("@bundleId@0x%x", bundle.getBundleId());
+        }
+        Vendor vendor = new Vendor(bsn, bundle.getVersion().toString());
         waitingProviders.remove(bundle);
         providerPortfolio.remove(vendor);
     }

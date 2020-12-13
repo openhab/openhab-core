@@ -13,7 +13,8 @@
 package org.openhab.core.audio.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -23,11 +24,12 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.BiFunction;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSource;
@@ -57,7 +59,7 @@ public class AudioManagerTest {
     private AudioSinkFake audioSink;
     private AudioSource audioSource;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         fileHandler = new BundledSoundFileHandler();
         audioManager = new AudioManagerImpl();
@@ -68,7 +70,7 @@ public class AudioManagerTest {
         when(audioSource.getLabel(any(Locale.class))).thenReturn("audioSourceLabel");
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         fileHandler.close();
     }
@@ -222,7 +224,7 @@ public class AudioManagerTest {
         audioManager.addAudioSink(audioSink);
 
         Collection<ParameterOption> parameterOptions = audioManager.getParameterOptions(URI.create("wrong.uri"),
-                AudioManagerImpl.CONFIG_DEFAULT_SINK, Locale.US);
+                AudioManagerImpl.CONFIG_DEFAULT_SINK, null, Locale.US);
         assertThat("The parameter options were not as expected", parameterOptions, is(nullValue()));
     }
 
@@ -230,8 +232,7 @@ public class AudioManagerTest {
         audioManager.addAudioSource(audioSource);
 
         if (isSourceDefault) {
-            audioManager
-                    .modified(Collections.singletonMap(AudioManagerImpl.CONFIG_DEFAULT_SOURCE, audioSource.getId()));
+            audioManager.modified(Map.of(AudioManagerImpl.CONFIG_DEFAULT_SOURCE, audioSource.getId()));
         } else {
             // just to make sure there is no default source
             audioManager.modified(Collections.emptyMap());
@@ -249,10 +250,10 @@ public class AudioManagerTest {
         audioManager.addAudioSink(audioSink);
 
         if (isSinkDefault) {
-            audioManager.modified(Collections.singletonMap(AudioManagerImpl.CONFIG_DEFAULT_SINK, audioSink.getId()));
+            audioManager.modified(Map.of(AudioManagerImpl.CONFIG_DEFAULT_SINK, audioSink.getId()));
         } else {
             // just to make sure there is no default sink
-            audioManager.modified(Collections.emptyMap());
+            audioManager.modified(Map.of());
         }
 
         assertThat(String.format("The sink %s was not registered", audioSink.getId()), audioManager.getSink(),
@@ -294,7 +295,7 @@ public class AudioManagerTest {
         }
 
         Collection<ParameterOption> parameterOptions = audioManager
-                .getParameterOptions(URI.create(AudioManagerImpl.CONFIG_URI), param, locale);
+                .getParameterOptions(URI.create(AudioManagerImpl.CONFIG_URI), param, null, locale);
 
         @SuppressWarnings("null")
         BiFunction<String, String, Boolean> isParameterOptionAdded = (v, l) -> parameterOptions.stream()

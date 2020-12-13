@@ -30,8 +30,6 @@
 			<includes>
 				<include>NOTICE</include>
 				<include>pom.xml</include>
-				<include>.project</include>
-				<include>.classpath</include>
 				<include>README.md</include>
 			</includes>
 		</fileSet>

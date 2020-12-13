@@ -42,8 +42,8 @@ import org.osgi.service.component.annotations.Reference;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort audio sink and source options
  */
-@NonNullByDefault
 @Component(service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     static final String SUBCMD_PLAY = "play";

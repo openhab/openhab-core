@@ -1,6 +1,6 @@
 # openHAB Core
 
-[![Build Status](https://travis-ci.org/openhab/openhab-core.svg)](https://travis-ci.org/openhab/openhab-core)
+[![Build Status](https://ci.openhab.org/job/openHAB-Core/badge/icon)](https://ci.openhab.org/job/openHAB-Core/)
 [![EPL-2.0](https://img.shields.io/badge/license-EPL%202-green.svg)](https://opensource.org/licenses/EPL-2.0)
 [![Bountysource](https://www.bountysource.com/badge/tracker?tracker_id=28054058)](https://www.bountysource.com/teams/openhab/issues?tracker_ids=28054058)
 

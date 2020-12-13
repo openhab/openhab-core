@@ -13,14 +13,15 @@
 package org.openhab.core.internal.items;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.items.NumberItem;
@@ -41,7 +42,7 @@ public class ItemStateConverterImplTest {
 
     private ItemStateConverterImpl itemStateConverter;
 
-    @Before
+    @BeforeEach
     public void setup() {
         UnitProvider unitProvider = mock(UnitProvider.class);
         when(unitProvider.getUnit(Temperature.class)).thenReturn(ImperialUnits.FAHRENHEIT);

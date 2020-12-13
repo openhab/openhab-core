@@ -13,15 +13,16 @@
 package org.openhab.core.common;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * The ThreadPoolManagerTest tests functionality of the ThreadPoolManager class.
@@ -58,7 +59,7 @@ public class ThreadPoolManagerTest {
     @Test
     public void testGetConfiguredScheduledPool() {
         ThreadPoolManager tpm = new ThreadPoolManager();
-        tpm.modified(Collections.singletonMap("test3", "5"));
+        tpm.modified(Map.of("test3", "5"));
         ThreadPoolExecutor result = (ThreadPoolExecutor) ThreadPoolManager.getScheduledPool("test3");
 
         assertThat(result, instanceOf(ScheduledExecutorService.class));
@@ -68,7 +69,7 @@ public class ThreadPoolManagerTest {
     @Test
     public void testGetConfiguredCachedPool() {
         ThreadPoolManager tpm = new ThreadPoolManager();
-        tpm.modified(Collections.singletonMap("test4", "4"));
+        tpm.modified(Map.of("test4", "4"));
         ThreadPoolExecutor result = (ThreadPoolExecutor) ThreadPoolManager.getPool("test4");
 
         assertEquals(4, result.getMaximumPoolSize());
@@ -80,7 +81,7 @@ public class ThreadPoolManagerTest {
         assertEquals(ThreadPoolManager.DEFAULT_THREAD_POOL_SIZE, result.getCorePoolSize());
 
         ThreadPoolManager tpm = new ThreadPoolManager();
-        tpm.modified(Collections.singletonMap("test5", "11"));
+        tpm.modified(Map.of("test5", "11"));
 
         assertEquals(11, result.getCorePoolSize());
     }
@@ -91,11 +92,11 @@ public class ThreadPoolManagerTest {
         assertEquals(ThreadPoolManager.DEFAULT_THREAD_POOL_SIZE, result.getMaximumPoolSize());
 
         ThreadPoolManager tpm = new ThreadPoolManager();
-        tpm.modified(Collections.singletonMap("test6", "7"));
+        tpm.modified(Map.of("test6", "7"));
 
         assertEquals(7, result.getMaximumPoolSize());
 
-        tpm.modified(Collections.singletonMap("test6", "3"));
+        tpm.modified(Map.of("test6", "3"));
         assertEquals(3, result.getMaximumPoolSize());
     }
 }

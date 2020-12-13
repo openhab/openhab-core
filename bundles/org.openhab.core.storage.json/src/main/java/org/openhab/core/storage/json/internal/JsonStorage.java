@@ -250,10 +250,9 @@ public class JsonStorage<T> implements Storage<T> {
         List<Long> fileTimes = new ArrayList<>();
         File[] files = folder.listFiles();
         if (files != null) {
-            int count = files.length;
-            for (int i = 0; i < count; i++) {
-                if (files[i].isFile()) {
-                    String[] parts = files[i].getName().split(SEPARATOR);
+            for (File value : files) {
+                if (value.isFile()) {
+                    String[] parts = value.getName().split(SEPARATOR);
                     if (parts.length != 2 || !parts[1].equals(file.getName())) {
                         continue;
                     }

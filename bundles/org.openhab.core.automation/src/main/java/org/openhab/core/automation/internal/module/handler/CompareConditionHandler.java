@@ -33,14 +33,14 @@ import org.slf4j.LoggerFactory;
  */
 public class CompareConditionHandler extends BaseConditionModuleHandler {
 
-    public final Logger logger = LoggerFactory.getLogger(CompareConditionHandler.class);
-
     public static final String MODULE_TYPE = "core.GenericCompareCondition";
 
     public static final String INPUT_LEFT_OBJECT = "input";
     public static final String INPUT_LEFT_FIELD = "inputproperty";
     public static final String RIGHT_OP = "right";
     public static final String OPERATOR = "operator";
+
+    public final Logger logger = LoggerFactory.getLogger(CompareConditionHandler.class);
 
     public CompareConditionHandler(Condition module) {
         super(module);

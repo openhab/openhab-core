@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.OpenHAB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ public class InstanceUUID {
     public static synchronized String get() {
         if (uuid == null) {
             try {
-                File file = new File(ConfigConstants.getUserDataFolder() + File.separator + UUID_FILE_NAME);
+                File file = new File(OpenHAB.getUserDataFolder() + File.separator + UUID_FILE_NAME);
                 if (!file.exists()) {
                     uuid = java.util.UUID.randomUUID().toString();
                     writeFile(file, uuid);

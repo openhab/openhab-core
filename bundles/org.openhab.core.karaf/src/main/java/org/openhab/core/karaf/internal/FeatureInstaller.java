@@ -12,12 +12,15 @@
  */
 package org.openhab.core.karaf.internal;
 
+import static java.util.function.Predicate.not;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -28,20 +31,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.openhab.core.OpenHAB;
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.addon.AddonEventFactory;
+import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.extension.ExtensionEventFactory;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
@@ -67,7 +71,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
     protected static final String CONFIG_URI = "system:addons";
 
-    public static final String EXTENSION_TYPE_ACTION = "action";
+    public static final String EXTENSION_TYPE_AUTOMATION = "automation";
     public static final String EXTENSION_TYPE_BINDING = "binding";
     public static final String EXTENSION_TYPE_MISC = "misc";
     public static final String EXTENSION_TYPE_PERSISTENCE = "persistence";
@@ -87,7 +91,7 @@ public class FeatureInstaller implements ConfigurationListener {
     public static final String PREFIX = "openhab-";
     public static final String PREFIX_PACKAGE = "package-";
 
-    public static final String[] EXTENSION_TYPES = new String[] { EXTENSION_TYPE_ACTION, EXTENSION_TYPE_BINDING,
+    public static final String[] EXTENSION_TYPES = new String[] { EXTENSION_TYPE_AUTOMATION, EXTENSION_TYPE_BINDING,
             EXTENSION_TYPE_MISC, EXTENSION_TYPE_PERSISTENCE, EXTENSION_TYPE_TRANSFORMATION, EXTENSION_TYPE_UI,
             EXTENSION_TYPE_VOICE };
 
@@ -103,8 +107,17 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private boolean paxCfgUpdated = true; // a flag used to check whether CM has already successfully updated the pax
                                           // configuration as this must be waited for before trying to add feature repos
+    private Map<String, Object> configMapCache;
 
     private static String currentPackage = null;
+
+    private static boolean anyMatchingFeature(Feature[] features, Predicate<Feature> predicate) {
+        return Stream.of(features).anyMatch(predicate);
+    }
+
+    private static Predicate<Feature> withName(final String name) {
+        return feature -> feature.getName().equals(name);
+    }
 
     @Activate
     public FeatureInstaller(final @Reference ConfigurationAdmin configurationAdmin,
@@ -122,11 +135,15 @@ public class FeatureInstaller implements ConfigurationListener {
         FeatureInstaller.eventPublisher = null;
     }
 
+    private Exception debugException(Exception e) {
+        return logger.isDebugEnabled() ? e : null;
+    }
+
     @Activate
     protected void activate(final Map<String, Object> config) {
+        scheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("karaf-addons"));
         setOnlineRepoUrl();
         modified(config);
-        scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleWithFixedDelay(() -> {
             logger.debug("Running scheduled sync job");
             try {
@@ -137,7 +154,10 @@ public class FeatureInstaller implements ConfigurationListener {
                     final String key = enumeration.nextElement();
                     cfgMap.put(key, cfg.get(key));
                 }
-                modified(cfgMap);
+                if (!cfgMap.equals(configMapCache)) {
+                    configMapCache = cfgMap;
+                    modified(cfgMap);
+                }
             } catch (IOException e) {
                 logger.debug("Failed to retrieve the addons configuration from configuration admin: {}",
                         e.getMessage());
@@ -168,19 +188,16 @@ public class FeatureInstaller implements ConfigurationListener {
             paxCfgUpdated = false;
         }
 
-        final FeaturesService service = featuresService;
-        ExecutorService scheduler = Executors.newSingleThreadExecutor();
-
         scheduler.execute(() -> {
             if (configChanged) {
                 waitForConfigUpdateEvent();
             }
-            if (installPackage(service, config)) {
+            if (installPackage(config)) {
                 // our package selection has changed, so let's wait for the values to be available in config admin
                 // which we will receive as another call to modified
                 return;
             }
-            installAddons(service, config);
+            installAddons(config);
         });
     }
 
@@ -215,7 +232,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 return false;
             }
         } catch (IOException e) {
-            logger.warn("Adding add-on 'openhab-{}-{}' failed: {}", type, id, e.getMessage());
+            logger.warn("Adding add-on 'openhab-{}-{}' failed: {}", type, id, e.getMessage(), debugException(e));
             return false;
         }
     }
@@ -239,7 +256,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 return false;
             }
         } catch (IOException e) {
-            logger.warn("Removing add-on 'openhab-{}-{}' failed: {}", type, id, e.getMessage());
+            logger.warn("Removing add-on 'openhab-{}-{}' failed: {}", type, id, e.getMessage(), debugException(e));
             return false;
         }
     }
@@ -247,12 +264,12 @@ public class FeatureInstaller implements ConfigurationListener {
     private void setOnlineRepoUrl() {
         Properties prop = new Properties();
 
-        Path versionFilePath = Paths.get(ConfigConstants.getUserDataFolder(), "etc", "version.properties");
+        Path versionFilePath = Paths.get(OpenHAB.getUserDataFolder(), "etc", "version.properties");
         try (FileInputStream fis = new FileInputStream(versionFilePath.toFile())) {
             prop.load(fis);
         } catch (Exception e) {
             logger.warn("Cannot determine online repo url - online repo support will be disabled. Error: {}",
-                    e.getMessage());
+                    e.getMessage(), debugException(e));
         }
 
         String repo = prop.getProperty("online-repo");
@@ -274,11 +291,12 @@ public class FeatureInstaller implements ConfigurationListener {
                 Object repos = properties.get(PROPERTY_MVN_REPOS);
                 List<String> repoCfg;
                 if (repos instanceof String) {
-                    repoCfg = Arrays.asList(((String) repos).split(","));
+                    repoCfg = List.of(((String) repos).split(","));
                     return repoCfg.contains(onlineRepoUrl);
                 }
             } catch (IOException e) {
-                logger.error("Failed getting the add-on management online/offline mode: {}", e.getMessage());
+                logger.error("Failed getting the add-on management online/offline mode: {}", e.getMessage(),
+                        debugException(e));
             }
         }
         return false;
@@ -318,44 +336,50 @@ public class FeatureInstaller implements ConfigurationListener {
                     paxCfg.update(properties);
                 }
             } catch (IOException e) {
-                logger.error("Failed setting the add-on management online/offline mode: {}", e.getMessage());
+                logger.error("Failed setting the add-on management online/offline mode: {}", e.getMessage(),
+                        debugException(e));
             }
         }
         return changed;
     }
 
-    private synchronized void installAddons(final FeaturesService service, final Map<String, Object> config) {
+    private synchronized void installAddons(final Map<String, Object> config) {
         final Set<String> currentAddons = new HashSet<>(); // the currently installed ones
         final Set<String> targetAddons = new HashSet<>(); // the target we want to have installed afterwards
         final Set<String> installAddons = new HashSet<>(); // the ones to be installed (the diff)
 
         for (String type : EXTENSION_TYPES) {
-            Object install = config.get(type);
-            if (install instanceof String) {
-                String[] entries = ((String) install).split(",");
+            Object configValue = config.get(type);
+            if (configValue instanceof String) {
                 try {
-                    Feature[] features = service.listInstalledFeatures();
-                    for (String addon : entries) {
-                        if (addon != null && !addon.isEmpty()) {
-                            String id = PREFIX + type + "-" + addon.trim();
-                            targetAddons.add(id);
-                            if (!isInstalled(features, id)) {
-                                installAddons.add(id);
+                    Feature[] features = featuresService.listInstalledFeatures();
+                    String typePrefix = PREFIX + type + "-";
+                    Set<String> configFeatureNames = Stream.of(((String) configValue).split(",")) //
+                            .map(String::strip) //
+                            .filter(not(String::isEmpty)) //
+                            .map(addon -> typePrefix + addon) //
+                            .collect(Collectors.toSet());
+
+                    for (String name : configFeatureNames) {
+                        if (featuresService.getFeature(name) != null) {
+                            targetAddons.add(name);
+                            if (!anyMatchingFeature(features, withName(name))) {
+                                installAddons.add(name);
                             }
+                        } else {
+                            logger.warn("The {} add-on '{}' does not exist - ignoring it.", type,
+                                    name.substring(typePrefix.length()));
                         }
                     }
 
-                    // we collect all installed addons
-                    for (String addon : getAllAddonsOfType(service, type)) {
-                        if (addon != null && !addon.isEmpty()) {
-                            String id = PREFIX + type + "-" + addon.trim();
-                            if (isInstalled(features, id)) {
-                                currentAddons.add(id);
-                            }
+                    // we collect all installed add-ons
+                    for (String name : getAllFeatureNamesWithPrefix(typePrefix)) {
+                        if (anyMatchingFeature(features, withName(name))) {
+                            currentAddons.add(name);
                         }
                     }
                 } catch (Exception e) {
-                    logger.error("Failed retrieving features: {}", e.getMessage());
+                    logger.error("Failed retrieving features: {}", e.getMessage(), debugException(e));
                 }
             }
         }
@@ -366,31 +390,28 @@ public class FeatureInstaller implements ConfigurationListener {
 
         // do the installation
         if (!installAddons.isEmpty()) {
-            installFeatures(service, installAddons);
+            installFeatures(installAddons);
         }
 
         // do the de-installation
         if (!uninstallAddons.isEmpty()) {
-            uninstallFeatures(service, uninstallAddons);
+            uninstallFeatures(uninstallAddons);
         }
     }
 
-    private Set<String> getAllAddonsOfType(FeaturesService featuresService, String type) {
-        Set<String> addons = new HashSet<>();
-        String prefix = FeatureInstaller.PREFIX + type + "-";
+    private Set<String> getAllFeatureNamesWithPrefix(String prefix) {
         try {
-            for (Feature feature : featuresService.listFeatures()) {
-                if (feature.getName().startsWith(prefix)) {
-                    addons.add(feature.getName().substring(prefix.length()));
-                }
-            }
+            return Arrays.stream(featuresService.listFeatures()) //
+                    .map(Feature::getName) //
+                    .filter(name -> name.startsWith(prefix)) //
+                    .collect(Collectors.toSet());
         } catch (Exception e) {
-            logger.error("Failed retrieving features: {}", e.getMessage());
+            logger.error("Failed retrieving features: {}", e.getMessage(), debugException(e));
+            return Collections.emptySet();
         }
-        return addons;
     }
 
-    private synchronized void installFeatures(FeaturesService featuresService, Set<String> addons) {
+    private synchronized void installFeatures(Set<String> addons) {
         try {
             if (logger.isDebugEnabled()) {
                 logger.debug("Installing '{}'", addons.stream().collect(Collectors.joining(", ")));
@@ -403,7 +424,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 Set<String> failed = new HashSet<>();
 
                 for (String addon : addons) {
-                    if (isInstalled(features, addon)) {
+                    if (anyMatchingFeature(features, withName(addon))) {
                         installed.add(addon);
                     } else {
                         failed.add(addon);
@@ -415,48 +436,52 @@ public class FeatureInstaller implements ConfigurationListener {
                 }
                 if (!failed.isEmpty()) {
                     logger.error("Failed installing '{}'", failed.stream().collect(Collectors.joining(", ")));
+                    configMapCache = null; // make sure we retry the installation
                 }
 
                 for (String addon : installed) {
                     postInstalledEvent(addon);
                 }
             } catch (Exception e) {
-                logger.error("Failed retrieving features: {}", e.getMessage());
+                logger.error("Failed retrieving features: {}", e.getMessage(), debugException(e));
+                configMapCache = null; // make sure we retry the installation
             }
         } catch (Exception e) {
             logger.error("Failed installing '{}': {}", addons.stream().collect(Collectors.joining(", ")),
-                    e.getMessage());
+                    e.getMessage(), debugException(e));
+            configMapCache = null; // make sure we retry the installation
         }
     }
 
-    private synchronized void uninstallFeatures(FeaturesService featuresService, Set<String> addons) {
+    private synchronized void uninstallFeatures(Set<String> addons) {
         for (String addon : addons) {
-            uninstallFeature(featuresService, addon);
+            uninstallFeature(addon);
         }
     }
 
-    private synchronized boolean installFeature(FeaturesService featuresService, String name) {
+    private synchronized boolean installFeature(String name) {
         try {
             Feature[] features = featuresService.listInstalledFeatures();
-            if (!isInstalled(features, name)) {
+            if (!anyMatchingFeature(features, withName(name))) {
                 featuresService.installFeature(name);
                 features = featuresService.listInstalledFeatures();
-                if (isInstalled(features, name)) {
+                if (anyMatchingFeature(features, withName(name))) {
                     logger.debug("Installed '{}'", name);
                     postInstalledEvent(name);
                     return true;
                 }
             }
         } catch (Exception e) {
-            logger.error("Failed installing '{}': {}", name, e.getMessage());
+            logger.error("Failed installing '{}': {}", name, e.getMessage(), debugException(e));
+            configMapCache = null; // make sure we retry the installation
         }
         return false;
     }
 
-    private synchronized boolean uninstallFeature(FeaturesService featuresService, String name) {
+    private synchronized boolean uninstallFeature(String name) {
         try {
             Feature[] features = featuresService.listInstalledFeatures();
-            if (isInstalled(features, name)) {
+            if (anyMatchingFeature(features, withName(name))) {
                 featuresService.uninstallFeature(name);
                 logger.debug("Uninstalled '{}'", name);
                 postUninstalledEvent(name);
@@ -468,7 +493,7 @@ public class FeatureInstaller implements ConfigurationListener {
         return false;
     }
 
-    private synchronized boolean installPackage(FeaturesService featuresService, final Map<String, Object> config) {
+    private synchronized boolean installPackage(final Map<String, Object> config) {
         boolean configChanged = false;
         Object packageName = config.get(OpenHAB.CFG_PACKAGE);
         if (packageName instanceof String) {
@@ -478,7 +503,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 // no changes are done to the add-ons list, so the installer should proceed
                 configChanged = false;
             } else {
-                if (installFeature(featuresService, fullName)) {
+                if (installFeature(fullName)) {
                     configChanged = true;
                 }
             }
@@ -487,27 +512,14 @@ public class FeatureInstaller implements ConfigurationListener {
             try {
                 for (Feature feature : featuresService.listFeatures()) {
                     if (feature.getName().startsWith(PREFIX + PREFIX_PACKAGE) && !feature.getName().equals(fullName)) {
-                        uninstallFeature(featuresService, feature.getName());
+                        uninstallFeature(feature.getName());
                     }
                 }
             } catch (Exception e) {
-                logger.error("Failed retrieving features: {}", e.getMessage());
+                logger.error("Failed retrieving features: {}", e.getMessage(), debugException(e));
             }
         }
         return configChanged;
-    }
-
-    private boolean isInstalled(Feature[] features, String name) {
-        try {
-            for (Feature feature : features) {
-                if (feature.getName().equals(name)) {
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Failed retrieving features: {}", e.getMessage());
-        }
-        return false;
     }
 
     @Override
@@ -520,7 +532,7 @@ public class FeatureInstaller implements ConfigurationListener {
     private static void postInstalledEvent(String featureName) {
         String extensionId = featureName.substring(PREFIX.length());
         if (eventPublisher != null) {
-            Event event = ExtensionEventFactory.createExtensionInstalledEvent(extensionId);
+            Event event = AddonEventFactory.createAddonInstalledEvent(extensionId);
             eventPublisher.post(event);
         }
     }
@@ -528,7 +540,7 @@ public class FeatureInstaller implements ConfigurationListener {
     private static void postUninstalledEvent(String featureName) {
         String extensionId = featureName.substring(PREFIX.length());
         if (eventPublisher != null) {
-            Event event = ExtensionEventFactory.createExtensionUninstalledEvent(extensionId);
+            Event event = AddonEventFactory.createAddonUninstalledEvent(extensionId);
             eventPublisher.post(event);
         }
     }

@@ -44,10 +44,10 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     private final Logger logger = LoggerFactory.getLogger(AbstractScriptModuleHandler.class);
 
     /** Constant defining the configuration parameter of modules that specifies the mime type of a script */
-    protected static final String SCRIPT_TYPE = "type";
+    public static final String SCRIPT_TYPE = "type";
 
     /** Constant defining the configuration parameter of modules that specifies the script itself */
-    protected static final String SCRIPT = "script";
+    public static final String SCRIPT = "script";
 
     protected final ScriptEngineManager scriptEngineManager;
 
@@ -57,7 +57,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     private final String type;
     protected final String script;
 
-    private final String ruleUID;
+    protected final String ruleUID;
 
     public AbstractScriptModuleHandler(T module, String ruleUID, ScriptEngineManager scriptEngineManager) {
         super(module);

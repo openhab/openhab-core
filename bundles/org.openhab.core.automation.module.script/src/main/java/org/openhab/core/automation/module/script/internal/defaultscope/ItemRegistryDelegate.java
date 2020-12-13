@@ -12,12 +12,12 @@
  */
 package org.openhab.core.automation.module.script.internal.defaultscope;
 
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
@@ -65,7 +65,10 @@ public class ItemRegistryDelegate implements Map<String, State> {
     }
 
     @Override
-    public State get(Object key) {
+    public State get(@Nullable Object key) {
+        if (key == null) {
+            return null;
+        }
         final Item item = itemRegistry.get((String) key);
         if (item == null) {
             return null;
@@ -115,7 +118,7 @@ public class ItemRegistryDelegate implements Map<String, State> {
     public Set<java.util.Map.Entry<String, State>> entrySet() {
         Set<Map.Entry<String, State>> entries = new HashSet<>();
         for (Item item : itemRegistry.getAll()) {
-            entries.add(new AbstractMap.SimpleEntry<>(item.getName(), item.getState()));
+            entries.add(Map.entry(item.getName(), item.getState()));
         }
         return entries;
     }

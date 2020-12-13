@@ -12,41 +12,30 @@
  */
 package org.openhab.core.model.lsp.internal;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.emf.common.util.URI;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  *
  * @author Simon Kaufmann - Initial contribution
  */
-@RunWith(Parameterized.class)
 public class MappingUriExtensionsTest {
 
-    @Rule
-    public final TemporaryFolder folder = new TemporaryFolder();
+    public @TempDir File folder;
     private File confFolder;
-    private File itemsFolder;
-    private File itemsFile;
-    private final String conf;
-    private final String request;
-    private final String expectedClientPath;
-    private final String expectedUriPath;
 
-    @Parameters
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] { //
+    private static Collection<Object[]> data() {
+        return List.of(new Object[][] { //
                 { "conf", //
                         "file:///q:/conf", //
                         "file:///q:/conf", //
@@ -82,48 +71,35 @@ public class MappingUriExtensionsTest {
         });
     }
 
-    public MappingUriExtensionsTest(String conf, String request, String expectedClientPath, String expectedUriPath) {
-        this.conf = conf;
-        this.request = request;
-        this.expectedClientPath = expectedClientPath;
-        this.expectedUriPath = expectedUriPath;
-    }
+    @BeforeEach
+    public void setup() throws IOException {
+        confFolder = new File(folder, "conf");
 
-    @Before
-    public void setup() throws Exception {
-        confFolder = folder.newFolder("conf");
-        itemsFolder = new File(confFolder, "items");
+        File itemsFolder = new File(confFolder, "items");
         itemsFolder.mkdirs();
-        itemsFile = new File(itemsFolder, "test.items");
+
+        File itemsFile = new File(itemsFolder, "test.items");
         itemsFile.deleteOnExit();
         itemsFile.createNewFile();
     }
 
-    @Test
-    public void testGuessClientPath() {
-        MappingUriExtensions mapper = createMapper();
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testGuessClientPath(String conf, String request, String expectedClientPath, String expectedUriPath) {
+        MappingUriExtensions mapper = createMapper(conf);
         String clientPath = mapper.guessClientPath(request);
         assertEquals(expectedClientPath, clientPath);
     }
 
-    @Test
-    public void testToUri() {
-        MappingUriExtensions mapper = createMapper();
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testToUri(String conf, String request, String expectedClientPath, String expectedUriPath) {
+        MappingUriExtensions mapper = createMapper(conf);
         URI clientPath = mapper.toUri(request);
         assertEquals(confFolder.toPath().toUri().toString() + expectedUriPath, clientPath.toString());
     }
 
-    @Test
-    public void testToPathEmfURI() {
-        MappingUriExtensions mapper = createMapper();
-        mapper.toUri(request);
-
-        URI uri = URI.createURI(confFolder.toPath().toUri().toString() + expectedUriPath);
-        String res = mapper.toPath(uri);
-        assertEquals(request, res);
-    }
-
-    private MappingUriExtensions createMapper() {
+    private MappingUriExtensions createMapper(String conf) {
         return new MappingUriExtensions(conf) {
             @Override
             protected String calcServerLocation(String configFolder) {

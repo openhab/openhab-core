@@ -13,6 +13,7 @@
 package org.openhab.core.io.transport.mqtt;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Thrown if an error occurs communicating with the server. The exception contains a reason code. The semantic of the
@@ -23,20 +24,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class MqttException extends Exception {
     private static final long serialVersionUID = 301L;
-    private int reasonCode;
     private Throwable cause;
-
-    /**
-     * Constructs a new <code>MqttException</code> with the specified code
-     * as the underlying reason.
-     *
-     * @param reasonCode the reason code for the exception.
-     */
-    @Deprecated
-    public MqttException(int reasonCode) {
-        this.cause = new Exception();
-        this.reasonCode = reasonCode;
-    }
 
     /**
      * Constructs a new <code>MqttException</code> with the specified reason
@@ -45,7 +33,6 @@ public class MqttException extends Exception {
      */
     public MqttException(String reason) {
         this.cause = new Exception("reason");
-        this.reasonCode = Integer.MIN_VALUE;
     }
 
     /**
@@ -55,31 +42,7 @@ public class MqttException extends Exception {
      * @param cause the underlying cause of the exception.
      */
     public MqttException(Throwable cause) {
-        this.reasonCode = Integer.MIN_VALUE;
         this.cause = cause;
-    }
-
-    /**
-     * Constructs a new <code>MqttException</code> with the specified
-     * <code>Throwable</code> as the underlying reason.
-     *
-     * @param reason the reason code for the exception.
-     * @param cause the underlying cause of the exception.
-     */
-    @Deprecated
-    public MqttException(int reason, Throwable cause) {
-        this.reasonCode = reason;
-        this.cause = cause;
-    }
-
-    /**
-     * Returns the reason code for this exception.
-     *
-     * @return the code representing the reason for this exception.
-     */
-    @Deprecated
-    public int getReasonCode() {
-        return reasonCode;
     }
 
     /**
@@ -89,7 +52,7 @@ public class MqttException extends Exception {
      *         which may be <code>null</code>.
      */
     @Override
-    public Throwable getCause() {
+    public @Nullable Throwable getCause() {
         return cause;
     }
 
@@ -97,7 +60,7 @@ public class MqttException extends Exception {
      * Returns the detail message for this exception. May be null.
      */
     @Override
-    public String getMessage() {
+    public @Nullable String getMessage() {
         return cause.getMessage();
     }
 

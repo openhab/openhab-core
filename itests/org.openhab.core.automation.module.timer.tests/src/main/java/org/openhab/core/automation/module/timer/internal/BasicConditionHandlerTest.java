@@ -13,11 +13,10 @@
 package org.openhab.core.automation.module.timer.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +24,8 @@ import java.util.Random;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
@@ -35,6 +34,7 @@ import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
+import org.openhab.core.automation.internal.RuleEngineImpl;
 import org.openhab.core.automation.internal.module.handler.ItemCommandActionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
 import org.openhab.core.automation.util.ModuleBuilder;
@@ -53,6 +53,7 @@ import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.test.storage.VolatileStorageService;
 import org.slf4j.Logger;
@@ -76,7 +77,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
      *
      * @Before-annotated methods in sub-classes.
      */
-    @Before
+    @BeforeEach
     public void beforeBase() {
         @NonNullByDefault
         ItemProvider itemProvider = new ItemProvider() {
@@ -106,6 +107,9 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
             ruleEngine = getService(RuleManager.class);
             assertThat(ruleEngine, is(notNullValue()));
         }, 3000, 100);
+
+        // start rule engine
+        ((RuleEngineImpl) getService(RuleManager.class)).onReadyMarkerAdded(new ReadyMarker("", ""));
     }
 
     @Test
@@ -121,27 +125,30 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
          * Create Rule
          */
         logger.info("Create rule");
-        Configuration triggerConfig = new Configuration(Collections.singletonMap("itemName", testItemName1));
-        List<Trigger> triggers = Collections.singletonList(ModuleBuilder.createTrigger().withId("MyTrigger")
+        Configuration triggerConfig = new Configuration(Map.of("itemName", testItemName1));
+        List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId("MyTrigger")
                 .withTypeUID(ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(triggerConfig).build());
 
-        List<Condition> conditions = Collections.singletonList(getPassingCondition());
+        List<Condition> conditions = List.of(getPassingCondition());
 
         Map<String, Object> cfgEntries = new HashMap<>();
         cfgEntries.put("itemName", testItemName2);
         cfgEntries.put("command", "ON");
         Configuration actionConfig = new Configuration(cfgEntries);
-        List<Action> actions = Collections.singletonList(ModuleBuilder.createAction().withId("MyItemPostCommandAction")
+        List<Action> actions = List.of(ModuleBuilder.createAction().withId("MyItemPostCommandAction")
                 .withTypeUID(ItemCommandActionHandler.ITEM_COMMAND_ACTION).withConfiguration(actionConfig).build());
 
         // prepare the execution
         EventPublisher eventPublisher = getService(EventPublisher.class);
 
+        // start rule engine
+        ((RuleEngineImpl) getService(RuleManager.class)).onReadyMarkerAdded(new ReadyMarker("", ""));
+
         EventSubscriber itemEventHandler = new EventSubscriber() {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemCommandEvent.TYPE);
+                return Set.of(ItemCommandEvent.TYPE);
             }
 
             @Override

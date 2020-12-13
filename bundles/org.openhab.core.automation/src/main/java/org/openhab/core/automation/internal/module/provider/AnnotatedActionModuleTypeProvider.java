@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.AnnotatedActions;
 import org.openhab.core.automation.Module;
@@ -37,7 +38,6 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
 import org.openhab.core.common.registry.ProviderChangeListener;
-import org.openhab.core.config.core.ConfigConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
@@ -169,8 +169,8 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
 
         for (ModuleInformation mi : moduleInformations) {
             mi.setConfigName(configName);
-            ModuleType oldType = null;
 
+            ModuleType oldType = null;
             Set<ModuleInformation> availableModuleConfigs = moduleInformation.get(mi.getUID());
             if (availableModuleConfigs != null) {
                 if (availableModuleConfigs.size() > 1) {
@@ -181,11 +181,14 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
                 }
 
                 ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation);
-                for (ProviderChangeListener<ModuleType> l : changeListeners) {
-                    if (oldType != null) {
-                        l.updated(this, oldType, mt);
-                    } else {
-                        l.removed(this, mt);
+                // localize moduletype -> remove from map
+                if (mt != null) {
+                    for (ProviderChangeListener<ModuleType> l : changeListeners) {
+                        if (oldType != null) {
+                            l.updated(this, oldType, mt);
+                        } else {
+                            l.removed(this, mt);
+                        }
                     }
                 }
             }
@@ -193,15 +196,13 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
     }
 
     private @Nullable String getConfigNameFromService(Map<String, Object> properties) {
-        Object o = properties.get(ConfigConstants.SERVICE_CONTEXT);
+        Object o = properties.get(OpenHAB.SERVICE_CONTEXT);
         String configName = null;
         if (o instanceof String) {
             configName = (String) o;
         }
         return configName;
     }
-
-    // HandlerFactory:
 
     @Override
     public Collection<String> getTypes() {
@@ -212,11 +213,9 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
     protected @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
         if (module instanceof Action) {
             Action actionModule = (Action) module;
-
             if (moduleInformation.containsKey(actionModule.getTypeUID())) {
                 ModuleInformation finalMI = helper.getModuleInformationForIdentifier(actionModule, moduleInformation,
                         false);
-
                 if (finalMI != null) {
                     ActionType moduleType = helper.buildModuleType(module.getTypeUID(), moduleInformation);
                     return new AnnotationActionHandler(actionModule, moduleType, finalMI.getMethod(),

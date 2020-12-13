@@ -13,10 +13,13 @@
 package org.openhab.core.library.types;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.library.unit.MetricPrefix.CENTI;
 
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.text.DecimalFormatSymbols;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Energy;
@@ -24,24 +27,29 @@ import javax.measure.quantity.Length;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
+import javax.measure.quantity.Time;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.unit.BinaryPrefix;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
+import org.openhab.core.types.util.UnitUtils;
 
 import tec.uom.se.quantity.QuantityDimension;
-import tec.uom.se.unit.Units;
 
 /**
  * @author Gaël L'hopital - Initial contribution
  */
-@SuppressWarnings({ "rawtypes", "unchecked", "null" })
+@SuppressWarnings("null")
 public class QuantityTypeTest {
+
+    // we need to get the decimal separator of the default locale for our tests
+    private static final char SEP = new DecimalFormatSymbols().getDecimalSeparator();
 
     @Test
     public void testDimensionless() {
@@ -54,9 +62,9 @@ public class QuantityTypeTest {
         assertTrue(dt0.getUnit().getDimension() == QuantityDimension.NONE);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testKnownInvalidConstructors() throws Exception {
-        new QuantityType<>("123 Hello World");
+    @Test
+    public void testKnownInvalidConstructors() {
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123 Hello World"));
     }
 
     @Test
@@ -76,10 +84,12 @@ public class QuantityTypeTest {
     }
 
     @Test
-    public void testReflectiveInstantiation() throws InstantiationException, IllegalAccessException {
-        QuantityType.class.newInstance();
+    public void testReflectiveInstantiation() throws InstantiationException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        QuantityType.class.getDeclaredConstructor().newInstance();
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testUnits() {
         QuantityType<Length> dt2 = new QuantityType<>("2 m");
@@ -113,6 +123,23 @@ public class QuantityTypeTest {
     }
 
     @Test
+    public void testFormats() {
+        QuantityType<Time> seconds = new QuantityType<>(80, Units.SECOND);
+        QuantityType<Time> millis = seconds.toUnit(MetricPrefix.MILLI(Units.SECOND));
+        QuantityType<Time> minutes = seconds.toUnit(Units.MINUTE);
+
+        assertThat(seconds.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80" + SEP + "0 s"));
+        assertThat(millis.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80000" + SEP + "0 ms"));
+        assertThat(minutes.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("1" + SEP + "3 min"));
+
+        assertThat(seconds.format("%.1f"), is("80" + SEP + "0"));
+        assertThat(minutes.format("%.1f"), is("1" + SEP + "3"));
+
+        assertThat(seconds.format("%1$tH:%1$tM:%1$tS"), is("00:01:20"));
+        assertThat(millis.format("%1$tHh %1$tMm %1$tSs"), is("00h 01m 20s"));
+    }
+
+    @Test
     public void testConverters() {
         QuantityType<?> dt2 = QuantityType.valueOf("2 m");
         QuantityType<?> dt3 = new QuantityType<>("200 cm");
@@ -124,7 +151,7 @@ public class QuantityTypeTest {
         assertTrue(dt2.equals(dt3));
 
         QuantityType<?> tempInC = new QuantityType<>("22 °C");
-        QuantityType<?> tempInK = tempInC.toUnit(SmartHomeUnits.KELVIN);
+        QuantityType<?> tempInK = tempInC.toUnit(Units.KELVIN);
         assertTrue(tempInC.equals(tempInK));
         tempInK = tempInC.toUnit("K");
         assertTrue(tempInC.equals(tempInK));
@@ -226,9 +253,9 @@ public class QuantityTypeTest {
         assertThat(new QuantityType<>("4 m").divide(new QuantityType<>("2 cm")), is(new QuantityType<>("2 m/cm")));
     }
 
-    @Test(expected = ArithmeticException.class)
+    @Test
     public void testDivideZero() {
-        new QuantityType<>("4 m").divide(QuantityType.ZERO);
+        assertThrows(ArithmeticException.class, () -> new QuantityType<>("4 m").divide(QuantityType.ZERO));
     }
 
     @Test
@@ -256,12 +283,12 @@ public class QuantityTypeTest {
     public void testIntensity() {
         QuantityType<Intensity> density = new QuantityType<>("10 W/m²");
         assertEquals(10, density.doubleValue(), 1E-5);
-        assertEquals(SmartHomeUnits.IRRADIANCE.toString(), density.getUnit().toString());
+        assertEquals(Units.IRRADIANCE.toString(), density.getUnit().toString());
 
         density = density.toUnit("W/cm²");
         assertEquals("0.001 W/cm²", density.toString());
 
-        density = new QuantityType<>(2, SmartHomeUnits.IRRADIANCE);
+        density = new QuantityType<>(2, Units.IRRADIANCE);
         assertEquals(2, density.doubleValue(), 1E-5);
         assertEquals("2 W/m²", density.toString());
 
@@ -299,24 +326,35 @@ public class QuantityTypeTest {
     @Test
     public void testDataAmount() {
         QuantityType<DataAmount> amount = new QuantityType<>("8 bit");
-        QuantityType<DataAmount> octet = amount.toUnit(SmartHomeUnits.BYTE);
+        QuantityType<DataAmount> octet = amount.toUnit(Units.BYTE);
         assertEquals(1, octet.byteValue());
+        QuantityType<DataAmount> bytes = new QuantityType<>("1 B");
+        assertEquals("1 B", bytes.toString());
+        QuantityType<DataAmount> bits = bytes.toUnit(Units.BIT);
+        assertEquals(8, bits.byteValue());
+        bytes = new QuantityType<>("1 MB");
+        assertEquals("1 MB", bytes.toString());
+        bytes = new QuantityType<DataAmount>(1, MetricPrefix.MEGA(Units.BYTE));
+        assertEquals("1 MB", bytes.toString());
+        bytes = new QuantityType<>("1 GiB");
+        assertEquals("1 GiB", bytes.toString());
+        bytes = new QuantityType<DataAmount>(1, BinaryPrefix.GIBI(Units.BYTE));
+        assertEquals("1 GiB", bytes.toString());
         QuantityType<DataAmount> bigAmount = new QuantityType<>("1 Kio");
-        QuantityType<DataAmount> octets = bigAmount.toUnit(SmartHomeUnits.OCTET);
+        QuantityType<DataAmount> octets = bigAmount.toUnit(Units.OCTET);
         assertEquals(1024, octets.intValue());
         QuantityType<DataAmount> hugeAmount = new QuantityType<>("1024Gio");
-        QuantityType<DataAmount> lotOfOctets = hugeAmount.toUnit(SmartHomeUnits.OCTET);
-        assertEquals("1099511627776 o", lotOfOctets.toString());
+        QuantityType<DataAmount> lotOfOctets = hugeAmount.toUnit(Units.OCTET);
+        assertEquals("1099511627776 o", lotOfOctets.format("%d o"));
     }
 
     @Test
     public void testDataTransferRate() {
         QuantityType<DataTransferRate> speed = new QuantityType<>("1024 bit/s");
-        QuantityType<DataTransferRate> octet = speed.toUnit(SmartHomeUnits.OCTET.divide(Units.SECOND));
+        QuantityType<DataTransferRate> octet = speed.toUnit(Units.OCTET.divide(Units.SECOND));
         assertEquals(128, octet.intValue());
         QuantityType<DataTransferRate> gsm2G = new QuantityType<>("115 Mbit/s");
-        QuantityType<DataTransferRate> octets = gsm2G
-                .toUnit(MetricPrefix.KILO(SmartHomeUnits.OCTET).divide(Units.SECOND));
+        QuantityType<DataTransferRate> octets = gsm2G.toUnit(MetricPrefix.KILO(Units.OCTET).divide(Units.SECOND));
         assertEquals(14375, octets.intValue());
     }
 }

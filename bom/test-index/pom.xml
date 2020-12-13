@@ -16,9 +16,19 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>osgi.enroute.junit.wrapper</artifactId>
-      <version>4.12.0</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.6.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <version>1.6.2</version>
+    </dependency>
+    <dependency>
+      <groupId>biz.aQute.bnd</groupId>
+      <artifactId>biz.aQute.tester.junit-platform</artifactId>
+      <version>5.1.2</version>
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bom</groupId>

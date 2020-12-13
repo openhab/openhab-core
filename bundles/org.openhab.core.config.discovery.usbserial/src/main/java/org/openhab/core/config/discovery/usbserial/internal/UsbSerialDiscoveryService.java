@@ -81,14 +81,14 @@ public class UsbSerialDiscoveryService extends AbstractDiscoveryService implemen
 
     @Override
     @Activate
-    protected void activate(@Nullable Map<String, @Nullable Object> configProperties) {
+    protected void activate(@Nullable Map<String, Object> configProperties) {
         super.activate(configProperties);
         usbSerialDiscovery.registerDiscoveryListener(this);
     }
 
     @Modified
     @Override
-    protected void modified(@Nullable Map<String, @Nullable Object> configProperties) {
+    protected void modified(@Nullable Map<String, Object> configProperties) {
         super.modified(configProperties);
     }
 

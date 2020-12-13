@@ -12,9 +12,9 @@
  */
 package org.openhab.core.thing.internal;
 
-import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
@@ -23,7 +23,6 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -32,9 +31,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.common.registry.RegistryChangeListener;
@@ -54,6 +53,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.StringType;
@@ -128,11 +128,13 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     private ReadyService readyService;
     private Thing thing;
 
-    @Before
+    @BeforeEach
     @SuppressWarnings("null")
     public void setUp() {
-        thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(ChannelBuilder.create(CHANNEL_UID, "Switch")
-                .withKind(ChannelKind.STATE).withType(CHANNEL_TYPE_UID).build()).build();
+        thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
+                .withChannels(ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.SWITCH).withKind(ChannelKind.STATE)
+                        .withType(CHANNEL_TYPE_UID).build())
+                .build();
 
         registerVolatileStorageService();
 
@@ -166,13 +168,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
                 fail("Failed to get service reference: " + e.getMessage());
             }
         });
-        waitForAssert(() -> {
-            try {
-                assertThat(bundleContext.getServiceReferences(ChannelItemProvider.class, null), is(notNullValue()));
-            } catch (InvalidSyntaxException e) {
-                fail("Failed to get service reference: " + e.getMessage());
-            }
-        });
 
         Bundle bundle = mock(Bundle.class);
         when(bundle.getSymbolicName()).thenReturn("org.openhab.core.thing");
@@ -184,7 +179,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         thingManager.setBundleResolver(bundleResolver);
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         managedThingProvider.getAll().forEach(t -> managedThingProvider.remove(t.getUID()));
         ComponentContext componentContext = mock(ComponentContext.class);
@@ -212,7 +207,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         ThingTypeUID newThingTypeUID = new ThingTypeUID("binding:type2");
 
         ThingTypeMigrationService migrator = getService(ThingTypeMigrationService.class);
-        assertThat(migrator, is(not(nullValue())));
+        assertThat(migrator, is(notNullValue()));
 
         migrator.migrateThingType(thing, newThingTypeUID, thing.getConfiguration());
 
@@ -280,7 +275,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         assertThat(state.raceCondition, is(false));
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     @SuppressWarnings("null")
     public void thingManagerDoesNotChangeTheThingTypeWhenNewThingTypeIsNotRegistered() {
         ThingHandler thingHandler = mock(ThingHandler.class);
@@ -299,9 +294,10 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         ThingTypeUID newThingTypeUID = new ThingTypeUID("binding:type2");
 
         ThingTypeMigrationService migrator = getService(ThingTypeMigrationService.class);
-        assertThat(migrator, is(not(null)));
+        assertThat(migrator, is(notNullValue()));
 
-        migrator.migrateThingType(thing, newThingTypeUID, thing.getConfiguration());
+        assertThrows(RuntimeException.class,
+                () -> migrator.migrateThingType(thing, newThingTypeUID, thing.getConfiguration()));
     }
 
     @Test
@@ -309,7 +305,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         registerThingTypeProvider();
 
         Thing thing2 = ThingBuilder.create(THING_TYPE_UID, THING_UID)
-                .withChannels(singletonList(ChannelBuilder.create(CHANNEL_UID, "Switch").build())).build();
+                .withChannels(List.of(ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.SWITCH).build())).build();
 
         class ThingHandlerState {
             boolean raceCondition;
@@ -791,6 +787,8 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         managedItemChannelLinkProvider.add(new ItemChannelLink(itemName, CHANNEL_UID));
 
         registerService(thingHandlerFactory);
+        Item item = new StringItem(itemName);
+        itemRegistry.add(item);
         waitForAssert(() -> assertThat(itemRegistry.get(itemName), is(notNullValue())));
 
         state.callback.statusUpdated(thing, ThingStatusInfoBuilder.create(ThingStatus.ONLINE).build());
@@ -866,12 +864,12 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemStateEvent.TYPE);
+                return Set.of(ItemStateEvent.TYPE);
             }
 
             @Override
             public @Nullable EventFilter getEventFilter() {
-                return new TopicEventFilter("smarthome/items/.*/state");
+                return new TopicEventFilter("openhab/items/.*/state");
             }
         };
         registerService(itemUpdateEventSubscriber);
@@ -881,7 +879,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         waitForAssert(() -> assertThat(receivedEvents.size(), is(1)));
         assertThat(receivedEvents.get(0), is(instanceOf(ItemStateEvent.class)));
         ItemStateEvent itemUpdateEvent = (ItemStateEvent) receivedEvents.get(0);
-        assertThat(itemUpdateEvent.getTopic(), is("smarthome/items/name/state"));
+        assertThat(itemUpdateEvent.getTopic(), is("openhab/items/name/state"));
         assertThat(itemUpdateEvent.getItemName(), is(itemName));
         assertThat(itemUpdateEvent.getSource(), is(CHANNEL_UID.toString()));
         assertThat(itemUpdateEvent.getItemState(), is(instanceOf(StringType.class)));
@@ -889,7 +887,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         receivedEvents.clear();
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
-                .withChannel(ChannelBuilder.create(CHANNEL_UID, "Switch").build()).build();
+                .withChannel(ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.SWITCH).build()).build();
         managedThingProvider.update(thing);
 
         state.callback.stateUpdated(CHANNEL_UID, new StringType("Value"));
@@ -897,7 +895,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         assertThat(receivedEvents.get(0), is(instanceOf(ItemStateEvent.class)));
         itemUpdateEvent = (ItemStateEvent) receivedEvents.get(0);
-        assertThat(itemUpdateEvent.getTopic(), is("smarthome/items/name/state"));
+        assertThat(itemUpdateEvent.getTopic(), is("openhab/items/name/state"));
         assertThat(itemUpdateEvent.getItemName(), is(itemName));
         assertThat(itemUpdateEvent.getSource(), is(CHANNEL_UID.toString()));
         assertThat(itemUpdateEvent.getItemState(), is(instanceOf(StringType.class)));
@@ -1082,7 +1080,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         assertThat(thingManager, is(notNullValue()));
 
         ThingProvider customThingProvider = mock(ThingProvider.class);
-        when(customThingProvider.getAll()).thenReturn(Collections.singletonList(thing));
+        when(customThingProvider.getAll()).thenReturn(List.of(thing));
 
         registerService(customThingProvider);
 
@@ -1134,7 +1132,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         EventSubscriber thingStatusEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return singleton(ThingStatusInfoEvent.TYPE);
+                return Set.of(ThingStatusInfoEvent.TYPE);
             }
 
             @Override
@@ -1230,7 +1228,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         EventSubscriber thingStatusEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return singleton(ThingStatusInfoChangedEvent.TYPE);
+                return Set.of(ThingStatusInfoChangedEvent.TYPE);
             }
 
             @Override
@@ -1251,7 +1249,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         waitForAssert(() -> assertThat(infoChangedEvents.size(), is(1)));
         assertThat(infoChangedEvents.get(0).getType(), is(ThingStatusInfoChangedEvent.TYPE));
-        assertThat(infoChangedEvents.get(0).getTopic(), is("smarthome/things/binding:type:id/statuschanged"));
+        assertThat(infoChangedEvents.get(0).getTopic(), is("openhab/things/binding:type:id/statuschanged"));
         assertThat(infoChangedEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.INITIALIZING));
         assertThat(infoChangedEvents.get(0).getOldStatusInfo().getStatus(), is(ThingStatus.UNINITIALIZED));
         infoChangedEvents.clear();
@@ -1262,7 +1260,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         waitForAssert(() -> assertThat(infoChangedEvents.size(), is(1)));
         assertThat(infoChangedEvents.get(0).getType(), is(ThingStatusInfoChangedEvent.TYPE));
-        assertThat(infoChangedEvents.get(0).getTopic(), is("smarthome/things/binding:type:id/statuschanged"));
+        assertThat(infoChangedEvents.get(0).getTopic(), is("openhab/things/binding:type:id/statuschanged"));
         assertThat(infoChangedEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.ONLINE));
         assertThat(infoChangedEvents.get(0).getOldStatusInfo().getStatus(), is(ThingStatus.INITIALIZING));
         infoChangedEvents.clear();
@@ -1312,7 +1310,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         EventSubscriber thingStatusInfoEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return singleton(ThingStatusInfoEvent.TYPE);
+                return Set.of(ThingStatusInfoEvent.TYPE);
             }
 
             @Override
@@ -1332,7 +1330,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         EventSubscriber thingStatusInfoChangedEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return singleton(ThingStatusInfoChangedEvent.TYPE);
+                return Set.of(ThingStatusInfoChangedEvent.TYPE);
             }
 
             @Override
@@ -1356,13 +1354,13 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         });
 
         assertThat(infoEvents.get(0).getType(), is(ThingStatusInfoEvent.TYPE));
-        assertThat(infoEvents.get(0).getTopic(), is("smarthome/things/binding:type:id/status"));
+        assertThat(infoEvents.get(0).getTopic(), is("openhab/things/binding:type:id/status"));
         assertThat(infoEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.INITIALIZING));
         assertThat(infoEvents.get(0).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
         assertThat(infoEvents.get(0).getStatusInfo().getDescription(), is(nullValue()));
 
         assertThat(infoChangedEvents.get(0).getType(), is(ThingStatusInfoChangedEvent.TYPE));
-        assertThat(infoChangedEvents.get(0).getTopic(), is("smarthome/things/binding:type:id/statuschanged"));
+        assertThat(infoChangedEvents.get(0).getTopic(), is("openhab/things/binding:type:id/statuschanged"));
         assertThat(infoChangedEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.INITIALIZING));
         assertThat(infoChangedEvents.get(0).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
         assertThat(infoChangedEvents.get(0).getStatusInfo().getDescription(), is(nullValue()));
@@ -1391,13 +1389,13 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         });
 
         assertThat(infoEvents.get(0).getType(), is(ThingStatusInfoEvent.TYPE));
-        assertThat(infoEvents.get(0).getTopic(), is("smarthome/things/binding:type:id/status"));
+        assertThat(infoEvents.get(0).getTopic(), is("openhab/things/binding:type:id/status"));
         assertThat(infoEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.ONLINE));
         assertThat(infoEvents.get(0).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
         assertThat(infoEvents.get(0).getStatusInfo().getDescription(), is("Thing is online."));
 
         assertThat(infoChangedEvents.get(0).getType(), is(ThingStatusInfoChangedEvent.TYPE));
-        assertThat(infoChangedEvents.get(0).getTopic(), is("smarthome/things/binding:type:id/statuschanged"));
+        assertThat(infoChangedEvents.get(0).getTopic(), is("openhab/things/binding:type:id/statuschanged"));
         assertThat(infoChangedEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.ONLINE));
         assertThat(infoChangedEvents.get(0).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
         assertThat(infoChangedEvents.get(0).getStatusInfo().getDescription(), is("Thing is online."));
@@ -1422,13 +1420,13 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         });
 
         assertThat(infoEvents.get(0).getType(), is(ThingStatusInfoEvent.TYPE));
-        assertThat(infoEvents.get(0).getTopic(), is("smarthome/things/binding:type:id/status"));
+        assertThat(infoEvents.get(0).getTopic(), is("openhab/things/binding:type:id/status"));
         assertThat(infoEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.OFFLINE));
         assertThat(infoEvents.get(0).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
         assertThat(infoEvents.get(0).getStatusInfo().getDescription(), is("Thing ist offline."));
 
         assertThat(infoChangedEvents.get(0).getType(), is(ThingStatusInfoChangedEvent.TYPE));
-        assertThat(infoChangedEvents.get(0).getTopic(), is("smarthome/things/binding:type:id/statuschanged"));
+        assertThat(infoChangedEvents.get(0).getTopic(), is("openhab/things/binding:type:id/statuschanged"));
         assertThat(infoChangedEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.OFFLINE));
         assertThat(infoChangedEvents.get(0).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
         assertThat(infoChangedEvents.get(0).getStatusInfo().getDescription(), is("Thing ist offline."));
@@ -1951,11 +1949,13 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
         registerService(thingHandlerFactory);
+        String itemName = "testItem";
+        Item item = new StringItem(itemName);
+        itemRegistry.add(item);
+        itemChannelLinkRegistry.add(new ItemChannelLink(itemName, new ChannelUID(thing.getUID(), "channel")));
+        waitForAssert(() -> assertThat(itemRegistry.get(itemName), is(notNullValue())));
 
-        itemChannelLinkRegistry.add(new ItemChannelLink("testItem", new ChannelUID(thing.getUID(), "channel")));
-        waitForAssert(() -> assertThat(itemRegistry.get("testItem"), is(notNullValue())));
-
-        eventPublisher.post(ItemEventFactory.createCommandEvent("testItem", OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, OnOffType.ON));
 
         assertThat(state.handleCommandCalled, is(false));
 
@@ -1964,7 +1964,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         state.callback.statusUpdated(thing, unknownNone);
         assertThat(thing.getStatusInfo(), is(unknownNone));
 
-        eventPublisher.post(ItemEventFactory.createCommandEvent("testItem", OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, OnOffType.ON));
 
         waitForAssert(() -> {
             assertThat(state.handleCommandCalled, is(true));

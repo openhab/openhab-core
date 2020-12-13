@@ -12,11 +12,8 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +43,12 @@ import org.slf4j.LoggerFactory;
  */
 public class GenericEventTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
+    public static final String MODULE_TYPE_ID = "core.GenericEventTrigger";
+
+    private static final String CFG_EVENT_TOPIC = "eventTopic";
+    private static final String CFG_EVENT_SOURCE = "eventSource";
+    private static final String CFG_EVENT_TYPES = "eventTypes";
+
     private final Logger logger = LoggerFactory.getLogger(GenericEventTriggerHandler.class);
 
     private final String source;
@@ -53,24 +56,16 @@ public class GenericEventTriggerHandler extends BaseTriggerModuleHandler impleme
     private final Set<String> types;
     private final BundleContext bundleContext;
 
-    public static final String MODULE_TYPE_ID = "core.GenericEventTrigger";
-
-    private static final String CFG_EVENT_TOPIC = "eventTopic";
-    private static final String CFG_EVENT_SOURCE = "eventSource";
-    private static final String CFG_EVENT_TYPES = "eventTypes";
-
-    @SuppressWarnings("rawtypes")
-    private ServiceRegistration eventSubscriberRegistration;
+    private ServiceRegistration<?> eventSubscriberRegistration;
 
     public GenericEventTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
         this.source = (String) module.getConfiguration().get(CFG_EVENT_SOURCE);
         this.topic = (String) module.getConfiguration().get(CFG_EVENT_TOPIC);
         if (module.getConfiguration().get(CFG_EVENT_TYPES) != null) {
-            this.types = Collections.unmodifiableSet(
-                    new HashSet<>(Arrays.asList(((String) module.getConfiguration().get(CFG_EVENT_TYPES)).split(","))));
+            this.types = Set.of(((String) module.getConfiguration().get(CFG_EVENT_TYPES)).split(","));
         } else {
-            this.types = Collections.emptySet();
+            this.types = Set.of();
         }
         this.bundleContext = bundleContext;
         Dictionary<String, Object> properties = new Hashtable<>();

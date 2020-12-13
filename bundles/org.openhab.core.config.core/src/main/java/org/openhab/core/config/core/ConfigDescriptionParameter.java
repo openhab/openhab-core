@@ -14,9 +14,7 @@ package org.openhab.core.config.core;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -104,10 +102,9 @@ public class ConfigDescriptionParameter {
     private boolean advanced = false;
     private boolean verify = false;
 
-    private static final Set<String> UNITS = Collections
-            .unmodifiableSet(new HashSet<>(Arrays.asList("A", "cd", "K", "kg", "m", "mol", "s", "g", "rad", "sr", "Hz",
-                    "N", "Pa", "J", "W", "C", "V", "F", "Ω", "S", "Wb", "T", "H", "Cel", "lm", "lx", "Bq", "Gy", "Sv",
-                    "kat", "m/s2", "m2v", "m3", "kph", "%", "l", "ms", "min", "h", "d", "week", "y")));
+    private static final Set<String> UNITS = Set.of("A", "cd", "K", "kg", "m", "mol", "s", "g", "rad", "sr", "Hz", "N",
+            "Pa", "J", "W", "C", "V", "F", "Ω", "S", "Wb", "T", "H", "Cel", "lm", "lx", "Bq", "Gy", "Sv", "kat", "m/s2",
+            "m2v", "m3", "kph", "%", "l", "ms", "min", "h", "d", "week", "y");
 
     /**
      * Default constructor.

@@ -100,7 +100,8 @@ public class PersistenceServiceRegistryImpl implements ConfigOptionProvider, Per
     }
 
     @Override
-    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
+            @Nullable Locale locale) {
         if (CONFIG_URI.equals(uri.toString()) && CONFIG_DEFAULT.equals(param)) {
             Set<ParameterOption> options = new HashSet<>();
             for (PersistenceService service : getAll()) {

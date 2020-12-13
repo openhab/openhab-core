@@ -14,12 +14,12 @@ package org.openhab.core.config.discovery.internal.console;
 
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.config.discovery.inbox.Inbox;
@@ -29,6 +29,7 @@ import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -36,8 +37,10 @@ import org.osgi.service.component.annotations.Reference;
  * This class provides console commands around the inbox functionality.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - New optional parameter for command approve
  */
 @Component(immediate = true, service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String SUBCMD_APPROVE = "approve";
@@ -47,10 +50,12 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private static final String SUBCMD_CLEAR = "clear";
     private static final String SUBCMD_REMOVE = "remove";
 
-    private Inbox inbox;
+    private final Inbox inbox;
 
-    public InboxConsoleCommandExtension() {
+    @Activate
+    public InboxConsoleCommandExtension(final @Reference Inbox inbox) {
         super("inbox", "Manage your inbox.");
+        this.inbox = inbox;
     }
 
     @Override
@@ -61,6 +66,10 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 case SUBCMD_APPROVE:
                     if (args.length > 2) {
                         String label = args[2];
+                        String newThingId = null;
+                        if (args.length > 3) {
+                            newThingId = args[3];
+                        }
                         try {
                             ThingUID thingUID = new ThingUID(args[1]);
                             List<DiscoveryResult> results = inbox.stream().filter(forThingUID(thingUID))
@@ -69,12 +78,12 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
                                 console.println("No matching inbox entry could be found.");
                                 return;
                             }
-                            inbox.approve(thingUID, label);
+                            inbox.approve(thingUID, label, newThingId);
                         } catch (IllegalArgumentException e) {
                             console.println(e.getMessage());
                         }
                     } else {
-                        console.println("Specify thing id to approve: inbox approve <thingUID> <label>");
+                        console.println("Specify thing id to approve: inbox approve <thingUID> <label> [<newThingID>]");
                     }
                     break;
                 case SUBCMD_IGNORE:
@@ -188,21 +197,13 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] { buildCommandUsage(SUBCMD_LIST, "lists all current inbox entries"),
+        return List.of(buildCommandUsage(SUBCMD_LIST, "lists all current inbox entries"),
                 buildCommandUsage(SUBCMD_LIST_IGNORED, "lists all ignored inbox entries"),
-                buildCommandUsage(SUBCMD_APPROVE + " <thingUID> <label>", "creates a thing for an inbox entry"),
+                buildCommandUsage(SUBCMD_APPROVE + " <thingUID> <label> [<newThingID>]",
+                        "creates a thing for an inbox entry"),
                 buildCommandUsage(SUBCMD_CLEAR, "clears all current inbox entries"),
                 buildCommandUsage(SUBCMD_REMOVE + " [<thingUID>|<thingTypeUID>]",
                         "remove the inbox entries of a given thing id or thing type"),
-                buildCommandUsage(SUBCMD_IGNORE + " <thingUID>", "ignores an inbox entry permanently") });
-    }
-
-    @Reference
-    protected void setInbox(Inbox inbox) {
-        this.inbox = inbox;
-    }
-
-    protected void unsetInbox(Inbox inbox) {
-        this.inbox = null;
+                buildCommandUsage(SUBCMD_IGNORE + " <thingUID>", "ignores an inbox entry permanently"));
     }
 }

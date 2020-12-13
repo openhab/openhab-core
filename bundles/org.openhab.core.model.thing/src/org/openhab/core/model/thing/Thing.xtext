@@ -90,10 +90,10 @@ BOOLEAN returns ecore::EBoolean:
 ;
 
 NUMBER returns ecore::EBigDecimal:
-	ID ('.' ID )?
+	('-')? ID ('.' ID )?
 ;
 
-terminal ID  		: '^'?('a'..'z'|'A'..'Z'|'_'|'-'|'0'..'9') ('a'..'z'|'A'..'Z'|'_'|'-'|'0'..'9')*;
+terminal ID: '^'?('a'..'z'|'A'..'Z'|'_'|'0'..'9') ('a'..'z'|'A'..'Z'|'_'|'-'|'0'..'9')*;
 
 // INT is disabled due to conflicts with the custom ID rule
 // terminal INT: '0'..'9';

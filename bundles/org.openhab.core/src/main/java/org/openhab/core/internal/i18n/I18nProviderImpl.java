@@ -22,7 +22,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.TimeZone;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -45,7 +44,7 @@ import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.types.PointType;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -154,10 +153,10 @@ public class I18nProviderImpl
 
         final SystemOfUnits newMeasurementSystem;
         switch (ms) {
-            case "SI":
+            case SIUnits.MEASUREMENT_SYSTEM_NAME:
                 newMeasurementSystem = SIUnits.getInstance();
                 break;
-            case "US":
+            case ImperialUnits.MEASUREMENT_SYSTEM_NAME:
                 newMeasurementSystem = ImperialUnits.getInstance();
                 break;
             default:
@@ -278,7 +277,7 @@ public class I18nProviderImpl
     public ZoneId getTimeZone() {
         final ZoneId timeZone = this.timeZone;
         if (timeZone == null) {
-            return TimeZone.getDefault().toZoneId();
+            return ZoneId.systemDefault();
         }
         return timeZone;
     }
@@ -365,18 +364,18 @@ public class I18nProviderImpl
         dimensionMap.put(Length.class, lengthMap);
 
         Map<SystemOfUnits, Unit<? extends Quantity<?>>> intensityMap = new HashMap<>();
-        intensityMap.put(SIUnits.getInstance(), SmartHomeUnits.IRRADIANCE);
-        intensityMap.put(ImperialUnits.getInstance(), SmartHomeUnits.IRRADIANCE);
+        intensityMap.put(SIUnits.getInstance(), Units.IRRADIANCE);
+        intensityMap.put(ImperialUnits.getInstance(), Units.IRRADIANCE);
         dimensionMap.put(Intensity.class, intensityMap);
 
         Map<SystemOfUnits, Unit<? extends Quantity<?>>> percentMap = new HashMap<>();
-        percentMap.put(SIUnits.getInstance(), SmartHomeUnits.ONE);
-        percentMap.put(ImperialUnits.getInstance(), SmartHomeUnits.ONE);
+        percentMap.put(SIUnits.getInstance(), Units.ONE);
+        percentMap.put(ImperialUnits.getInstance(), Units.ONE);
         dimensionMap.put(Dimensionless.class, percentMap);
 
         Map<SystemOfUnits, Unit<? extends Quantity<?>>> angleMap = new HashMap<>();
-        angleMap.put(SIUnits.getInstance(), SmartHomeUnits.DEGREE_ANGLE);
-        angleMap.put(ImperialUnits.getInstance(), SmartHomeUnits.DEGREE_ANGLE);
+        angleMap.put(SIUnits.getInstance(), Units.DEGREE_ANGLE);
+        angleMap.put(ImperialUnits.getInstance(), Units.DEGREE_ANGLE);
         dimensionMap.put(Angle.class, angleMap);
     }
 }

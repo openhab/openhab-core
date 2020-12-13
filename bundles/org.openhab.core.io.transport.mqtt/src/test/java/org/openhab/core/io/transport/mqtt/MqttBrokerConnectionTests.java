@@ -13,12 +13,12 @@
 package org.openhab.core.io.transport.mqtt;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
 import org.openhab.core.io.transport.mqtt.reconnect.AbstractReconnectStrategy;
 import org.openhab.core.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
@@ -46,6 +46,12 @@ import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
  */
 @NonNullByDefault
 public class MqttBrokerConnectionTests extends JavaTest {
+    private static final byte[] HELLO_BYTES = "hello".getBytes();
+
+    private static byte[] eqHelloBytes() {
+        return eq(HELLO_BYTES);
+    }
+
     @Test
     public void subscribeBeforeOnlineThenConnect()
             throws ConfigurationException, MqttException, InterruptedException, ExecutionException, TimeoutException {
@@ -60,11 +66,11 @@ public class MqttBrokerConnectionTests extends JavaTest {
         assertTrue(connection.hasSubscribers());
         assertThat(connection.connectionState(), is(MqttConnectionState.CONNECTED));
 
-        Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("homie/device123/$name").payload("hello".getBytes())
+        Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("homie/device123/$name").payload(HELLO_BYTES)
                 .build();
         // Test if subscription is active
         connection.getSubscribers().get("homie/device123/$name").messageArrived(publishMessage);
-        verify(subscriber).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
+        verify(subscriber).processMessage(eq("homie/device123/$name"), eqHelloBytes());
     }
 
     @Test
@@ -87,15 +93,15 @@ public class MqttBrokerConnectionTests extends JavaTest {
         assertTrue(connection.hasSubscribers());
         assertThat(connection.connectionState(), is(MqttConnectionState.CONNECTED));
 
-        Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("homie/device123/$name").payload("hello".getBytes())
+        Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("homie/device123/$name").payload(HELLO_BYTES)
                 .build();
         connection.getSubscribers().get("homie/device123/+").messageArrived(publishMessage);
         connection.getSubscribers().get("#").messageArrived(publishMessage);
         connection.getSubscribers().get("homie/#").messageArrived(publishMessage);
 
-        verify(subscriber).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
-        verify(subscriber2).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
-        verify(subscriber3).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
+        verify(subscriber).processMessage(eq("homie/device123/$name"), eqHelloBytes());
+        verify(subscriber2).processMessage(eq("homie/device123/$name"), eqHelloBytes());
+        verify(subscriber3).processMessage(eq("homie/device123/$name"), eqHelloBytes());
     }
 
     @Test
@@ -277,42 +283,38 @@ public class MqttBrokerConnectionTests extends JavaTest {
         connection.setLastWill(MqttWillAndTestament.fromString("topic:message:1:true"));
         assertEquals("topic", connection.getLastWill().getTopic());
         assertEquals(1, connection.getLastWill().getQos());
-        assertEquals(true, connection.getLastWill().isRetain());
-        byte b[] = { 'm', 'e', 's', 's', 'a', 'g', 'e' };
-        assertTrue(Arrays.equals(connection.getLastWill().getPayload(), b));
+        assertTrue(connection.getLastWill().isRetain());
+        byte[] b = { 'm', 'e', 's', 's', 'a', 'g', 'e' };
+        assertArrayEquals(connection.getLastWill().getPayload(), b);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void lastWillAndTestamentConstructorTests() {
-        new MqttWillAndTestament("", new byte[0], 0, false);
+        assertThrows(IllegalArgumentException.class, () -> new MqttWillAndTestament("", new byte[0], 0, false));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void qosInvalid() throws ConfigurationException {
         MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("123.123.123.123", null, false, "qosInvalid");
-        connection.setQos(10);
+        assertThrows(IllegalArgumentException.class, () -> connection.setQos(10));
     }
 
     @Test
     public void setterGetterTests() {
         MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("123.123.123.123", null, false,
                 "setterGetterTests");
-        assertEquals("URL getter", connection.getHost(), "123.123.123.123");
-        assertEquals("Name getter", connection.getPort(), 1883); // Check for non-secure port
-        assertEquals("Secure getter", connection.isSecure(), false);
-        assertEquals("ClientID getter", "setterGetterTests", connection.getClientId());
+        assertEquals(connection.getHost(), "123.123.123.123", "URL getter");
+        assertEquals(connection.getPort(), 1883, "Name getter"); // Check for non-secure port
+        assertFalse(connection.isSecure(), "Secure getter");
+        assertEquals("setterGetterTests", connection.getClientId(), "ClientID getter");
 
         connection.setCredentials("user@!", "password123@^");
-        assertEquals("User getter/setter", "user@!", connection.getUser());
-        assertEquals("Password getter/setter", "password123@^", connection.getPassword());
+        assertEquals("user@!", connection.getUser(), "User getter/setter");
+        assertEquals("password123@^", connection.getPassword(), "Password getter/setter");
 
         assertEquals(MqttBrokerConnection.DEFAULT_KEEPALIVE_INTERVAL, connection.getKeepAliveInterval());
         connection.setKeepAliveInterval(80);
         assertEquals(80, connection.getKeepAliveInterval());
-
-        assertFalse(connection.isRetain());
-        connection.setRetain(true);
-        assertTrue(connection.isRetain());
 
         assertEquals(MqttBrokerConnection.DEFAULT_QOS, connection.getQos());
         connection.setQos(2);

@@ -12,9 +12,9 @@
  */
 package org.openhab.core.library.types;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Simon Kaufmann - Initial contribution
@@ -37,7 +37,7 @@ public class UpDownTypeTest {
     @Test
     public void testConversionToPointType() {
         // should not be possible => null
-        assertEquals(null, UpDownType.UP.as(PointType.class));
-        assertEquals(null, UpDownType.DOWN.as(PointType.class));
+        assertNull(UpDownType.UP.as(PointType.class));
+        assertNull(UpDownType.DOWN.as(PointType.class));
     }
 }

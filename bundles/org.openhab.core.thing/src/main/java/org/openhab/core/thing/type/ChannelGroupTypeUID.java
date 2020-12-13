@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.type;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.UID;
 
 /**
@@ -19,6 +20,7 @@ import org.openhab.core.thing.UID;
  *
  * @author Michael Grammling - Initial contribution.
  */
+@NonNullByDefault
 public class ChannelGroupTypeUID extends UID {
 
     /**
@@ -33,8 +35,8 @@ public class ChannelGroupTypeUID extends UID {
     /**
      * Creates a new instance of this class with the specified parameter.
      *
-     * @param bindingId the binding ID (must neither be null, nor empty)
-     * @param id the identifier of the channel group (must neither be null, nor empty)
+     * @param bindingId the binding ID
+     * @param id the identifier of the channel group
      */
     public ChannelGroupTypeUID(String bindingId, String id) {
         super(bindingId, id);

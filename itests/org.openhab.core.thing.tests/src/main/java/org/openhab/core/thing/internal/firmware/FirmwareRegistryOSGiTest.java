@@ -13,24 +13,21 @@
 package org.openhab.core.thing.internal.firmware;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.openhab.core.thing.firmware.Constants.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Thing;
@@ -86,12 +83,12 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
         @Override
         public @Nullable Set<Firmware> getFirmwares(Thing thing, @Nullable Locale locale) {
             if (!thing.equals(thing1)) {
-                return Collections.emptySet();
+                return Set.of();
             }
             if (Locale.ENGLISH.equals(locale)) {
-                return Stream.of(FW111_EN, FW112_EN).collect(Collectors.toSet());
+                return Set.of(FW111_EN, FW112_EN);
             } else {
-                return Stream.of(FW111_DE, FW112_DE).collect(Collectors.toSet());
+                return Set.of(FW111_DE, FW112_DE);
             }
         }
 
@@ -142,15 +139,15 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
         public @Nullable Set<Firmware> getFirmwares(Thing thing, @Nullable Locale locale) {
             if (THING_TYPE_UID1.equals(thing.getThingTypeUID())) {
                 if (Locale.ENGLISH.equals(locale)) {
-                    return Collections.singleton(FW111_FIX_EN);
+                    return Set.of(FW111_FIX_EN);
                 } else {
-                    return Collections.singleton(FW111_FIX_DE);
+                    return Set.of(FW111_FIX_DE);
                 }
             } else if (THING_TYPE_UID2.equals(thing.getThingTypeUID())) {
                 if (Locale.ENGLISH.equals(locale)) {
-                    return Stream.of(FWALPHA_EN, FWBETA_EN, FWGAMMA_EN).collect(Collectors.toSet());
+                    return Set.of(FWALPHA_EN, FWBETA_EN, FWGAMMA_EN);
                 } else {
-                    return Stream.of(FWALPHA_DE, FWBETA_DE, FWGAMMA_DE).collect(Collectors.toSet());
+                    return Set.of(FWALPHA_DE, FWBETA_DE, FWGAMMA_DE);
                 }
             }
             return null;
@@ -193,7 +190,7 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
     private Thing thing2;
     private Thing thing3;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         LocaleProvider localeProvider = getService(LocaleProvider.class);
         assertThat(localeProvider, is(notNullValue()));
@@ -212,7 +209,7 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
         thing3 = ThingBuilder.create(THING_TYPE_UID2, THING3_ID).build();
     }
 
-    @After
+    @AfterEach
     public void teardown() throws IOException {
         new DefaultLocaleSetter(getService(ConfigurationAdmin.class)).setDefaultLocale(defaultLocale);
         waitForAssert(() -> assertThat(getService(LocaleProvider.class).getLocale(), is(defaultLocale)));

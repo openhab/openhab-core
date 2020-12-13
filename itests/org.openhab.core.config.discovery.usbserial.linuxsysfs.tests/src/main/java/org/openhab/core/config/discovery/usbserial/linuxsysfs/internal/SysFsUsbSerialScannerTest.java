@@ -15,26 +15,26 @@ package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 import static java.lang.Integer.toHexString;
 import static java.nio.file.Files.*;
 import static java.nio.file.attribute.PosixFilePermission.*;
-import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.SysfsUsbSerialScanner.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hamcrest.Matcher;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 
 /**
@@ -44,8 +44,7 @@ import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
  */
 public class SysFsUsbSerialScannerTest {
 
-    @Rule
-    public final TemporaryFolder rootFolder = new TemporaryFolder();
+    public @TempDir File rootFolder;
 
     private static final String SYSFS_TTY_DEVICES_DIR = "sys/class/tty";
     private static final String DEV_DIR = "dev";
@@ -60,12 +59,12 @@ public class SysFsUsbSerialScannerTest {
 
     private int deviceIndexCounter = 0;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         // only run the tests on systems that support symbolic links
         assumeTrue(systemSupportsSymLinks());
 
-        rootPath = rootFolder.getRoot().toPath();
+        rootPath = rootFolder.toPath();
 
         devPath = rootPath.resolve(DEV_DIR);
         createDirectories(devPath);
@@ -84,10 +83,10 @@ public class SysFsUsbSerialScannerTest {
         scanner.modified(config);
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void testIOExceptionIfSysfsTtyDoesNotExist() throws IOException {
         delete(sysfsTtyPath);
-        scanner.scan();
+        assertThrows(IOException.class, () -> scanner.scan());
     }
 
     @Test
@@ -113,7 +112,7 @@ public class SysFsUsbSerialScannerTest {
     public void testNonReadableDeviceFilesAreSkipped() throws IOException {
         createDevice("ttyUSB0", 0xABCD, 0X1234, "sample manufacturer", "sample product", "123-456-789", 0,
                 "interfaceDesc");
-        setPosixFilePermissions(devPath.resolve("ttyUSB0"), new HashSet<>(asList(OWNER_WRITE)));
+        setPosixFilePermissions(devPath.resolve("ttyUSB0"), Set.of(OWNER_WRITE));
         assertThat(scanner.scan(), is(empty()));
     }
 
@@ -121,7 +120,7 @@ public class SysFsUsbSerialScannerTest {
     public void testNonWritableDeviceFilesAreSkipped() throws IOException {
         createDevice("ttyUSB0", 0xABCD, 0X1234, "sample manufacturer", "sample product", "123-456-789", 0,
                 "interfaceDesc");
-        setPosixFilePermissions(devPath.resolve("ttyUSB0"), new HashSet<>(asList(OWNER_READ)));
+        setPosixFilePermissions(devPath.resolve("ttyUSB0"), Set.of(OWNER_READ));
         assertThat(scanner.scan(), is(empty()));
     }
 
@@ -194,17 +193,17 @@ public class SysFsUsbSerialScannerTest {
         createDirectories(serialDevicePath);
 
         // Create the symlink into the USB device folder structure
-        if (!Arrays.asList(deviceCreationOptions).contains(DeviceCreationOption.NON_USB_DEVICE)) {
+        if (!List.of(deviceCreationOptions).contains(DeviceCreationOption.NON_USB_DEVICE)) {
             createSymbolicLink(sysfsTtyPath.resolve(serialPortName), serialDevicePath);
         } else {
             createSymbolicLink(sysfsTtyPath.resolve(serialPortName), devPath);
         }
 
         // Create the files containing information about the USB device
-        if (!Arrays.asList(deviceCreationOptions).contains(DeviceCreationOption.NO_VENDOR_ID)) {
+        if (!List.of(deviceCreationOptions).contains(DeviceCreationOption.NO_VENDOR_ID)) {
             write(createFile(usbDevicePath.resolve("idVendor")), toHexString(vendorId).getBytes());
         }
-        if (!Arrays.asList(deviceCreationOptions).contains(DeviceCreationOption.NO_PRODUCT_ID)) {
+        if (!List.of(deviceCreationOptions).contains(DeviceCreationOption.NO_PRODUCT_ID)) {
             write(createFile(usbDevicePath.resolve("idProduct")), toHexString(productId).getBytes());
         }
         if (manufacturer != null) {
@@ -218,7 +217,7 @@ public class SysFsUsbSerialScannerTest {
         }
 
         // Create the files containing information about the USB interface
-        if (!Arrays.asList(deviceCreationOptions).contains(DeviceCreationOption.NO_INTERFACE_NUMBER)) {
+        if (!List.of(deviceCreationOptions).contains(DeviceCreationOption.NO_INTERFACE_NUMBER)) {
             write(createFile(usbInterfacePath.resolve("bInterfaceNumber")), toHexString(interfaceNumber).getBytes());
         }
         if (interfaceDescription != null) {
@@ -234,7 +233,7 @@ public class SysFsUsbSerialScannerTest {
 
     private boolean systemSupportsSymLinks() throws IOException {
         try {
-            createSymbolicLink(rootFolder.getRoot().toPath().resolve("aSymbolicLink"), rootFolder.getRoot().toPath());
+            createSymbolicLink(rootFolder.toPath().resolve("aSymbolicLink"), rootFolder.toPath());
             return true;
         } catch (UnsupportedOperationException e) {
             return false;

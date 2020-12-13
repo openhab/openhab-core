@@ -33,7 +33,7 @@ public class ConsoleInterpreter {
         final List<String> usages = ConsoleInterpreter.getUsages(extensions);
         final StringBuffer buffer = new StringBuffer();
 
-        buffer.append("---SmartHome commands---\n\t");
+        buffer.append("---openHAB commands---\n\t");
         for (int i = 0; i < usages.size(); i++) {
             final String usageString = usages.get(i);
             buffer.append(String.format("%s%s%s\n", base, separator, usageString));

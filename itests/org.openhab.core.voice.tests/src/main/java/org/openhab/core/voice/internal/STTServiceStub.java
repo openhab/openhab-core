@@ -14,8 +14,6 @@ package org.openhab.core.voice.internal;
 
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
@@ -32,8 +30,7 @@ import org.openhab.core.voice.STTServiceHandle;
  */
 public class STTServiceStub implements STTService {
 
-    private static final Set<AudioFormat> SUPPORTED_FORMATS = Stream.of(AudioFormat.MP3, AudioFormat.WAV)
-            .collect(Collectors.toSet());
+    private static final Set<AudioFormat> SUPPORTED_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
 
     private static final String STTSERVICE_STUB_ID = "sttServiceStubID";
     private static final String STTSERVICE_STUB_LABEL = "sttServiceStubLabel";

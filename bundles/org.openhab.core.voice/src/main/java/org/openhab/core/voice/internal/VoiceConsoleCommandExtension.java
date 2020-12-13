@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.io.console.Console;
@@ -40,6 +41,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Wouter Born - Sort TTS voices
  */
 @Component(service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String SUBCMD_SAY = "say";
@@ -61,9 +63,9 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] { buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"),
+        return List.of(buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"),
                 buildCommandUsage(SUBCMD_INTERPRET + " <command>", "interprets a human language command"),
-                buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services") });
+                buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services"));
     }
 
     @Override

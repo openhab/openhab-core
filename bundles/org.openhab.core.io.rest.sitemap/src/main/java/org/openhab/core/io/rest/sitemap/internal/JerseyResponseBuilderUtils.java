@@ -13,7 +13,6 @@
 package org.openhab.core.io.rest.sitemap.internal;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +57,7 @@ public class JerseyResponseBuilderUtils extends DTO {
         jrbDTO.status = "CREATED";
         jrbDTO.context = new ContextDTO();
         jrbDTO.context.headers = new HashMap<>();
-        jrbDTO.context.headers.put("Location", Arrays.asList(location));
+        jrbDTO.context.headers.put("Location", List.of(location));
         jrbDTO.context.committingOutputStream = new StreamInfoDTO();
         jrbDTO.context.committingOutputStream.bufferSize = 0;
         jrbDTO.context.committingOutputStream.directWrite = true;

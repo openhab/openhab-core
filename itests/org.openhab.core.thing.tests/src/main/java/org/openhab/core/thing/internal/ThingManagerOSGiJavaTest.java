@@ -13,7 +13,8 @@
 package org.openhab.core.thing.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -22,15 +23,16 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
@@ -129,13 +131,13 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     private @NonNullByDefault({}) URI configDescriptionThing;
     private @NonNullByDefault({}) Thing thing;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         configDescriptionChannel = new URI("test:channel");
         configDescriptionThing = new URI("test:test");
-        thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(Collections.singletonList( //
+        thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(List.of( //
                 ChannelBuilder.create(CHANNEL_UID, "Switch").withLabel("Test Label").withDescription("Test Description")
-                        .withType(CHANNEL_TYPE_UID).withDefaultTags(Collections.singleton("Test Tag")).build() //
+                        .withType(CHANNEL_TYPE_UID).withDefaultTags(Set.of("Test Tag")).build() //
         )).build();
         registerVolatileStorageService();
 
@@ -165,22 +167,15 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             try {
                 assertThat(
                         bundleContext.getServiceReferences(ReadyMarker.class,
-                                "(esh.xmlThingTypes=" + bundleContext.getBundle().getSymbolicName() + ")"),
+                                "(openhab.xmlThingTypes=" + bundleContext.getBundle().getSymbolicName() + ")"),
                         is(notNullValue()));
-            } catch (InvalidSyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        waitForAssert(() -> {
-            try {
-                assertThat(bundleContext.getServiceReferences(ChannelItemProvider.class, null), is(notNullValue()));
             } catch (InvalidSyntaxException e) {
                 throw new RuntimeException(e);
             }
         });
     }
 
-    @After
+    @AfterEach
     public void teardown() throws Exception {
         managedThingProvider.getAll().forEach(it -> {
             managedThingProvider.remove(it.getUID());
@@ -247,11 +242,12 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         assertTrue(thc.get().isChannelLinked(CHANNEL_UID));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateChannelBuilderThrowsIllegalArgumentException() throws Exception {
         AtomicReference<ThingHandlerCallback> thc = initializeThingHandlerCallback();
 
-        thc.get().createChannelBuilder(CHANNEL_UID, new ChannelTypeUID(BINDING_ID, "invalid-channel"));
+        assertThrows(IllegalArgumentException.class,
+                () -> thc.get().createChannelBuilder(CHANNEL_UID, new ChannelTypeUID(BINDING_ID, "invalid-channel")));
     }
 
     @Test
@@ -263,11 +259,12 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         validateChannel(channelBuilder.build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testEditChannelBuilderThrowsIllegalArgumentException() throws Exception {
         AtomicReference<ThingHandlerCallback> thc = initializeThingHandlerCallback();
 
-        thc.get().editChannel(thing, new ChannelUID(THING_UID, "invalid-channel"));
+        assertThrows(IllegalArgumentException.class,
+                () -> thc.get().editChannel(thing, new ChannelUID(THING_UID, "invalid-channel")));
     }
 
     @Test
@@ -279,12 +276,12 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         validateChannel(channelBuilder.build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateChannelGroupBuilderThrowsIllegalArgumentException() throws Exception {
         AtomicReference<ThingHandlerCallback> thc = initializeThingHandlerCallback();
 
-        thc.get().createChannelBuilders(CHANNEL_GROUP_UID,
-                new ChannelGroupTypeUID(BINDING_ID, "invalid-channel-group"));
+        assertThrows(IllegalArgumentException.class, () -> thc.get().createChannelBuilders(CHANNEL_GROUP_UID,
+                new ChannelGroupTypeUID(BINDING_ID, "invalid-channel-group")));
     }
 
     @Test
@@ -321,6 +318,11 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void handleCommand(ChannelUID channelUID, Command command) {
             }
+
+            @Override
+            public void initialize() {
+                updateStatus(ThingStatus.ONLINE);
+            }
         });
 
         ConfigDescriptionProvider mockConfigDescriptionProvider = mock(ConfigDescriptionProvider.class);
@@ -337,12 +339,12 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         // verify a missing mandatory channel config prevents it from getting initialized
         when(mockConfigDescriptionProvider.getConfigDescription(eq(configDescriptionChannel), any()))
                 .thenReturn(ConfigDescriptionBuilder.create(configDescriptionChannel).withParameter(parameter).build());
-        assertThingStatus(Collections.singletonMap(CONFIG_PARAM_NAME, "value"), Collections.emptyMap(),
-                ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_CONFIGURATION_PENDING);
+        assertThingStatus(Map.of(CONFIG_PARAM_NAME, "value"), Collections.emptyMap(), ThingStatus.UNINITIALIZED,
+                ThingStatusDetail.HANDLER_CONFIGURATION_PENDING);
 
         // verify a satisfied config does not prevent it from getting initialized anymore
-        assertThingStatus(Collections.singletonMap(CONFIG_PARAM_NAME, "value"),
-                Collections.singletonMap(CONFIG_PARAM_NAME, "value"), ThingStatus.ONLINE, ThingStatusDetail.NONE);
+        assertThingStatus(Map.of(CONFIG_PARAM_NAME, "value"), Map.of(CONFIG_PARAM_NAME, "value"), ThingStatus.ONLINE,
+                ThingStatusDetail.NONE);
     }
 
     @Test
@@ -983,7 +985,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         Configuration configThing = new Configuration(propsThing);
         Configuration configChannel = new Configuration(propsChannel);
 
-        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(Collections.singletonList( //
+        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(List.of( //
                 ChannelBuilder.create(CHANNEL_UID, "Switch").withType(CHANNEL_TYPE_UID).withConfiguration(configChannel)
                         .build() //
         )).withConfiguration(configThing).build();
@@ -1012,8 +1014,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     private void registerThingTypeProvider() throws Exception {
         ThingType thingType = ThingTypeBuilder.instance(THING_TYPE_UID, "label")
                 .withConfigDescriptionURI(configDescriptionThing)
-                .withChannelDefinitions(
-                        Collections.singletonList(new ChannelDefinitionBuilder(CHANNEL_ID, CHANNEL_TYPE_UID).build()))
+                .withChannelDefinitions(List.of(new ChannelDefinitionBuilder(CHANNEL_ID, CHANNEL_TYPE_UID).build()))
                 .build();
 
         ThingTypeProvider mockThingTypeProvider = mock(ThingTypeProvider.class);
@@ -1034,8 +1035,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     private void registerChannelGroupTypeProvider() throws Exception {
         ChannelGroupType channelGroupType = ChannelGroupTypeBuilder.instance(CHANNEL_GROUP_TYPE_UID, "Test Group Label")
                 .withDescription("Test Group Description").withCategory("Test Group Category")
-                .withChannelDefinitions(
-                        Collections.singletonList(new ChannelDefinitionBuilder(CHANNEL_ID, CHANNEL_TYPE_UID).build()))
+                .withChannelDefinitions(List.of(new ChannelDefinitionBuilder(CHANNEL_ID, CHANNEL_TYPE_UID).build()))
                 .build();
 
         ChannelGroupTypeProvider mockChannelGroupTypeProvider = mock(ChannelGroupTypeProvider.class);

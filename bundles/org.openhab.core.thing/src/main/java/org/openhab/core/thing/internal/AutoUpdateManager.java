@@ -12,13 +12,14 @@
  */
 package org.openhab.core.thing.internal;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
@@ -106,7 +107,7 @@ public class AutoUpdateManager {
     }
 
     @Activate
-    public AutoUpdateManager(Map<String, @Nullable Object> configuration,
+    public AutoUpdateManager(Map<String, Object> configuration,
             final @Reference ChannelTypeRegistry channelTypeRegistry, //
             final @Reference EventPublisher eventPublisher,
             final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
@@ -122,7 +123,7 @@ public class AutoUpdateManager {
     }
 
     @Modified
-    protected void modified(Map<String, @Nullable Object> configuration) {
+    protected void modified(Map<String, Object> configuration) {
         Object valueEnabled = configuration.get(PROPERTY_ENABLED);
         if (valueEnabled != null) {
             enabled = Boolean.parseBoolean(valueEnabled.toString());
@@ -143,12 +144,12 @@ public class AutoUpdateManager {
         if (command instanceof State) {
             final State state = (State) command;
 
-            Recommendation autoUpdate = shouldAutoUpdate(itemName);
+            Recommendation autoUpdate = shouldAutoUpdate(item);
 
             // consider user-override via item meta-data
             MetadataKey key = new MetadataKey(AUTOUPDATE_KEY, itemName);
             Metadata metadata = metadataRegistry.get(key);
-            if (metadata != null && !metadata.getValue().trim().isEmpty()) {
+            if (metadata != null && !metadata.getValue().isBlank()) {
                 boolean override = Boolean.parseBoolean(metadata.getValue());
                 if (override) {
                     logger.trace("Auto update strategy {} overriden by item metadata to REQUIRED", autoUpdate);
@@ -186,14 +187,18 @@ public class AutoUpdateManager {
         }
     }
 
-    private Recommendation shouldAutoUpdate(String itemName) {
+    private Recommendation shouldAutoUpdate(Item item) {
+        String itemName = item.getName();
         Recommendation ret = Recommendation.REQUIRED;
 
+        // check if the item is a group item
+        if (item instanceof GroupItem) {
+            return Recommendation.DONT;
+        }
+
         List<ChannelUID> linkedChannelUIDs = new ArrayList<>();
-        for (ItemChannelLink link : itemChannelLinkRegistry.getAll()) {
-            if (link.getItemName().equals(itemName)) {
-                linkedChannelUIDs.add(link.getLinkedUID());
-            }
+        for (ItemChannelLink link : itemChannelLinkRegistry.getLinks(itemName)) {
+            linkedChannelUIDs.add(link.getLinkedUID());
         }
 
         // check if there is any channel ONLINE
@@ -282,14 +287,14 @@ public class AutoUpdateManager {
             // Look for class hierarchy
             for (Class<?> state : item.getAcceptedDataTypes()) {
                 try {
-                    if (!state.isEnum() && state.newInstance().getClass().isAssignableFrom(newState.getClass())) {
+                    if (!state.isEnum() && state.getDeclaredConstructor().newInstance().getClass()
+                            .isAssignableFrom(newState.getClass())) {
                         isAccepted = true;
                         break;
                     }
-                } catch (InstantiationException e) {
-                    logger.warn("InstantiationException on {}", e.getMessage(), e); // Should never happen
-                } catch (IllegalAccessException e) {
-                    logger.warn("IllegalAccessException on {}", e.getMessage(), e); // Should never happen
+                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+                        | InvocationTargetException e) {
+                    logger.warn("Exception on {}", e.getMessage(), e); // Should never happen
                 }
             }
         }

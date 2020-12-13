@@ -32,14 +32,13 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.library.unit.UnitInitializer;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tec.uom.se.quantity.Quantities;
 import tec.uom.se.unit.MetricPrefix;
 import tec.uom.se.unit.TransformedUnit;
-import tec.uom.se.unit.Units;
 
 /**
  * A utility for parsing dimensions to interface classes of {@link Quantity} and parsing units from format strings.
@@ -58,7 +57,7 @@ public class UnitUtils {
     private static final String FRAMEWORK_DIMENSION_PREFIX = "org.openhab.core.library.dimension.";
 
     private static final Collection<Class<? extends SystemOfUnits>> ALL_SYSTEM_OF_UNITS = Arrays.asList(SIUnits.class,
-            ImperialUnits.class, SmartHomeUnits.class, Units.class);
+            ImperialUnits.class, Units.class, tec.uom.se.unit.Units.class);
 
     static {
         UnitInitializer.init();
@@ -155,7 +154,7 @@ public class UnitUtils {
 
         if (!UNIT_PLACEHOLDER.equals(unitSymbol)) {
             if (UNIT_PERCENT_FORMAT_STRING.equals(unitSymbol)) {
-                return SmartHomeUnits.PERCENT;
+                return Units.PERCENT;
             }
             try {
                 Quantity<?> quantity = Quantities.getQuantity("1 " + unitSymbol);

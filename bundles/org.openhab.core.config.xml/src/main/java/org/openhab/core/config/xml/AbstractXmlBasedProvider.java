@@ -13,7 +13,6 @@
 package org.openhab.core.config.xml;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,7 +63,7 @@ public abstract class AbstractXmlBasedProvider<@NonNull T_ID, @NonNull T_OBJECT 
      * @param object the object to be added
      */
     public final synchronized void add(Bundle bundle, T_OBJECT object) {
-        addAll(bundle, Collections.singletonList(object));
+        addAll(bundle, List.of(object));
     }
 
     /**
@@ -166,16 +165,14 @@ public abstract class AbstractXmlBasedProvider<@NonNull T_ID, @NonNull T_OBJECT 
     private T_OBJECT acquireLocalizedObject(Bundle bundle, T_OBJECT object, @Nullable Locale locale) {
         final LocalizedKey localizedKey = getLocalizedKey(object, locale);
 
-        final T_OBJECT cacheEntry = localizedObjectCache.get(localizedKey);
+        final @Nullable T_OBJECT cacheEntry = localizedObjectCache.get(localizedKey);
         if (cacheEntry != null) {
             return cacheEntry;
         }
 
-        @Nullable
-        final T_OBJECT localizedObject = localize(bundle, object, locale);
+        final @Nullable T_OBJECT localizedObject = localize(bundle, object, locale);
         if (localizedObject != null) {
-            @NonNull
-            T_OBJECT nonNullLocalizedObject = (@NonNull T_OBJECT) localizedObject;
+            T_OBJECT nonNullLocalizedObject = localizedObject;
             localizedObjectCache.put(localizedKey, nonNullLocalizedObject);
             return localizedObject;
         } else {

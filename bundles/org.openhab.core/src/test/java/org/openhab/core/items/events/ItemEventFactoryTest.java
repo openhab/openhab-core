@@ -12,10 +12,11 @@
  */
 package org.openhab.core.items.events;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.dto.ItemDTOMapper;
@@ -49,11 +50,11 @@ public class ItemEventFactoryTest {
     private static final String ITEM_ADDED_EVENT_TYPE = ItemAddedEvent.TYPE;
     private static final String GROUPITEM_CHANGED_EVENT_TYPE = GroupItemStateChangedEvent.TYPE;
 
-    private static final String ITEM_COMMAND_EVENT_TOPIC = "smarthome/items/" + ITEM_NAME + "/command";
-    private static final String ITEM_STATE_EVENT_TOPIC = "smarthome/items/" + ITEM_NAME + "/state";
-    private static final String ITEM_STATE_PREDICTED_EVENT_TOPIC = "smarthome/items/" + ITEM_NAME + "/statepredicted";
-    private static final String ITEM_ADDED_EVENT_TOPIC = "smarthome/items/" + ITEM_NAME + "/added";
-    private static final String GROUPITEM_STATE_CHANGED_EVENT_TOPIC = "smarthome/items/" + GROUP_NAME + "/" + ITEM_NAME
+    private static final String ITEM_COMMAND_EVENT_TOPIC = "openhab/items/" + ITEM_NAME + "/command";
+    private static final String ITEM_STATE_EVENT_TOPIC = "openhab/items/" + ITEM_NAME + "/state";
+    private static final String ITEM_STATE_PREDICTED_EVENT_TOPIC = "openhab/items/" + ITEM_NAME + "/statepredicted";
+    private static final String ITEM_ADDED_EVENT_TOPIC = "openhab/items/" + ITEM_NAME + "/added";
+    private static final String GROUPITEM_STATE_CHANGED_EVENT_TOPIC = "openhab/items/" + GROUP_NAME + "/" + ITEM_NAME
             + "/statechanged";
 
     private static final Command ITEM_COMMAND = OnOffType.ON;

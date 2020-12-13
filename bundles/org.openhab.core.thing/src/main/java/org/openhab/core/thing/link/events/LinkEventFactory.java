@@ -35,9 +35,9 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true, service = EventFactory.class)
 public class LinkEventFactory extends AbstractEventFactory {
 
-    private static final String LINK_ADDED_EVENT_TOPIC = "smarthome/links/{linkID}/added";
+    private static final String LINK_ADDED_EVENT_TOPIC = "openhab/links/{linkID}/added";
 
-    private static final String LINK_REMOVED_EVENT_TOPIC = "smarthome/links/{linkID}/removed";
+    private static final String LINK_REMOVED_EVENT_TOPIC = "openhab/links/{linkID}/removed";
 
     /**
      * Constructs a new LinkEventFactory.

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.test;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,11 +31,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
-import org.junit.Assert;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerUtils;
 import org.openhab.core.service.ReadyService;
@@ -64,15 +63,14 @@ public class SyntheticBundleInstaller {
     private static final int WAIT_TIMOUT = 30; // [seconds]
     private static final String BUNDLE_POOL_PATH = "/test-bundle-pool";
 
-    private static final String XML_THING_TYPE = "esh.xmlThingTypes";
-    private static final String XML_BINDING_INFO = "esh.xmlBindingInfo";
-    private static final String XML_CONFIG = "esh.xmlConfig";
+    private static final String XML_THING_TYPE = "openhab.xmlThingTypes";
+    private static final String XML_BINDING_INFO = "openhab.xmlBindingInfo";
+    private static final String XML_CONFIG = "openhab.xmlConfig";
 
     /**
      * A list of default extensions to be included in the synthetic bundle.
      */
-    private static final Set<String> DEFAULT_EXTENSIONS = Collections
-            .unmodifiableSet(Stream.of("*.xml", "*.properties", "*.json", ".keep").collect(Collectors.toSet()));
+    private static final Set<String> DEFAULT_EXTENSIONS = Set.of("*.xml", "*.properties", "*.json", ".keep");
 
     /**
      * Install synthetic bundle, denoted by its name, into the test runtime (by using the given bundle context). Only
@@ -292,7 +290,7 @@ public class SyntheticBundleInstaller {
         ReadyMarker expected = new ReadyMarker(marker, identifier);
         while (!readyService.isReady(expected)) {
             if (System.nanoTime() - startTime > TimeUnit.SECONDS.toNanos(WAIT_TIMOUT)) {
-                Assert.fail(MessageFormat.format("Timout waiting for marker {0} at bundle {1}", marker, identifier));
+                fail(MessageFormat.format("Timout waiting for marker {0} at bundle {1}", marker, identifier));
             }
             try {
                 Thread.sleep(100);

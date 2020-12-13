@@ -12,22 +12,21 @@
  */
 package org.openhab.core.thing.internal;
 
+import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
@@ -82,7 +81,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
     private @Nullable Map<String, Object> changedParameters = null;
     private @Nullable Event receivedEvent = null;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
         managedThingProvider = getService(ManagedThingProvider.class);
@@ -90,7 +89,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
         unregisterCurrentThingHandlerFactory();
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         unregisterCurrentThingHandlerFactory();
         managedThingProvider.getAll().stream().forEach(it -> managedThingProvider.remove(it.getUID()));
@@ -102,11 +101,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                Set<String> types = new HashSet<>();
-                types.add(ThingAddedEvent.TYPE);
-                types.add(ThingRemovedEvent.TYPE);
-                types.add(ThingUpdatedEvent.TYPE);
-                return types;
+                return Set.of(ThingAddedEvent.TYPE, ThingRemovedEvent.TYPE, ThingUpdatedEvent.TYPE);
             }
 
             @Override
@@ -161,6 +156,11 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
             public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
                 changedParameters = configurationParameters;
             }
+
+            @Override
+            public void initialize() {
+                updateStatus(ThingStatus.ONLINE);
+            }
         };
 
         thing.setHandler(thingHandler);
@@ -173,7 +173,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
 
             @Override
             public Collection<Thing> getAll() {
-                return Collections.singleton(thing);
+                return Set.of(thing);
             }
 
             @Override
@@ -184,31 +184,28 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
 
         ThingRegistry thingRegistry = getService(ThingRegistry.class);
 
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("param1", "value1");
-        parameters.put("param2", 1);
+        Map<String, Object> parameters = Map.ofEntries(entry("param1", "value1"), entry("param2", 1));
 
         thingRegistry.updateConfiguration(thingUID, parameters);
 
         assertThat(changedParameters.entrySet(), is(equalTo(parameters.entrySet())));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatThingRegistryThrowsExceptionForConfigUpdateOfNonExistingThing() {
         ThingRegistry thingRegistry = getService(ThingRegistry.class);
-        ThingUID thingUID = new ThingUID(THING_TYPE_UID, "binding:type:thing");
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("param", "value1");
-        thingRegistry.updateConfiguration(thingUID, parameters);
+        ThingUID thingUID = new ThingUID(THING_TYPE_UID, "thing");
+        Map<String, Object> parameters = Map.of("param", "value1");
+        assertThrows(IllegalArgumentException.class, () -> thingRegistry.updateConfiguration(thingUID, parameters));
     }
 
     @Test
     public void assertThatCreateThingDelegatesToRegisteredThingHandlerFactory() {
         ThingTypeUID expectedThingTypeUID = THING_TYPE_UID;
-        ThingUID expectedThingUID = new ThingUID(THING_TYPE_UID, THING1_ID);
-        Configuration expectedConfiguration = new Configuration();
         ThingUID expectedBridgeUID = new ThingUID(THING_TYPE_UID, THING2_ID);
+        ThingUID expectedThingUID = new ThingUID(THING_TYPE_UID, expectedBridgeUID, THING1_ID);
         String expectedLabel = "Test Thing";
+        Configuration expectedConfiguration = new Configuration();
 
         AtomicReference<Thing> thingResultWrapper = new AtomicReference<>();
 

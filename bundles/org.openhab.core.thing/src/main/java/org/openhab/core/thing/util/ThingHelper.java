@@ -109,19 +109,6 @@ public class ThingHelper {
     }
 
     /**
-     * @deprecated Use {@link ThingHelper#ensureUniqueChannels(Collection)} instead.
-     */
-    @Deprecated
-    public static void ensureUnique(Collection<Channel> channels) {
-        Set<UID> ids = new HashSet<>();
-        for (Channel channel : channels) {
-            if (!ids.add(channel.getUID())) {
-                throw new IllegalArgumentException("Duplicate channels " + channel.getUID().getAsString());
-            }
-        }
-    }
-
-    /**
      * Ensures that there are no duplicate channels in the array (i.e. not using the same ChannelUID)
      *
      * @param channels the channels to check
@@ -150,7 +137,7 @@ public class ThingHelper {
      * @throws IllegalArgumentException in case there are duplicate channels found
      */
     public static void ensureUniqueChannels(final Collection<Channel> channels, final Channel channel) {
-        ensureUniqueChannels(channels, Collections.singleton(channel));
+        ensureUniqueChannels(channels, Set.of(channel));
     }
 
     private static void ensureUniqueChannels(final Collection<Channel> channels1, final Collection<Channel> channels2) {
@@ -158,7 +145,7 @@ public class ThingHelper {
                 ensureUniqueChannels(channels2.iterator(), new HashSet<>(channels1.size() + channels2.size())));
     }
 
-    private static HashSet<UID> ensureUniqueChannels(final Iterator<Channel> channels, final HashSet<UID> ids) {
+    private static Set<UID> ensureUniqueChannels(final Iterator<Channel> channels, final Set<UID> ids) {
         while (channels.hasNext()) {
             final Channel channel = channels.next();
             if (!ids.add(channel.getUID())) {

@@ -12,14 +12,21 @@
  */
 package org.openhab.core.config.discovery;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.AbstractUID;
 import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link DiscoveryResultBuilder} helps creating a {@link DiscoveryResult} through the builder pattern.
@@ -32,6 +39,7 @@ import org.openhab.core.thing.ThingUID;
  */
 @NonNullByDefault
 public class DiscoveryResultBuilder {
+    private Logger logger = LoggerFactory.getLogger(DiscoveryResultBuilder.class);
 
     private final ThingUID thingUID;
 
@@ -43,7 +51,6 @@ public class DiscoveryResultBuilder {
     private @Nullable ThingTypeUID thingTypeUID;
 
     private DiscoveryResultBuilder(ThingUID thingUID) {
-        this.thingTypeUID = thingUID.getThingTypeUID();
         this.thingUID = thingUID;
     };
 
@@ -88,7 +95,7 @@ public class DiscoveryResultBuilder {
      * @return the updated builder
      */
     public DiscoveryResultBuilder withProperty(String key, Object value) {
-        this.properties.put(key, value);
+        properties.put(key, value);
         return this;
     }
 
@@ -110,6 +117,7 @@ public class DiscoveryResultBuilder {
      * @return the updated builder
      */
     public DiscoveryResultBuilder withBridge(@Nullable ThingUID bridgeUID) {
+        validateThingUID(bridgeUID);
         this.bridgeUID = bridgeUID;
         return this;
     }
@@ -143,7 +151,36 @@ public class DiscoveryResultBuilder {
      */
     @SuppressWarnings("deprecation")
     public DiscoveryResult build() {
+        if (representationProperty != null && !properties.containsKey(representationProperty)) {
+            logger.warn(
+                    "Representation property '{}' of discovery result for thing '{}' is missing in properties map. It has to be fixed by the bindings developer.\n{}",
+                    representationProperty, thingUID, getStackTrace(Thread.currentThread()));
+        }
+        if (thingTypeUID == null) {
+            String[] segments = thingUID.getAsString().split(AbstractUID.SEPARATOR);
+            if (!segments[1].isEmpty()) {
+                thingTypeUID = new ThingTypeUID(thingUID.getBindingId(), segments[1]);
+            }
+        }
         return new DiscoveryResultImpl(thingTypeUID, thingUID, bridgeUID, properties, representationProperty, label,
                 ttl);
+    }
+
+    private void validateThingUID(@Nullable ThingUID bridgeUID) {
+        if (bridgeUID != null && (!thingUID.getBindingId().equals(bridgeUID.getBindingId())
+                || !thingUID.getBridgeIds().contains(bridgeUID.getId()))) {
+            throw new IllegalArgumentException(
+                    "Thing UID '" + thingUID + "' does not match bridge UID '" + bridgeUID + "'");
+        }
+    }
+
+    private String getStackTrace(final Thread thread) {
+        StackTraceElement[] elements = AccessController.doPrivileged(new PrivilegedAction<StackTraceElement[]>() {
+            @Override
+            public StackTraceElement[] run() {
+                return thread.getStackTrace();
+            }
+        });
+        return Arrays.stream(elements).map(element -> "\tat " + element.toString()).collect(Collectors.joining("\n"));
     }
 }

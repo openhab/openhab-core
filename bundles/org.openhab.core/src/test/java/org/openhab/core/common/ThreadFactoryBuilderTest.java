@@ -12,14 +12,16 @@
  */
 package org.openhab.core.common;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringStartsWith.startsWith;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.ThreadFactory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for the {@link ThreadFactoryBuilder}.
@@ -116,14 +118,16 @@ public class ThreadFactoryBuilderTest {
         assertThat(threadFactory.newThread(TEST_RUNNABLE).getPriority(), is(Thread.MAX_PRIORITY));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithPriorityValidationTooLow() {
-        ThreadFactoryBuilder.create().withPriority(Thread.MIN_PRIORITY - 1).build();
+        assertThrows(IllegalArgumentException.class,
+                () -> ThreadFactoryBuilder.create().withPriority(Thread.MIN_PRIORITY - 1).build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithPriorityValidationTooHigh() {
-        ThreadFactoryBuilder.create().withPriority(Thread.MAX_PRIORITY + 1).build();
+        assertThrows(IllegalArgumentException.class,
+                () -> ThreadFactoryBuilder.create().withPriority(Thread.MAX_PRIORITY + 1).build());
     }
 
     @Test

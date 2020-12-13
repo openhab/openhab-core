@@ -13,13 +13,13 @@
 package org.openhab.core.thing.xml.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.net.URI;
 import java.util.Collection;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -40,7 +40,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
 
     private ConfigDescriptionRegistry configDescriptionRegistry;
 
-    @Before
+    @BeforeEach
     public void before() {
         configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
         assertThat(configDescriptionRegistry, is(notNullValue()));

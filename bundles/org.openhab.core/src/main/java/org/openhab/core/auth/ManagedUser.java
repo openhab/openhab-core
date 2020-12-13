@@ -60,6 +60,24 @@ public class ManagedUser implements User {
     }
 
     /**
+     * Alters the password salt.
+     *
+     * @param passwordSalt the new password salt
+     */
+    public void setPasswordSalt(String passwordSalt) {
+        this.passwordSalt = passwordSalt;
+    }
+
+    /**
+     * Alters the password hash.
+     *
+     * @param passwordHash the new password hash
+     */
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    /**
      * Gets the password salt.
      *
      * @return the password salt
@@ -153,5 +171,10 @@ public class ManagedUser implements User {
      */
     public void setApiTokens(List<UserApiToken> apiTokens) {
         this.apiTokens = apiTokens;
+    }
+
+    @Override
+    public String toString() {
+        return name + " (" + String.join(", ", roles.stream().toArray(String[]::new)) + ")";
     }
 }

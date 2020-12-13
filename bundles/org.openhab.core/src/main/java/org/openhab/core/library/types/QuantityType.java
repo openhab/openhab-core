@@ -15,6 +15,9 @@ package org.openhab.core.library.types;
 import static org.eclipse.jdt.annotation.DefaultLocation.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.IllegalFormatConversionException;
 
@@ -29,7 +32,8 @@ import javax.measure.quantity.Dimensionless;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.library.unit.UnitInitializer;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.MetricPrefix;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
 import org.openhab.core.types.State;
@@ -51,7 +55,6 @@ import tec.uom.se.quantity.Quantities;
                                                                     // annotated.
 public class QuantityType<T extends Quantity<T>> extends Number
         implements PrimitiveType, State, Command, Comparable<QuantityType<T>> {
-    private final Logger logger = LoggerFactory.getLogger(QuantityType.class);
 
     private static final long serialVersionUID = 8828949721938234629L;
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
@@ -65,11 +68,13 @@ public class QuantityType<T extends Quantity<T>> extends Number
     // The later would be an exponent from the scalar value.
     private static final String UNIT_PATTERN = "(?<=\\d)\\s*(?=[a-zA-Z°µ%'](?![\\+\\-]?\\d))";
 
-    private final Quantity<T> quantity;
-
     static {
         UnitInitializer.init();
     }
+
+    private transient final Logger logger = LoggerFactory.getLogger(QuantityType.class);
+
+    private final Quantity<T> quantity;
 
     /**
      * Creates a dimensionless {@link QuantityType} with scalar 0 and unit {@link AbstractUnit#ONE}.
@@ -229,13 +234,28 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     @Override
     public String format(String pattern) {
+        boolean unitPlaceholder = pattern.contains(UnitUtils.UNIT_PLACEHOLDER);
         final String formatPattern;
 
-        if (pattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
-            String unitSymbol = SmartHomeUnits.PERCENT.equals(getUnit()) ? "%%" : getUnit().toString();
+        if (unitPlaceholder) {
+            String unitSymbol = getUnit().equals(Units.PERCENT) ? "%%" : getUnit().toString();
             formatPattern = pattern.replace(UnitUtils.UNIT_PLACEHOLDER, unitSymbol);
         } else {
             formatPattern = pattern;
+        }
+
+        // The dimension could be a time value thus we want to support patterns to format datetime
+        if (quantity.getUnit().isCompatible(Units.SECOND) && !unitPlaceholder) {
+            QuantityType<T> millis = toUnit(MetricPrefix.MILLI(Units.SECOND));
+            if (millis != null) {
+                try {
+                    return String.format(formatPattern,
+                            ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis.longValue()), ZoneOffset.UTC));
+                } catch (IllegalFormatConversionException ifce) {
+                    // The conversion is not valid for the type ZonedDateTime. This happens, if the format is like
+                    // "%.1f". Fall through to default behavior.
+                }
+            }
         }
 
         // The value could be an integer value. Try to convert to BigInteger in
@@ -289,7 +309,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
         if (target == OnOffType.class) {
             if (intValue() == 0) {
                 return target.cast(OnOffType.OFF);
-            } else if (SmartHomeUnits.PERCENT.equals(getUnit())) {
+            } else if (Units.PERCENT.equals(getUnit())) {
                 return target.cast(toBigDecimal().compareTo(BigDecimal.ZERO) > 0 ? OnOffType.ON : OnOffType.OFF);
             } else if (toBigDecimal().compareTo(BigDecimal.ONE) == 0) {
                 return target.cast(OnOffType.ON);
@@ -316,7 +336,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
             return target.cast(
                     new HSBType(DecimalType.ZERO, PercentType.ZERO, new PercentType(toBigDecimal().multiply(HUNDRED))));
         } else if (target == PercentType.class) {
-            if (SmartHomeUnits.PERCENT.equals(getUnit())) {
+            if (Units.PERCENT.equals(getUnit())) {
                 return target.cast(new PercentType(toBigDecimal()));
             }
             return target.cast(new PercentType(toBigDecimal().multiply(HUNDRED)));

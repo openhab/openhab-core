@@ -13,17 +13,16 @@
 package org.openhab.core.thing.util;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 import static org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder.create;
 import static org.openhab.core.thing.util.ThingHandlerHelper.isHandlerInitialized;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingTypeUID;
@@ -37,15 +36,14 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
  * @author Simon Kaufmann - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@ExtendWith(MockitoExtension.class)
 public class ThingHandlerHelperTest {
 
     private Thing thing;
 
     private @Mock ThingHandler thingHandler;
 
-    public @Rule MockitoRule rule = MockitoJUnit.rule();
-
-    @Before
+    @BeforeEach
     public void setup() {
         thing = ThingBuilder.create(new ThingTypeUID("test:test"), new ThingUID("test:test:test")).build();
     }

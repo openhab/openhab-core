@@ -13,11 +13,8 @@
 package org.openhab.core.voice.internal;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,10 +36,8 @@ import org.openhab.core.library.types.PercentType;
 public class SinkStub implements AudioSink {
 
     private boolean isStreamProcessed;
-    private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Collections
-            .unmodifiableSet(Stream.of(AudioFormat.MP3, AudioFormat.WAV).collect(Collectors.toSet()));
-    private static final Set<Class<? extends AudioStream>> SUPPORTED_AUDIO_STREAMS = Collections
-            .singleton(AudioStream.class);
+    private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
+    private static final Set<Class<? extends AudioStream>> SUPPORTED_AUDIO_STREAMS = Set.of(AudioStream.class);
 
     private static final String SINK_STUB_ID = "sinkStubID";
     private static final String SINK_STUB_LABEL = "sinkStubLabel";

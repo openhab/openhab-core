@@ -13,19 +13,18 @@
 package org.openhab.core.voice.voiceconsolecommandextension;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.items.StringItem;
@@ -47,22 +46,17 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated tests from groovy to java
  */
-@RunWith(Parameterized.class)
 public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
+
     private static final String CONFIG_DEFAULT_TTS = "defaultTTS";
     private static final String SUBCMD_SAY = "say";
-    private boolean shouldItemsBePassed;
-    private boolean shouldItemsBeRegistered;
-    private boolean shouldMultipleItemsBeRegistered;
-    private TTSService defaultTTSService;
-    private boolean ttsServiceMockShouldBeRegistered;
-    private boolean shouldStreamBeExpected;
 
     private static TTSServiceStub ttsService;
+
     private SinkStub sink;
     private VoiceStub voice;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         sink = new SinkStub();
         voice = new VoiceStub();
@@ -74,17 +68,6 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
         registerService(voice);
     }
 
-    public SayCommandTest(boolean areItemsPassed, boolean areItemsRegistered, boolean areMultipleItemsRegistered,
-            TTSService defaultTTSService, boolean isTTSServiceMockRegistered, boolean isStreamProcessedExpected) {
-        this.shouldItemsBePassed = areItemsPassed;
-        this.shouldItemsBeRegistered = areItemsRegistered;
-        this.shouldMultipleItemsBeRegistered = areMultipleItemsRegistered;
-        this.defaultTTSService = defaultTTSService;
-        this.ttsServiceMockShouldBeRegistered = isStreamProcessedExpected;
-        this.shouldStreamBeExpected = isStreamProcessedExpected;
-    }
-
-    @Parameters
     public static Collection<Object[]> data() {
         Object[][] params = new Object[13][5];
         params[0] = new Object[] { false, false, false, null, false, false };
@@ -99,22 +82,29 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
         params[9] = new Object[] { true, false, false, null, true, true };
         params[10] = new Object[] { true, false, false, ttsService, true, true };
         params[11] = new Object[] { true, false, false, ttsService, false, false };
-        params[12] = new Object[] { true, true, true, ttsService, true, false };
+        params[12] = new Object[] { true, true, true, ttsService, true, true };
 
-        return Arrays.asList(params);
+        return List.of(params);
     }
 
-    @Test
-    public void testSayCommand() throws IOException {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testSayCommand(boolean shouldItemsBePassed, boolean shouldItemsBeRegistered,
+            boolean shouldMultipleItemsBeRegistered, TTSService defaultTTSService,
+            boolean ttsServiceMockShouldBeRegistered, boolean shouldStreamBeExpected) throws IOException {
         String[] methodParameters = new String[2];
         methodParameters[0] = SUBCMD_SAY;
 
         if (defaultTTSService != null) {
-            Dictionary<String, Object> config = new Hashtable<>();
-            config.put(CONFIG_DEFAULT_TTS, defaultTTSService);
             ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-            Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
-            configuration.update(config);
+            Dictionary<String, Object> audioConfig = new Hashtable<>();
+            audioConfig.put("defaultSink", sink.getId());
+            Configuration configuration = configAdmin.getConfiguration("org.openhab.audio", null);
+            configuration.update(audioConfig);
+            Dictionary<String, Object> voiceConfig = new Hashtable<>();
+            voiceConfig.put(CONFIG_DEFAULT_TTS, defaultTTSService);
+            configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
+            configuration.update(voiceConfig);
         }
 
         if (ttsServiceMockShouldBeRegistered) {

@@ -12,12 +12,12 @@
  */
 package org.openhab.core.semantics;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
@@ -38,7 +38,7 @@ public class SemanticTagsTest {
     private GroupItem equipmentItem;
     private GenericItem pointItem;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         CoreItemFactory itemFactory = new CoreItemFactory();
         locationItem = new GroupItem("TestBathRoom");

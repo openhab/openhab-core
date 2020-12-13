@@ -12,21 +12,22 @@
  */
 package org.openhab.core.thing.internal;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.openhab.core.common.SafeCaller;
@@ -125,13 +126,15 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private static final ItemChannelLink LINK_1_T2 = new ItemChannelLink(ITEM_NAME_1, TRIGGER_CHANNEL_UID_2);
     private static final ItemChannelLink LINK_2_T2 = new ItemChannelLink(ITEM_NAME_2, TRIGGER_CHANNEL_UID_2);
     private static final Thing THING = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(
-            ChannelBuilder.create(STATE_CHANNEL_UID_1, "").withKind(ChannelKind.STATE).build(),
-            ChannelBuilder.create(STATE_CHANNEL_UID_2, "").withKind(ChannelKind.STATE).build(),
+            ChannelBuilder.create(STATE_CHANNEL_UID_1).withKind(ChannelKind.STATE).build(),
+            ChannelBuilder.create(STATE_CHANNEL_UID_2).withKind(ChannelKind.STATE).build(),
             ChannelBuilder.create(STATE_CHANNEL_UID_3, "Number:Temperature").withKind(ChannelKind.STATE).build(),
-            ChannelBuilder.create(STATE_CHANNEL_UID_4, "Number").withKind(ChannelKind.STATE)
+            ChannelBuilder.create(STATE_CHANNEL_UID_4, CoreItemFactory.NUMBER).withKind(ChannelKind.STATE)
                     .withType(CHANNEL_TYPE_UID_4).build(),
-            ChannelBuilder.create(TRIGGER_CHANNEL_UID_1, "").withKind(ChannelKind.TRIGGER).build(),
-            ChannelBuilder.create(TRIGGER_CHANNEL_UID_2, "").withKind(ChannelKind.TRIGGER).build()).build();
+            ChannelBuilder.create(TRIGGER_CHANNEL_UID_1).withKind(ChannelKind.TRIGGER).build(),
+            ChannelBuilder.create(TRIGGER_CHANNEL_UID_2).withKind(ChannelKind.TRIGGER).build()).build();
+
+    private @NonNullByDefault({}) AutoCloseable mocksCloseable;
 
     private @Mock @NonNullByDefault({}) AutoUpdateManager autoUpdateManagerMock;
     private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistryMock;
@@ -151,15 +154,19 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private ItemChannelLinkRegistryAdvanced iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistryMock,
             itemRegistryMock);
 
-    @Before
-    public void setup() {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
         safeCaller = getService(SafeCaller.class);
         assertNotNull(safeCaller);
 
         SystemProfileFactory profileFactory = getService(ProfileTypeProvider.class, SystemProfileFactory.class);
+
         assertNotNull(profileFactory);
+        if (profileFactory == null) {
+            throw new IllegalStateException("thing is null");
+        }
 
         manager = new CommunicationManager(autoUpdateManagerMock, channelTypeRegistryMock, profileFactory, iclRegistry,
                 itemRegistryMock, itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock);
@@ -201,8 +208,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
             @Override
             public Collection<ItemChannelLink> getAll() {
-                return Arrays.asList(LINK_1_S1, LINK_1_S2, LINK_2_S2, LINK_1_T1, LINK_1_T2, LINK_2_T2, LINK_3_S3,
-                        LINK_4_S4);
+                return List.of(LINK_1_S1, LINK_1_S2, LINK_2_S2, LINK_1_T1, LINK_1_T2, LINK_2_T2, LINK_3_S3, LINK_4_S4);
             }
         });
 
@@ -225,6 +231,11 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
         ITEM_3.setUnitProvider(unitProvider);
         ITEM_4.setUnitProvider(unitProvider);
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     @Test
@@ -514,8 +525,9 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testItemCommandEventTypeDowncast() {
-        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
-                .withChannels(ChannelBuilder.create(STATE_CHANNEL_UID_2, "Dimmer").withKind(ChannelKind.STATE).build())
+        Thing thing = ThingBuilder
+                .create(THING_TYPE_UID, THING_UID).withChannels(ChannelBuilder
+                        .create(STATE_CHANNEL_UID_2, CoreItemFactory.DIMMER).withKind(ChannelKind.STATE).build())
                 .build();
         thing.setHandler(thingHandlerMock);
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
@@ -534,8 +546,9 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testItemStateEventTypeDowncast() {
-        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
-                .withChannels(ChannelBuilder.create(STATE_CHANNEL_UID_2, "Dimmer").withKind(ChannelKind.STATE).build())
+        Thing thing = ThingBuilder
+                .create(THING_TYPE_UID, THING_UID).withChannels(ChannelBuilder
+                        .create(STATE_CHANNEL_UID_2, CoreItemFactory.DIMMER).withKind(ChannelKind.STATE).build())
                 .build();
         thing.setHandler(thingHandlerMock);
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);

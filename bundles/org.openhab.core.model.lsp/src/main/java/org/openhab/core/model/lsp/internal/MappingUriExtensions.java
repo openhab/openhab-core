@@ -15,7 +15,6 @@ package org.openhab.core.model.lsp.internal;
 import java.io.File;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -56,36 +55,16 @@ public class MappingUriExtensions extends UriExtensions {
     }
 
     @Override
-    public String toPath(URI uri) {
-        return toPath(java.net.URI.create(uri.toString()));
-    }
-
-    @Override
-    public String toPath(java.net.URI uri) {
-        java.net.URI ret = uri;
-        try {
-            ret = Paths.get(uri).toUri();
-        } catch (FileSystemNotFoundException e) {
-            // fall-back to the argument
-        }
-        String clientPath = removeTrailingSlash(ret.toASCIIString());
-        if (clientLocation != null) {
-            clientPath = clientPath.replace(serverLocation, clientLocation);
-        }
-        return clientPath;
-    }
-
-    @Override
     public URI toUri(String pathWithScheme) {
         String decodedPathWithScheme = URLDecoder.decode(pathWithScheme, StandardCharsets.UTF_8);
-
-        if (clientLocation != null && decodedPathWithScheme.startsWith(clientLocation)) {
+        String localClientLocation = clientLocation;
+        if (localClientLocation != null && decodedPathWithScheme.startsWith(localClientLocation)) {
             return map(decodedPathWithScheme);
         }
 
-        clientLocation = guessClientPath(decodedPathWithScheme);
-        if (clientLocation != null) {
-            logger.debug("Identified client workspace as '{}'", clientLocation);
+        localClientLocation = clientLocation = guessClientPath(decodedPathWithScheme);
+        if (localClientLocation != null) {
+            logger.debug("Identified client workspace as '{}'", localClientLocation);
             return map(decodedPathWithScheme);
         }
 
@@ -110,8 +89,10 @@ public class MappingUriExtensions extends UriExtensions {
     }
 
     private String mapToClientPath(String pathWithScheme) {
-        String clientPath = toPathAsInXtext212(
-                java.net.URI.create(pathWithScheme.replace(serverLocation, clientLocation)));
+        String clientLocation = this.clientLocation;
+        String uriString = clientLocation == null ? serverLocation
+                : pathWithScheme.replace(serverLocation, clientLocation);
+        String clientPath = toPathAsInXtext212(java.net.URI.create(uriString));
         logger.trace("Mapping server path {} to client path {}", pathWithScheme, clientPath);
         return clientPath;
     }

@@ -13,9 +13,7 @@
 package org.openhab.core.automation.internal.module.factory;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -45,10 +43,9 @@ public class EphemerisModuleHandlerFactory extends BaseModuleHandlerFactory impl
 
     private final Logger logger = LoggerFactory.getLogger(EphemerisModuleHandlerFactory.class);
 
-    private static final Collection<String> TYPES = Collections.unmodifiableList(Stream
-            .of(EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID, EphemerisConditionHandler.WEEKEND_MODULE_TYPE_ID,
-                    EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID, EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID)
-            .collect(Collectors.toList()));
+    private static final Collection<String> TYPES = List.of(EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID,
+            EphemerisConditionHandler.WEEKEND_MODULE_TYPE_ID, EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID,
+            EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID);
 
     private final EphemerisManager ephemerisManager;
 

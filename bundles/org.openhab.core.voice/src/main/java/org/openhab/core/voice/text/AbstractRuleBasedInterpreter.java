@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInterpreter {
 
     private static final String JSGF = "JSGF";
-    private static final Set<String> SUPPORTED_GRAMMERS = Collections.unmodifiableSet(Collections.singleton(JSGF));
+    private static final Set<String> SUPPORTED_GRAMMERS = Set.of(JSGF);
 
     private static final String OK = "ok";
     private static final String SORRY = "sorry";
@@ -228,19 +229,20 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return Rules in descending match priority order.
      */
     public Rule[] getRules(Locale locale) {
-        Map<Locale, List<Rule>> lr = getLanguageRules();
+        Map<Locale, List<Rule>> languageRules = getLanguageRules();
         List<Rule> rules = new ArrayList<>();
         Set<List<Rule>> ruleSets = new HashSet<>();
-        List<Rule> ruleSet = lr.get(locale);
+        List<Rule> ruleSet = languageRules.get(locale);
         if (ruleSet != null) {
             ruleSets.add(ruleSet);
             rules.addAll(ruleSet);
         }
 
-        String l = locale.getLanguage();
-        for (Locale rl : lr.keySet()) {
-            if (rl.getLanguage().equals(l)) {
-                ruleSet = lr.get(rl);
+        String language = locale.getLanguage();
+        for (Entry<Locale, List<Rule>> entry : languageRules.entrySet()) {
+            Locale ruleLocale = entry.getKey();
+            if (ruleLocale.getLanguage().equals(language)) {
+                ruleSet = entry.getValue();
                 if (!ruleSets.contains(ruleSet)) {
                     ruleSets.add(ruleSet);
                     rules.addAll(ruleSet);
@@ -344,8 +346,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      */
     protected Expression[] exps(Object... objects) {
         List<Expression> result = new ArrayList<>();
-        for (int i = 0; i < objects.length; i++) {
-            Expression e = exp(objects[i]);
+        for (Object object : objects) {
+            Expression e = exp(object);
             if (e != null) {
                 result.add(e);
             }
@@ -594,8 +596,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         } else {
             split = text.toLowerCase(localeSafe).replaceAll("[\\']", "").replaceAll("[^\\w\\s]", " ").split("\\s");
         }
-        for (int i = 0; i < split.length; i++) {
-            String part = split[i].trim();
+        for (String s : split) {
+            String part = s.trim();
             if (part.length() > 0) {
                 parts.add(part);
             }

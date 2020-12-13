@@ -14,8 +14,8 @@ package org.openhab.core.model.item.internal;
 
 import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
@@ -31,9 +31,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
@@ -87,7 +87,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
     private MetadataRegistry metadataRegistry;
     private ModelRepository modelRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         itemRegistry = getService(ItemRegistry.class);
         assertThat(itemRegistry, is(notNullValue()));
@@ -105,7 +105,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
     /**
      * Make sure the models and items are removed and the removal events have been processed.
      */
-    @After
+    @AfterEach
     public void tearDown() {
         Collection<Item> itemsToRemove = itemRegistry.getAll();
         List<String> modelNamesToRemove = TESTMODEL_NAMES.stream()
@@ -570,7 +570,8 @@ public class GenericItemProviderTest extends JavaOSGiTest {
     @Test
     public void testMetadataConfigured() {
         String model = "Switch simple { namespace=\"value\" } " + //
-                "Switch configured { foo=\"bar\" [ answer=42 ] } ";
+                "Switch configured { foo=\"bar\" [ answer=42 ] } " + //
+                "Switch negative { foo=\"bar\" [ property=-42 ] }";
 
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
         Item item = itemRegistry.get("configured");
@@ -580,6 +581,11 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         assertThat(res, is(notNullValue()));
         assertThat(res.getValue(), is("bar"));
         assertThat(res.getConfiguration().get("answer"), is(new BigDecimal(42)));
+
+        res = metadataRegistry.get(new MetadataKey("foo", "negative"));
+        assertThat(res, is(notNullValue()));
+        assertThat(res.getValue(), is("bar"));
+        assertThat(res.getConfiguration().get("property"), is(new BigDecimal(-42)));
 
         Collection<Item> itemsToRemove = itemRegistry.getAll();
         List<AbstractItemRegistryEvent> removedItemEvents = new ArrayList<>();

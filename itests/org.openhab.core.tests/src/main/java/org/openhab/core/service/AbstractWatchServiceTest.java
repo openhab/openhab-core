@@ -14,7 +14,7 @@ package org.openhab.core.service;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaTest;
 
 /**
@@ -51,7 +51,7 @@ public class AbstractWatchServiceTest extends JavaTest {
 
     private RelativeWatchService watchService;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpBeforeClass() {
         // set the NO_EVENT_TIMEOUT_IN_SECONDS according to the operating system used
         if (System.getProperty("os.name").startsWith("Mac OS X")) {
@@ -61,13 +61,13 @@ public class AbstractWatchServiceTest extends JavaTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         File watchDir = new File(WATCHED_DIRECTORY);
         watchDir.mkdirs();
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         watchService.deactivate();
         final Path watchedDirectory = Paths.get(WATCHED_DIRECTORY);

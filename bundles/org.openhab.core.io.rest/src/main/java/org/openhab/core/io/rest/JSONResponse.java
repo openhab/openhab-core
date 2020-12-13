@@ -94,8 +94,7 @@ public class JSONResponse {
      * @return ResponseBuilder configured for "Content-Type" MediaType.APPLICATION_JSON
      */
     private ResponseBuilder responseBuilder(Response.StatusType status) {
-        return Response.status(status).header("Content-Type", MediaType.APPLICATION_JSON)
-                .encoding(StandardCharsets.UTF_8.name());
+        return Response.status(status).header("Content-Type", MediaType.APPLICATION_JSON);
     }
 
     /**
@@ -168,7 +167,8 @@ public class JSONResponse {
         }
 
         Thread writerThread = new Thread(() -> {
-            try (JsonWriter jsonWriter = new JsonWriter(new BufferedWriter(new OutputStreamWriter(out)))) {
+            try (JsonWriter jsonWriter = new JsonWriter(
+                    new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8)))) {
                 gson.toJson(entity, entity.getClass(), jsonWriter);
                 jsonWriter.flush();
             } catch (IOException | JsonIOException e) {

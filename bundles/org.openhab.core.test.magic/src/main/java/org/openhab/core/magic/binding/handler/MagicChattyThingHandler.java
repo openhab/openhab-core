@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -49,8 +47,8 @@ public class MagicChattyThingHandler extends BaseThingHandler {
     private static final String PARAM_INTERVAL = "interval";
     private static final int START_DELAY = 3;
 
-    private static final List<String> RANDOM_TEXTS = Stream
-            .of("OPEN", "CLOSED", "ON", "OFF", "Hello", "This is a sentence").collect(Collectors.toList());
+    private static final List<String> RANDOM_TEXTS = List.of("OPEN", "CLOSED", "ON", "OFF", "Hello",
+            "This is a sentence");
 
     private final Set<ChannelUID> numberChannelUIDs = new HashSet<>();
     private final Set<ChannelUID> textChannelUIDs = new HashSet<>();

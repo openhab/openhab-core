@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -41,6 +40,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
+    public static final String MODULE_TYPE_ID = "core.ItemCommandTrigger";
+
+    public static final String CFG_ITEMNAME = "itemName";
+    public static final String CFG_COMMAND = "command";
+
     private final Logger logger = LoggerFactory.getLogger(ItemCommandTriggerHandler.class);
 
     private final String itemName;
@@ -50,22 +54,16 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
     private final Set<String> types;
     private final BundleContext bundleContext;
 
-    public static final String MODULE_TYPE_ID = "core.ItemCommandTrigger";
-
-    private static final String CFG_ITEMNAME = "itemName";
-    private static final String CFG_COMMAND = "command";
-
-    @SuppressWarnings("rawtypes")
-    private ServiceRegistration eventSubscriberRegistration;
+    private ServiceRegistration<?> eventSubscriberRegistration;
 
     public ItemCommandTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
         this.itemName = (String) module.getConfiguration().get(CFG_ITEMNAME);
         this.command = (String) module.getConfiguration().get(CFG_COMMAND);
-        this.types = Collections.singleton(ItemCommandEvent.TYPE);
+        this.types = Set.of(ItemCommandEvent.TYPE);
         this.bundleContext = bundleContext;
         Dictionary<String, Object> properties = new Hashtable<>();
-        this.topic = "smarthome/items/" + itemName + "/command";
+        this.topic = "openhab/items/" + itemName + "/command";
         properties.put("event.topics", topic);
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);

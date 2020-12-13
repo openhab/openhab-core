@@ -12,14 +12,14 @@
  */
 package org.openhab.core.config.discovery.inbox;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultBuilder;
@@ -78,7 +78,7 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
 
     private volatile @NonNullByDefault({}) ThingHandlerCallback callback;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
 

@@ -13,9 +13,9 @@
 package org.openhab.core.automation.module.media.internal;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -56,12 +56,12 @@ public class MediaScriptScopeProvider implements ScriptExtensionProvider {
 
     @Override
     public Collection<String> getDefaultPresets() {
-        return Collections.singleton("media");
+        return Set.of("media");
     }
 
     @Override
     public Collection<String> getPresets() {
-        return Collections.singleton("media");
+        return Set.of("media");
     }
 
     @Override

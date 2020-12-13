@@ -12,8 +12,9 @@
  */
 package org.openhab.core.voice;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Test general purpose STT exception
@@ -28,7 +29,7 @@ public class STTExceptionTest {
     @Test
     public void testConstructor0() {
         STTException ttsException = new STTException();
-        Assert.assertNotNull("STTException() constructor failed", ttsException);
+        assertNotNull(ttsException, "STTException() constructor failed");
     }
 
     /**
@@ -37,7 +38,7 @@ public class STTExceptionTest {
     @Test
     public void testConstructor1() {
         STTException ttsException = new STTException("Message", new Throwable());
-        Assert.assertNotNull("STTException(String, Throwable) constructor failed", ttsException);
+        assertNotNull(ttsException, "STTException(String, Throwable) constructor failed");
     }
 
     /**
@@ -46,7 +47,7 @@ public class STTExceptionTest {
     @Test
     public void testConstructor2() {
         STTException ttsException = new STTException("Message");
-        Assert.assertNotNull("STTException(String) constructor failed", ttsException);
+        assertNotNull(ttsException, "STTException(String) constructor failed");
     }
 
     /**
@@ -55,6 +56,6 @@ public class STTExceptionTest {
     @Test
     public void testConstructor3() {
         STTException ttsException = new STTException(new Throwable());
-        Assert.assertNotNull("STTException(Throwable) constructor failed", ttsException);
+        assertNotNull(ttsException, "STTException(Throwable) constructor failed");
     }
 }

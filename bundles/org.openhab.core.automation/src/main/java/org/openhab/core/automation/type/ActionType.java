@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Module;
@@ -32,6 +33,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
  * @author Ana Dimova - Initial contribution
  * @author Vasil Ilchev - Initial contribution
  */
+@NonNullByDefault
 public class ActionType extends ModuleType {
 
     /**
@@ -57,7 +59,7 @@ public class ActionType extends ModuleType {
      *            {@link Action} instances.
      */
     public ActionType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
-            List<Input> inputs) {
+            @Nullable List<Input> inputs) {
         this(UID, configDescriptions, inputs, null);
     }
 
@@ -101,8 +103,8 @@ public class ActionType extends ModuleType {
             @Nullable String label, @Nullable String description, @Nullable Set<String> tags,
             @Nullable Visibility visibility, @Nullable List<Input> inputs, @Nullable List<Output> outputs) {
         super(UID, configDescriptions, label, description, tags, visibility);
-        this.inputs = inputs != null ? Collections.unmodifiableList(inputs) : Collections.emptyList();
-        this.outputs = outputs != null ? Collections.unmodifiableList(outputs) : Collections.emptyList();
+        this.inputs = inputs != null ? Collections.unmodifiableList(inputs) : List.of();
+        this.outputs = outputs != null ? Collections.unmodifiableList(outputs) : List.of();
     }
 
     /**

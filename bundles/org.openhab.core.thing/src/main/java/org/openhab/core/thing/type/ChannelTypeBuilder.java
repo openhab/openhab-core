@@ -98,7 +98,7 @@ public interface ChannelTypeBuilder<T extends ChannelTypeBuilder<T>> {
      *
      * @param channelTypeUID UID of the ChannelType
      * @param label Label for the ChannelType
-     * @return ChannelTypeBuilder for {@link ChannelType}s of type TRGIGGER
+     * @return ChannelTypeBuilder for {@link ChannelType}s of type TRIGGER
      */
     static TriggerChannelTypeBuilder trigger(ChannelTypeUID channelTypeUID, String label) {
         return new TriggerChannelTypeBuilderImpl(channelTypeUID, label);

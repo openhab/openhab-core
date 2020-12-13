@@ -12,14 +12,14 @@
  */
 package org.openhab.core.thing.type;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests the {@link ChannelGroupTypeBuilder}.
@@ -36,15 +36,16 @@ public class ChannelGroupTypeBuilderTest {
 
     private ChannelGroupTypeBuilder builder;
 
-    @Before
+    @BeforeEach
     public void setup() {
         // set up a valid basic ChannelGroupTypeBuilder
         builder = ChannelGroupTypeBuilder.instance(CHANNEL_GROUP_TYPE_UID, LABEL);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void whenLabelIsBlankForStateShouldFail() {
-        ChannelGroupTypeBuilder.instance(CHANNEL_GROUP_TYPE_UID, "");
+        assertThrows(IllegalArgumentException.class,
+                () -> ChannelGroupTypeBuilder.instance(CHANNEL_GROUP_TYPE_UID, ""));
     }
 
     @Test

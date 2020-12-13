@@ -13,25 +13,25 @@
 package org.openhab.core.io.rest.core.internal.item;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.IsCollectionContaining.hasItem;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.core.IsIterableContaining.hasItem;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.openhab.core.config.core.ConfigDescription;
-import org.openhab.core.config.core.ConfigDescriptionBuilder;
-import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 
 /**
@@ -39,35 +39,24 @@ import org.openhab.core.items.MetadataRegistry;
  *
  * @author Henning Treu - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class MetadataSelectorMatcherTest {
 
     private MetadataSelectorMatcher matcher;
 
-    @Mock
-    private ConfigDescriptionRegistry configDescriptionRegistry;
+    private @Mock MetadataRegistry metadataRegistry;
 
-    @Mock
-    private MetadataRegistry metadataRegistry;
-
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
-        initMocks(this);
-
-        when(configDescriptionRegistry.getConfigDescriptions(null)).thenReturn(mockConfigDescriptions());
+        when(metadataRegistry.getAll())
+                .thenReturn(List.of(new Metadata(new MetadataKey("magic", "test_item"), "test", Map.of()),
+                        new Metadata(new MetadataKey("magic2", "test_item"), "test", Map.of()),
+                        new Metadata(new MetadataKey("homekit", "test_item"), "test", Map.of()),
+                        new Metadata(new MetadataKey("alexa", "test_item"), "test", Map.of())));
         when(metadataRegistry.isInternalNamespace(anyString())).thenReturn(false);
 
-        matcher = new MetadataSelectorMatcher(metadataRegistry, configDescriptionRegistry);
-    }
-
-    private Collection<ConfigDescription> mockConfigDescriptions() throws Exception {
-        List<ConfigDescription> configDescriptions = new ArrayList<>();
-
-        configDescriptions.add(ConfigDescriptionBuilder.create(new URI("metadata:magic")).build());
-        configDescriptions.add(ConfigDescriptionBuilder.create(new URI("metadata:magic2")).build());
-        configDescriptions.add(ConfigDescriptionBuilder.create(new URI("metadata:homekit")).build());
-        configDescriptions.add(ConfigDescriptionBuilder.create(new URI("metadata:alexa")).build());
-
-        return configDescriptions;
+        matcher = new MetadataSelectorMatcher(metadataRegistry);
     }
 
     @Test

@@ -18,7 +18,7 @@ import static org.openhab.core.io.rest.internal.filter.ProxyFilter.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
+import java.util.List;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -26,12 +26,13 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * Test for {@link ProxyFilter}
@@ -39,15 +40,16 @@ import org.mockito.junit.MockitoRule;
  * @author Ivan Iliev - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java and use Mockito
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class ProxyFilterTest {
 
     private final ProxyFilter filter = new ProxyFilter();
 
     private @Mock ContainerRequestContext context;
     private @Mock UriInfo uriInfo;
-    public @Rule MockitoRule mockitoRule = MockitoJUnit.rule();
 
-    @Before
+    @BeforeEach
     public void before() {
         when(context.getUriInfo()).thenReturn(uriInfo);
     }
@@ -167,10 +169,10 @@ public class ProxyFilterTest {
     private void setupContextHeaders(String protoHeader, String hostHeader) {
         MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
         if (protoHeader != null) {
-            headers.put(PROTO_PROXY_HEADER, Collections.singletonList(protoHeader));
+            headers.put(PROTO_PROXY_HEADER, List.of(protoHeader));
         }
         if (hostHeader != null) {
-            headers.put(HOST_PROXY_HEADER, Collections.singletonList(hostHeader));
+            headers.put(HOST_PROXY_HEADER, List.of(hostHeader));
         }
         when(context.getHeaders()).thenReturn(headers);
     }

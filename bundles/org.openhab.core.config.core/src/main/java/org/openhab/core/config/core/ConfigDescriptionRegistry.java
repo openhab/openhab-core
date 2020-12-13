@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -44,6 +45,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Höfer - Added unit
  */
 @Component(immediate = true, service = { ConfigDescriptionRegistry.class })
+@NonNullByDefault
 public class ConfigDescriptionRegistry {
 
     private final Logger logger = LoggerFactory.getLogger(ConfigDescriptionRegistry.class);
@@ -54,41 +56,29 @@ public class ConfigDescriptionRegistry {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addConfigOptionProvider(ConfigOptionProvider configOptionProvider) {
-        if (configOptionProvider != null) {
-            configOptionProviders.add(configOptionProvider);
-        }
+        configOptionProviders.add(configOptionProvider);
     }
 
     protected void removeConfigOptionProvider(ConfigOptionProvider configOptionProvider) {
-        if (configOptionProvider != null) {
-            configOptionProviders.remove(configOptionProvider);
-        }
+        configOptionProviders.remove(configOptionProvider);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addConfigDescriptionProvider(ConfigDescriptionProvider configDescriptionProvider) {
-        if (configDescriptionProvider != null) {
-            configDescriptionProviders.add(configDescriptionProvider);
-        }
+        configDescriptionProviders.add(configDescriptionProvider);
     }
 
     protected void removeConfigDescriptionProvider(ConfigDescriptionProvider configDescriptionProvider) {
-        if (configDescriptionProvider != null) {
-            configDescriptionProviders.remove(configDescriptionProvider);
-        }
+        configDescriptionProviders.remove(configDescriptionProvider);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addConfigDescriptionAliasProvider(ConfigDescriptionAliasProvider configDescriptionAliasProvider) {
-        if (configDescriptionAliasProvider != null) {
-            configDescriptionAliasProviders.add(configDescriptionAliasProvider);
-        }
+        configDescriptionAliasProviders.add(configDescriptionAliasProvider);
     }
 
     protected void removeConfigDescriptionAliasProvider(ConfigDescriptionAliasProvider configDescriptionAliasProvider) {
-        if (configDescriptionAliasProvider != null) {
-            configDescriptionAliasProviders.remove(configDescriptionAliasProvider);
-        }
+        configDescriptionAliasProviders.remove(configDescriptionAliasProvider);
     }
 
     /**
@@ -109,7 +99,7 @@ public class ConfigDescriptionRegistry {
         Map<URI, ConfigDescription> configMap = new HashMap<>();
 
         // Loop over all providers
-        for (ConfigDescriptionProvider configDescriptionProvider : this.configDescriptionProviders) {
+        for (ConfigDescriptionProvider configDescriptionProvider : configDescriptionProviders) {
             // And for each provider, loop over all their config descriptions
             for (ConfigDescription configDescription : configDescriptionProvider.getConfigDescriptions(locale)) {
                 // See if there already exists a configuration for this URI in the map
@@ -212,7 +202,7 @@ public class ConfigDescriptionRegistry {
     private boolean fillFromProviders(URI uri, @Nullable Locale locale, List<ConfigDescriptionParameter> parameters,
             List<ConfigDescriptionParameterGroup> parameterGroups) {
         boolean found = false;
-        for (ConfigDescriptionProvider configDescriptionProvider : this.configDescriptionProviders) {
+        for (ConfigDescriptionProvider configDescriptionProvider : configDescriptionProviders) {
             ConfigDescription config = configDescriptionProvider.getConfigDescription(uri, locale);
 
             if (config != null) {
@@ -248,13 +238,13 @@ public class ConfigDescriptionRegistry {
      * the binding to ensure that multiple sources (eg static XML and dynamic binding data) do not contain overlapping
      * information.
      *
-     * @param uri the URI to which the options to be returned (must not be null)
+     * @param uri the URI to which the options to be returned
      * @param parameter the parameter requiring options to be updated
      * @param locale locale
      * @return config description
      */
     private ConfigDescriptionParameter getConfigOptions(URI uri, Set<URI> aliases, ConfigDescriptionParameter parameter,
-            Locale locale) {
+            @Nullable Locale locale) {
         List<ParameterOption> options = new ArrayList<>();
 
         // Add all the existing options that may be provided by the initial config description provider
@@ -262,7 +252,7 @@ public class ConfigDescriptionRegistry {
 
         boolean found = fillFromProviders(uri, parameter, locale, options);
 
-        if (!found && aliases != null) {
+        if (!found) {
             for (URI alias : aliases) {
                 found = fillFromProviders(alias, parameter, locale, options);
                 if (found) {
@@ -304,7 +294,7 @@ public class ConfigDescriptionRegistry {
     private boolean fillFromProviders(URI alias, ConfigDescriptionParameter parameter, @Nullable Locale locale,
             List<ParameterOption> options) {
         boolean found = false;
-        for (ConfigOptionProvider configOptionProvider : this.configOptionProviders) {
+        for (ConfigOptionProvider configOptionProvider : configOptionProviders) {
             Collection<ParameterOption> newOptions = configOptionProvider.getParameterOptions(alias,
                     parameter.getName(), parameter.getContext(), locale);
 

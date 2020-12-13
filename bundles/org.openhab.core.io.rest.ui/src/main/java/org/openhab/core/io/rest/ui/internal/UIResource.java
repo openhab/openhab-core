@@ -13,6 +13,8 @@
 package org.openhab.core.io.rest.ui.internal;
 
 import java.security.InvalidParameterException;
+import java.util.Date;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -23,11 +25,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
@@ -47,16 +51,21 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for the UI resources and is registered with the
  * Jersey servlet.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component(service = { RESTResource.class, UIResource.class })
 @JaxrsResource
@@ -64,7 +73,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(UIResource.PATH_UI)
-@Api(UIResource.PATH_UI)
+@Tag(name = UIResource.PATH_UI)
 @NonNullByDefault
 public class UIResource implements RESTResource {
 
@@ -85,8 +94,8 @@ public class UIResource implements RESTResource {
     @GET
     @Path("/tiles")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get all registered UI tiles.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class) })
+    @Operation(operationId = "getUITiles", summary = "Get all registered UI tiles.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TileDTO.class)))) })
     public Response getAll() {
         Stream<TileDTO> tiles = tileProvider.getTiles().map(this::toTileDTO);
         return Response.ok(new Stream2JSONInputStream(tiles)).build();
@@ -95,20 +104,37 @@ public class UIResource implements RESTResource {
     @GET
     @Path("/components/{namespace}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get all registered UI components in the specified namespace.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class) })
-    public Response getAllComponents(@PathParam("namespace") String namespace) {
+    @Operation(operationId = "getRegisteredUIComponentsInNamespace", summary = "Get all registered UI components in the specified namespace.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RootUIComponent.class)))) })
+    public Response getAllComponents(@PathParam("namespace") String namespace,
+            @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         Stream<RootUIComponent> components = registry.getAll().stream();
+        if (summary != null && summary == true) {
+            components = components.map(c -> {
+                RootUIComponent component = new RootUIComponent(c.getUID(), c.getType());
+                @Nullable
+                Set<String> tags = c.getTags();
+                if (tags != null) {
+                    component.addTags(c.getTags());
+                }
+                @Nullable
+                Date timestamp = c.getTimestamp();
+                if (timestamp != null) {
+                    component.setTimestamp(timestamp);
+                }
+                return component;
+            });
+        }
         return Response.ok(new Stream2JSONInputStream(components)).build();
     }
 
     @GET
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get a specific UI component in the specified namespace.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class),
-            @ApiResponse(code = 404, message = "Component not found", response = Tile.class) })
+    @Operation(operationId = "getUIComponentInNamespace", summary = "Get a specific UI component in the specified namespace.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))),
+            @ApiResponse(responseCode = "404", description = "Component not found") })
     public Response getComponentByUID(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
@@ -123,8 +149,9 @@ public class UIResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Add an UI component in the specified namespace.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class) })
+    @Operation(operationId = "addUIComponentToNamespace", summary = "Add an UI component in the specified namespace.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))) })
     public Response addComponent(@PathParam("namespace") String namespace, RootUIComponent component) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         component.updateTimestamp();
@@ -136,9 +163,10 @@ public class UIResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update a specific UI component in the specified namespace.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class),
-            @ApiResponse(code = 404, message = "Component not found", response = Tile.class) })
+    @Operation(operationId = "updateUIComponentInNamespace", summary = "Update a specific UI component in the specified namespace.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))),
+                    @ApiResponse(responseCode = "404", description = "Component not found") })
     public Response updateComponent(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID, RootUIComponent component) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
@@ -159,9 +187,10 @@ public class UIResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Remove a specific UI component in the specified namespace.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class),
-            @ApiResponse(code = 404, message = "Component not found", response = Tile.class) })
+    @Operation(operationId = "removeUIComponentFromNamespace", summary = "Remove a specific UI component in the specified namespace.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Component not found") })
     public Response deleteComponent(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);

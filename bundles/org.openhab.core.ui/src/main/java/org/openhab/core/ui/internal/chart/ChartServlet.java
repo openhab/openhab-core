@@ -12,20 +12,17 @@
  */
 package org.openhab.core.ui.internal.chart;
 
+import static java.util.Map.entry;
+
 import java.awt.image.BufferedImage;
 import java.io.EOFException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
@@ -36,7 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.openhab.core.config.core.ConfigurableService;
-import org.openhab.core.io.http.servlet.SmartHomeServlet;
+import org.openhab.core.io.http.servlet.OpenHABServlet;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.ui.chart.ChartProvider;
 import org.osgi.framework.Constants;
@@ -69,9 +66,9 @@ import org.osgi.service.http.HttpService;
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  */
 @Component(immediate = true, service = ChartServlet.class, configurationPid = "org.openhab.chart", //
-        property = Constants.SERVICE_PID + "=org.openhab.core.chart")
+        property = Constants.SERVICE_PID + "=org.openhab.chart")
 @ConfigurableService(category = "system", label = "Charts", description_uri = ChartServlet.CONFIG_URI)
-public class ChartServlet extends SmartHomeServlet {
+public class ChartServlet extends OpenHABServlet {
 
     private static final long serialVersionUID = 7700873790924746422L;
 
@@ -89,15 +86,15 @@ public class ChartServlet extends SmartHomeServlet {
     // The URI of this servlet
     public static final String SERVLET_NAME = "/chart";
 
-    protected static final Map<String, Long> PERIODS = Collections.unmodifiableMap(Stream.of( //
-            new SimpleEntry<>("h", 3600000L), new SimpleEntry<>("4h", 14400000L), //
-            new SimpleEntry<>("8h", 28800000L), new SimpleEntry<>("12h", 43200000L), //
-            new SimpleEntry<>("D", 86400000L), new SimpleEntry<>("2D", 172800000L), //
-            new SimpleEntry<>("3D", 259200000L), new SimpleEntry<>("W", 604800000L), //
-            new SimpleEntry<>("2W", 1209600000L), new SimpleEntry<>("M", 2592000000L), //
-            new SimpleEntry<>("2M", 5184000000L), new SimpleEntry<>("4M", 10368000000L), //
-            new SimpleEntry<>("Y", 31536000000L)//
-    ).collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+    protected static final Map<String, Long> PERIODS = Map.ofEntries( //
+            entry("h", 3600000L), entry("4h", 14400000L), //
+            entry("8h", 28800000L), entry("12h", 43200000L), //
+            entry("D", 86400000L), entry("2D", 172800000L), //
+            entry("3D", 259200000L), entry("W", 604800000L), //
+            entry("2W", 1209600000L), entry("M", 2592000000L), //
+            entry("2M", 5184000000L), entry("4M", 10368000000L), //
+            entry("Y", 31536000000L)//
+    );
 
     protected static final Map<String, ChartProvider> CHART_PROVIDERS = new ConcurrentHashMap<>();
 
@@ -280,9 +277,10 @@ public class ChartServlet extends SmartHomeServlet {
 
         // Read out the parameter 'dpi'
         Integer dpi = null;
-        if (req.getParameter("dpi") != null) {
+        String dpiString = req.getParameter("dpi");
+        if (dpiString != null) {
             try {
-                dpi = Integer.valueOf(req.getParameter("dpi"));
+                dpi = Integer.valueOf(dpiString);
             } catch (NumberFormatException e) {
                 res.sendError(HttpServletResponse.SC_BAD_REQUEST, "dpi parameter is invalid");
                 return;

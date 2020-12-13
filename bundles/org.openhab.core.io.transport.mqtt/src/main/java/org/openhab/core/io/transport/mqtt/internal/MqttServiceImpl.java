@@ -104,7 +104,6 @@ public class MqttServiceImpl implements MqttService {
         }
 
         connection.setQos(config.qos.intValue());
-        connection.setRetain(config.retainMessages);
         if (config.lwtTopic != null) {
             String topic = config.lwtTopic;
             MqttWillAndTestament will = new MqttWillAndTestament(topic,

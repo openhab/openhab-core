@@ -13,15 +13,16 @@
 package org.openhab.core.items;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.items.ManagedItemProvider.PersistedItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.NumberItem;
@@ -51,14 +52,14 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
     private ManagedItemProvider itemProvider;
     private ItemRegistry itemRegistry;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
         itemProvider = getService(ManagedItemProvider.class);
         itemRegistry = getService(ItemRegistry.class);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         for (Item item : itemProvider.getAll()) {
             itemProvider.remove(item.getName());
@@ -143,12 +144,12 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
         assertThat(itemProvider.getAll().size(), is(0));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertTwoItemsWithSameNameCanNotBeAdded() {
         assertThat(itemProvider.getAll().size(), is(0));
 
         itemProvider.add(new StringItem("Item"));
-        itemProvider.add(new StringItem("Item"));
+        assertThrows(IllegalArgumentException.class, () -> itemProvider.add(new StringItem("Item")));
     }
 
     @Test
@@ -347,5 +348,41 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
         assertThat(result2.function.getParameters(), is(new State[0]));
 
         assertThat(itemProvider.getAll().size(), is(0));
+    }
+
+    @Test
+    public void assertRemoveGroupnameFromMembersOnGroupitemRemoval() {
+        assertThat(itemProvider.getAll().size(), is(0));
+
+        GroupItem group = new GroupItem("group");
+
+        GenericItem item1 = new SwitchItem("SwitchItem1");
+        item1.addGroupName(group.getName());
+        GenericItem item2 = new SwitchItem("SwitchItem2");
+        item2.addGroupName(group.getName());
+
+        itemProvider.add(group);
+        itemProvider.add(item1);
+        itemProvider.add(item2);
+
+        assertThat(itemProvider.getAll().size(), is(3));
+
+        assertThat(item1.getGroupNames().size(), is(1));
+        assertThat(item2.getGroupNames().size(), is(1));
+
+        Item oldItem = itemProvider.remove(group.getName());
+
+        assertThat(oldItem, is(group));
+
+        item1 = (GenericItem) itemProvider.get("SwitchItem1");
+        item2 = (GenericItem) itemProvider.get("SwitchItem2");
+
+        assertNotNull(item1);
+        assertNotNull(item2);
+        if (item1 != null && item2 != null) {
+            assertThat(item1.getGroupNames().size(), is(0));
+            assertThat(item2.getGroupNames().size(), is(0));
+        }
+        assertThat(itemProvider.getAll().size(), is(2));
     }
 }

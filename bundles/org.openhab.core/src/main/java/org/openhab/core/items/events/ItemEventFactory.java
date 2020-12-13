@@ -45,21 +45,21 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     private static final String CORE_LIBRARY_PACKAGE = "org.openhab.core.library.types.";
 
-    private static final String ITEM_COMAND_EVENT_TOPIC = "smarthome/items/{itemName}/command";
+    private static final String ITEM_COMAND_EVENT_TOPIC = "openhab/items/{itemName}/command";
 
-    private static final String ITEM_STATE_EVENT_TOPIC = "smarthome/items/{itemName}/state";
+    private static final String ITEM_STATE_EVENT_TOPIC = "openhab/items/{itemName}/state";
 
-    private static final String ITEM_STATE_PREDICTED_EVENT_TOPIC = "smarthome/items/{itemName}/statepredicted";
+    private static final String ITEM_STATE_PREDICTED_EVENT_TOPIC = "openhab/items/{itemName}/statepredicted";
 
-    private static final String ITEM_STATE_CHANGED_EVENT_TOPIC = "smarthome/items/{itemName}/statechanged";
+    private static final String ITEM_STATE_CHANGED_EVENT_TOPIC = "openhab/items/{itemName}/statechanged";
 
-    private static final String GROUPITEM_STATE_CHANGED_EVENT_TOPIC = "smarthome/items/{itemName}/{memberName}/statechanged";
+    private static final String GROUPITEM_STATE_CHANGED_EVENT_TOPIC = "openhab/items/{itemName}/{memberName}/statechanged";
 
-    private static final String ITEM_ADDED_EVENT_TOPIC = "smarthome/items/{itemName}/added";
+    private static final String ITEM_ADDED_EVENT_TOPIC = "openhab/items/{itemName}/added";
 
-    private static final String ITEM_REMOVED_EVENT_TOPIC = "smarthome/items/{itemName}/removed";
+    private static final String ITEM_REMOVED_EVENT_TOPIC = "openhab/items/{itemName}/removed";
 
-    private static final String ITEM_UPDATED_EVENT_TOPIC = "smarthome/items/{itemName}/updated";
+    private static final String ITEM_UPDATED_EVENT_TOPIC = "openhab/items/{itemName}/updated";
 
     /**
      * Constructs a new ItemEventFactory.
@@ -77,7 +77,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         } else if (ItemStateEvent.TYPE.equals(eventType)) {
             return createStateEvent(topic, payload, source);
         } else if (ItemStatePredictedEvent.TYPE.equals(eventType)) {
-            return createStatePredictedEvent(topic, payload, source);
+            return createStatePredictedEvent(topic, payload);
         } else if (ItemStateChangedEvent.TYPE.equals(eventType)) {
             return createStateChangedEvent(topic, payload);
         } else if (ItemAddedEvent.TYPE.equals(eventType)) {
@@ -115,7 +115,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         return new ItemStateEvent(topic, payload, itemName, state, source);
     }
 
-    private Event createStatePredictedEvent(String topic, String payload, String source) {
+    private Event createStatePredictedEvent(String topic, String payload) {
         String itemName = getItemName(topic);
         ItemStatePredictedEventPayloadBean bean = deserializePayload(payload, ItemStatePredictedEventPayloadBean.class);
         State state = getState(bean.getPredictedType(), bean.getPredictedValue());
@@ -262,7 +262,7 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @return the created item state event
      * @throws IllegalArgumentException if itemName or state is null
      */
-    public static ItemStateEvent createStateEvent(String itemName, State state) {
+    public static ItemEvent createStateEvent(String itemName, State state) {
         return createStateEvent(itemName, state, null);
     }
 

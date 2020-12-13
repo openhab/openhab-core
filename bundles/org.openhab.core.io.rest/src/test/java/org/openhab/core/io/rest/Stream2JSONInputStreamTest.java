@@ -13,17 +13,17 @@
 package org.openhab.core.io.rest;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -39,9 +39,9 @@ public class Stream2JSONInputStreamTest {
 
     private static final Gson GSON = new GsonBuilder().create();
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void shouldFailForNullSource() throws IOException {
-        new Stream2JSONInputStream(null).close();
+        assertThrows(IllegalArgumentException.class, () -> new Stream2JSONInputStream(null).close());
     }
 
     @Test
@@ -55,7 +55,7 @@ public class Stream2JSONInputStreamTest {
     @Test
     public void shouldStreamSingleObjectToJSON() throws Exception {
         DummyObject dummyObject = new DummyObject("demoKey", "demoValue");
-        List<DummyObject> dummyList = Arrays.asList(dummyObject);
+        List<DummyObject> dummyList = List.of(dummyObject);
         collection2InputStream = new Stream2JSONInputStream(Stream.of(dummyObject));
 
         assertThat(inputStreamToString(collection2InputStream), is(GSON.toJson(dummyList)));
@@ -65,7 +65,7 @@ public class Stream2JSONInputStreamTest {
     public void shouldStreamCollectionStreamToJSON() throws Exception {
         DummyObject dummyObject1 = new DummyObject("demoKey1", "demoValue1");
         DummyObject dummyObject2 = new DummyObject("demoKey2", "demoValue2");
-        List<DummyObject> dummyCollection = Arrays.asList(dummyObject1, dummyObject2);
+        List<DummyObject> dummyCollection = List.of(dummyObject1, dummyObject2);
         collection2InputStream = new Stream2JSONInputStream(dummyCollection.stream());
 
         assertThat(inputStreamToString(collection2InputStream), is(GSON.toJson(dummyCollection)));

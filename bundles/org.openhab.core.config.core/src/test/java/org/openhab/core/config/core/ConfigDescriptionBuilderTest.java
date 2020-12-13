@@ -13,15 +13,14 @@
 package org.openhab.core.config.core;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertThat;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
 /**
@@ -42,7 +41,7 @@ public class ConfigDescriptionBuilderTest {
             .create("TEST GROUP 2").withAdvanced(Boolean.TRUE).withLabel("Test Group 2").build();
     private ConfigDescriptionBuilder builder;
 
-    @Before
+    @BeforeEach
     public void setup() {
         builder = ConfigDescriptionBuilder.create(CONFIG_URI);
     }
@@ -66,7 +65,7 @@ public class ConfigDescriptionBuilderTest {
 
     @Test
     public void testWithTwoParameters() {
-        final List<ConfigDescriptionParameter> params = Arrays.asList(PARAM1, PARAM2);
+        final List<ConfigDescriptionParameter> params = List.of(PARAM1, PARAM2);
 
         ConfigDescription configDescription = builder.withParameters(params).build();
         assertThat(configDescription.getUID(), is(CONFIG_URI));
@@ -86,7 +85,7 @@ public class ConfigDescriptionBuilderTest {
 
     @Test
     public void testWithTwoParameterGroups() {
-        final List<ConfigDescriptionParameterGroup> groups = Arrays.asList(GROUP1, GROUP2);
+        final List<ConfigDescriptionParameterGroup> groups = List.of(GROUP1, GROUP2);
 
         ConfigDescription configDescription = builder.withParameterGroups(groups).build();
         assertThat(configDescription.getUID(), is(CONFIG_URI));

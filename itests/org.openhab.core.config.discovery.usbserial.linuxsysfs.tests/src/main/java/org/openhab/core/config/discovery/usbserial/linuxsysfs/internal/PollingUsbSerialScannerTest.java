@@ -12,19 +12,19 @@
  */
 package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 
-import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 import static org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.PollingUsbSerialScanner.PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryListener;
@@ -40,12 +40,15 @@ public class PollingUsbSerialScannerTest {
     private UsbSerialDeviceInformationGenerator usbDeviceInfoGenerator = new UsbSerialDeviceInformationGenerator();
 
     private PollingUsbSerialScanner pollingScanner;
+
+    private AutoCloseable mocksCloseable;
+
     private @Mock UsbSerialDiscoveryListener discoveryListenerMock;
     private @Mock UsbSerialScanner usbSerialScannerMock;
 
-    @Before
-    public void setup() {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
         Map<String, Object> config = new HashMap<>();
         config.put(PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE, "1");
@@ -53,6 +56,11 @@ public class PollingUsbSerialScannerTest {
         pollingScanner = new PollingUsbSerialScanner(config, usbSerialScannerMock);
 
         pollingScanner.registerDiscoveryListener(discoveryListenerMock);
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     @Test
@@ -69,7 +77,7 @@ public class PollingUsbSerialScannerTest {
         UsbSerialDeviceInformation usb2 = usbDeviceInfoGenerator.generate();
         UsbSerialDeviceInformation usb3 = usbDeviceInfoGenerator.generate();
 
-        when(usbSerialScannerMock.scan()).thenReturn(new HashSet<>(asList(usb1, usb2)));
+        when(usbSerialScannerMock.scan()).thenReturn(Set.of(usb1, usb2));
         when(usbSerialScannerMock.canPerformScans()).thenReturn(true);
 
         pollingScanner.doSingleScan();
@@ -90,8 +98,7 @@ public class PollingUsbSerialScannerTest {
         UsbSerialDeviceInformation usb2 = usbDeviceInfoGenerator.generate();
         UsbSerialDeviceInformation usb3 = usbDeviceInfoGenerator.generate();
 
-        when(usbSerialScannerMock.scan()).thenReturn(new HashSet<>(asList(usb1, usb2)))
-                .thenReturn(new HashSet<>(asList(usb2, usb3)));
+        when(usbSerialScannerMock.scan()).thenReturn(Set.of(usb1, usb2)).thenReturn(Set.of(usb2, usb3));
         when(usbSerialScannerMock.canPerformScans()).thenReturn(true);
 
         pollingScanner.unregisterDiscoveryListener(discoveryListenerMock);
@@ -118,8 +125,7 @@ public class PollingUsbSerialScannerTest {
         UsbSerialDeviceInformation usb2 = usbDeviceInfoGenerator.generate();
         UsbSerialDeviceInformation usb3 = usbDeviceInfoGenerator.generate();
 
-        when(usbSerialScannerMock.scan()).thenReturn(new HashSet<>(asList(usb1, usb2)))
-                .thenReturn(new HashSet<>(asList(usb2, usb3)));
+        when(usbSerialScannerMock.scan()).thenReturn(Set.of(usb1, usb2)).thenReturn(Set.of(usb2, usb3));
         when(usbSerialScannerMock.canPerformScans()).thenReturn(true);
 
         pollingScanner.startBackgroundScanning();
@@ -142,7 +148,7 @@ public class PollingUsbSerialScannerTest {
 
     @Test
     public void testNoBackgroundScanningWhenNoScansPossible() throws IOException, InterruptedException {
-        when(usbSerialScannerMock.scan()).thenReturn(new HashSet<>(asList(usbDeviceInfoGenerator.generate())));
+        when(usbSerialScannerMock.scan()).thenReturn(Set.of(usbDeviceInfoGenerator.generate()));
         when(usbSerialScannerMock.canPerformScans()).thenReturn(false);
 
         pollingScanner.startBackgroundScanning();

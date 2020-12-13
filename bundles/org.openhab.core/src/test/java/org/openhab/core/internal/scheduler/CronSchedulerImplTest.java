@@ -12,14 +12,15 @@
  */
 package org.openhab.core.internal.scheduler;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.openhab.core.scheduler.CronJob;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 
@@ -34,7 +35,8 @@ import org.openhab.core.scheduler.ScheduledCompletableFuture;
 public class CronSchedulerImplTest {
     private final CronSchedulerImpl cronScheduler = new CronSchedulerImpl(new SchedulerImpl());
 
-    @Test(timeout = 1000)
+    @Test
+    @Timeout(value = 1, unit = TimeUnit.SECONDS)
     public void testCronReboot() throws Exception {
         long now = System.currentTimeMillis();
         Semaphore s = new Semaphore(0);
@@ -44,11 +46,12 @@ public class CronSchedulerImplTest {
         s.acquire(1);
 
         long diff = System.currentTimeMillis() - now;
-        assertTrue("Time difference should be less 200 but was: " + diff, diff < 200);
-        assertTrue("Scheduler should be done once reboot call done.", future.isDone());
+        assertTrue(diff < 200, "Time difference should be less 200 but was: " + diff);
+        assertTrue(future.isDone(), "Scheduler should be done once reboot call done.");
     }
 
-    @Test(timeout = 6000)
+    @Test
+    @Timeout(value = 6, unit = TimeUnit.SECONDS)
     public void testCronScheduling() throws Exception {
         long now = System.currentTimeMillis();
         AtomicReference<Object> ref = new AtomicReference<>();
@@ -57,7 +60,7 @@ public class CronSchedulerImplTest {
         cronScheduler.schedule(foo -> {
             s.release();
             ref.set(foo.get("foo"));
-        }, Collections.singletonMap("foo", "bar"), "#\n" //
+        }, Map.of("foo", "bar"), "#\n" //
                 + "\n" //
                 + " foo = bar \n" //
                 + "# bla bla foo=foo\n" //
@@ -65,15 +68,16 @@ public class CronSchedulerImplTest {
         s.acquire(2);
 
         long diff = (System.currentTimeMillis() - now + 50) / 1000;
-        assertTrue("Difference calculation should be between 3 and 4 but was: " + diff, diff >= 3 && diff <= 4);
-        assertEquals("Environment variable 'foo' should be correctly set", "bar", ref.get());
+        assertTrue(diff >= 3 && diff <= 4, "Difference calculation should be between 3 and 4 but was: " + diff);
+        assertEquals("bar", ref.get(), "Environment variable 'foo' should be correctly set");
     }
 
-    @Test(timeout = 2000)
+    @Test
+    @Timeout(value = 2, unit = TimeUnit.SECONDS)
     public void testAddRemoveScheduler() throws InterruptedException {
         Semaphore s = new Semaphore(0);
         CronJob cronJob = m -> s.release();
-        Map<String, Object> map = Collections.singletonMap(CronJob.CRON, "* * * * * *");
+        Map<String, Object> map = Map.of(CronJob.CRON, "* * * * * *");
         cronScheduler.addSchedule(cronJob, map);
         s.acquire();
         cronScheduler.removeSchedule(cronJob);

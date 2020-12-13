@@ -35,13 +35,16 @@ public class Properties {
         PROPERTIES.add(CO2.class);
         PROPERTIES.add(ColorTemperature.class);
         PROPERTIES.add(Current.class);
+        PROPERTIES.add(Duration.class);
         PROPERTIES.add(Energy.class);
         PROPERTIES.add(Frequency.class);
         PROPERTIES.add(Gas.class);
         PROPERTIES.add(Humidity.class);
+        PROPERTIES.add(Level.class);
         PROPERTIES.add(Light.class);
         PROPERTIES.add(Noise.class);
         PROPERTIES.add(Oil.class);
+        PROPERTIES.add(Opening.class);
         PROPERTIES.add(Power.class);
         PROPERTIES.add(Presence.class);
         PROPERTIES.add(Pressure.class);
@@ -49,6 +52,9 @@ public class Properties {
         PROPERTIES.add(Smoke.class);
         PROPERTIES.add(SoundVolume.class);
         PROPERTIES.add(Temperature.class);
+        PROPERTIES.add(Timestamp.class);
+        PROPERTIES.add(Ultraviolet.class);
+        PROPERTIES.add(Vibration.class);
         PROPERTIES.add(Voltage.class);
         PROPERTIES.add(Water.class);
         PROPERTIES.add(Wind.class);

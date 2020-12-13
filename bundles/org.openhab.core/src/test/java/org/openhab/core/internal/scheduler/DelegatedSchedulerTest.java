@@ -12,10 +12,9 @@
  */
 package org.openhab.core.internal.scheduler;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -24,9 +23,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 
 /**
@@ -34,20 +37,18 @@ import org.openhab.core.scheduler.ScheduledCompletableFuture;
  *
  * @author Hilbrand Bouwkamp - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class DelegatedSchedulerTest {
 
     private DelegatedSchedulerImpl delegatedscheduler;
 
-    @Mock
-    private SchedulerImpl scheduler;
-    @Mock
-    private ScheduledCompletableFuture<Instant> temporalScheduledFuture;
-    @Mock
-    private CompletableFuture<Instant> completableFuture;
+    private @Mock SchedulerImpl scheduler;
+    private @Mock ScheduledCompletableFuture<Instant> temporalScheduledFuture;
+    private @Mock CompletableFuture<Instant> completableFuture;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
         when(scheduler.after(any())).thenReturn(temporalScheduledFuture);
         when(temporalScheduledFuture.getPromise()).thenReturn(completableFuture);
         delegatedscheduler = new DelegatedSchedulerImpl(scheduler);
@@ -62,9 +63,9 @@ public class DelegatedSchedulerTest {
             return null;
         }).when(temporalScheduledFuture).cancel(true);
         delegatedscheduler.after(Duration.ofMillis(100));
-        assertFalse("Check if cancel was not called", check.get());
+        assertFalse(check.get(), "Check if cancel was not called");
         delegatedscheduler.deactivate();
-        assertTrue("Cancel should be called on deactivation", check.get());
+        assertTrue(check.get(), "Cancel should be called on deactivation");
     }
 
     @Test
@@ -79,9 +80,9 @@ public class DelegatedSchedulerTest {
             return null;
         });
         delegatedscheduler.after(Duration.ofMillis(100));
-        assertFalse("Check if cancel was not called", check.get());
+        assertFalse(check.get(), "Check if cancel was not called");
         delegatedscheduler.deactivate();
-        assertFalse("When job handled, cancel should not be called on deactivation. Because is job already gone.",
-                check.get());
+        assertFalse(check.get(),
+                "When job handled, cancel should not be called on deactivation. Because is job already gone.");
     }
 }

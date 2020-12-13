@@ -12,15 +12,15 @@
  */
 package org.openhab.core.thing;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.BINDING_ID;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeProvider;
@@ -68,7 +68,7 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
 
     private ChannelTypeProvider systemChannelTypeProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ChannelTypeProvider provider = getService(ChannelTypeProvider.class, DefaultSystemChannelTypeProvider.class);
         assertTrue(provider instanceof DefaultSystemChannelTypeProvider);

@@ -12,7 +12,7 @@
  */
 package org.openhab.core.model.script.actions;
 
-import java.time.Instant;
+import java.time.ZonedDateTime;
 
 /**
  * A timer is a handle for a block of code that is scheduled for future execution. A timer
@@ -59,6 +59,6 @@ public interface Timer {
      * @param newTime the new time to execute the code
      * @return true, if the rescheduling was done successful
      */
-    public boolean reschedule(Instant newTime);
+    public boolean reschedule(ZonedDateTime newTime);
 
 }

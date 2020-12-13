@@ -21,12 +21,9 @@ import org.osgi.service.component.annotations.Component;
  * @author Stefan Triller - Initial contribution
  */
 
-@Component(immediate = true, service = MagicMultiInstanceServiceMarker.class, property = {
-        Constants.SERVICE_PID + "=org.openhab.magicMultiInstance",
-        ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE + "=true",
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=MagicMultiInstanceService",
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=test",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=test:multipleMagic" })
+@Component(immediate = true, service = MagicMultiInstanceServiceMarker.class, //
+        property = Constants.SERVICE_PID + "=org.openhab.magicMultiInstance")
+@ConfigurableService(category = "test", label = "MagicMultiInstanceService", description_uri = "test:multipleMagic", factory = true)
 public class MagicMultiInstanceServiceMarker {
     // this is a marker service and represents a service factory so multiple configuration instances of type
     // "org.openhab.core.magicMultiInstance" can be created.

@@ -22,8 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 
+import org.openhab.core.OpenHAB;
 import org.openhab.core.audio.internal.AudioManagerTest;
-import org.openhab.core.config.core.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ public class BundledSoundFileHandler implements Closeable {
         tmpdir = Files.createTempDirectory(null);
 
         final Path configdir = tmpdir.resolve("configdir");
-        System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, configdir.toString());
+        System.setProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT, configdir.toString());
 
         mp3FilePath = configdir.resolve("sounds/" + MP3_FILE_NAME).toString();
         copy("/configuration/sounds/mp3AudioFile.mp3", mp3FilePath);
@@ -67,7 +67,7 @@ public class BundledSoundFileHandler implements Closeable {
 
     @Override
     public void close() {
-        System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, ConfigConstants.DEFAULT_CONFIG_FOLDER);
+        System.setProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT, OpenHAB.DEFAULT_CONFIG_FOLDER);
 
         if (tmpdir != null) {
             try {

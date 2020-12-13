@@ -13,19 +13,17 @@
 package org.openhab.core.thing.firmware;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
@@ -56,12 +54,12 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
 
     private FirmwareProvider lambdaFirmwareProvider;
 
-    @Before
+    @BeforeEach
     public void setup() {
         thingTypeUID = new ThingTypeUID("customBinding:type");
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         unregisterSingleFirmwareProvider();
     }
@@ -149,13 +147,15 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
         registerService(createFirmwareUpdateHandler(hwVersionTwoHighFwVersionThing));
 
         // Define restrictions for the hardware versions
-        FirmwareRestriction hwVersion1Restriction = thg -> Integer
-                .parseInt(thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION)) < 14
-                || FW_VERSION_32.equals(thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION));
+        FirmwareRestriction hwVersion1Restriction = thg -> {
+            String version = thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION);
+            return version != null && (Integer.parseInt(version) < 14 || FW_VERSION_32.equals(version));
+        };
 
-        FirmwareRestriction hwVersion2Restriction = thg -> Integer
-                .parseInt(thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION)) >= 14
-                && !FW_VERSION_32.equals(thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION));
+        FirmwareRestriction hwVersion2Restriction = thg -> {
+            String version = thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION);
+            return version != null && (Integer.parseInt(version) >= 14 && !FW_VERSION_32.equals(version));
+        };
 
         // Build firmwares
         Firmware fw38 = FirmwareBuilder.create(thingTypeUID, FW_VERSION_38)
@@ -165,8 +165,7 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
 
         // Mock the provider to return the firmwares
         FirmwareProvider lambdaFirmwareProvider = mock(FirmwareProvider.class);
-        Set<Firmware> resultSet = new HashSet<>(Arrays.asList(fw38, fw40));
-        when(lambdaFirmwareProvider.getFirmwares(any(), any())).thenReturn(resultSet);
+        when(lambdaFirmwareProvider.getFirmwares(any(), any())).thenReturn(Set.of(fw38, fw40));
         registerService(lambdaFirmwareProvider);
 
         FirmwareUpdateService firmwareUpdateService = getService(FirmwareUpdateService.class);
@@ -235,8 +234,7 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
 
     private void registerFirmwareProviderWithSingleFirmware(Firmware firmwareToReturn) {
         lambdaFirmwareProvider = mock(FirmwareProvider.class);
-        Set<Firmware> resultSet = new HashSet<>(Arrays.asList(firmwareToReturn));
-        when(lambdaFirmwareProvider.getFirmwares(any(), any())).thenReturn(resultSet);
+        when(lambdaFirmwareProvider.getFirmwares(any(), any())).thenReturn(Set.of(firmwareToReturn));
         when(lambdaFirmwareProvider.getFirmware(any(), any(), any())).thenReturn(firmwareToReturn);
         registerService(lambdaFirmwareProvider);
     }

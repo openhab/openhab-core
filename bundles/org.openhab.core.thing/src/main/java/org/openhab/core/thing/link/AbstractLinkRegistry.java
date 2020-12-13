@@ -12,7 +12,6 @@
  */
 package org.openhab.core.thing.link;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -183,7 +182,7 @@ public abstract class AbstractLinkRegistry<L extends AbstractLink, P extends Pro
         try {
             final Set<L> forLinkedUID = linkedUidToLink.get(uid);
             if (forLinkedUID == null) {
-                return Collections.emptySet();
+                return Set.of();
             }
             return forLinkedUID.parallelStream().map(link -> link.getItemName()).collect(Collectors.toSet());
         } finally {
@@ -201,7 +200,7 @@ public abstract class AbstractLinkRegistry<L extends AbstractLink, P extends Pro
         toLinkLock.readLock().lock();
         try {
             final Set<L> forLinkedUID = linkedUidToLink.get(uid);
-            return forLinkedUID != null ? new HashSet<>(forLinkedUID) : Collections.emptySet();
+            return forLinkedUID != null ? new HashSet<>(forLinkedUID) : Set.of();
         } finally {
             toLinkLock.readLock().unlock();
         }
@@ -217,7 +216,7 @@ public abstract class AbstractLinkRegistry<L extends AbstractLink, P extends Pro
         toLinkLock.readLock().lock();
         try {
             final Set<L> forLinkedUID = itemNameToLink.get(itemName);
-            return forLinkedUID != null ? new HashSet<>(forLinkedUID) : Collections.emptySet();
+            return forLinkedUID != null ? new HashSet<>(forLinkedUID) : Set.of();
         } finally {
             toLinkLock.readLock().unlock();
         }

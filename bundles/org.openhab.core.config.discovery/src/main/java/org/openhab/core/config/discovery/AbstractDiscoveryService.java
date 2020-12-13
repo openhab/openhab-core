@@ -13,10 +13,8 @@
 package org.openhab.core.config.discovery;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
@@ -88,18 +86,11 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      */
     public AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout,
             boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
-        if (supportedThingTypes == null) {
-            this.supportedThingTypes = Collections.emptySet();
-        } else {
-            this.supportedThingTypes = Collections.unmodifiableSet(new HashSet<>(supportedThingTypes));
-        }
-
         if (timeout < 0) {
             throw new IllegalArgumentException("The timeout must be >= 0!");
         }
-
+        this.supportedThingTypes = supportedThingTypes == null ? Set.of() : Set.copyOf(supportedThingTypes);
         this.timeout = timeout;
-
         this.backgroundDiscoveryEnabled = backgroundDiscoveryEnabledByDefault;
     }
 
@@ -137,7 +128,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      */
     @Override
     public Set<ThingTypeUID> getSupportedThingTypes() {
-        return this.supportedThingTypes;
+        return supportedThingTypes;
     }
 
     /**
@@ -148,7 +139,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      */
     @Override
     public int getScanTimeout() {
-        return this.timeout;
+        return timeout;
     }
 
     @Override
@@ -185,24 +176,19 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
                 scheduledStop = null;
             }
 
-            this.scanListener = listener;
+            scanListener = listener;
 
             // schedule an automatic call of stopScan when timeout is reached
             if (getScanTimeout() > 0) {
-                Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            stopScan();
-                        } catch (Exception e) {
-                            logger.debug("Exception occurred during execution: {}", e.getMessage(), e);
-                        }
+                scheduledStop = scheduler.schedule(() -> {
+                    try {
+                        stopScan();
+                    } catch (Exception e) {
+                        logger.debug("Exception occurred during execution: {}", e.getMessage(), e);
                     }
-                };
-
-                scheduledStop = scheduler.schedule(runnable, getScanTimeout(), TimeUnit.SECONDS);
+                }, getScanTimeout(), TimeUnit.SECONDS);
             }
-            this.timestampOfLastScan = new Date().getTime();
+            timestampOfLastScan = new Date().getTime();
 
             try {
                 startScan();
@@ -258,14 +244,14 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      */
     protected void thingDiscovered(final DiscoveryResult discoveryResult) {
         final DiscoveryResult discoveryResultNew;
-        if (this.i18nProvider != null && this.localeProvider != null) {
+        if (i18nProvider != null && localeProvider != null) {
             Bundle bundle = FrameworkUtil.getBundle(this.getClass());
 
             String defaultLabel = discoveryResult.getLabel();
 
             String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferKey(discoveryResult, "label"));
 
-            String label = this.i18nProvider.getText(bundle, key, defaultLabel, this.localeProvider.getLocale());
+            String label = i18nProvider.getText(bundle, key, defaultLabel, localeProvider.getLocale());
 
             discoveryResultNew = DiscoveryResultBuilder.create(discoveryResult.getThingUID())
                     .withThingType(discoveryResult.getThingTypeUID()).withBridge(discoveryResult.getBridgeUID())
@@ -374,14 +360,14 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *
      * @param configProperties configuration properties
      */
-    protected void activate(@Nullable Map<String, @Nullable Object> configProperties) {
+    protected void activate(@Nullable Map<String, Object> configProperties) {
         if (configProperties != null) {
             Object property = configProperties.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY);
             if (property != null) {
-                this.backgroundDiscoveryEnabled = getAutoDiscoveryEnabled(property);
+                backgroundDiscoveryEnabled = getAutoDiscoveryEnabled(property);
             }
         }
-        if (this.backgroundDiscoveryEnabled) {
+        if (backgroundDiscoveryEnabled) {
             startBackgroundDiscovery();
             logger.debug("Background discovery for discovery service '{}' enabled.", this.getClass().getName());
         }
@@ -397,21 +383,21 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *
      * @param configProperties configuration properties
      */
-    protected void modified(@Nullable Map<String, @Nullable Object> configProperties) {
+    protected void modified(@Nullable Map<String, Object> configProperties) {
         if (configProperties != null) {
             Object property = configProperties.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY);
             if (property != null) {
                 boolean enabled = getAutoDiscoveryEnabled(property);
 
-                if (this.backgroundDiscoveryEnabled && !enabled) {
+                if (backgroundDiscoveryEnabled && !enabled) {
                     stopBackgroundDiscovery();
                     logger.debug("Background discovery for discovery service '{}' disabled.",
                             this.getClass().getName());
-                } else if (!this.backgroundDiscoveryEnabled && enabled) {
+                } else if (!backgroundDiscoveryEnabled && enabled) {
                     startBackgroundDiscovery();
                     logger.debug("Background discovery for discovery service '{}' enabled.", this.getClass().getName());
                 }
-                this.backgroundDiscoveryEnabled = enabled;
+                backgroundDiscoveryEnabled = enabled;
             }
         }
     }
@@ -423,7 +409,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * discovery is enabled at the time of component deactivation.
      */
     protected void deactivate() {
-        if (this.backgroundDiscoveryEnabled) {
+        if (backgroundDiscoveryEnabled) {
             stopBackgroundDiscovery();
         }
     }

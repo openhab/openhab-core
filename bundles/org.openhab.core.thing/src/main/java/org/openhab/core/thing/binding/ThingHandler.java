@@ -25,7 +25,6 @@ import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
 
 /**
  * A {@link ThingHandler} handles the communication between the openHAB framework and an entity from the real
@@ -100,20 +99,6 @@ public interface ThingHandler {
      * @param command the {@link Command}
      */
     void handleCommand(ChannelUID channelUID, Command command);
-
-    /**
-     * Handles a {@link State} update for a given channel.
-     * <p>
-     * This method is only called, if the thing has been initialized (status ONLINE/OFFLINE/UNKNOWN).
-     * <p>
-     *
-     * @param channelUID the {@link ChannelUID} of the channel on which the update was performed
-     * @param newState the new {@link State}
-     * @deprecated in favor of using a "slave" profile. Will be removed before a 1.0 release. Bindings must not
-     *             implement this method!
-     */
-    @Deprecated
-    void handleUpdate(ChannelUID channelUID, State newState);
 
     /**
      * Handles a configuration update.

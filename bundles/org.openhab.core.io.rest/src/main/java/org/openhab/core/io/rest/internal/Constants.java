@@ -18,12 +18,5 @@ package org.openhab.core.io.rest.internal;
  * @author Ivan Iliev - Initial contribution
  */
 public class Constants {
-
-    public static final String JAXRS_CONNECTOR_CONFIG = "com.eclipsesource.jaxrs.connector";
-
-    public static final String JAXRS_CONNECTOR_ROOT_PROPERTY = "root";
-
     public static final String CORS_PROPERTY = "enable";
-
-    public static final String JAXRS_CONNECTOR_CORS_PROPERTY_ENABLE_VALUE = "enable";
 }

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.transport.mqtt;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +37,6 @@ import org.openhab.core.io.transport.mqtt.internal.client.MqttAsyncClientWrapper
 import org.openhab.core.io.transport.mqtt.reconnect.AbstractReconnectStrategy;
 import org.openhab.core.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
 import org.openhab.core.io.transport.mqtt.ssl.CustomTrustManagerFactory;
-import org.openhab.core.io.transport.mqtt.sslcontext.CustomSSLContextProvider;
-import org.openhab.core.io.transport.mqtt.sslcontext.SSLContextProvider;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,15 +88,12 @@ public class MqttBrokerConnection {
     protected final MqttVersion mqttVersion;
 
     private @Nullable TrustManagerFactory trustManagerFactory = InsecureTrustManagerFactory.INSTANCE;
-    private SSLContextProvider sslContextProvider = new CustomSSLContextProvider(trustManagerFactory);
     protected final String clientId;
     private @Nullable String user;
     private @Nullable String password;
 
     /// Configuration variables
     private int qos = DEFAULT_QOS;
-    @Deprecated
-    private boolean retain = false;
     private @Nullable MqttWillAndTestament lastWill;
     protected @Nullable AbstractReconnectStrategy reconnectStrategy;
     private int keepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
@@ -115,12 +109,14 @@ public class MqttBrokerConnection {
     protected @Nullable ScheduledExecutorService timeoutExecutor;
     private int timeout = 1200; /* Connection timeout in milliseconds */
 
+    // Server quirk flags
+    private boolean unsubscribeOnStop = true;
+
     /**
      * Create a listener object for being used as a callback for a connection attempt.
      * The callback will interact with the {@link AbstractReconnectStrategy} as well as inform registered
      * {@link MqttConnectionObserver}s.
      */
-    @NonNullByDefault
     public class ConnectionCallback implements MqttClientConnectedListener, MqttClientDisconnectedListener {
         private final MqttBrokerConnection connection;
         private final Runnable cancelTimeoutFuture;
@@ -205,25 +201,6 @@ public class MqttBrokerConnection {
     }
 
     /**
-     * Create a new MQTT3 client connection to a server with the given protocol, mqtt client version, host and port.
-     *
-     * @param protocol The transport protocol
-     * @param host A host name or address
-     * @param port A port or null to select the default port for a secure or insecure connection
-     * @param secure A secure connection
-     * @param clientId Client id. Each client on a MQTT server has a unique client id. Sometimes client ids are
-     *            used for access restriction implementations.
-     *            If none is specified, a default is generated. The client id cannot be longer than 65535
-     *            characters.
-     * @throws IllegalArgumentException If the client id or port is not valid.
-     */
-    @Deprecated
-    public MqttBrokerConnection(Protocol protocol, String host, @Nullable Integer port, boolean secure,
-            @Nullable String clientId) {
-        this(protocol, MqttVersion.V3, host, port, secure, clientId);
-    }
-
-    /**
      * Create a new MQTT client connection to a server with the given protocol, host and port.
      *
      * @param protocol The transport protocol
@@ -298,7 +275,6 @@ public class MqttBrokerConnection {
         } else {
             trustManagerFactory = null;
         }
-        sslContextProvider = new CustomSSLContextProvider(trustManagerFactory);
     }
 
     public TrustManager[] getTrustManagers() {
@@ -393,27 +369,6 @@ public class MqttBrokerConnection {
     }
 
     /**
-     * use retain flags on message publish instead
-     *
-     * @return true if newly messages sent to the broker should be retained by the broker.
-     */
-    @Deprecated
-    public boolean isRetain() {
-        return retain;
-    }
-
-    /**
-     * Set whether newly published messages should be retained by the broker.
-     * use retain flags on message publish instead
-     *
-     * @param retain true to retain.
-     */
-    @Deprecated
-    public void setRetain(boolean retain) {
-        this.retain = retain;
-    }
-
-    /**
      * Return the last will object or null if there is none.
      */
     public @Nullable MqttWillAndTestament getLastWill() {
@@ -449,20 +404,15 @@ public class MqttBrokerConnection {
     }
 
     /**
-     * Sets the path for the persistence storage.
+     * Enable / disable sending Unsubscribe command when the connection is closed
+     * Some servers can be quirky, then do not handle Usubscribe request properly.
+     * In this case we have to omit sending it. Example: iRobot built-in MQTT server.
+     * By default this behavior is set to true.
      *
-     * A persistence mechanism is necessary to enable reliable messaging.
-     * For messages sent at qualities of service (QoS) 1 or 2 to be reliably delivered, messages must be stored (on both
-     * the client and server) until the delivery of the message is complete.
-     * If messages are not safely stored when being delivered then a failure in the client or server can result in lost
-     * messages.
-     * A file persistence storage is used that uses the given path. If the path does not exist it will be created on
-     * runtime (if possible). If it is set to {@code null} a implementation specific default path is used.
-     *
-     * @param persistencePath the path that should be used to store persistent data
+     * @param unsubscribeOnStop Enable or disable flag.
      */
-    @Deprecated
-    public void setPersistencePath(final @Nullable Path persistencePath) {
+    public void setUnsubscribeOnStop(boolean unsubscribeOnStop) {
+        this.unsubscribeOnStop = unsubscribeOnStop;
     }
 
     /**
@@ -504,26 +454,6 @@ public class MqttBrokerConnection {
      */
     public int getKeepAliveInterval() {
         return keepAliveInterval;
-    }
-
-    /**
-     * Return the ssl context provider.
-     */
-    @Deprecated
-    public SSLContextProvider getSSLContextProvider() {
-        return sslContextProvider;
-    }
-
-    /**
-     * Set the ssl context provider. The default provider is {@see AcceptAllCertifcatesSSLContext}.
-     *
-     * @return The ssl context provider. Should not be null, but the ssl context will in fact
-     *         only be used if a ssl:// url is given.
-     */
-    @Deprecated
-    public void setSSLContextProvider(SSLContextProvider sslContextProvider) {
-        this.sslContextProvider = sslContextProvider;
-        trustManagerFactory = new CustomTrustManagerFactory(sslContextProvider);
     }
 
     /**
@@ -808,15 +738,13 @@ public class MqttBrokerConnection {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         // Close connection
         if (client.getState().isConnected()) {
-            unsubscribeAll().thenRun(() -> {
-                client.disconnect().whenComplete((m, t) -> {
-                    if (t == null) {
-                        future.complete(true);
-                    } else {
-                        future.complete(false);
-                    }
+            if (unsubscribeOnStop) {
+                unsubscribeAll().thenRun(() -> {
+                    doDisconnect(future);
                 });
-            });
+            } else {
+                doDisconnect(future);
+            }
         } else {
             future.complete(true);
         }
@@ -824,55 +752,10 @@ public class MqttBrokerConnection {
         return future.thenApply(this::finalizeStopAfterDisconnect);
     }
 
-    /**
-     * Publish a message to the broker.
-     *
-     * @param topic The topic
-     * @param payload The message payload
-     * @param listener A listener to be notified of success or failure of the delivery.
-     */
-    @Deprecated
-    public void publish(String topic, byte[] payload, MqttActionCallback listener) {
-        publish(topic, payload, getQos(), isRetain(), listener);
-    }
-
-    /**
-     * Publish a message to the broker with the given QoS and retained flag.
-     *
-     * @param topic The topic
-     * @param payload The message payload
-     * @param qos The quality of service for this message
-     * @param retain Set to true to retain the message on the broker
-     * @param listener A listener to be notified of success or failure of the delivery.
-     */
-    @Deprecated
-    public void publish(String topic, byte[] payload, int qos, boolean retain, MqttActionCallback listener) {
-        final MqttAsyncClientWrapper client = this.client;
-        if (client == null) {
-            listener.onFailure(topic, new MqttException(new Throwable()));
-            return;
-        }
-
-        client.publish(topic, payload, retain, qos).whenComplete((m, t) -> {
-            if (t != null) {
-                listener.onFailure(topic, new MqttException(t));
-            } else {
-                listener.onSuccess(topic);
-            }
+    private void doDisconnect(CompletableFuture<Boolean> future) {
+        client.disconnect().whenComplete((m, t) -> {
+            future.complete(t == null);
         });
-        logger.debug("Publishing message to topic '{}'", topic);
-    }
-
-    /**
-     * Publish a message to the broker.
-     *
-     * @param topic The topic
-     * @param payload The message payload
-     * @return Returns a future that completes with a result of true if the publishing succeeded and completes
-     *         exceptionally on an error or with a result of false if no broker connection is established.
-     */
-    public CompletableFuture<Boolean> publish(String topic, byte[] payload) {
-        return publish(topic, payload, getQos(), isRetain());
     }
 
     /**

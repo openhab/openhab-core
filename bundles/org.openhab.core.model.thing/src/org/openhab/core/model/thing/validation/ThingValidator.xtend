@@ -55,7 +55,7 @@ class ThingValidator extends AbstractThingValidator {
 				val endOffset = thingIdFeature.endOffset
 				getMessageAcceptor().acceptError("Provide a thing UID in this format:\n <bindingId>:<thingTypeId>:<thingId>", thing, startOffset, endOffset - startOffset, null, null)
 			} else {
-				if (thing.id != null) {
+				if (thing.id !== null) {
 					try {
 						new ThingUID(thing.id)
 					} catch (IllegalArgumentException e) {

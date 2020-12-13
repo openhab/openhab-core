@@ -30,8 +30,8 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class ChannelUID extends UID {
 
-    private static final String CHANNEL_SEGMENT_PATTERN = "[\\w-]*|[\\w-]*#[\\w-]*";
-    private static final String CHANNEL_GROUP_SEPARATOR = "#";
+    public static final String CHANNEL_SEGMENT_PATTERN = "[\\w-]*|[\\w-]*#[\\w-]*";
+    public static final String CHANNEL_GROUP_SEPARATOR = "#";
 
     /**
      * Default constructor in package scope only. Will allow to instantiate this
@@ -45,7 +45,7 @@ public class ChannelUID extends UID {
      * Parses a {@link ChannelUID} for a given string. The UID must be in the format
      * 'bindingId:segment:segment:...'.
      *
-     * @param channelUid uid in form a string (must not be null)
+     * @param channelUid uid in form a string
      */
     public ChannelUID(String channelUid) {
         super(channelUid);
@@ -56,11 +56,6 @@ public class ChannelUID extends UID {
      * @param id the channel's id
      */
     public ChannelUID(ThingUID thingUID, String id) {
-        super(toSegments(thingUID, null, id));
-    }
-
-    @Deprecated
-    public ChannelUID(ThingTypeUID thingTypeUID, ThingUID thingUID, String id) {
         super(toSegments(thingUID, null, id));
     }
 
@@ -79,44 +74,6 @@ public class ChannelUID extends UID {
      */
     public ChannelUID(ThingUID thingUID, String groupId, String id) {
         super(toSegments(thingUID, groupId, id));
-    }
-
-    @Deprecated
-    public ChannelUID(ThingTypeUID thingTypeUID, ThingUID thingUID, String groupId, String id) {
-        super(toSegments(thingUID, groupId, id));
-    }
-
-    /**
-     * @param thingTypeUID the unique id of the thing's thingType
-     * @param thingId the id of the thing the channel belongs to
-     * @param id the channel's id
-     */
-    @Deprecated
-    public ChannelUID(ThingTypeUID thingTypeUID, String thingId, String id) {
-        this(thingTypeUID.getBindingId(), thingTypeUID.getId(), thingId, id);
-    }
-
-    /**
-     * @param bindingId the binding id of the thingType
-     * @param thingTypeId the thing type id of the thing's thingType
-     * @param thingId the id of the thing the channel belongs to
-     * @param id the channel's id
-     */
-    @Deprecated
-    public ChannelUID(String bindingId, String thingTypeId, String thingId, String id) {
-        super(bindingId, thingTypeId, thingId, id);
-    }
-
-    /**
-     * @param bindingId the binding id of the thingType
-     * @param thingTypeId the thing type id of the thing's thingType
-     * @param thingId the id of the thing the channel belongs to
-     * @param groupId the channel's group id
-     * @param id the channel's id
-     */
-    @Deprecated
-    public ChannelUID(String bindingId, String thingTypeId, String thingId, String groupId, String id) {
-        super(bindingId, thingTypeId, thingId, getChannelId(groupId, id));
     }
 
     private static List<String> toSegments(ThingUID thingUID, @Nullable String groupId, String id) {

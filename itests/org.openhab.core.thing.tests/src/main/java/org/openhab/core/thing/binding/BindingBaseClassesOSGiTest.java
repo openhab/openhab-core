@@ -12,11 +12,12 @@
  */
 package org.openhab.core.thing.binding;
 
-import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -24,23 +25,19 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigDescription;
@@ -57,6 +54,7 @@ import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
@@ -98,12 +96,14 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
     private ManagedThingProvider managedThingProvider;
     private ThingRegistry thingRegistry;
 
+    private AutoCloseable mocksCloseable;
+
     private @Mock ComponentContext componentContext;
 
-    public @Rule MockitoRule rule = MockitoJUnit.rule();
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
-    @Before
-    public void setup() {
         registerVolatileStorageService();
         managedThingProvider = getService(ManagedThingProvider.class);
         assertThat(managedThingProvider, is(notNullValue()));
@@ -112,8 +112,10 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
     }
 
-    @After
-    public void teardown() {
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
+
         managedThingProvider.getAll().forEach(t -> managedThingProvider.remove(t.getUID()));
     }
 
@@ -249,7 +251,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
         @Override
         public Set<String> getSubscribedEventTypes() {
-            return unmodifiableSet(Stream.of("ConfigStatusInfoEvent").collect(Collectors.toSet()));
+            return Set.of("ConfigStatusInfoEvent");
         }
 
         @Override
@@ -258,7 +260,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
                 @Override
                 public boolean apply(Event event) {
                     return event.getTopic().equals(
-                            "smarthome/things/{thingUID}/config/status".replace("{thingUID}", thingUID.getAsString()));
+                            "openhab/things/{thingUID}/config/status".replace("{thingUID}", thingUID.getAsString()));
                 };
             };
         }
@@ -310,7 +312,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
         Thread.sleep(2000);
 
-        thing.getHandler().handleConfigurationUpdate(singletonMap("param", "invalid"));
+        thing.getHandler().handleConfigurationUpdate(Map.of("param", "invalid"));
 
         waitForAssert(() -> {
             Event event = eventSubscriber.getReceivedEvent();
@@ -320,7 +322,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
             eventSubscriber.resetReceivedEvent();
         }, 2500, DFL_SLEEP_TIME);
 
-        thing.getHandler().handleConfigurationUpdate(singletonMap("param", "ok"));
+        thing.getHandler().handleConfigurationUpdate(Map.of("param", "ok"));
 
         waitForAssert(() -> {
             Event event = eventSubscriber.getReceivedEvent();
@@ -352,7 +354,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_CONFIGURATION_PENDING).build();
         assertThat(thing.getStatusInfo(), is(uninitialized));
 
-        thingRegistry.updateConfiguration(thingUID, singletonMap("parameter", "value"));
+        thingRegistry.updateConfiguration(thingUID, Map.of("parameter", "value"));
 
         // ThingHandler.initialize() has been called; thing with status ONLINE.NONE
         final ThingStatusInfo online = ThingStatusInfoBuilder.create(ThingStatus.ONLINE).build();
@@ -399,9 +401,9 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         @Override
         public Collection<ConfigStatusMessage> getConfigStatus() {
             if ("invalid".equals(getThing().getConfiguration().get(PARAM))) {
-                return singletonList(ERROR);
+                return List.of(ERROR);
             }
-            return singletonList(INFO);
+            return List.of(INFO);
         }
     }
 
@@ -427,8 +429,8 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         @Override
         public void initialize() {
             ThingBuilder thingBuilder = editThing();
-            thingBuilder
-                    .withChannel(ChannelBuilder.create(new ChannelUID("bindingId:type:thingId:1"), "String").build());
+            thingBuilder.withChannel(
+                    ChannelBuilder.create(new ChannelUID("bindingId:type:thingId:1"), CoreItemFactory.STRING).build());
             updateThing(thingBuilder.build());
             updateStatus(ThingStatus.ONLINE);
         }
@@ -443,14 +445,14 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
             updateConfiguration(configuration);
         }
 
-        public void updateProperties() {
+        public void updateProperties(String value) {
             Map<String, String> properties = editProperties();
-            properties.put(Thing.PROPERTY_MODEL_ID, "1234");
+            properties.put(Thing.PROPERTY_MODEL_ID, value);
             updateProperties(properties);
         }
 
-        public void updateProperty() {
-            updateProperty(Thing.PROPERTY_VENDOR, "vendor");
+        public void updateProperty(String value) {
+            updateProperty(Thing.PROPERTY_VENDOR, value);
         }
     }
 
@@ -531,13 +533,25 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
             assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), is(nullValue()));
             assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is(nullValue()));
 
-            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperties();
+            // set properties
+            String modelId = "1234";
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperties(modelId);
 
-            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), is("1234"));
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), is(modelId));
 
-            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperty();
+            String vendor = "vendor";
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperty(vendor);
 
-            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is("vendor"));
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is(vendor));
+
+            // unset properties
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperties((String) null);
+
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), is(nullValue()));
+
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperty(null);
+
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is(nullValue()));
         } finally {
             thingRegistry.removeRegistryChangeListener(listener);
         }
@@ -559,7 +573,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
             managedThingProvider.add(thing);
 
-            thingRegistry.updateConfiguration(thingUID, singletonMap("parameter", "value"));
+            thingRegistry.updateConfiguration(thingUID, Map.of("parameter", "value"));
 
             waitForAssert(() -> assertThat(listener.isUpdated(), is(true)), 10000, 100);
 
@@ -569,7 +583,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         }
     }
 
-    @Test(expected = ConfigValidationException.class)
+    @Test
     public void assertConfigurationParametersAreValidated() {
         SimpleThingHandlerFactory thingHandlerFactory = new SimpleThingHandlerFactory();
         thingHandlerFactory.activate(componentContext);
@@ -581,14 +595,15 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId:type");
         ThingUID thingUID = new ThingUID("bindingId:type:thingId");
         Thing thing = ThingBuilder.create(thingTypeUID, thingUID)
-                .withConfiguration(new Configuration(singletonMap("parameter", "someValue"))).build();
+                .withConfiguration(new Configuration(Map.of("parameter", "someValue"))).build();
 
         managedThingProvider.add(thing);
 
         Map<String, Object> configuration = new HashMap<>();
         configuration.put("parameter", null);
 
-        thingRegistry.updateConfiguration(thingUID, singletonMap("parameter", configuration));
+        assertThrows(ConfigValidationException.class,
+                () -> thingRegistry.updateConfiguration(thingUID, Map.of("parameter", configuration)));
     }
 
     @Test
@@ -608,7 +623,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         managedThingProvider.add(thing);
 
         // set the config to an initial value
-        thingRegistry.updateConfiguration(thingUID, singletonMap("parameter", "before"));
+        thingRegistry.updateConfiguration(thingUID, Map.of("parameter", "before"));
         assertThat(thing.getConfiguration().get("parameter"), is("before"));
 
         // let it fail next time...
@@ -617,7 +632,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         ((SimpleThingHandler) thing.getHandler()).setCallback(callback);
 
         try {
-            thingRegistry.updateConfiguration(thingUID, singletonMap("parameter", "after"));
+            thingRegistry.updateConfiguration(thingUID, Map.of("parameter", "after"));
             fail("There should have been an exception!");
         } catch (IllegalStateException e) {
             // all good, we want that

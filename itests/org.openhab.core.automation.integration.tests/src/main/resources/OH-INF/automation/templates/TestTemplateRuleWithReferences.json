@@ -30,7 +30,7 @@
 				"type": "core.GenericEventTrigger",
 				"configuration": {
 					"eventSource": "${triggerItem}",
-					"eventTopic": "smarthome/items/*",
+					"eventTopic": "openhab/items/*",
 					"eventTypes": "ItemStateEvent"
 				}
 			}
@@ -40,7 +40,7 @@
 				"id": "ItemStateConditionID",
 				"type": "core.GenericEventCondition",
 				"configuration": {
-					"topic": "smarthome/items/${triggerItem}/state",
+					"topic": "openhab/items/${triggerItem}/state",
 					"payload": ".*ON.*"
 				},
 				"inputs": {

@@ -12,9 +12,9 @@
  */
 package org.openhab.core.library.types;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Simon Kaufmann - Initial contribution
@@ -43,7 +43,7 @@ public class OnOffTypeTest {
     @Test
     public void testConversionToPointType() {
         // should not be possible => null
-        assertEquals(null, OnOffType.ON.as(PointType.class));
-        assertEquals(null, OnOffType.OFF.as(PointType.class));
+        assertNull(OnOffType.ON.as(PointType.class));
+        assertNull(OnOffType.OFF.as(PointType.class));
     }
 }

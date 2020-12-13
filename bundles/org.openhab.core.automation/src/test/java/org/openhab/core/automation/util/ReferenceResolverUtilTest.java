@@ -12,14 +12,14 @@
  */
 package org.openhab.core.automation.util;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Module;
 import org.openhab.core.config.core.Configuration;
 import org.slf4j.Logger;
@@ -95,17 +95,17 @@ public class ReferenceResolverUtilTest {
         Module trigger = ModuleBuilder.createTrigger().withId("id1").withTypeUID("typeUID1")
                 .withConfiguration(new Configuration(MODULE_CONFIGURATION)).build();
         ReferenceResolver.updateConfiguration(trigger.getConfiguration(), CONTEXT, logger);
-        Assert.assertEquals(trigger.getConfiguration(), new Configuration(EXPECTED_MODULE_CONFIGURATION));
+        assertEquals(trigger.getConfiguration(), new Configuration(EXPECTED_MODULE_CONFIGURATION));
         // test condition configuration.
         Module condition = ModuleBuilder.createCondition().withId("id2").withTypeUID("typeUID2")
                 .withConfiguration(new Configuration(MODULE_CONFIGURATION)).build();
         ReferenceResolver.updateConfiguration(condition.getConfiguration(), CONTEXT, logger);
-        Assert.assertEquals(condition.getConfiguration(), new Configuration(EXPECTED_MODULE_CONFIGURATION));
+        assertEquals(condition.getConfiguration(), new Configuration(EXPECTED_MODULE_CONFIGURATION));
         // test action configuration.
         Module action = ModuleBuilder.createAction().withId("id3").withTypeUID("typeUID3")
                 .withConfiguration(new Configuration(MODULE_CONFIGURATION)).build();
         ReferenceResolver.updateConfiguration(action.getConfiguration(), CONTEXT, logger);
-        Assert.assertEquals(action.getConfiguration(), new Configuration(EXPECTED_MODULE_CONFIGURATION));
+        assertEquals(action.getConfiguration(), new Configuration(EXPECTED_MODULE_CONFIGURATION));
     }
 
     @Test
@@ -114,112 +114,107 @@ public class ReferenceResolverUtilTest {
         Module condition = ModuleBuilder.createCondition().withId("id1").withTypeUID("typeUID1")
                 .withInputs(COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES).build();
         Map<String, Object> conditionContext = ReferenceResolver.getCompositeChildContext(condition, CONTEXT);
-        Assert.assertEquals(conditionContext, EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT);
+        assertEquals(conditionContext, EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT);
         // test Composite child ModuleImpl(action) context
         Module action = ModuleBuilder.createAction().withId("id2").withTypeUID("typeUID2")
                 .withInputs(COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES).build();
-        Assert.assertEquals(EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT, conditionContext);
+        assertEquals(EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT, conditionContext);
         Map<String, Object> actionContext = ReferenceResolver.getCompositeChildContext(action, CONTEXT);
-        Assert.assertEquals(actionContext, EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT);
+        assertEquals(actionContext, EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT);
     }
 
     @Test
     public void testSplitReferenceToTokens() {
-        Assert.assertNull(ReferenceResolver.splitReferenceToTokens(null));
-        Assert.assertTrue(ReferenceResolver.splitReferenceToTokens("").length == 0);
+        assertNull(ReferenceResolver.splitReferenceToTokens(null));
+        assertTrue(ReferenceResolver.splitReferenceToTokens("").length == 0);
         final String[] referenceTokens = ReferenceResolver
                 .splitReferenceToTokens(".module.array[\".na[m}.\"e\"][1].values1");
-        Assert.assertTrue("module".equals(referenceTokens[0]));
-        Assert.assertTrue("array".equals(referenceTokens[1]));
-        Assert.assertTrue(".na[m}.\"e".equals(referenceTokens[2]));
-        Assert.assertTrue("1".equals(referenceTokens[3]));
-        Assert.assertTrue("values1".equals(referenceTokens[4]));
+        assertTrue("module".equals(referenceTokens[0]));
+        assertTrue("array".equals(referenceTokens[1]));
+        assertTrue(".na[m}.\"e".equals(referenceTokens[2]));
+        assertTrue("1".equals(referenceTokens[3]));
+        assertTrue("values1".equals(referenceTokens[4]));
     }
 
     @Test
     public void testResolvingFromNull() {
         String ken = "Ken";
-        Assert.assertEquals(ken,
+        assertEquals(ken,
                 ReferenceResolver.resolveComplexDataReference(ken, ReferenceResolver.splitReferenceToTokens(null)));
     }
 
     @Test
     public void testResolvingFromEmptyString() {
         String ken = "Ken";
-        Assert.assertEquals(ken,
+        assertEquals(ken,
                 ReferenceResolver.resolveComplexDataReference(ken, ReferenceResolver.splitReferenceToTokens("")));
     }
 
     @Test
     public void testGetFromList() {
         String ken = "Ken";
-        List<String> names = Arrays.asList("John", ken, "Sue");
-        Assert.assertEquals(ken,
+        List<String> names = List.of("John", ken, "Sue");
+        assertEquals(ken,
                 ReferenceResolver.resolveComplexDataReference(names, ReferenceResolver.splitReferenceToTokens("[1]")));
     }
 
-    @Test(expected = NumberFormatException.class)
+    @Test
     public void testGetFromListInvalidIndexFormat() {
-        List<String> names = Arrays.asList("John", "Ken", "Sue");
-        ReferenceResolver.resolveComplexDataReference(names, ReferenceResolver.splitReferenceToTokens("[Ten]"));
+        List<String> names = List.of("John", "Ken", "Sue");
+        assertThrows(NumberFormatException.class, () -> ReferenceResolver.resolveComplexDataReference(names,
+                ReferenceResolver.splitReferenceToTokens("[Ten]")));
     }
 
     @Test
     public void getFromMap() {
         String phone = "0331 1387 121";
-        Map<String, String> phones = new HashMap<>();
-        phones.put("John", phone);
-        phones.put("Sue", "0222 2184 121");
-        phones.put("Mark", "0222 5641 121");
-        Assert.assertEquals(phone, ReferenceResolver.resolveComplexDataReference(phones,
+        Map<String, String> phones = Map.of("John", phone, "Sue", "0222 2184 121", "Mark", "0222 5641 121");
+        assertEquals(phone, ReferenceResolver.resolveComplexDataReference(phones,
                 ReferenceResolver.splitReferenceToTokens("[\"John\"]")));
     }
 
     @Test
     public void getFromMapWithKeyThatContainsSpecialCharacters() {
         String phone = "0331 1387 121";
-        Map<String, String> phones = new HashMap<>();
-        phones.put("John[].Smi\"th].", phone);
-        phones.put("Sue", "0222 2184 121");
-        phones.put("Mark", "0222 5641 121");
-        Assert.assertEquals(phone, ReferenceResolver.resolveComplexDataReference(phones,
+        Map<String, String> phones = Map.of("John[].Smi\"th].", phone, "Sue", "0222 2184 121", "Mark", "0222 5641 121");
+        assertEquals(phone, ReferenceResolver.resolveComplexDataReference(phones,
                 ReferenceResolver.splitReferenceToTokens("[\"John[].Smi\"th].\"]")));
     }
 
     @Test
     public void getFromMapUnExistingKey() {
-        Map<String, String> phones = new HashMap<>();
-        phones.put("Sue", "0222 2184 121");
-        phones.put("Mark", "0222 5641 121");
-        Assert.assertNull(ReferenceResolver.resolveComplexDataReference(phones,
+        Map<String, String> phones = Map.of("Sue", "0222 2184 121", "Mark", "0222 5641 121");
+        assertNull(ReferenceResolver.resolveComplexDataReference(phones,
                 ReferenceResolver.splitReferenceToTokens("[\"John\"]")));
     }
 
     @Test
     public void getFromList() {
         String ken = "Ken";
-        List<String> names = Arrays.asList(new String[] { "John", ken, "Sue" });
-        Assert.assertEquals(ken,
+        List<String> names = List.of("John", ken, "Sue");
+        assertEquals(ken,
                 ReferenceResolver.resolveComplexDataReference(names, ReferenceResolver.splitReferenceToTokens("[1]")));
     }
 
-    @Test(expected = ArrayIndexOutOfBoundsException.class)
+    @Test
     public void testGetFromListInvalidIndex() {
-        List<String> names = Arrays.asList(new String[] { "John", "Ken", "Sue" });
-        ReferenceResolver.resolveComplexDataReference(names, ReferenceResolver.splitReferenceToTokens("[10]"));
+        List<String> names = List.of("John", "Ken", "Sue");
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> ReferenceResolver.resolveComplexDataReference(names,
+                ReferenceResolver.splitReferenceToTokens("[10]")));
     }
 
-    @Test(expected = NumberFormatException.class)
+    @Test
     public void testGetFromInvalidIndexFormat() {
-        List<String> names = Arrays.asList(new String[] { "John", "Ken", "Sue" });
-        ReferenceResolver.resolveComplexDataReference(names, ReferenceResolver.splitReferenceToTokens("[Ten]"));
+        List<String> names = List.of("John", "Ken", "Sue");
+        assertThrows(NumberFormatException.class, () -> ReferenceResolver.resolveComplexDataReference(names,
+                ReferenceResolver.splitReferenceToTokens("[Ten]")));
     }
 
     @Test
     public void testGetFromBean() {
         String name = "John";
         B1<String> b3 = new B1<>(name);
-        Assert.assertEquals(name,
+        assertEquals(name,
                 ReferenceResolver.resolveComplexDataReference(b3, ReferenceResolver.splitReferenceToTokens("value")));
     }
 
@@ -227,18 +222,17 @@ public class ReferenceResolverUtilTest {
     public void testGetFromBeanWithPrivateField() {
         String name = "John";
         B2<String> b4 = new B2<>(name);
-        Assert.assertEquals(name,
+        assertEquals(name,
                 ReferenceResolver.resolveComplexDataReference(b4, ReferenceResolver.splitReferenceToTokens("value")));
     }
 
     @Test
     public void testBeanFromBean() {
         String phone = "0331 1387 121";
-        Map<String, String> phones = new HashMap<>();
-        phones.put("John", phone);
+        Map<String, String> phones = Map.of("John", phone);
         B1<Map<String, String>> b3 = new B1<>(phones);
         B2<B1<Map<String, String>>> b4 = new B2<>(b3);
-        Assert.assertEquals(phone, ReferenceResolver.resolveComplexDataReference(b4,
+        assertEquals(phone, ReferenceResolver.resolveComplexDataReference(b4,
                 ReferenceResolver.splitReferenceToTokens("value.value[\"John\"]")));
     }
 
@@ -248,8 +242,8 @@ public class ReferenceResolverUtilTest {
         B1<String> b31 = new B1<>("Ken");
         B1<String> b32 = new B1<>("Sue");
         B1<String> b33 = new B1<>(name);
-        List<B1<String>> b = Arrays.asList(b31, b32, b33);
-        Assert.assertEquals(name, ReferenceResolver.resolveComplexDataReference(b,
+        List<B1<String>> b = List.of(b31, b32, b33);
+        assertEquals(name, ReferenceResolver.resolveComplexDataReference(b,
                 ReferenceResolver.splitReferenceToTokens("[2].value")));
     }
 

@@ -12,8 +12,6 @@
  */
 package org.openhab.core.events;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -42,7 +40,7 @@ public abstract class AbstractEventFactory implements EventFactory {
      * @param supportedEventTypes the supported event types
      */
     public AbstractEventFactory(Set<String> supportedEventTypes) {
-        this.supportedEventTypes = Collections.unmodifiableSet(new HashSet<>(supportedEventTypes));
+        this.supportedEventTypes = Set.copyOf(supportedEventTypes);
     }
 
     @Override

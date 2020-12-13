@@ -13,7 +13,6 @@
 package org.openhab.core.config.dispatch.internal;
 
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -21,24 +20,24 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author Stefan Triller - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class ConfigDispatcherFileWatcherTest {
 
     private TestConfigDispatcherFileWatcher configDispatcherFileWatcher;
 
-    @Mock
-    ConfigDispatcher configDispatcher;
+    private @Mock ConfigDispatcher configDispatcher;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        initMocks(this);
-
         configDispatcherFileWatcher = new TestConfigDispatcherFileWatcher(configDispatcher);
     }
 
@@ -66,7 +65,7 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher.processWatchEvent(null, StandardWatchEventKinds.ENTRY_CREATE,
                 new File(path).toPath());
 
-        verifyZeroInteractions(configDispatcher);
+        verifyNoInteractions(configDispatcher);
     }
 
     @Test
@@ -75,7 +74,7 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher.processWatchEvent(null, StandardWatchEventKinds.ENTRY_MODIFY,
                 new File(path).toPath());
 
-        verifyZeroInteractions(configDispatcher);
+        verifyNoInteractions(configDispatcher);
     }
 
     @Test
@@ -93,7 +92,7 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher.processWatchEvent(null, StandardWatchEventKinds.ENTRY_DELETE,
                 new File(path).toPath());
 
-        verifyZeroInteractions(configDispatcher);
+        verifyNoInteractions(configDispatcher);
     }
 
     public class TestConfigDispatcherFileWatcher extends ConfigDispatcherFileWatcher {

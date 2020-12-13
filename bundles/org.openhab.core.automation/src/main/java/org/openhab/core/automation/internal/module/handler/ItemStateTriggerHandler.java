@@ -12,10 +12,8 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +42,14 @@ import org.slf4j.LoggerFactory;
  * @author Simon Merschjohann - Initial contribution
  */
 public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
+
+    public static final String UPDATE_MODULE_TYPE_ID = "core.ItemStateUpdateTrigger";
+    public static final String CHANGE_MODULE_TYPE_ID = "core.ItemStateChangeTrigger";
+
+    public static final String CFG_ITEMNAME = "itemName";
+    public static final String CFG_STATE = "state";
+    public static final String CFG_PREVIOUS_STATE = "previousState";
+
     private final Logger logger = LoggerFactory.getLogger(ItemStateTriggerHandler.class);
 
     private final String itemName;
@@ -52,15 +58,7 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
     private Set<String> types;
     private final BundleContext bundleContext;
 
-    public static final String UPDATE_MODULE_TYPE_ID = "core.ItemStateUpdateTrigger";
-    public static final String CHANGE_MODULE_TYPE_ID = "core.ItemStateChangeTrigger";
-
-    private static final String CFG_ITEMNAME = "itemName";
-    private static final String CFG_STATE = "state";
-    private static final String CFG_PREVIOUS_STATE = "previousState";
-
-    @SuppressWarnings("rawtypes")
-    private ServiceRegistration eventSubscriberRegistration;
+    private ServiceRegistration<?> eventSubscriberRegistration;
 
     public ItemStateTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
@@ -68,16 +66,13 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
         this.state = (String) module.getConfiguration().get(CFG_STATE);
         this.previousState = (String) module.getConfiguration().get(CFG_PREVIOUS_STATE);
         if (UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            this.types = Collections.singleton(ItemStateEvent.TYPE);
+            this.types = Set.of(ItemStateEvent.TYPE);
         } else {
-            Set<String> set = new HashSet<>();
-            set.add(ItemStateChangedEvent.TYPE);
-            set.add(GroupItemStateChangedEvent.TYPE);
-            this.types = Collections.unmodifiableSet(set);
+            this.types = Set.of(ItemStateChangedEvent.TYPE, GroupItemStateChangedEvent.TYPE);
         }
         this.bundleContext = bundleContext;
         Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("event.topics", "smarthome/items/" + itemName + "/*");
+        properties.put("event.topics", "openhab/items/" + itemName + "/*");
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);
     }
@@ -143,6 +138,6 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
     @Override
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
-        return event.getTopic().contains("smarthome/items/" + itemName + "/");
+        return event.getTopic().contains("openhab/items/" + itemName + "/");
     }
 }

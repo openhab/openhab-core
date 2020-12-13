@@ -23,4 +23,6 @@ public class RESTConstants {
     public static final String REST_URI = "/rest";
 
     public static final String JAX_RS_NAME = "openhab";
+
+    public static final String API_VERSION = "4";
 }

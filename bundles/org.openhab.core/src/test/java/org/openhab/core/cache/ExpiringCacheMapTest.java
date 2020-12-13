@@ -12,7 +12,7 @@
  */
 package org.openhab.core.cache;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -23,8 +23,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test class for the {@link ExpiringCacheMap} class.
@@ -32,33 +34,34 @@ import org.junit.Test;
  * @author Christoph Weitkamp - Initial contribution
  * @author Martin van Wingerden - Added tests for putIfAbsentAndGet
  */
+@NonNullByDefault
 public class ExpiringCacheMapTest {
     private static final long CACHE_EXPIRY = TimeUnit.SECONDS.toMillis(2);
 
     private static final String RESPONSE_1 = "ACTION 1";
     private static final String RESPONSE_2 = "ACTION 2";
 
-    private static final Supplier<String> CACHE_ACTION = () -> {
+    private static final Supplier<@Nullable String> CACHE_ACTION = () -> {
         byte[] array = new byte[8];
         new Random().nextBytes(array);
         return new String(array, StandardCharsets.UTF_8);
     };
-    private static final Supplier<String> PREDICTABLE_CACHE_ACTION_1 = () -> RESPONSE_1;
-    private static final Supplier<String> PREDICTABLE_CACHE_ACTION_2 = () -> RESPONSE_2;
+    private static final Supplier<@Nullable String> PREDICTABLE_CACHE_ACTION_1 = () -> RESPONSE_1;
+    private static final Supplier<@Nullable String> PREDICTABLE_CACHE_ACTION_2 = () -> RESPONSE_2;
 
     private static final String FIRST_TEST_KEY = "FIRST_TEST_KEY";
     private static final String SECOND_TEST_KEY = "SECOND_TEST_KEY";
 
-    private ExpiringCacheMap<String, String> subject;
+    private @NonNullByDefault({}) ExpiringCacheMap<String, String> subject;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         subject = new ExpiringCacheMap<>(CACHE_EXPIRY);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPutIllegalArgumentException3() throws IllegalArgumentException {
-        subject.put(null, CACHE_ACTION);
+        assertThrows(IllegalArgumentException.class, () -> subject.put(null, CACHE_ACTION));
     }
 
     @Test
@@ -87,9 +90,9 @@ public class ExpiringCacheMapTest {
         assertNotEquals(RESPONSE_2, response);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPutValueIllegalArgumentException1() throws IllegalArgumentException {
-        subject.putValue("KEY_NOT_FOUND", "test");
+        assertThrows(IllegalArgumentException.class, () -> subject.putValue("KEY_NOT_FOUND", "test"));
     }
 
     @Test
@@ -139,13 +142,15 @@ public class ExpiringCacheMapTest {
         assertNotNull(value3);
         assertNotEquals(value1, value3);
 
-        // get all values
-        final Collection<String> expectedValues = new LinkedList<>();
-        expectedValues.add(value3);
-        expectedValues.add(value1);
+        if (value1 != null && value3 != null) {
+            // get all values
+            final Collection<String> expectedValues = new LinkedList<>();
+            expectedValues.add(value3);
+            expectedValues.add(value1);
 
-        final Collection<String> values = subject.values();
-        assertEquals(expectedValues, values);
+            final Collection<@Nullable String> values = subject.values();
+            assertEquals(expectedValues, values);
+        }
 
         // use another different key
         String value4 = subject.get("KEY_NOT_FOUND");
@@ -192,14 +197,17 @@ public class ExpiringCacheMapTest {
 
         // refresh item
         String value2 = subject.refresh(FIRST_TEST_KEY);
+        assertNotNull(value2);
         assertNotEquals(value1, value2);
 
-        // refresh all
-        final Collection<String> expectedValues = new LinkedList<>();
-        expectedValues.add(value2);
+        if (value2 != null) {
+            // refresh all
+            final Collection<String> expectedValues = new LinkedList<>();
+            expectedValues.add(value2);
 
-        final Collection<String> values = subject.refreshAll();
-        assertNotEquals(expectedValues, values);
+            final Collection<@Nullable String> values = subject.refreshAll();
+            assertNotEquals(expectedValues, values);
+        }
     }
 
     @Test

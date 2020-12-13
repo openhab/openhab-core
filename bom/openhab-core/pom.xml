@@ -36,12 +36,6 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.boot</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.karaf</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
@@ -78,12 +72,6 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.extension.sample</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.id</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
@@ -91,12 +79,6 @@
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.persistence</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.scheduler</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -163,6 +145,12 @@
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.io.transport.mdns</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.io.transport.modbus</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -265,12 +253,6 @@
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.io.rest.voice</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.io.transport.dbus</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>

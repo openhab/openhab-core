@@ -12,11 +12,7 @@
  */
 package org.openhab.core.model.script.actions;
 
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.newTrigger;
-
-import java.time.Instant;
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure0;
@@ -26,15 +22,8 @@ import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.model.script.engine.Script;
 import org.openhab.core.model.script.engine.ScriptEngine;
 import org.openhab.core.model.script.engine.ScriptExecutionException;
-import org.openhab.core.model.script.internal.actions.TimerExecutionJob;
 import org.openhab.core.model.script.internal.actions.TimerImpl;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openhab.core.scheduler.Scheduler;
 
 /**
  * The static methods of this class are made available as functions in the scripts.
@@ -43,8 +32,6 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 public class ScriptExecution {
-
-    private static int timerCounter = 0;
 
     /**
      * Calls a script which must be located in the configurations/scripts folder.
@@ -88,10 +75,12 @@ public class ScriptExecution {
      * @return a handle to the created timer, so that it can be canceled or rescheduled
      * @throws ScriptExecutionException if an error occurs during the execution
      */
-    public static Timer createTimer(Instant instant, Procedure0 closure) {
-        JobDataMap dataMap = new JobDataMap();
-        dataMap.put("procedure", closure);
-        return makeTimer(instant, closure.toString(), dataMap);
+    public static Timer createTimer(ZonedDateTime instant, Procedure0 closure) {
+        Scheduler scheduler = ScriptServiceUtil.getScheduler();
+
+        return new TimerImpl(scheduler, instant, () -> {
+            closure.apply();
+        });
     }
 
     /**
@@ -104,43 +93,12 @@ public class ScriptExecution {
      * @return a handle to the created timer, so that it can be canceled or rescheduled
      * @throws ScriptExecutionException if an error occurs during the execution
      */
-    public static Timer createTimerWithArgument(Instant instant, Object arg1, Procedure1<Object> closure) {
-        JobDataMap dataMap = new JobDataMap();
-        dataMap.put("procedure1", closure);
-        dataMap.put("argument1", arg1);
-        return makeTimer(instant, closure.toString(), dataMap);
+    public static Timer createTimerWithArgument(ZonedDateTime instant, Object arg1, Procedure1<Object> closure) {
+        Scheduler scheduler = ScriptServiceUtil.getScheduler();
+
+        return new TimerImpl(scheduler, instant, () -> {
+            closure.apply(arg1);
+        });
     }
 
-    /**
-     * helper function to create the timer
-     *
-     * @param instant the point in time when the code should be executed
-     * @param closure string for job id
-     * @param dataMap job data map, preconfigured with arguments
-     * @return
-     */
-    private static Timer makeTimer(Instant instant, String closure, JobDataMap dataMap) {
-
-        Logger logger = LoggerFactory.getLogger(ScriptExecution.class);
-        JobKey jobKey = new JobKey(getTimerId() + " " + instant.toString() + ": " + closure.toString());
-        Trigger trigger = newTrigger().startAt(Date.from(instant)).build();
-        Timer timer = new TimerImpl(jobKey, trigger.getKey(), dataMap, instant);
-        try {
-            JobDetail job = newJob(TimerExecutionJob.class).withIdentity(jobKey).usingJobData(dataMap).build();
-            if (TimerImpl.scheduler.checkExists(job.getKey())) {
-                TimerImpl.scheduler.deleteJob(job.getKey());
-                logger.debug("Deleted existing Job {}", job.getKey().toString());
-            }
-            TimerImpl.scheduler.scheduleJob(job, trigger);
-            logger.debug("Scheduled code for execution at {}", instant.toString());
-            return timer;
-        } catch (SchedulerException e) {
-            logger.error("Failed to schedule code for execution.", e);
-            return null;
-        }
-    }
-
-    private static synchronized String getTimerId() {
-        return String.format("Timer %d", ++timerCounter);
-    }
 }

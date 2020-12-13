@@ -13,9 +13,9 @@
 package org.openhab.core.model.core.internal.folder;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -34,15 +33,17 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EObject;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.service.AbstractWatchService;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.osgi.service.component.ComponentContext;
 
@@ -82,21 +83,20 @@ public class FolderObserverTest extends JavaOSGiTest {
 
     private static final String INITIAL_FILE_CONTENT = "Initial content";
 
+    private Dictionary<String, Object> configProps;
+    private String defaultWatchedDir;
     private FolderObserver folderObserver;
     private ModelRepoDummy modelRepo;
 
-    @Mock
-    private ModelParser modelParser;
+    private AutoCloseable mocksCloseable;
 
-    @Mock
-    private ComponentContext context;
-    private Dictionary<String, Object> configProps;
+    private @Mock ModelParser modelParser;
+    private @Mock ReadyService readyService;
+    private @Mock ComponentContext context;
 
-    private String defaultWatchedDir;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
         configProps = new Hashtable<>();
 
@@ -104,16 +104,21 @@ public class FolderObserverTest extends JavaOSGiTest {
         setUpServices();
     }
 
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
+    }
+
     /**
      * The main configuration folder's path is saved in the defaultWatchedDir variable
      * in order to be restored after all the tests are finished.
      * For the purpose of the FolderObserverTest class a new folder is created.
-     * Its path is set to the ConfigConstants.CONFIG_DIR_PROG_ARGUMENT property.
+     * Its path is set to the OpenHAB.CONFIG_DIR_PROG_ARGUMENT property.
      */
     private void setupWatchedDirectory() {
-        defaultWatchedDir = System.getProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT);
+        defaultWatchedDir = System.getProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT);
         WATCHED_DIRECTORY.mkdirs();
-        System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, WATCHED_DIRECTORY.getPath());
+        System.setProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT, WATCHED_DIRECTORY.getPath());
         EXISTING_SUBDIR_PATH.mkdirs();
     }
 
@@ -123,8 +128,7 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         modelRepo = new ModelRepoDummy();
 
-        folderObserver = new FolderObserver();
-        folderObserver.setModelRepository(modelRepo);
+        folderObserver = new FolderObserver(modelRepo, readyService);
         folderObserver.addModelParser(modelParser);
     }
 
@@ -134,7 +138,7 @@ public class FolderObserverTest extends JavaOSGiTest {
      *
      * @throws Exception
      */
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         folderObserver.deactivate();
         try (Stream<Path> walk = Files.walk(WATCHED_DIRECTORY.toPath())) {
@@ -143,9 +147,9 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         modelRepo.clean();
         if (defaultWatchedDir != null) {
-            System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, defaultWatchedDir);
+            System.setProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT, defaultWatchedDir);
         } else {
-            System.clearProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT);
+            System.clearProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT);
         }
     }
 
@@ -348,11 +352,12 @@ public class FolderObserverTest extends JavaOSGiTest {
                 throw new RuntimeException("intentional failure.");
             }
         };
-        folderObserver.setModelRepository(modelRepo);
+        FolderObserver localFolderObserver = new FolderObserver(modelRepo, readyService);
+        localFolderObserver.addModelParser(modelParser);
 
         String validExtension = "java";
         configProps.put(EXISTING_SUBDIR_NAME, "txt,jpg," + validExtension);
-        folderObserver.activate(context);
+        localFolderObserver.activate(context);
 
         File mockFileWithValidExt = new File(EXISTING_SUBDIR_PATH, "MockFileForModification." + validExtension);
         mockFileWithValidExt.createNewFile();
@@ -407,7 +412,10 @@ public class FolderObserverTest extends JavaOSGiTest {
             File file = new File(UNWATCHED_DIRECTORY, filename);
             file.createNewFile();
             Files.setAttribute(file.toPath(), "dos:hidden", true);
-            Files.move(file.toPath(), EXISTING_SUBDIR_PATH.toPath());
+            try {
+                Files.move(file.toPath(), EXISTING_SUBDIR_PATH.toPath());
+            } catch (java.nio.file.FileAlreadyExistsException e) {
+            }
             try (Stream<Path> walk = Files.walk(UNWATCHED_DIRECTORY.toPath())) {
                 walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             }
@@ -452,8 +460,7 @@ public class FolderObserverTest extends JavaOSGiTest {
          */
         @Override
         public Iterable<String> getAllModelNamesOfType(String modelType) {
-            List<String> arrayOfModelsToBeRemoved = Collections.singletonList(MOCK_MODEL_TO_BE_REMOVED);
-            return arrayOfModelsToBeRemoved;
+            return List.of(MOCK_MODEL_TO_BE_REMOVED);
         }
 
         @Override
@@ -469,7 +476,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         }
 
         @Override
-        public EObject getModel(String name) {
+        public @Nullable EObject getModel(String name) {
             return null;
         }
 
@@ -482,7 +489,7 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         @Override
         public Set<String> removeAllModelsOfType(String modelType) {
-            return null;
+            return Set.of();
         }
     }
 }

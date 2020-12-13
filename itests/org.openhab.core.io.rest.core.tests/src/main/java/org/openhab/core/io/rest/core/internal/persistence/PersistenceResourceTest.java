@@ -12,18 +12,19 @@
  */
 package org.openhab.core.io.rest.core.internal.persistence;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.LocaleService;
@@ -48,14 +49,16 @@ public class PersistenceResourceTest {
     private PersistenceResource pResource;
     private List<HistoricItem> items;
 
+    private AutoCloseable mocksCloseable;
+
     private @Mock ItemRegistry itemRegistry;
     private @Mock LocaleService localeService;
     private @Mock PersistenceServiceRegistry persistenceServiceRegistry;
     private @Mock TimeZoneProvider timeZoneProvider;
 
-    @Before
-    public void setup() {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
         pResource = new PersistenceResource(itemRegistry, localeService, persistenceServiceRegistry, timeZoneProvider);
 
@@ -66,8 +69,8 @@ public class PersistenceResourceTest {
             final int year = i;
             items.add(new HistoricItem() {
                 @Override
-                public Date getTimestamp() {
-                    return new Date(year - 1900, 0, 1);
+                public ZonedDateTime getTimestamp() {
+                    return ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
                 }
 
                 @Override
@@ -90,7 +93,12 @@ public class PersistenceResourceTest {
         when(pService.query(any())).thenReturn(items);
 
         when(persistenceServiceRegistry.get(PERSISTENCE_SERVICE_ID)).thenReturn(pService);
-        when(timeZoneProvider.getTimeZone()).thenReturn(TimeZone.getDefault().toZoneId());
+        when(timeZoneProvider.getTimeZone()).thenReturn(ZoneId.systemDefault());
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     @Test

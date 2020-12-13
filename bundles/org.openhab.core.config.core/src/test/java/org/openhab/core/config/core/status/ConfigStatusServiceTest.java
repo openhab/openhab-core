@@ -13,7 +13,7 @@
 package org.openhab.core.config.core.status;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.LocaleProvider;
@@ -80,7 +80,7 @@ public class ConfigStatusServiceTest extends JavaTest {
     private final Collection<ConfigStatusMessage> messagesEntity1En = new ArrayList<>();
     private final Collection<ConfigStatusMessage> messagesEntity2En = new ArrayList<>();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         messagesEntity1.add(PARAM1_MSG1);
         messagesEntity1.add(PARAM2_MSG2);

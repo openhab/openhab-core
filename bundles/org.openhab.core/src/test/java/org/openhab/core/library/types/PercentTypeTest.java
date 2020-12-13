@@ -12,24 +12,24 @@
  */
 package org.openhab.core.library.types;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.library.unit.Units;
 
 /**
  * @author Kai Kreuzer - Initial contribution
  */
 public class PercentTypeTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void negativeNumber() {
-        new PercentType(-3);
+        assertThrows(IllegalArgumentException.class, () -> new PercentType(-3));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void moreThan100() {
-        new PercentType("100.2");
+        assertThrows(IllegalArgumentException.class, () -> new PercentType("100.2"));
     }
 
     @Test
@@ -46,14 +46,15 @@ public class PercentTypeTest {
 
     @Test
     public void testEquals() {
-        PercentType pt1 = new PercentType(new Integer(100));
+        PercentType pt1 = new PercentType(Integer.valueOf(100));
         PercentType pt2 = new PercentType("100.0");
         PercentType pt3 = new PercentType(0);
         PercentType pt4 = new PercentType(0);
 
-        assertEquals(true, pt1.equals(pt2));
-        assertEquals(true, pt3.equals(pt4));
-        assertEquals(false, pt3.equals(pt1));
+        // Do not change to assertEquals(), because we want to check if .equals() works as expected!
+        assertTrue(pt1.equals(pt2));
+        assertTrue(pt3.equals(pt4));
+        assertFalse(pt3.equals(pt1));
     }
 
     @Test
@@ -74,7 +75,7 @@ public class PercentTypeTest {
     public void testConversionToQuantityType() {
         assertEquals(new QuantityType<>("100 %"), PercentType.HUNDRED.as(QuantityType.class));
         assertEquals(new QuantityType<>("1 one"),
-                ((QuantityType<?>) PercentType.HUNDRED.as(QuantityType.class)).toUnit(SmartHomeUnits.ONE));
+                ((QuantityType<?>) PercentType.HUNDRED.as(QuantityType.class)).toUnit(Units.ONE));
     }
 
     @Test

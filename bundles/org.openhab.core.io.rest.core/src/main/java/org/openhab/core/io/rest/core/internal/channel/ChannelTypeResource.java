@@ -12,7 +12,7 @@
  */
 package org.openhab.core.io.rest.core.internal.channel;
 
-import java.util.ArrayList;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -62,11 +62,14 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * Provides access to ChannelType via REST.
@@ -75,6 +78,7 @@ import io.swagger.annotations.ApiResponses;
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Yannick Schaus - Added filter to getAll
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -83,7 +87,8 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(ChannelTypeResource.PATH_CHANNEL_TYPES)
 @RolesAllowed({ Role.ADMIN })
-@Api(ChannelTypeResource.PATH_CHANNEL_TYPES)
+@SecurityRequirement(name = "oauth2", scopes = { "admin" })
+@Tag(name = ChannelTypeResource.PATH_CHANNEL_TYPES)
 @NonNullByDefault
 public class ChannelTypeResource implements RESTResource {
 
@@ -109,11 +114,11 @@ public class ChannelTypeResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets all available channel types.", response = ChannelTypeDTO.class, responseContainer = "Set")
-    @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = ChannelTypeDTO.class, responseContainer = "Set"))
+    @Operation(operationId = "getChannelTypes", summary = "Gets all available channel types.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ChannelTypeDTO.class), uniqueItems = true))) })
     public Response getAll(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
-            @QueryParam("prefixes") @ApiParam(value = "filter UIDs by prefix (multiple comma-separated prefixes allowed, for example: 'system,mqtt')") @Nullable String prefixes) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @QueryParam("prefixes") @Parameter(description = "filter UIDs by prefix (multiple comma-separated prefixes allowed, for example: 'system,mqtt')") @Nullable String prefixes) {
         Locale locale = localeService.getLocale(language);
 
         Stream<ChannelTypeDTO> channelStream = channelTypeRegistry.getChannelTypes(locale).stream()
@@ -133,12 +138,12 @@ public class ChannelTypeResource implements RESTResource {
     @GET
     @Path("/{channelTypeUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets channel type by UID.", response = ChannelTypeDTO.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Channel type with provided channelTypeUID does not exist.", response = ChannelTypeDTO.class),
-            @ApiResponse(code = 404, message = "No content") })
-    public Response getByUID(@PathParam("channelTypeUID") @ApiParam(value = "channelTypeUID") String channelTypeUID,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
+    @Operation(operationId = "getChannelTypeByUID", summary = "Gets channel type by UID.", responses = {
+            @ApiResponse(responseCode = "200", description = "Channel type with provided channelTypeUID does not exist.", content = @Content(schema = @Schema(implementation = ChannelTypeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No content") })
+    public Response getByUID(
+            @PathParam("channelTypeUID") @Parameter(description = "channelTypeUID") String channelTypeUID,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         ChannelType channelType = channelTypeRegistry.getChannelType(new ChannelTypeUID(channelTypeUID), locale);
         if (channelType != null) {
@@ -151,13 +156,12 @@ public class ChannelTypeResource implements RESTResource {
     @GET
     @Path("/{channelTypeUID}/linkableItemTypes")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets the item types the given trigger channel type UID can be linked to.", response = String.class, responseContainer = "Set")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "Set"),
-            @ApiResponse(code = 204, message = "No content: channel type has no linkable items or is no trigger channel."),
-            @ApiResponse(code = 404, message = "Given channel type UID not found.") })
+    @Operation(operationId = "getLinkableItemTypesByChannelTypeUID", summary = "Gets the item types the given trigger channel type UID can be linked to.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class), uniqueItems = true))),
+            @ApiResponse(responseCode = "204", description = "No content: channel type has no linkable items or is no trigger channel."),
+            @ApiResponse(responseCode = "404", description = "Given channel type UID not found.") })
     public Response getLinkableItemTypes(
-            @PathParam("channelTypeUID") @ApiParam(value = "channelTypeUID") String channelTypeUID) {
+            @PathParam("channelTypeUID") @Parameter(description = "channelTypeUID") String channelTypeUID) {
         ChannelTypeUID ctUID = new ChannelTypeUID(channelTypeUID);
         ChannelType channelType = channelTypeRegistry.getChannelType(ctUID);
         if (channelType == null) {
@@ -185,25 +189,16 @@ public class ChannelTypeResource implements RESTResource {
     }
 
     private ChannelTypeDTO convertToChannelTypeDTO(ChannelType channelType, Locale locale) {
-        final ConfigDescription configDescription;
-        if (channelType.getConfigDescriptionURI() != null) {
-            configDescription = this.configDescriptionRegistry
-                    .getConfigDescription(channelType.getConfigDescriptionURI(), locale);
-        } else {
-            configDescription = null;
-        }
+        final URI descURI = channelType.getConfigDescriptionURI();
+        final ConfigDescription configDescription = descURI == null ? null
+                : configDescriptionRegistry.getConfigDescription(descURI, locale);
+        final ConfigDescriptionDTO configDescriptionDTO = configDescription == null ? null
+                : ConfigDescriptionDTOMapper.map(configDescription);
 
-        List<ConfigDescriptionParameterDTO> parameters;
-        List<ConfigDescriptionParameterGroupDTO> parameterGroups;
-
-        if (configDescription != null) {
-            ConfigDescriptionDTO configDescriptionDTO = ConfigDescriptionDTOMapper.map(configDescription);
-            parameters = configDescriptionDTO.parameters;
-            parameterGroups = configDescriptionDTO.parameterGroups;
-        } else {
-            parameters = new ArrayList<>(0);
-            parameterGroups = new ArrayList<>(0);
-        }
+        final List<ConfigDescriptionParameterDTO> parameters = configDescriptionDTO == null ? List.of()
+                : configDescriptionDTO.parameters;
+        final List<ConfigDescriptionParameterGroupDTO> parameterGroups = configDescriptionDTO == null ? List.of()
+                : configDescriptionDTO.parameterGroups;
 
         return new ChannelTypeDTO(channelType.getUID().toString(), channelType.getLabel(), channelType.getDescription(),
                 channelType.getCategory(), channelType.getItemType(), channelType.getKind(), parameters,

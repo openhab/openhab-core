@@ -12,9 +12,6 @@
  */
 package org.openhab.core.thing;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -29,9 +26,9 @@ import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
- * {@link Channel} is a part of a {@link Thing} that represents a functionality
- * of it. Therefore {@link Item}s can be linked a to a channel. The channel only
- * accepts a specific item type which is specified by {@link Channel#getAcceptedItemType()} methods.
+ * {@link Channel} is a part of a {@link Thing} that represents a functionality of it. Therefore {@link Item}s can be
+ * linked a to a channel. The channel only accepts a specific item type which is specified by
+ * {@link Channel#getAcceptedItemType()} methods. Use the {@link ChannelBuilder} for building channels.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Alex Tugarev - Extended about default tags
@@ -70,51 +67,13 @@ public class Channel {
     Channel() {
         this.kind = ChannelKind.STATE;
         this.configuration = new Configuration();
-        this.properties = Collections.unmodifiableMap(new HashMap<>(0));
+        this.properties = Map.of();
     }
 
     /**
-     * @deprecated - use {@link ChannelBuilder} instead
+     * Use the {@link ChannelBuilder} for building channels.
      */
-    @Deprecated
-    public Channel(ChannelUID uid, String acceptedItemType) {
-        this.uid = uid;
-        this.acceptedItemType = acceptedItemType;
-        this.kind = ChannelKind.STATE;
-        this.configuration = new Configuration();
-        this.properties = Collections.unmodifiableMap(new HashMap<>(0));
-    }
-
-    /**
-     * @deprecated - use {@link ChannelBuilder} instead
-     */
-    @Deprecated
-    public Channel(ChannelUID uid, String acceptedItemType, Configuration configuration) {
-        this(uid, null, acceptedItemType, ChannelKind.STATE, configuration, new HashSet<>(0), null, null, null, null);
-    }
-
-    /**
-     * @deprecated - use {@link ChannelBuilder} instead
-     */
-    @Deprecated
-    public Channel(ChannelUID uid, String acceptedItemType, Set<String> defaultTags) {
-        this(uid, null, acceptedItemType, ChannelKind.STATE, null, defaultTags, null, null, null, null);
-    }
-
-    /**
-     * @deprecated - use {@link ChannelBuilder} instead
-     */
-    @Deprecated
-    public Channel(ChannelUID uid, String acceptedItemType, Configuration configuration, Set<String> defaultTags,
-            Map<String, String> properties) {
-        this(uid, null, acceptedItemType, ChannelKind.STATE, null, defaultTags, properties, null, null, null);
-    }
-
-    /**
-     * @deprecated - use ChannelBuilder instead
-     */
-    @Deprecated
-    public Channel(ChannelUID uid, @Nullable ChannelTypeUID channelTypeUID, @Nullable String acceptedItemType,
+    protected Channel(ChannelUID uid, @Nullable ChannelTypeUID channelTypeUID, @Nullable String acceptedItemType,
             ChannelKind kind, @Nullable Configuration configuration, Set<String> defaultTags,
             @Nullable Map<String, String> properties, @Nullable String label, @Nullable String description,
             @Nullable AutoUpdatePolicy autoUpdatePolicy) {
@@ -125,17 +84,9 @@ public class Channel {
         this.label = label;
         this.description = description;
         this.autoUpdatePolicy = autoUpdatePolicy;
-        this.defaultTags = Collections.<String> unmodifiableSet(new HashSet<>(defaultTags));
-        if (configuration == null) {
-            this.configuration = new Configuration();
-        } else {
-            this.configuration = configuration;
-        }
-        if (properties == null) {
-            this.properties = Collections.unmodifiableMap(new HashMap<>(0));
-        } else {
-            this.properties = properties;
-        }
+        this.defaultTags = Set.copyOf(defaultTags);
+        this.configuration = configuration == null ? new Configuration() : configuration;
+        this.properties = properties == null ? Map.of() : properties;
     }
 
     /**
@@ -144,7 +95,7 @@ public class Channel {
      * @return accepted item type
      */
     public @Nullable String getAcceptedItemType() {
-        return this.acceptedItemType;
+        return acceptedItemType;
     }
 
     /**
@@ -162,7 +113,7 @@ public class Channel {
      * @return unique id of the channel
      */
     public ChannelUID getUID() {
-        return this.uid;
+        return uid;
     }
 
     /**
@@ -181,7 +132,7 @@ public class Channel {
      * @return the label for the channel. Can be null.
      */
     public @Nullable String getLabel() {
-        return this.label;
+        return label;
     }
 
     /**
@@ -192,7 +143,7 @@ public class Channel {
      * @return the description for the channel. Can be null.
      */
     public @Nullable String getDescription() {
-        return this.description;
+        return description;
     }
 
     /**
@@ -211,7 +162,7 @@ public class Channel {
      */
     public Map<String, String> getProperties() {
         synchronized (this) {
-            return Collections.unmodifiableMap(new HashMap<>(properties));
+            return Map.copyOf(properties);
         }
     }
 

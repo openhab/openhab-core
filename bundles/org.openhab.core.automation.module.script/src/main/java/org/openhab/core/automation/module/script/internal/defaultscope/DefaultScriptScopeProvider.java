@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -49,7 +50,7 @@ import org.openhab.core.library.unit.BinaryPrefix;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.binding.ThingActions;
 import org.openhab.core.types.Command;
@@ -149,7 +150,7 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
         elements.put("SIUnits", SIUnits.class);
         elements.put("ImperialUnits", ImperialUnits.class);
         elements.put("MetricPrefix", MetricPrefix.class);
-        elements.put("SmartHomeUnits", SmartHomeUnits.class);
+        elements.put("Units", Units.class);
         elements.put("BinaryPrefix", BinaryPrefix.class);
 
         // services
@@ -182,12 +183,12 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
 
     @Override
     public Collection<String> getDefaultPresets() {
-        return Collections.singleton(PRESET_DEFAULT);
+        return Set.of(PRESET_DEFAULT);
     }
 
     @Override
     public Collection<String> getPresets() {
-        return Collections.singleton(PRESET_DEFAULT);
+        return Set.of(PRESET_DEFAULT);
     }
 
     @Override

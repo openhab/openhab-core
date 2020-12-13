@@ -43,13 +43,13 @@ public class RuleEventFactory extends AbstractEventFactory {
 
     private final Logger logger = LoggerFactory.getLogger(RuleEventFactory.class);
 
-    private static final String RULE_STATE_EVENT_TOPIC = "smarthome/rules/{ruleID}/state";
+    private static final String RULE_STATE_EVENT_TOPIC = "openhab/rules/{ruleID}/state";
 
-    private static final String RULE_ADDED_EVENT_TOPIC = "smarthome/rules/{ruleID}/added";
+    private static final String RULE_ADDED_EVENT_TOPIC = "openhab/rules/{ruleID}/added";
 
-    private static final String RULE_REMOVED_EVENT_TOPIC = "smarthome/rules/{ruleID}/removed";
+    private static final String RULE_REMOVED_EVENT_TOPIC = "openhab/rules/{ruleID}/removed";
 
-    private static final String RULE_UPDATED_EVENT_TOPIC = "smarthome/rules/{ruleID}/updated";
+    private static final String RULE_UPDATED_EVENT_TOPIC = "openhab/rules/{ruleID}/updated";
 
     private static final Set<String> SUPPORTED_TYPES = new HashSet<>();
 

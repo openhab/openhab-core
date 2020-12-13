@@ -13,18 +13,15 @@
 package org.openhab.core.thing.firmware;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.openhab.core.thing.Thing.*;
 import static org.openhab.core.thing.firmware.FirmwareStatus.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
@@ -67,7 +64,7 @@ public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
     private FirmwareUpdateService firmwareUpdateService;
     private ManagedThingProvider managedThingProvider;
 
-    @Before
+    @BeforeEach
     public void setup() {
         registerVolatileStorageService();
 
@@ -221,9 +218,9 @@ public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
             @Override
             public Set<Firmware> getFirmwares(Thing thing, Locale locale) {
                 if (thing.getThingTypeUID().equals(THING_TYPE.getUID())) {
-                    return new HashSet<>(Arrays.asList(firmwares));
+                    return Set.of(firmwares);
                 } else {
-                    return Collections.emptySet();
+                    return Set.of();
                 }
             }
 

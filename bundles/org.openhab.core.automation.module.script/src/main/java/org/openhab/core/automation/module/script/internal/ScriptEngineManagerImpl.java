@@ -12,14 +12,19 @@
  */
 package org.openhab.core.automation.module.script.internal;
 
+import static org.openhab.core.automation.module.script.ScriptEngineFactory.CONTEXT_KEY_ENGINE_IDENTIFIER;
+import static org.openhab.core.automation.module.script.ScriptEngineFactory.CONTEXT_KEY_EXTENSION_ACCESSOR;
+
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import javax.script.SimpleScriptContext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -38,6 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Scott Rushworth - replaced GenericScriptEngineFactory with a service and cleaned up logging
+ * @author Jonathan Gilbert - included passing of context to script engines
  */
 @NonNullByDefault
 @Component(service = ScriptEngineManager.class)
@@ -57,7 +63,6 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addScriptEngineFactory(ScriptEngineFactory engineFactory) {
         List<String> scriptTypes = engineFactory.getScriptTypes();
-
         logger.trace("{}.getScriptTypes(): {}", engineFactory.getClass().getSimpleName(), scriptTypes);
         for (String scriptType : scriptTypes) {
             if (isCustomFactory(engineFactory)) {
@@ -66,26 +71,27 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 this.genericSupport.put(scriptType, engineFactory);
             }
         }
-        if (!engineFactory.getScriptTypes().isEmpty()) {
-            ScriptEngine scriptEngine = engineFactory.createScriptEngine(engineFactory.getScriptTypes().get(0));
-            if (scriptEngine != null) {
-                javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
-                logger.debug(
-                        "Initialized a {} ScriptEngineFactory for {} ({}): supports {} ({}) with file extensions {}, names {}, and mimetypes {}",
-                        (isCustomFactory(engineFactory)) ? "custom" : "generic", factory.getEngineName(),
-                        factory.getEngineVersion(), factory.getLanguageName(), factory.getLanguageVersion(),
-                        factory.getExtensions(), factory.getNames(), factory.getMimeTypes());
+        if (logger.isDebugEnabled()) {
+            if (!scriptTypes.isEmpty()) {
+                ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
+                if (scriptEngine != null) {
+                    javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
+                    logger.debug(
+                            "Initialized a {} ScriptEngineFactory for {} ({}): supports {} ({}) with file extensions {}, names {}, and mimetypes {}",
+                            (isCustomFactory(engineFactory)) ? "custom" : "generic", factory.getEngineName(),
+                            factory.getEngineVersion(), factory.getLanguageName(), factory.getLanguageVersion(),
+                            factory.getExtensions(), factory.getNames(), factory.getMimeTypes());
+                } else {
+                    logger.trace("addScriptEngineFactory: engine was null");
+                }
             } else {
-                logger.trace("addScriptEngineFactory: engine was null");
+                logger.trace("addScriptEngineFactory: scriptTypes was empty");
             }
-        } else {
-            logger.trace("addScriptEngineFactory: scriptTypes was empty");
         }
     }
 
     public void removeScriptEngineFactory(ScriptEngineFactory engineFactory) {
         List<String> scriptTypes = engineFactory.getScriptTypes();
-
         logger.trace("{}.getScriptTypes(): {}", engineFactory.getClass().getSimpleName(), scriptTypes);
         for (String scriptType : scriptTypes) {
             if (isCustomFactory(engineFactory)) {
@@ -129,6 +135,18 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     loadedScriptEngineInstances.put(engineIdentifier, result);
                     logger.debug("Added ScriptEngine for language '{}' with identifier: {}", scriptType,
                             engineIdentifier);
+
+                    ScriptContext scriptContext = engine.getContext();
+
+                    if (scriptContext == null) {
+                        scriptContext = new SimpleScriptContext();
+                        engine.setContext(scriptContext);
+                    }
+
+                    scriptContext.setAttribute(CONTEXT_KEY_ENGINE_IDENTIFIER, engineIdentifier,
+                            ScriptContext.ENGINE_SCOPE);
+                    scriptContext.setAttribute(CONTEXT_KEY_EXTENSION_ACCESSOR, scriptExtensionManager,
+                            ScriptContext.ENGINE_SCOPE);
                 } else {
                     logger.error("ScriptEngine for language '{}' could not be created for identifier: {}", scriptType,
                             engineIdentifier);
@@ -150,7 +168,6 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             ScriptEngine engine = container.getScriptEngine();
             try {
                 engine.eval(scriptData);
-
                 if (engine instanceof Invocable) {
                     Invocable inv = (Invocable) engine;
                     try {

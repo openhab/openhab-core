@@ -49,11 +49,14 @@ public class BindingInfoReader extends XmlDocumentReader<BindingInfoXmlResult> {
      * The default constructor of this class.
      */
     public BindingInfoReader() {
-        super.setClassLoader(BindingInfoReader.class.getClassLoader());
+        ClassLoader classLoader = BindingInfoReader.class.getClassLoader();
+        if (classLoader != null) {
+            super.setClassLoader(classLoader);
+        }
     }
 
     @Override
-    public void registerConverters(XStream xstream) {
+    protected void registerConverters(XStream xstream) {
         xstream.registerConverter(new NodeAttributesConverter());
         xstream.registerConverter(new NodeValueConverter());
         xstream.registerConverter(new BindingInfoConverter());
@@ -64,7 +67,7 @@ public class BindingInfoReader extends XmlDocumentReader<BindingInfoXmlResult> {
     }
 
     @Override
-    public void registerAliases(XStream xstream) {
+    protected void registerAliases(XStream xstream) {
         xstream.alias("binding", BindingInfoXmlResult.class);
         xstream.alias("name", NodeValue.class);
         xstream.alias("description", NodeValue.class);

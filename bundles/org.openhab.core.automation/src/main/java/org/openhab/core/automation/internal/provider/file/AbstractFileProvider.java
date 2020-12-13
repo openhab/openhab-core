@@ -28,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.parser.ParsingException;
 import org.openhab.core.automation.template.Template;
@@ -36,7 +38,6 @@ import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.ProviderChangeListener;
-import org.openhab.core.config.core.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +88,7 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
 
     public AbstractFileProvider(String root) {
         this.rootSubdirectory = root;
-        configurationRoots = new String[] { ConfigConstants.getConfigFolder() + File.separator + "automation" };
+        configurationRoots = new String[] { OpenHAB.getConfigFolder() + File.separator + "automation" };
     }
 
     public void activate(Map<String, Object> config) {
@@ -117,8 +118,8 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
             }
             this.configurationRoots = roots.split(",");
         }
-        for (int i = 0; i < this.configurationRoots.length; i++) {
-            initializeWatchService(this.configurationRoots[i] + File.separator + rootSubdirectory);
+        for (String configurationRoot : this.configurationRoots) {
+            initializeWatchService(configurationRoot + File.separator + rootSubdirectory);
         }
     }
 
@@ -268,14 +269,14 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
             for (E providedObject : providedObjects) {
                 String uid = getUID(providedObject);
                 uids.add(uid);
-                E oldProvidedObject = providedObjectsHolder.put(uid, providedObject);
+                final @Nullable E oldProvidedObject = providedObjectsHolder.put(uid, providedObject);
                 notifyListeners(oldProvidedObject, providedObject);
             }
             providerPortfolio.put(url, uids);
         }
     }
 
-    protected void removeElements(List<String> objectsForRemove) {
+    protected void removeElements(@Nullable List<String> objectsForRemove) {
         if (objectsForRemove != null) {
             for (String removedObject : objectsForRemove) {
                 notifyListeners(providedObjectsHolder.remove(removedObject));
@@ -283,7 +284,7 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
         }
     }
 
-    protected void notifyListeners(E oldElement, E newElement) {
+    protected void notifyListeners(@Nullable E oldElement, E newElement) {
         synchronized (listeners) {
             for (ProviderChangeListener<E> listener : listeners) {
                 if (oldElement != null) {
@@ -295,7 +296,7 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
         }
     }
 
-    protected void notifyListeners(E removedObject) {
+    protected void notifyListeners(@Nullable E removedObject) {
         if (removedObject != null) {
             synchronized (listeners) {
                 for (ProviderChangeListener<E> listener : listeners) {

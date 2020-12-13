@@ -13,11 +13,10 @@
 package org.openhab.core.io.rest.core.thing;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +26,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
@@ -43,6 +44,7 @@ import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
 /**
  * @author Henning Treu - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class EnrichedThingDTOMapperTest {
 
     private static final String ITEM_TYPE = "itemType";
@@ -51,27 +53,15 @@ public class EnrichedThingDTOMapperTest {
     private static final String THING_LABEL = "label";
     private static final String LOCATION = "location";
 
-    @Mock
-    private Thing thing;
+    private @Mock Thing thing;
+    private @Mock ThingStatusInfo thingStatusInfo;
+    private @Mock FirmwareStatusDTO firmwareStatus;
+    private @Mock Map<String, Set<String>> linkedItemsMap;
+    private @Mock Configuration configuration;
+    private @Mock Map<String, String> properties;
 
-    @Mock
-    private ThingStatusInfo thingStatusInfo;
-
-    @Mock
-    private FirmwareStatusDTO firmwareStatus;
-
-    @Mock
-    private Map<String, Set<String>> linkedItemsMap;
-
-    @Mock
-    private Configuration configuration;
-
-    @Mock
-    private Map<String, String> properties;
-
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
         when(thing.getThingTypeUID()).thenReturn(new ThingTypeUID(THING_TYPE_UID));
         when(thing.getUID()).thenReturn(new ThingUID(UID));
         when(thing.getLabel()).thenReturn(THING_LABEL);

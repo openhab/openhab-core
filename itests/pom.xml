@@ -35,7 +35,6 @@
     <module>org.openhab.core.io.rest.core.tests</module>
     <module>org.openhab.core.model.core.tests</module>
     <module>org.openhab.core.model.item.tests</module>
-    <module>org.openhab.core.model.persistence.tests</module>
     <module>org.openhab.core.model.rule.tests</module>
     <module>org.openhab.core.model.script.tests</module>
     <module>org.openhab.core.model.thing.testsupport</module>
@@ -49,6 +48,7 @@
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <maven.javadoc.skip>true</maven.javadoc.skip>
+    <m2e.jdt.annotationpath>target/dependency</m2e.jdt.annotationpath>
   </properties>
 
   <dependencies>
@@ -86,6 +86,29 @@
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>unpack-eea</id>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.lastnpe.eea</groupId>
+                  <artifactId>eea-all</artifactId>
+                  <version>${eea.version}</version>
+                  <overWrite>true</overWrite>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

@@ -74,20 +74,24 @@ public class ScriptItemRefresher implements ItemRegistryChangeListener {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addActionService(ActionService actionService) {
+        logger.debug("Script action added => scripts are going to be refreshed");
         scheduleScriptRefresh();
     }
 
     protected void removeActionService(ActionService actionService) {
+        logger.debug("Script action removed => scripts are going to be refreshed");
         scheduleScriptRefresh();
     }
 
     @Override
     public void added(Item element) {
+        logger.debug("Item \"{}\" added => scripts are going to be refreshed", element.getName());
         scheduleScriptRefresh();
     }
 
     @Override
     public void removed(Item element) {
+        logger.debug("Item \"{}\" removed => scripts are going to be refreshed", element.getName());
         scheduleScriptRefresh();
     }
 
@@ -98,6 +102,7 @@ public class ScriptItemRefresher implements ItemRegistryChangeListener {
 
     @Override
     public void allItemsChanged(Collection<String> oldItemNames) {
+        logger.debug("All items changed => scripts are going to be refreshed");
         scheduleScriptRefresh();
     }
 

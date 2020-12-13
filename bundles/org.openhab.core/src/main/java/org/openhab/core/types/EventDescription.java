@@ -12,8 +12,6 @@
  */
 package org.openhab.core.types;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,9 +29,9 @@ public class EventDescription {
      */
     public EventDescription(List<EventOption> options) {
         if (options != null) {
-            this.options = Collections.unmodifiableList(new ArrayList<>(options));
+            this.options = List.copyOf(options);
         } else {
-            this.options = Collections.unmodifiableList(new ArrayList<>(0));
+            this.options = List.of();
         }
     }
 

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.core.internal.thing;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -68,11 +69,13 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * ThingTypeResource provides access to ThingType via REST.
@@ -87,6 +90,7 @@ import io.swagger.annotations.ApiResponses;
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Yannick Schaus - Added filter to getAll
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -94,7 +98,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(ThingTypeResource.PATH_THING_TYPES)
-@Api(ThingTypeResource.PATH_THING_TYPES)
+@Tag(name = ThingTypeResource.PATH_THING_TYPES)
 @NonNullByDefault
 public class ThingTypeResource implements RESTResource {
 
@@ -124,13 +128,13 @@ public class ThingTypeResource implements RESTResource {
     }
 
     @GET
-    @RolesAllowed({ Role.USER })
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets all available thing types without config description, channels and properties.", response = StrippedThingTypeDTO.class, responseContainer = "Set")
-    @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = StrippedThingTypeDTO.class, responseContainer = "Set"))
+    @Operation(operationId = "getThingTypes", summary = "Gets all available thing types without config description, channels and properties.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = StrippedThingTypeDTO.class), uniqueItems = true))) })
     public Response getAll(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
-            @QueryParam("bindingId") @ApiParam(value = "filter by binding Id") @Nullable String bindingId) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @QueryParam("bindingId") @Parameter(description = "filter by binding Id") @Nullable String bindingId) {
         Locale locale = localeService.getLocale(language);
         Stream<StrippedThingTypeDTO> typeStream = thingTypeRegistry.getThingTypes(locale).stream()
                 .map(thingType -> StrippedThingTypeDTOMapper.map(thingType, locale));
@@ -143,15 +147,14 @@ public class ThingTypeResource implements RESTResource {
     }
 
     @GET
-    @RolesAllowed({ Role.USER })
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{thingTypeUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets thing type by UID.", response = ThingTypeDTO.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Thing type with provided thingTypeUID does not exist.", response = ThingTypeDTO.class),
-            @ApiResponse(code = 404, message = "No content") })
-    public Response getByUID(@PathParam("thingTypeUID") @ApiParam(value = "thingTypeUID") String thingTypeUID,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
+    @Operation(operationId = "getThingTypeById", summary = "Gets thing type by UID.", responses = {
+            @ApiResponse(responseCode = "200", description = "Thing type with provided thingTypeUID does not exist.", content = @Content(schema = @Schema(implementation = ThingTypeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No content") })
+    public Response getByUID(@PathParam("thingTypeUID") @Parameter(description = "thingTypeUID") String thingTypeUID,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         ThingType thingType = thingTypeRegistry.getThingType(new ThingTypeUID(thingTypeUID), locale);
         if (thingType != null) {
@@ -161,14 +164,11 @@ public class ThingTypeResource implements RESTResource {
         }
     }
 
-    private @Nullable ThingTypeDTO convertToThingTypeDTO(ThingType thingType, Locale locale) {
+    private ThingTypeDTO convertToThingTypeDTO(ThingType thingType, Locale locale) {
         final ConfigDescription configDescription;
-        if (thingType.getConfigDescriptionURI() != null) {
-            configDescription = this.configDescriptionRegistry.getConfigDescription(thingType.getConfigDescriptionURI(),
-                    locale);
-        } else {
-            configDescription = null;
-        }
+
+        final URI descURI = thingType.getConfigDescriptionURI();
+        configDescription = descURI == null ? null : configDescriptionRegistry.getConfigDescription(descURI, locale);
 
         List<ConfigDescriptionParameterDTO> parameters;
         List<ConfigDescriptionParameterGroupDTO> parameterGroups;
@@ -184,9 +184,6 @@ public class ThingTypeResource implements RESTResource {
 
         final List<ChannelDefinitionDTO> channelDefinitions = convertToChannelDefinitionDTOs(
                 thingType.getChannelDefinitions(), locale);
-        if (channelDefinitions == null) {
-            return null;
-        }
 
         return new ThingTypeDTO(thingType.getUID().toString(), thingType.getLabel(), thingType.getDescription(),
                 thingType.getCategory(), thingType.isListed(), parameters, channelDefinitions,
@@ -208,7 +205,9 @@ public class ThingTypeResource implements RESTResource {
             String description = channelGroupDefinition.getDescription();
             List<ChannelDefinition> channelDefinitions = Collections.emptyList();
 
-            if (channelGroupType != null) {
+            if (channelGroupType == null) {
+                logger.warn("Cannot find channel group type: {}", channelGroupDefinition.getTypeUID());
+            } else {
                 if (label == null) {
                     label = channelGroupType.getLabel();
                 }
@@ -227,35 +226,35 @@ public class ThingTypeResource implements RESTResource {
         return channelGroupDefinitionDTOs;
     }
 
-    private @Nullable List<ChannelDefinitionDTO> convertToChannelDefinitionDTOs(
-            List<ChannelDefinition> channelDefinitions, Locale locale) {
+    private List<ChannelDefinitionDTO> convertToChannelDefinitionDTOs(List<ChannelDefinition> channelDefinitions,
+            Locale locale) {
         List<ChannelDefinitionDTO> channelDefinitionDTOs = new ArrayList<>();
         for (ChannelDefinition channelDefinition : channelDefinitions) {
             ChannelType channelType = channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID(), locale);
+
             if (channelType == null) {
                 logger.warn("Cannot find channel type: {}", channelDefinition.getChannelTypeUID());
-                return null;
-            }
+            } else {
+                // Default to the channelDefinition label to override the
+                // channelType
+                String label = channelDefinition.getLabel();
+                if (label == null) {
+                    label = channelType.getLabel();
+                }
 
-            // Default to the channelDefinition label to override the
-            // channelType
-            String label = channelDefinition.getLabel();
-            if (label == null) {
-                label = channelType.getLabel();
-            }
+                // Default to the channelDefinition description to override the
+                // channelType
+                String description = channelDefinition.getDescription();
+                if (description == null) {
+                    description = channelType.getDescription();
+                }
 
-            // Default to the channelDefinition description to override the
-            // channelType
-            String description = channelDefinition.getDescription();
-            if (description == null) {
-                description = channelType.getDescription();
+                ChannelDefinitionDTO channelDefinitionDTO = new ChannelDefinitionDTO(channelDefinition.getId(),
+                        channelDefinition.getChannelTypeUID().toString(), label, description, channelType.getTags(),
+                        channelType.getCategory(), channelType.getState(), channelType.isAdvanced(),
+                        channelDefinition.getProperties());
+                channelDefinitionDTOs.add(channelDefinitionDTO);
             }
-
-            ChannelDefinitionDTO channelDefinitionDTO = new ChannelDefinitionDTO(channelDefinition.getId(),
-                    channelDefinition.getChannelTypeUID().toString(), label, description, channelType.getTags(),
-                    channelType.getCategory(), channelType.getState(), channelType.isAdvanced(),
-                    channelDefinition.getProperties());
-            channelDefinitionDTOs.add(channelDefinitionDTO);
         }
         return channelDefinitionDTOs;
     }

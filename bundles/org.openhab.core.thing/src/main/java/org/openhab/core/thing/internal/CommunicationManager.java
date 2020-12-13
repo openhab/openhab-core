@@ -12,12 +12,11 @@
  */
 package org.openhab.core.thing.internal;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -29,6 +28,7 @@ import javax.measure.Quantity;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.cache.ExpiringCacheMap;
 import org.openhab.core.common.AbstractUID;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.registry.RegistryChangeListener;
@@ -74,6 +74,7 @@ import org.openhab.core.types.Type;
 import org.openhab.core.types.util.UnitUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -91,11 +92,14 @@ import org.slf4j.LoggerFactory;
 @Component(service = { EventSubscriber.class, CommunicationManager.class }, immediate = true)
 public class CommunicationManager implements EventSubscriber, RegistryChangeListener<ItemChannelLink> {
 
+    // how long to cache profile safe call instances
+    private static final Duration CACHE_EXPIRATION = Duration.ofMinutes(30);
+
     // the timeout to use for any item event processing
     public static final long THINGHANDLER_EVENT_TIMEOUT = TimeUnit.SECONDS.toMillis(30);
 
-    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Collections.unmodifiableSet(
-            new HashSet<>(Arrays.asList(ItemStateEvent.TYPE, ItemCommandEvent.TYPE, ChannelTriggeredEvent.TYPE)));
+    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE,
+            ChannelTriggeredEvent.TYPE);
 
     private final Logger logger = LoggerFactory.getLogger(CommunicationManager.class);
 
@@ -108,6 +112,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     private final EventPublisher eventPublisher;
     private final SafeCaller safeCaller;
     private final ThingRegistry thingRegistry;
+
+    private final ExpiringCacheMap<Integer, Profile> profileSafeCallCache = new ExpiringCacheMap<>(CACHE_EXPIRATION);
 
     @Activate
     public CommunicationManager(final @Reference AutoUpdateManager autoUpdateManager,
@@ -128,6 +134,13 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         this.eventPublisher = eventPublisher;
         this.safeCaller = safeCaller;
         this.thingRegistry = thingRegistry;
+
+        itemChannelLinkRegistry.addRegistryChangeListener(this);
+    }
+
+    @Deactivate
+    public void deactivate() {
+        itemChannelLinkRegistry.removeRegistryChangeListener(this);
     }
 
     private final Set<ItemFactory> itemFactories = new CopyOnWriteArraySet<>();
@@ -140,8 +153,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private final Set<ProfileAdvisor> profileAdvisors = new CopyOnWriteArraySet<>();
 
-    private final Map<String, @Nullable List<Class<? extends Command>>> acceptedCommandTypeMap = new ConcurrentHashMap<>();
-    private final Map<String, @Nullable List<Class<? extends State>>> acceptedStateTypeMap = new ConcurrentHashMap<>();
+    private final Map<String, List<Class<? extends Command>>> acceptedCommandTypeMap = new ConcurrentHashMap<>();
+    private final Map<String, List<Class<? extends State>>> acceptedStateTypeMap = new ConcurrentHashMap<>();
 
     @Override
     public Set<String> getSubscribedEventTypes() {
@@ -172,6 +185,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         synchronized (profiles) {
             Profile profile = profiles.get(link.getUID());
             if (profile != null) {
+                logger.trace("using profile '{}' from cache", profile.getProfileTypeUID());
                 return profile;
             }
             ProfileTypeUID profileTypeUID = determineProfileTypeUID(link, item, thing);
@@ -285,11 +299,19 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         handleEvent(itemName, command, commandEvent.getSource(), s -> acceptedCommandTypeMap.get(s),
                 (profile, thing, convertedCommand) -> {
                     if (profile instanceof StateProfile) {
-                        safeCaller.create(((StateProfile) profile), StateProfile.class) //
-                                .withAsync() //
-                                .withIdentifier(thing) //
-                                .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
-                                .build().onCommandFromItem(convertedCommand);
+                        int key = Objects.hash("COMMAND", profile, thing);
+                        Profile p = profileSafeCallCache.putIfAbsentAndGet(key, () -> {
+                            return safeCaller.create(((StateProfile) profile), StateProfile.class) //
+                                    .withAsync() //
+                                    .withIdentifier(thing) //
+                                    .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
+                                    .build();
+                        });
+                        if (p instanceof StateProfile) {
+                            ((StateProfile) p).onCommandFromItem(convertedCommand);
+                        } else {
+                            throw new IllegalStateException("Expiringcache didn't provide a StateProfile instance!");
+                        }
                     }
                 });
     }
@@ -299,11 +321,19 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         final State newState = updateEvent.getItemState();
         handleEvent(itemName, newState, updateEvent.getSource(), s -> acceptedStateTypeMap.get(s),
                 (profile, thing, convertedState) -> {
-                    safeCaller.create(profile, Profile.class) //
-                            .withAsync() //
-                            .withIdentifier(thing) //
-                            .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
-                            .build().onStateUpdateFromItem(convertedState);
+                    int key = Objects.hash("UPDATE", profile, thing);
+                    Profile p = profileSafeCallCache.putIfAbsentAndGet(key, () -> {
+                        return safeCaller.create(profile, Profile.class) //
+                                .withAsync() //
+                                .withIdentifier(thing) //
+                                .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
+                                .build();
+                    });
+                    if (p != null) {
+                        p.onStateUpdateFromItem(convertedState);
+                    } else {
+                        throw new IllegalStateException("Expiringcache didn't provide a Profile instance!");
+                    }
                 });
     }
 
@@ -538,11 +568,12 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addProfileFactory(ProfileFactory profileFactory) {
-        this.profileFactories.put(profileFactory, ConcurrentHashMap.newKeySet());
+        profileFactories.put(profileFactory, ConcurrentHashMap.newKeySet());
     }
 
+    @SuppressWarnings("null")
     protected void removeProfileFactory(ProfileFactory profileFactory) {
-        Set<String> links = this.profileFactories.remove(profileFactory);
+        Set<String> links = profileFactories.remove(profileFactory);
         synchronized (profiles) {
             links.forEach(link -> {
                 profiles.remove(link);

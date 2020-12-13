@@ -22,10 +22,12 @@ import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -39,10 +41,12 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jose4j.base64url.Base64Url;
 import org.openhab.core.auth.ManagedUser;
 import org.openhab.core.auth.PendingToken;
 import org.openhab.core.auth.User;
+import org.openhab.core.auth.UserApiToken;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UserSession;
 import org.openhab.core.io.rest.JSONResponse;
@@ -61,16 +65,19 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class is used to issue JWT tokens to clients.
  *
  * @author Yannick Schaus - Initial contribution
  * @author Wouter Born - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Yannick Schaus - Add API token operations
  */
 @Component(service = { RESTResource.class, TokenResource.class })
 @JaxrsResource
@@ -78,7 +85,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(TokenResource.PATH_AUTH)
-@Api(TokenResource.PATH_AUTH)
+@Tag(name = TokenResource.PATH_AUTH)
 @NonNullByDefault
 public class TokenResource implements RESTResource {
     private final Logger logger = LoggerFactory.getLogger(TokenResource.class);
@@ -107,12 +114,14 @@ public class TokenResource implements RESTResource {
     @Path("/token")
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-    @ApiOperation(value = "Get access and refresh tokens.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(operationId = "getOAuthToken", summary = "Get access and refresh tokens.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "Invalid request parameters") })
     public Response getToken(@FormParam("grant_type") String grantType, @FormParam("code") String code,
             @FormParam("redirect_uri") String redirectUri, @FormParam("client_id") String clientId,
             @FormParam("refresh_token") String refreshToken, @FormParam("code_verifier") String codeVerifier,
-            @QueryParam("useCookie") boolean useCookie, @CookieParam(SESSIONID_COOKIE_NAME) Cookie sessionCookie) {
+            @QueryParam("useCookie") boolean useCookie,
+            @Nullable @CookieParam(SESSIONID_COOKIE_NAME) Cookie sessionCookie) {
         try {
             switch (grantType) {
                 case "authorization_code":
@@ -135,8 +144,10 @@ public class TokenResource implements RESTResource {
 
     @GET
     @Path("/sessions")
-    @ApiOperation(value = "List the sessions associated to the authenticated user.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = UserSessionDTO.class) })
+    @Operation(operationId = "getSessionsForCurrentUser", summary = "List the sessions associated to the authenticated user.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserSessionDTO.class))),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User not found") })
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getSessions(@Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
@@ -152,12 +163,62 @@ public class TokenResource implements RESTResource {
         return Response.ok(new Stream2JSONInputStream(sessions)).build();
     }
 
+    @GET
+    @Path("/apitokens")
+    @Operation(operationId = "getApiToken", summary = "List the API tokens associated to the authenticated user.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserApiTokenDTO.class))),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User not found") })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response getApiTokens(@Context SecurityContext securityContext) {
+        if (securityContext.getUserPrincipal() == null) {
+            return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
+        }
+
+        ManagedUser user = (ManagedUser) userRegistry.get(securityContext.getUserPrincipal().getName());
+        if (user == null) {
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "User not found");
+        }
+
+        Stream<UserApiTokenDTO> sessions = user.getApiTokens().stream().map(this::toUserApiTokenDTO);
+        return Response.ok(new Stream2JSONInputStream(sessions)).build();
+    }
+
+    @DELETE
+    @Path("/apitokens/{name}")
+    @Operation(operationId = "removeApiToken", summary = "Revoke a specified API token associated to the authenticated user.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User or API token not found") })
+    public Response removeApiToken(@Context SecurityContext securityContext, @PathParam("name") String name) {
+        if (securityContext.getUserPrincipal() == null) {
+            return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
+        }
+
+        ManagedUser user = (ManagedUser) userRegistry.get(securityContext.getUserPrincipal().getName());
+        if (user == null) {
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "User not found");
+        }
+
+        Optional<UserApiToken> userApiToken = user.getApiTokens().stream()
+                .filter(apiToken -> apiToken.getName().equals(name)).findAny();
+        if (userApiToken.isEmpty()) {
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No API token found with that name");
+        }
+
+        userRegistry.removeUserApiToken(user, userApiToken.get());
+        return Response.ok().build();
+    }
+
     @POST
     @Path("/logout")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-    @ApiOperation(value = "Delete the session associated with a refresh token.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response deleteSession(@FormParam("refresh_token") String refreshToken, @FormParam("id") String id,
+    @Operation(operationId = "deleteSession", summary = "Delete the session associated with a refresh token.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User or refresh token not found") })
+    public Response deleteSession(@Nullable @FormParam("refresh_token") String refreshToken,
+            @Nullable @FormParam("id") String id, @Nullable @CookieParam(SESSIONID_COOKIE_NAME) Cookie sessionCookie,
             @Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
@@ -182,19 +243,18 @@ public class TokenResource implements RESTResource {
 
         ResponseBuilder response = Response.ok();
 
-        if (session.get().hasSessionCookie()) {
+        if (sessionCookie != null && sessionCookie.getValue().equals(session.get().getSessionId())) {
             URI domainUri;
             try {
                 domainUri = new URI(session.get().getRedirectUri());
-                NewCookie newCookie = new NewCookie(SESSIONID_COOKIE_NAME, "", "/", domainUri.getHost(), null, 0, false,
-                        true);
+                NewCookie newCookie = new NewCookie(SESSIONID_COOKIE_NAME, null, "/", domainUri.getHost(), null, 0,
+                        false, true);
                 response.cookie(newCookie);
             } catch (Exception e) {
             }
         }
 
-        user.getSessions().remove(session.get());
-        userRegistry.update(user);
+        userRegistry.removeUserSession(user, session.get());
 
         return response.build();
     }
@@ -206,11 +266,19 @@ public class TokenResource implements RESTResource {
                 session.getLastRefreshTime(), session.getClientId(), session.getScope());
     }
 
+    private UserApiTokenDTO toUserApiTokenDTO(UserApiToken apiToken) {
+        return new UserApiTokenDTO(apiToken.getName(), apiToken.getCreatedTime(), apiToken.getScope());
+    }
+
     private Response processAuthorizationCodeGrant(String code, String redirectUri, String clientId,
-            String codeVerifier, boolean useCookie) throws TokenEndpointException, NoSuchAlgorithmException {
-        // find an user with the authorization code pending
-        Optional<User> user = userRegistry.getAll().stream().filter(u -> ((ManagedUser) u).getPendingToken() != null
-                && ((ManagedUser) u).getPendingToken().getAuthorizationCode().equals(code)).findAny();
+            @Nullable String codeVerifier, boolean useCookie) throws TokenEndpointException, NoSuchAlgorithmException {
+        // find a user with the authorization code pending
+        Optional<User> user = userRegistry.getAll().stream().filter(u -> {
+            ManagedUser managedUser = (ManagedUser) u;
+            @Nullable
+            PendingToken pendingToken = managedUser.getPendingToken();
+            return (pendingToken != null && pendingToken.getAuthorizationCode().equals(code));
+        }).findAny();
 
         if (!user.isPresent()) {
             logger.warn("Couldn't find a user with the provided authentication code pending");
@@ -306,8 +374,8 @@ public class TokenResource implements RESTResource {
         return response.build();
     }
 
-    private Response processRefreshTokenGrant(String clientId, String refreshToken, Cookie sessionCookie)
-            throws TokenEndpointException {
+    private Response processRefreshTokenGrant(String clientId, @Nullable String refreshToken,
+            @Nullable Cookie sessionCookie) throws TokenEndpointException {
         if (refreshToken == null) {
             throw new TokenEndpointException(ErrorType.INVALID_REQUEST);
         }

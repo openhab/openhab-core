@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Extension of the default OSGi bundle activator
+ * Addon of the default OSGi bundle activator
  *
  * @author Kai Kreuzer - Initial contribution
  */

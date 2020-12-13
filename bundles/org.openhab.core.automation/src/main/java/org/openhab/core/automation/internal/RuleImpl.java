@@ -14,7 +14,6 @@ package org.openhab.core.automation.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -95,15 +94,11 @@ public class RuleImpl implements Rule {
         this.uid = uid == null ? UUID.randomUUID().toString() : uid;
         this.name = name;
         this.description = description;
-        this.tags = tags == null ? Collections.emptySet() : Collections.unmodifiableSet(new HashSet<>(tags));
-        this.triggers = triggers == null ? Collections.emptyList()
-                : Collections.unmodifiableList(new ArrayList<>(triggers));
-        this.conditions = conditions == null ? Collections.emptyList()
-                : Collections.unmodifiableList(new ArrayList<>(conditions));
-        this.actions = actions == null ? Collections.emptyList()
-                : Collections.unmodifiableList(new ArrayList<>(actions));
-        this.configDescriptions = configDescriptions == null ? Collections.emptyList()
-                : Collections.unmodifiableList(new ArrayList<>(configDescriptions));
+        this.tags = tags == null ? Set.of() : Set.copyOf(tags);
+        this.triggers = triggers == null ? List.of() : List.copyOf(triggers);
+        this.conditions = conditions == null ? List.of() : List.copyOf(conditions);
+        this.actions = actions == null ? List.of() : List.copyOf(actions);
+        this.configDescriptions = configDescriptions == null ? List.of() : List.copyOf(configDescriptions);
         this.configuration = configuration == null ? new Configuration()
                 : new Configuration(configuration.getProperties());
         this.templateUID = templateUID;

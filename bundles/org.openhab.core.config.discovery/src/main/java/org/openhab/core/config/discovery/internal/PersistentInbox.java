@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -87,6 +88,7 @@ import org.slf4j.LoggerFactory;
  * @author Dennis Nobel - Added persistence support
  * @author Andre Fuechsel - Added removeOlderResults
  * @author Christoph Knauf - Added removeThingsForBridge and getPropsAndConfigParams
+ * @author Laurent Garnier - Added parameter newThingId to method approve
  */
 @Component(immediate = true, service = Inbox.class)
 @NonNullByDefault
@@ -94,9 +96,9 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
     // Internal enumeration to identify the correct type of the event to be fired.
     private enum EventType {
-        added,
-        removed,
-        updated
+        ADDED,
+        REMOVED,
+        UPDATED
     }
 
     private class TimeToLiveCheckingThread implements Runnable {
@@ -112,7 +114,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
             long now = new Date().getTime();
             for (DiscoveryResult result : inbox.getAll()) {
                 if (isResultExpired(result, now)) {
-                    logger.debug("Inbox entry for thing {} is expired and will be removed", result.getThingUID());
+                    logger.debug("Inbox entry for thing '{}' is expired and will be removed.", result.getThingUID());
                     remove(result.getThingUID());
                 }
             }
@@ -158,22 +160,22 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
     @Activate
     protected void activate() {
-        this.discoveryServiceRegistry.addDiscoveryListener(this);
-        this.thingRegistry.addRegistryChangeListener(this);
-        this.timeToLiveChecker = ThreadPoolManager.getScheduledPool("discovery")
+        discoveryServiceRegistry.addDiscoveryListener(this);
+        thingRegistry.addRegistryChangeListener(this);
+        timeToLiveChecker = ThreadPoolManager.getScheduledPool("discovery")
                 .scheduleWithFixedDelay(new TimeToLiveCheckingThread(this), 0, 30, TimeUnit.SECONDS);
     }
 
     @Deactivate
     protected void deactivate() {
-        this.thingRegistry.removeRegistryChangeListener(this);
-        this.discoveryServiceRegistry.removeDiscoveryListener(this);
-        this.listeners.clear();
-        this.timeToLiveChecker.cancel(true);
+        thingRegistry.removeRegistryChangeListener(this);
+        discoveryServiceRegistry.removeDiscoveryListener(this);
+        listeners.clear();
+        timeToLiveChecker.cancel(true);
     }
 
     @Override
-    public @Nullable Thing approve(ThingUID thingUID, @Nullable String label) {
+    public @Nullable Thing approve(ThingUID thingUID, @Nullable String label, @Nullable String newThingId) {
         if (thingUID == null) {
             throw new IllegalArgumentException("Thing UID must not be null");
         }
@@ -187,10 +189,19 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         getPropsAndConfigParams(result, properties, configParams);
         final Configuration config = new Configuration(configParams);
         ThingTypeUID thingTypeUID = result.getThingTypeUID();
-        Thing newThing = ThingFactory.createThing(thingUID, config, properties, result.getBridgeUID(), thingTypeUID,
-                this.thingHandlerFactories);
+        ThingUID newThingUID = thingUID;
+        if (newThingId != null) {
+            try {
+                newThingUID = new ThingUID(thingTypeUID, newThingId);
+            } catch (IllegalArgumentException e) {
+                logger.warn("Cannot create thing: {}", e.getMessage());
+                return null;
+            }
+        }
+        Thing newThing = ThingFactory.createThing(newThingUID, config, properties, result.getBridgeUID(), thingTypeUID,
+                thingHandlerFactories);
         if (newThing == null) {
-            logger.warn("Cannot create thing. No binding found that supports creating a thing" + " of type {}.",
+            logger.warn("Cannot create thing. No binding found that supports creating a thing of type {}.",
                     thingTypeUID);
             return null;
         }
@@ -211,14 +222,14 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         final DiscoveryResult result = discoveryResult;
 
         ThingUID thingUID = result.getThingUID();
-        Thing thing = this.thingRegistry.get(thingUID);
+        Thing thing = thingRegistry.get(thingUID);
 
         if (thing == null) {
             DiscoveryResult inboxResult = get(thingUID);
 
             if (inboxResult == null) {
                 discoveryResultStorage.put(result.getThingUID().toString(), result);
-                notifyListeners(result, EventType.added);
+                notifyListeners(result, EventType.ADDED);
                 logger.info("Added new thing '{}' to inbox.", thingUID);
                 return true;
             } else {
@@ -226,7 +237,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
                     DiscoveryResultImpl resultImpl = (DiscoveryResultImpl) inboxResult;
                     resultImpl.synchronize(result);
                     discoveryResultStorage.put(result.getThingUID().toString(), resultImpl);
-                    notifyListeners(resultImpl, EventType.updated);
+                    notifyListeners(resultImpl, EventType.UPDATED);
                     logger.debug("Updated discovery result for '{}'.", thingUID);
                     return true;
                 } else {
@@ -235,15 +246,16 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
                 }
             }
         } else {
-            logger.debug("Discovery result with thing '{}' not added as inbox entry."
-                    + " It is already present as thing in the ThingRegistry.", thingUID);
+            logger.debug(
+                    "Discovery result with thing '{}' not added as inbox entry. It is already present as thing in the ThingRegistry.",
+                    thingUID);
 
             boolean updated = synchronizeConfiguration(result.getThingTypeUID(), result.getProperties(),
                     thing.getConfiguration());
 
             if (updated) {
                 logger.debug("The configuration for thing '{}' is updated...", thingUID);
-                this.managedThingProvider.update(thing);
+                managedThingProvider.update(thing);
             }
         }
 
@@ -300,7 +312,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     @Override
     public void addInboxListener(@Nullable InboxListener listener) throws IllegalStateException {
         if (listener != null) {
-            this.listeners.add(listener);
+            listeners.add(listener);
         }
     }
 
@@ -338,8 +350,8 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
                     removeResultsForBridge(thingUID);
                 }
                 resultDiscovererMap.remove(discoveryResult);
-                this.discoveryResultStorage.remove(thingUID.toString());
-                notifyListeners(discoveryResult, EventType.removed);
+                discoveryResultStorage.remove(thingUID.toString());
+                notifyListeners(discoveryResult, EventType.REMOVED);
                 return true;
             }
         }
@@ -349,7 +361,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     @Override
     public void removeInboxListener(@Nullable InboxListener listener) throws IllegalStateException {
         if (listener != null) {
-            this.listeners.remove(listener);
+            listeners.remove(listener);
         }
     }
 
@@ -378,7 +390,8 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
                 if (bridgeUID == null || bridgeUID.equals(discoveryResult.getBridgeUID())) {
                     removedThings.add(thingUID);
                     remove(thingUID);
-                    logger.debug("Removed {} from inbox because it was older than {}", thingUID, new Date(timestamp));
+                    logger.debug("Removed thing '{}' from inbox because it was older than {}.", thingUID,
+                            new Date(timestamp));
                 }
             }
         }
@@ -389,7 +402,8 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     public void added(Thing thing) {
         if (remove(thing.getUID())) {
             logger.debug(
-                    "Discovery result removed from inbox, because it was added as a Thing" + " to the ThingRegistry.");
+                    "Discovery result for thing '{}' removed from inbox, because it was added as a Thing to the ThingRegistry.",
+                    thing.getUID());
         }
     }
 
@@ -414,7 +428,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
             DiscoveryResultImpl resultImpl = (DiscoveryResultImpl) result;
             resultImpl.setFlag((flag == null) ? DiscoveryResultFlag.NEW : flag);
             discoveryResultStorage.put(resultImpl.getThingUID().toString(), resultImpl);
-            notifyListeners(resultImpl, EventType.updated);
+            notifyListeners(resultImpl, EventType.UPDATED);
         } else {
             logger.warn("Cannot set flag for result of instance type '{}'", result.getClass().getName());
         }
@@ -434,35 +448,32 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         if (thingUID != null) {
             return discoveryResultStorage.get(thingUID.toString());
         }
-
         return null;
     }
 
     private void notifyListeners(DiscoveryResult result, EventType type) {
-        for (InboxListener listener : this.listeners) {
+        for (InboxListener listener : listeners) {
             try {
                 switch (type) {
-                    case added:
+                    case ADDED:
                         listener.thingAdded(this, result);
                         break;
-                    case removed:
+                    case REMOVED:
                         listener.thingRemoved(this, result);
                         break;
-                    case updated:
+                    case UPDATED:
                         listener.thingUpdated(this, result);
                         break;
                 }
             } catch (Exception ex) {
-                String errorMessage = String.format("Cannot notify the InboxListener '%s' about a Thing %s event!",
-                        listener.getClass().getName(), type.name());
-
-                logger.error(errorMessage, ex);
+                logger.error("Cannot notify the InboxListener '{}' about a Thing {} event!",
+                        listener.getClass().getName(), type.name(), ex);
             }
         }
 
         // in case of EventType added/updated the listeners might have modified the result in the discoveryResultStorage
         final DiscoveryResult resultForEvent;
-        if (type == EventType.removed) {
+        if (type == EventType.REMOVED) {
             resultForEvent = result;
         } else {
             resultForEvent = get(result.getThingUID());
@@ -477,13 +488,13 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         if (eventPublisher != null) {
             try {
                 switch (eventType) {
-                    case added:
+                    case ADDED:
                         eventPublisher.post(InboxEventFactory.createAddedEvent(result));
                         break;
-                    case removed:
+                    case REMOVED:
                         eventPublisher.post(InboxEventFactory.createRemovedEvent(result));
                         break;
-                    case updated:
+                    case UPDATED:
                         eventPublisher.post(InboxEventFactory.createUpdatedEvent(result));
                         break;
                     default:
@@ -506,8 +517,8 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         for (ThingUID thingUID : getResultsForBridge(bridgeUID)) {
             DiscoveryResult discoveryResult = get(thingUID);
             if (discoveryResult != null) {
-                this.discoveryResultStorage.remove(thingUID.toString());
-                notifyListeners(discoveryResult, EventType.removed);
+                discoveryResultStorage.remove(thingUID.toString());
+                notifyListeners(discoveryResult, EventType.REMOVED);
             }
         }
     }
@@ -534,13 +545,15 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         final List<ConfigDescriptionParameter> configDescParams = getConfigDescParams(discoveryResult);
         final Set<String> paramNames = getConfigDescParamNames(configDescParams);
         final Map<String, Object> resultProps = discoveryResult.getProperties();
-        for (String resultKey : resultProps.keySet()) {
+        for (Entry<String, Object> resultEntry : resultProps.entrySet()) {
+            String resultKey = resultEntry.getKey();
+            Object resultValue = resultEntry.getValue();
             if (paramNames.contains(resultKey)) {
                 ConfigDescriptionParameter param = getConfigDescriptionParam(configDescParams, resultKey);
-                Object normalizedValue = ConfigUtil.normalizeType(resultProps.get(resultKey), param);
+                Object normalizedValue = ConfigUtil.normalizeType(resultValue, param);
                 configParams.put(resultKey, normalizedValue);
             } else {
-                props.put(resultKey, String.valueOf(resultProps.get(resultKey)));
+                props.put(resultKey, String.valueOf(resultValue));
             }
         }
     }
@@ -563,9 +576,11 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     private List<ConfigDescriptionParameter> getConfigDescParams(@Nullable ThingType thingType) {
         if (thingType != null && thingType.getConfigDescriptionURI() != null) {
             URI descURI = thingType.getConfigDescriptionURI();
-            ConfigDescription desc = configDescRegistry.getConfigDescription(descURI);
-            if (desc != null) {
-                return desc.getParameters();
+            if (descURI != null) {
+                ConfigDescription desc = configDescRegistry.getConfigDescription(descURI);
+                if (desc != null) {
+                    return desc.getParameters();
+                }
             }
         }
         return Collections.emptyList();
@@ -580,8 +595,8 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     }
 
     void setTimeToLiveCheckingInterval(int interval) {
-        this.timeToLiveChecker.cancel(true);
-        this.timeToLiveChecker = ThreadPoolManager.getScheduledPool("discovery")
+        timeToLiveChecker.cancel(true);
+        timeToLiveChecker = ThreadPoolManager.getScheduledPool("discovery")
                 .scheduleWithFixedDelay(new TimeToLiveCheckingThread(this), 0, interval, TimeUnit.SECONDS);
     }
 

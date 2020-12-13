@@ -28,7 +28,7 @@ public interface PersistenceServiceRegistry {
     /**
      * Get the default persistence service.
      *
-     * @return {@link PersistenceService} default service
+     * @return the default {@link PersistenceService}
      */
     @Nullable
     PersistenceService getDefault();
@@ -37,7 +37,7 @@ public interface PersistenceServiceRegistry {
      * Get the persistence service with the given id.
      *
      * @param serviceId the service id
-     * @return {@link PersistenceService} the service with the id or null, if not present
+     * @return the {@link PersistenceService} with the given id
      */
     @Nullable
     PersistenceService get(@Nullable String serviceId);
@@ -45,7 +45,7 @@ public interface PersistenceServiceRegistry {
     /**
      * Get the id of the default persistence service.
      *
-     * @return the id of the default persistence service or null, if no default service is defined
+     * @return the id of the default {@link PersistenceService}
      */
     @Nullable
     String getDefaultId();
@@ -53,7 +53,7 @@ public interface PersistenceServiceRegistry {
     /**
      * Returns all available persistence services.
      *
-     * @return all available persistence services
+     * @return a set of all available {@link PersistenceService}s
      */
     Set<PersistenceService> getAll();
 }

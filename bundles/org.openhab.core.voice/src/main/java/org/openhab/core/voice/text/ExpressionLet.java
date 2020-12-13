@@ -12,8 +12,6 @@
  */
 package org.openhab.core.voice.text;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -90,7 +88,7 @@ public final class ExpressionLet extends Expression {
 
     @Override
     List<Expression> getChildExpressions() {
-        return Collections.unmodifiableList(Arrays.asList(subExpression));
+        return List.of(subExpression);
     }
 
     @Override

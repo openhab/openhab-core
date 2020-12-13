@@ -23,14 +23,12 @@ import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
+import org.openhab.core.common.NamedThreadFactory;
 
 /**
  * This class is implementation of {@link TriggerHandlerCallback} used by the {@link Trigger}s to notify rule engine
- * about
- * appearing of new triggered data. There is one and only one {@link TriggerHandlerCallback} per RuleImpl and it is used
- * by
- * all
- * rule's {@link Trigger}s.
+ * about appearing of new triggered data. There is one and only one {@link TriggerHandlerCallback} per Rule and
+ * it is used by all rule's {@link Trigger}s.
  *
  * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - improved stability
@@ -48,7 +46,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     protected TriggerHandlerCallbackImpl(RuleEngineImpl re, String ruleUID) {
         this.re = re;
         this.ruleUID = ruleUID;
-        executor = Executors.newSingleThreadExecutor();
+        executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("rule-" + ruleUID));
     }
 
     @Override

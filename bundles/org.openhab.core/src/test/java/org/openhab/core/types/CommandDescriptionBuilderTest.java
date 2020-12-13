@@ -13,14 +13,13 @@
 package org.openhab.core.types;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test the {@link CommandDescriptionBuilder}.
@@ -31,26 +30,26 @@ public class CommandDescriptionBuilderTest {
 
     private CommandDescriptionBuilder builder;
 
-    @Before
+    @BeforeEach
     public void setup() {
         builder = CommandDescriptionBuilder.create();
     }
 
     @Test
     public void builderWithEmptyOptions() {
-        List<CommandOption> options = Collections.emptyList();
+        List<CommandOption> options = List.of();
         assertThat(builder.withCommandOptions(options).build().getCommandOptions(), is(options));
     }
 
     @Test
     public void builderWithOption() {
         CommandOption option = new CommandOption("command", "label");
-        assertThat(builder.withCommandOption(option).build().getCommandOptions(), is(Arrays.asList(option)));
+        assertThat(builder.withCommandOption(option).build().getCommandOptions(), is(List.of(option)));
     }
 
     @Test
     public void builderWithOptions() {
-        List<CommandOption> options = Arrays.asList(new CommandOption("command1", "label1"),
+        List<CommandOption> options = List.of(new CommandOption("command1", "label1"),
                 new CommandOption("command2", "label2"));
         assertThat(builder.withCommandOptions(options).build().getCommandOptions(), is(options));
     }
@@ -58,7 +57,7 @@ public class CommandDescriptionBuilderTest {
     @Test
     public void subsequentBuildsCreateIndependentFragments() {
         CommandDescription commandDescription1 = builder
-                .withCommandOptions(Collections.singletonList(new CommandOption("command", "label"))).build();
+                .withCommandOptions(List.of(new CommandOption("command", "label"))).build();
         CommandDescription commandDescription2 = builder.withCommandOptions(Collections.emptyList()).build();
 
         assertThat(commandDescription1.getCommandOptions(), is(not(commandDescription2.getCommandOptions())));

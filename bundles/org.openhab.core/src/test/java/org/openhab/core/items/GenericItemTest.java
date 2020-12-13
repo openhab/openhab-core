@@ -12,8 +12,9 @@
  */
 package org.openhab.core.items;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
@@ -67,7 +68,7 @@ public class GenericItemTest {
         ItemStateChangedEvent change = captor.getValue();
 
         assertEquals(item.getName(), change.getItemName());
-        assertEquals("smarthome/items/member1/statechanged", change.getTopic());
+        assertEquals("openhab/items/member1/statechanged", change.getTopic());
         assertEquals(oldState, change.getOldItemState());
         assertEquals(item.getState(), change.getItemState());
         assertEquals(ItemStateChangedEvent.TYPE, change.getType());
@@ -77,22 +78,23 @@ public class GenericItemTest {
         verifyNoMoreInteractions(publisher);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAddGroupNameWithNull() {
         TestItem item = new TestItem("member1");
-        item.addGroupName(toNull());
+        assertThrows(IllegalArgumentException.class, () -> item.addGroupName(toNull()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAddGroupNamesWithNull() {
         TestItem item = new TestItem("member1");
-        item.addGroupNames(Arrays.asList("group-a", toNull(), "group-b"));
+        assertThrows(IllegalArgumentException.class,
+                () -> item.addGroupNames(Arrays.asList("group-a", toNull(), "group-b")));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testRemoveGroupNameWithNull() {
         TestItem item = new TestItem("member1");
-        item.removeGroupName(toNull());
+        assertThrows(IllegalArgumentException.class, () -> item.removeGroupName(toNull()));
     }
 
     @Test
@@ -152,7 +154,7 @@ public class GenericItemTest {
 
             @Override
             public List<CommandOption> getCommandOptions() {
-                return Arrays.asList(new CommandOption("ALERT", "Alert"), new CommandOption("REBOOT", "Reboot"));
+                return List.of(new CommandOption("ALERT", "Alert"), new CommandOption("REBOOT", "Reboot"));
             }
         });
         item.setCommandDescriptionService(commandDescriptionService);
@@ -170,7 +172,7 @@ public class GenericItemTest {
 
                     @Override
                     public List<CommandOption> getCommandOptions() {
-                        return Arrays.asList(new CommandOption("C1", "Command 1"), new CommandOption("C2", "Command 2"),
+                        return List.of(new CommandOption("C1", "Command 1"), new CommandOption("C2", "Command 2"),
                                 new CommandOption("C3", "Command 3"));
                     }
                 });
@@ -184,7 +186,7 @@ public class GenericItemTest {
         TestItem item = new TestItem("test");
 
         StateDescriptionService stateDescriptionService = mock(StateDescriptionService.class);
-        List<StateOption> stateOptions = Arrays.asList(new StateOption("STATE1", "State 1"),
+        List<StateOption> stateOptions = List.of(new StateOption("STATE1", "State 1"),
                 new StateOption("STATE2", "State 2"));
         when(stateDescriptionService.getStateDescription("test", null)).thenReturn(
                 StateDescriptionFragmentBuilder.create().withOptions(stateOptions).build().toStateDescription());

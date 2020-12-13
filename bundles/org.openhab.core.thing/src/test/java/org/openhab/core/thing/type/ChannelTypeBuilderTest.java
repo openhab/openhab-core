@@ -13,17 +13,17 @@
 package org.openhab.core.thing.type;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.thing.CommonTriggerEvents;
 import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.EventOption;
@@ -43,7 +43,7 @@ public class ChannelTypeBuilderTest {
     private static final String CATEGORY = "category";
     private static final String LABEL = "label";
     private static final String TAG = "tag";
-    private static final List<String> TAGS = Arrays.asList("TAG1", "TAG2");
+    private static final List<String> TAGS = List.of("TAG1", "TAG2");
     private static URI configDescriptionUri;
     private static final ChannelTypeUID CHANNEL_TYPE_UID = new ChannelTypeUID("bindingId", "channelId");
     private static final StateDescriptionFragment STATE_DESCRIPTION_FRAGMENT = StateDescriptionFragmentBuilder.create()
@@ -51,13 +51,13 @@ public class ChannelTypeBuilderTest {
             .build();
     private static final StateDescription STATE_DESCRIPTION = STATE_DESCRIPTION_FRAGMENT.toStateDescription();
     private static final EventDescription EVENT_DESCRIPTION = new EventDescription(
-            Arrays.asList(new EventOption(CommonTriggerEvents.DIR1_PRESSED, null),
+            List.of(new EventOption(CommonTriggerEvents.DIR1_PRESSED, null),
                     new EventOption(CommonTriggerEvents.DIR1_RELEASED, null)));
 
     private StateChannelTypeBuilder stateBuilder;
     private TriggerChannelTypeBuilder triggerBuilder;
 
-    @Before
+    @BeforeEach
     public void setup() throws URISyntaxException {
         configDescriptionUri = new URI("config:dummy");
         // set up a valid basic ChannelTypeBuilder
@@ -65,19 +65,19 @@ public class ChannelTypeBuilderTest {
         triggerBuilder = ChannelTypeBuilder.trigger(CHANNEL_TYPE_UID, LABEL);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void whenLabelIsBlankForStateShouldFail() {
-        ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "", ITEM_TYPE);
+        assertThrows(IllegalArgumentException.class, () -> ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "", ITEM_TYPE));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void whenItemTypeIsBlankForStateShouldFail() {
-        ChannelTypeBuilder.state(CHANNEL_TYPE_UID, LABEL, "");
+        assertThrows(IllegalArgumentException.class, () -> ChannelTypeBuilder.state(CHANNEL_TYPE_UID, LABEL, ""));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void whenLabelIsBlankForTriggerShouldFail() {
-        ChannelTypeBuilder.trigger(CHANNEL_TYPE_UID, "");
+        assertThrows(IllegalArgumentException.class, () -> ChannelTypeBuilder.trigger(CHANNEL_TYPE_UID, ""));
     }
 
     @Test
@@ -137,14 +137,6 @@ public class ChannelTypeBuilderTest {
         ChannelType channelType = stateBuilder.withTags(TAGS).build();
 
         assertThat(channelType.getTags(), is(hasSize(2)));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void withStateDescriptionShouldSetStateDescription() {
-        ChannelType channelType = stateBuilder.withStateDescription(STATE_DESCRIPTION).build();
-
-        assertThat(channelType.getState(), is(STATE_DESCRIPTION));
     }
 
     @Test

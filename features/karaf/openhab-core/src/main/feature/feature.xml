@@ -23,9 +23,12 @@
 		<requirement>openhab.tp;filter:="(feature=base)"</requirement>
 		<feature dependency="true">openhab.tp-base</feature>
 
+		<requirement>openhab.tp;filter:="(feature=jollyday)"</requirement>
+		<feature dependency="true">openhab.tp-jollyday</feature>
+
 		<feature dependency="true">openhab.tp-gson</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.19.0)(!(version&gt;=2.20.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.23.0)(!(version&gt;=2.24.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext</feature>
 
 		<requirement>openhab.tp;filter:="(feature=jax-rs-whiteboard)"</requirement>
@@ -34,6 +37,7 @@
 		<requirement>openhab.tp;filter:="(feature=httpclient)"</requirement>
 		<feature dependency="true">openhab.tp-httpclient</feature>
 
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.dispatch/${project.version}</bundle>
@@ -41,10 +45,10 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
 		<feature dependency="true">openhab-core-storage-json</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.binding.xml/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.id/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.persistence/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.semantics/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.scheduler/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.thing/${project.version}</bundle>
 		<bundle start-level="75">mvn:org.openhab.core.bundles/org.openhab.core.thing.xml/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
@@ -70,55 +74,26 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.auth.oauth2client/${project.version}</bundle>
 	</feature>
 
-	<feature name="openhab-core-automation" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<feature>openhab-core-ephemeris</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
-	</feature>
-
 	<feature name="openhab-core-automation-module-script" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature dependency="true">openhab-core-automation</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.script/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-automation-module-script-rulesupport" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature dependency="true">openhab-core-automation</feature>
 		<feature dependency="true">openhab-core-automation-module-script</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.script.rulesupport/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-automation-module-media" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature dependency="true">openhab-core-automation</feature>
 		<feature dependency="true">openhab-core-automation-module-script</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.media/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-automation-rest" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature dependency="true">openhab-core-automation</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.rest/${project.version}</bundle>
-	</feature>
-
-	<feature name="openhab-core-config-serial" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<feature>openhab-core-io-transport-serial</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.serial/${project.version}</bundle>
-	</feature>
-
-	<feature name="openhab-core-config-discovery-usbserial" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.linuxsysfs/${project.version}</bundle>
-	</feature>
-
-	<feature name="openhab-core-ephemeris" version="${project.version}">
-		<requirement>openhab.tp;filter:="(feature=jollyday)"</requirement>
-		<feature dependency="true">openhab.tp-jollyday</feature>
-		<feature>openhab-core-base</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-io-bin2json" description="Binary to JSON converter" version="${project.version}">
@@ -145,7 +120,7 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http.auth.basic/${project.version}</bundle>
 
 		<feature>openhab-core-io-http-auth</feature>
-		<config name="org.openhab.core.auth">
+		<config name="org.openhab.auth">
 			enabled = true
 		</config>
 	</feature>
@@ -173,8 +148,8 @@
 	<feature name="openhab-core-io-rest-swagger" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.swagger/${project.version}</bundle>
-		<requirement>openhab.tp;filter:="(feature=jaxrswb-swagger-gen)"</requirement>
-		<feature dependency="true">openhab.tp-jaxrswb-swagger-gen</feature>
+		<requirement>openhab.tp;filter:="(feature=swagger-jaxrs)"</requirement>
+		<feature dependency="true">openhab.tp-swagger-jaxrs</feature>
 	</feature>
 
 	<feature name="openhab-core-io-rest-audio" version="${project.version}">
@@ -200,11 +175,6 @@
 		<feature dependency="true">openhab.tp-coap</feature>
 	</feature>
 
-	<feature name="openhab-core-io-transport-dbus" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.dbus/${project.version}</bundle>
-	</feature>
-
 	<feature name="openhab-core-io-transport-http" version="${project.version}">
 		<feature>openhab-core-base</feature>
 
@@ -222,6 +192,14 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.mdns/${project.version}</bundle>
 	</feature>
 
+	<feature name="openhab-core-io-transport-modbus" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<feature>openhab-transport-serial</feature>
+
+		<bundle dependency="true">mvn:org.apache.commons/commons-pool2/2.8.1</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.modbus/${project.version}</bundle>
+	</feature>
+
 	<feature name="openhab-core-io-transport-mqtt" version="${project.version}">
 		<feature>openhab-core-base</feature>
 
@@ -229,15 +207,6 @@
 		<feature dependency="true">openhab.tp-hivemqclient</feature>
 
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.mqtt/${project.version}</bundle>
-	</feature>
-
-	<feature name="openhab-core-io-transport-serial" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<requirement>osgi.service;filter:="(objectClass=org.openhab.core.io.transport.serial.SerialPortManager)"</requirement>
-		<requirement>osgi.service;filter:="(objectClass=org.openhab.core.io.transport.serial.SerialPortProvider)"</requirement>
-		<feature dependency="true">openhab-core-io-transport-serial-rxtx</feature>
-
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-io-transport-serial-javacomm" version="${project.version}">
@@ -248,29 +217,6 @@
 
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.javacomm/${project.version}</bundle>
-	</feature>
-
-	<feature name="openhab-core-io-transport-serial-rxtx" version="${project.version}">
-		<feature>openhab-core-base</feature>
-
-		<requirement>openhab.tp;filter:="(&amp;(feature=serial)(impl=rxtx))"</requirement>
-		<feature dependency="true">openhab.tp-serial-rxtx</feature>
-
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx/${project.version}</bundle>
-	</feature>
-
-	<feature name="openhab-core-io-transport-serial-rfc2217" version="${project.version}">
-		<feature>openhab-core-base</feature>
-
-		<requirement>openhab.tp;filter:="(&amp;(feature=serial)(impl=rxtx))"</requirement>
-		<feature dependency="true">openhab-core-io-transport-serial-rxtx</feature>
-
-		<requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
-		<feature dependency="true">openhab.tp-commons-net</feature>
-
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx.rfc2217/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-io-transport-upnp" version="${project.version}">
@@ -340,7 +286,7 @@
 
 	<feature name="openhab-core-model-script" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature>openhab-core-ephemeris</feature>
+		<feature>openhab-core-automation-module-script</feature>
 		<feature>openhab-core-model-persistence</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.script/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.script.runtime/${project.version}</bundle>
@@ -389,10 +335,10 @@
 
 	<feature name="openhab-core-model-lsp" version="${project.version}">
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.19.0)(!(version&gt;=2.20.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.23.0)(!(version&gt;=2.24.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext-ide</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.8.0)(!(version&gt;=0.9.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.9.0)(!(version&gt;=0.9.9)))"</requirement>
 		<feature dependency="true">openhab.tp-lsp4j</feature>
 
 		<feature>openhab-core-model-item-ide</feature>
@@ -424,18 +370,21 @@
 	</feature>
 
 	<feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
-		<bundle>mvn:com.google.guava/guava/18.0</bundle>
 		<requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
 		<feature dependency="true">openhab.tp-commons-net</feature>
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-auth-jaas</feature>
-		<feature>openhab-core-ephemeris</feature>
+		<feature>openhab-core-automation-rest</feature>
+		<feature>openhab-core-automation-module-script</feature>
+		<feature>openhab-core-automation-module-script-rulesupport</feature>
+		<feature>openhab-core-automation-module-media</feature>
 		<feature>openhab-core-io-console-karaf</feature>
 		<feature>openhab-core-io-http-auth</feature>
 		<feature>openhab-core-io-rest-auth</feature>
 		<feature>openhab-core-io-rest-sitemap</feature>
 		<feature>openhab-core-io-rest-audio</feature>
 		<feature>openhab-core-io-rest-voice</feature>
+		<feature>openhab-core-io-rest-swagger</feature>
 		<feature>openhab-core-io-rest-mdns</feature>
 		<feature>openhab-core-model-lsp</feature>
 		<feature>openhab-core-model-item</feature>
@@ -455,12 +404,11 @@
 		<!-- This bundle needs to be started early as it registers the 404 and startup pages on Jetty -->
 		<!-- It is temperarily disabled due to https://github.com/openhab/openhab-core/issues/422 -->
 		<!-- <bundle start-level="30">mvn:org.openhab.core.bundles/org.openhab.ui.start/${project.version}</bundle> -->
-		<bundle start-level="90">mvn:org.openhab.core.bundles/org.openhab.core.boot/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.karaf/${project.version}</bundle>
-		<config name="org.openhab.core.audio">
+		<config name="org.openhab.audio">
 			defaultSink = enhancedjavasound
 		</config>
-		<config name="org.openhab.core.voice">
+		<config name="org.openhab.voice">
 			defaultHLI = rulehli
 		</config>
 	</feature>
@@ -496,14 +444,32 @@
 		<feature>openhab-core-io-transport-mdns</feature>
 	</feature>
 
+	<feature name="openhab-transport-modbus" description="Modbus Transport" version="${project.version}">
+		<feature>openhab-core-io-transport-modbus</feature>
+	</feature>
+
 	<feature name="openhab-transport-mqtt" description="MQTT Transport" version="${project.version}">
 		<feature>openhab-core-io-transport-mqtt</feature>
 	</feature>
 
 	<feature name="openhab-transport-serial" description="Serial Transport" version="${project.version}">
-		<feature>openhab-core-io-transport-serial-rfc2217</feature>
-		<feature>openhab-core-config-serial</feature>
-		<feature>openhab-core-config-discovery-usbserial</feature>
+		<feature>openhab-core-base</feature>
+
+		<requirement>osgi.service;filter:="(objectClass=org.openhab.core.io.transport.serial.SerialPortManager)"</requirement>
+		<requirement>osgi.service;filter:="(objectClass=org.openhab.core.io.transport.serial.SerialPortProvider)"</requirement>
+
+		<requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
+		<feature dependency="true">openhab.tp-commons-net</feature>
+
+		<requirement>openhab.tp;filter:="(&amp;(feature=serial)(impl=rxtx))"</requirement>
+		<feature dependency="true">openhab.tp-serial-rxtx</feature>
+
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.serial/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.linuxsysfs/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx.rfc2217/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-transport-upnp" description="UPnP Transport" version="${project.version}">

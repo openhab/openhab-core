@@ -13,7 +13,8 @@
 package org.openhab.core.storage.json.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,17 +22,16 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import org.openhab.core.config.core.ConfigConstants;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.storage.Storage;
@@ -49,27 +49,27 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
     private StorageService storageService;
     private Storage<PersistedItem> storage;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         storageService = getService(StorageService.class);
         storage = storageService.getStorage(UUID.randomUUID().toString(), this.getClass().getClassLoader());
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         unregisterService(storageService);
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() throws IOException {
         // clean up database files ...
-        final Path userData = Paths.get(ConfigConstants.getUserDataFolder());
+        final Path userData = Paths.get(OpenHAB.getUserDataFolder());
         if (Files.exists(userData)) {
             try (Stream<Path> walk = Files.walk(userData)) {
                 walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             }
         }
-        final Path config = Paths.get(ConfigConstants.getConfigFolder());
+        final Path config = Paths.get(OpenHAB.getConfigFolder());
         if (Files.exists(config)) {
             try (Stream<Path> walk = Files.walk(config)) {
                 walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
@@ -100,8 +100,8 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
     public void testSerialization() {
         assertThat(storage.getKeys().size(), is(0));
 
-        storage.put(KEY1, new PersistedItem(CoreItemFactory.STRING, Arrays.asList("LIGHT", "GROUND_FLOOR")));
-        storage.put(KEY2, new PersistedItem(CoreItemFactory.NUMBER, Arrays.asList("TEMPERATURE", "OUTSIDE")));
+        storage.put(KEY1, new PersistedItem(CoreItemFactory.STRING, List.of("LIGHT", "GROUND_FLOOR")));
+        storage.put(KEY2, new PersistedItem(CoreItemFactory.NUMBER, List.of("TEMPERATURE", "OUTSIDE")));
         assertThat(storage.getKeys().size(), is(2));
 
         storage.remove(KEY1);
@@ -115,7 +115,7 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
 
         assertThat(storage.getKeys().size(), is(0));
 
-        pItem = storage.put(KEY1, new PersistedItem(CoreItemFactory.STRING, Arrays.asList("LIGHT", "GROUND_FLOOR")));
+        pItem = storage.put(KEY1, new PersistedItem(CoreItemFactory.STRING, List.of("LIGHT", "GROUND_FLOOR")));
         assertThat(storage.getKeys().size(), is(1));
         assertThat(pItem, is(nullValue()));
 
@@ -123,7 +123,7 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
         assertThat(pItem, is(notNullValue()));
         assertThat(pItem.itemType, is(CoreItemFactory.STRING));
 
-        pItem = storage.put(KEY1, new PersistedItem(CoreItemFactory.NUMBER, Arrays.asList("TEMPERATURE")));
+        pItem = storage.put(KEY1, new PersistedItem(CoreItemFactory.NUMBER, List.of("TEMPERATURE")));
         assertThat(pItem, is(notNullValue()));
         assertThat(storage.getKeys().size(), is(1));
         assertThat(pItem.itemType, is(CoreItemFactory.STRING));

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.events;
 
-import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -39,7 +38,7 @@ public abstract class AbstractTypedEventSubscriber<T extends Event> implements E
      * @param eventType the event type
      */
     protected AbstractTypedEventSubscriber(String eventType) {
-        this.subscribedEventTypes = Collections.singleton(eventType);
+        this.subscribedEventTypes = Set.of(eventType);
     }
 
     @Override

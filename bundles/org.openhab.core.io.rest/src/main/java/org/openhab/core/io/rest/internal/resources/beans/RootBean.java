@@ -15,17 +15,41 @@ package org.openhab.core.io.rest.internal.resources.beans;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.OpenHAB;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.io.rest.RESTConstants;
+
 /**
  * This is a java bean that is used to define the root entry
  * page of the REST interface.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Yannick Schaus - Add runtime info
  */
+@NonNullByDefault
 public class RootBean {
 
-    public final String version = "3";
+    public final String version = RESTConstants.API_VERSION;
+
+    public final String locale;
+
+    public final String measurementSystem;
+
+    public final RuntimeInfo runtimeInfo = new RuntimeInfo();
 
     public final List<Links> links = new ArrayList<>();
+
+    public RootBean(LocaleProvider localeProvider, UnitProvider unitProvider) {
+        this.locale = localeProvider.getLocale().toString();
+        this.measurementSystem = unitProvider.getMeasurementSystem().getName();
+    }
+
+    public static class RuntimeInfo {
+        public final String version = OpenHAB.getVersion();
+        public final String buildString = OpenHAB.buildString();
+    }
 
     public static class Links {
         public Links(String type, String url) {

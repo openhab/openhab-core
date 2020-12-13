@@ -13,19 +13,19 @@
 package org.openhab.core.automation.integration.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.ManagedRuleProvider;
 import org.openhab.core.automation.Rule;
@@ -36,6 +36,7 @@ import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.events.RuleStatusInfoEvent;
+import org.openhab.core.automation.internal.RuleEngineImpl;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
@@ -54,6 +55,7 @@ import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.test.storage.VolatileStorageService;
@@ -84,7 +86,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
     // keep storage rules imported from json files
     public static final VolatileStorageService VOLATILE_STORAGE_SERVICE = new VolatileStorageService();
 
-    @Before
+    @BeforeEach
     public void before() {
         logger.info("@Before.begin");
 
@@ -128,7 +130,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(RuleStatusInfoEvent.TYPE);
+                return Set.of(RuleStatusInfoEvent.TYPE);
             }
 
             @Override
@@ -165,10 +167,14 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             assertThat(managedRuleProvider, is(notNullValue()));
             assertThat(moduleTypeRegistry, is(notNullValue()));
         }, 9000, 1000);
+
+        // start rule engine
+        ((RuleEngineImpl) ruleManager).onReadyMarkerAdded(new ReadyMarker("", ""));
+
         logger.info("@Before.finish");
     }
 
-    @After
+    @AfterEach
     public void after() {
         logger.info("@After");
     }
@@ -247,7 +253,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         assertThat(trigger.isPresent(), is(true));
         assertThat(trigger.get().getTypeUID(), is("core.GenericEventTrigger"));
         assertThat(trigger.get().getConfiguration().get("eventSource"), is("myMotionItem"));
-        assertThat(trigger.get().getConfiguration().get("eventTopic"), is("smarthome/items/*"));
+        assertThat(trigger.get().getConfiguration().get("eventTopic"), is("openhab/items/*"));
         assertThat(trigger.get().getConfiguration().get("eventTypes"), is("ItemStateEvent"));
         Optional<? extends Action> action = rule.getActions().stream()
                 .filter(a -> "ItemPostCommandActionID".equals(a.getId())).findFirst();
@@ -286,7 +292,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
                 .filter(t -> "ItemStateChangeTriggerID".equals(t.getId())).findFirst();
         assertThat(trigger.isPresent(), is(true));
         assertThat(trigger.get().getTypeUID(), is("core.GenericEventTrigger"));
-        assertThat(trigger.get().getConfiguration().get("eventTopic"), is("smarthome/items/*"));
+        assertThat(trigger.get().getConfiguration().get("eventTopic"), is("openhab/items/*"));
         assertThat(trigger.get().getConfiguration().get("eventTypes"), is("ItemStateEvent"));
         Optional<? extends Action> action = rule.getActions().stream()
                 .filter(a -> "ItemPostCommandActionID".equals(a.getId())).findFirst();
@@ -304,7 +310,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemCommandEvent.TYPE);
+                return Set.of(ItemCommandEvent.TYPE);
             }
 
             @Override
@@ -326,7 +332,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
         }, 3000, 100);
-        assertThat(itemEvent.getTopic(), is(equalTo("smarthome/items/myLampItem/command")));
+        assertThat(itemEvent.getTopic(), is(equalTo("openhab/items/myLampItem/command")));
         assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
     }
 
@@ -353,7 +359,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemCommandEvent.TYPE);
+                return Set.of(ItemCommandEvent.TYPE);
             }
 
             @Override
@@ -364,7 +370,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             @Override
             public void receive(Event e) {
                 logger.info("Event: {}", e.getTopic());
-                if ("smarthome/items/myLampItem/command".equals(e.getTopic())) {
+                if ("openhab/items/myLampItem/command".equals(e.getTopic())) {
                     itemEvent = e;
                 }
             }

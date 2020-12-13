@@ -13,10 +13,10 @@
 package org.openhab.core.io.net.http.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -36,17 +36,20 @@ import javax.net.ssl.SSLHandshakeException;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author Kai Kreuzer - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class WebClientFactoryImplTest {
 
     private WebClientFactoryImpl webClientFactory;
@@ -55,14 +58,13 @@ public class WebClientFactoryImplTest {
 
     private @Mock ExtensibleTrustManagerImpl extensibleTrustManager;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
         webClientFactory = new WebClientFactoryImpl(extensibleTrustManager);
         webClientFactory.activate(createConfigMap(4, 200, 60, 2, 10, 60));
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         webClientFactory.deactivate();
     }
@@ -76,8 +78,8 @@ public class WebClientFactoryImplTest {
         assertThat(webSocketClient, is(notNullValue()));
     }
 
+    @Disabled("connecting to the outside world makes this test flaky")
     @Test
-    @Ignore("connecting to the outside world makes this test flaky")
     public void testCommonClientUsesExtensibleTrustManager() throws Exception {
         ArgumentCaptor<X509Certificate[]> certificateChainCaptor = ArgumentCaptor.forClass(X509Certificate[].class);
         ArgumentCaptor<SSLEngine> sslEngineCaptor = ArgumentCaptor.forClass(SSLEngine.class);
@@ -97,21 +99,23 @@ public class WebClientFactoryImplTest {
                 containsString("eclipse.org"));
     }
 
-    @Ignore("connecting to the outside world makes this test flaky")
-    @Test(expected = SSLHandshakeException.class)
+    @Disabled("connecting to the outside world makes this test flaky")
+    @Test
     public void testCommonClientUsesExtensibleTrustManagerFailure() throws Throwable {
         doThrow(new CertificateException()).when(extensibleTrustManager).checkServerTrusted(
                 ArgumentMatchers.any(X509Certificate[].class), anyString(), ArgumentMatchers.any(SSLEngine.class));
         HttpClient httpClient = webClientFactory.getCommonHttpClient();
 
-        try {
-            httpClient.GET(TEST_URL);
-        } catch (ExecutionException e) {
-            throw e.getCause();
-        }
+        assertThrows(SSLHandshakeException.class, () -> {
+            try {
+                httpClient.GET(TEST_URL);
+            } catch (ExecutionException e) {
+                throw e.getCause();
+            }
+        });
     }
 
-    @Ignore("only for manual test")
+    @Disabled("only for manual test")
     @Test
     public void testMultiThreadedShared() throws Exception {
         ThreadPoolExecutor workers = new ThreadPoolExecutor(20, 80, 60, TimeUnit.SECONDS,
@@ -154,7 +158,7 @@ public class WebClientFactoryImplTest {
         }
     }
 
-    @Ignore("only for manual test")
+    @Disabled("only for manual test")
     @Test
     public void testMultiThreadedCustom() throws Exception {
         ThreadPoolExecutor workers = new ThreadPoolExecutor(20, 80, 60, TimeUnit.SECONDS,

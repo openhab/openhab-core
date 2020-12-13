@@ -18,8 +18,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,6 +32,8 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.resource.SynchronizedXtextResourceSet;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
@@ -53,10 +53,13 @@ import org.slf4j.LoggerFactory;
  * @author Simon Kaufmann - added validation of models before loading them
  */
 @Component(immediate = true)
+@NonNullByDefault
 public class ModelRepositoryImpl implements ModelRepository {
 
     private final Logger logger = LoggerFactory.getLogger(ModelRepositoryImpl.class);
     private final ResourceSet resourceSet;
+    private final Map<String, String> resourceOptions = Map.of(XtextResource.OPTION_ENCODING,
+            StandardCharsets.UTF_8.name());
 
     private final List<ModelRepositoryChangeListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -74,7 +77,7 @@ public class ModelRepositoryImpl implements ModelRepository {
     }
 
     @Override
-    public EObject getModel(String name) {
+    public @Nullable EObject getModel(String name) {
         synchronized (resourceSet) {
             Resource resource = getResource(name);
             if (resource != null) {
@@ -94,20 +97,22 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream) {
+        logger.info("Loading model '{}'", name);
         Resource resource = null;
-        try {
-            InputStream inputStream = null;
-            if (originalInputStream != null) {
-                byte[] bytes = originalInputStream.readAllBytes();
-                String validationResult = validateModel(name, new ByteArrayInputStream(bytes));
-                if (validationResult != null) {
-                    logger.warn("Configuration model '{}' has errors, therefore ignoring it: {}", name,
-                            validationResult);
-                    removeModel(name);
-                    return false;
-                }
-                inputStream = new ByteArrayInputStream(bytes);
+        byte[] bytes = null;
+        try (InputStream inputStream = originalInputStream) {
+            bytes = inputStream.readAllBytes();
+            String validationResult = validateModel(name, new ByteArrayInputStream(bytes));
+            if (validationResult != null) {
+                logger.warn("Configuration model '{}' has errors, therefore ignoring it: {}", name, validationResult);
+                removeModel(name);
+                return false;
             }
+        } catch (IOException e) {
+            logger.warn("Configuration model '{}' cannot be parsed correctly!", name, e);
+            return false;
+        }
+        try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
             resource = getResource(name);
             if (resource == null) {
                 synchronized (resourceSet) {
@@ -119,16 +124,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove("*");
                         resource = resourceSet.createResource(URI.createURI(name));
                         if (resource != null) {
-                            logger.info("Loading model '{}'", name);
-                            Map<String, String> options = new HashMap<>();
-                            options.put(XtextResource.OPTION_ENCODING, StandardCharsets.UTF_8.name());
-                            if (inputStream == null) {
-                                logger.warn(
-                                        "Resource '{}' not found. You have to pass an inputStream to create the resource.",
-                                        name);
-                                return false;
-                            }
-                            resource.load(inputStream, options);
+                            resource.load(inputStream, resourceOptions);
                             notifyListeners(name, EventType.ADDED);
                             return true;
                         } else {
@@ -139,12 +135,7 @@ public class ModelRepositoryImpl implements ModelRepository {
             } else {
                 synchronized (resourceSet) {
                     resource.unload();
-                    logger.info("Refreshing model '{}'", name);
-                    if (inputStream != null) {
-                        resource.load(inputStream, Collections.EMPTY_MAP);
-                    } else {
-                        resource.load(Collections.EMPTY_MAP);
-                    }
+                    resource.load(inputStream, resourceOptions);
                     notifyListeners(name, EventType.MODIFIED);
                     return true;
                 }
@@ -180,7 +171,7 @@ public class ModelRepositoryImpl implements ModelRepository {
             List<Resource> resourceListCopy = new ArrayList<>(resourceSet.getResources());
 
             return resourceListCopy.stream().filter(input -> {
-                return input != null && input.getURI().lastSegment().contains(".") && input.isLoaded()
+                return input.getURI().lastSegment().contains(".") && input.isLoaded()
                         && modelType.equalsIgnoreCase(input.getURI().fileExtension());
             }).map(from -> {
                 return from.getURI().path();
@@ -194,16 +185,16 @@ public class ModelRepositoryImpl implements ModelRepository {
             // Make a copy to avoid ConcurrentModificationException
             List<Resource> resourceListCopy = new ArrayList<>(resourceSet.getResources());
             for (Resource resource : resourceListCopy) {
-                if (resource != null && resource.getURI().lastSegment().contains(".") && resource.isLoaded()) {
-                    if (modelType.equalsIgnoreCase(resource.getURI().fileExtension())) {
-                        XtextResource xtextResource = (XtextResource) resource;
-                        // It's not sufficient to discard the derived state.
-                        // The quick & dirts solution is to reparse the whole resource.
-                        // We trigger this by dummy updating the resource.
-                        logger.debug("Refreshing resource '{}'", resource.getURI().lastSegment());
-                        xtextResource.update(1, 0, "");
-                        notifyListeners(resource.getURI().lastSegment(), EventType.MODIFIED);
-                    }
+                if (resource.getURI().lastSegment().contains(".") && resource.isLoaded()
+                        && modelType.equalsIgnoreCase(resource.getURI().fileExtension())
+                        && !resource.getURI().lastSegment().startsWith("tmp_")) {
+                    XtextResource xtextResource = (XtextResource) resource;
+                    // It's not sufficient to discard the derived state.
+                    // The quick & dirts solution is to reparse the whole resource.
+                    // We trigger this by dummy updating the resource.
+                    logger.debug("Refreshing resource '{}'", resource.getURI().lastSegment());
+                    xtextResource.update(1, 0, "");
+                    notifyListeners(resource.getURI().lastSegment(), EventType.MODIFIED);
                 }
             }
         }
@@ -216,13 +207,13 @@ public class ModelRepositoryImpl implements ModelRepository {
             // Make a copy to avoid ConcurrentModificationException
             List<Resource> resourceListCopy = new ArrayList<>(resourceSet.getResources());
             for (Resource resource : resourceListCopy) {
-                if (resource != null && resource.getURI().lastSegment().contains(".") && resource.isLoaded()) {
-                    if (modelType.equalsIgnoreCase(resource.getURI().fileExtension())) {
-                        logger.debug("Removing resource '{}'", resource.getURI().lastSegment());
-                        ret.add(resource.getURI().lastSegment());
-                        resourceSet.getResources().remove(resource);
-                        notifyListeners(resource.getURI().lastSegment(), EventType.REMOVED);
-                    }
+                if (resource.getURI().lastSegment().contains(".") && resource.isLoaded()
+                        && modelType.equalsIgnoreCase(resource.getURI().fileExtension())
+                        && !resource.getURI().lastSegment().startsWith("tmp_")) {
+                    logger.debug("Removing resource '{}'", resource.getURI().lastSegment());
+                    ret.add(resource.getURI().lastSegment());
+                    resourceSet.getResources().remove(resource);
+                    notifyListeners(resource.getURI().lastSegment(), EventType.REMOVED);
                 }
             }
         }
@@ -239,7 +230,7 @@ public class ModelRepositoryImpl implements ModelRepository {
         listeners.remove(listener);
     }
 
-    private Resource getResource(String name) {
+    private @Nullable Resource getResource(String name) {
         return resourceSet.getResource(URI.createURI(name), false);
     }
 
@@ -264,15 +255,15 @@ public class ModelRepositoryImpl implements ModelRepository {
      * @return error messages as a String if any syntactical error were found, <code>null</code> otherwise
      * @throws IOException if there was an error with the given {@link InputStream}, loading the resource from there
      */
-    private String validateModel(String name, InputStream inputStream) throws IOException {
+    private @Nullable String validateModel(String name, InputStream inputStream) throws IOException {
         // use another resource for validation in order to keep the original one for emergency-removal in case of errors
         Resource resource = resourceSet.createResource(URI.createURI("tmp_" + name));
         try {
-            resource.load(inputStream, Collections.EMPTY_MAP);
+            resource.load(inputStream, resourceOptions);
             StringBuilder criticalErrors = new StringBuilder();
             List<String> warnings = new LinkedList<>();
 
-            if (resource != null && !resource.getContents().isEmpty()) {
+            if (!resource.getContents().isEmpty()) {
                 // Check for syntactical errors
                 for (Diagnostic diagnostic : resource.getErrors()) {
                     criticalErrors

@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -246,16 +247,15 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         }
 
         public Set<String> getAllHandlesFromIndex() {
-            Set<String> handlesFromStoreageIndex = new HashSet<>();
             try {
                 String allHandlesStr = get(STORE_KEY_INDEX_OF_HANDLES);
                 logger.debug("All available handles: {}", allHandlesStr);
                 if (allHandlesStr == null) {
-                    return handlesFromStoreageIndex;
+                    return Set.of();
                 }
-                return gson.fromJson(allHandlesStr, HashSet.class);
+                return Objects.requireNonNullElse(gson.fromJson(allHandlesStr, HashSet.class), Set.of());
             } catch (RuntimeException storeNotAvailable) {
-                return handlesFromStoreageIndex; // empty
+                return Set.of();
             }
         }
 

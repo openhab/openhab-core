@@ -12,21 +12,26 @@
  */
 package org.openhab.core.config.core;
 
+import static org.eclipse.jdt.annotation.Checks.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.test.java.JavaTest;
 
 /**
@@ -34,28 +39,30 @@ import org.openhab.core.test.java.JavaTest;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class ConfigDescriptionRegistryTest extends JavaTest {
 
-    private URI uriDummy;
-    private URI uriDummy1;
-    private URI uriAliases;
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-    private ConfigDescription configDescription;
-    private @Mock ConfigDescriptionProvider configDescriptionProviderMock;
-    private ConfigDescription configDescription1;
-    private @Mock ConfigDescriptionProvider configDescriptionProviderMock1;
-    private ConfigDescription configDescription2;
-    private @Mock ConfigDescriptionProvider configDescriptionProviderMock2;
-    private ConfigDescription configDescriptionAliased;
-    private @Mock ConfigDescriptionProvider configDescriptionProviderAliased;
-    private @Mock ConfigDescriptionAliasProvider aliasProvider;
-    private @Mock ConfigOptionProvider configOptionsProviderMockAliased;
-    private @Mock ConfigOptionProvider configOptionsProviderMock;
+    private @NonNullByDefault({}) URI uriDummy;
+    private @NonNullByDefault({}) URI uriDummy1;
+    private @NonNullByDefault({}) URI uriAliases;
+    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
+    private @NonNullByDefault({}) ConfigDescription configDescription;
+    private @NonNullByDefault({}) ConfigDescription configDescription1;
+    private @NonNullByDefault({}) ConfigDescription configDescription2;
+    private @NonNullByDefault({}) ConfigDescription configDescriptionAliased;
 
-    @Before
+    private @Mock @NonNullByDefault({}) ConfigDescriptionProvider configDescriptionProviderMock;
+    private @Mock @NonNullByDefault({}) ConfigDescriptionProvider configDescriptionProviderMock1;
+    private @Mock @NonNullByDefault({}) ConfigDescriptionProvider configDescriptionProviderMock2;
+    private @Mock @NonNullByDefault({}) ConfigDescriptionProvider configDescriptionProviderAliased;
+    private @Mock @NonNullByDefault({}) ConfigDescriptionAliasProvider aliasProvider;
+    private @Mock @NonNullByDefault({}) ConfigOptionProvider configOptionsProviderMockAliased;
+    private @Mock @NonNullByDefault({}) ConfigOptionProvider configOptionsProviderMock;
+
+    @BeforeEach
     public void setUp() throws Exception {
-        initMocks(this);
-
         uriDummy = new URI("config:Dummy");
         uriDummy1 = new URI("config:Dummy1");
         uriAliases = new URI("config:Aliased");
@@ -65,39 +72,36 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
                 .create("param1", ConfigDescriptionParameter.Type.INTEGER).build();
 
         configDescription = ConfigDescriptionBuilder.create(uriDummy).withParameter(param1).build();
-        when(configDescriptionProviderMock.getConfigDescriptions(any()))
-                .thenReturn(Collections.singleton(configDescription));
+        when(configDescriptionProviderMock.getConfigDescriptions(any())).thenReturn(Set.of(configDescription));
         when(configDescriptionProviderMock.getConfigDescription(eq(uriDummy), any())).thenReturn(configDescription);
 
         configDescription1 = ConfigDescriptionBuilder.create(uriDummy1).build();
-        when(configDescriptionProviderMock1.getConfigDescriptions(any()))
-                .thenReturn(Collections.singleton(configDescription1));
+        when(configDescriptionProviderMock1.getConfigDescriptions(any())).thenReturn(Set.of(configDescription1));
         when(configDescriptionProviderMock1.getConfigDescription(eq(uriDummy1), any())).thenReturn(configDescription1);
 
         configDescriptionAliased = ConfigDescriptionBuilder.create(uriAliases).withParameter(
                 ConfigDescriptionParameterBuilder.create("instanceId", ConfigDescriptionParameter.Type.INTEGER).build())
                 .build();
         when(configDescriptionProviderAliased.getConfigDescriptions(any()))
-                .thenReturn(Collections.singleton(configDescriptionAliased));
+                .thenReturn(Set.of(configDescriptionAliased));
         when(configDescriptionProviderAliased.getConfigDescription(eq(uriAliases), any()))
                 .thenReturn(configDescriptionAliased);
 
         ConfigDescriptionParameter param2 = ConfigDescriptionParameterBuilder
                 .create("param2", ConfigDescriptionParameter.Type.INTEGER).build();
         configDescription2 = ConfigDescriptionBuilder.create(uriDummy).withParameter(param2).build();
-        when(configDescriptionProviderMock2.getConfigDescriptions(any()))
-                .thenReturn(Collections.singleton(configDescription2));
+        when(configDescriptionProviderMock2.getConfigDescriptions(any())).thenReturn(Set.of(configDescription2));
         when(configDescriptionProviderMock2.getConfigDescription(eq(uriDummy), any())).thenReturn(configDescription2);
 
         when(aliasProvider.getAlias(eq(uriAliases))).thenReturn(uriDummy);
 
         when(configOptionsProviderMockAliased.getParameterOptions(eq(uriAliases), anyString(), any(), any()))
-                .thenReturn(Collections.singletonList(new ParameterOption("Option", "Aliased")));
+                .thenReturn(List.of(new ParameterOption("Option", "Aliased")));
         when(configOptionsProviderMockAliased.getParameterOptions(eq(uriDummy), anyString(), any(), any()))
                 .thenReturn(null);
 
         when(configOptionsProviderMock.getParameterOptions(eq(uriDummy), anyString(), any(), any()))
-                .thenReturn(Collections.singletonList(new ParameterOption("Option", "Original")));
+                .thenReturn(List.of(new ParameterOption("Option", "Original")));
         when(configOptionsProviderMock.getParameterOptions(eq(uriAliases), anyString(), any(), any())).thenReturn(null);
     }
 
@@ -105,8 +109,7 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
     public void testGetConfigDescription() throws Exception {
         configDescriptionRegistry.addConfigDescriptionProvider(configDescriptionProviderMock);
 
-        ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(uriDummy);
-        assertThat(configDescription, is(notNullValue()));
+        ConfigDescription configDescription = requireNonNull(configDescriptionRegistry.getConfigDescription(uriDummy));
         assertThat(configDescription.getUID(), is(equalTo(uriDummy)));
     }
 
@@ -164,8 +167,7 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
         configDescriptionRegistry.addConfigDescriptionAliasProvider(aliasProvider);
         configDescriptionRegistry.addConfigOptionProvider(configOptionsProviderMockAliased);
 
-        ConfigDescription res = configDescriptionRegistry.getConfigDescription(uriAliases);
-        assertThat(res, is(notNullValue()));
+        ConfigDescription res = requireNonNull(configDescriptionRegistry.getConfigDescription(uriAliases));
         assertThat(res.getParameters().get(0).getOptions().size(), is(1));
         assertThat(res.getParameters().get(0).getOptions().get(0).getLabel(), is("Aliased"));
         assertThat(res.getUID(), is(uriAliases));
@@ -183,8 +185,7 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
         configDescriptionRegistry.addConfigOptionProvider(configOptionsProviderMock);
         configDescriptionRegistry.addConfigOptionProvider(configOptionsProviderMockAliased);
 
-        ConfigDescription res = configDescriptionRegistry.getConfigDescription(uriAliases);
-        assertThat(res, is(notNullValue()));
+        ConfigDescription res = requireNonNull(configDescriptionRegistry.getConfigDescription(uriAliases));
         assertThat(res.getParameters().get(0).getOptions().size(), is(1));
         assertThat(res.getParameters().get(0).getOptions().get(0).getLabel(), is("Aliased"));
         assertThat(res.getUID(), is(uriAliases));
@@ -201,8 +202,7 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
         configDescriptionRegistry.addConfigDescriptionAliasProvider(aliasProvider);
         configDescriptionRegistry.addConfigOptionProvider(configOptionsProviderMock);
 
-        ConfigDescription res = configDescriptionRegistry.getConfigDescription(uriAliases);
-        assertThat(res, is(notNullValue()));
+        ConfigDescription res = requireNonNull(configDescriptionRegistry.getConfigDescription(uriAliases));
         assertThat(res.getParameters().get(0).getOptions().size(), is(1));
         assertThat(res.getParameters().get(0).getOptions().get(0).getLabel(), is("Original"));
         assertThat(res.getUID(), is(uriAliases));
@@ -218,14 +218,12 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
         configDescriptionRegistry.addConfigDescriptionProvider(configDescriptionProviderMock);
         configDescriptionRegistry.addConfigDescriptionAliasProvider(aliasProvider);
 
-        ConfigDescription res1 = configDescriptionRegistry.getConfigDescription(uriAliases);
-        assertThat(res1, is(notNullValue()));
+        ConfigDescription res1 = requireNonNull(configDescriptionRegistry.getConfigDescription(uriAliases));
         assertThat(res1.getParameters().size(), is(1));
 
         configDescriptionRegistry.addConfigDescriptionProvider(configDescriptionProviderAliased);
 
-        ConfigDescription res2 = configDescriptionRegistry.getConfigDescription(uriAliases);
-        assertThat(res2, is(notNullValue()));
+        ConfigDescription res2 = requireNonNull(configDescriptionRegistry.getConfigDescription(uriAliases));
         assertThat(res2.getParameters().size(), is(2));
 
         configDescriptionRegistry.removeConfigDescriptionProvider(configDescriptionProviderAliased);

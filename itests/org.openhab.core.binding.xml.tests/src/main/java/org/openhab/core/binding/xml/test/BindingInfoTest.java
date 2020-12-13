@@ -12,16 +12,17 @@
  */
 package org.openhab.core.binding.xml.test;
 
+import static org.eclipse.jdt.annotation.Checks.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.binding.BindingInfo;
 import org.openhab.core.binding.BindingInfoRegistry;
 import org.openhab.core.config.core.ConfigDescription;
@@ -42,7 +43,7 @@ public class BindingInfoTest extends JavaOSGiTest {
     private ConfigDescriptionRegistry configDescriptionRegistry;
     private BindingInstaller bindingInstaller;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         bindingInfoRegistry = getService(BindingInfoRegistry.class);
         assertThat(bindingInfoRegistry, is(notNullValue()));
@@ -85,7 +86,7 @@ public class BindingInfoTest extends JavaOSGiTest {
             Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos();
             BindingInfo bindingInfo = bindingInfos.iterator().next();
 
-            URI configDescriptionURI = bindingInfo.getConfigDescriptionURI();
+            URI configDescriptionURI = requireNonNull(bindingInfo.getConfigDescriptionURI());
             ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
             List<ConfigDescriptionParameter> parameters = configDescription.getParameters();
             assertThat(parameters.size(), is(2));

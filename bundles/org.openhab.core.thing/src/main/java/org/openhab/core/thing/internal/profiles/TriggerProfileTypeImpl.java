@@ -21,7 +21,7 @@ import org.openhab.core.thing.profiles.TriggerProfileType;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
- * Default implementation of a {@link TriggerProfileTypeImpl}.
+ * Default implementation of a {@link TriggerProfileType}.
  *
  * @author Simon Kaufmann - Initial contribution
  */
@@ -29,9 +29,9 @@ import org.openhab.core.thing.type.ChannelTypeUID;
 public class TriggerProfileTypeImpl implements TriggerProfileType {
 
     private final ProfileTypeUID profileTypeUID;
-    private final Collection<ChannelTypeUID> supportedChannelTypeUIDs;
     private final String label;
     private final Collection<String> supportedItemTypes;
+    private final Collection<ChannelTypeUID> supportedChannelTypeUIDs;
 
     public TriggerProfileTypeImpl(ProfileTypeUID profileTypeUID, String label, Collection<String> supportedItemTypes,
             Collection<ChannelTypeUID> supportedChannelTypeUIDs) {

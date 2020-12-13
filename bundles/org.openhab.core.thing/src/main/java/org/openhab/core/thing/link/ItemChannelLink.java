@@ -12,6 +12,8 @@
  */
 package org.openhab.core.thing.link;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.Item;
 import org.openhab.core.thing.ChannelUID;
@@ -23,9 +25,10 @@ import org.openhab.core.thing.ChannelUID;
  * @author Jochen Hiller - Bugfix 455434: added default constructor, object is now mutable
  * @author Simon Kaufmann - added configuration
  */
+@NonNullByDefault
 public class ItemChannelLink extends AbstractLink {
 
-    private final ChannelUID channelUID;
+    private final @NonNullByDefault({}) ChannelUID channelUID;
     private final Configuration configuration;
 
     /**
@@ -50,10 +53,24 @@ public class ItemChannelLink extends AbstractLink {
 
     @Override
     public ChannelUID getLinkedUID() {
-        return this.channelUID;
+        return channelUID;
     }
 
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof ItemChannelLink) {
+            ItemChannelLink link = (ItemChannelLink) obj;
+            return super.equals(obj) && configuration.equals(link.getConfiguration());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() * configuration.hashCode();
     }
 }

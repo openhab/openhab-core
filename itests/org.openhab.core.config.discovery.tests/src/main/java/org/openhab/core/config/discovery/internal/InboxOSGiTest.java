@@ -12,10 +12,10 @@
  */
 package org.openhab.core.config.discovery.internal;
 
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
@@ -24,7 +24,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -37,9 +36,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -111,22 +110,25 @@ public class InboxOSGiTest extends JavaOSGiTest {
     private static final ThingTypeUID BRIDGE_THING_TYPE_UID = new ThingTypeUID("bindingId", "bridge");
 
     private static final ThingUID BRIDGE_THING_UID = new ThingUID(BRIDGE_THING_TYPE_UID, "bridgeId");
+    private static final ThingUID OTHER_BRIDGE_THING_UID = new ThingUID(THING_TYPE_UID, "id5");
 
     private static final DiscoveryResult BRIDGE = DiscoveryResultBuilder.create(BRIDGE_THING_UID)
             .withThingType(BRIDGE_THING_TYPE_UID).withRepresentationProperty("Bridge1").withLabel("bridge")
             .withTTL(DEFAULT_TTL).build();
     private static final DiscoveryResult THING1_WITH_BRIDGE = DiscoveryResultBuilder
-            .create(new ThingUID(THING_TYPE_UID, "id1")).withThingType(THING_TYPE_UID).withBridge(BRIDGE_THING_UID)
-            .withRepresentationProperty("Thing1").withLabel("thing1").withTTL(DEFAULT_TTL).build();
+            .create(new ThingUID(THING_TYPE_UID, BRIDGE_THING_UID, "id1")).withThingType(THING_TYPE_UID)
+            .withBridge(BRIDGE_THING_UID).withRepresentationProperty("Thing1").withLabel("thing1").withTTL(DEFAULT_TTL)
+            .build();
     private static final DiscoveryResult THING2_WITH_BRIDGE = DiscoveryResultBuilder
-            .create(new ThingUID(THING_TYPE_UID, "id2")).withThingType(THING_TYPE_UID).withBridge(BRIDGE_THING_UID)
-            .withRepresentationProperty("Thing2").withLabel("thing2").withTTL(DEFAULT_TTL).build();
+            .create(new ThingUID(THING_TYPE_UID, BRIDGE_THING_UID, "id2")).withThingType(THING_TYPE_UID)
+            .withBridge(BRIDGE_THING_UID).withRepresentationProperty("Thing2").withLabel("thing2").withTTL(DEFAULT_TTL)
+            .build();
     private static final DiscoveryResult THING_WITHOUT_BRIDGE = DiscoveryResultBuilder
             .create(new ThingUID(THING_TYPE_UID, "id3")).withThingType(THING_TYPE_UID)
             .withRepresentationProperty("Thing3").withLabel("thing3").withTTL(DEFAULT_TTL).build();
     private static final DiscoveryResult THING_WITH_OTHER_BRIDGE = DiscoveryResultBuilder
-            .create(new ThingUID(THING_TYPE_UID, "id4")).withThingType(THING_TYPE_UID)
-            .withBridge(new ThingUID(THING_TYPE_UID, "id5")).withRepresentationProperty("Thing4").withLabel("thing4")
+            .create(new ThingUID(THING_TYPE_UID, OTHER_BRIDGE_THING_UID, "id4")).withThingType(THING_TYPE_UID)
+            .withBridge(OTHER_BRIDGE_THING_UID).withRepresentationProperty("Thing4").withLabel("thing4")
             .withTTL(DEFAULT_TTL).build();
 
     private final URI testURI = createURI("http:dummy");
@@ -134,6 +136,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
     private final ThingUID testUID = new ThingUID("binding:type:id");
     private final ThingTypeUID testTypeUID = new ThingTypeUID("binding:type");
     private final Thing testThing = ThingBuilder.create(testTypeUID, testUID).build();
+    private String testId2 = "myId";
+    private final Thing test2Thing = ThingBuilder.create(testTypeUID, testId2).build();
     private final String discoveryResultLabel = "MyLabel";
 
     @SuppressWarnings("serial")
@@ -170,7 +174,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
     private @NonNullByDefault({}) ThingRegistry registry;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
 
@@ -192,7 +196,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         inbox.addThingHandlerFactory(new DummyThingHandlerFactory(componentContextMock));
     }
 
-    @After
+    @AfterEach
     public void cleanUp() {
         discoveryResults.forEach((thingUID, discoveryResult) -> inbox.remove(thingUID));
         inboxListeners.forEach(listener -> inbox.removeInboxListener(listener));
@@ -851,15 +855,15 @@ public class InboxOSGiTest extends JavaOSGiTest {
         });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatApproveThrowsIllegalArgumentExceptionIfNoDiscoveryResultForGivenThingUIDisAvailable() {
-        inbox.approve(new ThingUID("1234"), "label");
+        assertThrows(IllegalArgumentException.class, () -> inbox.approve(new ThingUID("1234"), "label", null));
     }
 
     @Test
     public void assertThatApproveAddsAllPropertiesOfDiscoveryResultToThingPropertiesIfNoConfigDescriptionParametersForTheThingTypeAreAvailable() {
         inbox.add(testDiscoveryResult);
-        Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel);
+        Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel, null);
         Thing addedThing = registry.get(testThing.getUID());
 
         assertFalse(addedThing == null);
@@ -878,7 +882,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @SuppressWarnings("null")
     public void assertThatApproveSetsTheExplicitlyGivenLabel() {
         inbox.add(testDiscoveryResult);
-        Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel);
+        Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel, null);
         Thing addedThing = registry.get(testThing.getUID());
 
         assertThat(approvedThing.getLabel(), is(testThingLabel));
@@ -889,11 +893,23 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @SuppressWarnings("null")
     public void assertThatApproveSetsTheDiscoveredLabelIfNoOtherIsGiven() {
         inbox.add(testDiscoveryResult);
-        Thing approvedThing = inbox.approve(testThing.getUID(), null);
+        Thing approvedThing = inbox.approve(testThing.getUID(), null, null);
         Thing addedThing = registry.get(testThing.getUID());
 
         assertThat(approvedThing.getLabel(), is(discoveryResultLabel));
         assertThat(addedThing.getLabel(), is(discoveryResultLabel));
+    }
+
+    @Test
+    @SuppressWarnings("null")
+    public void assertThatApproveSetsTheExplicitlyGivenThingId() {
+        inbox.add(testDiscoveryResult);
+        Thing approvedThing = inbox.approve(testThing.getUID(), null, testId2);
+        Thing addedThing = registry.get(test2Thing.getUID());
+
+        assertFalse(addedThing == null);
+        assertFalse(approvedThing == null);
+        assertTrue(approvedThing.equals(addedThing));
     }
 
     @Test
@@ -906,7 +922,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         final ThingTypeProvider thingTypeProvider = new ThingTypeProvider() {
             @Override
             public Collection<ThingType> getThingTypes(@Nullable Locale locale) {
-                return Collections.singleton(testThingType);
+                return Set.of(testThingType);
             }
 
             @Override
@@ -922,7 +938,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         final ConfigDescriptionProvider configDescriptionProvider = new ConfigDescriptionProvider() {
             @Override
             public Collection<ConfigDescription> getConfigDescriptions(@Nullable Locale locale) {
-                return Collections.singleton(testConfigDescription);
+                return Set.of(testConfigDescription);
             }
 
             @Override
@@ -936,7 +952,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         waitForAssert(
                 () -> assertNotNull(configDescriptionRegistry.getConfigDescription(testConfigDescription.getUID())));
 
-        Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel);
+        Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel, null);
         Thing addedThing = registry.get(testThing.getUID());
         assertTrue(approvedThing.equals(addedThing));
         assertFalse(addedThing == null);
@@ -968,11 +984,11 @@ public class InboxOSGiTest extends JavaOSGiTest {
         assertThat(inbox.getAll().size(), is(1));
 
         // should not remove a result
-        inbox.removeOlderResults(discoveryService2, now, singleton(testThingType.getUID()), null);
+        inbox.removeOlderResults(discoveryService2, now, Set.of(testThingType.getUID()), null);
         assertThat(inbox.getAll().size(), is(1));
 
         // should remove a result
-        inbox.removeOlderResults(discoveryService1, now, singleton(testThingType.getUID()), null);
+        inbox.removeOlderResults(discoveryService1, now, Set.of(testThingType.getUID()), null);
         assertThat(inbox.getAll().size(), is(0));
     }
 
@@ -983,7 +999,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         assertThat(inbox.getAll().size(), is(1));
 
         // should remove a result
-        inbox.removeOlderResults(discoveryService2, now, singleton(testThingType.getUID()), null);
+        inbox.removeOlderResults(discoveryService2, now, Set.of(testThingType.getUID()), null);
         assertThat(inbox.getAll().size(), is(0));
     }
 

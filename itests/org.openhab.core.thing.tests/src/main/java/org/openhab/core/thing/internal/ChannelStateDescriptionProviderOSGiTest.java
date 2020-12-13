@@ -13,22 +13,22 @@
 package org.openhab.core.thing.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.openhab.core.common.registry.ProviderChangeListener;
@@ -64,17 +64,18 @@ import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.type.ChannelDefinition;
 import org.openhab.core.thing.type.ChannelDefinitionBuilder;
 import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeBuilder;
 import org.openhab.core.thing.type.ChannelTypeProvider;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.DynamicStateDescriptionProvider;
 import org.openhab.core.thing.type.ThingTypeBuilder;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.ComponentContext;
 
@@ -91,6 +92,8 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
     private static final String TEST_BUNDLE_NAME = "thingStatusInfoI18nTest.bundle";
     private static final ChannelTypeUID CHANNEL_TYPE_7_UID = new ChannelTypeUID("hue:num-dynamic");
 
+    private @NonNullByDefault({}) AutoCloseable mocksCloseable;
+
     private @Mock @NonNullByDefault({}) ComponentContext componentContext;
 
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
@@ -98,9 +101,9 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) Bundle testBundle;
     private @NonNullByDefault({}) ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
 
-    @Before
-    public void setup() throws Exception {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        mocksCloseable = openMocks(this);
 
         Mockito.when(componentContext.getBundleContext()).thenReturn(bundleContext);
 
@@ -113,27 +116,32 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         thingHandlerFactory.activate(componentContext);
         registerService(thingHandlerFactory, ThingHandlerFactory.class.getName());
 
-        final StateDescription state = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+        final StateDescriptionFragment state = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                 .withMaximum(BigDecimal.valueOf(100)).withStep(BigDecimal.TEN).withPattern("%d Peek").withReadOnly(true)
-                .withOption(new StateOption("SOUND", "My great sound.")).build().toStateDescription();
+                .withOption(new StateOption("SOUND", "My great sound.")).build();
 
-        final StateDescription state2 = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
-                .withMaximum(BigDecimal.valueOf(256)).withStep(BigDecimal.valueOf(8)).build().toStateDescription();
+        final StateDescriptionFragment state2 = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                .withMaximum(BigDecimal.valueOf(256)).withStep(BigDecimal.valueOf(8)).build();
 
-        final ChannelType channelType = new ChannelType(new ChannelTypeUID("hue:alarm"), false, CoreItemFactory.NUMBER,
-                " ", "", null, null, state, null);
-        final ChannelType channelType2 = new ChannelType(new ChannelTypeUID("hue:num"), false, CoreItemFactory.NUMBER,
-                " ", "", null, null, state2, null);
-        final ChannelType channelType3 = new ChannelType(new ChannelTypeUID("hue:info"), true, CoreItemFactory.STRING,
-                " ", "", null, null, (StateDescription) null, null);
-        final ChannelType channelType4 = new ChannelType(new ChannelTypeUID("hue:color"), false, CoreItemFactory.COLOR,
-                "Color", "", "ColorLight", null, (StateDescription) null, null);
-        final ChannelType channelType5 = new ChannelType(new ChannelTypeUID("hue:brightness"), false,
-                CoreItemFactory.DIMMER, "Brightness", "", "DimmableLight", null, (StateDescription) null, null);
-        final ChannelType channelType6 = new ChannelType(new ChannelTypeUID("hue:switch"), false,
-                CoreItemFactory.SWITCH, "Switch", "", "Light", null, (StateDescription) null, null);
-        final ChannelType channelType7 = new ChannelType(CHANNEL_TYPE_7_UID, false, CoreItemFactory.NUMBER, " ", "",
-                "Light", null, state, null);
+        final ChannelType channelType = ChannelTypeBuilder
+                .state(new ChannelTypeUID("hue:alarm"), " ", CoreItemFactory.NUMBER).withStateDescriptionFragment(state)
+                .build();
+        final ChannelType channelType2 = ChannelTypeBuilder
+                .state(new ChannelTypeUID("hue:num"), " ", CoreItemFactory.NUMBER).withStateDescriptionFragment(state2)
+                .build();
+        final ChannelType channelType3 = ChannelTypeBuilder
+                .state(new ChannelTypeUID("hue:info"), " ", CoreItemFactory.STRING).isAdvanced(true).build();
+        final ChannelType channelType4 = ChannelTypeBuilder
+                .state(new ChannelTypeUID("hue:color"), "Color", CoreItemFactory.COLOR).withCategory("ColorLight")
+                .build();
+        final ChannelType channelType5 = ChannelTypeBuilder
+                .state(new ChannelTypeUID("hue:brightness"), "Brightness", CoreItemFactory.DIMMER).withCategory("Light")
+                .build();
+        final ChannelType channelType6 = ChannelTypeBuilder
+                .state(new ChannelTypeUID("hue:switch"), "Switch", CoreItemFactory.SWITCH).withCategory("Light")
+                .build();
+        final ChannelType channelType7 = ChannelTypeBuilder.state(CHANNEL_TYPE_7_UID, " ", CoreItemFactory.NUMBER)
+                .withCategory("Light").withStateDescriptionFragment(state).build();
 
         List<ChannelType> channelTypes = new ArrayList<>();
         channelTypes.add(channelType);
@@ -179,7 +187,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         channelDefinitions.add(new ChannelDefinitionBuilder("7_1", channelType7.getUID()).build());
         channelDefinitions.add(new ChannelDefinitionBuilder("7_2", channelType7.getUID()).build());
 
-        registerService(new SimpleThingTypeProvider(Collections.singleton(ThingTypeBuilder
+        registerService(new SimpleThingTypeProvider(Set.of(ThingTypeBuilder
                 .instance(new ThingTypeUID("hue:lamp"), "label").withChannelDefinitions(channelDefinitions).build())));
 
         List<Item> items = new ArrayList<>();
@@ -196,8 +204,9 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         linkRegistry = getService(ItemChannelLinkRegistry.class);
     }
 
-    @After
-    public void teardown() throws BundleException {
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
         testBundle.uninstall();
         ManagedThingProvider managedThingProvider = getService(ManagedThingProvider.class);
         assertNotNull(managedThingProvider);
@@ -233,7 +242,12 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
 
         Thing thing = thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"), new ThingUID("hue:lamp:lamp1"),
                 null, "test thing", new Configuration());
+
         assertNotNull(thing);
+        if (thing == null) {
+            throw new IllegalStateException("thing is null");
+        }
+
         managedThingProvider.add(thing);
         ItemChannelLink link = new ItemChannelLink("TestItem", getChannel(thing, "1").getUID());
         linkRegistry.add(link);
@@ -253,7 +267,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         linkRegistry.add(link);
         //
         final Collection<Item> items = itemRegistry.getItems();
-        assertEquals(false, items.isEmpty());
+        assertFalse(items.isEmpty());
 
         Item item = itemRegistry.getItem("TestItem");
         assertEquals(CoreItemFactory.NUMBER, item.getType());
@@ -265,7 +279,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertEquals(BigDecimal.valueOf(100), state.getMaximum());
         assertEquals(BigDecimal.TEN, state.getStep());
         assertEquals("%d Peek", state.getPattern());
-        assertEquals(true, state.isReadOnly());
+        assertTrue(state.isReadOnly());
         List<StateOption> opts = state.getOptions();
         assertEquals(1, opts.size());
         final StateOption opt = opts.get(0);
@@ -282,7 +296,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertEquals(BigDecimal.valueOf(256), state.getMaximum());
         assertEquals(BigDecimal.valueOf(8), state.getStep());
         assertEquals("%.0f", state.getPattern());
-        assertEquals(false, state.isReadOnly());
+        assertFalse(state.isReadOnly());
         opts = state.getOptions();
         assertEquals(0, opts.size());
 
@@ -296,7 +310,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertNull(state.getMaximum());
         assertNull(state.getStep());
         assertEquals("%s", state.getPattern());
-        assertEquals(false, state.isReadOnly());
+        assertFalse(state.isReadOnly());
         opts = state.getOptions();
         assertEquals(0, opts.size());
 
@@ -328,7 +342,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertEquals(BigDecimal.valueOf(100), state.getMaximum());
         assertEquals(BigDecimal.valueOf(5), state.getStep());
         assertEquals("VALUE %d", state.getPattern());
-        assertEquals(false, state.isReadOnly());
+        assertFalse(state.isReadOnly());
 
         opts = state.getOptions();
         assertNotNull(opts);
@@ -352,7 +366,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertEquals(BigDecimal.valueOf(101), state.getMaximum());
         assertEquals(BigDecimal.valueOf(20), state.getStep());
         assertEquals("NEW %d Peek", state.getPattern());
-        assertEquals(false, state.isReadOnly());
+        assertFalse(state.isReadOnly());
 
         opts = state.getOptions();
         assertNotNull(opts);
@@ -375,13 +389,18 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
 
         Thing thing = thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"), new ThingUID("hue:lamp:lamp1"),
                 null, "test thing", new Configuration());
+
         assertNotNull(thing);
+        if (thing == null) {
+            throw new IllegalStateException("thing is null");
+        }
+
         managedThingProvider.add(thing);
         ItemChannelLink link = new ItemChannelLink("TestItem7_2", getChannel(thing, "7_2").getUID());
         linkRegistry.add(link);
         //
         final Collection<Item> items = itemRegistry.getItems();
-        assertEquals(false, items.isEmpty());
+        assertFalse(items.isEmpty());
 
         Item item = itemRegistry.getItem("TestItem7_2");
 
@@ -392,7 +411,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertEquals(BigDecimal.valueOf(101), state.getMaximum());
         assertEquals(BigDecimal.valueOf(20), state.getStep());
         assertEquals("NEW %d Peek", state.getPattern());
-        assertEquals(false, state.isReadOnly());
+        assertFalse(state.isReadOnly());
 
         List<StateOption> opts = state.getOptions();
         assertNotNull(opts);
@@ -409,8 +428,8 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         final @Nullable StateDescription newState = StateDescriptionFragmentBuilder.create()
                 .withMinimum(BigDecimal.valueOf(10)).withMaximum(BigDecimal.valueOf(100))
                 .withStep(BigDecimal.valueOf(5)).withPattern("VALUE %d").withReadOnly(false)
-                .withOptions(Arrays.asList(new StateOption("value0", "label0"), new StateOption("value1", "label1")))
-                .build().toStateDescription();
+                .withOptions(List.of(new StateOption("value0", "label0"), new StateOption("value1", "label1"))).build()
+                .toStateDescription();
 
         @Override
         public @Nullable StateDescription getStateDescription(Channel channel, @Nullable StateDescription original,
@@ -427,8 +446,8 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
                         .withMaximum(original.getMaximum().add(BigDecimal.ONE))
                         .withStep(original.getStep().add(BigDecimal.TEN)).withPattern("NEW " + original.getPattern())
                         .withReadOnly(!original.isReadOnly())
-                        .withOptions(Collections.singletonList(new StateOption("NEW SOUND", "My great new sound.")))
-                        .build().toStateDescription();
+                        .withOptions(List.of(new StateOption("NEW SOUND", "My great new sound."))).build()
+                        .toStateDescription();
             }
             return null;
         }

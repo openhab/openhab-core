@@ -13,15 +13,15 @@
 package org.openhab.core.thing.link;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
@@ -66,7 +66,7 @@ public class LinkEventOSGiTest extends JavaOSGiTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         registerVolatileStorageService();
         itemChannelLinkRegistry = getService(ItemChannelLinkRegistry.class);
@@ -82,11 +82,11 @@ public class LinkEventOSGiTest extends JavaOSGiTest {
         waitFor(() -> eventSubscriber.getLastReceivedEvent() != null);
         waitForAssert(
                 () -> assertThat(eventSubscriber.getLastReceivedEvent().getType(), is(ItemChannelLinkAddedEvent.TYPE)));
-        assertThat(eventSubscriber.getLastReceivedEvent().getTopic(), is("smarthome/links/item-a:b:c:d/added"));
+        assertThat(eventSubscriber.getLastReceivedEvent().getTopic(), is("openhab/links/item-a:b:c:d/added"));
 
         itemChannelLinkRegistry.remove(link.getUID());
         waitForAssert(() -> assertThat(eventSubscriber.getLastReceivedEvent().getType(),
                 is(ItemChannelLinkRemovedEvent.TYPE)));
-        assertThat(eventSubscriber.getLastReceivedEvent().getTopic(), is("smarthome/links/item-a:b:c:d/removed"));
+        assertThat(eventSubscriber.getLastReceivedEvent().getTopic(), is("openhab/links/item-a:b:c:d/removed"));
     }
 }

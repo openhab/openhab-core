@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.security.sasl.AuthenticationException;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
 import org.jose4j.jwk.JsonWebKey;
@@ -34,12 +32,15 @@ import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.MalformedClaimException;
+import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.auth.Authentication;
+import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.User;
-import org.openhab.core.config.core.ConfigConstants;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ import org.slf4j.LoggerFactory;
 public class JwtHelper {
     private final Logger logger = LoggerFactory.getLogger(JwtHelper.class);
 
-    private static final String KEY_FILE_PATH = ConfigConstants.getUserDataFolder() + File.separator + "secrets"
+    private static final String KEY_FILE_PATH = OpenHAB.getUserDataFolder() + File.separator + "secrets"
             + File.separator + "rsa_json_web_key.json";
 
     private static final String ISSUER_NAME = "openhab";
@@ -126,9 +127,8 @@ public class JwtHelper {
             String jwt = jws.getCompactSerialization();
 
             return jwt;
-        } catch (Exception e) {
-            logger.error("Error while writing JWT token", e);
-            throw new RuntimeException(e.getMessage());
+        } catch (JoseException e) {
+            throw new RuntimeException("Error while writing JWT token", e);
         }
     }
 
@@ -149,11 +149,10 @@ public class JwtHelper {
             JwtClaims jwtClaims = jwtConsumer.processToClaims(jwt);
             String username = jwtClaims.getSubject();
             List<String> roles = jwtClaims.getStringListClaimValue("role");
-            Authentication auth = new Authentication(username, roles.toArray(new String[roles.size()]));
-            return auth;
-        } catch (Exception e) {
-            logger.error("Error while processing JWT token", e);
-            throw new AuthenticationException(e.getMessage());
+            String scope = jwtClaims.getStringClaimValue("scope");
+            return new Authentication(username, roles.toArray(new String[roles.size()]), scope);
+        } catch (InvalidJwtException | MalformedClaimException e) {
+            throw new AuthenticationException("Error while processing JWT token", e);
         }
     }
 }

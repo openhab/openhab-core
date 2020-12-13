@@ -14,11 +14,12 @@
  */
 package org.openhab.core.model.script.tests.lib;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.model.script.lib.NumberExtensions;
 import org.openhab.core.types.Type;
@@ -40,8 +41,8 @@ public class NumberExtensionsTest {
 
         BigDecimal result = NumberExtensions.operator_plus(x, y);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, new BigDecimal(9));
+        assertNotNull(result);
+        assertEquals(result, new BigDecimal(9));
     }
 
     /**
@@ -54,8 +55,8 @@ public class NumberExtensionsTest {
 
         BigDecimal result = NumberExtensions.operator_plus(x, y);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, new BigDecimal(5));
+        assertNotNull(result);
+        assertEquals(result, new BigDecimal(5));
     }
 
     /**
@@ -68,8 +69,8 @@ public class NumberExtensionsTest {
 
         BigDecimal result = NumberExtensions.operator_plus(x, y);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, new BigDecimal(10));
+        assertNotNull(result);
+        assertEquals(result, new BigDecimal(10));
     }
 
     /**
@@ -81,8 +82,8 @@ public class NumberExtensionsTest {
 
         BigDecimal result = NumberExtensions.operator_minus(x);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, new BigDecimal(-2));
+        assertNotNull(result);
+        assertEquals(result, new BigDecimal(-2));
     }
 
     /**
@@ -94,7 +95,7 @@ public class NumberExtensionsTest {
 
         BigDecimal result = NumberExtensions.operator_minus(x);
 
-        Assert.assertNull(result);
+        assertNull(result);
     }
 
     /**
@@ -107,8 +108,8 @@ public class NumberExtensionsTest {
 
         BigDecimal result = NumberExtensions.operator_minus(x, y);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, new BigDecimal(10 - 100));
+        assertNotNull(result);
+        assertEquals(result, new BigDecimal(10 - 100));
     }
 
     /**
@@ -121,8 +122,8 @@ public class NumberExtensionsTest {
 
         BigDecimal result = NumberExtensions.operator_minus(x, y);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, new BigDecimal(-100));
+        assertNotNull(result);
+        assertEquals(result, new BigDecimal(-100));
     }
 
     /**
@@ -135,8 +136,8 @@ public class NumberExtensionsTest {
 
         BigDecimal result = NumberExtensions.operator_minus(x, y);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, new BigDecimal(10));
+        assertNotNull(result);
+        assertEquals(result, new BigDecimal(10));
     }
 
     /**
@@ -149,8 +150,8 @@ public class NumberExtensionsTest {
 
         BigDecimal result = NumberExtensions.operator_multiply(x, y);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, new BigDecimal(20 * 30));
+        assertNotNull(result);
+        assertEquals(result, new BigDecimal(20 * 30));
     }
 
     /**
@@ -163,8 +164,8 @@ public class NumberExtensionsTest {
 
         BigDecimal result = NumberExtensions.operator_multiply(x, y);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, new BigDecimal(0));
+        assertNotNull(result);
+        assertEquals(result, new BigDecimal(0));
     }
 
     /**
@@ -177,8 +178,8 @@ public class NumberExtensionsTest {
 
         BigDecimal result = NumberExtensions.operator_multiply(x, y);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, new BigDecimal(0));
+        assertNotNull(result);
+        assertEquals(result, new BigDecimal(0));
     }
 
     /**
@@ -191,33 +192,30 @@ public class NumberExtensionsTest {
 
         BigDecimal result = NumberExtensions.operator_divide(x, y);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, new BigDecimal(12).divide(new BigDecimal(4), 8, RoundingMode.HALF_UP));
+        assertNotNull(result);
+        assertEquals(result, new BigDecimal(12).divide(new BigDecimal(4), 8, RoundingMode.HALF_UP));
     }
 
     /**
      * Test method for {@link NumberExtensions#operator_divide(java.lang.Number, java.lang.Number)}
      */
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testOperatorDivideNullLeft() {
         Number x = null;
         Number y = 4;
 
-        BigDecimal result = NumberExtensions.operator_divide(x, y);
-
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, new BigDecimal(0).divide(new BigDecimal(4), 8, RoundingMode.HALF_UP));
+        assertThrows(NullPointerException.class, () -> NumberExtensions.operator_divide(x, y));
     }
 
     /**
      * Test method for {@link NumberExtensions#operator_divide(java.lang.Number, java.lang.Number)}
      */
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testOperatorDivideNullRight() {
         Number x = 12;
         Number y = null;
 
-        NumberExtensions.operator_divide(x, y);
+        assertThrows(NullPointerException.class, () -> NumberExtensions.operator_divide(x, y));
     }
 
     /**
@@ -229,13 +227,13 @@ public class NumberExtensionsTest {
         Number y = 123;
 
         boolean resutl = NumberExtensions.operator_equals(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
 
         x = 123;
         y = 321;
 
         resutl = NumberExtensions.operator_equals(x, y);
-        Assert.assertFalse(resutl);
+        assertFalse(resutl);
     }
 
     /**
@@ -247,7 +245,7 @@ public class NumberExtensionsTest {
         Number y = 123;
 
         boolean resutl = NumberExtensions.operator_equals(x, y);
-        Assert.assertFalse(resutl);
+        assertFalse(resutl);
     }
 
     /**
@@ -259,7 +257,7 @@ public class NumberExtensionsTest {
         Number y = null;
 
         boolean resutl = NumberExtensions.operator_equals(x, y);
-        Assert.assertFalse(resutl);
+        assertFalse(resutl);
     }
 
     /**
@@ -271,7 +269,7 @@ public class NumberExtensionsTest {
         Number y = null;
 
         boolean resutl = NumberExtensions.operator_equals(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -283,13 +281,13 @@ public class NumberExtensionsTest {
         Number y = 123;
 
         boolean resutl = NumberExtensions.operator_notEquals(x, y);
-        Assert.assertFalse(resutl);
+        assertFalse(resutl);
 
         x = 123;
         y = 321;
 
         resutl = NumberExtensions.operator_notEquals(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -301,7 +299,7 @@ public class NumberExtensionsTest {
         Number y = null;
 
         boolean resutl = NumberExtensions.operator_notEquals(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -313,7 +311,7 @@ public class NumberExtensionsTest {
         Number y = 123;
 
         boolean resutl = NumberExtensions.operator_notEquals(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -325,13 +323,13 @@ public class NumberExtensionsTest {
         Number y = 123;
 
         boolean resutl = NumberExtensions.operator_lessThan(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
 
         x = 90;
         y = 2;
 
         resutl = NumberExtensions.operator_lessThan(x, y);
-        Assert.assertFalse(resutl);
+        assertFalse(resutl);
     }
 
     /**
@@ -343,7 +341,7 @@ public class NumberExtensionsTest {
         Number y = 123;
 
         boolean resutl = NumberExtensions.operator_lessThan(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -355,7 +353,7 @@ public class NumberExtensionsTest {
         Number y = null;
 
         boolean resutl = NumberExtensions.operator_lessThan(x, y);
-        Assert.assertFalse(resutl);
+        assertFalse(resutl);
     }
 
     /**
@@ -367,13 +365,13 @@ public class NumberExtensionsTest {
         Number y = 123;
 
         boolean resutl = NumberExtensions.operator_greaterThan(x, y);
-        Assert.assertFalse(resutl);
+        assertFalse(resutl);
 
         x = 90;
         y = 2;
 
         resutl = NumberExtensions.operator_greaterThan(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -385,7 +383,7 @@ public class NumberExtensionsTest {
         Number y = 123;
 
         boolean resutl = NumberExtensions.operator_greaterThan(x, y);
-        Assert.assertFalse(resutl);
+        assertFalse(resutl);
     }
 
     /**
@@ -397,7 +395,7 @@ public class NumberExtensionsTest {
         Number y = null;
 
         boolean resutl = NumberExtensions.operator_greaterThan(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -409,19 +407,19 @@ public class NumberExtensionsTest {
         Number y = 123;
 
         boolean resutl = NumberExtensions.operator_lessEqualsThan(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
 
         x = 90;
         y = 2;
 
         resutl = NumberExtensions.operator_lessEqualsThan(x, y);
-        Assert.assertFalse(resutl);
+        assertFalse(resutl);
 
         x = 3;
         y = 3;
 
         resutl = NumberExtensions.operator_lessEqualsThan(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -433,7 +431,7 @@ public class NumberExtensionsTest {
         Number y = 123;
 
         boolean resutl = NumberExtensions.operator_lessEqualsThan(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -445,7 +443,7 @@ public class NumberExtensionsTest {
         Number y = null;
 
         boolean resutl = NumberExtensions.operator_lessEqualsThan(x, y);
-        Assert.assertFalse(resutl);
+        assertFalse(resutl);
     }
 
     /**
@@ -457,7 +455,7 @@ public class NumberExtensionsTest {
         Number y = null;
 
         boolean resutl = NumberExtensions.operator_lessEqualsThan(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -469,19 +467,19 @@ public class NumberExtensionsTest {
         Number y = 123;
 
         boolean resutl = NumberExtensions.operator_greaterEqualsThan(x, y);
-        Assert.assertFalse(resutl);
+        assertFalse(resutl);
 
         x = 90;
         y = 2;
 
         resutl = NumberExtensions.operator_greaterEqualsThan(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
 
         x = 3;
         y = 3;
 
         resutl = NumberExtensions.operator_greaterEqualsThan(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -493,7 +491,7 @@ public class NumberExtensionsTest {
         Number y = 123;
 
         boolean resutl = NumberExtensions.operator_greaterEqualsThan(x, y);
-        Assert.assertFalse(resutl);
+        assertFalse(resutl);
     }
 
     /**
@@ -505,7 +503,7 @@ public class NumberExtensionsTest {
         Number y = null;
 
         boolean resutl = NumberExtensions.operator_greaterEqualsThan(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -517,7 +515,7 @@ public class NumberExtensionsTest {
         Number y = null;
 
         boolean resutl = NumberExtensions.operator_greaterEqualsThan(x, y);
-        Assert.assertTrue(resutl);
+        assertTrue(resutl);
     }
 
     /**
@@ -530,13 +528,13 @@ public class NumberExtensionsTest {
 
         boolean result = NumberExtensions.operator_equals((Type) type, x);
 
-        Assert.assertTrue(result);
+        assertTrue(result);
 
         x = 1;
 
         result = NumberExtensions.operator_equals((Type) type, x);
 
-        Assert.assertFalse(result);
+        assertFalse(result);
     }
 
     /**
@@ -550,13 +548,13 @@ public class NumberExtensionsTest {
 
         boolean result = NumberExtensions.operator_notEquals((Type) type, x);
 
-        Assert.assertFalse(result);
+        assertFalse(result);
 
         x = 1;
 
         result = NumberExtensions.operator_notEquals((Type) type, x);
 
-        Assert.assertTrue(result);
+        assertTrue(result);
     }
 
     /**
@@ -570,13 +568,13 @@ public class NumberExtensionsTest {
 
         boolean result = NumberExtensions.operator_greaterThan((Type) type, x);
 
-        Assert.assertFalse(result);
+        assertFalse(result);
 
         x = 2;
 
         result = NumberExtensions.operator_greaterThan((Type) type, x);
 
-        Assert.assertTrue(result);
+        assertTrue(result);
     }
 
     /**
@@ -590,19 +588,19 @@ public class NumberExtensionsTest {
 
         boolean result = NumberExtensions.operator_greaterEqualsThan((Type) type, x);
 
-        Assert.assertFalse(result);
+        assertFalse(result);
 
         x = 2;
 
         result = NumberExtensions.operator_greaterEqualsThan((Type) type, x);
 
-        Assert.assertTrue(result);
+        assertTrue(result);
 
         x = 10;
 
         result = NumberExtensions.operator_greaterEqualsThan((Type) type, x);
 
-        Assert.assertTrue(result);
+        assertTrue(result);
     }
 
     /**
@@ -616,13 +614,13 @@ public class NumberExtensionsTest {
 
         boolean result = NumberExtensions.operator_lessThan((Type) type, x);
 
-        Assert.assertTrue(result);
+        assertTrue(result);
 
         x = 2;
 
         result = NumberExtensions.operator_lessThan((Type) type, x);
 
-        Assert.assertFalse(result);
+        assertFalse(result);
     }
 
     /**
@@ -636,18 +634,18 @@ public class NumberExtensionsTest {
 
         boolean result = NumberExtensions.operator_lessEqualsThan((Type) type, x);
 
-        Assert.assertTrue(result);
+        assertTrue(result);
 
         x = 2;
 
         result = NumberExtensions.operator_lessEqualsThan((Type) type, x);
 
-        Assert.assertFalse(result);
+        assertFalse(result);
 
         x = 10;
 
         result = NumberExtensions.operator_lessEqualsThan((Type) type, x);
 
-        Assert.assertTrue(result);
+        assertTrue(result);
     }
 }

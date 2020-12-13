@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.console.internal.extension;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -56,7 +55,7 @@ public class SendConsoleCommandExtension extends AbstractConsoleCommandExtension
 
     @Override
     public List<String> getUsages() {
-        return Collections.singletonList(buildCommandUsage("<item> <command>", "sends a command for an item"));
+        return List.of(buildCommandUsage("<item> <command>", "sends a command for an item"));
     }
 
     @Override

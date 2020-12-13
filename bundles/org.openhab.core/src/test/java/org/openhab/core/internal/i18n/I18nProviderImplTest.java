@@ -13,9 +13,9 @@
 package org.openhab.core.internal.i18n;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.openhab.core.internal.i18n.I18nProviderImpl.*;
 
 import java.time.ZoneId;
@@ -23,11 +23,12 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.library.types.PointType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -38,6 +39,7 @@ import org.osgi.service.component.ComponentContext;
  *
  * @author Stefan Triller - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class I18nProviderImplTest {
 
     private static final String LOCATION_ZERO = "0,0";
@@ -61,16 +63,12 @@ public class I18nProviderImplTest {
     private I18nProviderImpl i18nProviderImpl;
     private Dictionary<String, Object> initialConfig = new Hashtable<>();
 
-    @Mock
-    private ComponentContext componentContext;
-    @Mock
-    private BundleContext bundleContext;
-    @Mock
-    private Bundle bundle;
+    private @Mock ComponentContext componentContext;
+    private @Mock BundleContext bundleContext;
+    private @Mock Bundle bundle;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
         initialConfig = buildInitialConfig();
         when(componentContext.getProperties()).thenReturn(initialConfig);
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
@@ -104,7 +102,7 @@ public class I18nProviderImplTest {
         Locale setLocale = i18nProviderImpl.getLocale();
 
         assertNull(location);
-        assertThat(i18nProviderImpl.getTimeZone(), is(TimeZone.getDefault().toZoneId()));
+        assertThat(i18nProviderImpl.getTimeZone(), is(ZoneId.systemDefault()));
         assertThat(setLocale, is(Locale.getDefault()));
     }
 
@@ -140,7 +138,7 @@ public class I18nProviderImplTest {
         conf.put(TIMEZONE, "invalid");
         i18nProviderImpl.modified(conf);
 
-        assertThat(i18nProviderImpl.getTimeZone(), is(TimeZone.getDefault().toZoneId()));
+        assertThat(i18nProviderImpl.getTimeZone(), is(ZoneId.systemDefault()));
     }
 
     @Test

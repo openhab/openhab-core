@@ -12,15 +12,17 @@
  */
 package org.openhab.core.config.core.status;
 
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.*;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
 
 /**
@@ -88,16 +90,16 @@ public class ConfigStatusInfoTest {
         assertConfigStatusInfo(info);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void assertNPEisThrownIfTypesAreNull() {
         ConfigStatusInfo info = new ConfigStatusInfo();
-        info.getConfigStatusMessages(null, emptySet());
+        assertThrows(NullPointerException.class, () -> info.getConfigStatusMessages(null, emptySet()));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void assertNPEisThrownIfParameterNamesAreNull() {
         ConfigStatusInfo info = new ConfigStatusInfo();
-        info.getConfigStatusMessages(emptySet(), null);
+        assertThrows(NullPointerException.class, () -> info.getConfigStatusMessages(emptySet(), null));
     }
 
     private void assertConfigStatusInfo(ConfigStatusInfo info) {
@@ -128,14 +130,9 @@ public class ConfigStatusInfoTest {
         assertThat(info.getConfigStatusMessages(PARAM3, PARAM4).size(), is(2));
         assertThat(info.getConfigStatusMessages(PARAM3, PARAM4), hasItems(MSG3, MSG4));
 
-        assertThat(info
-                .getConfigStatusMessages(unmodifiableSet(Stream.of(Type.INFORMATION, Type.WARNING).collect(toSet())),
-                        unmodifiableSet(Stream.of(PARAM1, PARAM6).collect(toSet())))
-                .size(), is(5));
-        assertThat(
-                info.getConfigStatusMessages(
-                        unmodifiableSet(Stream.of(Type.INFORMATION, Type.WARNING).collect(toSet())),
-                        unmodifiableSet(Stream.of(PARAM1, PARAM6).collect(toSet()))),
+        assertThat(info.getConfigStatusMessages(Set.of(Type.INFORMATION, Type.WARNING), Set.of(PARAM1, PARAM6)).size(),
+                is(5));
+        assertThat(info.getConfigStatusMessages(Set.of(Type.INFORMATION, Type.WARNING), Set.of(PARAM1, PARAM6)),
                 hasItems(MSG1, MSG2, MSG3, MSG4, MSG6));
 
         assertThat(info.getConfigStatusMessages("unknown").size(), is(0));

@@ -54,7 +54,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * This Script-Extension provides types and presets to support writing Rules using a ScriptEngine.
+ * This Script-Addon provides types and presets to support writing Rules using a ScriptEngine.
  * One can write and register Rules and Modules by adding them through the HandlerRegistry and/or RuleRegistry
  *
  * @author Simon Merschjohann - Initial contribution
@@ -186,9 +186,13 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
         Map<String, Object> scopeValues = new HashMap<>();
 
         Collection<String> values = PRESETS.get(preset);
-
-        for (String value : values) {
-            scopeValues.put(value, STATIC_TYPES.get(value));
+        if (values != null) {
+            for (String value : values) {
+                Object staticType = STATIC_TYPES.get(value);
+                if (staticType != null) {
+                    scopeValues.put(value, staticType);
+                }
+            }
         }
 
         if (RULE_SUPPORT.equals(preset)) {

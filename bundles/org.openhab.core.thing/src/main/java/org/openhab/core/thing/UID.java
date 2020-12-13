@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.AbstractUID;
 
 /**
- * Base class for binding related unique identifiers within the SmartHome framework.
+ * Base class for binding related unique identifiers.
  * <p>
  * A UID must always start with a binding ID.
  *
@@ -42,7 +42,7 @@ public abstract class UID extends AbstractUID {
      * Parses a UID for a given string. The UID must be in the format
      * 'bindingId:segment:segment:...'.
      *
-     * @param uid uid in form a string (must not be null)
+     * @param uid uid in form a string
      */
     public UID(String uid) {
         super(uid);
@@ -51,7 +51,7 @@ public abstract class UID extends AbstractUID {
     /**
      * Creates a UID for list of segments.
      *
-     * @param segments segments (must not be null)
+     * @param segments segments
      */
     public UID(String... segments) {
         super(segments);
@@ -60,7 +60,7 @@ public abstract class UID extends AbstractUID {
     /**
      * Creates a UID for list of segments.
      *
-     * @param segments segments (must not be null)
+     * @param segments segments
      */
     protected UID(List<String> segments) {
         super(segments);
@@ -75,41 +75,32 @@ public abstract class UID extends AbstractUID {
         return getSegment(0);
     }
 
-    /**
-     * @deprecated use {@link #getAllSegments()} instead
-     */
-    @Deprecated
-    protected String[] getSegments() {
-        final List<String> segments = super.getAllSegments();
-        return segments.toArray(new String[segments.size()]);
-    }
-
     @Override
-    // Avoid subclasses to require importing the o.e.sh.core.common package
+    // Avoid subclasses to require importing the org.openhab.core.common package
     protected List<String> getAllSegments() {
         return super.getAllSegments();
     }
 
     @Override
-    // Avoid bindings to require importing the o.e.sh.core.common package
+    // Avoid bindings to require importing the org.openhab.core.common package
     public String toString() {
         return super.toString();
     }
 
     @Override
-    // Avoid bindings to require importing the o.e.sh.core.common package
+    // Avoid bindings to require importing the org.openhab.core.common package
     public String getAsString() {
         return super.getAsString();
     }
 
     @Override
-    // Avoid bindings to require importing the o.e.sh.core.common package
+    // Avoid bindings to require importing the org.openhab.core.common package
     public int hashCode() {
         return super.hashCode();
     }
 
     @Override
-    // Avoid bindings to require importing the o.e.sh.core.common package
+    // Avoid bindings to require importing the org.openhab.core.common package
     public boolean equals(@Nullable Object obj) {
         return super.equals(obj);
     }

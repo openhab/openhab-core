@@ -14,12 +14,14 @@ package org.openhab.core.config.discovery;
 
 import java.util.Random;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
 /**
  * @author Andre Fuechsel - Initial contribution
  */
+@NonNullByDefault
 public class DiscoveryServiceMockOfBridge extends DiscoveryServiceMock {
 
     final ThingUID bridgeUID;
@@ -31,7 +33,11 @@ public class DiscoveryServiceMockOfBridge extends DiscoveryServiceMock {
 
     @Override
     public void startScan() {
-        thingDiscovered(DiscoveryResultBuilder.create(new ThingUID(thingType, "test" + new Random().nextInt(999999999)))
+        if (faulty) {
+            throw new RuntimeException();
+        }
+        thingDiscovered(DiscoveryResultBuilder
+                .create(new ThingUID(thingType, bridgeUID, "test" + new Random().nextInt(999999999)))
                 .withBridge(bridgeUID).withTTL(DEFAULT_TTL).build());
     }
 

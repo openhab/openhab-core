@@ -18,10 +18,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * An {@link EventFactory} is responsible for creating {@link Event} instances of specific event types. The Eclipse
- * SmartHome framework uses Event Factories in order to create new Events (
- * {@link #createEvent(String, String, String, String)}) based on the event type, the topic, the payload and the source
- * if an event type is supported ( {@link #getSupportedEventTypes()}).
+ * An {@link EventFactory} is responsible for creating {@link Event} instances of specific event types. Event Factories
+ * are used to create new Events ({@link #createEvent(String, String, String, String)}) based on the event type, the
+ * topic, the payload and the source if an event type is supported ({@link #getSupportedEventTypes()}).
  *
  * @author Stefan Bußweiler - Initial contribution
  */

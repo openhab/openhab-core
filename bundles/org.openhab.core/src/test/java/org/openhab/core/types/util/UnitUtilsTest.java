@@ -12,9 +12,11 @@
  */
 package org.openhab.core.types.util;
 
+import static org.eclipse.jdt.annotation.Checks.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.library.unit.MetricPrefix.*;
 
 import javax.measure.Quantity;
@@ -24,16 +26,18 @@ import javax.measure.quantity.Length;
 import javax.measure.quantity.Power;
 import javax.measure.quantity.Temperature;
 
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.unit.Units;
 
 /**
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class UnitUtilsTest {
 
     @Test
@@ -59,23 +63,18 @@ public class UnitUtilsTest {
 
     @Test
     public void whenValidDimensionIsGivenShouldCreateQuantityClass() {
-        Class<? extends Quantity<?>> temperature = UnitUtils.parseDimension("Temperature");
-        assertNotNull(temperature);
+        Class<? extends Quantity<?>> temperature = requireNonNull(UnitUtils.parseDimension("Temperature"));
         assertTrue(Temperature.class.isAssignableFrom(temperature));
 
-        Class<? extends Quantity<?>> intensity = UnitUtils.parseDimension("Intensity");
-        assertNotNull(intensity);
+        Class<? extends Quantity<?>> intensity = requireNonNull(UnitUtils.parseDimension("Intensity"));
         assertTrue(Intensity.class.isAssignableFrom(intensity));
     }
 
     @Test
     public void testConversionOfUnit() {
-        assertThat(SmartHomeUnits.DECIBEL_MILLIWATTS.getConverterTo(SmartHomeUnits.WATT).convert(50),
-                closeTo(100, 0.001));
-        assertThat(SmartHomeUnits.WATT.getConverterTo(SmartHomeUnits.DECIBEL_MILLIWATTS).convert(0.1),
-                closeTo(20, 0.0001));
-        assertThat(
-                SmartHomeUnits.METRE_PER_SQUARE_SECOND.getConverterTo(SmartHomeUnits.STANDARD_GRAVITY).convert(9.8065),
+        assertThat(Units.DECIBEL_MILLIWATTS.getConverterTo(Units.WATT).convert(50), closeTo(100, 0.001));
+        assertThat(Units.WATT.getConverterTo(Units.DECIBEL_MILLIWATTS).convert(0.1), closeTo(20, 0.0001));
+        assertThat(Units.METRE_PER_SQUARE_SECOND.getConverterTo(Units.STANDARD_GRAVITY).convert(9.8065),
                 closeTo(1.0, 0.0001));
     }
 
@@ -84,32 +83,36 @@ public class UnitUtilsTest {
         assertThat(UnitUtils.parseUnit("%.2f °F"), is(ImperialUnits.FAHRENHEIT));
         assertThat(UnitUtils.parseUnit("%.2f °C"), is(SIUnits.CELSIUS));
         assertThat(UnitUtils.parseUnit("myLabel km"), is(KILO(SIUnits.METRE)));
-        assertThat(UnitUtils.parseUnit("%.2f %%"), is(SmartHomeUnits.PERCENT));
+        assertThat(UnitUtils.parseUnit("%.2f %%"), is(Units.PERCENT));
         assertThat(UnitUtils.parseUnit("myLabel %unit%"), is(nullValue()));
-        assertThat(UnitUtils.parseUnit("%.2f kvarh"), is(SmartHomeUnits.KILOVAR_HOUR));
+        assertThat(UnitUtils.parseUnit("%.2f kvarh"), is(Units.KILOVAR_HOUR));
     }
 
     @Test
     public void testParsePureUnit() {
-        assertThat(UnitUtils.parseUnit("DU"), is(SmartHomeUnits.DOBSON_UNIT));
+        assertThat(UnitUtils.parseUnit("DU"), is(Units.DOBSON_UNIT));
         assertThat(UnitUtils.parseUnit("°F"), is(ImperialUnits.FAHRENHEIT));
         assertThat(UnitUtils.parseUnit("m"), is(SIUnits.METRE));
-        assertThat(UnitUtils.parseUnit("%"), is(SmartHomeUnits.PERCENT));
+        assertThat(UnitUtils.parseUnit("%"), is(Units.PERCENT));
     }
 
     @Test
     public void testGetDimensionName() {
         assertThat(UnitUtils.getDimensionName(SIUnits.CELSIUS), is(Temperature.class.getSimpleName()));
-        assertThat(UnitUtils.getDimensionName(SmartHomeUnits.KILOWATT_HOUR), is(Energy.class.getSimpleName()));
-        assertThat(UnitUtils.getDimensionName(SmartHomeUnits.WATT), is(Power.class.getSimpleName()));
-        assertThat(UnitUtils.getDimensionName(MetricPrefix.MEGA(SmartHomeUnits.KILOWATT_HOUR)),
+        assertThat(UnitUtils.getDimensionName(Units.KILOWATT_HOUR), is(Energy.class.getSimpleName()));
+        assertThat(UnitUtils.getDimensionName(Units.WATT), is(Power.class.getSimpleName()));
+        assertThat(UnitUtils.getDimensionName(MetricPrefix.MEGA(Units.KILOWATT_HOUR)),
                 is(Energy.class.getSimpleName()));
 
         Unit<?> unit = UnitUtils.parseUnit("°F");
         assertNotNull(unit);
-        assertThat(UnitUtils.getDimensionName(unit), is(Temperature.class.getSimpleName()));
+        if (unit != null) {
+            assertThat(UnitUtils.getDimensionName(unit), is(Temperature.class.getSimpleName()));
+        }
         unit = UnitUtils.parseUnit("m");
         assertNotNull(unit);
-        assertThat(UnitUtils.getDimensionName(unit), is(Length.class.getSimpleName()));
+        if (unit != null) {
+            assertThat(UnitUtils.getDimensionName(unit), is(Length.class.getSimpleName()));
+        }
     }
 }

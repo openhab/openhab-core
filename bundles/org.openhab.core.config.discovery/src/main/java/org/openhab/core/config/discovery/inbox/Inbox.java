@@ -36,6 +36,7 @@ import org.openhab.core.thing.ThingUID;
  * is added, updated or removed.
  *
  * @author Michael Grammling - Initial contribution
+ * @author Laurent Garnier - Added parameter newThingId to method approve
  *
  * @see InboxListener
  */
@@ -96,7 +97,7 @@ public interface Inbox {
      *
      * @param flag the flag of the given thingUID result to be set (could be null)
      */
-    public void setFlag(ThingUID thingUID, @Nullable DiscoveryResultFlag flag);
+    void setFlag(ThingUID thingUID, @Nullable DiscoveryResultFlag flag);
 
     /**
      * Adds an {@link InboxListener} to the listeners' registry.
@@ -127,8 +128,10 @@ public interface Inbox {
      *
      * @param thingUID the UID of the Thing
      * @param label the label of the Thing
+     * @param newThingId the thing ID of the Thing to be created; if not null, it will replace the thing ID from
+     *            parameter thingUID
      * @return the approved Thing
      */
     @Nullable
-    Thing approve(ThingUID thingUID, @Nullable String label);
+    Thing approve(ThingUID thingUID, @Nullable String label, @Nullable String newThingId);
 }

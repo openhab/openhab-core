@@ -12,7 +12,7 @@
  */
 package org.openhab.core.common.osgi;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -21,11 +21,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.Bundle;
 
 /**
@@ -52,7 +51,7 @@ public class ResourceBundleClassLoaderTest {
 
         Bundle bundleMock = mock(Bundle.class);
         when(bundleMock.findEntries(any(), any(), anyBoolean()))
-                .thenAnswer(answer -> Collections.enumeration(Arrays.asList(hostPropertiesURL, fragmentPropertiesURL)));
+                .thenAnswer(answer -> Collections.enumeration(List.of(hostPropertiesURL, fragmentPropertiesURL)));
         when(bundleMock.getEntry(any())).thenReturn(hostPropertiesURL);
 
         ResourceBundleClassLoader classloader = new ResourceBundleClassLoader(bundleMock, "/OH-INF/i18n",

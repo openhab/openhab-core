@@ -13,21 +13,21 @@
 package org.openhab.core.io.rest.core.internal.item;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.IsCollectionContaining.hasItems;
-import static org.junit.Assert.*;
+import static org.hamcrest.core.IsIterableContaining.hasItems;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -35,8 +35,9 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.items.GenericItem;
@@ -73,6 +74,8 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     private GenericItem item3;
     private GenericItem item4;
 
+    private AutoCloseable mocksCloseable;
+
     private @Mock ItemProvider itemProvider;
 
     private UriInfo uriInfo;
@@ -81,9 +84,9 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     private ItemResource itemResource;
     private ManagedItemProvider managedItemProvider;
 
-    @Before
-    public void setup() {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
         registerService(new VolatileStorageService());
 
@@ -98,7 +101,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         item3 = new DimmerItem(ITEM_NAME3);
         item4 = new StringItem(ITEM_NAME4);
 
-        when(itemProvider.getAll()).thenReturn(Arrays.asList(item1, item2, item3, item4));
+        when(itemProvider.getAll()).thenReturn(List.of(item1, item2, item3, item4));
         registerService(itemProvider);
 
         UriBuilder uriBuilder = mock(UriBuilder.class);
@@ -108,6 +111,11 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         when(uriInfo.getPath()).thenReturn("");
         httpHeaders = mock(HttpHeaders.class);
         when(httpHeaders.getHeaderString(anyString())).thenReturn(null);
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     @Test
@@ -194,7 +202,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         assertThat(response.getStatus(), is(Status.NOT_FOUND.getStatusCode()));
 
         unregisterService(itemProvider);
-        when(itemProvider.getAll()).thenReturn(Collections.singletonList(new SwitchItem("UnmanagedItem")));
+        when(itemProvider.getAll()).thenReturn(List.of(new SwitchItem("UnmanagedItem")));
         registerService(itemProvider);
 
         response = itemResource.addTag("UnmanagedItem", "MyTag");
@@ -316,8 +324,8 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     @Test
     public void testRemoveMetadataUnmanagedMetadata() {
         MetadataProvider provider = mock(MetadataProvider.class);
-        when(provider.getAll()).thenReturn(
-                Collections.singleton(new Metadata(new MetadataKey("namespace", ITEM_NAME1), "some value", null)));
+        when(provider.getAll())
+                .thenReturn(Set.of(new Metadata(new MetadataKey("namespace", ITEM_NAME1), "some value", null)));
         registerService(provider);
 
         Response response = itemResource.removeMetadata(ITEM_NAME1, "namespace");

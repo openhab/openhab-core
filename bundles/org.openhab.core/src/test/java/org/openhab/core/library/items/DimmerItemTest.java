@@ -12,11 +12,11 @@
  */
 package org.openhab.core.library.items;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.OnOffType;

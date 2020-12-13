@@ -12,15 +12,16 @@
  */
 package org.openhab.core.items.events;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
@@ -44,19 +45,22 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM_NAME = "SomeItem";
     private EventPublisher eventPublisher;
-    private @Mock ItemProvider itemProvider;
     private ItemCommandEvent commandEvent;
     private ItemStateEvent updateEvent;
+
+    private AutoCloseable mocksCloseable;
+
+    private @Mock ItemProvider itemProvider;
     private @Mock MetadataProvider mockMetadataProvider;
 
-    @Before
-    public void setup() {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
         eventPublisher = getService(EventPublisher.class);
         assertNotNull(eventPublisher);
 
-        when(itemProvider.getAll()).thenReturn(Collections.singletonList(new SwitchItem(ITEM_NAME)));
+        when(itemProvider.getAll()).thenReturn(List.of(new SwitchItem(ITEM_NAME)));
         registerService(itemProvider);
 
         EventSubscriber itemEventSubscriber = new AbstractItemEventSubscriber() {
@@ -72,9 +76,14 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
         };
         registerService(itemEventSubscriber, EventSubscriber.class.getName());
 
-        when(mockMetadataProvider.getAll()).thenReturn(Collections
-                .singletonList(new Metadata(new MetadataKey("autoupdate", ITEM_NAME), Boolean.toString(false), null)));
+        when(mockMetadataProvider.getAll()).thenReturn(
+                List.of(new Metadata(new MetadataKey("autoupdate", ITEM_NAME), Boolean.toString(false), null)));
         registerService(mockMetadataProvider);
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     @Test
@@ -122,7 +131,7 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSupportedEventTypes() {
-                return Collections.singleton(someEventType);
+                return Set.of(someEventType);
             }
         };
         registerService(someEventFactory);
@@ -135,7 +144,7 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
 
             @Override
             public String getTopic() {
-                return "smarthome/items";
+                return "openhab/items";
             }
 
             @Override

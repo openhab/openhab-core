@@ -12,13 +12,13 @@
  */
 package org.openhab.core.io.transport.upnp.internal;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.jupnp.UpnpService;
 import org.jupnp.controlpoint.ControlPoint;
 import org.jupnp.model.meta.DeviceDetails;
@@ -32,6 +32,9 @@ import org.jupnp.model.types.UDAServiceId;
 import org.jupnp.model.types.UDN;
 import org.jupnp.registry.Registry;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
 
 /**
@@ -39,6 +42,8 @@ import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
  *
  * @author Andre Fuechsel - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class UpnpIOServiceTest {
 
     private static final String UDN_1_STRING = "UDN";
@@ -59,12 +64,9 @@ public class UpnpIOServiceTest {
 
     private UpnpIOServiceImpl upnpIoService;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
-        initMocks(this);
-
         when(upnpIoParticipant.getUDN()).thenReturn(UDN_1_STRING);
-
         when(upnpIoParticipant2.getUDN()).thenReturn(UDN_2_STRING);
 
         DeviceIdentity deviceIdentity = new DeviceIdentity(UDN_1);

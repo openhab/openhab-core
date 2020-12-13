@@ -52,9 +52,4 @@ public class SerialConfigOptionProvider implements ConfigOptionProvider {
         }
         return options;
     }
-
-    @Override
-    public Collection<ParameterOption> getParameterOptions(URI uri, String param, Locale locale) {
-        return null;
-    }
 }

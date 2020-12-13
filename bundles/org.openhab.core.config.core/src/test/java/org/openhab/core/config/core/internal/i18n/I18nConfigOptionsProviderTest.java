@@ -13,14 +13,13 @@
 package org.openhab.core.config.core.internal.i18n;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.net.URI;
 import java.util.Locale;
 
 import org.hamcrest.collection.IsEmptyCollection;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ParameterOption;
 
 /**
@@ -30,37 +29,41 @@ import org.openhab.core.config.core.ParameterOption;
  */
 public class I18nConfigOptionsProviderTest {
 
-    private I18nConfigOptionsProvider provider;
+    private final I18nConfigOptionsProvider provider = new I18nConfigOptionsProvider();
+    private final URI uriI18N = URI.create("system:i18n");
+
+    private final ParameterOption empty = new ParameterOption("", "");
     private final ParameterOption expectedLangEN = new ParameterOption("en", "English");
     private final ParameterOption expectedLangFR = new ParameterOption("en", "anglais");
     private final ParameterOption expectedCntryEN = new ParameterOption("US", "United States");
     private final ParameterOption expectedCntryFRJava8 = new ParameterOption("US", "Etats-Unis");
     private final ParameterOption expectedCntryFRJava9 = new ParameterOption("US", "États-Unis");
-    private URI uriI18N;
 
-    @Before
-    public void setup() throws Exception {
-        provider = new I18nConfigOptionsProvider();
-        uriI18N = new URI("system:i18n");
+    @Test
+    public void testLanguage() {
+        assertThat(provider.getParameterOptions(uriI18N, "language", null, Locale.US), hasItem(expectedLangEN));
+        assertThat(provider.getParameterOptions(uriI18N, "language", null, Locale.US), not(hasItem(empty)));
+
+        assertThat(provider.getParameterOptions(uriI18N, "language", null, Locale.FRENCH), hasItem(expectedLangFR));
+        assertThat(provider.getParameterOptions(uriI18N, "language", null, Locale.FRENCH), not(hasItem(empty)));
+
+        assertThat(provider.getParameterOptions(uriI18N, "language", null, null), not(IsEmptyCollection.empty()));
     }
 
     @Test
-    public void testLanguage() throws Exception {
-        assertThat(provider.getParameterOptions(uriI18N, "language", Locale.US), hasItem(expectedLangEN));
-        assertThat(provider.getParameterOptions(uriI18N, "language", Locale.FRENCH), hasItem(expectedLangFR));
-        assertThat(provider.getParameterOptions(uriI18N, "language", null), not(IsEmptyCollection.empty()));
-    }
+    public void testRegion() {
+        assertThat(provider.getParameterOptions(uriI18N, "region", null, Locale.US), hasItem(expectedCntryEN));
+        assertThat(provider.getParameterOptions(uriI18N, "region", null, Locale.US), not(hasItem(empty)));
 
-    @Test
-    public void testRegion() throws Exception {
-        assertThat(provider.getParameterOptions(uriI18N, "region", Locale.US), hasItem(expectedCntryEN));
-        assertThat(provider.getParameterOptions(uriI18N, "region", Locale.FRENCH),
+        assertThat(provider.getParameterOptions(uriI18N, "region", null, Locale.FRENCH),
                 anyOf(hasItem(expectedCntryFRJava8), hasItem(expectedCntryFRJava9)));
-        assertThat(provider.getParameterOptions(uriI18N, "region", null), not(IsEmptyCollection.empty()));
+        assertThat(provider.getParameterOptions(uriI18N, "region", null, Locale.FRENCH), not(hasItem(empty)));
+
+        assertThat(provider.getParameterOptions(uriI18N, "region", null, null), not(IsEmptyCollection.empty()));
     }
 
     @Test
-    public void testUnknownParameter() throws Exception {
-        assertThat(provider.getParameterOptions(uriI18N, "unknown", Locale.US), nullValue());
+    public void testUnknownParameter() {
+        assertThat(provider.getParameterOptions(uriI18N, "unknown", null, Locale.US), nullValue());
     }
 }

@@ -15,7 +15,6 @@ package org.openhab.core.model.script.scoping;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,17 +24,13 @@ import org.openhab.core.library.unit.BinaryPrefix;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.library.unit.SmartHomeUnits;
-import org.openhab.core.model.persistence.extensions.PersistenceExtensions;
-import org.openhab.core.model.script.actions.Audio;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.model.script.actions.BusEvent;
 import org.openhab.core.model.script.actions.Exec;
 import org.openhab.core.model.script.actions.HTTP;
-import org.openhab.core.model.script.actions.LogAction;
+import org.openhab.core.model.script.actions.Log;
 import org.openhab.core.model.script.actions.Ping;
 import org.openhab.core.model.script.actions.ScriptExecution;
-import org.openhab.core.model.script.actions.Things;
-import org.openhab.core.model.script.actions.Voice;
 import org.openhab.core.model.script.engine.IActionServiceProvider;
 import org.openhab.core.model.script.engine.IThingActionsProvider;
 import org.openhab.core.model.script.engine.action.ActionService;
@@ -73,16 +68,15 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.remove(BigInteger.class);
         result.remove(BigDecimal.class);
         result.remove(double.class);
+
         result.add(NumberExtensions.class);
-        result.add(URLEncoder.class);
-        result.add(PersistenceExtensions.class);
+
         result.add(BusEvent.class);
-        result.add(Exec.class);
         result.add(HTTP.class);
+        result.add(Log.class);
         result.add(Ping.class);
-        result.add(Audio.class);
-        result.add(Voice.class);
-        result.add(Things.class);
+        result.add(ScriptExecution.class);
+        result.add(URLEncoder.class);
 
         result.addAll(getActionClasses());
         return result;
@@ -94,21 +88,18 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(BusEvent.class);
         result.add(Exec.class);
         result.add(HTTP.class);
+        result.add(Log.class);
         result.add(Ping.class);
         result.add(ScriptExecution.class);
-        result.add(LogAction.class);
-        result.add(Audio.class);
-        result.add(Voice.class);
-        result.add(Things.class);
+        result.add(URLEncoder.class);
 
         result.add(ImperialUnits.class);
         result.add(MetricPrefix.class);
         result.add(SIUnits.class);
-        result.add(SmartHomeUnits.class);
+        result.add(Units.class);
         result.add(BinaryPrefix.class);
 
         // date time static functions
-        result.add(Instant.class);
         result.add(ZonedDateTime.class);
 
         result.addAll(getActionClasses());

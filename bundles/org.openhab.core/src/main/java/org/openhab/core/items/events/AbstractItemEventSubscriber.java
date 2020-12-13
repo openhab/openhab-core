@@ -12,10 +12,7 @@
  */
 package org.openhab.core.items.events;
 
-import java.util.Collections;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
@@ -33,8 +30,7 @@ import org.openhab.core.events.EventSubscriber;
  */
 public abstract class AbstractItemEventSubscriber implements EventSubscriber {
 
-    private final Set<String> subscribedEventTypes = Collections
-            .unmodifiableSet(Stream.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE).collect(Collectors.toSet()));
+    private final Set<String> subscribedEventTypes = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE);
 
     @Override
     public Set<String> getSubscribedEventTypes() {

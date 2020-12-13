@@ -13,15 +13,15 @@
 package org.openhab.core.automation.integration.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -43,10 +43,10 @@ import org.slf4j.LoggerFactory;
 public class HostFragmentSupportTest extends JavaOSGiTest {
 
     private static final Locale BULGARIAN = new Locale("bg");
-    private static final Locale DEFAULT = Locale.getDefault();
+    private static final Locale DEFAULT = Locale.ENGLISH;
     private static final Locale GERMAN = Locale.GERMANY;
 
-    private static final List<Locale> LOCALES = Arrays.asList(BULGARIAN, DEFAULT, GERMAN);
+    private static final List<Locale> LOCALES = List.of(BULGARIAN, DEFAULT, GERMAN);
 
     private final Logger logger = LoggerFactory.getLogger(HostFragmentSupportTest.class);
     private ModuleTypeRegistry registry;
@@ -92,7 +92,7 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
 
     boolean waiting = true;
 
-    @Before
+    @BeforeEach
     public void before() {
         logger.info("@Before.begin");
 
@@ -111,7 +111,7 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
         logger.info("@Before.finish");
     }
 
-    @After
+    @AfterEach
     public void after() {
         logger.info("@After");
     }

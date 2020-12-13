@@ -12,18 +12,18 @@
  */
 package org.openhab.core.library.types;
 
+import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -31,11 +31,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * @author Thomas Eichstaedt-Engelen - Initial contribution
@@ -45,7 +43,6 @@ import org.junit.runners.Parameterized.Parameters;
  * @author Gaël L'hopital - added ability to use second and milliseconds unix time
  */
 @NonNullByDefault
-@RunWith(Parameterized.class)
 public class DateTimeTypeTest {
 
     /**
@@ -61,12 +58,12 @@ public class DateTimeTypeTest {
         public final TimeZone defaultTimeZone;
         /**
          * input time.
-         * used to call the {@link Calendar#set(int, int, int, int, int, int)} method to set the time.
+         * used to call the {@link LocalDateTime#of(int, int, int, int, int, int, int)}method to set the time.
          */
         public final @Nullable Map<String, Integer> inputTimeMap;
         /**
          * input time zone.
-         * used to call the {@link Calendar#setTimeZone(TimeZone)} to set the time zone.
+         * used to call the {@link ZonedDateTime#of(LocalDateTime, ZoneId)} to set the time zone.
          * the time zone offset has direct impact on the result.
          */
         public final @Nullable TimeZone inputTimeZone;
@@ -177,10 +174,9 @@ public class DateTimeTypeTest {
      *
      * @return collection
      */
-    @Parameters
     public static Collection<Object[]> parameters() {
         // for simplicity we use always the same input time.
-        return Arrays.asList(new Object[][] {
+        return List.of(new Object[][] {
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("UTC"),
                         "2014-03-30T10:58:47.033+0000", "2014-03-30T10:58:47.033+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("CET"),
@@ -226,42 +222,12 @@ public class DateTimeTypeTest {
     }
 
     private static Map<String, Integer> initTimeMap() {
-        Map<String, Integer> inputTimeMap = new HashMap<>();
-        inputTimeMap.put("year", 2014);
-        inputTimeMap.put("month", 2);
-        inputTimeMap.put("date", 30);
-        inputTimeMap.put("hourOfDay", 10);
-        inputTimeMap.put("minute", 58);
-        inputTimeMap.put("second", 47);
-        inputTimeMap.put("milliseconds", 33);
-        return inputTimeMap;
-    }
-
-    private final ParameterSet parameterSet;
-
-    /**
-     * setup Test class with current parameter map.
-     *
-     * @param parameterMap parameter map
-     */
-    public DateTimeTypeTest(ParameterSet parameterSet) {
-        this.parameterSet = parameterSet;
-    }
-
-    @Before
-    public void setUp() {
-        // set default time zone
-        TimeZone.setDefault(parameterSet.defaultTimeZone);
+        return Map.ofEntries(entry("year", 2014), entry("month", 2), entry("date", 30), entry("hourOfDay", 10),
+                entry("minute", 58), entry("second", 47), entry("milliseconds", 33));
     }
 
     @Test
     public void serializationTest() {
-        DateTimeType dt = new DateTimeType(Calendar.getInstance());
-        assertTrue(dt.equals(new DateTimeType(dt.toString())));
-    }
-
-    @Test
-    public void serializationTestZoned() {
         ZonedDateTime zoned = ZonedDateTime.now();
         DateTimeType dt = new DateTimeType(zoned);
         DateTimeType sdt = new DateTimeType(dt.toFullString());
@@ -270,16 +236,6 @@ public class DateTimeTypeTest {
 
     @Test
     public void equalityTest() {
-        DateTimeType dt1 = new DateTimeType(Calendar.getInstance());
-        DateTimeType dt2 = DateTimeType.valueOf(dt1.toFullString());
-
-        assertTrue(dt1.toString().equals(dt2.toString()));
-        assertTrue(dt1.getCalendar().equals(dt2.getCalendar()));
-        assertTrue(dt1.equals(dt2));
-    }
-
-    @Test
-    public void equalityTestZoned() {
         ZonedDateTime zoned = ZonedDateTime.now();
         DateTimeType dt1 = new DateTimeType(zoned);
         DateTimeType dt2 = DateTimeType.valueOf(dt1.toFullString());
@@ -317,31 +273,10 @@ public class DateTimeTypeTest {
         assertThat(epochStandard, is(zdtStandard));
     }
 
-    @Test
-    public void createDate() {
-        Map<String, Integer> inputTimeMap = parameterSet.inputTimeMap;
-        TimeZone inputTimeZone = parameterSet.inputTimeZone;
-        if (inputTimeMap == null || inputTimeZone == null) {
-            return;
-        }
-
-        // get DateTimeType from the current parameter
-        final Calendar calendar = Calendar.getInstance(inputTimeZone);
-        calendar.set(inputTimeMap.get("year"), inputTimeMap.get("month"), inputTimeMap.get("date"),
-                inputTimeMap.get("hourOfDay"), inputTimeMap.get("minute"), inputTimeMap.get("second"));
-        calendar.set(Calendar.MILLISECOND, inputTimeMap.get("milliseconds"));
-        DateTimeType dt1 = new DateTimeType(calendar);
-        DateTimeType dt2 = new DateTimeType(
-                new SimpleDateFormat(DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS).format(calendar.getTime()));
-        // Test
-        assertEquals(dt1.toFullString(), dt1.toString());
-        assertEquals(parameterSet.expectedResultLocalTZ, dt1.toString());
-        assertEquals(parameterSet.expectedResultLocalTZ, dt2.toString());
-        assertEquals(dt1, dt2);
-    }
-
-    @Test
-    public void createZonedDate() {
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void createDate(ParameterSet parameterSet) {
+        TimeZone.setDefault(parameterSet.defaultTimeZone);
         // get DateTimeType from the current parameter
         DateTimeType dt1;
         DateTimeType dt2;
@@ -365,7 +300,7 @@ public class DateTimeTypeTest {
             dt2 = new DateTimeType(zonedDate);
         } else if (inputTimeString != null) {
             dt1 = new DateTimeType(inputTimeString);
-            dt2 = new DateTimeType(dt1.getZonedDateTime().withZoneSameInstant(TimeZone.getDefault().toZoneId()));
+            dt2 = new DateTimeType(dt1.getZonedDateTime().withZoneSameInstant(ZoneId.systemDefault()));
             dt3 = new DateTimeType(dt1.getZonedDateTime());
         } else {
             throw new DateTimeException("Invalid inputs in parameter set");
@@ -379,9 +314,11 @@ public class DateTimeTypeTest {
         assertEquals(dt1, dt3);
     }
 
-    @Test
-    public void formattingTest() {
-        DateTimeType dt = createDateTimeType();
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void formattingTest(ParameterSet parameterSet) {
+        TimeZone.setDefault(parameterSet.defaultTimeZone);
+        DateTimeType dt = createDateTimeType(parameterSet);
         Locale locale = parameterSet.locale;
         String pattern = parameterSet.pattern;
         if (locale != null && pattern != null) {
@@ -391,22 +328,26 @@ public class DateTimeTypeTest {
         }
     }
 
-    @Test
-    public void changingZoneTest() {
-        DateTimeType dt = createDateTimeType();
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void changingZoneTest(ParameterSet parameterSet) {
+        TimeZone.setDefault(parameterSet.defaultTimeZone);
+        DateTimeType dt = createDateTimeType(parameterSet);
         DateTimeType dt2 = dt.toLocaleZone();
         assertEquals(parameterSet.expectedResultLocalTZ, dt2.toFullString());
         dt2 = dt.toZone(parameterSet.defaultTimeZone.toZoneId());
         assertEquals(parameterSet.expectedResultLocalTZ, dt2.toFullString());
     }
 
-    @Test(expected = DateTimeException.class)
-    public void changingZoneThrowsExceptionTest() {
-        DateTimeType dt = createDateTimeType();
-        dt.toZone("XXX");
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void changingZoneThrowsExceptionTest(ParameterSet parameterSet) {
+        TimeZone.setDefault(parameterSet.defaultTimeZone);
+        DateTimeType dt = createDateTimeType(parameterSet);
+        assertThrows(DateTimeException.class, () -> dt.toZone("XXX"));
     }
 
-    private DateTimeType createDateTimeType() throws DateTimeException {
+    private DateTimeType createDateTimeType(ParameterSet parameterSet) throws DateTimeException {
         Map<String, Integer> inputTimeMap = parameterSet.inputTimeMap;
         TimeZone inputTimeZone = parameterSet.inputTimeZone;
         String inputTimeString = parameterSet.inputTimeString;
