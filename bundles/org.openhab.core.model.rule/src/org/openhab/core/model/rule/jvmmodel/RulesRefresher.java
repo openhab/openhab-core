@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 public class RulesRefresher implements ReadyTracker {
 
     // delay in seconds before rule resources are refreshed after items or services have changed
-    private static final long REFRESH_DELAY = 5;
+    private static final long REFRESH_DELAY = 30;
 
     public static final String RULES_REFRESH_MARKER_TYPE = "rules";
     public static final String RULES_REFRESH = "refresh";
