@@ -1,3 +1,5 @@
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/openhab/openhab-core)
+
 # openHAB Core
 
 [![Build Status](https://ci.openhab.org/job/openHAB-Core/badge/icon)](https://ci.openhab.org/job/openHAB-Core/)
