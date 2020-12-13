@@ -11,28 +11,28 @@
 					"label": "Start Level",
 					"description": "The system start level.",
 					"required": true,
-                    "options": [
-                        {
-                            "label": "40 - Rules loaded",
-                            "value": 40
-                        },
-                        {
-                            "label": "50 - Rule engine started",
-                            "value": 50
-                        },
-                        {
-                            "label": "70 - User interfaces started",
-                            "value": 70
-                        },
-                        {
-                            "label": "80 - Things initialized",
-                            "value": 80
-                        },
-                        {
-                            "label": "100 - Startup complete",
-                            "value": 100
-                        }
-                    ]
+					"options": [
+						{
+							"label": "40 - Rules loaded",
+							"value": 40
+						},
+						{
+							"label": "50 - Rule engine started",
+							"value": 50
+						},
+						{
+							"label": "70 - User interfaces started",
+							"value": 70
+						},
+						{
+							"label": "80 - Things initialized",
+							"value": 80
+						},
+						{
+							"label": "100 - Startup complete",
+							"value": 100
+						}
+					]
 				}
 			],
 			"outputs": [
