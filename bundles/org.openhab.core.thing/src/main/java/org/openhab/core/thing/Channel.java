@@ -26,9 +26,9 @@ import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
- * {@link Channel} is a part of a {@link Thing} that represents a functionality
- * of it. Therefore {@link Item}s can be linked a to a channel. The channel only
- * accepts a specific item type which is specified by {@link Channel#getAcceptedItemType()} methods.
+ * {@link Channel} is a part of a {@link Thing} that represents a functionality of it. Therefore {@link Item}s can be
+ * linked a to a channel. The channel only accepts a specific item type which is specified by
+ * {@link Channel#getAcceptedItemType()} methods. Use the {@link ChannelBuilder} for building channels.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Alex Tugarev - Extended about default tags
@@ -71,10 +71,9 @@ public class Channel {
     }
 
     /**
-     * @deprecated - use {@link ChannelBuilder} instead
+     * Use the {@link ChannelBuilder} for building channels.
      */
-    @Deprecated
-    public Channel(ChannelUID uid, @Nullable ChannelTypeUID channelTypeUID, @Nullable String acceptedItemType,
+    protected Channel(ChannelUID uid, @Nullable ChannelTypeUID channelTypeUID, @Nullable String acceptedItemType,
             ChannelKind kind, @Nullable Configuration configuration, Set<String> defaultTags,
             @Nullable Map<String, String> properties, @Nullable String label, @Nullable String description,
             @Nullable AutoUpdatePolicy autoUpdatePolicy) {

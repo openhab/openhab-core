@@ -27,6 +27,7 @@ import org.openhab.core.types.StateDescription;
  * The {@link ChannelType} describes a concrete type of a {@link Channel}.
  * <p>
  * This description is used as template definition for the creation of the according concrete {@link Channel} object.
+ * Use the {@link ChannelTypeBuilder} for building channel types.
  * <p>
  * <b>Hint:</b> This class is immutable.
  *
@@ -50,34 +51,6 @@ public class ChannelType extends AbstractDescriptionType {
     /**
      * Creates a new instance of this class with the specified parameters.
      *
-     * @deprecated Use the {@link ChannelTypeBuilder#trigger(ChannelTypeUID, String)} instead.
-     */
-    @Deprecated
-    public ChannelType(ChannelTypeUID uid, boolean advanced, String label, @Nullable String description,
-            @Nullable String category, @Nullable Set<String> tags, @Nullable EventDescription event,
-            @Nullable URI configDescriptionURI) throws IllegalArgumentException {
-        this(uid, advanced, null, ChannelKind.TRIGGER, label, description, category, tags, null, null, event,
-                configDescriptionURI, null);
-    }
-
-    /**
-     * Creates a new instance of this class with the specified parameters.
-     *
-     * @deprecated Use the {@link ChannelTypeBuilder#state(ChannelTypeUID, String, String)} instead.
-     */
-    @Deprecated
-    public ChannelType(ChannelTypeUID uid, boolean advanced, String itemType, String label,
-            @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
-            @Nullable StateDescription state, @Nullable CommandDescription commandDescription,
-            @Nullable URI configDescriptionURI, @Nullable AutoUpdatePolicy autoUpdatePolicy)
-            throws IllegalArgumentException {
-        this(uid, advanced, itemType, ChannelKind.STATE, label, description, category, tags, state, commandDescription,
-                null, configDescriptionURI, autoUpdatePolicy);
-    }
-
-    /**
-     * Creates a new instance of this class with the specified parameters.
-     *
      * @param uid the unique identifier which identifies this Channel type within
      *            the overall system (must neither be null, nor empty)
      * @param advanced true if this channel type contains advanced features, otherwise false
@@ -97,8 +70,8 @@ public class ChannelType extends AbstractDescriptionType {
      * @throws IllegalArgumentException if the UID or the item type is null or empty,
      *             or the meta information is null
      */
-    ChannelType(ChannelTypeUID uid, boolean advanced, @Nullable String itemType, ChannelKind kind, String label,
-            @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
+    protected ChannelType(ChannelTypeUID uid, boolean advanced, @Nullable String itemType, ChannelKind kind,
+            String label, @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
             @Nullable StateDescription state, @Nullable CommandDescription commandDescription,
             @Nullable EventDescription event, @Nullable URI configDescriptionURI,
             @Nullable AutoUpdatePolicy autoUpdatePolicy) throws IllegalArgumentException {

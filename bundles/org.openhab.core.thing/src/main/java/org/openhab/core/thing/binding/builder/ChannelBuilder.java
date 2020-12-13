@@ -37,6 +37,16 @@ import org.openhab.core.thing.type.ChannelTypeUID;
 @NonNullByDefault
 public class ChannelBuilder {
 
+    private class ChannelImpl extends Channel {
+        ChannelImpl(ChannelUID uid, @Nullable ChannelTypeUID channelTypeUID, @Nullable String acceptedItemType,
+                ChannelKind kind, @Nullable Configuration configuration, Set<String> defaultTags,
+                @Nullable Map<String, String> properties, @Nullable String label, @Nullable String description,
+                @Nullable AutoUpdatePolicy autoUpdatePolicy) {
+            super(channelUID, channelTypeUID, acceptedItemType, kind, configuration, defaultTags, properties, label,
+                    description, autoUpdatePolicy);
+        }
+    }
+
     private final ChannelUID channelUID;
     private @Nullable String acceptedItemType;
     private ChannelKind kind;
@@ -206,9 +216,8 @@ public class ChannelBuilder {
      *
      * @return the {@link Channel}
      */
-    @SuppressWarnings("deprecation")
     public Channel build() {
-        return new Channel(channelUID, channelTypeUID, acceptedItemType, kind, configuration, defaultTags, properties,
-                label, description, autoUpdatePolicy);
+        return new ChannelImpl(channelUID, channelTypeUID, acceptedItemType, kind, configuration, defaultTags,
+                properties, label, description, autoUpdatePolicy);
     }
 }

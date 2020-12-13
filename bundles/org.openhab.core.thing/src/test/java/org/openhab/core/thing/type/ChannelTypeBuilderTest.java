@@ -139,14 +139,6 @@ public class ChannelTypeBuilderTest {
         assertThat(channelType.getTags(), is(hasSize(2)));
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void withStateDescriptionShouldSetStateDescription() {
-        ChannelType channelType = stateBuilder.withStateDescription(STATE_DESCRIPTION).build();
-
-        assertThat(channelType.getState(), is(STATE_DESCRIPTION));
-    }
-
     @Test
     public void withStateDescriptionFragmentShouldSetStateDescription() {
         ChannelType channelType = stateBuilder.withStateDescriptionFragment(STATE_DESCRIPTION_FRAGMENT).build();

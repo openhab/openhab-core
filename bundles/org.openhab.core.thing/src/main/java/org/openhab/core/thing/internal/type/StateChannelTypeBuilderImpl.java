@@ -12,16 +12,19 @@
  */
 package org.openhab.core.thing.internal.type;
 
+import java.net.URI;
+import java.util.Set;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.type.AutoUpdatePolicy;
+import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.StateChannelTypeBuilder;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
-import org.openhab.core.types.StateDescriptionFragmentBuilder;
 
 /**
  * StateChannelTypeBuilder to create {@link ChannelType}s of kind STATE
@@ -31,6 +34,17 @@ import org.openhab.core.types.StateDescriptionFragmentBuilder;
 @NonNullByDefault
 public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<StateChannelTypeBuilder>
         implements StateChannelTypeBuilder {
+
+    private class StateChannelTypeImpl extends ChannelType {
+        private StateChannelTypeImpl(ChannelTypeUID uid, boolean advanced, String itemType, String label,
+                @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
+                @Nullable StateDescription state, @Nullable CommandDescription commandDescription,
+                @Nullable URI configDescriptionURI, @Nullable AutoUpdatePolicy autoUpdatePolicy)
+                throws IllegalArgumentException {
+            super(uid, advanced, itemType, ChannelKind.STATE, label, description, category, tags, state,
+                    commandDescription, null, configDescriptionURI, autoUpdatePolicy);
+        }
+    }
 
     private final String itemType;
     private @Nullable StateDescriptionFragment stateDescriptionFragment;
@@ -45,14 +59,6 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
         }
 
         this.itemType = itemType;
-    }
-
-    @Override
-    public StateChannelTypeBuilder withStateDescription(@Nullable StateDescription stateDescription) {
-        this.stateDescriptionFragment = stateDescription != null
-                ? StateDescriptionFragmentBuilder.create(stateDescription).build()
-                : null;
-        return this;
     }
 
     @Override
@@ -74,10 +80,9 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
         return this;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public ChannelType build() {
-        return new ChannelType(channelTypeUID, advanced, itemType, label, description, category, tags,
+        return new StateChannelTypeImpl(channelTypeUID, advanced, itemType, label, description, category, tags,
                 stateDescriptionFragment != null ? stateDescriptionFragment.toStateDescription() : null,
                 commandDescription, configDescriptionURI, autoUpdatePolicy);
     }

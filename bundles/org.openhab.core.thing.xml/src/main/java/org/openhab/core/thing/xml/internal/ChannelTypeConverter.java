@@ -31,6 +31,8 @@ import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragment;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
@@ -173,6 +175,10 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         Set<String> tags = readTags(nodeIterator);
 
         StateDescription stateDescription = readStateDescription(nodeIterator);
+        StateDescriptionFragment stateDescriptionFragment = stateDescription != null
+                ? StateDescriptionFragmentBuilder.create(stateDescription).build()
+                : null;
+
         CommandDescription commandDescription = readCommandDescription(nodeIterator);
         EventDescription eventDescription = readEventDescription(nodeIterator);
 
@@ -191,7 +197,7 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         if (cKind == ChannelKind.STATE) {
             builder = ChannelTypeBuilder.state(channelTypeUID, label, itemType).isAdvanced(advanced)
                     .withCategory(category).withConfigDescriptionURI(configDescriptionURI)
-                    .withStateDescription(stateDescription).withAutoUpdatePolicy(autoUpdatePolicy)
+                    .withStateDescriptionFragment(stateDescriptionFragment).withAutoUpdatePolicy(autoUpdatePolicy)
                     .withCommandDescription(commandDescription);
         } else if (cKind == ChannelKind.TRIGGER) {
             builder = ChannelTypeBuilder.trigger(channelTypeUID, label).isAdvanced(advanced).withCategory(category)

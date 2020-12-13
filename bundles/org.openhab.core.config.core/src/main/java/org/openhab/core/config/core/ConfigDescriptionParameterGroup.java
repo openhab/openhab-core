@@ -45,11 +45,9 @@ public class ConfigDescriptionParameterGroup {
      * @param advanced a flag that is set to true if this group contains advanced settings
      * @param label the human readable group label
      * @param description a description that can be provided to the user
-     * @deprecated use {@link ConfigDescriptionParameterGroupBuilder} instead.
      */
-    @Deprecated
-    public ConfigDescriptionParameterGroup(String name, @Nullable String context, Boolean advanced,
-            @Nullable String label, @Nullable String description) {
+    ConfigDescriptionParameterGroup(String name, @Nullable String context, Boolean advanced, @Nullable String label,
+            @Nullable String description) {
         this.name = name;
         this.context = context;
         this.advanced = advanced;
