@@ -23,6 +23,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -109,7 +110,7 @@ public class InboxResource implements RESTResource {
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @Parameter(description = "thing label") @Nullable String label,
-            @Parameter(description = "new thing ID") @Nullable String newThingId) {
+            @QueryParam("newThingId") @Parameter(description = "new thing ID") @Nullable String newThingId) {
         ThingUID thingUIDObject = new ThingUID(thingUID);
         String notEmptyLabel = label != null && !label.isEmpty() ? label : null;
         String notEmptyNewThingId = newThingId != null && !newThingId.isEmpty() ? newThingId : null;
