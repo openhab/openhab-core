@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Höfer - added config status provider and firmware update handler service registration
  * @author Stefan Bußweiler - API changes due to bridge/thing life cycle refactoring, removed OSGi service registration
  *         for thing handlers
+ * @author Connor Petty - added osgi service registration for thing handler services.
  */
 @NonNullByDefault
 public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
@@ -407,6 +408,5 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
                 serviceObjs.ungetService(this.serviceInstance);
             }
         }
-
     }
 }
