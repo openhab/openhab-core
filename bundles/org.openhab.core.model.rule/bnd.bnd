@@ -33,6 +33,7 @@ Import-Package: \
  org.openhab.core.model.script.engine.action,\
  com.google.common.base;version="14",\
  javax.measure,\
+ javax.measure.quantity,\
  org.eclipse.jdt.annotation;resolution:=optional,\
  org.eclipse.xtext.xbase.lib,\
  org.osgi.*,\
