@@ -55,7 +55,6 @@ public interface ThingHandlerService {
      */
     @Deprecated
     default void deactivate() {
-
     }
 
     /**
@@ -71,5 +70,4 @@ public interface ThingHandlerService {
     default void dispose() {
         deactivate();
     }
-
 }
