@@ -41,13 +41,35 @@ public interface ThingHandlerService {
 
     /**
      * Method that will be called if this service will be activated
+     *
+     * @deprecated please override initialize instead
      */
+    @Deprecated
     default void activate() {
     }
 
     /**
      * Method that will be called if this service will be deactivated
+     *
+     * @deprecated please override dispose instead
      */
+    @Deprecated
     default void deactivate() {
+
     }
+
+    /**
+     * Method that will be called if this service will be initialized
+     */
+    default void initialize() {
+        activate();
+    }
+
+    /**
+     * Method that will be called if this service will be disposed
+     */
+    default void dispose() {
+        deactivate();
+    }
+
 }
