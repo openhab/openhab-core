@@ -398,10 +398,11 @@ public class PersistenceExtensions {
             int count = 0;
 
             while (it.hasNext()) {
-                State state = it.next().getState();
-                if (state instanceof DecimalType) {
+                HistoricItem historicItem = it.next();
+                DecimalType value = historicItem.getState().as(DecimalType.class);
+                if (value != null) {
                     count++;
-                    sum = sum.add(((DecimalType) state).toBigDecimal().subtract(average, MathContext.DECIMAL64).pow(2,
+                    sum = sum.add(value.toBigDecimal().subtract(average, MathContext.DECIMAL64).pow(2,
                             MathContext.DECIMAL64));
                 }
             }
@@ -567,12 +568,12 @@ public class PersistenceExtensions {
 
         BigDecimal sum = BigDecimal.ZERO;
         while (it.hasNext()) {
-            State state = it.next().getState();
-            if (state instanceof DecimalType) {
-                sum = sum.add(((DecimalType) state).toBigDecimal());
+            HistoricItem historicItem = it.next();
+            DecimalType value = historicItem.getState().as(DecimalType.class);
+            if (value != null) {
+                sum = sum.add(value.toBigDecimal());
             }
         }
-
         return new DecimalType(sum);
     }
 
@@ -664,10 +665,9 @@ public class PersistenceExtensions {
     public static DecimalType deltaSince(Item item, ZonedDateTime timestamp, String serviceId) {
         HistoricItem itemThen = historicState(item, timestamp, serviceId);
         if (itemThen != null) {
-            DecimalType valueThen = (DecimalType) itemThen.getState();
+            DecimalType valueThen = itemThen.getState().as(DecimalType.class);
             DecimalType valueNow = item.getStateAs(DecimalType.class);
-
-            if (valueNow != null) {
+            if (valueThen != null && valueNow != null) {
                 return new DecimalType(valueNow.toBigDecimal().subtract(valueThen.toBigDecimal()));
             }
         }
@@ -707,10 +707,9 @@ public class PersistenceExtensions {
     public static DecimalType evolutionRate(Item item, ZonedDateTime timestamp, String serviceId) {
         HistoricItem itemThen = historicState(item, timestamp, serviceId);
         if (itemThen != null) {
-            DecimalType valueThen = (DecimalType) itemThen.getState();
+            DecimalType valueThen = itemThen.getState().as(DecimalType.class);
             DecimalType valueNow = item.getStateAs(DecimalType.class);
-
-            if ((valueThen.toBigDecimal().compareTo(BigDecimal.ZERO) != 0) && (valueNow != null)) {
+            if (valueThen != null && valueThen.toBigDecimal().compareTo(BigDecimal.ZERO) != 0 && valueNow != null) {
                 // ((now - then) / then) * 100
                 return new DecimalType(valueNow.toBigDecimal().subtract(valueThen.toBigDecimal())
                         .divide(valueThen.toBigDecimal(), MathContext.DECIMAL64).movePointRight(2));
