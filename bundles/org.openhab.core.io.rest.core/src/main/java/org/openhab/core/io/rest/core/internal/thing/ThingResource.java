@@ -305,7 +305,7 @@ public class ThingResource implements RESTResource {
                 .distinct();
         if (summary != null && summary == true) {
             thingStream = dtoMapper.limitToFields(thingStream,
-                    "UID,label,bridgeUID,thingTypeUID,statusInfo,location,editable");
+                    "UID,label,bridgeUID,thingTypeUID,statusInfo,firmwareStatus,location,editable");
         }
         return Response.ok(new Stream2JSONInputStream(thingStream)).build();
     }
