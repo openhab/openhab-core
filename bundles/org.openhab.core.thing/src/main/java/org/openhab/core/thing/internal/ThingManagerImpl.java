@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -51,6 +52,8 @@ import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
 import org.openhab.core.service.ReadyMarkerUtils;
 import org.openhab.core.service.ReadyService;
+import org.openhab.core.service.ReadyService.ReadyTracker;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.thing.Bridge;
@@ -136,6 +139,8 @@ public class ThingManagerImpl
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(THING_MANAGER_THREADPOOL_NAME);
 
+    private final ReadyMarker marker = new ReadyMarker("things", "handler");
+
     private final List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<>();
     private final Map<ThingUID, ThingHandler> thingHandlers = new ConcurrentHashMap<>();
     private final Map<ThingHandlerFactory, Set<ThingHandler>> thingHandlersByFactory = new HashMap<>();
@@ -160,6 +165,8 @@ public class ThingManagerImpl
     private final Storage<String> storage;
     private final ThingRegistryImpl thingRegistry;
     private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
+
+    private @Nullable ScheduledFuture<?> startLevelSetterJob = null;
 
     private final ThingHandlerCallback thingHandlerCallback = new ThingHandlerCallback() {
 
@@ -380,6 +387,32 @@ public class ThingManagerImpl
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(XML_THING_TYPE));
         this.thingRegistry.addThingTracker(this);
         storage = storageService.getStorage(THING_STATUS_STORAGE_NAME, this.getClass().getClassLoader());
+        initializeStartLevelSetter();
+    }
+
+    private void initializeStartLevelSetter() {
+        readyService.registerTracker(new ReadyTracker() {
+            @Override
+            public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
+            }
+
+            @Override
+            public void onReadyMarkerAdded(ReadyMarker readyMarker) {
+                startLevelSetterJob = scheduler.scheduleWithFixedDelay(() -> {
+                    for (Thing t : things) {
+                        if (!ThingHandlerHelper.isHandlerInitialized(t)) {
+                            return;
+                        }
+                    }
+                    readyService.markReady(marker);
+                    if (startLevelSetterJob != null) {
+                        startLevelSetterJob.cancel(false);
+                    }
+                    readyService.unregisterTracker(this);
+                }, 2, 2, TimeUnit.SECONDS);
+            }
+        }, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
+                .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_MODEL)));
     }
 
     @Deactivate
