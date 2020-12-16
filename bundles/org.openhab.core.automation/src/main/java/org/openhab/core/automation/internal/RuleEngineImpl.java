@@ -1460,4 +1460,13 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         }
         return false;
     }
+
+    /**
+     * Returns whether the rule engine has been started
+     *
+     * @return true, if the rule engine has been started
+     */
+    public boolean isStarted() {
+        return started;
+    }
 }
