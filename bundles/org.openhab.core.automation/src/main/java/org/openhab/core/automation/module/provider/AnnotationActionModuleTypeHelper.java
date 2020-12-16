@@ -30,6 +30,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.AnnotatedActions;
+import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
 import org.openhab.core.automation.annotation.ActionOutputs;
@@ -86,7 +87,10 @@ public class AnnotationActionModuleTypeHelper {
                 ModuleInformation mi = new ModuleInformation(uid, actionProvider, method);
                 mi.setLabel(ruleAction.label());
                 mi.setDescription(ruleAction.description());
-                mi.setVisibility(ruleAction.visibility());
+                // We temporarily want to hide all ThingActions in UIs as we do not have a proper solution to enter
+                // their input values (see https://github.com/openhab/openhab-core/issues/1745)
+                // mi.setVisibility(ruleAction.visibility());
+                mi.setVisibility(Visibility.HIDDEN);
                 mi.setInputs(inputs);
                 mi.setOutputs(outputs);
                 mi.setTags(tags);
