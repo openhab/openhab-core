@@ -122,11 +122,10 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
                 s = scriptEngine.newScriptFromString(script);
             }
             IEvaluationContext evalContext = createEvaluationContext(s, specificContext);
-            s.execute(evalContext);
+            return s.execute(evalContext);
         } catch (ScriptExecutionException | ScriptParsingException e) {
             throw new ScriptException(e.getMessage(), modelName, -1);
         }
-        return null;
     }
 
     private DefaultEvaluationContext createEvaluationContext(Script script, IEvaluationContext specificContext) {
