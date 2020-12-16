@@ -55,7 +55,7 @@ public class ScriptConditionHandler extends AbstractScriptModuleHandler<Conditio
                 if (returnVal instanceof Boolean) {
                     result = (boolean) returnVal;
                 } else {
-                    logger.error("Script did not return a boolean value, but '{}'", returnVal.toString());
+                    logger.error("Script did not return a boolean value, but '{}'", returnVal);
                 }
             } catch (ScriptException e) {
                 logger.error("Script execution failed: {}", e.getMessage());
