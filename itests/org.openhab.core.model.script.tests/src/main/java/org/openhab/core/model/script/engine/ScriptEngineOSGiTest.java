@@ -262,7 +262,9 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         Item numberItem = itemRegistry.get(NUMBER_ITEM_LENGTH);
         ((NumberItem) numberItem).setState(new QuantityType<>("1 m"));
 
-        assertThat((QuantityType<?>) runScript("val length = NumberC.state as QuantityType; return length / 2|cm;"),
+        assertThat(
+                (QuantityType<?>) runScript(
+                        "val length = NumberC.state as QuantityType<Length>; return length / 2|cm;"),
                 is(QuantityType.valueOf("50")));
     }
 

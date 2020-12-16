@@ -43,7 +43,8 @@ Import-Package: \
  org.openhab.core.io.net.http,\
  org.openhab.core.model.core,\
  com.google.common.*;version="14",\
- javax.measure.*,\
+ javax.measure,\
+ javax.measure.quantity,\
  org.apache.*,\
  org.eclipse.jdt.annotation;resolution:=optional,\
  org.eclipse.jetty.http.*,\
