@@ -23,15 +23,15 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class ModbusTCPSlaveEndpoint extends ModbusIPSlaveEndpoint {
 
-    private boolean rtuEncoding;
+    private boolean rtuEncoded;
 
-    public ModbusTCPSlaveEndpoint(String address, int port, boolean rtuEncoding) {
+    public ModbusTCPSlaveEndpoint(String address, int port, boolean rtuEncoded) {
         super(address, port);
-        this.rtuEncoding = rtuEncoding;
+        this.rtuEncoded = rtuEncoded;
     }
 
-    public boolean getRtuEncoding() {
-        return rtuEncoding;
+    public boolean getRtuEncoded() {
+        return rtuEncoded;
     }
 
     @Override
