@@ -61,6 +61,8 @@ public class EndpointPoolConfiguration {
      */
     private int connectTimeoutMillis;
 
+    private boolean rtuEncoded;
+
     private static StandardToStringStyle toStringStyle = new StandardToStringStyle();
 
     static {
@@ -119,7 +121,7 @@ public class EndpointPoolConfiguration {
                 .append("interTransactionDelayMillis", interTransactionDelayMillis)
                 .append("interConnectDelayMillis", interConnectDelayMillis).append("connectMaxTries", connectMaxTries)
                 .append("reconnectAfterMillis", reconnectAfterMillis)
-                .append("connectTimeoutMillis", connectTimeoutMillis).toString();
+                .append("connectTimeoutMillis", connectTimeoutMillis).append("rtuEncoded", rtuEncoded).toString();
     }
 
     @Override
@@ -137,6 +139,10 @@ public class EndpointPoolConfiguration {
         return new EqualsBuilder().append(interTransactionDelayMillis, rhs.interTransactionDelayMillis)
                 .append(interConnectDelayMillis, rhs.interConnectDelayMillis)
                 .append(connectMaxTries, rhs.connectMaxTries).append(reconnectAfterMillis, rhs.reconnectAfterMillis)
-                .append(connectTimeoutMillis, rhs.connectTimeoutMillis).isEquals();
+                .append(connectTimeoutMillis, rhs.connectTimeoutMillis).append(rtuEncoded, rhs.rtuEncoded).isEquals();
+    }
+
+    public void setRtuEncoded(boolean rtuEncoded) {
+        this.rtuEncoded = rtuEncoded;
     }
 }
