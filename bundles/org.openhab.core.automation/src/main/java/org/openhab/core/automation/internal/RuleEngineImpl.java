@@ -1452,7 +1452,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 Object slObj = t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL);
                 try {
                     Integer sl = Integer.valueOf(slObj.toString());
-                    if (sl < StartLevelService.STARTLEVEL_RULEENGINE) {
+                    if (sl <= StartLevelService.STARTLEVEL_RULEENGINE) {
                         return true;
                     }
                 } catch (NumberFormatException e) {
