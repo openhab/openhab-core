@@ -145,4 +145,8 @@ public class EndpointPoolConfiguration {
     public void setRtuEncoded(boolean rtuEncoded) {
         this.rtuEncoded = rtuEncoded;
     }
+
+    public boolean getRtuEncoded() {
+        return rtuEncoded;
+    }
 }

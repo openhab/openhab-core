@@ -159,10 +159,13 @@ public class ModbusSlaveConnectionFactoryImpl
                 }
                 EndpointPoolConfiguration config = getEndpointPoolConfiguration(key);
                 int connectTimeoutMillis = 0;
+                boolean rtuEncoded = false;
                 if (config != null) {
                     connectTimeoutMillis = config.getConnectTimeoutMillis();
+                    rtuEncoded = config.getRtuEncoded();
                 }
-                TCPMasterConnection connection = new TCPMasterConnection(address, key.getPort(), connectTimeoutMillis);
+                TCPMasterConnection connection = new TCPMasterConnection(address, key.getPort(), connectTimeoutMillis,
+                        rtuEncoded);
                 logger.trace("Created connection {} for endpoint {}", connection, key);
                 return connection;
             }
