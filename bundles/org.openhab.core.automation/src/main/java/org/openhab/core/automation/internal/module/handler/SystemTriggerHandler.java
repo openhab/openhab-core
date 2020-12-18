@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 public class SystemTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
     public static final String STARTLEVEL_MODULE_TYPE_ID = "core.SystemStartlevelTrigger";
+    public static final String RULELOADED_MODULE_TYPE_ID = "core.RuleLoadedTrigger";
     public static final String CFG_STARTLEVEL = "startlevel";
     public static final String OUT_STARTLEVEL = "startlevel";
 
@@ -59,14 +60,16 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
 
     public SystemTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
-        this.startlevel = ((BigDecimal) module.getConfiguration().get(CFG_STARTLEVEL)).intValue();
+        this.bundleContext = bundleContext;
         if (STARTLEVEL_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            this.types = Set.of(StartlevelEvent.TYPE);
+            this.startlevel = ((BigDecimal) module.getConfiguration().get(CFG_STARTLEVEL)).intValue();
+        } else if (STARTLEVEL_MODULE_TYPE_ID.equals(module.getTypeUID())) {
+            this.startlevel = 50;
         } else {
             logger.warn("Module type '{}' is not (yet) handled by this class.", module.getTypeUID());
             throw new IllegalArgumentException(module.getTypeUID() + " is no valid module type.");
         }
-        this.bundleContext = bundleContext;
+        this.types = Set.of(StartlevelEvent.TYPE);
         Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("event.topics", "openhab/system/*");
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,

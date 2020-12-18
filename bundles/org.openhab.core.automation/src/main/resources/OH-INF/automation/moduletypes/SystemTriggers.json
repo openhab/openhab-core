@@ -43,6 +43,11 @@
 					"description": "The system start level."
 				}
 			]
-		}
+		},
+        {
+            "uid": "core.RuleLoadedTrigger",
+            "label": "the rule has been loaded",
+            "description": "This triggers the rule when it is loaded, e.g. at startup or after modification."
+        }
 	]
 }

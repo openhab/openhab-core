@@ -507,6 +507,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                     f.cancel(true);
                 }
             }
+            executeRuleOnLoad(rule.unwrap());
         }
     }
 
@@ -1432,6 +1433,21 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         started = false;
     }
 
+    private void executeRuleOnLoad(Rule r) {
+        if (started) {
+            boolean hasOnLoadTrigger = false;
+            for (Trigger t : r.getTriggers()) {
+                if (t.getTypeUID() == SystemTriggerHandler.RULELOADED_MODULE_TYPE_ID) {
+                    hasOnLoadTrigger = true;
+                    break;
+                }
+            }
+            if (hasOnLoadTrigger) {
+                getScheduledExecutor().submit(() -> runNow(r.getUID(), true, null));
+            }
+        }
+    }
+
     private void executeRulesWithStartLevel() {
         getScheduledExecutor().submit(() -> {
             ruleRegistry.getAll().stream() //
@@ -1446,11 +1462,13 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
     private boolean mustTrigger(Rule r) {
         for (Trigger t : r.getTriggers()) {
-            if (t.getTypeUID() == SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID) {
+            if (t.getTypeUID() == SystemTriggerHandler.RULELOADED_MODULE_TYPE_ID) {
+                return true;
+            } else if (t.getTypeUID() == SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID) {
                 Object slObj = t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL);
                 try {
                     Integer sl = Integer.valueOf(slObj.toString());
-                    if (sl < StartLevelService.STARTLEVEL_RULEENGINE) {
+                    if (sl <= StartLevelService.STARTLEVEL_RULEENGINE) {
                         return true;
                     }
                 } catch (NumberFormatException e) {

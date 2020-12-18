@@ -278,10 +278,8 @@ public class DSLRuleProvider
 
     private @Nullable Trigger mapTrigger(EventTrigger t) {
         if (t instanceof SystemOnStartupTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put("startlevel", 20);
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.SystemStartlevelTrigger").withConfiguration(cfg).build();
+            return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("core.RuleLoadedTrigger")
+                    .build();
         } else if (t instanceof SystemOnShutdownTrigger) {
             logger.warn("System shutdown rule triggers are no longer supported!");
             return null;
