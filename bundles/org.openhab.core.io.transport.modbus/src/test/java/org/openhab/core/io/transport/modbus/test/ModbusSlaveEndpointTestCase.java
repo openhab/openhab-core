@@ -105,4 +105,16 @@ public class ModbusSlaveEndpointTestCase {
         assertNotEquals(e1, e2);
         assertNotEquals(e1.hashCode(), e2.hashCode());
     }
+
+    /*
+     * TCP slaves pointing to same host & port are considered equal even rtu encodinng differs.
+     * Thus ensures correct connection pooling and connection sharing
+     */
+    @Test
+    public void testEqualsSameTcpDifferentEncoding() {
+        ModbusTCPSlaveEndpoint e1 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500, false);
+        ModbusTCPSlaveEndpoint e2 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500, true);
+        assertEquals(e1, e2);
+        assertEquals(e1.hashCode(), e2.hashCode());
+    }
 }
