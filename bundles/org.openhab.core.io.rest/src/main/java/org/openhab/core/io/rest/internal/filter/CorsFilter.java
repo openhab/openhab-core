@@ -59,6 +59,7 @@ public class CorsFilter implements ContainerResponseFilter {
     static final String HTTP_OPTIONS_METHOD = "OPTIONS";
 
     static final String CONTENT_TYPE_HEADER = HttpHeaders.CONTENT_TYPE;
+    static final String AUTHORIZATION_HEADER = HttpHeaders.AUTHORIZATION;
 
     static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
     static final String ACCESS_CONTROL_ALLOW_METHODS_HEADER = "Access-Control-Allow-Methods";
@@ -132,6 +133,7 @@ public class CorsFilter implements ContainerResponseFilter {
                 responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, origin);
                 responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_METHODS_HEADER, ACCEPTED_HTTP_METHODS);
                 responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_HEADERS, CONTENT_TYPE_HEADER);
+                responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_HEADERS, AUTHORIZATION_HEADER);
 
                 // Add the accepted request headers
                 appendVaryHeader(responseContext);
