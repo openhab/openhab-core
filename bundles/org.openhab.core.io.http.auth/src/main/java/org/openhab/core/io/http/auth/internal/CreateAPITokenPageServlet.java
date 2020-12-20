@@ -90,7 +90,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
                 throw new AuthenticationException("no password");
             }
             if (!params.containsKey("token_name")) {
-                throw new AuthenticationException("no new password");
+                throw new AuthenticationException("no token name");
             }
             if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
                 throw new AuthenticationException("CSRF check failed");
@@ -101,10 +101,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
             String username = params.get("username")[0];
             String password = params.get("password")[0];
             String tokenName = params.get("token_name")[0];
-            String tokenScope = "";
-            if (params.containsKey("token_name")) {
-                tokenScope = params.get("token_scope")[0];
-            }
+            String tokenScope = params.get("token_scope")[0];
 
             User user = login(username, password);
             String newApiToken;
@@ -119,7 +116,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
                     return;
                 }
 
-                if (!tokenName.matches("[a-zA-Z0-9]*")) {
+                if (!tokenName.matches("[a-zA-Z0-9]+")) {
                     resp.setContentType("text/html;charset=UTF-8");
                     resp.getWriter().append(
                             getPageBody(params, getLocalizedMessage("auth.createapitoken.name.format.fail"), false));
