@@ -32,7 +32,7 @@ import org.openhab.core.automation.internal.module.handler.ItemCommandActionHand
 import org.openhab.core.automation.internal.module.handler.ItemCommandTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
-import org.openhab.core.automation.internal.module.handler.ItemUpdateActionHandler;
+import org.openhab.core.automation.internal.module.handler.ItemStateUpdateActionHandler;
 import org.openhab.core.automation.internal.module.handler.RuleEnablementActionHandler;
 import org.openhab.core.automation.internal.module.handler.RunRuleActionHandler;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
@@ -64,7 +64,7 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
             ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID, GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID,
             GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID, ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID,
             ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID, ItemStateConditionHandler.ITEM_STATE_CONDITION,
-            ItemCommandActionHandler.ITEM_COMMAND_ACTION, ItemUpdateActionHandler.ITEM_UPDATE_ACTION,
+            ItemCommandActionHandler.ITEM_COMMAND_ACTION, ItemStateUpdateActionHandler.ITEM_STATE_UPDATE_ACTION,
             GenericEventTriggerHandler.MODULE_TYPE_ID, ChannelEventTriggerHandler.MODULE_TYPE_ID,
             GenericEventConditionHandler.MODULETYPE_ID, GenericEventConditionHandler.MODULETYPE_ID,
             CompareConditionHandler.MODULE_TYPE, SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID,
@@ -210,8 +210,8 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
                 postCommandActionHandler.setEventPublisher(eventPublisher);
                 postCommandActionHandler.setItemRegistry(itemRegistry);
                 return postCommandActionHandler;
-            } else if (ItemUpdateActionHandler.ITEM_UPDATE_ACTION.equals(moduleTypeUID)) {
-                return new ItemUpdateActionHandler((Action) module, eventPublisher, itemRegistry);
+            } else if (ItemStateUpdateActionHandler.ITEM_STATE_UPDATE_ACTION.equals(moduleTypeUID)) {
+                return new ItemStateUpdateActionHandler((Action) module, eventPublisher, itemRegistry);
             } else if (RuleEnablementActionHandler.UID.equals(moduleTypeUID)) {
                 return new RuleEnablementActionHandler((Action) module);
             } else if (RunRuleActionHandler.UID.equals(moduleTypeUID)) {

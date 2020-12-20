@@ -58,8 +58,8 @@
 			]
 		},
 		{
-			"uid": "core.ItemUpdateAction",
-			"label": "update state",
+			"uid": "core.ItemStateUpdateAction",
+			"label": "update an item state",
 			"description": "Updates the state of a specified item.",
 			"configDescriptions": [
 				{
@@ -110,7 +110,7 @@
 					"name": "state",
 					"type": "state",
 					"label": "State",
-					"description": "state that will be used to update the item."
+					"description": "state that the item will be set to."
 				}
 			]
 		}
