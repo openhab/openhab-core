@@ -47,52 +47,49 @@ public class ItemStateUpdateActionHandler extends BaseActionModuleHandler {
     private final EventPublisher eventPublisher;
     private final ItemRegistry itemRegistry;
 
-    private final String itemName;
-    private final String state;
-
     public ItemStateUpdateActionHandler(Action module, EventPublisher eventPublisher, ItemRegistry itemRegistry) {
         super(module);
 
         this.eventPublisher = eventPublisher;
         this.itemRegistry = itemRegistry;
-
-        final Configuration config = module.getConfiguration();
-
-        String localItemName = (String) config.get(ITEM_NAME);
-        if (localItemName == null) {
-            throw new IllegalArgumentException("Configuration is not correct, parameter 'itemName' is missing.");
-        }
-        this.itemName = localItemName;
-
-        this.state = (String) config.get(STATE);
     }
 
     @Override
     public @Nullable Map<String, Object> execute(Map<String, Object> inputs) {
-        try {
-            Item item = itemRegistry.getItem(itemName);
+        Configuration config = module.getConfiguration();
+        String itemName = (String) config.get(ITEM_NAME);
+        String state = (String) config.get(STATE);
 
-            State stateObj = null;
-            final Object st = inputs.get(STATE);
+        if (itemName != null) {
+            try {
+                Item item = itemRegistry.getItem(itemName);
 
-            if (st instanceof State) {
-                if (item.getAcceptedDataTypes().contains(st.getClass())) {
-                    stateObj = (State) st;
+                State stateObj = null;
+                final Object st = inputs.get(STATE);
+
+                if (st instanceof State) {
+                    if (item.getAcceptedDataTypes().contains(st.getClass())) {
+                        stateObj = (State) st;
+                    }
+                } else {
+                    stateObj = TypeParser.parseState(item.getAcceptedDataTypes(), state);
                 }
-            } else {
-                stateObj = TypeParser.parseState(item.getAcceptedDataTypes(), state);
+                if (stateObj != null) {
+                    final ItemStateEvent itemStateEvent = (ItemStateEvent) ItemEventFactory.createStateEvent(itemName,
+                            stateObj);
+                    logger.debug("Executing ItemStateEvent on Item {} with State {}", itemStateEvent.getItemName(),
+                            itemStateEvent.getItemState());
+                    eventPublisher.post(itemStateEvent);
+                } else {
+                    logger.warn("State '{}' is not valid for item '{}'.", state, itemName);
+                }
+            } catch (ItemNotFoundException e) {
+                logger.error("Item with name {} not found in ItemRegistry.", itemName);
             }
-            if (stateObj != null) {
-                final ItemStateEvent itemStateEvent = (ItemStateEvent) ItemEventFactory.createStateEvent(item.getName(),
-                        stateObj);
-                logger.debug("Executing ItemStateEvent on Item {} with State {}", itemStateEvent.getItemName(),
-                        itemStateEvent.getItemState());
-                eventPublisher.post(itemStateEvent);
-            } else {
-                logger.warn("State '{}' is not valid for item '{}'.", state, item.getName());
-            }
-        } catch (ItemNotFoundException e) {
-            logger.error("Item with name {} not found in ItemRegistry.", itemName);
+        } else {
+            logger.error(
+                    "Item state was not updated because the configuration was not correct: ItemName: {}, State: {}",
+                    itemName, state);
         }
         return null;
     }
