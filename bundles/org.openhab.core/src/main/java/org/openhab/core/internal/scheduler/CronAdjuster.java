@@ -280,11 +280,6 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
         final String[] increments = sub.split("/");
         final int[] range = parseRange(cronExpression, chronoField, increments[0], min, max, names);
 
-        if (chronoField == ChronoField.DAY_OF_WEEK) {
-            range[0] = range[0] - 1;
-            range[1] = range[1] - 1;
-        }
-
         if (increments.length == 2) {
             // we had a / expression
             final int increment = parseInt(cronExpression, chronoField, increments[1]);
@@ -488,7 +483,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
         if (nameIndex == null) {
             return parseInt(cronExpression, chronoField, name);
         } else {
-            return min + nameIndex;
+            return min + nameIndex - (chronoField == ChronoField.DAY_OF_WEEK ? 1 : 0);
         }
     }
 
