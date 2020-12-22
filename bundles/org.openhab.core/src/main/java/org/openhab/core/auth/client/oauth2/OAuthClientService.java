@@ -79,6 +79,7 @@ import com.google.gson.JsonDeserializer;
  *
  * @author Gary Tse - Initial contribution
  * @author Hilbrand Bouwkamp - Added AccessTokenRefreshListener, fixed javadoc warnings
+ * @author Gaël L'hopital - Added capability for custom deserializer
  */
 @NonNullByDefault
 public interface OAuthClientService extends AutoCloseable {

@@ -51,6 +51,7 @@ import com.google.gson.JsonDeserializer;
  *
  * @author Michael Bock - Initial contribution
  * @author Gary Tse - Initial contribution
+ * @author Gaël L'hopital - Added capability for custom deserializer
  */
 @NonNullByDefault
 public class OAuthClientServiceImpl implements OAuthClientService {
