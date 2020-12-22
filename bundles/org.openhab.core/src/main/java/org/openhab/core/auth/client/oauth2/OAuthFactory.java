@@ -15,8 +15,6 @@ package org.openhab.core.auth.client.oauth2;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.google.gson.JsonDeserializer;
-
 /**
  * The OAuth Factory interface
  *
@@ -46,10 +44,6 @@ public interface OAuthFactory {
     OAuthClientService createOAuthClientService(String handle, String tokenUrl, @Nullable String authorizationUrl,
             String clientId, @Nullable String clientSecret, @Nullable String scope,
             @Nullable Boolean supportsBasicAuth);
-
-    <T extends JsonDeserializer<?>> OAuthClientService createOAuthClientService(String handle, String tokenUrl,
-            @Nullable String authorizationUrl, String clientId, @Nullable String clientSecret, @Nullable String scope,
-            @Nullable Boolean supportsBasicAuth, @Nullable Class<T> deserializeClass);
 
     /**
      * Gets the oauth service for a given handle

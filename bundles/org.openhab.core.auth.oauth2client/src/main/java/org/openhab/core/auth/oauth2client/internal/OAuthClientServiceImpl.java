@@ -35,6 +35,8 @@ import org.openhab.core.io.net.http.HttpClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonDeserializer;
+
 /**
  * Implementation of OAuthClientService.
  *
@@ -394,5 +396,18 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     private String createNewState() {
         return UUID.randomUUID().toString();
+    }
+
+    @Override
+    public <T extends JsonDeserializer<?>> OAuthClientService withDeserializer(Class<T> deserializerClass) {
+        OAuthClientServiceImpl clientService = new OAuthClientServiceImpl(handle, persistedParams.tokenExpiresInSeconds,
+                httpClientFactory);
+        persistedParams.deserializerClassName = deserializerClass.getName();
+        clientService.persistedParams = persistedParams;
+        clientService.storeHandler = storeHandler;
+
+        storeHandler.savePersistedParams(handle, clientService.persistedParams);
+
+        return clientService;
     }
 }
