@@ -62,10 +62,16 @@ public final class ScriptError {
     public ScriptError(final String message, final EObject atEObject) {
         this.message = message;
         INode node = NodeModelUtils.getNode(atEObject);
-        LineAndColumn lac = NodeModelUtils.getLineAndColumn(node, node.getOffset());
-        this.line = lac.getLine();
-        this.column = lac.getColumn();
-        this.length = node.getEndOffset() - node.getOffset();
+        if (node == null) {
+            this.line = 0;
+            this.column = 0;
+            this.length = -1;
+        } else {
+            LineAndColumn lac = NodeModelUtils.getLineAndColumn(node, node.getOffset());
+            this.line = lac.getLine();
+            this.column = lac.getColumn();
+            this.length = node.getEndOffset() - node.getOffset();
+        }
     }
 
     /**
