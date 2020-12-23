@@ -213,27 +213,32 @@ public class ChartServlet extends OpenHABServlet {
             }
         }
 
+        String periodParam = req.getParameter("period");
+        String timeBeginParam = req.getParameter("begin");
+        String timeEndParam = req.getParameter("end");
         // To avoid ambiguity you are not allowed to specify period, begin and end time at the same time.
-        if (req.getParameter("period") != null && req.getParameter("begin") != null
-                && req.getParameter("end") != null) {
+        if (periodParam != null && timeBeginParam != null && timeEndParam != null) {
             res.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     "Do not specify the three parameters period, begin and end at the same time.");
             return;
         }
 
         // Read out the parameter period, begin and end and save them.
+        Long period = null;
         Date timeBegin = null;
         Date timeEnd = null;
 
-        Long period = PERIODS.get(req.getParameter("period"));
+        if (periodParam != null) {
+            period = PERIODS.get(periodParam);
+        }
         if (period == null) {
             // use a day as the default period
             period = PERIODS.get("D");
         }
 
-        if (req.getParameter("begin") != null) {
+        if (timeBeginParam != null) {
             try {
-                timeBegin = new SimpleDateFormat(DATE_FORMAT).parse(req.getParameter("begin"));
+                timeBegin = new SimpleDateFormat(DATE_FORMAT).parse(timeBeginParam);
             } catch (ParseException e) {
                 res.sendError(HttpServletResponse.SC_BAD_REQUEST,
                         "Begin and end must have this format: " + DATE_FORMAT + ".");
@@ -241,9 +246,9 @@ public class ChartServlet extends OpenHABServlet {
             }
         }
 
-        if (req.getParameter("end") != null) {
+        if (timeEndParam != null) {
             try {
-                timeEnd = new SimpleDateFormat(DATE_FORMAT).parse(req.getParameter("end"));
+                timeEnd = new SimpleDateFormat(DATE_FORMAT).parse(timeEndParam);
             } catch (ParseException e) {
                 res.sendError(HttpServletResponse.SC_BAD_REQUEST,
                         "Begin and end must have this format: " + DATE_FORMAT + ".");
@@ -292,9 +297,10 @@ public class ChartServlet extends OpenHABServlet {
         }
 
         // Read out parameter 'legend'
+        String legendParam = req.getParameter("legend");
         Boolean legend = null;
-        if (req.getParameter("legend") != null) {
-            legend = Boolean.valueOf(req.getParameter("legend"));
+        if (legendParam != null) {
+            legend = Boolean.valueOf(legendParam);
         }
 
         if (maxWidth > 0 && width > maxWidth) {
