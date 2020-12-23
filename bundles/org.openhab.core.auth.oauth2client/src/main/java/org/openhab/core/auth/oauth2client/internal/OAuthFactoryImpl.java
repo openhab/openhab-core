@@ -70,7 +70,7 @@ public class OAuthFactoryImpl implements OAuthFactory {
             @Nullable Boolean supportsBasicAuth) {
         PersistedParams params = oAuthStoreHandler.loadPersistedParams(handle);
         PersistedParams newParams = new PersistedParams(handle, tokenUrl, authorizationUrl, clientId, clientSecret,
-                scope, supportsBasicAuth, tokenExpiresInBuffer);
+                scope, supportsBasicAuth, tokenExpiresInBuffer, null);
         OAuthClientService clientImpl = null;
 
         // If parameters in storage and parameters are the same as arguments passed get the client from storage

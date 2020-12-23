@@ -35,6 +35,8 @@ import org.openhab.core.io.net.http.HttpClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonDeserializer;
+
 /**
  * Implementation of OAuthClientService.
  *
@@ -49,6 +51,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Michael Bock - Initial contribution
  * @author Gary Tse - Initial contribution
+ * @author Gaël L'hopital - Added capability for custom deserializer
  */
 @NonNullByDefault
 public class OAuthClientServiceImpl implements OAuthClientService {
@@ -150,7 +153,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing client ID");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory);
+        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClassName);
         return connector.getAuthorizationUrl(authorizationUrl, clientId, redirectURI, persistedParams.state,
                 scopeToUse);
     }
@@ -204,7 +207,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing client ID");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory);
+        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClassName);
         AccessTokenResponse accessTokenResponse = connector.grantTypeAuthorizationCode(tokenUrl, authorizationCode,
                 clientId, persistedParams.clientSecret, redirectURI,
                 Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -236,7 +239,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing token url");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory);
+        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClassName);
         AccessTokenResponse accessTokenResponse = connector.grantTypePassword(tokenUrl, username, password,
                 persistedParams.clientId, persistedParams.clientSecret, scope,
                 Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -261,7 +264,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing client ID");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory);
+        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClassName);
         // depending on usage, cannot guarantee every parameter is not null at the beginning
         AccessTokenResponse accessTokenResponse = connector.grantTypeClientCredentials(tokenUrl, clientId,
                 persistedParams.clientSecret, scope, Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -295,7 +298,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("tokenUrl is required but null");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory);
+        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClassName);
         AccessTokenResponse accessTokenResponse = connector.grantTypeRefreshToken(tokenUrl,
                 lastAccessToken.getRefreshToken(), persistedParams.clientId, persistedParams.clientSecret,
                 persistedParams.scope, Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -394,5 +397,18 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     private String createNewState() {
         return UUID.randomUUID().toString();
+    }
+
+    @Override
+    public <T extends JsonDeserializer<?>> OAuthClientService withDeserializer(Class<T> deserializerClass) {
+        OAuthClientServiceImpl clientService = new OAuthClientServiceImpl(handle, persistedParams.tokenExpiresInSeconds,
+                httpClientFactory);
+        persistedParams.deserializerClassName = deserializerClass.getName();
+        clientService.persistedParams = persistedParams;
+        clientService.storeHandler = storeHandler;
+
+        storeHandler.savePersistedParams(handle, clientService.persistedParams);
+
+        return clientService;
     }
 }
