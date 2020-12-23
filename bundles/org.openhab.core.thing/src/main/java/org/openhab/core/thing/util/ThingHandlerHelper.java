@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.util;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.binding.ThingHandler;
@@ -22,6 +23,7 @@ import org.openhab.core.thing.binding.ThingHandler;
  * @author Markus Rathgeb - Initial contribution
  * @author Simon Kaufmann - added UNKNOWN
  */
+@NonNullByDefault
 public class ThingHandlerHelper {
 
     private ThingHandlerHelper() {
