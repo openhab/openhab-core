@@ -85,7 +85,6 @@ Fragment-Host: org.openhab.core.model.thing
 	org.ops4j.pax.web.pax-web-jetty;version='[7.2.19,7.2.20)',\
 	org.ops4j.pax.web.pax-web-runtime;version='[7.2.19,7.2.20)',\
 	org.ops4j.pax.web.pax-web-spi;version='[7.2.19,7.2.20)',\
-	xstream;version='[1.4.13,1.4.14)',\
 	org.openhab.core;version='[3.1.0,3.1.1)',\
 	org.openhab.core.audio;version='[3.1.0,3.1.1)',\
 	org.openhab.core.automation;version='[3.1.0,3.1.1)',\
@@ -113,5 +112,6 @@ Fragment-Host: org.openhab.core.model.thing
 	org.openhab.core.thing;version='[3.1.0,3.1.1)',\
 	org.openhab.core.thing.xml;version='[3.1.0,3.1.1)',\
 	org.openhab.core.transform;version='[3.1.0,3.1.1)',\
-	org.openhab.core.voice;version='[3.1.0,3.1.1)'
+	org.openhab.core.voice;version='[3.1.0,3.1.1)',\
+	xstream;version='[1.4.15,1.4.16)'
 
