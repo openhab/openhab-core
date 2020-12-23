@@ -297,5 +297,4 @@ public interface OAuthClientService extends AutoCloseable {
      * @return the oauth service
      */
     <T extends JsonDeserializer<?>> OAuthClientService withDeserializer(Class<T> deserializerClass);
-
 }
