@@ -138,5 +138,4 @@ public class OAuthFactoryImpl implements OAuthFactory {
     public void setTokenExpiresInBuffer(int bufferInSeconds) {
         tokenExpiresInBuffer = bufferInSeconds;
     }
-
 }
