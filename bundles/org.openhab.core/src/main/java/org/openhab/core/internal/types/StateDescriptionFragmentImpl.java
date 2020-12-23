@@ -31,6 +31,13 @@ import org.openhab.core.types.StateOption;
 @NonNullByDefault
 public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
 
+    private class StateDescriptionImpl extends StateDescription {
+        StateDescriptionImpl(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum, @Nullable BigDecimal step,
+                @Nullable String pattern, boolean readOnly, @Nullable List<StateOption> options) {
+            super(minimum, maximum, step, pattern, readOnly, options);
+        }
+    }
+
     private @Nullable BigDecimal minimum;
     private @Nullable BigDecimal maximum;
     private @Nullable BigDecimal step;
@@ -156,7 +163,6 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         this.options = options;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public @Nullable StateDescription toStateDescription() {
         if (minimum == null && maximum == null && step == null && readOnly == null && pattern == null
@@ -164,7 +170,8 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
             return null;
         }
         final Boolean ro = readOnly;
-        return new StateDescription(minimum, maximum, step, pattern, ro == null ? false : ro.booleanValue(), options);
+        return new StateDescriptionImpl(minimum, maximum, step, pattern, ro == null ? false : ro.booleanValue(),
+                options);
     }
 
     /**
