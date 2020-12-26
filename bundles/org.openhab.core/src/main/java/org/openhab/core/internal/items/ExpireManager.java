@@ -38,6 +38,7 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
+import org.openhab.core.items.events.GroupItemStateChangedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.items.events.ItemStateEvent;
@@ -71,7 +72,8 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
     protected static final String METADATA_NAMESPACE = "expire";
     protected static final String PROPERTY_ENABLED = "enabled";
 
-    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE);
+    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE,
+            GroupItemStateChangedEvent.TYPE);
 
     private final Logger logger = LoggerFactory.getLogger(ExpireManager.class);
 
@@ -242,6 +244,9 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         } else if (event instanceof ItemCommandEvent) {
             ItemCommandEvent icEvent = (ItemCommandEvent) event;
             processEvent(icEvent.getItemName(), icEvent.getItemCommand());
+        } else if (event instanceof GroupItemStateChangedEvent) {
+            GroupItemStateChangedEvent gcEvent = (GroupItemStateChangedEvent) event;
+            processEvent(gcEvent.getItemName(), gcEvent.getItemState());
         }
     }
 
