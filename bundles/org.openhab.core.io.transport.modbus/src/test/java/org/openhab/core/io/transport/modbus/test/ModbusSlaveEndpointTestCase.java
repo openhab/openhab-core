@@ -29,8 +29,8 @@ public class ModbusSlaveEndpointTestCase {
 
     @Test
     public void testEqualsSameTcp() {
-        ModbusTCPSlaveEndpoint e1 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500);
-        ModbusTCPSlaveEndpoint e2 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500);
+        ModbusTCPSlaveEndpoint e1 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500, false);
+        ModbusTCPSlaveEndpoint e2 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500, false);
         assertEquals(e1, e2);
     }
 
@@ -74,23 +74,23 @@ public class ModbusSlaveEndpointTestCase {
 
     @Test
     public void testEqualsDifferentTCPPort() {
-        ModbusTCPSlaveEndpoint e1 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500);
-        ModbusTCPSlaveEndpoint e2 = new ModbusTCPSlaveEndpoint("127.0.0.1", 501);
+        ModbusTCPSlaveEndpoint e1 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500, false);
+        ModbusTCPSlaveEndpoint e2 = new ModbusTCPSlaveEndpoint("127.0.0.1", 501, false);
         assertNotEquals(e1, e2);
         assertNotEquals(e1.hashCode(), e2.hashCode());
     }
 
     @Test
     public void testEqualsDifferentTCPHost() {
-        ModbusTCPSlaveEndpoint e1 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500);
-        ModbusTCPSlaveEndpoint e2 = new ModbusTCPSlaveEndpoint("127.0.0.2", 501);
+        ModbusTCPSlaveEndpoint e1 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500, false);
+        ModbusTCPSlaveEndpoint e2 = new ModbusTCPSlaveEndpoint("127.0.0.2", 501, false);
         assertNotEquals(e1, e2);
         assertNotEquals(e1.hashCode(), e2.hashCode());
     }
 
     @Test
     public void testEqualsDifferentProtocol() {
-        ModbusTCPSlaveEndpoint e1 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500);
+        ModbusTCPSlaveEndpoint e1 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500, false);
         ModbusUDPSlaveEndpoint e2 = new ModbusUDPSlaveEndpoint("127.0.0.1", 500);
         assertNotEquals(e1, e2);
         assertNotEquals(e1.hashCode(), e2.hashCode());
@@ -98,11 +98,23 @@ public class ModbusSlaveEndpointTestCase {
 
     @Test
     public void testEqualsDifferentProtocol2() {
-        ModbusTCPSlaveEndpoint e1 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500);
+        ModbusTCPSlaveEndpoint e1 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500, false);
         ModbusSerialSlaveEndpoint e2 = new ModbusSerialSlaveEndpoint("port2", 9600, SerialPort.FLOWCONTROL_NONE,
                 SerialPort.FLOWCONTROL_NONE, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE,
                 Modbus.DEFAULT_SERIAL_ENCODING, true, 500);
         assertNotEquals(e1, e2);
         assertNotEquals(e1.hashCode(), e2.hashCode());
+    }
+
+    /*
+     * TCP slaves pointing to same host & port are considered equal even rtu encodinng differs.
+     * Thus ensures correct connection pooling and connection sharing
+     */
+    @Test
+    public void testEqualsSameTcpDifferentEncoding() {
+        ModbusTCPSlaveEndpoint e1 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500, false);
+        ModbusTCPSlaveEndpoint e2 = new ModbusTCPSlaveEndpoint("127.0.0.1", 500, true);
+        assertEquals(e1, e2);
+        assertEquals(e1.hashCode(), e2.hashCode());
     }
 }

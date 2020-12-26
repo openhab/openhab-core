@@ -162,7 +162,8 @@ public class ModbusSlaveConnectionFactoryImpl
                 if (config != null) {
                     connectTimeoutMillis = config.getConnectTimeoutMillis();
                 }
-                TCPMasterConnection connection = new TCPMasterConnection(address, key.getPort(), connectTimeoutMillis);
+                TCPMasterConnection connection = new TCPMasterConnection(address, key.getPort(), connectTimeoutMillis,
+                        key.getRtuEncoded());
                 logger.trace("Created connection {} for endpoint {}", connection, key);
                 return connection;
             }
