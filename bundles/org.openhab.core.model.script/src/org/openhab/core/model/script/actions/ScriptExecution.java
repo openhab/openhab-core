@@ -46,7 +46,7 @@ public class ScriptExecution {
         ModelRepository repo = ScriptServiceUtil.getModelRepository();
         if (repo != null) {
             String scriptNameWithExt = scriptName;
-            if (scriptName.endsWith(Script.SCRIPT_FILEEXT)) {
+            if (!scriptName.endsWith(Script.SCRIPT_FILEEXT)) {
                 scriptNameWithExt = scriptName + "." + Script.SCRIPT_FILEEXT;
             }
             XExpression expr = (XExpression) repo.getModel(scriptNameWithExt);
