@@ -21,11 +21,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import javax.measure.Unit;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
@@ -43,6 +48,12 @@ import org.openhab.core.types.State;
 public class TestPersistenceService implements QueryablePersistenceService {
 
     public static final String ID = "test";
+
+    private final ItemRegistry itemRegistry;
+
+    public TestPersistenceService(ItemRegistry itemRegistry) {
+        this.itemRegistry = itemRegistry;
+    }
 
     @Override
     public String getId() {
@@ -96,9 +107,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                 Collections.reverse(results);
             }
             return results;
-        } else
-
-        {
+        } else {
             int startValue = 1950;
             int endValue = 2012;
 
@@ -124,7 +133,9 @@ public class TestPersistenceService implements QueryablePersistenceService {
 
                     @Override
                     public State getState() {
-                        return new DecimalType(year);
+                        Item item = itemRegistry.get(filter.getItemName());
+                        Unit<?> unit = item instanceof NumberItem ? ((NumberItem) item).getUnit() : null;
+                        return unit == null ? new DecimalType(year) : QuantityType.valueOf(year, unit);
                     }
 
                     @Override
