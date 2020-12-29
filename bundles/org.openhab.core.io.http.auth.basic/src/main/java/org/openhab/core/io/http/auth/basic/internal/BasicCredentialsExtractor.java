@@ -14,6 +14,7 @@ package org.openhab.core.io.http.auth.basic.internal;
 
 import java.util.Base64;
 import java.util.Optional;
+import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -21,6 +22,8 @@ import org.openhab.core.auth.Credentials;
 import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.openhab.core.io.http.auth.CredentialsExtractor;
 import org.osgi.service.component.annotations.Component;
+
+HashMap<String, String> authCache = new HashMap<String, UsernamePasswordCredentials>();
 
 /**
  * Extract user name and password from incoming request.
@@ -42,14 +45,29 @@ public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServl
         if (tokens.length == 2) {
             String authType = tokens[0];
             if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(authType)) {
-                String usernameAndPassword = new String(Base64.getDecoder().decode(tokens[1]));
+                String auth_value = tokens[1]
+                cached_value = authCache.get(auth_value)
+                if (cached_value != null):
+                    return cached_value;
+                    
+                String usernameAndPassword = new String(Base64.getDecoder().decode(auth_value));
 
                 tokens = usernameAndPassword.split(":");
                 if (tokens.length == 2) {
                     String username = tokens[0];
                     String password = tokens[1];
 
-                    return Optional.of(new UsernamePasswordCredentials(username, password));
+                    UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username, password);
+                    if (authCache.size() > 9) {
+                        Object remName = null;
+                        for (Object obj : authCache.keySet()) {
+                            remName = obj;
+                            break;
+                        }
+                        authCache.remove(remName);
+                    }
+                    authCache.put(auth_value, creds);
+                    return Optional.of(creds);
                 }
             }
         }
