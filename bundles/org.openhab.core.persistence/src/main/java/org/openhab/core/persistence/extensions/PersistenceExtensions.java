@@ -397,6 +397,7 @@ public class PersistenceExtensions {
             BigDecimal average = averageSince.toBigDecimal(), sum = BigDecimal.ZERO;
             int count = 0;
 
+            it = result.iterator();
             while (it.hasNext()) {
                 HistoricItem historicItem = it.next();
                 DecimalType value = historicItem.getState().as(DecimalType.class);
