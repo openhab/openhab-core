@@ -80,4 +80,34 @@ public class EphemerisModuleHandlerFactoryTest {
         assertThat(handler, is(notNullValue()));
         assertThat(handler, instanceOf(EphemerisConditionHandler.class));
     }
+
+    @Test
+    public void testFactoryCreatesModuleHandlerForHolidayCondition() {
+        when(moduleMock.getTypeUID()).thenReturn(EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID);
+
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration());
+        ModuleHandler handler = factory.internalCreate(moduleMock, "My first rule");
+        assertThat(handler, is(notNullValue()));
+        assertThat(handler, instanceOf(EphemerisConditionHandler.class));
+
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Map.of("offset", 5)));
+        handler = factory.internalCreate(moduleMock, "My second rule");
+        assertThat(handler, is(notNullValue()));
+        assertThat(handler, instanceOf(EphemerisConditionHandler.class));
+    }
+
+    @Test
+    public void testFactoryCreatesModuleHandlerForNotHolidayCondition() {
+        when(moduleMock.getTypeUID()).thenReturn(EphemerisConditionHandler.NOT_HOLIDAY_MODULE_TYPE_ID);
+
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration());
+        ModuleHandler handler = factory.internalCreate(moduleMock, "My first rule");
+        assertThat(handler, is(notNullValue()));
+        assertThat(handler, instanceOf(EphemerisConditionHandler.class));
+
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Map.of("offset", 5)));
+        handler = factory.internalCreate(moduleMock, "My second rule");
+        assertThat(handler, is(notNullValue()));
+        assertThat(handler, instanceOf(EphemerisConditionHandler.class));
+    }
 }

@@ -17,6 +17,22 @@
 			]
 		},
 		{
+			"uid": "ephemeris.NotHolidayCondition",
+			"label": "it is not a holiday",
+			"description": "Checks if the current day is not a holiday.",
+			"configDescriptions": [
+				{
+					"name": "offset",
+					"type": "INTEGER",
+					"label": "Offset",
+					"description": "Today +/- offset days (+1 = tomorrow, -1 = yesterday).",
+					"default": 0,
+					"stepsize": 1,
+					"required": false
+				}
+			]
+		},
+		{
 			"uid": "ephemeris.WeekendCondition",
 			"label": "it is a weekend",
 			"description": "Checks if the current day is on the weekend.",

@@ -32,6 +32,7 @@ import org.openhab.core.ephemeris.EphemerisManager;
 public class EphemerisConditionHandler extends BaseModuleHandler<Condition> implements ConditionHandler {
 
     public static final String HOLIDAY_MODULE_TYPE_ID = "ephemeris.HolidayCondition";
+    public static final String NOT_HOLIDAY_MODULE_TYPE_ID = "ephemeris.NotHolidayCondition";
     public static final String WEEKEND_MODULE_TYPE_ID = "ephemeris.WeekendCondition";
     public static final String WEEKDAY_MODULE_TYPE_ID = "ephemeris.WeekdayCondition";
     public static final String DAYSET_MODULE_TYPE_ID = "ephemeris.DaysetCondition";
@@ -65,6 +66,8 @@ public class EphemerisConditionHandler extends BaseModuleHandler<Condition> impl
         switch (module.getTypeUID()) {
             case HOLIDAY_MODULE_TYPE_ID:
                 return ephemerisManager.isBankHoliday(target);
+            case NOT_HOLIDAY_MODULE_TYPE_ID:
+                return !ephemerisManager.isBankHoliday(target);
             case WEEKEND_MODULE_TYPE_ID:
                 return ephemerisManager.isWeekend(target);
             case WEEKDAY_MODULE_TYPE_ID:
