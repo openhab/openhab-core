@@ -17,12 +17,13 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.transport.modbus.ModbusConstants.ValueType;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.Command;
 
 /**
@@ -77,7 +78,7 @@ public class ModbusBitUtilities {
      * - it assumed that the first register contains the most significant 16 bits
      * - it is assumed that each register is encoded in most significant bit first order
      * INT64_SWAP:
-     * - same as INT64 but registers swapped, that is, registers (index + 3), (index + 2), (index + 1), (index + 1) are
+     * - same as INT64 but registers swapped, that is, registers (index + 3), (index + 2), (index + 1), (index + 0) are
      * interpreted as signed 64bit integer
      * UINT64:
      * - same as INT64 except value is interpreted as unsigned integer
@@ -92,7 +93,7 @@ public class ModbusBitUtilities {
      * @param type item type, e.g. unsigned 16bit integer (<tt>ModbusBindingProvider.ValueType.UINT16</tt>)
      * @return number representation queried value, <tt>DecimalType</tt>. Empty optional is returned
      *         with NaN and infinity floating point values
-     * @throws NotImplementedException in cases where implementation is lacking for the type. This can be considered a
+     * @throws IllegalStateException in cases where implementation is lacking for the type. This can be considered a
      *             bug
      * @throws IllegalArgumentException when <tt>index</tt> is out of bounds of registers
      *
@@ -148,7 +149,7 @@ public class ModbusBitUtilities {
             case UINT64_SWAP:
                 return Optional.of(new DecimalType(new BigDecimal(extractUInt64Swap(bytes, index * 2))));
             default:
-                throw new IllegalArgumentException(type.getConfigValue());
+                throw new IllegalStateException(type.getConfigValue());
         }
     }
 
@@ -620,22 +621,31 @@ public class ModbusBitUtilities {
     /**
      * Convert command to array of registers using a specific value type
      *
-     * @param command command to be converted
+     * @param command command to be converted. Either OnOffType, OpenClosedType, DecimalType or QuantityType that can be
+     *            converted to dimensionless unit.
      * @param type value type to use in conversion
      * @return array of registers
-     * @throws NotImplementedException in cases where implementation is lacking for the type. This is thrown with 1-bit
-     *             and 8-bit value types
+     * @throws IllegalArgumentException in cases where implementation is lacking for the type. This is thrown with 1-bit
+     *             and 8-bit value types. Also raised with unsupported command types
      */
     public static ModbusRegisterArray commandToRegisters(Command command, ModbusConstants.ValueType type) {
-        DecimalType numericCommand;
+        Number numericCommand;
         if (command instanceof OnOffType || command instanceof OpenClosedType) {
             numericCommand = translateCommand2Boolean(command).get() ? new DecimalType(BigDecimal.ONE)
                     : DecimalType.ZERO;
         } else if (command instanceof DecimalType) {
             numericCommand = (DecimalType) command;
+        } else if (command instanceof QuantityType<?>) {
+            QuantityType<?> qtCommand = ((QuantityType<?>) command).toUnit(Units.ONE);
+            if (qtCommand == null) {
+                throw new IllegalArgumentException(
+                        String.format("Command '%s' of class '%s' cannot be converted to bare number.", command,
+                                command.getClass().getName()));
+            }
+            numericCommand = qtCommand;
         } else {
-            throw new NotImplementedException(String.format(
-                    "Command '%s' of class '%s' cannot be converted to registers. Please use OnOffType, OpenClosedType, or DecimalType commands.",
+            throw new IllegalArgumentException(String.format(
+                    "Command '%s' of class '%s' cannot be converted to registers. Please use OnOffType, OpenClosedType, DecimalType or dimensionless QuantityType commands.",
                     command, command.getClass().getName()));
         }
         if (type.getBits() != 16 && type.getBits() != 32 && type.getBits() != 64) {
@@ -723,7 +733,7 @@ public class ModbusBitUtilities {
                 return new ModbusRegisterArray(new byte[] { hi4, lo4, hi3, lo3, hi2, lo2, hi1, lo1 });
             }
             default:
-                throw new NotImplementedException(
+                throw new IllegalArgumentException(
                         String.format("Illegal type=%s. Missing implementation for this type", type));
         }
     }
