@@ -30,11 +30,10 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(property = { "context=javax.servlet.http.HttpServletRequest" })
 public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServletRequest> {
+    static HashMap<String, String> authCache = new HashMap<String, UsernamePasswordCredentials>();
 
     @Override
     public Optional<Credentials> retrieveCredentials(HttpServletRequest request) {
-        static HashMap<String, String> authCache = new HashMap<String, UsernamePasswordCredentials>();
-
         String authenticationHeader = request.getHeader("Authorization");
 
         if (authenticationHeader == null) {
@@ -46,7 +45,7 @@ public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServl
             String authType = tokens[0];
             if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(authType)) {
                 String auth_value = tokens[1];
-                cached_value = authCache.get(auth_value);
+                cached_value = BasicCredentialsExtractor.authCache.get(auth_value);
                 if (cached_value != null):
                     return cached_value;
                     
@@ -58,15 +57,15 @@ public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServl
                     String password = tokens[1];
 
                     UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username, password);
-                    if (authCache.size() > 9) {
+                    if (BasicCredentialsExtractor.authCache.size() > 9) {
                         Object remName = null;
-                        for (Object obj : authCache.keySet()) {
+                        for (Object obj : BasicCredentialsExtractor.authCache.keySet()) {
                             remName = obj;
                             break;
                         }
-                        authCache.remove(remName);
+                        BasicCredentialsExtractor.authCache.remove(remName);
                     }
-                    authCache.put(auth_value, creds);
+                    BasicCredentialsExtractor.authCache.put(auth_value, creds);
                     return Optional.of(creds);
                 }
             }
