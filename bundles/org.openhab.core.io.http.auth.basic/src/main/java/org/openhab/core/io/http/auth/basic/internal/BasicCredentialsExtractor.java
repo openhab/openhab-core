@@ -23,8 +23,6 @@ import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.openhab.core.io.http.auth.CredentialsExtractor;
 import org.osgi.service.component.annotations.Component;
 
-HashMap<String, String> authCache = new HashMap<String, UsernamePasswordCredentials>();
-
 /**
  * Extract user name and password from incoming request.
  *
@@ -35,6 +33,8 @@ public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServl
 
     @Override
     public Optional<Credentials> retrieveCredentials(HttpServletRequest request) {
+        static HashMap<String, String> authCache = new HashMap<String, UsernamePasswordCredentials>();
+
         String authenticationHeader = request.getHeader("Authorization");
 
         if (authenticationHeader == null) {
