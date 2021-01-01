@@ -13,8 +13,8 @@
 package org.openhab.core.io.http.auth.basic.internal;
 
 import java.util.Base64;
-import java.util.Optional;
 import java.util.HashMap;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -49,7 +49,7 @@ public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServl
                 if (cached_value != null) {
                     return cached_value;
                 }
-                    
+
                 String usernameAndPassword = new String(Base64.getDecoder().decode(auth_value));
 
                 tokens = usernameAndPassword.split(":");
