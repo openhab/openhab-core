@@ -30,6 +30,7 @@ import gnu.io.SerialPortEvent;
  * Specific serial port implementation.
  *
  * @author Markus Rathgeb - Initial contribution
+ * @author Vita Tucek - added further methods
  */
 @NonNullByDefault
 public class RxTxSerialPort implements SerialPort {
@@ -156,5 +157,95 @@ public class RxTxSerialPort implements SerialPort {
         } catch (gnu.io.UnsupportedCommOperationException e) {
             throw new UnsupportedCommOperationException(e);
         }
+    }
+
+    @Override
+    public int getBaudRate() {
+        return sp.getBaudRate();
+    }
+
+    @Override
+    public int getDataBits() {
+        return sp.getDataBits();
+    }
+
+    @Override
+    public int getStopBits() {
+        return sp.getStopBits();
+    }
+
+    @Override
+    public int getParity() {
+        return sp.getParity();
+    }
+
+    @Override
+    public void notifyOnOutputEmpty(boolean enable) {
+        sp.notifyOnOutputEmpty(enable);
+    }
+
+    @Override
+    public void notifyOnCTS(boolean enable) {
+        sp.notifyOnCTS(enable);
+    }
+
+    @Override
+    public void notifyOnDSR(boolean enable) {
+        sp.notifyOnDSR(enable);
+    }
+
+    @Override
+    public void notifyOnRingIndicator(boolean enable) {
+        sp.notifyOnRingIndicator(enable);
+    }
+
+    @Override
+    public void notifyOnCarrierDetect(boolean enable) {
+        sp.notifyOnCarrierDetect(enable);
+    }
+
+    @Override
+    public int getFlowControlMode() {
+        return getFlowControlMode();
+    }
+
+    @Override
+    public boolean isRTS() {
+        return sp.isRTS();
+    }
+
+    @Override
+    public void setDTR(boolean state) {
+        sp.setDTR(state);
+    }
+
+    @Override
+    public boolean isDTR() {
+        return sp.isDTR();
+    }
+
+    @Override
+    public boolean isCTS() {
+        return sp.isCTS();
+    }
+
+    @Override
+    public boolean isDSR() {
+        return sp.isDSR();
+    }
+
+    @Override
+    public boolean isCD() {
+        return sp.isCD();
+    }
+
+    @Override
+    public boolean isRI() {
+        return sp.isRI();
+    }
+
+    @Override
+    public void sendBreak(int duration) {
+        sp.sendBreak(duration);
     }
 }
