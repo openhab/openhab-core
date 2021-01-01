@@ -45,9 +45,9 @@ public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServl
             String authType = tokens[0];
             if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(authType)) {
                 String auth_value = tokens[1];
-                cached_value = BasicCredentialsExtractor.authCache.get(auth_value);
+                UsernamePasswordCredentials cached_value = BasicCredentialsExtractor.authCache.get(auth_value);
                 if (cached_value != null) {
-                    return cached_value;
+                    return Optional.of(cached_value);
                 }
 
                 String usernameAndPassword = new String(Base64.getDecoder().decode(auth_value));
