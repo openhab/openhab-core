@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -305,7 +305,7 @@ public class ThingResource implements RESTResource {
                 .distinct();
         if (summary != null && summary == true) {
             thingStream = dtoMapper.limitToFields(thingStream,
-                    "UID,label,bridgeUID,thingTypeUID,statusInfo,location,editable");
+                    "UID,label,bridgeUID,thingTypeUID,statusInfo,firmwareStatus,location,editable");
         }
         return Response.ok(new Stream2JSONInputStream(thingStream)).build();
     }

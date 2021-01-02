@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -43,10 +43,8 @@ public class StateDescription {
      * @param pattern pattern to render the state
      * @param readOnly if the state can be changed by the system
      * @param options predefined list of options
-     * @deprecated use {@link StateDescriptionFragmentBuilder} instead.
      */
-    @Deprecated
-    public StateDescription(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum, @Nullable BigDecimal step,
+    protected StateDescription(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum, @Nullable BigDecimal step,
             @Nullable String pattern, boolean readOnly, @Nullable List<StateOption> options) {
         this.minimum = minimum;
         this.maximum = maximum;

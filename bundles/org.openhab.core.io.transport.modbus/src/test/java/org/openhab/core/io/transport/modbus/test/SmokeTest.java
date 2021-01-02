@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -181,7 +181,7 @@ public class SmokeTest extends IntegrationTestSupport {
     public void testSlaveConnectionError() throws Exception {
         // In the test we have non-responding slave (see http://stackoverflow.com/a/904609), and we use short connection
         // timeout
-        ModbusSlaveEndpoint endpoint = new ModbusTCPSlaveEndpoint("10.255.255.1", 9999);
+        ModbusSlaveEndpoint endpoint = new ModbusTCPSlaveEndpoint("10.255.255.1", 9999, false);
         EndpointPoolConfiguration configuration = new EndpointPoolConfiguration();
         configuration.setConnectTimeoutMillis(100);
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,8 @@ import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+
+import com.google.gson.JsonDeserializer;
 
 /**
  * This is the service factory to produce a OAuth2 service client that authenticates using OAUTH2.
@@ -77,6 +79,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Gary Tse - Initial contribution
  * @author Hilbrand Bouwkamp - Added AccessTokenRefreshListener, fixed javadoc warnings
+ * @author Gaël L'hopital - Added capability for custom deserializer
  */
 @NonNullByDefault
 public interface OAuthClientService extends AutoCloseable {
@@ -286,4 +289,12 @@ public interface OAuthClientService extends AutoCloseable {
      * @param listener the listener to remove
      */
     boolean removeAccessTokenRefreshListener(AccessTokenRefreshListener listener);
+
+    /**
+     * Adds a personalized deserializer to a given oauth service.
+     *
+     * @param deserializeClass the deserializer class that should be used to deserialize AccessTokenResponse
+     * @return the oauth service
+     */
+    <T extends JsonDeserializer<?>> OAuthClientService withDeserializer(Class<T> deserializerClass);
 }

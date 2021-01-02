@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -236,6 +236,7 @@ public class PersistenceExtensionsTest {
         assertEquals(OnOffType.ON, historicItem.getState());
     }
 
+    @Test
     public void testVarianceSince() {
         numberItem.setState(new DecimalType(3025));
 
@@ -262,6 +263,7 @@ public class PersistenceExtensionsTest {
         assertNull(variance);
     }
 
+    @Test
     public void testDeviationSince() {
         numberItem.setState(new DecimalType(3025));
 

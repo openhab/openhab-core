@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -271,7 +271,7 @@ public class IntegrationTestSupport extends JavaTest {
 
     public ModbusSlaveEndpoint getEndpoint() {
         assert tcpModbusPort > 0;
-        return new ModbusTCPSlaveEndpoint("127.0.0.1", tcpModbusPort);
+        return new ModbusTCPSlaveEndpoint("127.0.0.1", tcpModbusPort, false);
     }
 
     /**

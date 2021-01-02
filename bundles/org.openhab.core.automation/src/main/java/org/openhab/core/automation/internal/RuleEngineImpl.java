@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,6 +27,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -116,6 +117,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
     private static final String DISABLED_RULE_STORAGE = "automation_rules_disabled";
 
+    private static final int RULE_INIT_DELAY = 500;
+
     private static final ReadyMarker MARKER = new ReadyMarker("ruleengine", "start");
 
     private final Map<String, WrappedRule> managedRules = new ConcurrentHashMap<>();
@@ -185,8 +188,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
     /**
      * {@link Map} holding all scheduled {@link Rule} re-initialization tasks. The relation is {@link Rule}'s
-     * UID to
-     * re-initialization task as a {@link Future} instance.
+     * UID to re-initialization task as a {@link Future} instance.
      */
     private final Map<String, Future<?>> scheduleTasks = new HashMap<>(31);
 
@@ -894,13 +896,13 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     protected void scheduleRuleInitialization(final String rUID) {
         Future<?> f = scheduleTasks.get(rUID);
         if (f == null || f.isDone()) {
-            scheduleTasks.put(rUID, getScheduledExecutor().submit(() -> {
+            scheduleTasks.put(rUID, getScheduledExecutor().schedule(() -> {
                 final WrappedRule managedRule = getManagedRule(rUID);
                 if (managedRule == null) {
                     return;
                 }
                 setRule(managedRule);
-            }));
+            }, RULE_INIT_DELAY, TimeUnit.MILLISECONDS));
         }
     }
 
@@ -1450,7 +1452,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 Object slObj = t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL);
                 try {
                     Integer sl = Integer.valueOf(slObj.toString());
-                    if (sl < StartLevelService.STARTLEVEL_RULEENGINE) {
+                    if (sl <= StartLevelService.STARTLEVEL_RULEENGINE) {
                         return true;
                     }
                 } catch (NumberFormatException e) {
@@ -1459,5 +1461,14 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             }
         }
         return false;
+    }
+
+    /**
+     * Returns whether the rule engine has been started
+     *
+     * @return true, if the rule engine has been started
+     */
+    public boolean isStarted() {
+        return started;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -93,12 +93,10 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
                 event.getType(), event.getPayload());
         if (event instanceof StartlevelEvent && STARTLEVEL_MODULE_TYPE_ID.equals(module.getTypeUID())) {
             Integer sl = ((StartlevelEvent) event).getStartlevel();
-            if (startlevel <= sl) {
-                if (sl > StartLevelService.STARTLEVEL_RULEENGINE) {
-                    // only execute rules if their start level is higher than the rule engine activation level, since
-                    // otherwise the rule engine takes care of the execution already
-                    trigger();
-                }
+            if (startlevel <= sl && startlevel > StartLevelService.STARTLEVEL_RULEENGINE) {
+                // only execute rules if their start level is higher than the rule engine activation level, since
+                // otherwise the rule engine takes care of the execution already
+                trigger();
             }
         }
     }

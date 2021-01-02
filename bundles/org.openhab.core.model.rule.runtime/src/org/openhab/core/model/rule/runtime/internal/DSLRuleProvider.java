@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -129,7 +129,7 @@ public class DSLRuleProvider
 
     @Override
     public void modelChanged(String modelFileName, EventType type) {
-        String ruleModelName = modelFileName.substring(0, modelFileName.indexOf("."));
+        String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
         switch (type) {
             case ADDED:
                 EObject model = modelRepository.getModel(modelFileName);

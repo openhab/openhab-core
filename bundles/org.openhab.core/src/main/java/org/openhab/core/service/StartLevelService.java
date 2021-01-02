@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -38,6 +38,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
@@ -68,7 +69,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @NonNullByDefault
-@Component(immediate = true, configurationPid = "org.openhab.startlevel")
+@Component(immediate = true, configurationPid = "org.openhab.startlevel", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class StartLevelService {
 
     public final static String STARTLEVEL_MARKER_TYPE = "startlevel";

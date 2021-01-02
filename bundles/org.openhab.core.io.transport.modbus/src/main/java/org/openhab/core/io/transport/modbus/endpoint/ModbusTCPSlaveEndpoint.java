@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,8 +23,15 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class ModbusTCPSlaveEndpoint extends ModbusIPSlaveEndpoint {
 
-    public ModbusTCPSlaveEndpoint(String address, int port) {
+    private boolean rtuEncoded;
+
+    public ModbusTCPSlaveEndpoint(String address, int port, boolean rtuEncoded) {
         super(address, port);
+        this.rtuEncoded = rtuEncoded;
+    }
+
+    public boolean getRtuEncoded() {
+        return rtuEncoded;
     }
 
     @Override
