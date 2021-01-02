@@ -30,7 +30,7 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(property = { "context=javax.servlet.http.HttpServletRequest" })
 public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServletRequest> {
-    static HashMap<String, String> authCache = new HashMap<String, UsernamePasswordCredentials>();
+    static HashMap<String, UsernamePasswordCredentials> authCache = new HashMap<String, UsernamePasswordCredentials>();
 
     @Override
     public Optional<Credentials> retrieveCredentials(HttpServletRequest request) {
