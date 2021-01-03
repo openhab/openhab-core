@@ -12,9 +12,12 @@
  */
 package org.openhab.core.io.http.auth.basic.internal;
 
+import java.security.MessageDigest;
+
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -30,7 +33,9 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(property = { "context=javax.servlet.http.HttpServletRequest" })
 public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServletRequest> {
-    static HashMap<String, UsernamePasswordCredentials> authCache = new HashMap<String, UsernamePasswordCredentials>();
+    private static final String UUID_STRING = UUID.randomUUID().toString();
+    static MessageDigest msgDigest = MessageDigest.getInstance("SHA-256");
+    static HashMap<ByteBuffer, UsernamePasswordCredentials> authCache = new HashMap<String, UsernamePasswordCredentials>();
 
     @Override
     public Optional<Credentials> retrieveCredentials(HttpServletRequest request) {
@@ -42,23 +47,26 @@ public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServl
 
         String[] tokens = authenticationHeader.split(" ");
         if (tokens.length == 2) {
-            String authType = tokens[0];
+            final String authType = tokens[0];
             if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(authType)) {
-                String auth_value = tokens[1];
-                UsernamePasswordCredentials cached_value = BasicCredentialsExtractor.authCache.get(auth_value);
-                if (cached_value != null) {
-                    return Optional.of(cached_value);
+                final String authValue = tokens[1];
+                ByteBuffer authHash = ByteBuffer.wrap(msgDigest.digest((tokens[1] + UUID_STRING).getBytes()));
+                
+                UsernamePasswordCredentials cachedValue = BasicCredentialsExtractor.authCache.get(authHash);
+                if (cachedValue != null) {
+                    return Optional.of(cachedValue);
                 }
 
-                String usernameAndPassword = new String(Base64.getDecoder().decode(auth_value));
-
+                String usernameAndPassword = new String(Base64.getDecoder().decode(authValue));
                 tokens = usernameAndPassword.split(":");
                 if (tokens.length == 2) {
-                    String username = tokens[0];
-                    String password = tokens[1];
+                    final String username = tokens[0];
+                    final String password = tokens[1];
 
                     UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username, password);
-                    if (BasicCredentialsExtractor.authCache.size() > 9) {
+                    
+                    // limit auth cache to a certain size
+                    if (BasicCredentialsExtractor.authCache.size() > 20) {
                         Object remName = null;
                         for (Object obj : BasicCredentialsExtractor.authCache.keySet()) {
                             remName = obj;
@@ -66,7 +74,8 @@ public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServl
                         }
                         BasicCredentialsExtractor.authCache.remove(remName);
                     }
-                    BasicCredentialsExtractor.authCache.put(auth_value, creds);
+                    
+                    BasicCredentialsExtractor.authCache.put(authHash, creds);
                     return Optional.of(creds);
                 }
             }
