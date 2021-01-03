@@ -116,7 +116,7 @@ public class JsonStorageService implements StorageService {
         logger.debug("Json Storage Service: Deactivated.");
     }
 
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({ "unchecked" })
     @Override
     public <T> Storage<T> getStorage(String name, @Nullable ClassLoader classLoader) {
         File legacyFile = new File(dbFolderName, name + ".json");
