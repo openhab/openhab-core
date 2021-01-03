@@ -15,6 +15,7 @@ package org.openhab.core.transform;
 import static java.nio.file.StandardWatchEventKinds.*;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -23,10 +24,12 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -151,19 +154,16 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
      *
      * @param transform transformation held by the file provided to <code>transform</code> method
      * @param source the input to transform
-     * @return the transformed result or null if the
-     *         transformation couldn't be completed for any reason.
-     *
+     * @return the transformed result or null if the transformation couldn't be completed for any reason.
      */
-    protected abstract String internalTransform(T transform, String source) throws TransformationException;
+    protected abstract @Nullable String internalTransform(T transform, String source) throws TransformationException;
 
     /**
      * <p>
      * Abstract method defined by subclasses to effectively read the transformation
      * source file according to their own needs.
      *
-     * @param filename Name of the file to be read. This filename may have been transposed
-     *            to a localized one
+     * @param filename Name of the file to be read. This filename may have been transposed to a localized one
      * @return An object containing the source file
      * @throws TransformationException file couldn't be read for any reason
      */
@@ -287,5 +287,35 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
     protected String getSourcePath() {
         return OpenHAB.getConfigFolder() + File.separator + TransformationService.TRANSFORM_FOLDER_NAME
                 + File.separator;
+    }
+
+    /**
+     * Returns a list of all files with the given extensions in the transformation folder
+     */
+    protected List<String> getFilenames(String[] validExtensions) {
+        File path = new File(getSourcePath());
+        return Arrays.asList(path.listFiles(new FileExtensionsFilter(validExtensions))).stream().map(f -> f.getName())
+                .collect(Collectors.toList());
+    }
+
+    protected class FileExtensionsFilter implements FilenameFilter {
+
+        private final String[] validExtensions;
+
+        public FileExtensionsFilter(String[] validExtensions) {
+            this.validExtensions = validExtensions;
+        }
+
+        @Override
+        public boolean accept(@Nullable File dir, @Nullable String name) {
+            if (name != null) {
+                for (String extension : validExtensions) {
+                    if (name.toLowerCase().endsWith(EXTENSION_SEPARATOR + extension)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }
