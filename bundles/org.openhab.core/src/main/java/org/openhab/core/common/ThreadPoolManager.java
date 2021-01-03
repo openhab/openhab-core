@@ -14,6 +14,7 @@ package org.openhab.core.common;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -166,5 +167,9 @@ public class ThreadPoolManager {
     protected static int getConfig(String poolName) {
         Integer cfg = configs.get(poolName);
         return (cfg != null) ? cfg : DEFAULT_THREAD_POOL_SIZE;
+    }
+
+    public static Set<String> getPoolNames() {
+        return pools.keySet();
     }
 }
