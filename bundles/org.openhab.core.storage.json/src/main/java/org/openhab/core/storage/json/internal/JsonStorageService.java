@@ -16,6 +16,7 @@ import java.io.File;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -23,6 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.StorageMigration;
 import org.openhab.core.storage.StorageService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
@@ -118,7 +120,8 @@ public class JsonStorageService implements StorageService {
 
     @SuppressWarnings({ "unchecked" })
     @Override
-    public <T> Storage<T> getStorage(String name, @Nullable ClassLoader classLoader) {
+    public <T> Storage<T> getStorage(String name, @Nullable ClassLoader classLoader,
+            @Nullable List<StorageMigration> storageMigrations) {
         File legacyFile = new File(dbFolderName, name + ".json");
         File escapedFile = new File(dbFolderName, urlEscapeUnwantedChars(name) + ".json");
 
@@ -127,13 +130,19 @@ public class JsonStorageService implements StorageService {
             file = legacyFile;
         }
 
-        JsonStorage<T> newStorage = new JsonStorage<>(file, classLoader, maxBackupFiles, writeDelay, maxDeferredPeriod);
+        JsonStorage<T> newStorage = new JsonStorage<>(file, classLoader, maxBackupFiles, writeDelay, maxDeferredPeriod,
+                storageMigrations);
 
         JsonStorage<Object> oldStorage = storageList.put(name, (JsonStorage<Object>) newStorage);
         if (oldStorage != null) {
             oldStorage.flush();
         }
         return newStorage;
+    }
+
+    @Override
+    public <T> Storage<T> getStorage(String name, @Nullable ClassLoader classLoader) {
+        return getStorage(name, null, null);
     }
 
     @Override

@@ -12,13 +12,16 @@
  */
 package org.openhab.core.thing;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractManagedProvider;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.dto.ThingDTOMapper;
-import org.openhab.core.thing.type.BridgeType;
+import org.openhab.core.thing.internal.ChangeBridgeStructureStorageMigration;
+import org.openhab.core.thing.internal.ChangeThingStructureStorageMigration;
 import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -43,7 +46,8 @@ public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUI
     @Activate
     public ManagedThingProvider(final @Reference StorageService storageService,
             final @Reference ThingTypeRegistry thingTypeRegistry) {
-        super(storageService);
+        super(storageService,
+                List.of(new ChangeThingStructureStorageMigration(), new ChangeBridgeStructureStorageMigration()));
         this.thingTypeRegistry = thingTypeRegistry;
     }
 
@@ -59,12 +63,7 @@ public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUI
 
     @Override
     protected @Nullable Thing toElement(String key, ThingDTO persistableElement) {
-        ThingTypeUID thingTypeUID = new ThingTypeUID(persistableElement.thingTypeUID);
-        boolean isBridge = thingTypeRegistry.getThingType(thingTypeUID) instanceof BridgeType;
-
-        Thing thing = ThingDTOMapper.map(persistableElement, isBridge);
-
-        return thing;
+        return ThingDTOMapper.map(persistableElement);
     }
 
     @Override

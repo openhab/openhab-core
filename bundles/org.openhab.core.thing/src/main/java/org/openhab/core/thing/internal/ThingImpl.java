@@ -285,4 +285,9 @@ public class ThingImpl implements Thing {
         }
         return true;
     }
+
+    @Override
+    public boolean isBridge() {
+        return false;
+    }
 }

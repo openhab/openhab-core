@@ -30,7 +30,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.ConfigurationDeserializer;
 import org.openhab.core.storage.Storage;
-import org.openhab.core.storage.json.StorageMigration;
+import org.openhab.core.storage.StorageMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,21 +72,21 @@ public class JsonStorage<T> implements Storage<T> {
 
     private long deferredSince = 0;
 
-    protected final File file;
+    private final File file;
     private final @Nullable ClassLoader classLoader;
-    protected final Map<String, StorageEntry> map = new ConcurrentHashMap<>();
+    private final Map<String, StorageEntry> map = new ConcurrentHashMap<>();
 
     private transient Gson internalMapper;
-    protected transient Gson entityMapper;
+    private transient Gson entityMapper;
 
     private boolean dirty;
 
-    protected JsonStorage(File file, @Nullable ClassLoader classLoader, int maxBackupFiles, int writeDelay,
+    public JsonStorage(File file, @Nullable ClassLoader classLoader, int maxBackupFiles, int writeDelay,
             int maxDeferredPeriod) {
         this(file, classLoader, maxBackupFiles, writeDelay, maxDeferredPeriod, null);
     }
 
-    protected JsonStorage(File file, @Nullable ClassLoader classLoader, int maxBackupFiles, int writeDelay,
+    public JsonStorage(File file, @Nullable ClassLoader classLoader, int maxBackupFiles, int writeDelay,
             int maxDeferredPeriod, @Nullable List<StorageMigration> migrations) {
         this.file = file;
         this.classLoader = classLoader;
@@ -102,10 +102,9 @@ public class JsonStorage<T> implements Storage<T> {
 
         commitTimer = new Timer();
 
-        // Apply migrations
+        // Apply migrations if any
         if (migrations != null) {
             Map<String, StorageEntry> migrationMap = this.applyMigrations(migrations);
-            // If we've read data from a file, then add it to the map
             if (migrationMap != null) {
                 map.putAll(migrationMap);
                 dirty = true;

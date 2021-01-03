@@ -89,7 +89,6 @@ import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
 import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
-import org.openhab.core.thing.type.BridgeType;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
@@ -281,7 +280,7 @@ public class ThingResource implements RESTResource {
             // we create the Thing exactly the way we received it, i.e. we
             // cannot take its thing type into account for automatically
             // populating channels and properties.
-            thing = ThingDTOMapper.map(thingBean, thingTypeRegistry.getThingType(thingTypeUID) instanceof BridgeType);
+            thing = ThingDTOMapper.map(thingBean);
         } else {
             return getThingResponse(Status.BAD_REQUEST, thing, locale,
                     "A UID must be provided, since no binding can create the thing!");

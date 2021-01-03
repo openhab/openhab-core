@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,12 +21,10 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.storage.json.StorageMigration;
+import org.openhab.core.storage.StorageMigration;
 import org.openhab.core.test.java.JavaTest;
 
 /**
- * This test makes sure that the migration algorithm works.
- *
  * @author Simon Lamon - Initial contribution
  */
 @NonNullByDefault
@@ -99,7 +97,7 @@ public class JsonStorageMigrationTest extends JavaTest {
         OldObject oldDummy = oldObjectStorage.get("DummyObject");
         assertNotNull(oldDummy);
 
-        List<StorageMigration> storageMigrations = List.of(new OldObjectToIntermediateObject(),
+        List<StorageMigration> storageMigrations = List.of(new OldObjectToInbetweenObject(),
                 new InBetweenObjectToNewObject());
         JsonStorage<NewObject> newObjectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0,
                 storageMigrations);
@@ -109,7 +107,6 @@ public class JsonStorageMigrationTest extends JavaTest {
             assertEquals(oldDummy.getTestNumber(), newDummy.getTestNumber());
             assertEquals(oldDummy.getTestString(), newDummy.getTestString());
         }
-
     }
 
     private class OldObjectToNewObjectChangedClasspath extends StorageMigration {
@@ -137,26 +134,26 @@ public class JsonStorageMigrationTest extends JavaTest {
         }
     }
 
-    private class OldObjectToIntermediateObject extends StorageMigration {
-        public OldObjectToIntermediateObject() {
-            super(OldObject.class, InBetweenObject.class);
+    private class OldObjectToInbetweenObject extends StorageMigration {
+        public OldObjectToInbetweenObject() {
+            super(OldObject.class, InbetweenObject.class);
         }
 
         @Override
         public Object migrate(Object in) {
             OldObject oldObject = (OldObject) in;
-            return new InBetweenObject(oldObject.getTestNumber(), oldObject.getTestString());
+            return new InbetweenObject(oldObject.getTestNumber(), oldObject.getTestString());
         }
     }
 
     private class InBetweenObjectToNewObject extends StorageMigration {
         public InBetweenObjectToNewObject() {
-            super(InBetweenObject.class, NewObject.class);
+            super(InbetweenObject.class, NewObject.class);
         }
 
         @Override
         public Object migrate(Object in) {
-            InBetweenObject oldObject = (InBetweenObject) in;
+            InbetweenObject oldObject = (InbetweenObject) in;
             return new NewObject(oldObject.getTestNumber(), oldObject.getTestString());
         }
     }
@@ -179,11 +176,11 @@ public class JsonStorageMigrationTest extends JavaTest {
         }
     }
 
-    private static class InBetweenObject {
+    private static class InbetweenObject {
         private int testNumber2;
         private String testString2;
 
-        public InBetweenObject(int testNumber, String testString) {
+        public InbetweenObject(int testNumber, String testString) {
             this.testNumber2 = testNumber;
             this.testString2 = testString;
         }

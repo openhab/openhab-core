@@ -13,6 +13,7 @@
 package org.openhab.core.common.registry;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.StorageMigration;
 import org.openhab.core.storage.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +55,11 @@ public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>
 
     public AbstractManagedProvider(final StorageService storageService) {
         storage = storageService.getStorage(getStorageName(), this.getClass().getClassLoader());
+    }
+
+    public AbstractManagedProvider(final StorageService storageService,
+            final List<StorageMigration> storageMigrations) {
+        storage = storageService.getStorage(getStorageName(), this.getClass().getClassLoader(), storageMigrations);
     }
 
     @Override
