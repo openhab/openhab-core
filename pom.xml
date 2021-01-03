@@ -435,6 +435,7 @@ Import-Package: \\
               <exclude>target/**</exclude>
               <exclude>**/pom.xml</exclude>
               <exclude>_*.java</exclude>
+              <exclude>**/archetype/**/feature.xml</exclude>
             </excludes>
             <useDefaultExcludes>true</useDefaultExcludes>
             <properties>
