@@ -33,10 +33,6 @@ import org.openhab.core.thing.ThingUID;
 @NonNullByDefault
 public class LegacyThingDTO {
 
-    /*
-     * !!! DO NOT CHANGE - We are not allowed to change the members of the ThingImpl implementation as the storage for
-     * things uses this implementation itself to store and restore the data.
-     */
     private @Nullable String label;
 
     private @Nullable ThingUID bridgeUID;
@@ -53,11 +49,6 @@ public class LegacyThingDTO {
 
     private @Nullable String location;
 
-    /**
-     * Package protected default constructor to allow reflective instantiation.
-     *
-     * !!! DO NOT REMOVE - Gson needs it !!!
-     */
     public LegacyThingDTO() {
     }
 

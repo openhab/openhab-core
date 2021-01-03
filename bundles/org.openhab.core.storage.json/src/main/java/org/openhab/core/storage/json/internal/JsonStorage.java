@@ -143,8 +143,6 @@ public class JsonStorage<T> implements Storage<T> {
                     }
 
                     if (storageEntry.getEntityClassName().equals(oldEntityClassName)) {
-                        // load required class within the given bundle context
-
                         Object valueFromDatabase = this.entityMapper.fromJson((JsonElement) storageEntry.getValue(),
                                 oldEntityType);
                         if (valueFromDatabase != null) {
@@ -252,7 +250,7 @@ public class JsonStorage<T> implements Storage<T> {
      * used in order to load the classes in the context of the calling bundle.
      */
     @SuppressWarnings("unchecked")
-    protected @Nullable T deserialize(@Nullable StorageEntry entry) {
+    private @Nullable T deserialize(@Nullable StorageEntry entry) {
         if (entry == null) {
             // nothing to deserialize
             return null;
@@ -277,7 +275,7 @@ public class JsonStorage<T> implements Storage<T> {
     }
 
     @SuppressWarnings("unchecked")
-    protected @Nullable Map<String, StorageEntry> readDatabase(File inputFile) {
+    private @Nullable Map<String, StorageEntry> readDatabase(File inputFile) {
         try {
             final Map<String, StorageEntry> inputMap = new ConcurrentHashMap<>();
 

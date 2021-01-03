@@ -25,9 +25,8 @@ import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
- * This is a data transfer object that is used to serialize things in the old thing structure.
- * Before OpenHAB 3.1, ThingImpl was persisted in the JSON storage. This class represents the structure to allow
- * conversion.
+ * Before OpenHAB 3.1, objects of type ThingImpl were persisted in the JSON storage.
+ * This class is a copy of Channel to load old entries from the storage for conversion.
  *
  * @author Simon Lamon - Initial contribution
  */
@@ -39,7 +38,6 @@ public class LegacyChannelDTO {
 
     private @Nullable ChannelKind kind;
 
-    // uid might not have been initialized by the default constructor.
     private @NonNullByDefault({}) ChannelUID uid;
 
     private @Nullable ChannelTypeUID channelTypeUID;

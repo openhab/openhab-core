@@ -49,10 +49,6 @@ import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
 @NonNullByDefault
 public class ThingImpl implements Thing {
 
-    /*
-     * !!! DO NOT CHANGE - We are not allowed to change the members of the ThingImpl implementation as the storage for
-     * things uses this implementation itself to store and restore the data.
-     */
     private @Nullable String label;
 
     private @Nullable ThingUID bridgeUID;
