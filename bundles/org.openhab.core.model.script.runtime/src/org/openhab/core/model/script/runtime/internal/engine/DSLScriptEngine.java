@@ -69,6 +69,8 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
     private final @Nullable DSLScriptContextProvider contextProvider;
     private final ScriptContext context = new SimpleScriptContext();
 
+    private @Nullable Script parsedScript;
+
     public DSLScriptEngine(org.openhab.core.model.script.engine.ScriptEngine scriptEngine,
             @Nullable DSLScriptContextProvider contextProvider) {
         this.scriptEngine = scriptEngine;
@@ -119,11 +121,17 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
                     return null;
                 }
             } else {
-                s = scriptEngine.newScriptFromString(script);
+                s = parsedScript;
+                if (s == null) {
+                    s = scriptEngine.newScriptFromString(script);
+                    parsedScript = s;
+                }
             }
             IEvaluationContext evalContext = createEvaluationContext(s, specificContext);
             return s.execute(evalContext);
         } catch (ScriptExecutionException | ScriptParsingException e) {
+            // in case of error, drop the cached script to make sure, it is re-resolved.
+            parsedScript = null;
             throw new ScriptException(e.getMessage(), modelName, -1);
         }
     }
@@ -134,7 +142,6 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             XExpression xExpression = ((ScriptImpl) script).getXExpression();
             if (xExpression != null) {
                 Resource resource = xExpression.eResource();
-                IEvaluationContext evaluationContext = null;
                 if (resource instanceof XtextResource) {
                     IResourceServiceProvider provider = ((XtextResource) resource).getResourceServiceProvider();
                     parentContext = provider.get(IEvaluationContext.class);
