@@ -221,7 +221,6 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 SelectionImpl selectionWidget = (SelectionImpl) SitemapFactory.eINSTANCE.createSelection();
                 addWidgetMappings(selectionWidget.getMappings(), component);
                 widget = selectionWidget;
-                setWidgetPropertyFromComponentConfig(widget, component, "height", SitemapPackage.WEBVIEW__HEIGHT);
                 break;
             case "List":
                 ListImpl listWidget = (ListImpl) SitemapFactory.eINSTANCE.createList();
@@ -288,9 +287,9 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             Object normalizedValue = ConfigUtil.normalizeType(value);
             if (widgetImpl.eGet(feature, false, false) instanceof Integer) {
                 normalizedValue = (normalizedValue instanceof BigDecimal) ? ((BigDecimal) normalizedValue).intValue()
-                        : Integer.valueOf(normalizedValue.toString().split(".")[0]);
-            }
-            if (widgetImpl.eGet(feature, false, false) instanceof Boolean && !(normalizedValue instanceof Boolean)) {
+                        : Integer.valueOf(normalizedValue.toString());
+            } else if (widgetImpl.eGet(feature, false, false) instanceof Boolean
+                    && !(normalizedValue instanceof Boolean)) {
                 normalizedValue = Boolean.valueOf(normalizedValue.toString());
             }
             widgetImpl.eSet(feature, normalizedValue);
