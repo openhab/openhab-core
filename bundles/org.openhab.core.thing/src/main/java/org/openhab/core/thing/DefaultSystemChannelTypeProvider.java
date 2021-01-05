@@ -77,7 +77,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * on (low battery) and off (battery ok).
      */
     public static final ChannelType SYSTEM_CHANNEL_LOW_BATTERY = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "low-battery"), "Low Battery", "Switch").withCategory("Battery")
+            .state(new ChannelTypeUID(BINDING_ID, "low-battery"), "Low Battery", "Switch").withCategory("LowBattery")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build()).build();
 
     /**
@@ -135,7 +135,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_POWER = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "power"), "Power", "Switch")
-            .withDescription("Device is operable when channel has state ON").build();
+            .withDescription("Device is operable when channel has state ON").withCategory("Switch").build();
 
     /**
      * Location: default system wide {@link ChannelType} which displays a location
