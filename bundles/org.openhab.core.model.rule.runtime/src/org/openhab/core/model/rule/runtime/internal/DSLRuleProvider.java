@@ -129,7 +129,7 @@ public class DSLRuleProvider
 
     @Override
     public void modelChanged(String modelFileName, EventType type) {
-        String ruleModelType = modelFileName.substring(modelFileName.lastIndexOf("."));
+        String ruleModelType = modelFileName.substring(modelFileName.lastIndexOf(".") + 1);
         if ("rules".equalsIgnoreCase(ruleModelType)) {
             String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
             switch (type) {
@@ -212,7 +212,7 @@ public class DSLRuleProvider
         Iterator<Entry<String, Rule>> it = rules.entrySet().iterator();
         while (it.hasNext()) {
             Entry<String, Rule> entry = it.next();
-            if (entry.getKey().startsWith(modelName + "-")) {
+            if (belongsToModel(entry.getKey(), modelName)) {
                 removeRule(entry.getValue());
                 it.remove();
             }
@@ -220,11 +220,20 @@ public class DSLRuleProvider
         Iterator<Entry<String, XExpression>> it2 = xExpressions.entrySet().iterator();
         while (it2.hasNext()) {
             Entry<String, XExpression> entry = it2.next();
-            if (entry.getKey().startsWith(modelName + "-")) {
+            if (belongsToModel(entry.getKey(), modelName)) {
                 it2.remove();
             }
         }
         contexts.remove(modelName);
+    }
+
+    private boolean belongsToModel(String id, String modelName) {
+        int idx = id.lastIndexOf("-");
+        if (idx >= 0) {
+            String prefix = id.substring(0, idx);
+            return prefix.equals(modelName);
+        }
+        return false;
     }
 
     private void removeRule(Rule rule) {
