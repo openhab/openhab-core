@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 import static org.openhab.core.thing.firmware.Constants.*;
 import static org.openhab.core.thing.firmware.FirmwareStatusInfo.*;
 
@@ -43,8 +42,12 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
@@ -79,6 +82,8 @@ import org.osgi.framework.Bundle;
  * @author Dimitar Ivanov - Added a test for valid cancel execution during firmware update; Replaced Firmware UID with
  *         thing UID and firmware version
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class FirmwareUpdateServiceTest extends JavaOSGiTest {
 
     public static final ProgressStep[] SEQUENCE = new ProgressStep[] { ProgressStep.REBOOTING, ProgressStep.DOWNLOADING,
@@ -89,8 +94,6 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     private Thing thing3;
 
     private FirmwareUpdateServiceImpl firmwareUpdateService;
-
-    private AutoCloseable mocksCloseable;
 
     private @Mock FirmwareRegistry mockFirmwareRegistry;
     private @Mock FirmwareUpdateHandler handler1;
@@ -104,8 +107,6 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         Map<String, String> props1 = new HashMap<>();
         props1.put(Thing.PROPERTY_FIRMWARE_VERSION, V111);
         props1.put(Thing.PROPERTY_MODEL_ID, MODEL1);
@@ -143,11 +144,6 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         initialFirmwareRegistryMocking();
 
         when(bundleResolver.resolveBundle(any())).thenReturn(mock(Bundle.class));
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     private void initialFirmwareRegistryMocking() {

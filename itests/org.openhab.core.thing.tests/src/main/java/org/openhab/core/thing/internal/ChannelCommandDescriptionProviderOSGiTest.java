@@ -15,7 +15,6 @@ package org.openhab.core.thing.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -29,8 +28,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.Item;
@@ -82,13 +83,12 @@ import org.osgi.service.component.ComponentContext;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 @NonNullByDefault
 public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "thingStatusInfoI18nTest.bundle";
     private static final ChannelTypeUID CHANNEL_TYPE_UID = new ChannelTypeUID("hue:dynamic");
-
-    private @NonNullByDefault({}) AutoCloseable mocksCloseable;
 
     private @Mock @NonNullByDefault({}) ComponentContext componentContextMock;
 
@@ -99,8 +99,6 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() throws Exception {
-        mocksCloseable = openMocks(this);
-
         Mockito.when(componentContextMock.getBundleContext()).thenReturn(bundleContext);
 
         registerVolatileStorageService();
@@ -177,7 +175,6 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
 
     @AfterEach
     public void afterEach() throws Exception {
-        mocksCloseable.close();
         testBundle.uninstall();
         ManagedThingProvider managedThingProvider = getService(ManagedThingProvider.class);
         assertNotNull(managedThingProvider);

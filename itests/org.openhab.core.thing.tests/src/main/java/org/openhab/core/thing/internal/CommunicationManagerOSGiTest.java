@@ -15,7 +15,6 @@ package org.openhab.core.thing.internal;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,11 +24,14 @@ import java.util.stream.Stream;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.ProviderChangeListener;
@@ -85,6 +87,8 @@ import org.openhab.core.types.StateDescriptionFragmentBuilder;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 @NonNullByDefault
 public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
@@ -134,8 +138,6 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
             ChannelBuilder.create(TRIGGER_CHANNEL_UID_1).withKind(ChannelKind.TRIGGER).build(),
             ChannelBuilder.create(TRIGGER_CHANNEL_UID_2).withKind(ChannelKind.TRIGGER).build()).build();
 
-    private @NonNullByDefault({}) AutoCloseable mocksCloseable;
-
     private @Mock @NonNullByDefault({}) AutoUpdateManager autoUpdateManagerMock;
     private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistryMock;
     private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
@@ -156,8 +158,6 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         safeCaller = getService(SafeCaller.class);
         assertNotNull(safeCaller);
 
@@ -231,11 +231,6 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
         ITEM_3.setUnitProvider(unitProvider);
         ITEM_4.setUnitProvider(unitProvider);
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     @Test

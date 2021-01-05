@@ -14,16 +14,18 @@ package org.openhab.core.thing.internal.profiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -43,6 +45,8 @@ import org.openhab.core.thing.type.ChannelType;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
 
     private final Map<String, Object> properties = Map.of(SystemOffsetProfile.OFFSET_PARAM, BigDecimal.ZERO,
@@ -50,24 +54,15 @@ public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
 
     private SystemProfileFactory profileFactory;
 
-    private AutoCloseable mocksCloseable;
-
     private @Mock ProfileCallback mockCallback;
     private @Mock ProfileContext mockContext;
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         profileFactory = getService(ProfileTypeProvider.class, SystemProfileFactory.class);
         assertNotNull(profileFactory);
 
         when(mockContext.getConfiguration()).thenReturn(new Configuration(properties));
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     @Test

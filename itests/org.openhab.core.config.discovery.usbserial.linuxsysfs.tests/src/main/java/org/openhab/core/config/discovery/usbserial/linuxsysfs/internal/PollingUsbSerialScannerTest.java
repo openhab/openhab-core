@@ -14,7 +14,6 @@ package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 import static org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.PollingUsbSerialScanner.PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE;
 
 import java.io.IOException;
@@ -22,10 +21,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryListener;
 import org.openhab.core.config.discovery.usbserial.linuxsysfs.testutil.UsbSerialDeviceInformationGenerator;
@@ -35,32 +37,25 @@ import org.openhab.core.config.discovery.usbserial.linuxsysfs.testutil.UsbSerial
  *
  * @author Henning Sudbrock - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class PollingUsbSerialScannerTest {
 
     private UsbSerialDeviceInformationGenerator usbDeviceInfoGenerator = new UsbSerialDeviceInformationGenerator();
 
     private PollingUsbSerialScanner pollingScanner;
 
-    private AutoCloseable mocksCloseable;
-
     private @Mock UsbSerialDiscoveryListener discoveryListenerMock;
     private @Mock UsbSerialScanner usbSerialScannerMock;
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         Map<String, Object> config = new HashMap<>();
         config.put(PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE, "1");
 
         pollingScanner = new PollingUsbSerialScanner(config, usbSerialScannerMock);
 
         pollingScanner.registerDiscoveryListener(discoveryListenerMock);
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     @Test

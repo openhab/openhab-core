@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,9 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.config.discovery.inbox.Inbox;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ThingRegistry;
@@ -48,6 +49,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author Simon Kaufmann - added tests for ExtendedDiscoveryService, ported to Java
  * @author Andre Fuechsel - added tests for removeOlderResults for a specific bridge only
  */
+@ExtendWith(MockitoExtension.class)
 public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
     private static final String ANY_BINDING_ID_1 = "any2BindingId1";
@@ -81,14 +83,10 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     private ThingRegistry thingRegistry;
     private Inbox inbox;
 
-    private AutoCloseable mocksCloseable;
-
     private @Mock DiscoveryListener mockDiscoveryListener;
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         registerVolatileStorageService();
 
         thingRegistry = getService(ThingRegistry.class);
@@ -126,8 +124,6 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
     @AfterEach
     public void afterEach() throws Exception {
-        mocksCloseable.close();
-
         discoveryServiceFaultyMock.abortScan();
         discoveryServiceMockForBinding1.abortScan();
         discoveryServiceMockForBinding2.abortScan();

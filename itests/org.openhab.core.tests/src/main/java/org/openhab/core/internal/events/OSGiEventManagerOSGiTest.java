@@ -15,7 +15,6 @@ package org.openhab.core.internal.events;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +23,12 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
 import org.openhab.core.events.EventPublisher;
@@ -40,6 +43,8 @@ import org.osgi.framework.ServiceRegistration;
  * @author Stefan Bußweiler - Initial contribution
  * @author Simon Kaufmann - migrated from Groovy to Java
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
 
     private static final String EVENT_TYPE_A = "EVENT_TYPE_A";
@@ -60,8 +65,6 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
 
     private EventPublisher eventPublisher;
 
-    private AutoCloseable mocksCloseable;
-
     private @Mock EventSubscriber subscriber1;
     private @Mock EventSubscriber subscriber2;
     private @Mock EventSubscriber subscriber3;
@@ -71,8 +74,6 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() throws Exception {
-        mocksCloseable = openMocks(this);
-
         eventPublisher = getService(EventPublisher.class);
         assertNotNull(eventPublisher);
 
@@ -103,7 +104,6 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
 
     @AfterEach
     public void afterEach() throws Exception {
-        mocksCloseable.close();
         for (ServiceRegistration<?> service : serviceRegistrations.values()) {
             service.unregister();
         }

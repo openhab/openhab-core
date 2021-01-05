@@ -15,7 +15,6 @@ package org.openhab.core.model.core.internal.folder;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +36,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.core.ModelRepository;
@@ -69,6 +70,7 @@ import org.osgi.service.component.ComponentContext;
  * @author Stefan Triller - added hidden file test
  * @author Simon Kaufmann - ported to Java
  */
+@ExtendWith(MockitoExtension.class)
 public class FolderObserverTest extends JavaOSGiTest {
 
     private static final boolean IS_OS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
@@ -88,25 +90,16 @@ public class FolderObserverTest extends JavaOSGiTest {
     private FolderObserver folderObserver;
     private ModelRepoDummy modelRepo;
 
-    private AutoCloseable mocksCloseable;
-
     private @Mock ModelParser modelParser;
     private @Mock ReadyService readyService;
     private @Mock ComponentContext context;
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         configProps = new Hashtable<>();
 
         setupWatchedDirectory();
         setUpServices();
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     /**

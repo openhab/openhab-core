@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.lang.Thread.State;
 import java.lang.management.ManagementFactory;
@@ -41,7 +40,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.common.QueueingThreadPoolExecutor;
 import org.openhab.core.test.java.JavaTest;
 import org.slf4j.Logger;
@@ -51,6 +52,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Simon Kaufmann - Initial contribution and API.
  */
+@ExtendWith(MockitoExtension.class)
 public class SafeCallerImplTest extends JavaTest {
 
     private static final int THREAD_POOL_SIZE = 3;
@@ -70,8 +72,6 @@ public class SafeCallerImplTest extends JavaTest {
     private QueueingThreadPoolExecutor scheduler;
     private TestInfo testInfo;
     private final List<AssertingThread> threads = new LinkedList<>();
-
-    private AutoCloseable mocksCloseable;
 
     private @Mock Runnable mockRunnable;
     private @Mock Runnable mockTimeoutHandler;
@@ -95,8 +95,6 @@ public class SafeCallerImplTest extends JavaTest {
     public void setup(TestInfo testInfo) {
         this.testInfo = testInfo;
 
-        mocksCloseable = openMocks(this);
-
         scheduler = QueueingThreadPoolExecutor.createInstance(testInfo.getTestMethod().get().getName(),
                 THREAD_POOL_SIZE);
         safeCaller = new SafeCallerImpl(null) {
@@ -112,8 +110,6 @@ public class SafeCallerImplTest extends JavaTest {
 
     @AfterEach
     public void afterEach() throws Exception {
-        mocksCloseable.close();
-
         // ensure all "inner" assertion errors are heard
         joinAll();
 

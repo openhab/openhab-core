@@ -14,15 +14,15 @@ package org.openhab.core.items.events;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
 import org.openhab.core.events.EventPublisher;
@@ -41,6 +41,7 @@ import org.openhab.core.test.java.JavaOSGiTest;
  *
  * @author Stefan Bußweiler - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM_NAME = "SomeItem";
@@ -48,15 +49,11 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
     private ItemCommandEvent commandEvent;
     private ItemStateEvent updateEvent;
 
-    private AutoCloseable mocksCloseable;
-
     private @Mock ItemProvider itemProvider;
     private @Mock MetadataProvider mockMetadataProvider;
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         eventPublisher = getService(EventPublisher.class);
         assertNotNull(eventPublisher);
 
@@ -79,11 +76,6 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
         when(mockMetadataProvider.getAll()).thenReturn(
                 List.of(new Metadata(new MetadataKey("autoupdate", ITEM_NAME), Boolean.toString(false), null)));
         registerService(mockMetadataProvider);
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     @Test

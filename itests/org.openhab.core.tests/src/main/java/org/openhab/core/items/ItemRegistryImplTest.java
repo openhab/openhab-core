@@ -20,18 +20,18 @@ import static org.hamcrest.core.IsIterableContaining.hasItem;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
@@ -57,6 +57,7 @@ import org.openhab.core.test.storage.VolatileStorageService;
  * @author Kai Kreuzer - added tests for all items changed cases
  * @author Sebastian Janzen - added test for getItemsByTag
  */
+@ExtendWith(MockitoExtension.class)
 @SuppressWarnings("null")
 public class ItemRegistryImplTest extends JavaTest {
 
@@ -73,14 +74,10 @@ public class ItemRegistryImplTest extends JavaTest {
     private ItemRegistry itemRegistry;
     private ManagedItemProvider itemProvider;
 
-    private AutoCloseable mocksCloseable;
-
     private @Mock EventPublisher eventPublisher;
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         ItemFactory coreItemFactory = new CoreItemFactory();
 
         GenericItem cameraItem1 = new SwitchItem(CAMERA_ITEM_NAME1);
@@ -114,11 +111,6 @@ public class ItemRegistryImplTest extends JavaTest {
                 setItemStateConverter(mock(ItemStateConverter.class));
             }
         };
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     @Test

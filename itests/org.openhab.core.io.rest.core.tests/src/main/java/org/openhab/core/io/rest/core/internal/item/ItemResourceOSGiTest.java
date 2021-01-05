@@ -19,7 +19,6 @@ import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,10 +34,13 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.ItemProvider;
@@ -61,6 +63,8 @@ import com.jayway.jsonpath.JsonPath;
 /**
  * @author Henning Treu - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class ItemResourceOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM_NAME1 = "Item1";
@@ -74,8 +78,6 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     private GenericItem item3;
     private GenericItem item4;
 
-    private AutoCloseable mocksCloseable;
-
     private @Mock ItemProvider itemProvider;
 
     private UriInfo uriInfo;
@@ -86,8 +88,6 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         registerService(new VolatileStorageService());
 
         itemResource = getService(RESTResource.class, ItemResource.class);
@@ -111,11 +111,6 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         when(uriInfo.getPath()).thenReturn("");
         httpHeaders = mock(HttpHeaders.class);
         when(httpHeaders.getHeaderString(anyString())).thenReturn(null);
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     @Test
