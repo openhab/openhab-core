@@ -51,7 +51,7 @@ public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServl
             if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(authType)) {
                 final String authValue = tokens[1];
                 ByteBuffer authHash = ByteBuffer.wrap(msgDigest.digest((tokens[1] + UUID_STRING).getBytes()));
-                
+
                 UsernamePasswordCredentials cachedValue = BasicCredentialsExtractor.authCache.get(authHash);
                 if (cachedValue != null) {
                     return Optional.of(cachedValue);
@@ -64,7 +64,7 @@ public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServl
                     final String password = tokens[1];
 
                     UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username, password);
-                    
+
                     // limit auth cache to a certain size
                     if (BasicCredentialsExtractor.authCache.size() > 20) {
                         Object remName = null;
@@ -74,7 +74,7 @@ public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServl
                         }
                         BasicCredentialsExtractor.authCache.remove(remName);
                     }
-                    
+
                     BasicCredentialsExtractor.authCache.put(authHash, creds);
                     return Optional.of(creds);
                 }
