@@ -12,6 +12,7 @@
  */
 package org.openhab.core.ui.internal.components;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -178,7 +179,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             case "Video":
                 VideoImpl videoWidget = (VideoImpl) SitemapFactory.eINSTANCE.createVideo();
                 widget = videoWidget;
-                setWidgetPropertyFromComponentConfig(widget, component, "url", SitemapPackage.IMAGE__URL);
+                setWidgetPropertyFromComponentConfig(widget, component, "url", SitemapPackage.VIDEO__URL);
                 setWidgetPropertyFromComponentConfig(widget, component, "encoding", SitemapPackage.VIDEO__ENCODING);
                 break;
             case "Chart":
@@ -220,7 +221,6 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 SelectionImpl selectionWidget = (SelectionImpl) SitemapFactory.eINSTANCE.createSelection();
                 addWidgetMappings(selectionWidget.getMappings(), component);
                 widget = selectionWidget;
-                setWidgetPropertyFromComponentConfig(widget, component, "height", SitemapPackage.WEBVIEW__HEIGHT);
                 break;
             case "List":
                 ListImpl listWidget = (ListImpl) SitemapFactory.eINSTANCE.createList();
@@ -282,8 +282,21 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         if (value == null) {
             return;
         }
-        WidgetImpl widgetImpl = (WidgetImpl) widget;
-        widgetImpl.eSet(feature, ConfigUtil.normalizeType(value));
+        try {
+            WidgetImpl widgetImpl = (WidgetImpl) widget;
+            Object normalizedValue = ConfigUtil.normalizeType(value);
+            if (widgetImpl.eGet(feature, false, false) instanceof Integer) {
+                normalizedValue = (normalizedValue instanceof BigDecimal) ? ((BigDecimal) normalizedValue).intValue()
+                        : Integer.valueOf(normalizedValue.toString());
+            } else if (widgetImpl.eGet(feature, false, false) instanceof Boolean
+                    && !(normalizedValue instanceof Boolean)) {
+                normalizedValue = Boolean.valueOf(normalizedValue.toString());
+            }
+            widgetImpl.eSet(feature, normalizedValue);
+        } catch (Exception e) {
+            logger.warn("Cannot set {} parameter for {} widget parameter: {}", configParamName, component.getType(),
+                    e.getMessage());
+        }
     }
 
     private void addWidgetMappings(EList<Mapping> mappings, UIComponent component) {
