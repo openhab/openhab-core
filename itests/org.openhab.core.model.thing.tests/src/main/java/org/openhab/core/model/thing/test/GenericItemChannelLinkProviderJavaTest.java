@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
@@ -28,7 +27,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.ItemRegistry;
@@ -46,6 +47,7 @@ import org.openhab.core.thing.link.ItemChannelLinkRegistry;
  *
  * @author Simon Kaufmann - Initial contribution and API
  */
+@ExtendWith(MockitoExtension.class)
 @NonNullByDefault
 public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
 
@@ -55,8 +57,6 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
     private static final String ITEM = "test";
     private static final String CHANNEL = "test:test:test:test";
     private static final String LINK = ITEM + " -> " + CHANNEL;
-
-    private @NonNullByDefault({}) AutoCloseable mocksCloseable;
 
     private @Mock @Nullable ProviderChangeListener<ItemChannelLink> listenerMock;
 
@@ -68,8 +68,6 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         registerVolatileStorageService();
 
         thingRegistry = getService(ThingRegistry.class);
@@ -88,8 +86,6 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
 
     @AfterEach
     public void afterEach() throws Exception {
-        mocksCloseable.close();
-
         modelRepository.removeModel(THINGS_TESTMODEL_NAME);
         modelRepository.removeModel(ITEMS_TESTMODEL_NAME);
 

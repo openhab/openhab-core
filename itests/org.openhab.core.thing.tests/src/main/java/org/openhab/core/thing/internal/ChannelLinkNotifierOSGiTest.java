@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +32,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.items.ManagedItemProvider;
 import org.openhab.core.library.CoreItemFactory;
@@ -67,6 +68,7 @@ import org.osgi.framework.Bundle;
  *
  * @author Wouter Born - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 @NonNullByDefault
 public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
@@ -75,8 +77,6 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
     private static final int CHANNEL_COUNT = 5;
 
     private int thingCount;
-
-    private @NonNullByDefault({}) AutoCloseable mocksCloseable;
 
     private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
     private @NonNullByDefault({}) ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
@@ -143,8 +143,6 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         registerVolatileStorageService();
 
         itemChannelLinkRegistry = getService(ItemChannelLinkRegistry.class);
@@ -186,8 +184,6 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
         managedThingProvider.getAll().forEach(thing -> managedThingProvider.remove(thing.getUID()));
 
         thingCount = 0;
-
-        mocksCloseable.close();
     }
 
     private Thing addThing(@Nullable ThingStatus thingStatus) {

@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -34,10 +33,14 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigDescription;
@@ -86,6 +89,8 @@ import org.osgi.service.component.ComponentContext;
  * @auther Thomas Höfer - Added config status tests
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 @SuppressWarnings("null")
 public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
@@ -96,14 +101,10 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
     private ManagedThingProvider managedThingProvider;
     private ThingRegistry thingRegistry;
 
-    private AutoCloseable mocksCloseable;
-
     private @Mock ComponentContext componentContext;
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         registerVolatileStorageService();
         managedThingProvider = getService(ManagedThingProvider.class);
         assertThat(managedThingProvider, is(notNullValue()));
@@ -114,8 +115,6 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
     @AfterEach
     public void afterEach() throws Exception {
-        mocksCloseable.close();
-
         managedThingProvider.getAll().forEach(t -> managedThingProvider.remove(t.getUID()));
     }
 

@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -30,11 +29,14 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Temperature;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventPublisher;
@@ -70,6 +72,8 @@ import tec.uom.se.unit.Units;
 /**
  * @author Stefan Triller - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class GroupItemOSGiTest extends JavaOSGiTest {
 
     /** Time to sleep when a file is created/modified/deleted, so the event can be handled */
@@ -80,8 +84,6 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
     private ItemRegistry itemRegistry;
 
-    private AutoCloseable mocksCloseable;
-
     private @Mock UnitProvider unitProvider;
 
     private final GroupFunctionHelper groupFunctionHelper = new GroupFunctionHelper();
@@ -89,8 +91,6 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         registerVolatileStorageService();
         publisher = event -> events.add(event);
 
@@ -120,11 +120,6 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         when(unitProvider.getUnit(Temperature.class)).thenReturn(Units.CELSIUS);
 
         itemStateConverter = new ItemStateConverterImpl(unitProvider);
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     @Disabled

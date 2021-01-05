@@ -16,17 +16,19 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.thing.profiles.ProfileType;
@@ -44,6 +46,8 @@ import org.openhab.core.thing.type.ChannelTypeUID;
  *
  * @author Stefan Triller - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class ProfileTypeResourceTest extends JavaTest {
 
     private ProfileTypeResource resource;
@@ -71,16 +75,12 @@ public class ProfileTypeResourceTest extends JavaTest {
     private final ChannelType otherTriggerChannelType = ChannelTypeBuilder
             .trigger(otherTriggerChannelTypeUID, "channel1").build();
 
-    private AutoCloseable mocksCloseable;
-
     private @Mock ChannelTypeRegistry channelTypeRegistry;
     private @Mock LocaleService localeService;
     private @Mock ProfileTypeRegistry profileTypeRegistry;
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         resource = new ProfileTypeResource(channelTypeRegistry, localeService, profileTypeRegistry);
 
         List<ProfileType> profileTypes = new ArrayList<>();
@@ -102,11 +102,6 @@ public class ProfileTypeResourceTest extends JavaTest {
 
         when(channelTypeRegistry.getChannelType(otherStateChannelTypeUID, null)).thenReturn(otherStateChannelType);
         when(channelTypeRegistry.getChannelType(otherTriggerChannelTypeUID, null)).thenReturn(otherTriggerChannelType);
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     @Test

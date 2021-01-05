@@ -15,7 +15,6 @@ package org.openhab.core.thing.internal.profiles;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -27,12 +26,12 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
@@ -50,6 +49,7 @@ import org.openhab.core.types.UnDefType;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class SystemHysteresisStateProfileTest {
 
     private static final String STRING_TEN = "10";
@@ -169,20 +169,8 @@ public class SystemHysteresisStateProfileTest {
         });
     }
 
-    private AutoCloseable mocksCloseable;
-
     private @Mock ProfileCallback mockCallback;
     private @Mock ProfileContext mockContext;
-
-    @BeforeEach
-    public void setup() {
-        mocksCloseable = openMocks(this);
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
-    }
 
     @Test
     public void testWrongParameterLower() {

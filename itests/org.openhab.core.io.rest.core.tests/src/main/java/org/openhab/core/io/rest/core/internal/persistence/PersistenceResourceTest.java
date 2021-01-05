@@ -15,17 +15,17 @@ package org.openhab.core.io.rest.core.internal.persistence;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.items.ItemRegistry;
@@ -42,14 +42,13 @@ import org.openhab.core.types.State;
  *
  * @author Stefan Triller - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class PersistenceResourceTest {
 
     private static final String PERSISTENCE_SERVICE_ID = "TestServiceID";
 
     private PersistenceResource pResource;
     private List<HistoricItem> items;
-
-    private AutoCloseable mocksCloseable;
 
     private @Mock ItemRegistry itemRegistry;
     private @Mock LocaleService localeService;
@@ -58,8 +57,6 @@ public class PersistenceResourceTest {
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         pResource = new PersistenceResource(itemRegistry, localeService, persistenceServiceRegistry, timeZoneProvider);
 
         int startValue = 2016;
@@ -94,11 +91,6 @@ public class PersistenceResourceTest {
 
         when(persistenceServiceRegistry.get(PERSISTENCE_SERVICE_ID)).thenReturn(pService);
         when(timeZoneProvider.getTimeZone()).thenReturn(ZoneId.systemDefault());
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     @Test

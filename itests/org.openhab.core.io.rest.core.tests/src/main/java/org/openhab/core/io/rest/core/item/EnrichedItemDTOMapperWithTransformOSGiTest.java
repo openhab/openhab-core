@@ -15,14 +15,14 @@ package org.openhab.core.io.rest.core.item;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.math.BigDecimal;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.service.StateDescriptionService;
@@ -34,27 +34,19 @@ import org.openhab.core.types.StateOption;
 /**
  * @author Henning Treu - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class EnrichedItemDTOMapperWithTransformOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM_NAME = "Item1";
-
-    private AutoCloseable mocksCloseable;
 
     private @Mock StateDescriptionService stateDescriptionService;
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         StateDescription stateDescription = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                 .withMaximum(BigDecimal.valueOf(100)).withStep(BigDecimal.TEN).withPattern("%d °C").withReadOnly(true)
                 .withOption(new StateOption("SOUND", "My great sound.")).build().toStateDescription();
         when(stateDescriptionService.getStateDescription(ITEM_NAME, null)).thenReturn(stateDescription);
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     @Test
