@@ -178,12 +178,20 @@ public class RuleResource implements RESTResource {
                     .header("Location", "rules/" + URLEncoder.encode(newRule.getUID(), StandardCharsets.UTF_8)).build();
         } catch (IllegalArgumentException e) {
             String errMessage = "Creation of the rule is refused: " + e.getMessage();
-            logger.warn("{}", errMessage);
+            logException(e, errMessage);
             return JSONResponse.createErrorResponse(Status.CONFLICT, errMessage);
         } catch (RuntimeException e) {
             String errMessage = "Creation of the rule is refused: " + e.getMessage();
-            logger.warn("{}", errMessage);
+            logException(e, errMessage);
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, errMessage);
+        }
+    }
+
+    private void logException(RuntimeException e, String errMessage) {
+        if (logger.isDebugEnabled()) {
+            logger.warn("{}", errMessage, e);
+        } else {
+            logger.warn("{}", errMessage);
         }
     }
 
