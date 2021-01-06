@@ -129,42 +129,45 @@ public class DSLRuleProvider
 
     @Override
     public void modelChanged(String modelFileName, EventType type) {
-        String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
-        switch (type) {
-            case ADDED:
-                EObject model = modelRepository.getModel(modelFileName);
-                if (model instanceof RuleModel) {
-                    RuleModel ruleModel = (RuleModel) model;
-                    int index = 1;
-                    for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                        addRule(toRule(ruleModelName, rule, index));
-                        xExpressions.put(ruleModelName + "-" + index, rule.getScript());
-                        index++;
+        String ruleModelType = modelFileName.substring(modelFileName.lastIndexOf(".") + 1);
+        if ("rules".equalsIgnoreCase(ruleModelType)) {
+            String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
+            switch (type) {
+                case ADDED:
+                    EObject model = modelRepository.getModel(modelFileName);
+                    if (model instanceof RuleModel) {
+                        RuleModel ruleModel = (RuleModel) model;
+                        int index = 1;
+                        for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
+                            addRule(toRule(ruleModelName, rule, index));
+                            xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                            index++;
+                        }
+                        handleVarDeclarations(ruleModelName, ruleModel);
                     }
-                    handleVarDeclarations(ruleModelName, ruleModel);
-                }
-                break;
-            case MODIFIED:
-                removeRuleModel(ruleModelName);
-                EObject modifiedModel = modelRepository.getModel(modelFileName);
-                if (modifiedModel instanceof RuleModel) {
-                    RuleModel ruleModel = (RuleModel) modifiedModel;
-                    int index = 1;
-                    for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                        Rule newRule = toRule(ruleModelName, rule, index);
-                        Rule oldRule = rules.get(ruleModelName);
-                        updateRule(oldRule, newRule);
-                        xExpressions.put(ruleModelName + "-" + index, rule.getScript());
-                        index++;
+                    break;
+                case MODIFIED:
+                    removeRuleModel(ruleModelName);
+                    EObject modifiedModel = modelRepository.getModel(modelFileName);
+                    if (modifiedModel instanceof RuleModel) {
+                        RuleModel ruleModel = (RuleModel) modifiedModel;
+                        int index = 1;
+                        for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
+                            Rule newRule = toRule(ruleModelName, rule, index);
+                            Rule oldRule = rules.get(ruleModelName);
+                            updateRule(oldRule, newRule);
+                            xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                            index++;
+                        }
+                        handleVarDeclarations(ruleModelName, ruleModel);
                     }
-                    handleVarDeclarations(ruleModelName, ruleModel);
-                }
-                break;
-            case REMOVED:
-                removeRuleModel(ruleModelName);
-                break;
-            default:
-                logger.debug("Unknown event type.");
+                    break;
+                case REMOVED:
+                    removeRuleModel(ruleModelName);
+                    break;
+                default:
+                    logger.debug("Unknown event type.");
+            }
         }
     }
 
@@ -209,7 +212,7 @@ public class DSLRuleProvider
         Iterator<Entry<String, Rule>> it = rules.entrySet().iterator();
         while (it.hasNext()) {
             Entry<String, Rule> entry = it.next();
-            if (entry.getKey().startsWith(modelName + "-")) {
+            if (belongsToModel(entry.getKey(), modelName)) {
                 removeRule(entry.getValue());
                 it.remove();
             }
@@ -217,11 +220,20 @@ public class DSLRuleProvider
         Iterator<Entry<String, XExpression>> it2 = xExpressions.entrySet().iterator();
         while (it2.hasNext()) {
             Entry<String, XExpression> entry = it2.next();
-            if (entry.getKey().startsWith(modelName + "-")) {
+            if (belongsToModel(entry.getKey(), modelName)) {
                 it2.remove();
             }
         }
         contexts.remove(modelName);
+    }
+
+    private boolean belongsToModel(String id, String modelName) {
+        int idx = id.lastIndexOf("-");
+        if (idx >= 0) {
+            String prefix = id.substring(0, idx);
+            return prefix.equals(modelName);
+        }
+        return false;
     }
 
     private void removeRule(Rule rule) {
