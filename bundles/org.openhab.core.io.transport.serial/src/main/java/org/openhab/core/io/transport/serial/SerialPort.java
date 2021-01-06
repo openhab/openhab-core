@@ -29,6 +29,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Markus Rathgeb - Initial contribution
  * @author Kai Kreuzer - added further methods
+ * @author Vita Tucek - added further methods
  */
 @NonNullByDefault
 public interface SerialPort extends Closeable {
@@ -65,6 +66,34 @@ public interface SerialPort extends Closeable {
      */
     void setSerialPortParams(int baudrate, int dataBits, int stopBits, int parity)
             throws UnsupportedCommOperationException;
+
+    /**
+     * Gets port baud rate.
+     *
+     * @return baud rate
+     */
+    int getBaudRate();
+
+    /**
+     * Gets number of port data bits.
+     *
+     * @return data bits
+     */
+    int getDataBits();
+
+    /**
+     * Gets number of port stop bits.
+     *
+     * @return stop bits count
+     */
+    int getStopBits();
+
+    /**
+     * Gets port parity.
+     *
+     * @return parity
+     */
+    int getParity();
 
     /**
      * Returns an input stream.
@@ -182,6 +211,41 @@ public interface SerialPort extends Closeable {
     void notifyOnParityError(boolean enable);
 
     /**
+     * Enable / disable the notification on output buffer empty.
+     *
+     * @param enable true if the notification should be enabled
+     */
+    void notifyOnOutputEmpty(boolean enable);
+
+    /**
+     * Enable / disable the notification on CTS.
+     *
+     * @param enable true if the notification should be enabled
+     */
+    void notifyOnCTS(boolean enable);
+
+    /**
+     * Enable / disable the notification on DSR.
+     *
+     * @param enable true if the notification should be enabled
+     */
+    void notifyOnDSR(boolean enable);
+
+    /**
+     * Enable / disable the notification on ring indicator.
+     *
+     * @param enable true if the notification should be enabled
+     */
+    void notifyOnRingIndicator(boolean enable);
+
+    /**
+     * Enable / disable the notification on carrier detect.
+     *
+     * @param enable true if the notification should be enabled
+     */
+    void notifyOnCarrierDetect(boolean enable);
+
+    /**
      * Enables the receive timeout.
      *
      * <p>
@@ -208,6 +272,13 @@ public interface SerialPort extends Closeable {
     void setFlowControlMode(int flowcontrolRtsctsOut) throws UnsupportedCommOperationException;
 
     /**
+     * Gets the flow control mode value.
+     *
+     * @return flowcontrol value.
+     */
+    int getFlowControlMode();
+
+    /**
      * Enable receive threshold with the specified thresh parameter.
      *
      * @param thresh The thresh (<code>int</code>) parameter.
@@ -221,4 +292,60 @@ public interface SerialPort extends Closeable {
      * @param rts true rts is set, false if rts cleared
      */
     void setRTS(boolean rts);
+
+    /**
+     * Check current state of RTS (Request To Send).
+     *
+     * @return true if RTS is set, otherwise false
+     */
+    boolean isRTS();
+
+    /**
+     * Sets or clears the DTR (Request To Send) bit in the UART, if supported by the underlying implementation.
+     *
+     * @param state true DTR is set, false if DTR cleared
+     */
+    void setDTR(boolean state);
+
+    /**
+     * Check current state of DTR (Data Terminal Ready).
+     *
+     * @return true if DTR is set, otherwise false
+     */
+    boolean isDTR();
+
+    /**
+     * Check current state of CTS (Clear To Send).
+     *
+     * @return true if CTS is set, otherwise false
+     */
+    boolean isCTS();
+
+    /**
+     * Check current state of DSR (Request To Send).
+     *
+     * @return true if DSR is set, otherwise false
+     */
+    boolean isDSR();
+
+    /**
+     * Check current state of CD (Carrier Detect).
+     *
+     * @return true if CD is set, otherwise false
+     */
+    boolean isCD();
+
+    /**
+     * Check current state of RI (Ring Indicator).
+     *
+     * @return true if RI is set, otherwise false
+     */
+    boolean isRI();
+
+    /**
+     * Send break.
+     *
+     * @param duration Break duration parameter
+     */
+    void sendBreak(int duration);
 }
