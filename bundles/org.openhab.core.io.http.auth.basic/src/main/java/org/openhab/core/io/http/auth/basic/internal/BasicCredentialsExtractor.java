@@ -13,7 +13,6 @@
 package org.openhab.core.io.http.auth.basic.internal;
 
 import java.security.MessageDigest;
-
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Optional;
