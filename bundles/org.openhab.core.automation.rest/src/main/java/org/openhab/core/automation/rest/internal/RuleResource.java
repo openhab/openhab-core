@@ -189,7 +189,7 @@ public class RuleResource implements RESTResource {
 
     private void logException(RuntimeException e, String errMessage) {
         if (logger.isDebugEnabled()) {
-            logger.warn(errMessage, e);
+            logger.warn("{}", errMessage, e);
         } else {
             logger.warn("{}", errMessage);
         }
