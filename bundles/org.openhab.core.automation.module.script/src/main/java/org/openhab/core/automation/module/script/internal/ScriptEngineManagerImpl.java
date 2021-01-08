@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.script.Invocable;
 import javax.script.ScriptContext;
@@ -54,6 +55,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     private final Map<String, ScriptEngineFactory> customSupport = new HashMap<>();
     private final Map<String, ScriptEngineFactory> genericSupport = new HashMap<>();
     private final ScriptExtensionManager scriptExtensionManager;
+    private final Map<String, Object> globalContext = new ConcurrentHashMap<>();
 
     @Activate
     public ScriptEngineManagerImpl(final @Reference ScriptExtensionManager scriptExtensionManager) {
@@ -234,5 +236,10 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     @Override
     public boolean isSupported(String scriptType) {
         return findEngineFactory(scriptType) != null;
+    }
+
+    @Override
+    public Map<String, Object> getGlobalContext() {
+        return globalContext;
     }
 }

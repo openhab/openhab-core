@@ -41,8 +41,9 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
     /**
      * constructs a new ScriptActionHandler
      *
-     * @param module
-     * @param ruleUid the UID of the rule this handler is used for
+     * @param module the action module
+     * @param ruleUID the UID of the rule this handler is used for
+     * @param scriptEngineManager the script engine manager assigned to this script action handler
      */
     public ScriptActionHandler(Action module, String ruleUID, ScriptEngineManager scriptEngineManager) {
         super(module, ruleUID, scriptEngineManager);
@@ -53,11 +54,12 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
     }
 
     @Override
-    public @Nullable Map<String, Object> execute(final Map<String, Object> context) {
+    public @Nullable Map<String, Object> execute(Map<String, Object> context) {
         Map<String, Object> resultMap = new HashMap<>();
 
         getScriptEngine().ifPresent(scriptEngine -> {
-            setExecutionContext(scriptEngine, context);
+            final Map<String, Object> globalContext = scriptEngineManager.getGlobalContext();
+            setExecutionContext(scriptEngine, context, globalContext);
             try {
                 Object result = scriptEngine.eval(script);
                 resultMap.put("result", result);
