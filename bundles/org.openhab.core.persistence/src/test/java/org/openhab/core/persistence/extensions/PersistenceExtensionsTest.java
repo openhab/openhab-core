@@ -16,7 +16,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -28,10 +27,13 @@ import java.util.stream.IntStream;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.ItemRegistry;
@@ -50,6 +52,8 @@ import org.openhab.core.persistence.PersistenceServiceRegistry;
  * @author Chris Jackson - Initial contribution
  * @author Jan N. Klug - Fix averageSince calculation
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class PersistenceExtensionsTest {
 
     public static final String TEST_NUMBER = "testNumber";
@@ -59,14 +63,10 @@ public class PersistenceExtensionsTest {
     private @Mock UnitProvider unitProvider;
     private @Mock ItemRegistry mockedItemRegistry;
 
-    private AutoCloseable mocksCloseable;
-
     private GenericItem numberItem, quantityItem, switchItem;
 
     @BeforeEach
     public void setUp() {
-        mocksCloseable = openMocks(this);
-
         when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
 
         CoreItemFactory itemFactory = new CoreItemFactory();
@@ -105,11 +105,6 @@ public class PersistenceExtensionsTest {
                 return TestPersistenceService.ID.equals(serviceId) ? testPersistenceService : null;
             }
         });
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
     }
 
     @Test
