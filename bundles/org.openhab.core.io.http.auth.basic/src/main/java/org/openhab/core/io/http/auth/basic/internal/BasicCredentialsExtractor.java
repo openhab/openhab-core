@@ -35,7 +35,7 @@ import org.osgi.service.component.annotations.Component;
 public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServletRequest> {
     private static final String UUID_STRING = UUID.randomUUID().toString();
     static MessageDigest msgDigest = MessageDigest.getInstance("SHA-256");
-    static HashMap<ByteBuffer, UsernamePasswordCredentials> authCache = new HashMap<String, UsernamePasswordCredentials>();
+    static HashMap<ByteBuffer, UsernamePasswordCredentials> authCache = new HashMap<ByteBuffer, UsernamePasswordCredentials>();
 
     @Override
     public Optional<Credentials> retrieveCredentials(HttpServletRequest request) {
