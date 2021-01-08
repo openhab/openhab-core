@@ -30,6 +30,7 @@ Import-Package: \
  org.openhab.core.persistence,\
  org.openhab.core.persistence.extensions,\
  org.openhab.core.scheduler,\
+ org.openhab.core.semantics,\
  org.openhab.core.thing,\
  org.openhab.core.thing.binding,\
  org.openhab.core.thing.events,\
