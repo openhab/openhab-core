@@ -169,7 +169,9 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         }, 9000, 1000);
 
         // start rule engine
-        ((RuleEngineImpl) ruleManager).onReadyMarkerAdded(new ReadyMarker("", ""));
+        RuleEngineImpl ruleEngine = (RuleEngineImpl) ruleManager;
+        ruleEngine.onReadyMarkerAdded(new ReadyMarker("", ""));
+        waitForAssert(() -> assertTrue(ruleEngine.isStarted()));
 
         logger.info("@Before.finish");
     }

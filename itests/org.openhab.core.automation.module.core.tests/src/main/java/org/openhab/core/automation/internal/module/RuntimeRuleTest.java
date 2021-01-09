@@ -13,6 +13,7 @@
 package org.openhab.core.automation.internal.module;
 
 import static java.util.Map.entry;
+import static org.eclipse.jdt.annotation.Checks.requireNonNull;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
@@ -59,6 +60,7 @@ import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.test.storage.VolatileStorageService;
 import org.openhab.core.types.TypeParser;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,16 +100,13 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         registerService(volatileStorageService);
 
         // start rule engine
-        ((RuleEngineImpl) getService(RuleManager.class)).onReadyMarkerAdded(new ReadyMarker("", ""));
+        RuleEngineImpl ruleEngine = requireNonNull((RuleEngineImpl) getService(RuleManager.class));
+        ruleEngine.onReadyMarkerAdded(new ReadyMarker("", ""));
+        waitForAssert(() -> assertTrue(ruleEngine.isStarted()));
     }
 
-    @Test
-    @Disabled
-    public void testPredefinedRule() throws ItemNotFoundException, InterruptedException {
-        final EventPublisher eventPublisher = getService(EventPublisher.class);
-        final Queue<Event> events = new LinkedList<>();
-
-        registerService(new EventSubscriber() {
+    private void subscribeToEvents(String eventType, final Queue<Event> events) {
+        EventSubscriber eventSubscriber = new EventSubscriber() {
             @Override
             public void receive(final Event event) {
                 logger.info("Event: {}", event.getTopic());
@@ -116,15 +115,26 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Set.of(ItemCommandEvent.TYPE);
+                return Set.of(eventType);
             }
 
             @Override
             public @Nullable EventFilter getEventFilter() {
                 return null;
             }
-        });
+        };
 
+        ServiceReference<?> subscriberReference = registerService(eventSubscriber).getReference();
+        assertNotNull(getServices(EventSubscriber.class, (reference) -> reference.equals(subscriberReference)));
+    }
+
+    @Test
+    @Disabled
+    public void testPredefinedRule() throws ItemNotFoundException, InterruptedException {
+        final Queue<Event> events = new LinkedList<>();
+        subscribeToEvents(ItemCommandEvent.TYPE, events);
+
+        final EventPublisher eventPublisher = getService(EventPublisher.class);
         eventPublisher.post(ItemEventFactory.createStateEvent("myMotionItem", OnOffType.ON));
 
         waitForAssert(() -> {
@@ -167,23 +177,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
         final Queue<Event> events = new LinkedList<>();
 
-        registerService(new EventSubscriber() {
-            @Override
-            public void receive(final Event event) {
-                logger.info("Event: {}", event.getTopic());
-                events.add(event);
-            }
-
-            @Override
-            public Set<String> getSubscribedEventTypes() {
-                return Set.of(ItemCommandEvent.TYPE);
-            }
-
-            @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
-            }
-        });
+        subscribeToEvents(ItemCommandEvent.TYPE, events);
 
         eventPublisher.post(ItemEventFactory.createStateEvent("myMotionItem2", OnOffType.ON));
 
@@ -370,24 +364,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         });
 
         final Queue<Event> events = new LinkedList<>();
-
-        registerService(new EventSubscriber() {
-            @Override
-            public void receive(final Event event) {
-                logger.info("RuleEvent: {}", event.getTopic());
-                events.add(event);
-            }
-
-            @Override
-            public Set<String> getSubscribedEventTypes() {
-                return Set.of(RuleStatusInfoEvent.TYPE);
-            }
-
-            @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
-            }
-        });
+        subscribeToEvents(RuleStatusInfoEvent.TYPE, events);
 
         final EventPublisher eventPublisher = getService(EventPublisher.class);
         eventPublisher.post(ItemEventFactory.createStateEvent("myPresenceItem3", OnOffType.ON));
