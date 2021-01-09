@@ -12,8 +12,10 @@
  */
 package org.openhab.core.automation.module.timer.internal;
 
+import static org.eclipse.jdt.annotation.Checks.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,7 +111,9 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
         }, 3000, 100);
 
         // start rule engine
-        ((RuleEngineImpl) getService(RuleManager.class)).onReadyMarkerAdded(new ReadyMarker("", ""));
+        RuleEngineImpl ruleEngine = requireNonNull((RuleEngineImpl) getService(RuleManager.class));
+        ruleEngine.onReadyMarkerAdded(new ReadyMarker("", ""));
+        waitForAssert(() -> assertTrue(ruleEngine.isStarted()));
     }
 
     @Test
@@ -142,7 +146,9 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
         EventPublisher eventPublisher = getService(EventPublisher.class);
 
         // start rule engine
-        ((RuleEngineImpl) getService(RuleManager.class)).onReadyMarkerAdded(new ReadyMarker("", ""));
+        RuleEngineImpl ruleEngine = requireNonNull((RuleEngineImpl) getService(RuleManager.class));
+        ruleEngine.onReadyMarkerAdded(new ReadyMarker("", ""));
+        waitForAssert(() -> assertTrue(ruleEngine.isStarted()));
 
         EventSubscriber itemEventHandler = new EventSubscriber() {
 

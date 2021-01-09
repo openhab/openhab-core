@@ -13,6 +13,7 @@
 package org.openhab.core.automation.internal.module;
 
 import static java.util.Map.entry;
+import static org.eclipse.jdt.annotation.Checks.requireNonNull;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.test.storage.VolatileStorageService;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +88,9 @@ public class RunRuleModuleTest extends JavaOSGiTest {
         registerService(volatileStorageService);
 
         // start rule engine
-        ((RuleEngineImpl) getService(RuleManager.class)).onReadyMarkerAdded(new ReadyMarker("", ""));
+        RuleEngineImpl ruleEngine = requireNonNull((RuleEngineImpl) getService(RuleManager.class));
+        ruleEngine.onReadyMarkerAdded(new ReadyMarker("", ""));
+        waitForAssert(() -> assertTrue(ruleEngine.isStarted()));
     }
 
     private Rule createSceneRule() {
@@ -166,24 +170,7 @@ public class RunRuleModuleTest extends JavaOSGiTest {
         assertNotNull(itemRegistry);
 
         final Queue<Event> events = new LinkedList<>();
-
-        registerService(new EventSubscriber() {
-            @Override
-            public void receive(final Event event) {
-                logger.info("Event: {}", event.getTopic());
-                events.add(event);
-            }
-
-            @Override
-            public Set<String> getSubscribedEventTypes() {
-                return Set.of(ItemCommandEvent.TYPE);
-            }
-
-            @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
-            }
-        });
+        subscribeToEvents(ItemCommandEvent.TYPE, events);
 
         // trigger rule by switching triggerItem ON
         eventPublisher.post(ItemEventFactory.createStateEvent("ruleTrigger", OnOffType.ON));
@@ -193,5 +180,28 @@ public class RunRuleModuleTest extends JavaOSGiTest {
             assertEquals("openhab/items/switch3/command", event.getTopic());
             assertEquals(OnOffType.ON, event.getItemCommand());
         });
+    }
+
+    private void subscribeToEvents(String eventType, final Queue<Event> events) {
+        EventSubscriber eventSubscriber = new EventSubscriber() {
+            @Override
+            public void receive(final Event event) {
+                logger.info("Event: {}", event.getTopic());
+                events.add(event);
+            }
+
+            @Override
+            public Set<String> getSubscribedEventTypes() {
+                return Set.of(eventType);
+            }
+
+            @Override
+            public @Nullable EventFilter getEventFilter() {
+                return null;
+            }
+        };
+
+        ServiceReference<?> subscriberReference = registerService(eventSubscriber).getReference();
+        assertNotNull(getServices(EventSubscriber.class, (reference) -> reference.equals(subscriberReference)));
     }
 }
