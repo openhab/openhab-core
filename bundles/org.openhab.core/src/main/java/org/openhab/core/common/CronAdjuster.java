@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.internal.scheduler;
+package org.openhab.core.common;
 
 import java.time.DayOfWeek;
 import java.time.temporal.ChronoField;
@@ -42,7 +42,7 @@ import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
  * @author Hilbrand Bouwkamp - code cleanup
  */
 @NonNullByDefault
-class CronAdjuster implements SchedulerTemporalAdjuster {
+public class CronAdjuster implements SchedulerTemporalAdjuster {
 
     /**
      * A function interface that we use to check a Temporal to see if it matches a part of the specification. These
