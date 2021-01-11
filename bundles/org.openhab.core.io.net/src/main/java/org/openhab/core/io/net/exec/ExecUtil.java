@@ -115,7 +115,7 @@ public class ExecUtil {
                     logger.debug("exit code '{}', result '{}', errors '{}'", exitCode, outputFuture.get(),
                             errorFuture.get());
                 }
-                return null;
+                return errorFuture.get();
             }
         } catch (ExecutionException e) {
             if (logger.isDebugEnabled()) {
