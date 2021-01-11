@@ -694,7 +694,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @return handler that processing this module. Could be {@code null} if the {@link ModuleHandlerFactory} is not
      *         available.
      */
-    private @Nullable ModuleHandler getModuleHandler(Module m, String ruleUID) {
+    @Nullable
+    ModuleHandler getModuleHandler(Module m, String ruleUID) {
         String moduleTypeId = m.getTypeUID();
         ModuleHandlerFactory mhf = getModuleHandlerFactory(moduleTypeId);
         if (mhf == null || mtRegistry.get(moduleTypeId) == null) {
