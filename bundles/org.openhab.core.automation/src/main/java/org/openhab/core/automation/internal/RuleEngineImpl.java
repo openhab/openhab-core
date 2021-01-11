@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.internal;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -36,6 +38,7 @@ import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.RuleExecution;
 import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.RuleStatus;
@@ -254,7 +257,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         this.contextMap = new HashMap<>();
         this.moduleHandlerFactories = new HashMap<>(20);
 
-        this.disabledRulesStorage = storageService.<Boolean> getStorage(DISABLED_RULE_STORAGE,
+        this.disabledRulesStorage = storageService.<Boolean>getStorage(DISABLED_RULE_STORAGE,
                 this.getClass().getClassLoader());
 
         mtRegistry = moduleTypeRegistry;
@@ -1471,5 +1474,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      */
     public boolean isStarted() {
         return started;
+    }
+
+    @Override
+    public Stream<RuleExecution> simulateRuleExecutions(ZonedDateTime from, ZonedDateTime until) {
+        return new RuleExecutionSimulator(this.ruleRegistry, this).simulateRuleExecutions(from, until);
     }
 }
