@@ -257,7 +257,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         this.contextMap = new HashMap<>();
         this.moduleHandlerFactories = new HashMap<>(20);
 
-        this.disabledRulesStorage = storageService.<Boolean>getStorage(DISABLED_RULE_STORAGE,
+        this.disabledRulesStorage = storageService.<Boolean> getStorage(DISABLED_RULE_STORAGE,
                 this.getClass().getClassLoader());
 
         mtRegistry = moduleTypeRegistry;
