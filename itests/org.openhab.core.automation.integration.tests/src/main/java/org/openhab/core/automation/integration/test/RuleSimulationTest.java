@@ -59,6 +59,11 @@ import org.openhab.core.test.java.JavaOSGiTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Test the simulation of rule executions with the {@link org.openhab.core.automation.internal.RuleExecutionSimulator}
+ * 
+ * @author Sönke Küper - Created tests for rule simulation
+ */
 @NonNullByDefault
 public class RuleSimulationTest extends JavaOSGiTest {
 
