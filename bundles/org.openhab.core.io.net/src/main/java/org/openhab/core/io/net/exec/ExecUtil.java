@@ -109,7 +109,7 @@ public class ExecUtil {
                 break cleanup;
             }
             if (exitCode == 0) {
-                return outputFuture.get();
+                return !"".equals(outputFuture.get()) ? outputFuture.get() : errorFuture.get();
             } else {
                 if (logger.isDebugEnabled()) {
                     logger.debug("exit code '{}', result '{}', errors '{}'", exitCode, outputFuture.get(),
