@@ -90,12 +90,9 @@ public class ExecUtil {
                 }
             });
 
-            int exitCode;
             if (timeout == null) {
-                exitCode = process.waitFor();
-            } else if (process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
-                exitCode = process.exitValue();
-            } else {
+                process.waitFor();
+            } else if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
                 logger.warn("Timeout occurred when executing commandLine '{}'", Arrays.toString(commandLine));
                 break cleanup;
             }
