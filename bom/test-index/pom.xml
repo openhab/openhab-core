@@ -28,7 +28,7 @@
     <dependency>
       <groupId>biz.aQute.bnd</groupId>
       <artifactId>biz.aQute.tester.junit-platform</artifactId>
-      <version>5.1.2</version>
+      <version>${bnd.version}</version>
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bom</groupId>
