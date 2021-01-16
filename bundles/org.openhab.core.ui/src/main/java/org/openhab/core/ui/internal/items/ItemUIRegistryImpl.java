@@ -15,8 +15,10 @@ package org.openhab.core.ui.internal.items;
 import java.time.DateTimeException;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -733,7 +735,14 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 Item item = getItem(itemName);
                 if (item instanceof GroupItem) {
                     GroupItem groupItem = (GroupItem) item;
-                    for (Item member : groupItem.getMembers()) {
+                    List<Item> members = new ArrayList<>(groupItem.getMembers());
+                    Collections.sort(members, new Comparator<Item>() {
+                        @Override
+                        public int compare(Item u1, Item u2) {
+                            return u1.getName().compareTo(u2.getName());
+                        }
+                    });
+                    for (Item member : members) {
                         Widget widget = getDefaultWidget(member.getClass(), member.getName());
                         if (widget != null) {
                             widget.setItem(member.getName());
