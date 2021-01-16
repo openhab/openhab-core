@@ -62,4 +62,17 @@ public class ExecUtilTest {
         String osName = System.getProperty("os.name").toLowerCase();
         return osName.indexOf("windows") >= 0;
     }
+
+    @Test
+    public void testExecuteCommandLineAndWaitStdErrRedirection() {
+        final String result;
+        if (isWindowsSystem()) {
+            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "cmd", "/c", "dir", "xxx.xxx",
+                    "1>", "nul");
+        } else {
+            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "ls", "xxx.xxx");
+        }
+        assertNotNull(result);
+        assertNotEquals("", result);
+    }
 }
