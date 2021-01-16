@@ -78,9 +78,8 @@ public class ExecUtil {
 
         Process processTemp = null;
         Future<String> outputFuture = null;
-        Future<String> errorFuture = null;
         cleanup: try {
-            Process process = processTemp = new ProcessBuilder(commandLine).start();
+            Process process = processTemp = new ProcessBuilder(commandLine).redirectErrorStream(true).start();
 
             outputFuture = executor.submit(() -> {
                 try (InputStream inputStream = process.getInputStream();
@@ -91,32 +90,13 @@ public class ExecUtil {
                 }
             });
 
-            errorFuture = executor.submit(() -> {
-                try (InputStream inputStream = process.getErrorStream();
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-                    StringWriter output = new StringWriter();
-                    reader.transferTo(output);
-                    return output.toString();
-                }
-            });
-            int exitCode;
             if (timeout == null) {
-                exitCode = process.waitFor();
-            } else if (process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
-                exitCode = process.exitValue();
-            } else {
+                process.waitFor();
+            } else if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
                 logger.warn("Timeout occurred when executing commandLine '{}'", Arrays.toString(commandLine));
                 break cleanup;
             }
-            if (exitCode == 0) {
-                return outputFuture.get();
-            } else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("exit code '{}', result '{}', errors '{}'", exitCode, outputFuture.get(),
-                            errorFuture.get());
-                }
-                return errorFuture.get();
-            }
+            return outputFuture.get();
         } catch (ExecutionException e) {
             if (logger.isDebugEnabled()) {
                 logger.warn("Error occurred when executing commandLine '{}'", Arrays.toString(commandLine),
@@ -138,9 +118,6 @@ public class ExecUtil {
         }
         if (outputFuture != null) {
             outputFuture.cancel(true);
-        }
-        if (errorFuture != null) {
-            errorFuture.cancel(true);
         }
         return null;
     }
