@@ -12,8 +12,8 @@
  */
 package org.openhab.core.io.transport.modbus.endpoint;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -101,8 +101,8 @@ public class EndpointPoolConfiguration {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(2149, 3117).append(interTransactionDelayMillis).append(interConnectDelayMillis)
-                .append(connectMaxTries).append(reconnectAfterMillis).append(connectTimeoutMillis).toHashCode();
+        return Objects.hash(connectMaxTries, connectTimeoutMillis, interConnectDelayMillis, interTransactionDelayMillis,
+                reconnectAfterMillis);
     }
 
     @Override
@@ -125,9 +125,10 @@ public class EndpointPoolConfiguration {
             return false;
         }
         EndpointPoolConfiguration rhs = (EndpointPoolConfiguration) obj;
-        return new EqualsBuilder().append(interTransactionDelayMillis, rhs.interTransactionDelayMillis)
-                .append(interConnectDelayMillis, rhs.interConnectDelayMillis)
-                .append(connectMaxTries, rhs.connectMaxTries).append(reconnectAfterMillis, rhs.reconnectAfterMillis)
-                .append(connectTimeoutMillis, rhs.connectTimeoutMillis).isEquals();
+        return connectMaxTries == rhs.connectMaxTries && connectTimeoutMillis == rhs.connectTimeoutMillis
+                && interConnectDelayMillis == rhs.interConnectDelayMillis
+                && interTransactionDelayMillis == rhs.interTransactionDelayMillis
+                && reconnectAfterMillis == rhs.reconnectAfterMillis;
     }
+
 }

@@ -12,8 +12,8 @@
  */
 package org.openhab.core.io.transport.modbus.endpoint;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -45,11 +45,7 @@ public abstract class ModbusIPSlaveEndpoint implements ModbusSlaveEndpoint {
     @Override
     public int hashCode() {
         // differentiate different protocols using the class name, and after that use address and port
-        int protocolHash = this.getClass().getName().hashCode();
-        if (protocolHash % 2 == 0) {
-            protocolHash += 1;
-        }
-        return new HashCodeBuilder(11, protocolHash).append(address).append(port).toHashCode();
+        return Objects.hash(getClass().getName(), address, port);
     }
 
     @Override
@@ -70,6 +66,7 @@ public abstract class ModbusIPSlaveEndpoint implements ModbusSlaveEndpoint {
             return false;
         }
         ModbusIPSlaveEndpoint rhs = (ModbusIPSlaveEndpoint) obj;
-        return new EqualsBuilder().append(address, rhs.address).append(port, rhs.port).isEquals();
+        return Objects.equals(address, rhs.address) && port == rhs.port;
     }
+
 }

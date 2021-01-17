@@ -12,7 +12,8 @@
  */
 package org.openhab.core.io.transport.modbus.endpoint;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -89,8 +90,7 @@ public class ModbusSerialSlaveEndpoint implements ModbusSlaveEndpoint {
             return false;
         }
         ModbusSerialSlaveEndpoint rhs = (ModbusSerialSlaveEndpoint) obj;
-        return new EqualsBuilder().append(serialParameters.getPortName(), rhs.serialParameters.getPortName())
-                .isEquals();
+        return Objects.equals(getPortName(), rhs.getPortName());
     }
 
     @Override
