@@ -14,8 +14,6 @@ package org.openhab.core.io.transport.modbus.endpoint;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.StandardToStringStyle;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -30,12 +28,6 @@ public abstract class ModbusIPSlaveEndpoint implements ModbusSlaveEndpoint {
 
     private String address;
     private int port;
-
-    private static StandardToStringStyle toStringStyle = new StandardToStringStyle();
-
-    static {
-        toStringStyle.setUseShortClassName(true);
-    }
 
     public ModbusIPSlaveEndpoint(String address, int port) {
         this.address = address;
@@ -62,7 +54,7 @@ public abstract class ModbusIPSlaveEndpoint implements ModbusSlaveEndpoint {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, toStringStyle).append("address", address).append("port", port).toString();
+        return "ModbusIPSlaveEndpoint [address=" + address + ", port=" + port + "]";
     }
 
     @Override

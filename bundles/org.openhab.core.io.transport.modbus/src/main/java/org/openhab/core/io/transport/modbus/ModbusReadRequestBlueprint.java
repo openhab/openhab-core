@@ -14,8 +14,6 @@ package org.openhab.core.io.transport.modbus;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.StandardToStringStyle;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -33,10 +31,6 @@ import net.wimpi.modbus.Modbus;
  */
 @NonNullByDefault
 public class ModbusReadRequestBlueprint {
-    private static StandardToStringStyle toStringStyle = new StandardToStringStyle();
-    static {
-        toStringStyle.setUseShortClassName(true);
-    }
 
     private final int slaveId;
     private final ModbusReadFunctionCode functionCode;
@@ -110,8 +104,8 @@ public class ModbusReadRequestBlueprint {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, toStringStyle).append("slaveId", slaveId).append("functionCode", functionCode)
-                .append("start", start).append("length", length).append("maxTries", maxTries).toString();
+        return "ModbusReadRequestBlueprint [slaveId=" + slaveId + ", functionCode=" + functionCode + ", start=" + start
+                + ", length=" + length + ", maxTries=" + maxTries + "]";
     }
 
     @Override

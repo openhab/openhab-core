@@ -13,8 +13,6 @@
 package org.openhab.core.io.transport.modbus.endpoint;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.StandardToStringStyle;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -32,11 +30,6 @@ import net.wimpi.modbus.util.SerialParameters;
 public class ModbusSerialSlaveEndpoint implements ModbusSlaveEndpoint {
 
     private SerialParameters serialParameters;
-    private static StandardToStringStyle toStringStyle = new StandardToStringStyle();
-
-    static {
-        toStringStyle.setUseShortClassName(true);
-    }
 
     public ModbusSerialSlaveEndpoint(String portName, int baudRate, int flowControlIn, int flowControlOut, int databits,
             int stopbits, int parity, String encoding, boolean echo, int receiveTimeoutMillis) {
@@ -102,6 +95,6 @@ public class ModbusSerialSlaveEndpoint implements ModbusSlaveEndpoint {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, toStringStyle).append("portName", serialParameters.getPortName()).toString();
+        return "ModbusSerialSlaveEndpoint [getPortName()=" + getPortName() + "]";
     }
 }

@@ -14,8 +14,6 @@ package org.openhab.core.io.transport.modbus.endpoint;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.StandardToStringStyle;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -60,12 +58,6 @@ public class EndpointPoolConfiguration {
      * default is respected.
      */
     private int connectTimeoutMillis;
-
-    private static StandardToStringStyle toStringStyle = new StandardToStringStyle();
-
-    static {
-        toStringStyle.setUseShortClassName(true);
-    }
 
     public long getInterConnectDelayMillis() {
         return interConnectDelayMillis;
@@ -115,11 +107,10 @@ public class EndpointPoolConfiguration {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, toStringStyle)
-                .append("interTransactionDelayMillis", interTransactionDelayMillis)
-                .append("interConnectDelayMillis", interConnectDelayMillis).append("connectMaxTries", connectMaxTries)
-                .append("reconnectAfterMillis", reconnectAfterMillis)
-                .append("connectTimeoutMillis", connectTimeoutMillis).toString();
+        return "EndpointPoolConfiguration [interTransactionDelayMillis=" + interTransactionDelayMillis
+                + ", interConnectDelayMillis=" + interConnectDelayMillis + ", connectMaxTries=" + connectMaxTries
+                + ", reconnectAfterMillis=" + reconnectAfterMillis + ", connectTimeoutMillis=" + connectTimeoutMillis
+                + "]";
     }
 
     @Override

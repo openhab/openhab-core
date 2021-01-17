@@ -14,8 +14,6 @@ package org.openhab.core.io.transport.modbus.internal;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.StandardToStringStyle;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.modbus.ModbusFailureCallback;
@@ -37,11 +35,6 @@ import org.openhab.core.io.transport.modbus.endpoint.ModbusSlaveEndpoint;
  */
 @NonNullByDefault
 public class BasicPollTask implements PollTask {
-
-    static StandardToStringStyle toStringStyle = new StandardToStringStyle();
-    static {
-        toStringStyle.setUseShortClassName(true);
-    }
 
     private ModbusSlaveEndpoint endpoint;
     private ModbusReadRequestBlueprint request;
@@ -84,9 +77,8 @@ public class BasicPollTask implements PollTask {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, toStringStyle).append("request", request).append("endpoint", endpoint)
-                .append("resultCallback", getResultCallback()).append("failureCallback", getFailureCallback())
-                .toString();
+        return "BasicPollTask [endpoint=" + endpoint + ", request=" + request + ", getResultCallback()="
+                + getResultCallback() + ", getFailureCallback()=" + getFailureCallback() + "]";
     }
 
     @Override
