@@ -119,7 +119,6 @@ public class ModbusReadRequestBlueprint {
             return false;
         }
         ModbusReadRequestBlueprint rhs = (ModbusReadRequestBlueprint) obj;
-        return functionCode == rhs.functionCode && length == rhs.length && maxTries == rhs.maxTries
-                && slaveId == rhs.slaveId && start == rhs.start;
+        return functionCode == rhs.functionCode && length == rhs.length && slaveId == rhs.slaveId && start == rhs.start;
     }
 }
