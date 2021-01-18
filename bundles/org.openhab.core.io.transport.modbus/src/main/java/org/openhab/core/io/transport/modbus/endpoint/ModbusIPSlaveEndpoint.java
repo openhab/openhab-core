@@ -68,5 +68,4 @@ public abstract class ModbusIPSlaveEndpoint implements ModbusSlaveEndpoint {
         ModbusIPSlaveEndpoint rhs = (ModbusIPSlaveEndpoint) obj;
         return Objects.equals(address, rhs.address) && port == rhs.port;
     }
-
 }

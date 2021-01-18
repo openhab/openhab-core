@@ -363,7 +363,6 @@ public class ModbusManagerImpl implements ModbusManager {
                         Optional.ofNullable(e).map(ex -> ex.getClass().getSimpleName()).orElse(""),
                         Optional.ofNullable(e).map(ex -> ex.getMessage()).orElse("<null>"), e);
             }
-
         });
         connectionPool = genericKeyedObjectPool;
         this.connectionFactory = connectionFactory;

@@ -130,5 +130,4 @@ public class EndpointPoolConfiguration {
                 && interTransactionDelayMillis == rhs.interTransactionDelayMillis
                 && reconnectAfterMillis == rhs.reconnectAfterMillis;
     }
-
 }
