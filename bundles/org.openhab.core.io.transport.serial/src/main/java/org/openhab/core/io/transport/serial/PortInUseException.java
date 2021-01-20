@@ -24,11 +24,11 @@ public class PortInUseException extends Exception {
 
     private static final long serialVersionUID = -2709480420743139383L;
 
-    public PortInUseException() {
-        super();
+    public PortInUseException(String message, Exception cause) {
+        super(message, cause);
     }
 
-    public PortInUseException(String message) {
-        super(message);
+    public PortInUseException(Exception cause) {
+        super(cause);
     }
 }

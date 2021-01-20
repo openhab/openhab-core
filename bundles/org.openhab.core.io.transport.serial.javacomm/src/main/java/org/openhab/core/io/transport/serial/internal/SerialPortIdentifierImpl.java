@@ -59,9 +59,9 @@ public class SerialPortIdentifierImpl implements SerialPortIdentifier {
         } catch (javax.comm.PortInUseException e) {
             String message = e.getMessage();
             if (message != null) {
-                throw new PortInUseException(message);
+                throw new PortInUseException(message, e);
             } else {
-                throw new PortInUseException();
+                throw new PortInUseException(e);
             }
         }
     }
