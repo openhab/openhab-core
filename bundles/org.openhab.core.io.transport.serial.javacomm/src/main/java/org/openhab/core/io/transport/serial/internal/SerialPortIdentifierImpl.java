@@ -57,7 +57,12 @@ public class SerialPortIdentifierImpl implements SerialPortIdentifier {
                         String.format("We expect an serial port instead of '%s'", cp.getClass()));
             }
         } catch (javax.comm.PortInUseException e) {
-            throw new PortInUseException();
+            String message = e.getMessage();
+            if (message != null) {
+                throw new PortInUseException(message, e);
+            } else {
+                throw new PortInUseException(e);
+            }
         }
     }
 
