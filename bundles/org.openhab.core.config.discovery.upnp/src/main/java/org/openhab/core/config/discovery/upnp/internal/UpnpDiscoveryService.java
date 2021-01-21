@@ -13,11 +13,14 @@
 package org.openhab.core.config.discovery.upnp.internal;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.jupnp.UpnpService;
 import org.jupnp.model.meta.LocalDevice;
@@ -64,6 +67,8 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     }
 
     private UpnpService upnpService;
+
+    Map<RemoteDevice, Future<Boolean>> deviceRemovalTasks = new HashMap<>();
 
     @Override
     protected void activate(Map<String, Object> configProperties) {
@@ -157,6 +162,12 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
             try {
                 DiscoveryResult result = participant.createResult(device);
                 if (result != null) {
+                    // if the device has been scheduled for removal from the OpenHAB Inbox, cancel the respective
+                    // removal task
+                    Future<Boolean> deviceRemovalTask = deviceRemovalTasks.remove(device);
+                    if (deviceRemovalTask != null) {
+                        deviceRemovalTask.cancel(false);
+                    }
                     thingDiscovered(result);
                 }
             } catch (Exception e) {
@@ -171,7 +182,13 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
             try {
                 ThingUID thingUID = participant.getThingUID(device);
                 if (thingUID != null) {
-                    thingRemoved(thingUID);
+                    // delay the device removal from the OpenHAB Inbox for a further maxAge seconds after UPnP has
+                    // officially lost it; the purpose is to not remove devices are still potentially online but have
+                    // just been a bit late in sending one of their 'ssdp:alive' notifications
+                    deviceRemovalTasks.put(device, scheduler.schedule(() -> {
+                        thingRemoved(thingUID);
+                        return true;
+                    }, device.getIdentity().getMaxAgeSeconds(), TimeUnit.SECONDS));
                 }
             } catch (Exception e) {
                 logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
