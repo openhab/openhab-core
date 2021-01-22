@@ -68,7 +68,16 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
 
     private UpnpService upnpService;
 
-    Map<RemoteDevice, Future<Boolean>> deviceRemovalTasks = new HashMap<>();
+    /*
+     * Map of scheduled tasks to remove devices from the Inbox
+     */
+    private Map<RemoteDevice, Future<?>> deviceRemovalTasks = new HashMap<>();
+
+    /*
+     * Parameter to define the delay period before removing a device from the Inbox
+     * i.e. delay = (maxAge / maxAgeDivisor)
+     */
+    private static final int maxAgeDivisor = 2;
 
     @Override
     protected void activate(Map<String, Object> configProperties) {
@@ -162,9 +171,11 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
             try {
                 DiscoveryResult result = participant.createResult(device);
                 if (result != null) {
-                    // if the device has been scheduled for removal from the OpenHAB Inbox, cancel the respective
-                    // removal task
-                    Future<Boolean> deviceRemovalTask = deviceRemovalTasks.remove(device);
+                    /*
+                     * If the device has been scheduled to be removed from the Inbox and it has already re-appeared
+                     * again, then cancel the respective scheduled removal task
+                     */
+                    Future<?> deviceRemovalTask = deviceRemovalTasks.remove(device);
                     if (deviceRemovalTask != null) {
                         deviceRemovalTask.cancel(false);
                     }
@@ -182,13 +193,19 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
             try {
                 ThingUID thingUID = participant.getThingUID(device);
                 if (thingUID != null) {
-                    // delay the device removal from the OpenHAB Inbox for a further maxAge seconds after UPnP has
-                    // officially lost it; the purpose is to not remove devices are still potentially online but have
-                    // just been a bit late in sending one of their 'ssdp:alive' notifications
+                    /*
+                     * The JUPnP library strictly follows the UPnP specification insofar as if a device fails to send
+                     * its next 'ssdp:alive' notification within its declared 'maxAge' period, it is immediately
+                     * considered to be gone. Unfortunately some types of OpenHAB bindings have devices that can
+                     * sometimes be a bit late in sending their 'ssdp:alive' notifications even though they have not
+                     * really gone offline (e.g. the Philips Hue bridge), which means that such devices are repeatedly
+                     * removed from and added to the InBox. To prevent this, when we receive a remoteDeviceRemoved()
+                     * notification from JUPnP we do not immediately remove it from the Inbox, but instead we schedule
+                     * to delay a further 'maxAge / maxAgeDivisor' seconds before actually removing it.
+                     */
                     deviceRemovalTasks.put(device, scheduler.schedule(() -> {
                         thingRemoved(thingUID);
-                        return true;
-                    }, device.getIdentity().getMaxAgeSeconds(), TimeUnit.SECONDS));
+                    }, device.getIdentity().getMaxAgeSeconds() / maxAgeDivisor, TimeUnit.SECONDS));
                 }
             } catch (Exception e) {
                 logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
