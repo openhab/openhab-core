@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import org.jupnp.UpnpService;
 import org.jupnp.model.meta.LocalDevice;
 import org.jupnp.model.meta.RemoteDevice;
+import org.jupnp.model.types.UDN;
 import org.jupnp.registry.Registry;
 import org.jupnp.registry.RegistryListener;
 import org.jupnp.transport.RouterException;
@@ -71,7 +72,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     /*
      * Map of scheduled tasks to remove devices from the Inbox
      */
-    private Map<RemoteDevice, Future<?>> deviceRemovalTasks = new HashMap<>();
+    private Map<UDN, Future<?>> deviceRemovalTasks = new HashMap<>();
 
     /*
      * Parameter to define the delay period before removing a device from the Inbox
@@ -171,19 +172,22 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
             try {
                 DiscoveryResult result = participant.createResult(device);
                 if (result != null) {
-                    /*
-                     * If the device has been scheduled to be removed from the Inbox and it has already re-appeared
-                     * again, then cancel the respective scheduled removal task
-                     */
-                    Future<?> deviceRemovalTask = deviceRemovalTasks.remove(device);
-                    if (deviceRemovalTask != null) {
-                        deviceRemovalTask.cancel(false);
-                    }
+                    cancelRemovalTask(device.getIdentity().getUdn());
                     thingDiscovered(result);
                 }
             } catch (Exception e) {
                 logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
             }
+        }
+    }
+
+    /*
+     * If the device has been scheduled to be removed, cancel the respective removal task
+     */
+    private void cancelRemovalTask(UDN udn) {
+        Future<?> deviceRemovalTask = deviceRemovalTasks.remove(udn);
+        if (deviceRemovalTask != null) {
+            deviceRemovalTask.cancel(false);
         }
     }
 
@@ -203,8 +207,11 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
                      * notification from JUPnP we do not immediately remove it from the Inbox, but instead we schedule
                      * to delay a further 'maxAge / maxAgeDivisor' seconds before actually removing it.
                      */
-                    deviceRemovalTasks.put(device, scheduler.schedule(() -> {
+                    UDN udn = device.getIdentity().getUdn();
+                    cancelRemovalTask(udn);
+                    deviceRemovalTasks.put(udn, scheduler.schedule(() -> {
                         thingRemoved(thingUID);
+                        cancelRemovalTask(udn);
                     }, device.getIdentity().getMaxAgeSeconds() / maxAgeDivisor, TimeUnit.SECONDS));
                 }
             } catch (Exception e) {
