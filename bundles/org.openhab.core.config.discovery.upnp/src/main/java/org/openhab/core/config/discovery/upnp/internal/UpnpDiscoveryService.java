@@ -166,8 +166,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
             try {
                 DiscoveryResult result = participant.createResult(device);
                 if (result != null) {
-                    int gracePeriod = participant.getRemovalGracePeriodSeconds(device);
-                    if (gracePeriod > 0) {
+                    if (participant.getRemovalGracePeriodSeconds(device) > 0) {
                         cancelRemovalTask(device.getIdentity().getUdn());
                     }
                     thingDiscovered(result);
