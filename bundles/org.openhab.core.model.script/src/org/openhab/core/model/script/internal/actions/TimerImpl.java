@@ -13,6 +13,7 @@
 package org.openhab.core.model.script.internal.actions;
 
 import java.time.ZonedDateTime;
+import java.util.concurrent.TimeUnit;
 
 import org.openhab.core.model.script.actions.Timer;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
@@ -61,6 +62,11 @@ public class TimerImpl implements Timer {
             logger.warn("Rescheduling failed as execution has already started!");
             return false;
         }
+    }
+
+    @Override
+    public ZonedDateTime getExecutionTime() {
+        return cancelled ? null : ZonedDateTime.now().plusNanos(future.getDelay(TimeUnit.NANOSECONDS));
     }
 
     @Override

@@ -31,6 +31,13 @@ public interface Timer {
     public boolean cancel();
 
     /**
+     * Gets the scheduled exection time
+     * 
+     * @return the scheduled execution time, or null if the timer was cancelled
+     */
+    public ZonedDateTime getExecutionTime();
+
+    /**
      * Determines whether the scheduled execution is yet to happen.
      *
      * @return true, if the code is still scheduled to execute, false otherwise
@@ -60,5 +67,4 @@ public interface Timer {
      * @return true, if the rescheduling was done successful
      */
     public boolean reschedule(ZonedDateTime newTime);
-
 }
