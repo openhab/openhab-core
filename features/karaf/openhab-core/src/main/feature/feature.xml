@@ -370,8 +370,6 @@
 	</feature>
 
 	<feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
-		<requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
-		<feature dependency="true">openhab.tp-commons-net</feature>
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-auth-jaas</feature>
 		<feature>openhab-core-automation-rest</feature>
