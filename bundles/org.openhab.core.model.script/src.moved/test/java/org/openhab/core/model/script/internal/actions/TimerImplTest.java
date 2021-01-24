@@ -73,6 +73,21 @@ public class TimerImplTest {
     }
 
     @Test
+    public void testTimerHasTerminatedAndReschedule() throws InterruptedException {
+        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 1));
+        assertThat(subject.isActive(), is(false));
+        assertThat(subject.hasTerminated(), is(true));
+     
+        subject.reschedule(ZonedDateTime.now().plusSeconds(DEFAULT_TIMEOUT_SECONDS));
+        assertThat(subject.isActive(), is(true));
+        assertThat(subject.hasTerminated(), is(false));
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 1));
+        assertThat(subject.isActive(), is(false));
+        assertThat(subject.hasTerminated(), is(true));
+    }
+
+    @Test
     public void testTimerIsRunning() throws InterruptedException {
         assertThat(subject.isRunning(), is(false));
         assertThat(subject.hasTerminated(), is(false));
