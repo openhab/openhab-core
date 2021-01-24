@@ -187,12 +187,24 @@
       <artifactId>javaxcomm</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-net</groupId>
+          <artifactId>commons-net</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.neuronrobotics</groupId>
       <artifactId>nrjavaserial</artifactId>
-      <version>3.12.0</version>
+      <version>3.14.0</version>
       <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-net</groupId>
+          <artifactId>commons-net</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- Servlet and JAX-RS API -->
