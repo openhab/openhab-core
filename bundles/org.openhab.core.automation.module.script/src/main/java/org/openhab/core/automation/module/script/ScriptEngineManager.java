@@ -13,6 +13,7 @@
 package org.openhab.core.automation.module.script;
 
 import java.io.InputStreamReader;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -59,4 +60,11 @@ public interface ScriptEngineManager {
      * @return true, if supported, else false
      */
     boolean isSupported(String scriptType);
+
+    /**
+     * Returns the global shared variables to be used by script actions.
+     *
+     * @return global shared variables
+     */
+    Map<String, Object> getGlobalContext();
 }
