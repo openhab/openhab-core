@@ -97,7 +97,7 @@ public class JsonStorage<T> implements Storage<T> {
         commitTimer = new Timer();
 
         Map<String, StorageEntry> inputMap = null;
-        if (file.exists() && file.length() > 0) {
+        if (file.exists()) {
             // Read the file
             inputMap = readDatabase(file);
         }
@@ -216,6 +216,11 @@ public class JsonStorage<T> implements Storage<T> {
 
     @SuppressWarnings("unchecked")
     private @Nullable Map<String, StorageEntry> readDatabase(File inputFile) {
+        if (inputFile.length() == 0) {
+            logger.warn("Json storage file at '{}' is empty - ignoring corrupt file.", inputFile.getAbsolutePath());
+            return null;
+        }
+
         try {
             final Map<String, StorageEntry> inputMap = new ConcurrentHashMap<>();
 
