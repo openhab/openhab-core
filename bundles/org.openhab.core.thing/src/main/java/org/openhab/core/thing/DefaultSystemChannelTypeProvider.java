@@ -179,7 +179,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .state(new ChannelTypeUID(BINDING_ID, "color-temperature"), "Color Temperature", "Dimmer")
             .withDescription("Controls the color temperature of the light from 0 (cold) to 100 (warm)")
             .withCategory("ColorLight").withStateDescriptionFragment(StateDescriptionFragmentBuilder.create()
-                    .withMinimum(BigDecimal.ZERO).withMaximum(new BigDecimal(100)).withPattern("%d").build())
+                    .withMinimum(BigDecimal.ZERO).withMaximum(new BigDecimal(100)).withPattern("%.0f").build())
             .build();
 
     /**
@@ -188,8 +188,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_COLOR_TEMPERATURE_ABS = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "color-temperature-abs"), "Color Temperature", "Number")
             .withDescription("Controls the color temperature of the light in Kelvin").withCategory("ColorLight")
-            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ONE)
-                    .withMaximum(new BigDecimal(1000000)).withPattern("%.0f K").build())
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(new BigDecimal(1000))
+                    .withMaximum(new BigDecimal(10000)).withPattern("%.0f K").build())
             .build();
 
     // media channels
