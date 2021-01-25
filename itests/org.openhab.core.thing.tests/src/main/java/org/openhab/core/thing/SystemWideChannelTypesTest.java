@@ -34,6 +34,8 @@ import org.openhab.core.types.StateOption;
  */
 public class SystemWideChannelTypesTest extends JavaOSGiTest {
 
+    private static final int NUMBER_OF_SYSTEM_WIDE_CHANNEL_TYPES = 24;
+
     private static final ChannelTypeUID SIGNAL_STRENGTH_CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID,
             "signal-strength");
     private static final ChannelTypeUID LOW_BATTERY_CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID, "low-battery");
@@ -50,6 +52,8 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
     private static final ChannelTypeUID COLOR_CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID, "color");
     private static final ChannelTypeUID COLOR_TEMPERATURE_CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID,
             "color-temperature");
+    private static final ChannelTypeUID COLOR_TEMPERATURE_ABS_CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID,
+            "color-temperature-abs");
     private static final ChannelTypeUID VOLUME_CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID, "volume");
     private static final ChannelTypeUID MUTE_CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID, "mute");
     private static final ChannelTypeUID MEDIA_CONTROL_CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID,
@@ -78,7 +82,7 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
     @Test
     public void systemChannelTypesShouldBeAvailable() {
         Collection<ChannelType> sytemChannelTypes = systemChannelTypeProvider.getChannelTypes(null);
-        assertEquals(23, sytemChannelTypes.size());
+        assertEquals(NUMBER_OF_SYSTEM_WIDE_CHANNEL_TYPES, sytemChannelTypes.size());
 
         assertNotNull(systemChannelTypeProvider.getChannelType(SIGNAL_STRENGTH_CHANNEL_TYPE_UID, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(LOW_BATTERY_CHANNEL_TYPE_UID, null));
@@ -93,6 +97,7 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
         assertNotNull(systemChannelTypeProvider.getChannelType(BRIGHTNESS_CHANNEL_TYPE_UID, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(COLOR_CHANNEL_TYPE_UID, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(COLOR_TEMPERATURE_CHANNEL_TYPE_UID, null));
+        assertNotNull(systemChannelTypeProvider.getChannelType(COLOR_TEMPERATURE_ABS_CHANNEL_TYPE_UID, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(VOLUME_CHANNEL_TYPE_UID, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(MUTE_CHANNEL_TYPE_UID, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(MEDIA_CONTROL_CHANNEL_TYPE_UID, null));
@@ -108,7 +113,7 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
     @Test
     public void systemChannelTypesShouldBeTranslatedProperly() {
         Collection<ChannelType> localizedChannelTypes = systemChannelTypeProvider.getChannelTypes(Locale.GERMAN);
-        assertEquals(23, localizedChannelTypes.size());
+        assertEquals(NUMBER_OF_SYSTEM_WIDE_CHANNEL_TYPES, localizedChannelTypes.size());
 
         ChannelType signalStrengthChannelType = systemChannelTypeProvider
                 .getChannelType(SIGNAL_STRENGTH_CHANNEL_TYPE_UID, Locale.GERMAN);
@@ -188,7 +193,15 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
                 .getChannelType(COLOR_TEMPERATURE_CHANNEL_TYPE_UID, Locale.GERMAN);
         assertNotNull(colorTemperatureChannelType);
         assertEquals("Farbtemperatur", colorTemperatureChannelType.getLabel());
-        assertEquals("Steuert die Farbtemperatur des Lichts.", colorTemperatureChannelType.getDescription());
+        assertEquals("Steuert die Farbtemperatur des Lichts von 0 (kalt) bis 100 (warm).",
+                colorTemperatureChannelType.getDescription());
+
+        ChannelType colorTemperatureAbsChannelType = systemChannelTypeProvider
+                .getChannelType(COLOR_TEMPERATURE_ABS_CHANNEL_TYPE_UID, Locale.GERMAN);
+        assertNotNull(colorTemperatureAbsChannelType);
+        assertEquals("Farbtemperatur", colorTemperatureAbsChannelType.getLabel());
+        assertEquals("Steuert die Farbtemperatur des Lichts in Kelvin.",
+                colorTemperatureAbsChannelType.getDescription());
 
         ChannelType volumeChannelType = systemChannelTypeProvider.getChannelType(VOLUME_CHANNEL_TYPE_UID,
                 Locale.GERMAN);
