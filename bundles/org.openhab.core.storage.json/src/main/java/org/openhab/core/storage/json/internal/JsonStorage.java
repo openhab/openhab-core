@@ -97,7 +97,7 @@ public class JsonStorage<T> implements Storage<T> {
         commitTimer = new Timer();
 
         Map<String, StorageEntry> inputMap = null;
-        if (file.exists()) {
+        if (file.exists() && file.length() > 0) {
             // Read the file
             inputMap = readDatabase(file);
         }
