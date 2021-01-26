@@ -216,6 +216,11 @@ public class JsonStorage<T> implements Storage<T> {
 
     @SuppressWarnings("unchecked")
     private @Nullable Map<String, StorageEntry> readDatabase(File inputFile) {
+        if (inputFile.length() == 0) {
+            logger.warn("Json storage file at '{}' is empty - ignoring corrupt file.", inputFile.getAbsolutePath());
+            return null;
+        }
+
         try {
             final Map<String, StorageEntry> inputMap = new ConcurrentHashMap<>();
 
