@@ -54,14 +54,10 @@ public class TimerImpl implements Timer {
 
     @Override
     public boolean reschedule(ZonedDateTime newTime) {
-        if (future.cancel(false)) {
-            cancelled = false;
-            future = scheduler.schedule(runnable, newTime.toInstant());
-            return true;
-        } else {
-            logger.warn("Rescheduling failed as execution has already started!");
-            return false;
-        }
+        future.cancel(false);
+        cancelled = false;
+        future = scheduler.schedule(runnable, newTime.toInstant());
+        return true;
     }
 
     @Override
