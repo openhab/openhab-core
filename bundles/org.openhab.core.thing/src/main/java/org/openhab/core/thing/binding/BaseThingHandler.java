@@ -12,11 +12,11 @@
  */
 package org.openhab.core.thing.binding;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -24,16 +24,11 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigValidationException;
-import org.openhab.core.thing.Bridge;
-import org.openhab.core.thing.ChannelUID;
-import org.openhab.core.thing.Thing;
-import org.openhab.core.thing.ThingStatus;
-import org.openhab.core.thing.ThingStatusDetail;
-import org.openhab.core.thing.ThingStatusInfo;
-import org.openhab.core.thing.ThingTypeUID;
-import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.*;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
+import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.util.ThingHandlerHelper;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
@@ -71,6 +66,9 @@ public abstract class BaseThingHandler implements ThingHandler {
 
     private @Nullable ThingHandlerCallback callback;
 
+    private final TreeMap<Integer, List<Map.Entry<String, String>>> updateInstructions = new TreeMap<>();
+    private int currentThingTypeVersion;
+
     /**
      * Creates a new instance of this class for the {@link Thing}.
      *
@@ -78,6 +76,31 @@ public abstract class BaseThingHandler implements ThingHandler {
      */
     public BaseThingHandler(Thing thing) {
         this.thing = thing;
+
+        currentThingTypeVersion = Integer.parseInt(thing.getProperties().getOrDefault("thingTypeVersion", "0"));
+        String thingType = thing.getThingTypeUID().getId();
+
+        URL resource = Thread.currentThread().getContextClassLoader().getResource(thingType + ".update");
+        try (Scanner scanner = new Scanner(resource.openStream(), StandardCharsets.UTF_8)) {
+            while (scanner.hasNext()) {
+                String line = scanner.next();
+                // create update instruction: version, command, parameters
+                String[] parts = line.split(";");
+                if (parts.length != 3) {
+                    logger.warn("Illegal thing update instruction found: {}", line);
+                    continue;
+                }
+                int targetThingTypeVersion = Integer.parseInt(parts[0]);
+                if (targetThingTypeVersion > currentThingTypeVersion) {
+                    updateInstructions.compute(targetThingTypeVersion, (k, v) -> {
+                        List<Map.Entry<String, String>> list = Objects.requireNonNullElse(v, new ArrayList<>());
+                        list.add(Map.entry(parts[1], parts[2]));
+                        return list;
+                    });
+                }
+            }
+        } catch (IOException e) {
+        }
     }
 
     @Override
@@ -156,6 +179,37 @@ public abstract class BaseThingHandler implements ThingHandler {
     public void setCallback(@Nullable ThingHandlerCallback thingHandlerCallback) {
         synchronized (this) {
             this.callback = thingHandlerCallback;
+        }
+        if (!updateInstructions.isEmpty()) {
+            ThingBuilder thingBuilder = editThing();
+            for (Integer targetThingTypeVersion : updateInstructions.keySet()) {
+                logger.info("Updating {} from version {} to {}", thing.getUID(), currentThingTypeVersion,
+                        targetThingTypeVersion);
+                updateInstructions.get(targetThingTypeVersion).forEach(instruction -> {
+                    switch (instruction.getKey()) {
+                        case "ADD_CHANNEL":
+                            // format: channelid, item-type, channel-type id, label
+                            String[] channelParams = instruction.getValue().split(",");
+                            if (channelParams.length != 4) {
+                                logger.warn("Encountered invalid add channel parameter set '{}' while updating {}",
+                                        instruction.getValue(), thing.getUID());
+                            } else {
+                                Channel channel = ChannelBuilder
+                                        .create(new ChannelUID(thing.getUID(), channelParams[0]), channelParams[1])
+                                        .withType(new ChannelTypeUID(channelParams[2])).withLabel(channelParams[3])
+                                        .build();
+                                thingBuilder.withChannel(channel);
+                            }
+                            break;
+                        case "REMOVE_CHANNEL":
+                            thingBuilder.withoutChannel(new ChannelUID(thing.getUID(), instruction.getValue()));
+                            break;
+                        default:
+                    }
+                });
+                thing.setProperty("thingTypeVersion", String.valueOf(targetThingTypeVersion));
+            }
+            updateThing(thingBuilder.build());
         }
     }
 
