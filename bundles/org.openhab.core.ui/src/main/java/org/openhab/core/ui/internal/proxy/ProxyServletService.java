@@ -17,7 +17,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.Servlet;
@@ -32,7 +34,10 @@ import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.util.B64Code;
 import org.eclipse.jetty.util.StringUtil;
 import org.openhab.core.library.types.StringType;
+import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.core.ModelRepositoryChangeListener;
+import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.Video;
@@ -43,6 +48,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -76,7 +82,7 @@ import org.slf4j.LoggerFactory;
  * @author John Cocula - added optional Image/Video item= support; refactored to allow use of later spec servlet
  */
 @Component(immediate = true, property = { "service.pid=org.openhab.core.proxy" })
-public class ProxyServletService extends HttpServlet {
+public class ProxyServletService extends HttpServlet implements ModelRepositoryChangeListener {
 
     /** the alias for this servlet */
     public static final String PROXY_ALIAS = "proxy";
@@ -86,7 +92,18 @@ public class ProxyServletService extends HttpServlet {
     public static final String ATTR_URI = ProxyServletService.class.getName() + ".URI";
     public static final String ATTR_SERVLET_EXCEPTION = ProxyServletService.class.getName() + ".ProxyServletException";
 
+    private static final String SITEMAP_SUFFIX = ".sitemap";
+
     private final Logger logger = LoggerFactory.getLogger(ProxyServletService.class);
+
+    private final List<SitemapProvider> sitemapProviders = new ArrayList<>();
+
+    public interface SitemapSubscriptionCallback {
+
+        void onEvent(Sitemap event);
+
+        void onRelease(String subscriptionId);
+    }
 
     private static final long serialVersionUID = -4716754591953017793L;
 
@@ -95,6 +112,28 @@ public class ProxyServletService extends HttpServlet {
     protected HttpService httpService;
     protected ItemUIRegistry itemUIRegistry;
     protected ModelRepository modelRepository;
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    protected void addSitemapProvider(SitemapProvider provider) {
+        sitemapProviders.add(provider);
+        provider.addModelChangeListener(this);
+    }
+
+    @Override
+    public void modelChanged(String modelName, EventType type) {
+        if (type != EventType.MODIFIED || !modelName.endsWith(SITEMAP_SUFFIX)) {
+            return; // we process only sitemap modifications here
+        }
+        // Don't think we really care if a model is changed, we're only using this for the sitemap lookup.
+        String changedSitemapName = modelName.substring(0, modelName.length() - SITEMAP_SUFFIX.length());
+        logger.debug("Model changed : {}", changedSitemapName);
+
+    }
+
+    protected void removeSitemapProvider(SitemapProvider provider) {
+        sitemapProviders.remove(provider);
+        provider.removeModelChangeListener(this);
+    }
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected void setItemUIRegistry(ItemUIRegistry itemUIRegistry) {
@@ -245,7 +284,14 @@ public class ProxyServletService extends HttpServlet {
                         "Parameter 'widgetId' must be provided!");
             }
 
-            Sitemap sitemap = (Sitemap) modelRepository.getModel(sitemapName);
+            Sitemap sitemap = null;
+            for (SitemapProvider sitemapProvider : sitemapProviders) {
+                sitemap = sitemapProvider.getSitemap(sitemapName);
+                if (sitemap != null) {
+                    break;
+                }
+            }
+
             if (sitemap == null) {
                 throw new ProxyServletException(HttpServletResponse.SC_NOT_FOUND,
                         String.format("Sitemap '%s' could not be found!", sitemapName));
