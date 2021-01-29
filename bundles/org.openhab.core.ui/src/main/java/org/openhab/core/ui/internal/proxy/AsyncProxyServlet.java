@@ -49,7 +49,7 @@ public class AsyncProxyServlet extends org.eclipse.jetty.proxy.AsyncProxyServlet
      */
     @Override
     protected HttpClient newHttpClient() {
-        return new HttpClient(new SslContextFactory());
+        return new HttpClient(new SslContextFactory.Client());
     }
 
     @Override
