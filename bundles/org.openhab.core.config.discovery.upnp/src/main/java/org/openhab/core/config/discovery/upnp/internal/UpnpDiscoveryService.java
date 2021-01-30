@@ -193,7 +193,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
             try {
                 ThingUID thingUID = participant.getThingUID(device);
                 if (thingUID != null) {
-                    int gracePeriod = participant.getRemovalGracePeriodSeconds(device);
+                    long gracePeriod = participant.getRemovalGracePeriodSeconds(device);
                     if (gracePeriod <= 0) {
                         thingRemoved(thingUID);
                     } else {

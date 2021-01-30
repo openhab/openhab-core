@@ -76,7 +76,7 @@ public interface UpnpDiscoveryParticipant {
      * @param device the upnp device on the network
      * @return the additional grace period delay in seconds before the device will be removed from the Inbox
      */
-    default int getRemovalGracePeriodSeconds(RemoteDevice device) {
+    default long getRemovalGracePeriodSeconds(RemoteDevice device) {
         return 0;
     }
 }
