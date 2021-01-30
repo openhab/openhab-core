@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
+import javax.measure.quantity.Temperature;
+
 import org.eclipse.emf.common.util.BasicEList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -874,5 +876,44 @@ public class ItemUIRegistryImplTest {
                 .toStateDescription());
         defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Text.class)));
+    }
+
+    @Test
+    public void getUnitForWidgetForNonNumberItem() throws Exception {
+        String unit = uiRegistry.getUnitForWidget(widget);
+
+        assertThat(unit, is(""));
+    }
+
+    @Test
+    public void getUnitForWidgetWithWidgetLabel() throws Exception {
+        // a NumberItem having a Dimension must be returned
+        NumberItem item = mock(NumberItem.class);
+        when(registry.getItem(ITEM_NAME)).thenReturn(item);
+
+        doReturn(Temperature.class).when(item).getDimension();
+
+        // we set the Label on the widget itself
+        when(widget.getLabel()).thenReturn("Label [%.1f °C]");
+
+        String unit = uiRegistry.getUnitForWidget(widget);
+
+        assertThat(unit, is(equalTo("°C")));
+    }
+
+    @Test
+    public void getUnitForWidgetWithItemLabelAndWithoutWidgetLabel() throws Exception {
+        // a NumberItem having a Dimension must be returned
+        NumberItem item = mock(NumberItem.class);
+        when(registry.getItem(ITEM_NAME)).thenReturn(item);
+
+        doReturn(Temperature.class).when(item).getDimension();
+
+        // we set the UnitSymbol on the item, this must be used as a fallback if no Widget label was used
+        when(item.getUnitSymbol()).thenReturn("°C");
+
+        String unit = uiRegistry.getUnitForWidget(widget);
+
+        assertThat(unit, is(equalTo("°C")));
     }
 }
