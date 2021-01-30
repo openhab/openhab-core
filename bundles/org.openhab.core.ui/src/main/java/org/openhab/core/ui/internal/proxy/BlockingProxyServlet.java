@@ -49,7 +49,7 @@ public class BlockingProxyServlet extends HttpServlet {
 
     private final ProxyServletService service;
 
-    private static HttpClient httpClient = new HttpClient(new SslContextFactory());
+    private static HttpClient httpClient = new HttpClient(new SslContextFactory.Client());
 
     /** Timeout for HTTP requests in ms */
     private static final int TIMEOUT = 15000;

@@ -35,7 +35,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer.Alphanumeric;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.io.TempDir;
@@ -48,7 +48,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * @author Petar Valchev - Initial contribution
  */
-@TestMethodOrder(Alphanumeric.class)
+@TestMethodOrder(MethodName.class)
 public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
     public @TempDir File tmpBaseFolder;
