@@ -334,7 +334,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     }
 
     private SslContextFactory createSslContextFactory() {
-        SslContextFactory sslContextFactory = new SslContextFactory();
+        SslContextFactory sslContextFactory = new SslContextFactory.Client();
         sslContextFactory.setEndpointIdentificationAlgorithm("HTTPS");
 
         try {

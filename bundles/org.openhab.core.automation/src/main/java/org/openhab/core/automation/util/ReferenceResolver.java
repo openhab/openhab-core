@@ -367,7 +367,7 @@ public class ReferenceResolver {
             throws NoSuchFieldException, SecurityException {
         try {
             Field f = objClass.getDeclaredField(fieldName);
-            if (!f.isAccessible()) {
+            if (!f.canAccess(bean)) {
                 f.setAccessible(true);
             }
             return f.get(bean);

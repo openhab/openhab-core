@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -42,8 +43,6 @@ import org.eclipse.jetty.client.util.InputStreamContentProvider;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.jetty.util.B64Code;
-import org.eclipse.jetty.util.StringUtil;
 import org.openhab.core.library.types.RawType;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -227,7 +226,8 @@ public class HttpUtil {
                 String user = userInfo[0];
                 String password = userInfo[1];
 
-                String basicAuthentication = "Basic " + B64Code.encode(user + ":" + password, StringUtil.__ISO_8859_1);
+                String basicAuthentication = "Basic "
+                        + Base64.getEncoder().encodeToString((user + ":" + password).getBytes());
                 request.header(HttpHeader.AUTHORIZATION, basicAuthentication);
             }
         } catch (URISyntaxException e) {
