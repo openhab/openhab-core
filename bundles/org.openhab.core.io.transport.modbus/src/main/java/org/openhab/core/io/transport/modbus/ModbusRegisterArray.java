@@ -15,6 +15,7 @@ package org.openhab.core.io.transport.modbus;
 import java.util.Arrays;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.util.HexUtils;
 
 /**
@@ -109,5 +110,31 @@ public class ModbusRegisterArray {
             return "";
         }
         return HexUtils.bytesToHex(getBytes());
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(bytes);
+        return result;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ModbusRegisterArray other = (ModbusRegisterArray) obj;
+        if (!Arrays.equals(bytes, other.bytes)) {
+            return false;
+        }
+        return true;
     }
 }
