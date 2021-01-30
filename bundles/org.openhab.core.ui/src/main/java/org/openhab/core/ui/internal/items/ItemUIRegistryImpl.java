@@ -1264,6 +1264,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
             // we require the item to define a dimension, otherwise no unit will be reported to the UIs.
             if (item instanceof NumberItem && ((NumberItem) item).getDimension() != null) {
+                if (w.getLabel() == null) {
+                    // if no Label was assigned to the Widget we fallback to the items unit
+                    return ((NumberItem) item).getUnitSymbol();
+                }
+
                 String unit = getUnitFromLabel(w.getLabel());
                 if (!UnitUtils.UNIT_PLACEHOLDER.equals(unit)) {
                     return unit;
