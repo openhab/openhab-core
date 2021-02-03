@@ -82,7 +82,7 @@ import org.slf4j.LoggerFactory;
  * @author John Cocula - added optional Image/Video item= support; refactored to allow use of later spec servlet
  */
 @Component(immediate = true, property = { "service.pid=org.openhab.core.proxy" })
-public class ProxyServletService extends HttpServlet implements ModelRepositoryChangeListener {
+public class ProxyServletService extends HttpServlet {
 
     /** the alias for this servlet */
     public static final String PROXY_ALIAS = "proxy";
@@ -98,36 +98,16 @@ public class ProxyServletService extends HttpServlet implements ModelRepositoryC
 
     private final List<SitemapProvider> sitemapProviders = new ArrayList<>();
 
-    public interface SitemapSubscriptionCallback {
-
-        void onEvent(Sitemap event);
-
-        void onRelease(String subscriptionId);
-    }
-
     private static final long serialVersionUID = -4716754591953017793L;
 
     private Servlet impl;
 
     protected HttpService httpService;
     protected ItemUIRegistry itemUIRegistry;
-    protected ModelRepository modelRepository;
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addSitemapProvider(SitemapProvider provider) {
         sitemapProviders.add(provider);
-        provider.addModelChangeListener(this);
-    }
-
-    @Override
-    public void modelChanged(String modelName, EventType type) {
-        if (type != EventType.MODIFIED || !modelName.endsWith(SITEMAP_SUFFIX)) {
-            return; // we process only sitemap modifications here
-        }
-        // Don't think we really care if a model is changed, we're only using this for the sitemap lookup.
-        String changedSitemapName = modelName.substring(0, modelName.length() - SITEMAP_SUFFIX.length());
-        logger.debug("Model changed : {}", changedSitemapName);
-
     }
 
     protected void removeSitemapProvider(SitemapProvider provider) {
