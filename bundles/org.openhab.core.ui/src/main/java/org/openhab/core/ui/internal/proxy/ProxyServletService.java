@@ -18,6 +18,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+
+import java.util.Base64;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.util.B64Code;
-import org.eclipse.jetty.util.StringUtil;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
@@ -343,7 +343,7 @@ public class ProxyServletService extends HttpServlet {
                 String password = userInfo.length >= 2 ? userInfo[1] : null;
                 String authString = password != null ? user + ":" + password : user + ":";
 
-                String basicAuthentication = "Basic " + B64Code.encode(authString, StringUtil.__ISO_8859_1);
+                String basicAuthentication = "Basic " + Base64.getEncoder().encodeToString(authString.getBytes());
                 request.header(HttpHeader.AUTHORIZATION, basicAuthentication);
             }
         }

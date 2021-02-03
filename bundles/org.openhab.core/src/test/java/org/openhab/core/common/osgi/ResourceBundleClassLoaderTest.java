@@ -40,7 +40,7 @@ public class ResourceBundleClassLoaderTest {
         File file = new File(root.toFile(), relativeFile);
         file.createNewFile();
 
-        return file.toURL();
+        return file.toURI().toURL();
     }
 
     @Test
