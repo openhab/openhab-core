@@ -17,7 +17,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.modbus.BitArray;
@@ -66,7 +65,7 @@ public final class WriteRequestJsonUtilities {
     private static final JsonParser PARSER = new JsonParser();
 
     private WriteRequestJsonUtilities() {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     /**

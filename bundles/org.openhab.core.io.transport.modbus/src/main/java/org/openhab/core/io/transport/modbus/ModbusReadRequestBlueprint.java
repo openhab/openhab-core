@@ -12,10 +12,8 @@
  */
 package org.openhab.core.io.transport.modbus;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.StandardToStringStyle;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -33,10 +31,6 @@ import net.wimpi.modbus.Modbus;
  */
 @NonNullByDefault
 public class ModbusReadRequestBlueprint {
-    private static StandardToStringStyle toStringStyle = new StandardToStringStyle();
-    static {
-        toStringStyle.setUseShortClassName(true);
-    }
 
     private final int slaveId;
     private final ModbusReadFunctionCode functionCode;
@@ -104,14 +98,13 @@ public class ModbusReadRequestBlueprint {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(81, 3).append(slaveId).append(functionCode).append(start).append(length)
-                .append(maxTries).toHashCode();
+        return Objects.hash(functionCode, length, maxTries, slaveId, start);
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, toStringStyle).append("slaveId", slaveId).append("functionCode", functionCode)
-                .append("start", start).append("length", length).append("maxTries", maxTries).toString();
+        return "ModbusReadRequestBlueprint [slaveId=" + slaveId + ", functionCode=" + functionCode + ", start=" + start
+                + ", length=" + length + ", maxTries=" + maxTries + "]";
     }
 
     @Override
@@ -126,7 +119,6 @@ public class ModbusReadRequestBlueprint {
             return false;
         }
         ModbusReadRequestBlueprint rhs = (ModbusReadRequestBlueprint) obj;
-        return new EqualsBuilder().append(slaveId, rhs.slaveId).append(functionCode, rhs.functionCode)
-                .append(start, rhs.start).append(length, rhs.length).isEquals();
+        return functionCode == rhs.functionCode && length == rhs.length && slaveId == rhs.slaveId && start == rhs.start;
     }
 }

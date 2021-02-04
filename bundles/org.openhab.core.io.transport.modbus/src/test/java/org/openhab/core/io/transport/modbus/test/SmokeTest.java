@@ -37,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,7 +91,8 @@ public class SmokeTest extends IntegrationTestSupport {
      * @return
      */
     private boolean isRunningInCI() {
-        return "true".equals(System.getenv("CI")) || StringUtils.isNotBlank(System.getenv("JENKINS_HOME"));
+        String jenkinsHome = System.getenv("JENKINS_HOME");
+        return "true".equals(System.getenv("CI")) || (jenkinsHome != null && !jenkinsHome.isBlank());
     }
 
     private void generateData() {

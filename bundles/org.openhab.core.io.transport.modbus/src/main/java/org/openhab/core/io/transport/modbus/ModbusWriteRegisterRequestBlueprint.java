@@ -12,8 +12,6 @@
  */
 package org.openhab.core.io.transport.modbus;
 
-import org.apache.commons.lang.builder.StandardToStringStyle;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -24,12 +22,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public class ModbusWriteRegisterRequestBlueprint extends ModbusWriteRequestBlueprint {
-
-    private static StandardToStringStyle toStringStyle = new StandardToStringStyle();
-
-    static {
-        toStringStyle.setUseShortClassName(true);
-    }
 
     private final int slaveId;
     private final int reference;
@@ -96,9 +88,8 @@ public class ModbusWriteRegisterRequestBlueprint extends ModbusWriteRequestBluep
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, toStringStyle).append("slaveId", slaveId).append("reference", reference)
-                .append("functionCode", getFunctionCode()).append("registers", registers).append("maxTries", maxTries)
-                .toString();
+        return "ModbusWriteRegisterRequestBlueprint [slaveId=" + slaveId + ", reference=" + reference + ", registers="
+                + registers + ", maxTries=" + maxTries + ", getFunctionCode()=" + getFunctionCode() + "]";
     }
 
     @Override

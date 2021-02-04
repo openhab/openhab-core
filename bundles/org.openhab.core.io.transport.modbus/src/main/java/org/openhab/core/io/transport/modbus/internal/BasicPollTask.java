@@ -12,10 +12,8 @@
  */
 package org.openhab.core.io.transport.modbus.internal;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.StandardToStringStyle;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.modbus.ModbusFailureCallback;
@@ -37,11 +35,6 @@ import org.openhab.core.io.transport.modbus.endpoint.ModbusSlaveEndpoint;
  */
 @NonNullByDefault
 public class BasicPollTask implements PollTask {
-
-    static StandardToStringStyle toStringStyle = new StandardToStringStyle();
-    static {
-        toStringStyle.setUseShortClassName(true);
-    }
 
     private ModbusSlaveEndpoint endpoint;
     private ModbusReadRequestBlueprint request;
@@ -78,15 +71,13 @@ public class BasicPollTask implements PollTask {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(69, 5).append(request).append(getEndpoint()).append(getResultCallback())
-                .append(getFailureCallback()).toHashCode();
+        return Objects.hash(request, getEndpoint(), getResultCallback(), getFailureCallback());
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, toStringStyle).append("request", request).append("endpoint", endpoint)
-                .append("resultCallback", getResultCallback()).append("failureCallback", getFailureCallback())
-                .toString();
+        return "BasicPollTask [getEndpoint=" + getEndpoint() + ", request=" + request + ", getResultCallback()="
+                + getResultCallback() + ", getFailureCallback()=" + getFailureCallback() + "]";
     }
 
     @Override
@@ -101,8 +92,8 @@ public class BasicPollTask implements PollTask {
             return false;
         }
         BasicPollTask rhs = (BasicPollTask) obj;
-        return new EqualsBuilder().append(request, rhs.request).append(endpoint, rhs.endpoint)
-                .append(getResultCallback(), rhs.getResultCallback())
-                .append(getFailureCallback(), rhs.getFailureCallback()).isEquals();
+        return Objects.equals(request, rhs.request) && Objects.equals(getEndpoint(), rhs.getEndpoint())
+                && Objects.equals(getResultCallback(), rhs.getResultCallback())
+                && Objects.equals(getFailureCallback(), rhs.getFailureCallback());
     }
 }

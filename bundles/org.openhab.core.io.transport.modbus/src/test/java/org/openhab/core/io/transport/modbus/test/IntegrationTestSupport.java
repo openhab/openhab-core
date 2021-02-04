@@ -27,7 +27,6 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.function.LongSupplier;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -182,7 +181,7 @@ public class IntegrationTestSupport extends JavaTest {
             } else if (ServerType.SERIAL.equals(serverType)) {
                 // No-op
             } else {
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
         }, MAX_WAIT_REQUESTS_MILLIS, 10);
     }
@@ -200,7 +199,7 @@ public class IntegrationTestSupport extends JavaTest {
         } else if (ServerType.SERIAL.equals(serverType)) {
             startSerialServer();
         } else {
-            throw new NotImplementedException();
+            throw new UnsupportedOperationException();
         }
     }
 
@@ -218,7 +217,7 @@ public class IntegrationTestSupport extends JavaTest {
             }
             serialServerThread.interrupt();
         } else {
-            throw new NotImplementedException();
+            throw new UnsupportedOperationException();
         }
     }
 

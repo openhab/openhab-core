@@ -34,7 +34,6 @@ import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.io.transport.modbus.AsyncModbusFailure;
 import org.openhab.core.io.transport.modbus.AsyncModbusWriteResult;
@@ -317,7 +316,7 @@ public class ModbusManagerImpl implements ModbusManager {
      */
     private volatile @Nullable ScheduledExecutorService scheduledThreadPoolExecutor;
     private volatile @Nullable ScheduledFuture<?> monitorFuture;
-    private volatile Set<ModbusCommunicationInterfaceImpl> communicationInterfaces = new ConcurrentHashSet<>();
+    private volatile Set<ModbusCommunicationInterfaceImpl> communicationInterfaces = ConcurrentHashMap.newKeySet();
 
     private void constructConnectionPool() {
         ModbusSlaveConnectionFactoryImpl connectionFactory = new ModbusSlaveConnectionFactoryImpl();
@@ -725,7 +724,7 @@ public class ModbusManagerImpl implements ModbusManager {
     private class ModbusCommunicationInterfaceImpl implements ModbusCommunicationInterface {
 
         private volatile ModbusSlaveEndpoint endpoint;
-        private volatile Set<PollTask> pollTasksRegisteredByThisCommInterface = new ConcurrentHashSet<>();
+        private volatile Set<PollTask> pollTasksRegisteredByThisCommInterface = ConcurrentHashMap.newKeySet();
         private volatile boolean closed;
         private @Nullable EndpointPoolConfiguration configuration;
 
