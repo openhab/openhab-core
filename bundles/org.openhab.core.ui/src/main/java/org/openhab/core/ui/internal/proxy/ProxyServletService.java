@@ -18,7 +18,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-
 import java.util.Base64;
 import java.util.Hashtable;
 import java.util.List;
@@ -34,9 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
 import org.openhab.core.library.types.StringType;
-import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
-import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
@@ -102,6 +99,7 @@ public class ProxyServletService extends HttpServlet {
 
     protected HttpService httpService;
     protected ItemUIRegistry itemUIRegistry;
+    protected ModelRepository modelRepository;
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addSitemapProvider(SitemapProvider provider) {
@@ -110,7 +108,6 @@ public class ProxyServletService extends HttpServlet {
 
     protected void removeSitemapProvider(SitemapProvider provider) {
         sitemapProviders.remove(provider);
-        provider.removeModelChangeListener(this);
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
