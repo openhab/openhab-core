@@ -89,8 +89,6 @@ public class ProxyServletService extends HttpServlet {
     public static final String ATTR_URI = ProxyServletService.class.getName() + ".URI";
     public static final String ATTR_SERVLET_EXCEPTION = ProxyServletService.class.getName() + ".ProxyServletException";
 
-    private static final String SITEMAP_SUFFIX = ".sitemap";
-
     private final Logger logger = LoggerFactory.getLogger(ProxyServletService.class);
 
     private final List<SitemapProvider> sitemapProviders = new ArrayList<>();
