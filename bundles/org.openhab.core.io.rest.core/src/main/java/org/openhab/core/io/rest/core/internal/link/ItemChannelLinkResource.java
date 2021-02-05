@@ -141,9 +141,15 @@ public class ItemChannelLinkResource implements RESTResource {
     public Response link(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
             @PathParam("channelUID") @Parameter(description = "channelUID") String channelUid,
             @Parameter(description = "link data") @Nullable ItemChannelLinkDTO bean) {
+        ChannelUID uid;
+        try {
+            uid = new ChannelUID(channelUid);
+        } catch (IllegalArgumentException e) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
         ItemChannelLink link;
         if (bean == null) {
-            link = new ItemChannelLink(itemName, new ChannelUID(channelUid), new Configuration());
+            link = new ItemChannelLink(itemName, uid, new Configuration());
         } else {
             if (bean.channelUID != null && !bean.channelUID.equals(channelUid)) {
                 return Response.status(Status.BAD_REQUEST).build();
@@ -151,7 +157,7 @@ public class ItemChannelLinkResource implements RESTResource {
             if (bean.itemName != null && !bean.itemName.equals(itemName)) {
                 return Response.status(Status.BAD_REQUEST).build();
             }
-            link = new ItemChannelLink(itemName, new ChannelUID(channelUid), new Configuration(bean.configuration));
+            link = new ItemChannelLink(itemName, uid, new Configuration(bean.configuration));
         }
         if (itemChannelLinkRegistry.get(link.getUID()) == null) {
             itemChannelLinkRegistry.add(link);
@@ -174,7 +180,13 @@ public class ItemChannelLinkResource implements RESTResource {
                     @ApiResponse(responseCode = "405", description = "Link not editable.") })
     public Response unlink(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
             @PathParam("channelUID") @Parameter(description = "channelUID") String channelUid) {
-        String linkId = AbstractLink.getIDFor(itemName, new ChannelUID(channelUid));
+        ChannelUID uid;
+        try {
+            uid = new ChannelUID(channelUid);
+        } catch (IllegalArgumentException e) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+        String linkId = AbstractLink.getIDFor(itemName, uid);
         if (itemChannelLinkRegistry.get(linkId) == null) {
             String message = "Link " + linkId + " does not exist!";
             return JSONResponse.createResponse(Status.NOT_FOUND, null, message);
