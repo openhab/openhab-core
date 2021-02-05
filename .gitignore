@@ -20,3 +20,5 @@ Californium.properties
 
 generated/
 userdata/
+
+bundles/org.openhab.core.ui/.classpath
