@@ -28,13 +28,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.StringType;
-import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.Switch;
 import org.openhab.core.model.sitemap.sitemap.Video;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.ui.items.ItemUIRegistry;
+import org.osgi.service.http.HttpService;
 
 /**
  * Unit tests for the {@link ProxyServletService} class.
@@ -65,7 +66,8 @@ public class ProxyServletServiceTest {
     private static ProxyServletService service;
 
     private ItemUIRegistry itemUIRegistry;
-    private ModelRepository modelRepository;
+    private HttpService httpService;
+    private SitemapProvider sitemapProvider;
     private Sitemap sitemap;
     private HttpServletRequest request;
     private Switch switchWidget;
@@ -74,15 +76,16 @@ public class ProxyServletServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new ProxyServletService();
-
         itemUIRegistry = mock(ItemUIRegistry.class);
-        modelRepository = mock(ModelRepository.class);
-        service.setModelRepository(modelRepository);
-        service.setItemUIRegistry(itemUIRegistry);
+        httpService = mock(HttpService.class);
+
+        service = new ProxyServletService(itemUIRegistry, httpService);
+
+        sitemapProvider = mock(SitemapProvider.class);
+        service.sitemapProviders.add(sitemapProvider);
 
         sitemap = mock(Sitemap.class);
-        when(modelRepository.getModel(eq(SITEMAP_NAME))).thenReturn(sitemap);
+        when(sitemapProvider.getSitemap(eq(SITEMAP_NAME))).thenReturn(sitemap);
 
         switchWidget = mock(Switch.class);
         when(itemUIRegistry.getWidget(eq(sitemap), eq(SWITCH_WIDGET_ID))).thenReturn(switchWidget);
