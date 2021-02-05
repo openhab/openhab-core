@@ -17,8 +17,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Base64;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.Servlet;
@@ -30,8 +31,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.util.B64Code;
+import org.eclipse.jetty.util.StringUtil;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.Video;
@@ -42,6 +46,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -87,6 +92,7 @@ public class ProxyServletService extends HttpServlet {
 
     private final Logger logger = LoggerFactory.getLogger(ProxyServletService.class);
 
+    private final List<SitemapProvider> sitemapProviders = new ArrayList<>();
     private static final long serialVersionUID = -4716754591953017793L;
 
     private Servlet impl;
@@ -94,6 +100,15 @@ public class ProxyServletService extends HttpServlet {
     protected HttpService httpService;
     protected ItemUIRegistry itemUIRegistry;
     protected ModelRepository modelRepository;
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    protected void addSitemapProvider(SitemapProvider provider) {
+        sitemapProviders.add(provider);
+    }
+
+    protected void removeSitemapProvider(SitemapProvider provider) {
+        sitemapProviders.remove(provider);
+    }
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected void setItemUIRegistry(ItemUIRegistry itemUIRegistry) {
@@ -244,7 +259,14 @@ public class ProxyServletService extends HttpServlet {
                         "Parameter 'widgetId' must be provided!");
             }
 
-            Sitemap sitemap = (Sitemap) modelRepository.getModel(sitemapName);
+            Sitemap sitemap = null;
+            for (SitemapProvider sitemapProvider : sitemapProviders) {
+                sitemap = sitemapProvider.getSitemap(sitemapName);
+                if (sitemap != null) {
+                    break;
+                }
+            }
+
             if (sitemap == null) {
                 throw new ProxyServletException(HttpServletResponse.SC_NOT_FOUND,
                         String.format("Sitemap '%s' could not be found!", sitemapName));
@@ -316,7 +338,7 @@ public class ProxyServletService extends HttpServlet {
                 String password = userInfo.length >= 2 ? userInfo[1] : null;
                 String authString = password != null ? user + ":" + password : user + ":";
 
-                String basicAuthentication = "Basic " + Base64.getEncoder().encodeToString(authString.getBytes());
+                String basicAuthentication = "Basic " + B64Code.encode(authString, StringUtil.__ISO_8859_1);
                 request.header(HttpHeader.AUTHORIZATION, basicAuthentication);
             }
         }
