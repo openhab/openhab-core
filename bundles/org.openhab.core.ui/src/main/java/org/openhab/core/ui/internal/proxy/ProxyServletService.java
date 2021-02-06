@@ -17,11 +17,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -98,7 +98,7 @@ public class ProxyServletService extends HttpServlet {
 
     protected final HttpService httpService;
     protected final ItemUIRegistry itemUIRegistry;
-    protected final List<SitemapProvider> sitemapProviders = new ArrayList<>();
+    protected final List<SitemapProvider> sitemapProviders = new CopyOnWriteArrayList<>();
 
     @Activate
     public ProxyServletService(@Reference ItemUIRegistry itemUIRegistry, @Reference HttpService httpService) {
