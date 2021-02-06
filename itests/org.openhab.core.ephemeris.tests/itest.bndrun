@@ -56,9 +56,9 @@ feature.openhab-config: \
 	jollyday;version='[0.5.10,0.5.11)',\
 	org.threeten.extra;version='[1.5.0,1.5.1)',\
 	xstream;version='[1.4.13,1.4.14)',\
-	org.openhab.core;version='[3.0.1,3.0.2)',\
-	org.openhab.core.config.core;version='[3.0.1,3.0.2)',\
-	org.openhab.core.config.xml;version='[3.0.1,3.0.2)',\
-	org.openhab.core.ephemeris;version='[3.0.1,3.0.2)',\
-	org.openhab.core.ephemeris.tests;version='[3.0.1,3.0.2)',\
-	org.openhab.core.test;version='[3.0.1,3.0.2)'
+	org.openhab.core;version='[3.0.2,3.0.3)',\
+	org.openhab.core.config.core;version='[3.0.2,3.0.3)',\
+	org.openhab.core.config.xml;version='[3.0.2,3.0.3)',\
+	org.openhab.core.ephemeris;version='[3.0.2,3.0.3)',\
+	org.openhab.core.ephemeris.tests;version='[3.0.2,3.0.3)',\
+	org.openhab.core.test;version='[3.0.2,3.0.3)'
