@@ -25,8 +25,6 @@ import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.common.ThreadPoolManager;
-import org.eclipse.jdt.annotation.Nullable;
-import org.osgi.service.component.annotations.Modified;
 
 /**
  * This class is implementation of {@link TriggerHandlerCallback} used by the {@link Trigger}s to notify rule engine
@@ -40,8 +38,6 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
 
     private static final String AUTOMATION_THREADPOOL_NAME = "automation";
 
-    private boolean useThreadPool = false;
-
     private final String ruleUID;
 
     private ExecutorService executor;
@@ -50,16 +46,19 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
 
     private final RuleEngineImpl re;
 
+    private final int threadPoolSize;
+
     protected TriggerHandlerCallbackImpl(RuleEngineImpl re, String ruleUID) {
         this.re = re;
         this.ruleUID = ruleUID;
-	if ( useThreadPool == false ) {
-            re.logger.debug("Firing rule {} using single thread",ruleUID);
+        this.threadPoolSize = ThreadPoolManager.getConfig(AUTOMATION_THREADPOOL_NAME);
+        if (threadPoolSize == -1) {
+            re.logger.debug("Firing rule {} using single thread", ruleUID);
             executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("rule-" + ruleUID));
         } else {
-	    re.logger.debug("Firing rule {} using threadpool",ruleUID);
-	    executor = ThreadPoolManager.getPool(AUTOMATION_THREADPOOL_NAME);
-	}
+            re.logger.debug("Firing rule {} using threadpool", ruleUID);
+            executor = ThreadPoolManager.getPool(AUTOMATION_THREADPOOL_NAME);
+        }
     }
 
     @Override
@@ -70,7 +69,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
             }
             future = executor.submit(new TriggerData(trigger, outputs));
         }
-        re.logger.debug("The trigger '{}' of rule '{}' is triggered.  ThreadPool set to {}", trigger.getId(), ruleUID, useThreadPool);
+        re.logger.debug("The trigger '{}' of rule '{}' is triggered.", trigger.getId(), ruleUID);
     }
 
     public boolean isRunning() {
@@ -103,32 +102,17 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
         }
     }
 
-    @Modified
-    public void modified(@Nullable Map<String, Object> properties) {
-        if (properties != null) {
-            Object prop = properties.get("rulesThreadPool");
-            if (prop instanceof String) {
-                try {
-                    useThreadPool = Boolean.valueOf((String) prop);
-                    re.logger.debug("Configured rulesThreadPool as '{}'",useThreadPool);
-		} catch (NumberFormatException e) {
-                    re.logger.error("Invalid value '{}' for rulesThreadPool - using default value '{}'", prop, useThreadPool);
-                }
-            }
-        }
-    }
-
     public void dispose() {
-        if ( useThreadPool == false ) {
-	    synchronized (this) {
+        if (threadPoolSize == -1) {
+            synchronized (this) {
                 AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
                     executor.shutdownNow();
                     return null;
                 });
                 executor = null;
             }
-	} else {
-	    executor = null;
+        } else {
+            executor = null;
         }
     }
 

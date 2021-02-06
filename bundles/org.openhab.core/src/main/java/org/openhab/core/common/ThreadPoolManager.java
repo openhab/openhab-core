@@ -164,7 +164,7 @@ public class ThreadPoolManager {
         return pool;
     }
 
-    protected static int getConfig(String poolName) {
+    public static int getConfig(String poolName) {
         Integer cfg = configs.get(poolName);
         return (cfg != null) ? cfg : DEFAULT_THREAD_POOL_SIZE;
     }
