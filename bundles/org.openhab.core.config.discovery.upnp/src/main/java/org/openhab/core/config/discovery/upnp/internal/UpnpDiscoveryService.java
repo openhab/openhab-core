@@ -17,11 +17,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.jupnp.UpnpService;
 import org.jupnp.model.meta.LocalDevice;
 import org.jupnp.model.meta.RemoteDevice;
+import org.jupnp.model.types.UDN;
 import org.jupnp.registry.Registry;
 import org.jupnp.registry.RegistryListener;
 import org.jupnp.transport.RouterException;
@@ -64,6 +68,11 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     }
 
     private UpnpService upnpService;
+
+    /*
+     * Map of scheduled tasks to remove devices from the Inbox
+     */
+    private Map<UDN, Future<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
 
     @Override
     protected void activate(Map<String, Object> configProperties) {
@@ -157,11 +166,24 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
             try {
                 DiscoveryResult result = participant.createResult(device);
                 if (result != null) {
+                    if (participant.getRemovalGracePeriodSeconds(device) > 0) {
+                        cancelRemovalTask(device.getIdentity().getUdn());
+                    }
                     thingDiscovered(result);
                 }
             } catch (Exception e) {
                 logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
             }
+        }
+    }
+
+    /*
+     * If the device has been scheduled to be removed, cancel its respective removal task
+     */
+    private void cancelRemovalTask(UDN udn) {
+        Future<?> deviceRemovalTask = deviceRemovalTasks.remove(udn);
+        if (deviceRemovalTask != null) {
+            deviceRemovalTask.cancel(false);
         }
     }
 
@@ -171,7 +193,17 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
             try {
                 ThingUID thingUID = participant.getThingUID(device);
                 if (thingUID != null) {
-                    thingRemoved(thingUID);
+                    long gracePeriod = participant.getRemovalGracePeriodSeconds(device);
+                    if (gracePeriod <= 0) {
+                        thingRemoved(thingUID);
+                    } else {
+                        UDN udn = device.getIdentity().getUdn();
+                        cancelRemovalTask(udn);
+                        deviceRemovalTasks.put(udn, scheduler.schedule(() -> {
+                            thingRemoved(thingUID);
+                            cancelRemovalTask(udn);
+                        }, gracePeriod, TimeUnit.SECONDS));
+                    }
                 }
             } catch (Exception e) {
                 logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);

@@ -62,4 +62,21 @@ public interface UpnpDiscoveryParticipant {
      */
     @Nullable
     ThingUID getThingUID(RemoteDevice device);
+
+    /**
+     * The JUPnP library strictly follows the UPnP specification insofar as if a device fails to send its next
+     * 'ssdp:alive' notification within its declared 'maxAge' period, it is immediately considered to be gone. But
+     * unfortunately some openHAB bindings handle devices that can sometimes be a bit late in sending their 'ssdp:alive'
+     * notifications even though they have not really gone offline, which means that such devices are repeatedly removed
+     * from, and (re)added to, the Inbox.
+     *
+     * To prevent this, a binding that implements a UpnpDiscoveryParticipant may OPTIONALLY implement this method to
+     * specify an additional delay period (grace period) to wait before the device is removed from the Inbox.
+     *
+     * @param device the UPnP device on the network
+     * @return the additional grace period delay in seconds before the device will be removed from the Inbox
+     */
+    default long getRemovalGracePeriodSeconds(RemoteDevice device) {
+        return 0;
+    }
 }
