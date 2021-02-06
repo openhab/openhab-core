@@ -19,7 +19,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Base64;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -28,10 +30,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
 import org.openhab.core.library.types.StringType;
-import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.Video;
@@ -42,6 +46,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -74,12 +79,14 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author John Cocula - added optional Image/Video item= support; refactored to allow use of later spec servlet
  */
-@Component(immediate = true, property = { "service.pid=org.openhab.core.proxy" })
+@NonNullByDefault
+@Component(immediate = true, property = { "service.pid=org.openhab.proxy" })
 public class ProxyServletService extends HttpServlet {
 
     /** the alias for this servlet */
     public static final String PROXY_ALIAS = "proxy";
 
+    private static final long serialVersionUID = -4716754591953017793L;
     private static final String CONFIG_MAX_THREADS = "maxThreads";
     private static final int DEFAULT_MAX_THREADS = 8;
     public static final String ATTR_URI = ProxyServletService.class.getName() + ".URI";
@@ -87,39 +94,25 @@ public class ProxyServletService extends HttpServlet {
 
     private final Logger logger = LoggerFactory.getLogger(ProxyServletService.class);
 
-    private static final long serialVersionUID = -4716754591953017793L;
+    private @Nullable Servlet impl;
 
-    private Servlet impl;
+    protected final HttpService httpService;
+    protected final ItemUIRegistry itemUIRegistry;
+    protected final List<SitemapProvider> sitemapProviders = new CopyOnWriteArrayList<>();
 
-    protected HttpService httpService;
-    protected ItemUIRegistry itemUIRegistry;
-    protected ModelRepository modelRepository;
-
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected void setItemUIRegistry(ItemUIRegistry itemUIRegistry) {
+    @Activate
+    public ProxyServletService(@Reference ItemUIRegistry itemUIRegistry, @Reference HttpService httpService) {
         this.itemUIRegistry = itemUIRegistry;
-    }
-
-    protected void unsetItemUIRegistry(ItemUIRegistry itemUIRegistry) {
-        this.itemUIRegistry = null;
-    }
-
-    @Reference
-    protected void setModelRepository(ModelRepository modelRepository) {
-        this.modelRepository = modelRepository;
-    }
-
-    protected void unsetModelRepository(ModelRepository modelRepository) {
-        this.modelRepository = null;
-    }
-
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected void setHttpService(HttpService httpService) {
         this.httpService = httpService;
     }
 
-    protected void unsetHttpService(HttpService httpService) {
-        this.httpService = null;
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    protected void addSitemapProvider(SitemapProvider provider) {
+        sitemapProviders.add(provider);
+    }
+
+    protected void removeSitemapProvider(SitemapProvider provider) {
+        sitemapProviders.remove(provider);
     }
 
     /**
@@ -127,15 +120,17 @@ public class ProxyServletService extends HttpServlet {
      * Supported OSGi containers might only support Servlet API 2.4 (blocking only).
      */
     private Servlet getImpl() {
-        if (impl == null) {
+        Servlet servlet = impl;
+        if (servlet == null) {
             try {
                 ServletRequest.class.getMethod("startAsync");
-                impl = new AsyncProxyServlet(this);
+                servlet = new AsyncProxyServlet(this);
             } catch (Throwable t) {
-                impl = new BlockingProxyServlet(this);
+                servlet = new BlockingProxyServlet(this);
             }
+            impl = servlet;
         }
-        return impl;
+        return servlet;
     }
 
     /**
@@ -144,13 +139,11 @@ public class ProxyServletService extends HttpServlet {
      * @param config the OSGi config, may be <code>null</code>
      * @return properties to pass to servlet for initialization
      */
-    private Hashtable<String, String> propsFromConfig(Map<String, Object> config) {
-        Hashtable<String, String> props = new Hashtable<>();
+    private Hashtable<String, @Nullable String> propsFromConfig(Map<String, Object> config) {
+        Hashtable<String, @Nullable String> props = new Hashtable<>();
 
-        if (config != null) {
-            for (String key : config.keySet()) {
-                props.put(key, config.get(key).toString());
-            }
+        for (String key : config.keySet()) {
+            props.put(key, config.get(key).toString());
         }
 
         // must specify for Jetty proxy servlet, per http://stackoverflow.com/a/27625380
@@ -169,7 +162,7 @@ public class ProxyServletService extends HttpServlet {
 
             logger.debug("Starting up '{}' servlet  at /{}", servlet.getServletInfo(), PROXY_ALIAS);
 
-            Hashtable<String, String> props = propsFromConfig(config);
+            Hashtable<String, @Nullable String> props = propsFromConfig(config);
             httpService.registerServlet("/" + PROXY_ALIAS, servlet, props, createHttpContext());
         } catch (NamespaceException | ServletException e) {
             logger.error("Error during servlet startup: {}", e.getMessage());
@@ -218,6 +211,7 @@ public class ProxyServletService extends HttpServlet {
      *            future calls.
      * @return the URI indicated by the request, or <code>null</code> if not possible
      */
+    /* default */ @Nullable
     URI uriFromRequest(HttpServletRequest request) {
         try {
             // Return any URI we've already saved for this request
@@ -244,7 +238,8 @@ public class ProxyServletService extends HttpServlet {
                         "Parameter 'widgetId' must be provided!");
             }
 
-            Sitemap sitemap = (Sitemap) modelRepository.getModel(sitemapName);
+            Sitemap sitemap = getSitemap(sitemapName);
+
             if (sitemap == null) {
                 throw new ProxyServletException(HttpServletResponse.SC_NOT_FOUND,
                         String.format("Sitemap '%s' could not be found!", sitemapName));
@@ -294,6 +289,17 @@ public class ProxyServletService extends HttpServlet {
         }
     }
 
+    private @Nullable Sitemap getSitemap(String sitemapName) {
+        Sitemap sitemap = null;
+        for (SitemapProvider sitemapProvider : sitemapProviders) {
+            sitemap = sitemapProvider.getSitemap(sitemapName);
+            if (sitemap != null) {
+                break;
+            }
+        }
+        return sitemap;
+    }
+
     private URI createURIFromString(String url) throws MalformedURLException, URISyntaxException {
         // URI in this context should be valid URL. Therefore before creating URI, create URL,
         // which validates the string.
@@ -307,7 +313,7 @@ public class ProxyServletService extends HttpServlet {
      * @param uri the URI which may contain user info
      * @param request the outgoing request to which an authorization header may be added
      */
-    void maybeAppendAuthHeader(URI uri, Request request) {
+    void maybeAppendAuthHeader(@Nullable URI uri, Request request) {
         if (uri != null && uri.getUserInfo() != null) {
             String[] userInfo = uri.getUserInfo().split(":");
 
@@ -342,7 +348,7 @@ public class ProxyServletService extends HttpServlet {
                         "Parameter 'widgetId' must be provided!");
             }
 
-            Sitemap sitemap = (Sitemap) modelRepository.getModel(sitemapName);
+            Sitemap sitemap = getSitemap(sitemapName);
             if (sitemap == null) {
                 throw new ProxyServletException(HttpServletResponse.SC_NOT_FOUND,
                         String.format("Sitemap '%s' could not be found!", sitemapName));
