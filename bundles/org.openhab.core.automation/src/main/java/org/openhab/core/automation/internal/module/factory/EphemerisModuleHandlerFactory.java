@@ -44,8 +44,8 @@ public class EphemerisModuleHandlerFactory extends BaseModuleHandlerFactory impl
     private final Logger logger = LoggerFactory.getLogger(EphemerisModuleHandlerFactory.class);
 
     private static final Collection<String> TYPES = List.of(EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID,
-            EphemerisConditionHandler.WEEKEND_MODULE_TYPE_ID, EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID,
-            EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID);
+            EphemerisConditionHandler.NOT_HOLIDAY_MODULE_TYPE_ID, EphemerisConditionHandler.WEEKEND_MODULE_TYPE_ID,
+            EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID, EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID);
 
     private final EphemerisManager ephemerisManager;
 
@@ -73,6 +73,7 @@ public class EphemerisModuleHandlerFactory extends BaseModuleHandlerFactory impl
         if (module instanceof Condition) {
             switch (moduleTypeUID) {
                 case EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID:
+                case EphemerisConditionHandler.NOT_HOLIDAY_MODULE_TYPE_ID:
                 case EphemerisConditionHandler.WEEKEND_MODULE_TYPE_ID:
                 case EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID:
                 case EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID:
