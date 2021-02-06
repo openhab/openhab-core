@@ -16,11 +16,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This is a helper class that helps parsing a string into an openHAB type (state or command).
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public final class TypeParser {
 
     /**
@@ -38,7 +42,7 @@ public final class TypeParser {
      * @param input input string to parse.
      * @return Parsed type or null, if the type couldn't be parsed.
      */
-    public static Type parseType(String typeName, String input) {
+    public static @Nullable Type parseType(String typeName, String input) {
         try {
             Class<?> stateClass = Class.forName(CORE_LIBRARY_PACKAGE + typeName);
             Method valueOfMethod = stateClass.getMethod("valueOf", String.class);
@@ -62,7 +66,7 @@ public final class TypeParser {
      * @param s the string to parse
      * @return the corresponding State instance or <code>null</code>
      */
-    public static State parseState(List<Class<? extends State>> types, String s) {
+    public static @Nullable State parseState(List<Class<? extends State>> types, String s) {
         for (Class<? extends State> type : types) {
             try {
                 Method valueOf = type.getMethod("valueOf", String.class);
@@ -90,7 +94,7 @@ public final class TypeParser {
      * @param s the string to parse
      * @return the corresponding Command instance or <code>null</code>
      */
-    public static Command parseCommand(List<Class<? extends Command>> types, String s) {
+    public static @Nullable Command parseCommand(List<Class<? extends Command>> types, String s) {
         for (Class<? extends Command> type : types) {
             try {
                 Method valueOf = type.getMethod("valueOf", String.class);
