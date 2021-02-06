@@ -23,6 +23,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Trap exceptions.
@@ -35,10 +37,12 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
 @NonNullByDefault
 public class JSONResponseExceptionMapper implements ExceptionMapper<@NonNull Exception> {
 
+    private final Logger logger = LoggerFactory.getLogger(JSONResponseExceptionMapper.class);
     private final ExceptionMapper<Exception> delegate = new JSONResponse.ExceptionMapper();
 
     @Override
     public Response toResponse(Exception e) {
+        logger.error("Unexpected exception occurred while processing REST request.", e);
         return delegate.toResponse(e);
     }
 }
