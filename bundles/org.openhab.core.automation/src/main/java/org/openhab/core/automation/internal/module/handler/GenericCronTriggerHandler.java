@@ -12,11 +12,13 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
+import org.openhab.core.automation.handler.TimeBasedTriggerHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
-import org.openhab.core.automation.handler.TriggerHandlerWithCronExpression;
+import org.openhab.core.common.CronAdjuster;
 import org.openhab.core.scheduler.CronScheduler;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.openhab.core.scheduler.SchedulerRunnable;
@@ -32,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Yordan Mihaylov - Remove Quarz lib dependency
  */
 public class GenericCronTriggerHandler extends BaseTriggerModuleHandler
-        implements SchedulerRunnable, TriggerHandlerWithCronExpression {
+        implements SchedulerRunnable, TimeBasedTriggerHandler {
 
     public static final String MODULE_TYPE_ID = "timer.GenericCronTrigger";
     public static final String CALLBACK_CONTEXT_NAME = "CALLBACK";
@@ -83,7 +85,7 @@ public class GenericCronTriggerHandler extends BaseTriggerModuleHandler
     }
 
     @Override
-    public String getExpression() {
-        return this.expression;
+    public @NonNull CronAdjuster getTemporalAdjuster() {
+        return new CronAdjuster(expression);
     }
 }

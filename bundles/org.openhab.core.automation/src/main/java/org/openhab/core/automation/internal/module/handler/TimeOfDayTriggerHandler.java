@@ -14,11 +14,13 @@ package org.openhab.core.automation.internal.module.handler;
 
 import java.text.MessageFormat;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
+import org.openhab.core.automation.handler.TimeBasedTriggerHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
-import org.openhab.core.automation.handler.TriggerHandlerWithCronExpression;
+import org.openhab.core.common.CronAdjuster;
 import org.openhab.core.scheduler.CronScheduler;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.openhab.core.scheduler.SchedulerRunnable;
@@ -32,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
-        implements SchedulerRunnable, TriggerHandlerWithCronExpression {
+        implements SchedulerRunnable, TimeBasedTriggerHandler {
 
     private final Logger logger = LoggerFactory.getLogger(TimeOfDayTriggerHandler.class);
 
@@ -91,7 +93,7 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
     }
 
     @Override
-    public String getExpression() {
-        return this.expression;
+    public @NonNull CronAdjuster getTemporalAdjuster() {
+        return new CronAdjuster(expression);
     }
 }

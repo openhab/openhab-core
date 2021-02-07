@@ -13,17 +13,20 @@
 package org.openhab.core.automation.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
 
 /**
- * Marker Interface for an {@link TriggerHandler} that contains an time based execution with an cron expression.
+ * Marker Interface for an {@link TriggerHandler} that contains an time based execution.
  *
  * @author Sönke Küper - Initial contribution
  */
 @NonNullByDefault
-public interface TriggerHandlerWithCronExpression extends TriggerHandler {
+public interface TimeBasedTriggerHandler extends TriggerHandler {
 
     /**
-     * Return the cron expression.
+     * Returns the {@link SchedulerTemporalAdjuster} which can be used to determine the next execution times.
      */
-    public abstract String getExpression();
+    @Nullable
+    public abstract SchedulerTemporalAdjuster getTemporalAdjuster();
 }

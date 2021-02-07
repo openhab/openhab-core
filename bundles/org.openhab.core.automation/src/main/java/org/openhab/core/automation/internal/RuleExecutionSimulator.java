@@ -27,9 +27,9 @@ import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.ConditionHandler;
 import org.openhab.core.automation.handler.TimeBasedConditionHandler;
+import org.openhab.core.automation.handler.TimeBasedTriggerHandler;
 import org.openhab.core.automation.handler.TriggerHandler;
-import org.openhab.core.automation.handler.TriggerHandlerWithCronExpression;
-import org.openhab.core.common.CronAdjuster;
+import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,9 +89,12 @@ final class RuleExecutionSimulator {
             TriggerHandler triggerHandler = (TriggerHandler) this.ruleEngine.getModuleHandler(trigger, rule.getUID());
 
             // Only triggers that are time-based will be considered within the simulation
-            if (triggerHandler instanceof TriggerHandlerWithCronExpression) {
-                String cronExpression = ((TriggerHandlerWithCronExpression) triggerHandler).getExpression();
-                executions.addAll(simulateExecutionsForCronBasedRule(rule, fromDate, untilDate, cronExpression));
+            if (triggerHandler instanceof TimeBasedTriggerHandler) {
+                SchedulerTemporalAdjuster temporalAdjuster = ((TimeBasedTriggerHandler) triggerHandler)
+                        .getTemporalAdjuster();
+                if (temporalAdjuster != null) {
+                    executions.addAll(simulateExecutionsForCronBasedRule(rule, fromDate, untilDate, temporalAdjuster));
+                }
             }
         }
         logger.debug("Created {} rule simulations for rule {}.", executions.size(), rule.getName());
@@ -108,19 +111,17 @@ final class RuleExecutionSimulator {
      * @return a list of expected executions.
      */
     private List<RuleExecution> simulateExecutionsForCronBasedRule(Rule rule, ZonedDateTime startTime,
-            ZonedDateTime untilDate, String cronExpression) {
-        assert cronExpression != null : rule.getName();
-        final CronAdjuster cronAdjuster = new CronAdjuster(cronExpression);
+            ZonedDateTime untilDate, SchedulerTemporalAdjuster temporalAdjuster) {
 
         final List<RuleExecution> result = new ArrayList<>();
-        ZonedDateTime currentTime = ZonedDateTime.from(cronAdjuster.adjustInto(startTime));
+        ZonedDateTime currentTime = ZonedDateTime.from(temporalAdjuster.adjustInto(startTime));
 
-        while (!cronAdjuster.isDone(currentTime) && currentTime.isBefore(untilDate)) {
+        while (!temporalAdjuster.isDone(currentTime) && currentTime.isBefore(untilDate)) {
             // if the current time satisfies all conditions add the instance to the result
             if (checkConditions(rule, currentTime)) {
                 result.add(new RuleExecution(Date.from(currentTime.toInstant()), rule));
             }
-            currentTime = ZonedDateTime.from(cronAdjuster.adjustInto(currentTime));
+            currentTime = ZonedDateTime.from(temporalAdjuster.adjustInto(currentTime));
 
         }
         return result;
