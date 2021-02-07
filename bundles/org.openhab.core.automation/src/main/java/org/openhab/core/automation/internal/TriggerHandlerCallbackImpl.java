@@ -96,7 +96,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
             } else {
                 re.logger.debug(
                         "The trigger '{}' of rule '{}' is triggered.  Rule failed to execute due to maximum itterations.",
-                        trigger.getId(), ruleUID, ruleStatus);
+                        trigger.getId(), ruleUID);
                 return;
             }
         }
