@@ -38,6 +38,10 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
 
     private static final String AUTOMATION_THREADPOOL_NAME = "automation";
 
+    private final int maxItterations = 100;
+
+    private final int itterationWait = 200;
+
     private final String ruleUID;
 
     private ExecutorService executor;
@@ -53,23 +57,49 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
         this.ruleUID = ruleUID;
         this.threadPoolSize = ThreadPoolManager.getConfig(AUTOMATION_THREADPOOL_NAME);
         if (threadPoolSize == -1) {
-            re.logger.debug("Firing rule {} using single thread", ruleUID);
+            re.logger.debug("Firing rule {} using single thread.", ruleUID);
             executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("rule-" + ruleUID));
         } else {
-            re.logger.debug("Firing rule {} using threadpool", ruleUID);
+            re.logger.debug("Firing rule {} using threadpool.", ruleUID);
             executor = ThreadPoolManager.getPool(AUTOMATION_THREADPOOL_NAME);
         }
     }
 
     @Override
     public void triggered(Trigger trigger, Map<String, ?> outputs) {
+        triggered(trigger, outputs, 0);
+    }
+
+    private void triggered(Trigger trigger, Map<String, ?> outputs, int itteration) {
+        RuleStatus ruleStatus = re.getRuleStatus(ruleUID);
         synchronized (this) {
             if (executor == null) {
                 return;
             }
-            future = executor.submit(new TriggerData(trigger, outputs));
+            if ((threadPoolSize == -1) || (RuleStatus.IDLE.equals(ruleStatus))) {
+                future = executor.submit(new TriggerData(trigger, outputs));
+                re.logger.debug("The trigger '{}' of rule '{}' is triggered. - Rule Status: '{}' - Rule Executed.",
+                        trigger.getId(), ruleUID, ruleStatus);
+            } else if ((RuleStatus.RUNNING.equals(ruleStatus)) && (itteration < maxItterations)) {
+                itteration++;
+                re.logger.debug("The trigger '{}' of rule '{}' is triggered.  Rule execution paused ({}/{})",
+                        trigger.getId(), ruleUID, itteration, maxItterations);
+                try {
+                    Thread.sleep(itterationWait);
+                    triggered(trigger, outputs, itteration);
+                } catch (InterruptedException e) {
+                    re.logger.debug(
+                            "Failed to wait for itteration.  The trigger '{}' of rule '{}' is triggered but not executed.",
+                            trigger.getId(), ruleUID);
+                    return;
+                }
+            } else {
+                re.logger.debug(
+                        "The trigger '{}' of rule '{}' is triggered.  Rule failed to execute due to maximum itterations.",
+                        trigger.getId(), ruleUID, ruleStatus);
+                return;
+            }
         }
-        re.logger.debug("The trigger '{}' of rule '{}' is triggered.", trigger.getId(), ruleUID);
     }
 
     public boolean isRunning() {
