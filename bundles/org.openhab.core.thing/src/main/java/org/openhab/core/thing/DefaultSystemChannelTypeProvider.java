@@ -188,8 +188,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_COLOR_TEMPERATURE_ABS = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "color-temperature-abs"), "Color Temperature", "Number")
             .withDescription("Controls the color temperature of the light in Kelvin").withCategory("ColorLight")
-            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(new BigDecimal(1000))
-                    .withMaximum(new BigDecimal(10000)).withPattern("%.0f K").build())
+            .isAdvanced(true).withStateDescriptionFragment(StateDescriptionFragmentBuilder.create()
+                    .withMinimum(new BigDecimal(1000)).withMaximum(new BigDecimal(10000)).withPattern("%.0f K").build())
             .build();
 
     // media channels
