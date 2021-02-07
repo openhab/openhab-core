@@ -14,10 +14,10 @@ package org.openhab.core.automation.internal.module.handler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.automation.internal.module.exception.UncomparableException;
@@ -155,14 +155,12 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
         throw new UncomparableException();
     }
 
-    private Object getRightOperandValue(String rightOperandString2, Object toCompare) {
+    private @Nullable Object getRightOperandValue(String rightOperandString2, Object toCompare) {
         if ("null".equals(rightOperandString2)) {
             return rightOperandString2;
         }
         if (toCompare instanceof State) {
-            List<Class<? extends State>> stateTypeList = new ArrayList<>();
-            stateTypeList.add(((State) toCompare).getClass());
-            return TypeParser.parseState(stateTypeList, rightOperandString2);
+            return TypeParser.parseState(List.of(((State) toCompare).getClass()), rightOperandString2);
         } else if (toCompare instanceof Integer) {
             return Integer.parseInt(rightOperandString2);
         } else if (toCompare instanceof String) {
