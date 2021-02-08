@@ -422,7 +422,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     }
 
     @Override
-    public Voice getPreferredVoice(Set<Voice> voices) {
+    public @Nullable Voice getPreferredVoice(Set<Voice> voices) {
         // Express preferences with a Language Priority List
         Locale locale = localeProvider.getLocale();
 
@@ -438,8 +438,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         Locale preferredLocale = Locale.lookup(languageRanges, locales);
 
         // As a last resort choose some Locale
-        if (preferredLocale == null) {
+        if (preferredLocale == null && !voices.isEmpty()) {
             preferredLocale = locales.iterator().next();
+        }
+        if (preferredLocale == null) {
+            return null;
         }
 
         // Determine preferred voice
@@ -449,7 +452,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 preferredVoice = currentVoice;
             }
         }
-        assert (preferredVoice != null);
 
         // Return preferred voice
         return preferredVoice;

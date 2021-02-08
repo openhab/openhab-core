@@ -112,7 +112,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         if (defaultVoice == null) {
             TTSService tts = voiceManager.getTTS();
             if (tts != null) {
-                defaultVoice = voiceManager.getPreferredVoice(tts.getAvailableVoices());
+                return voiceManager.getPreferredVoice(tts.getAvailableVoices());
             }
         }
         return defaultVoice;
