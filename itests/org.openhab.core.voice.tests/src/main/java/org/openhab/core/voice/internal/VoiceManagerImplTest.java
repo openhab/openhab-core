@@ -23,12 +23,14 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.text.InterpretationException;
 import org.osgi.framework.BundleContext;
@@ -372,5 +374,17 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         }
 
         assertTrue(isVoiceStubInTheOptions);
+    }
+
+    @Test
+    public void getPreferredVoiceOfAvailableTTSService() {
+        Voice voice = voiceManager.getPreferredVoice(ttsService.getAvailableVoices());
+        assertNotNull(voice);
+    }
+
+    @Test
+    public void getPreferredVoiceOfEmptySet() {
+        Voice voice = voiceManager.getPreferredVoice(Set.of());
+        assertNull(voice);
     }
 }
