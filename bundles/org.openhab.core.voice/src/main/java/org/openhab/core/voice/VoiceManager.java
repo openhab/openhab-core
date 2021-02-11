@@ -115,8 +115,9 @@ public interface VoiceManager {
      * Determines the preferred voice for the currently set locale
      *
      * @param voices a set of voices to chose from
-     * @return the preferred voice for the current locale
+     * @return the preferred voice for the current locale, or null if no voice can be found
      */
+    @Nullable
     Voice getPreferredVoice(Set<Voice> voices);
 
     /**
