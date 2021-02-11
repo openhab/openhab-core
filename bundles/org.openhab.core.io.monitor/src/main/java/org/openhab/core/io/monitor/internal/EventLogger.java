@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
@@ -37,6 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class EventLogger implements EventSubscriber, ReadyTracker {
 
     private final Map<String, Logger> eventLoggers = new HashMap<>();
@@ -63,6 +66,7 @@ public class EventLogger implements EventSubscriber, ReadyTracker {
     }
 
     @Override
+    @Nullable
     public EventFilter getEventFilter() {
         return null;
     }

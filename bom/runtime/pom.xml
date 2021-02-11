@@ -1024,7 +1024,6 @@
       <version>0.9.12</version>
       <scope>compile</scope>
     </dependency>
-
   </dependencies>
 
 </project>
