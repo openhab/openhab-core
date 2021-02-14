@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.io.monitor.MeterRegistryProvider;
 import org.openhab.core.io.monitor.internal.metrics.BundleStateMetric;
 import org.openhab.core.io.monitor.internal.metrics.EventCountMetric;
@@ -57,13 +58,15 @@ public class DefaultMetricsRegistration implements ReadyService.ReadyTracker, Me
     private final CompositeMeterRegistry registry = Metrics.globalRegistry;
     private final ReadyService readyService;
     private final ThingRegistry thingRegistry;
+    private final RuleRegistry ruleRegistry;
 
     @Activate
     public DefaultMetricsRegistration(BundleContext bundleContext, final @Reference ReadyService readyService,
-            final @Reference ThingRegistry thingRegistry) {
+            final @Reference ThingRegistry thingRegistry, final @Reference RuleRegistry ruleRegistry) {
         this.bundleContext = bundleContext;
         this.readyService = readyService;
         this.thingRegistry = thingRegistry;
+        this.ruleRegistry = ruleRegistry;
     }
 
     @Activate
@@ -87,7 +90,7 @@ public class DefaultMetricsRegistration implements ReadyService.ReadyTracker, Me
         meters.add(new BundleStateMetric(bundleContext, tags));
         meters.add(new ThingStateMetric(bundleContext, thingRegistry, tags));
         meters.add(new EventCountMetric(bundleContext, tags));
-        meters.add(new RuleMetric(bundleContext, tags));
+        meters.add(new RuleMetric(bundleContext, tags, ruleRegistry));
         meters.add(new ThreadPoolMetric(tags));
 
         meters.forEach(m -> m.bindTo(registry));
