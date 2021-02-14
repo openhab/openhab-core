@@ -129,7 +129,12 @@ public class ModbusSlaveConnectionFactoryImpl
     private volatile Map<ModbusSlaveEndpoint, Long> lastPassivateMillis = new ConcurrentHashMap<>();
     private volatile Map<ModbusSlaveEndpoint, Long> lastConnectMillis = new ConcurrentHashMap<>();
     private volatile Map<ModbusSlaveEndpoint, Long> disconnectIfConnectedBefore = new ConcurrentHashMap<>();
-    private volatile Function<ModbusSlaveEndpoint, @Nullable EndpointPoolConfiguration> defaultPoolConfigurationFactory = endpoint -> null;
+    private final Function<ModbusSlaveEndpoint, EndpointPoolConfiguration> defaultPoolConfigurationFactory;
+
+    public ModbusSlaveConnectionFactoryImpl(
+            Function<ModbusSlaveEndpoint, EndpointPoolConfiguration> defaultPoolConfigurationFactory) {
+        this.defaultPoolConfigurationFactory = defaultPoolConfigurationFactory;
+    }
 
     private @Nullable InetAddress getInetAddress(ModbusIPSlaveEndpoint key) {
         try {
@@ -268,22 +273,9 @@ public class ModbusSlaveConnectionFactoryImpl
      * @param endpoint endpoint to query
      * @return general connection settings of the given endpoint
      */
-    @SuppressWarnings("null")
-    public @Nullable EndpointPoolConfiguration getEndpointPoolConfiguration(ModbusSlaveEndpoint endpoint) {
-        @Nullable
-        EndpointPoolConfiguration config = endpointPoolConfigs.computeIfAbsent(endpoint,
-                defaultPoolConfigurationFactory);
-        return config;
-    }
-
-    /**
-     * Set default factory for {@link EndpointPoolConfiguration}
-     *
-     * @param defaultPoolConfigurationFactory function providing defaults for a given endpoint
-     */
-    public void setDefaultPoolConfigurationFactory(
-            Function<ModbusSlaveEndpoint, @Nullable EndpointPoolConfiguration> defaultPoolConfigurationFactory) {
-        this.defaultPoolConfigurationFactory = defaultPoolConfigurationFactory;
+    public EndpointPoolConfiguration getEndpointPoolConfiguration(ModbusSlaveEndpoint endpoint) {
+        return Optional.ofNullable(endpointPoolConfigs.get(endpoint))
+                .orElseGet(() -> defaultPoolConfigurationFactory.apply(endpoint));
     }
 
     private void tryConnect(ModbusSlaveEndpoint endpoint, PooledObject<ModbusSlaveConnection> obj,

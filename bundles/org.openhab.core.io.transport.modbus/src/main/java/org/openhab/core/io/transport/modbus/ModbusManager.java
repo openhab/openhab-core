@@ -29,7 +29,7 @@ public interface ModbusManager {
      * Open communication interface to endpoint
      *
      * @param endpoint endpoint pointing to modbus slave
-     * @param configuration configuration for the endpoint
+     * @param configuration configuration for the endpoint. Use null to use default pool configuration
      * @return Communication interface for interacting with the slave
      * @throws IllegalArgumentException if there is already open communication interface with same endpoint but
      *             differing configuration
@@ -45,5 +45,5 @@ public interface ModbusManager {
      * @param endpoint endpoint to query
      * @return general connection settings of the given endpoint
      */
-    public @Nullable EndpointPoolConfiguration getEndpointPoolConfiguration(ModbusSlaveEndpoint endpoint);
+    public EndpointPoolConfiguration getEndpointPoolConfiguration(ModbusSlaveEndpoint endpoint);
 }
