@@ -878,7 +878,10 @@ public class ModbusManagerImpl implements ModbusManager {
             @Nullable EndpointPoolConfiguration configuration) throws IllegalArgumentException {
         boolean openCommFoundWithSameEndpointDifferentConfig = communicationInterfaces.stream()
                 .filter(comm -> comm.endpoint.equals(endpoint))
-                .anyMatch(comm -> comm.configuration != null && !comm.configuration.equals(configuration));
+                .anyMatch(comm -> !Optional.ofNullable(comm.configuration)
+                        .orElseGet(() -> DEFAULT_POOL_CONFIGURATION.apply(endpoint))
+                        .equals(Optional.ofNullable(configuration)
+                                .orElseGet(() -> DEFAULT_POOL_CONFIGURATION.apply(endpoint))));
         if (openCommFoundWithSameEndpointDifferentConfig) {
             throw new IllegalArgumentException(
                     "Communication interface is already open with different configuration to this same endpoint");
