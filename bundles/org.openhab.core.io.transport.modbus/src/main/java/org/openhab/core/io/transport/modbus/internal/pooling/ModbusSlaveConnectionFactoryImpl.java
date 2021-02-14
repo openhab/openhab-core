@@ -15,6 +15,7 @@ package org.openhab.core.io.transport.modbus.internal.pooling;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -97,9 +98,8 @@ public class ModbusSlaveConnectionFactoryImpl
 
             ModbusSlaveConnection connection = getObject();
 
-            @Nullable
-            EndpointPoolConfiguration configuration = endpointPoolConfigs.get(localEndpoint);
-            long reconnectAfterMillis = configuration == null ? 0 : configuration.getReconnectAfterMillis();
+            EndpointPoolConfiguration configuration = getEndpointPoolConfiguration(localEndpoint);
+            long reconnectAfterMillis = configuration.getReconnectAfterMillis();
             long connectionAgeMillis = System.currentTimeMillis() - localLastConnected;
             long disconnectIfConnectedBeforeMillis = disconnectIfConnectedBefore.getOrDefault(localEndpoint, -1L);
             boolean disconnectSinceTooOldConnection = disconnectIfConnectedBeforeMillis < 0L ? false
@@ -125,7 +125,7 @@ public class ModbusSlaveConnectionFactoryImpl
     }
 
     private final Logger logger = LoggerFactory.getLogger(ModbusSlaveConnectionFactoryImpl.class);
-    private volatile Map<ModbusSlaveEndpoint, @Nullable EndpointPoolConfiguration> endpointPoolConfigs = new ConcurrentHashMap<>();
+    private volatile Map<ModbusSlaveEndpoint, EndpointPoolConfiguration> endpointPoolConfigs = new ConcurrentHashMap<>();
     private volatile Map<ModbusSlaveEndpoint, Long> lastPassivateMillis = new ConcurrentHashMap<>();
     private volatile Map<ModbusSlaveEndpoint, Long> lastConnectMillis = new ConcurrentHashMap<>();
     private volatile Map<ModbusSlaveEndpoint, Long> disconnectIfConnectedBefore = new ConcurrentHashMap<>();
@@ -162,11 +162,7 @@ public class ModbusSlaveConnectionFactoryImpl
                 if (address == null) {
                     return null;
                 }
-                EndpointPoolConfiguration config = getEndpointPoolConfiguration(key);
-                int connectTimeoutMillis = 0;
-                if (config != null) {
-                    connectTimeoutMillis = config.getConnectTimeoutMillis();
-                }
+                int connectTimeoutMillis = getEndpointPoolConfiguration(key).getConnectTimeoutMillis();
                 TCPMasterConnection connection = new TCPMasterConnection(address, key.getPort(), connectTimeoutMillis,
                         key.getRtuEncoded());
                 logger.trace("Created connection {} for endpoint {}", connection, key);
@@ -209,18 +205,15 @@ public class ModbusSlaveConnectionFactoryImpl
         }
         ModbusSlaveConnection connection = obj.getObject();
         try {
-            @Nullable
             EndpointPoolConfiguration config = getEndpointPoolConfiguration(endpoint);
             if (!connection.isConnected()) {
                 tryConnect(endpoint, obj, connection, config);
             }
 
-            if (config != null) {
-                long waited = waitAtleast(lastPassivateMillis.get(endpoint), config.getInterTransactionDelayMillis());
-                logger.trace(
-                        "Waited {}ms (interTransactionDelayMillis {}ms) before giving returning connection {} for endpoint {}, to ensure delay between transactions.",
-                        waited, config.getInterTransactionDelayMillis(), obj.getObject(), endpoint);
-            }
+            long waited = waitAtleast(lastPassivateMillis.get(endpoint), config.getInterTransactionDelayMillis());
+            logger.trace(
+                    "Waited {}ms (interTransactionDelayMillis {}ms) before giving returning connection {} for endpoint {}, to ensure delay between transactions.",
+                    waited, config.getInterTransactionDelayMillis(), obj.getObject(), endpoint);
         } catch (InterruptedException e) {
             // Someone wants to cancel us, reset the connection and abort
             if (connection.isConnected()) {
@@ -279,26 +272,24 @@ public class ModbusSlaveConnectionFactoryImpl
     }
 
     private void tryConnect(ModbusSlaveEndpoint endpoint, PooledObject<ModbusSlaveConnection> obj,
-            ModbusSlaveConnection connection, @Nullable EndpointPoolConfiguration config) throws Exception {
+            ModbusSlaveConnection connection, EndpointPoolConfiguration config) throws Exception {
         if (connection.isConnected()) {
             return;
         }
         int tryIndex = 0;
         Long lastConnect = lastConnectMillis.get(endpoint);
-        int maxTries = config == null ? 1 : config.getConnectMaxTries();
+        int maxTries = config.getConnectMaxTries();
         do {
             try {
-                if (config != null) {
-                    long waited = waitAtleast(lastConnect,
-                            Math.max(config.getInterConnectDelayMillis(), config.getInterTransactionDelayMillis()));
-                    if (waited > 0) {
-                        logger.trace(
-                                "Waited {}ms (interConnectDelayMillis {}ms, interTransactionDelayMillis {}ms) before "
-                                        + "connecting disconnected connection {} for endpoint {}, to allow delay "
-                                        + "between connections re-connects",
-                                waited, config.getInterConnectDelayMillis(), config.getInterTransactionDelayMillis(),
-                                obj.getObject(), endpoint);
-                    }
+                long waited = waitAtleast(lastConnect,
+                        Math.max(config.getInterConnectDelayMillis(), config.getInterTransactionDelayMillis()));
+                if (waited > 0) {
+                    logger.trace(
+                            "Waited {}ms (interConnectDelayMillis {}ms, interTransactionDelayMillis {}ms) before "
+                                    + "connecting disconnected connection {} for endpoint {}, to allow delay "
+                                    + "between connections re-connects",
+                            waited, config.getInterConnectDelayMillis(), config.getInterTransactionDelayMillis(),
+                            obj.getObject(), endpoint);
                 }
                 connection.connect();
                 long curTime = System.currentTimeMillis();

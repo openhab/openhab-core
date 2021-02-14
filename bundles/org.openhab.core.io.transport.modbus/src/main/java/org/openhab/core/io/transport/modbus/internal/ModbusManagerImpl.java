@@ -541,9 +541,7 @@ public class ModbusManagerImpl implements ModbusManager {
         F failureCallback = task.getFailureCallback();
         int maxTries = task.getMaxTries();
         AtomicReference<@Nullable Exception> lastError = new AtomicReference<>();
-        @SuppressWarnings("null") // since cfg in lambda cannot be really null
-        long retryDelay = Optional.ofNullable(connectionFactory.getEndpointPoolConfiguration(endpoint))
-                .map(cfg -> cfg.getInterTransactionDelayMillis()).orElse(0L);
+        long retryDelay = getEndpointPoolConfiguration(endpoint).getInterTransactionDelayMillis();
 
         if (maxTries <= 0) {
             throw new IllegalArgumentException("maxTries should be positive");
