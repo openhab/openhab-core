@@ -275,6 +275,11 @@ public class ModbusManagerImpl implements ModbusManager {
     public static final long DEFAULT_SERIAL_INTER_TRANSACTION_DELAY_MILLIS = 35;
 
     /**
+     * Default connection timeout
+     */
+    public static final int DEFAULT_CONNECT_TIMEOUT_MILLIS = 10_000;
+
+    /**
      * Thread naming for modbus read & write requests. Also used by the monitor thread
      */
     private static final String MODBUS_POLLER_THREAD_POOL_NAME = "modbusManagerPollerThreadPool";
@@ -301,6 +306,7 @@ public class ModbusManagerImpl implements ModbusManager {
                 EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
                 endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
                 endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
+                endpointPoolConfig.setConnectTimeoutMillis(DEFAULT_CONNECT_TIMEOUT_MILLIS);
                 return endpointPoolConfig;
             }
 
@@ -311,6 +317,7 @@ public class ModbusManagerImpl implements ModbusManager {
                 endpointPoolConfig.setReconnectAfterMillis(-1);
                 endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_SERIAL_INTER_TRANSACTION_DELAY_MILLIS);
                 endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
+                endpointPoolConfig.setConnectTimeoutMillis(DEFAULT_CONNECT_TIMEOUT_MILLIS);
                 return endpointPoolConfig;
             }
 
@@ -319,6 +326,7 @@ public class ModbusManagerImpl implements ModbusManager {
                 EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
                 endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
                 endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
+                endpointPoolConfig.setConnectTimeoutMillis(DEFAULT_CONNECT_TIMEOUT_MILLIS);
                 return endpointPoolConfig;
             }
         });
