@@ -728,7 +728,7 @@ public class ModbusManagerImpl implements ModbusManager {
         private @Nullable EndpointPoolConfiguration configuration;
 
         @SuppressWarnings("null")
-        public ModbusCommunicationInterfaceImpl(ModbusSlaveEndpoint endpoint,
+        private ModbusCommunicationInterfaceImpl(ModbusSlaveEndpoint endpoint,
                 @Nullable EndpointPoolConfiguration configuration) {
             this.endpoint = endpoint;
             this.configuration = configuration;
