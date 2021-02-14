@@ -25,6 +25,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import javax.imageio.IIOException;
 
@@ -274,6 +275,11 @@ public class ModbusManagerImpl implements ModbusManager {
     public static final long DEFAULT_SERIAL_INTER_TRANSACTION_DELAY_MILLIS = 35;
 
     /**
+     * Default connection timeout
+     */
+    public static final int DEFAULT_CONNECT_TIMEOUT_MILLIS = 10_000;
+
+    /**
      * Thread naming for modbus read & write requests. Also used by the monitor thread
      */
     private static final String MODBUS_POLLER_THREAD_POOL_NAME = "modbusManagerPollerThreadPool";
@@ -292,6 +298,39 @@ public class ModbusManagerImpl implements ModbusManager {
      */
     private static final long WARN_QUEUE_SIZE = 500;
     private static final long MONITOR_QUEUE_INTERVAL_MILLIS = 10000;
+    private static final Function<ModbusSlaveEndpoint, EndpointPoolConfiguration> DEFAULT_POOL_CONFIGURATION = endpoint -> {
+        return endpoint.accept(new ModbusSlaveEndpointVisitor<EndpointPoolConfiguration>() {
+
+            @Override
+            public @NonNull EndpointPoolConfiguration visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
+                EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
+                endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
+                endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
+                endpointPoolConfig.setConnectTimeoutMillis(DEFAULT_CONNECT_TIMEOUT_MILLIS);
+                return endpointPoolConfig;
+            }
+
+            @Override
+            public @NonNull EndpointPoolConfiguration visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
+                EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
+                // never "disconnect" (close/open serial port) serial connection between borrows
+                endpointPoolConfig.setReconnectAfterMillis(-1);
+                endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_SERIAL_INTER_TRANSACTION_DELAY_MILLIS);
+                endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
+                endpointPoolConfig.setConnectTimeoutMillis(DEFAULT_CONNECT_TIMEOUT_MILLIS);
+                return endpointPoolConfig;
+            }
+
+            @Override
+            public @NonNull EndpointPoolConfiguration visit(ModbusUDPSlaveEndpoint modbusUDPSlavePoolingKey) {
+                EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
+                endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
+                endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
+                endpointPoolConfig.setConnectTimeoutMillis(DEFAULT_CONNECT_TIMEOUT_MILLIS);
+                return endpointPoolConfig;
+            }
+        });
+    };
 
     private final PollOperation pollOperation = new PollOperation();
     private final WriteOperation writeOperation = new WriteOperation();
@@ -319,38 +358,8 @@ public class ModbusManagerImpl implements ModbusManager {
     private volatile Set<ModbusCommunicationInterfaceImpl> communicationInterfaces = ConcurrentHashMap.newKeySet();
 
     private void constructConnectionPool() {
-        ModbusSlaveConnectionFactoryImpl connectionFactory = new ModbusSlaveConnectionFactoryImpl();
-        connectionFactory.setDefaultPoolConfigurationFactory(endpoint -> {
-            return endpoint.accept(new ModbusSlaveEndpointVisitor<EndpointPoolConfiguration>() {
-
-                @Override
-                public @NonNull EndpointPoolConfiguration visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
-                    EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
-                    endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
-                    endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
-                    return endpointPoolConfig;
-                }
-
-                @Override
-                public @NonNull EndpointPoolConfiguration visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
-                    EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
-                    // never "disconnect" (close/open serial port) serial connection between borrows
-                    endpointPoolConfig.setReconnectAfterMillis(-1);
-                    endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_SERIAL_INTER_TRANSACTION_DELAY_MILLIS);
-                    endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
-                    return endpointPoolConfig;
-                }
-
-                @Override
-                public @NonNull EndpointPoolConfiguration visit(ModbusUDPSlaveEndpoint modbusUDPSlavePoolingKey) {
-                    EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
-                    endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
-                    endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
-                    return endpointPoolConfig;
-                }
-            });
-        });
-
+        ModbusSlaveConnectionFactoryImpl connectionFactory = new ModbusSlaveConnectionFactoryImpl(
+                DEFAULT_POOL_CONFIGURATION);
         GenericKeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> genericKeyedObjectPool = new ModbusConnectionPool(
                 connectionFactory);
         genericKeyedObjectPool.setSwallowedExceptionListener(new SwallowedExceptionListener() {
@@ -540,9 +549,7 @@ public class ModbusManagerImpl implements ModbusManager {
         F failureCallback = task.getFailureCallback();
         int maxTries = task.getMaxTries();
         AtomicReference<@Nullable Exception> lastError = new AtomicReference<>();
-        @SuppressWarnings("null") // since cfg in lambda cannot be really null
-        long retryDelay = Optional.ofNullable(connectionFactory.getEndpointPoolConfiguration(endpoint))
-                .map(cfg -> cfg.getInterTransactionDelayMillis()).orElse(0L);
+        long retryDelay = getEndpointPoolConfiguration(endpoint).getInterTransactionDelayMillis();
 
         if (maxTries <= 0) {
             throw new IllegalArgumentException("maxTries should be positive");
@@ -729,7 +736,7 @@ public class ModbusManagerImpl implements ModbusManager {
         private @Nullable EndpointPoolConfiguration configuration;
 
         @SuppressWarnings("null")
-        public ModbusCommunicationInterfaceImpl(ModbusSlaveEndpoint endpoint,
+        private ModbusCommunicationInterfaceImpl(ModbusSlaveEndpoint endpoint,
                 @Nullable EndpointPoolConfiguration configuration) {
             this.endpoint = endpoint;
             this.configuration = configuration;
@@ -879,7 +886,10 @@ public class ModbusManagerImpl implements ModbusManager {
             @Nullable EndpointPoolConfiguration configuration) throws IllegalArgumentException {
         boolean openCommFoundWithSameEndpointDifferentConfig = communicationInterfaces.stream()
                 .filter(comm -> comm.endpoint.equals(endpoint))
-                .anyMatch(comm -> comm.configuration != null && !comm.configuration.equals(configuration));
+                .anyMatch(comm -> !Optional.ofNullable(comm.configuration)
+                        .orElseGet(() -> DEFAULT_POOL_CONFIGURATION.apply(endpoint))
+                        .equals(Optional.ofNullable(configuration)
+                                .orElseGet(() -> DEFAULT_POOL_CONFIGURATION.apply(endpoint))));
         if (openCommFoundWithSameEndpointDifferentConfig) {
             throw new IllegalArgumentException(
                     "Communication interface is already open with different configuration to this same endpoint");
@@ -891,7 +901,7 @@ public class ModbusManagerImpl implements ModbusManager {
     }
 
     @Override
-    public @Nullable EndpointPoolConfiguration getEndpointPoolConfiguration(ModbusSlaveEndpoint endpoint) {
+    public EndpointPoolConfiguration getEndpointPoolConfiguration(ModbusSlaveEndpoint endpoint) {
         Objects.requireNonNull(connectionFactory, "Not activated!");
         return connectionFactory.getEndpointPoolConfiguration(endpoint);
     }
