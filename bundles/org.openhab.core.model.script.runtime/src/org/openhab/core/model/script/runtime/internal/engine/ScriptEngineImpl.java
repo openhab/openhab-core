@@ -14,6 +14,7 @@ package org.openhab.core.model.script.runtime.internal.engine;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,6 +57,8 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 public class ScriptEngineImpl implements ScriptEngine, ModelParser {
 
+    protected XtextResourceSet resourceSet;
+
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineImpl.class);
 
     private ScriptServiceUtil scriptServiceUtil;
@@ -70,13 +73,16 @@ public class ScriptEngineImpl implements ScriptEngine, ModelParser {
     }
 
     private XtextResourceSet getResourceSet() {
-        XtextResourceSet resourceSet = ScriptStandaloneSetup.getInjector().getInstance(XtextResourceSet.class);
-        resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.FALSE);
+        if (resourceSet == null) {
+            resourceSet = ScriptStandaloneSetup.getInjector().getInstance(XtextResourceSet.class);
+            resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.FALSE);
+        }
         return resourceSet;
     }
 
     @Deactivate
     public void deactivate() {
+        this.resourceSet = null;
         ScriptStandaloneSetup.unregister();
     }
 
@@ -131,21 +137,23 @@ public class ScriptEngineImpl implements ScriptEngine, ModelParser {
 
         List<Diagnostic> errors = resource.getErrors();
         if (!errors.isEmpty()) {
+            deleteResource(resource);
             throw new ScriptParsingException("Failed to parse expression (due to managed SyntaxError/s)",
                     scriptAsString).addDiagnosticErrors(errors);
         }
 
         EList<EObject> contents = resource.getContents();
-
         if (!contents.isEmpty()) {
             Iterable<Issue> validationErrors = getValidationErrors(contents.get(0));
             if (!validationErrors.iterator().hasNext()) {
                 return (XExpression) contents.get(0);
             } else {
+                deleteResource(resource);
                 throw new ScriptParsingException("Failed to parse expression (due to managed ValidationError/s)",
                         scriptAsString).addValidationIssues(validationErrors);
             }
         } else {
+            deleteResource(resource);
             return null;
         }
     }
@@ -179,4 +187,11 @@ public class ScriptEngineImpl implements ScriptEngine, ModelParser {
         return "script";
     }
 
+    private void deleteResource(Resource resource) {
+        try {
+            resource.delete(Collections.emptyMap());
+        } catch(IOException e) {
+            // Do nothing
+        }
+    }
 }
