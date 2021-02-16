@@ -618,7 +618,7 @@ public class SitemapResource
         if (uri.getPort() >= 0) {
             sb.append(":").append(uri.getPort());
         }
-        sb.append("/proxy?sitemap=").append(sitemapName).append(".sitemap&widgetId=").append(wId);
+        sb.append("/proxy?sitemap=").append(sitemapName).append("&widgetId=").append(wId);
         return sb.toString();
     }
 
