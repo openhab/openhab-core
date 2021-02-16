@@ -56,8 +56,6 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 public class ScriptEngineImpl implements ScriptEngine, ModelParser {
 
-    protected XtextResourceSet resourceSet;
-
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineImpl.class);
 
     private ScriptServiceUtil scriptServiceUtil;
@@ -72,16 +70,13 @@ public class ScriptEngineImpl implements ScriptEngine, ModelParser {
     }
 
     private XtextResourceSet getResourceSet() {
-        if (resourceSet == null) {
-            resourceSet = ScriptStandaloneSetup.getInjector().getInstance(XtextResourceSet.class);
-            resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.FALSE);
-        }
+        XtextResourceSet resourceSet = ScriptStandaloneSetup.getInjector().getInstance(XtextResourceSet.class);
+        resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.FALSE);
         return resourceSet;
     }
 
     @Deactivate
     public void deactivate() {
-        this.resourceSet = null;
         ScriptStandaloneSetup.unregister();
     }
 
