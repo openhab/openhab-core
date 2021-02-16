@@ -22,3 +22,11 @@ generated/
 userdata/
 
 bundles/org.openhab.core.ui/.classpath
+
+bundles/org.openhab.core.io.rest.sitemap/.vscode/launch.json
+
+bundles/org.openhab.core.io.rest.sitemap/.vscode/tasks.json
+
+bundles/org.openhab.core.ui/.vscode/launch.json
+
+bundles/org.openhab.core.ui/.vscode/tasks.json
