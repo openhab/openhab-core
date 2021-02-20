@@ -85,6 +85,7 @@ public class ThreadPoolManager {
             }
             String poolName = entry.getKey();
             Object config = entry.getValue();
+	    LOGGER.debug("Thread pool config for pool '{}' value '{}'",poolName,config);
             if (config == null) {
                 configs.remove(poolName);
             }
@@ -103,15 +104,14 @@ public class ThreadPoolManager {
                         LOGGER.debug("Thread pool '{}' configured as {}", poolName, poolSize);
                     }
                     enabled.put(poolName, true);
-                    return;
                 } catch (NumberFormatException e) {
                     LOGGER.warn("Ignoring invalid configuration for pool '{}': {}.  Comparing as a boolean next.",
                             poolName, config);
-                }
+		}
                 try {
                     Boolean enable = Boolean.valueOf((String) config);
                     enabled.put(poolName, enable);
-                    return;
+		    LOGGER.debug("Thread pool '{}' configured as {}", poolName, enable);
                 } catch (Exception e) {
                     LOGGER.debug(
                             "Configuration of {} for pool {} is not a boolean.  Config must be either an integer or boolean.",
@@ -130,7 +130,6 @@ public class ThreadPoolManager {
      * @return an instance to use
      */
     public static ScheduledExecutorService getScheduledPool(String poolName) {
-        LOGGER.debug("Attempting to create scheduled thread pool '{}'", poolName);
         ExecutorService pool = pools.get(poolName);
         if (pool == null) {
             synchronized (pools) {
@@ -164,7 +163,6 @@ public class ThreadPoolManager {
      * @return an instance to use
      */
     public static ExecutorService getPool(String poolName) {
-        LOGGER.debug("Attempting to create thread pool '{}'", poolName);
         ExecutorService pool = pools.get(poolName);
         if (pool == null) {
             synchronized (pools) {
