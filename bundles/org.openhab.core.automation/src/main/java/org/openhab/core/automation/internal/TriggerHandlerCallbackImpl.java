@@ -79,7 +79,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
             if (executor == null) {
                 return;
             }
-            if ((threadPoolSize == -1) || (RuleStatus.IDLE.equals(ruleStatus))) {
+            if ((threadPoolEnabled == false) || (RuleStatus.IDLE.equals(ruleStatus))) {
                 future = executor.submit(new TriggerData(trigger, outputs));
                 re.logger.debug("The trigger '{}' of rule '{}' is triggered. - Rule Status: '{}' - Rule Executed.",
                         trigger.getId(), ruleUID, ruleStatus);
@@ -136,7 +136,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     }
 
     public void dispose() {
-        if (threadPoolSize == -1) {
+        if (threadPoolEnabled == false) {
             synchronized (this) {
                 AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
                     executor.shutdownNow();
