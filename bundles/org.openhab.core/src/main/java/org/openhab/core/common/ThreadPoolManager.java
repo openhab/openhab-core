@@ -104,6 +104,7 @@ public class ThreadPoolManager {
                         LOGGER.debug("Thread pool '{}' configured as {}", poolName, poolSize);
                     }
                     enabled.put(poolName, true);
+		    continue;
                 } catch (NumberFormatException e) {
                     LOGGER.warn("Ignoring invalid configuration for pool '{}': {}.  Comparing as a boolean next.",
                             poolName, config);
