@@ -51,12 +51,15 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     private final RuleEngineImpl re;
 
     private final int threadPoolSize;
+    private final boolean threadPoolEnabled;
 
     protected TriggerHandlerCallbackImpl(RuleEngineImpl re, String ruleUID) {
         this.re = re;
         this.ruleUID = ruleUID;
         this.threadPoolSize = ThreadPoolManager.getConfig(AUTOMATION_THREADPOOL_NAME);
-        if (threadPoolSize == -1) {
+        this.threadPoolEnabled = ThreadPoolManager.getEnabled(AUTOMATION_THREADPOOL_NAME);
+        re.logger.debug("Automation threadpool configured as {} {}", threadPoolSize, threadPoolEnabled);
+        if (threadPoolEnabled == false) {
             re.logger.debug("Firing rule {} using single thread.", ruleUID);
             executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("rule-" + ruleUID));
         } else {
