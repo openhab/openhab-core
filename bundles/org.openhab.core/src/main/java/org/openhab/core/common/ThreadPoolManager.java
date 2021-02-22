@@ -85,7 +85,7 @@ public class ThreadPoolManager {
             }
             String poolName = entry.getKey();
             Object config = entry.getValue();
-	    LOGGER.debug("Thread pool config for pool '{}' value '{}'",poolName,config);
+            LOGGER.debug("Thread pool config for pool '{}' value '{}'", poolName, config);
             if (config == null) {
                 configs.remove(poolName);
             }
@@ -104,15 +104,15 @@ public class ThreadPoolManager {
                         LOGGER.debug("Thread pool '{}' configured as {}", poolName, poolSize);
                     }
                     enabled.put(poolName, true);
-		    continue;
+                    continue;
                 } catch (NumberFormatException e) {
                     LOGGER.warn("Ignoring invalid configuration for pool '{}': {}.  Comparing as a boolean next.",
                             poolName, config);
-		}
+                }
                 try {
                     Boolean enable = Boolean.valueOf((String) config);
                     enabled.put(poolName, enable);
-		    LOGGER.debug("Thread pool '{}' configured as {}", poolName, enable);
+                    LOGGER.debug("Thread pool '{}' configured as {}", poolName, enable);
                 } catch (Exception e) {
                     LOGGER.debug(
                             "Configuration of {} for pool {} is not a boolean.  Config must be either an integer or boolean.",
