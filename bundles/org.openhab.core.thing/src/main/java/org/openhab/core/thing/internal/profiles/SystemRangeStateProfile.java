@@ -35,29 +35,29 @@ import org.slf4j.LoggerFactory;
 import tec.uom.se.AbstractUnit;
 
 /***
- * This is the default implementation for a {@link SystemHysteresisStateProfile}.
+ * This is the default implementation for a {@link SystemRangeStateProfile}.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
 @NonNullByDefault
-public class SystemHysteresisStateProfile implements StateProfile {
+public class SystemRangeStateProfile implements StateProfile {
 
     static final String LOWER_PARAM = "lower";
-    private static final String UPPER_PARAM = "upper";
-    private static final String INVERTED_PARAM = "inverted";
+    static final String UPPER_PARAM = "upper";
+    static final String INVERTED_PARAM = "inverted";
 
-    private final Logger logger = LoggerFactory.getLogger(SystemHysteresisStateProfile.class);
+    private final Logger logger = LoggerFactory.getLogger(SystemRangeStateProfile.class);
 
     private final ProfileCallback callback;
 
     private final QuantityType<?> lower;
     private final QuantityType<?> upper;
-    private final OnOffType low;
-    private final OnOffType high;
+    private final OnOffType inRange;
+    private final OnOffType notInRange;
 
     private Type previousType = UnDefType.UNDEF;
 
-    public SystemHysteresisStateProfile(ProfileCallback callback, ProfileContext context) {
+    public SystemRangeStateProfile(ProfileCallback callback, ProfileContext context) {
         this.callback = callback;
 
         final QuantityType<?> lowerParam = getParam(context, LOWER_PARAM);
@@ -66,18 +66,26 @@ public class SystemHysteresisStateProfile implements StateProfile {
         }
         this.lower = lowerParam;
         final QuantityType<?> upperParam = getParam(context, UPPER_PARAM);
-        final QuantityType<?> convertedUpperParam = upperParam == null ? lower : upperParam.toUnit(lower.getUnit());
+        if (upperParam == null) {
+            throw new IllegalArgumentException(String.format("Parameter '%s' is not a Number value.", UPPER_PARAM));
+        }
+        final QuantityType<?> convertedUpperParam = upperParam.toUnit(lower.getUnit());
         if (convertedUpperParam == null) {
             throw new IllegalArgumentException(
                     String.format("Units of parameters '%s' and '%s' are not compatible: %s != %s", LOWER_PARAM,
                             UPPER_PARAM, lower, upperParam));
         }
+        if (convertedUpperParam.doubleValue() <= lower.doubleValue()) {
+            throw new IllegalArgumentException(
+                    String.format("Parameter '%s' (%s) is less than or equal to '%s' (%s) parameter.", UPPER_PARAM,
+                            convertedUpperParam, LOWER_PARAM, lower));
+        }
         this.upper = convertedUpperParam;
 
         final Object paramValue = context.getConfiguration().get(INVERTED_PARAM);
         final boolean inverted = paramValue == null ? false : Boolean.valueOf(paramValue.toString());
-        this.low = inverted ? OnOffType.ON : OnOffType.OFF;
-        this.high = inverted ? OnOffType.OFF : OnOffType.ON;
+        this.inRange = inverted ? OnOffType.OFF : OnOffType.ON;
+        this.notInRange = inverted ? OnOffType.ON : OnOffType.OFF;
     }
 
     private @Nullable QuantityType<?> getParam(ProfileContext context, String param) {
@@ -98,7 +106,7 @@ public class SystemHysteresisStateProfile implements StateProfile {
 
     @Override
     public ProfileTypeUID getProfileTypeUID() {
-        return SystemProfiles.HYSTERESIS;
+        return SystemProfiles.RANGE;
     }
 
     @Override
@@ -161,11 +169,6 @@ public class SystemHysteresisStateProfile implements StateProfile {
     }
 
     private Type mapValue(double lower, double upper, double value) {
-        if (value <= lower) {
-            return low;
-        } else if (value >= upper) {
-            return high;
-        }
-        return previousType;
+        return lower <= value && value <= upper ? inRange : notInRange;
     }
 }

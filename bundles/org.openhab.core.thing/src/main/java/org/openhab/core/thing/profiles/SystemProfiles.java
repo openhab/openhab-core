@@ -30,6 +30,7 @@ public interface SystemProfiles {
     ProfileTypeUID FOLLOW = new ProfileTypeUID(SYSTEM_SCOPE, "follow");
     ProfileTypeUID OFFSET = new ProfileTypeUID(SYSTEM_SCOPE, "offset");
     ProfileTypeUID HYSTERESIS = new ProfileTypeUID(SYSTEM_SCOPE, "hysteresis");
+    ProfileTypeUID RANGE = new ProfileTypeUID(SYSTEM_SCOPE, "range");
     ProfileTypeUID RAWBUTTON_ON_OFF_SWITCH = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-on-off-switch");
     ProfileTypeUID RAWBUTTON_TOGGLE_PLAYER = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-player");
     ProfileTypeUID RAWBUTTON_TOGGLE_ROLLERSHUTTER = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-rollershutter");
@@ -51,7 +52,13 @@ public interface SystemProfiles {
     StateProfileType OFFSET_TYPE = ProfileTypeBuilder.newState(OFFSET, "Offset")
             .withSupportedItemTypes(CoreItemFactory.NUMBER).withSupportedItemTypesOfChannel(CoreItemFactory.NUMBER)
             .build();
+
     ProfileType HYSTERESIS_TYPE = ProfileTypeBuilder.newState(HYSTERESIS, "Hysteresis") //
+            .withSupportedItemTypesOfChannel(CoreItemFactory.DIMMER, CoreItemFactory.NUMBER) //
+            .withSupportedItemTypes(CoreItemFactory.SWITCH) //
+            .build();
+
+    ProfileType RANGE_TYPE = ProfileTypeBuilder.newState(RANGE, "Range") //
             .withSupportedItemTypesOfChannel(CoreItemFactory.DIMMER, CoreItemFactory.NUMBER) //
             .withSupportedItemTypes(CoreItemFactory.SWITCH) //
             .build();
