@@ -58,7 +58,7 @@ public interface SystemProfiles {
             .withSupportedItemTypes(CoreItemFactory.SWITCH) //
             .build();
 
-    ProfileType RANGE_TYPE = ProfileTypeBuilder.newState(HYSTERESIS, "Range") //
+    ProfileType RANGE_TYPE = ProfileTypeBuilder.newState(RANGE, "Range") //
             .withSupportedItemTypesOfChannel(CoreItemFactory.DIMMER, CoreItemFactory.NUMBER) //
             .withSupportedItemTypes(CoreItemFactory.SWITCH) //
             .build();
