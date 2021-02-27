@@ -26,6 +26,9 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
+import org.openhab.core.semantics.model.Equipment;
+import org.openhab.core.semantics.model.Location;
+import org.openhab.core.semantics.model.Point;
 import org.openhab.core.semantics.model.Property;
 import org.openhab.core.semantics.model.Tag;
 import org.openhab.core.semantics.model.TagInfo;
@@ -107,14 +110,14 @@ public class SemanticTags {
     }
 
     /**
-     * Determines the semantic entity type of an item, i.e. a sub-type of Location, Equipment or Point.
+     * Determines the semantic type of an {@link Item} i.e. a sub-type of {@link Location}, {@link Equipment} or
+     * {@link Point}.
      *
-     * @param item the item to get the semantic type for
+     * @param item the Item to get the semantic type for
      * @return a sub-type of Location, Equipment or Point
      */
     public static @Nullable Class<? extends Tag> getSemanticType(Item item) {
-        Set<String> tags = item.getTags();
-        for (String tag : tags) {
+        for (String tag : item.getTags()) {
             Class<? extends Tag> type = getById(tag);
             if (type != null && !Property.class.isAssignableFrom(type)) {
                 return type;
@@ -134,18 +137,69 @@ public class SemanticTags {
     }
 
     /**
-     * Determines the Property that a Point relates to.
+     * Determines the {@link Property} type that a {@link Point} relates to.
      *
-     * @param item the item to get the property for
-     * @return a sub-type of Property if the item represents a Point, otherwise null
+     * @param item the Item to get the property for
+     * @return a sub-type of Property if the Item represents a Point, otherwise null
      */
     @SuppressWarnings("unchecked")
     public static @Nullable Class<? extends Property> getProperty(Item item) {
-        Set<String> tags = item.getTags();
-        for (String tag : tags) {
+        for (String tag : item.getTags()) {
             Class<? extends Tag> type = getById(tag);
             if (type != null && Property.class.isAssignableFrom(type)) {
                 return (Class<? extends Property>) type;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Determines the semantic {@link Point} type of an {@link Item}.
+     *
+     * @param item the Item to get the Point for
+     * @return a sub-type of a {@link Point}if the Item represents an Point, otherwise null
+     */
+    @SuppressWarnings("unchecked")
+    public static @Nullable Class<? extends Point> getPoint(Item item) {
+        Set<String> tags = item.getTags();
+        for (String tag : tags) {
+            Class<? extends Tag> type = getById(tag);
+            if (type != null && Point.class.isAssignableFrom(type)) {
+                return (Class<? extends Point>) type;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Determines the semantic {@link Equipment} type of an {@link Item}.
+     *
+     * @param item the Item to get the Equipment for
+     * @return a sub-type of {@link Equipment} if the Item represents an Equipment, otherwise null
+     */
+    @SuppressWarnings("unchecked")
+    public static @Nullable Class<? extends Equipment> getEquipment(Item item) {
+        for (String tag : item.getTags()) {
+            Class<? extends Tag> type = getById(tag);
+            if (type != null && Equipment.class.isAssignableFrom(type)) {
+                return (Class<? extends Equipment>) type;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Determines the semantic {@link Location} type of an {@link Item}.
+     *
+     * @param item the item to get the location for
+     * @return a sub-type of {@link Location} if the item represents a location, otherwise null
+     */
+    @SuppressWarnings("unchecked")
+    public static @Nullable Class<? extends Location> getLocation(Item item) {
+        for (String tag : item.getTags()) {
+            Class<? extends Tag> type = getById(tag);
+            if (type != null && Location.class.isAssignableFrom(type)) {
+                return (Class<? extends Location>) type;
             }
         }
         return null;

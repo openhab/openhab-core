@@ -39,8 +39,9 @@ public class SemanticTagsTest {
     private GenericItem pointItem;
 
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() {
         CoreItemFactory itemFactory = new CoreItemFactory();
+
         locationItem = new GroupItem("TestBathRoom");
         locationItem.addTag("Bathroom");
 
@@ -82,6 +83,21 @@ public class SemanticTagsTest {
         assertEquals(Bathroom.class, SemanticTags.getSemanticType(locationItem));
         assertEquals(CleaningRobot.class, SemanticTags.getSemanticType(equipmentItem));
         assertEquals(Measurement.class, SemanticTags.getSemanticType(pointItem));
+    }
+
+    @Test
+    public void testGetLocation() {
+        assertEquals(Bathroom.class, SemanticTags.getLocation(locationItem));
+    }
+
+    @Test
+    public void testGetEquipment() {
+        assertEquals(CleaningRobot.class, SemanticTags.getEquipment(equipmentItem));
+    }
+
+    @Test
+    public void testGetPoint() {
+        assertEquals(Measurement.class, SemanticTags.getPoint(pointItem));
     }
 
     @Test
