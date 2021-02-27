@@ -18,6 +18,8 @@ import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.chrono.ChronoZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.concurrent.Callable;
@@ -29,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -183,10 +186,11 @@ public class SchedulerImplTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     public void testSchedule() throws InterruptedException {
         Semaphore s = new Semaphore(0);
-        TestSchedulerTemporalAdjuster temporalAdjuster = new TestSchedulerTemporalAdjuster();
+        TestSchedulerWithCounter temporalAdjuster = new TestSchedulerWithCounter();
         scheduler.schedule(s::release, temporalAdjuster);
         s.acquire(3);
         Thread.sleep(300); // wait a little longer to see if not more are scheduled.
+
         assertEquals(0, s.availablePermits(), "Scheduler should not have released more after done");
         assertEquals(3, temporalAdjuster.getCount(), "Scheduler should have run 3 times");
     }
@@ -195,7 +199,7 @@ public class SchedulerImplTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     public void testScheduleCancel() throws InterruptedException {
         Semaphore s = new Semaphore(0);
-        TestSchedulerTemporalAdjuster temporalAdjuster = new TestSchedulerTemporalAdjuster();
+        TestSchedulerWithCounter temporalAdjuster = new TestSchedulerWithCounter();
         ScheduledCompletableFuture<Void> schedule = scheduler.schedule(s::release, temporalAdjuster);
         s.acquire(1);
         Thread.sleep(50);
@@ -209,7 +213,7 @@ public class SchedulerImplTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     public void testScheduleException() throws InterruptedException {
         Semaphore s = new Semaphore(0);
-        TestSchedulerTemporalAdjuster temporalAdjuster = new TestSchedulerTemporalAdjuster();
+        TestSchedulerWithCounter temporalAdjuster = new TestSchedulerWithCounter();
         SchedulerRunnable runnable = () -> {
             // Pass a exception not very likely thrown by the scheduler it self to avoid missing real exceptions.
             throw new FileNotFoundException("testBeforeTimeoutException");
@@ -265,7 +269,35 @@ public class SchedulerImplTest {
         future2.cancel(true);
     }
 
-    private final class TestSchedulerTemporalAdjuster implements SchedulerTemporalAdjuster {
+    /**
+     * This tests if the reschedule works correctly.
+     * It does this by manipulating the duration calculation of the next step.
+     * This causes the scheduler to reschedule the next call to early.
+     * It then should match against the actual expected time and reschedule because the expected time is not reached.
+     */
+    @Test
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
+    public void testEarlyTrigger() throws InterruptedException, ExecutionException {
+        final TestSchedulerTemporalAdjuster temporalAdjuster = new TestSchedulerTemporalAdjuster(3000);
+        final AtomicInteger counter = new AtomicInteger();
+        final SchedulerImpl scheduler = new SchedulerImpl() {
+            @Override
+            protected long currentTimeMillis() {
+                // Add 3 seconds to let the duration calculation be too short.
+                // This modification does mean it knows a bit about the internal implementation.
+                return super.currentTimeMillis() + 3000;
+            }
+        };
+        final AtomicReference<ScheduledCompletableFuture<Object>> reference = new AtomicReference<>();
+        final ScheduledCompletableFuture<Object> future = scheduler.schedule(() -> counter.incrementAndGet(),
+                temporalAdjuster);
+        reference.set(future);
+        future.get();
+        assertEquals(3, temporalAdjuster.getCount(), "The next schedule caluclator should have been done 3 times.");
+        assertEquals(3, counter.get(), "The schedule run method should have been called 3 times.");
+    }
+
+    private static class TestSchedulerWithCounter implements SchedulerTemporalAdjuster {
         private final AtomicInteger counter = new AtomicInteger();
 
         @Override
@@ -281,6 +313,36 @@ public class SchedulerImplTest {
 
         public int getCount() {
             return counter.get();
+        }
+    }
+
+    private static class TestSchedulerTemporalAdjuster extends TestSchedulerWithCounter {
+        private final ZonedDateTime startTime;
+        private final int duration;
+
+        public TestSchedulerTemporalAdjuster(int duration) {
+            this.duration = duration;
+            startTime = ZonedDateTime.now();
+        }
+
+        @Override
+        public Temporal adjustInto(Temporal arg0) {
+            Temporal now = arg0.plus(100, ChronoUnit.MILLIS);
+            for (int i = 0; i < 5; i++) {
+                ZonedDateTime newTime = startTime.plus(duration * i, ChronoUnit.MILLIS);
+
+                if (newTime.isAfter((ChronoZonedDateTime<?>) now)) {
+                    return newTime;
+                }
+
+            }
+            throw new IllegalStateException("Test should always find time");
+        }
+
+        @Override
+        public boolean isDone(Temporal temporal) {
+            super.isDone(temporal);
+            return ZonedDateTime.now().compareTo(startTime.plus(duration * 3 - 2000, ChronoUnit.MILLIS)) > 0;
         }
     }
 }
