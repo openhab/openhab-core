@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-	Copyright (c) 2010-2020 Contributors to the openHAB project
+	Copyright (c) 2010-2021 Contributors to the openHAB project
 
 	See the NOTICE file(s) distributed with this work for additional
 	information.
@@ -370,8 +370,6 @@
 	</feature>
 
 	<feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
-		<requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
-		<feature dependency="true">openhab.tp-commons-net</feature>
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-auth-jaas</feature>
 		<feature>openhab-core-automation-rest</feature>

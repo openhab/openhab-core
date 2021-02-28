@@ -56,6 +56,63 @@
 					"description": "command that will be sent to the item."
 				}
 			]
+		},
+		{
+			"uid": "core.ItemStateUpdateAction",
+			"label": "update an item state",
+			"description": "Updates the state of a specified item.",
+			"configDescriptions": [
+				{
+					"name": "itemName",
+					"type": "TEXT",
+					"label": "Item",
+					"context": "item",
+					"description": "the name of the item",
+					"required": true
+				},
+				{
+					"name": "state",
+					"type": "TEXT",
+					"label": "State",
+					"description": "the default state to be used to update the item if none is passed as an input value",
+					"required": true,
+					"limitToOptions": false,
+					"options": [
+						{
+							"label": "ON",
+							"value": "ON"
+						},
+						{
+							"label": "OFF",
+							"value": "OFF"
+						},
+						{
+							"label": "OPEN",
+							"value": "OPEN"
+						},
+						{
+							"label": "CLOSED",
+							"value": "CLOSED"
+						},
+						{
+							"label": "UP",
+							"value": "UP"
+						},
+						{
+							"label": "DOWN",
+							"value": "DOWN"
+						}
+					]
+				}
+			],
+			"inputs": [
+				{
+					"name": "state",
+					"type": "state",
+					"label": "State",
+					"description": "state that the item will be set to."
+				}
+			]
 		}
 	]
 }

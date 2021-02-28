@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -69,6 +69,36 @@ public class EphemerisModuleHandlerFactoryTest {
     @Test
     public void testFactoryCreatesModuleHandlerForWeekdayCondition() {
         when(moduleMock.getTypeUID()).thenReturn(EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID);
+
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration());
+        ModuleHandler handler = factory.internalCreate(moduleMock, "My first rule");
+        assertThat(handler, is(notNullValue()));
+        assertThat(handler, instanceOf(EphemerisConditionHandler.class));
+
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Map.of("offset", 5)));
+        handler = factory.internalCreate(moduleMock, "My second rule");
+        assertThat(handler, is(notNullValue()));
+        assertThat(handler, instanceOf(EphemerisConditionHandler.class));
+    }
+
+    @Test
+    public void testFactoryCreatesModuleHandlerForHolidayCondition() {
+        when(moduleMock.getTypeUID()).thenReturn(EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID);
+
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration());
+        ModuleHandler handler = factory.internalCreate(moduleMock, "My first rule");
+        assertThat(handler, is(notNullValue()));
+        assertThat(handler, instanceOf(EphemerisConditionHandler.class));
+
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Map.of("offset", 5)));
+        handler = factory.internalCreate(moduleMock, "My second rule");
+        assertThat(handler, is(notNullValue()));
+        assertThat(handler, instanceOf(EphemerisConditionHandler.class));
+    }
+
+    @Test
+    public void testFactoryCreatesModuleHandlerForNotHolidayCondition() {
+        when(moduleMock.getTypeUID()).thenReturn(EphemerisConditionHandler.NOT_HOLIDAY_MODULE_TYPE_ID);
 
         when(moduleMock.getConfiguration()).thenReturn(new Configuration());
         ModuleHandler handler = factory.internalCreate(moduleMock, "My first rule");

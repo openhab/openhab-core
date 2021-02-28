@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -88,9 +88,9 @@ public abstract class MqttAsyncClientWrapper {
     protected MqttQos getMqttQosFromInt(int qos) {
         switch (qos) {
             case 0:
-                return MqttQos.AT_LEAST_ONCE;
-            case 1:
                 return MqttQos.AT_MOST_ONCE;
+            case 1:
+                return MqttQos.AT_LEAST_ONCE;
             case 2:
                 return MqttQos.EXACTLY_ONCE;
             default:

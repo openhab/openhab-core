@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,8 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
-import static org.openhab.core.thing.util.ThingHandlerHelper.isHandlerInitialized;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +32,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.items.ManagedItemProvider;
 import org.openhab.core.library.CoreItemFactory;
@@ -58,6 +58,7 @@ import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.util.ThingHandlerHelper;
 import org.openhab.core.types.Command;
 import org.openhab.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
@@ -67,6 +68,7 @@ import org.osgi.framework.Bundle;
  *
  * @author Wouter Born - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 @NonNullByDefault
 public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
@@ -75,8 +77,6 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
     private static final int CHANNEL_COUNT = 5;
 
     private int thingCount;
-
-    private @NonNullByDefault({}) AutoCloseable mocksCloseable;
 
     private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
     private @NonNullByDefault({}) ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
@@ -96,7 +96,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
         private final @Nullable ThingStatus thingStatus;
 
-        private Map<ChannelUID, List<Boolean>> channelLinkEvents = new HashMap<>();
+        private final Map<ChannelUID, List<Boolean>> channelLinkEvents = new HashMap<>();
 
         public TestHandler(Thing thing, @Nullable ThingStatus thingStatus) {
             super(thing);
@@ -118,12 +118,12 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
         @Override
         public void channelLinked(ChannelUID channelUID) {
-            channelLinkEvents.get(channelUID).add(Boolean.TRUE);
+            channelLinkEvents.getOrDefault(channelUID, List.of()).add(Boolean.TRUE);
         }
 
         @Override
         public void channelUnlinked(ChannelUID channelUID) {
-            channelLinkEvents.get(channelUID).add(Boolean.FALSE);
+            channelLinkEvents.getOrDefault(channelUID, List.of()).add(Boolean.FALSE);
         }
 
         public List<Boolean> getChannelLinkEvents(ChannelUID channelUID) {
@@ -143,8 +143,6 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() {
-        mocksCloseable = openMocks(this);
-
         registerVolatileStorageService();
 
         itemChannelLinkRegistry = getService(ItemChannelLinkRegistry.class);
@@ -186,8 +184,6 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
         managedThingProvider.getAll().forEach(thing -> managedThingProvider.remove(thing.getUID()));
 
         thingCount = 0;
-
-        mocksCloseable.close();
     }
 
     private Thing addThing(@Nullable ThingStatus thingStatus) {
@@ -208,13 +204,13 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
     private Thing addInitializedThing() {
         Thing thing = addThing(ThingStatus.ONLINE);
-        assertThat(isHandlerInitialized(thing.getHandler()), is(true));
+        assertThat(ThingHandlerHelper.isHandlerInitialized(getHandler(thing)), is(true));
         return thing;
     }
 
     private Thing addUninitializedThing() {
         Thing thing = addThing(null);
-        assertThat(isHandlerInitialized(thing.getHandler()), is(false));
+        assertThat(ThingHandlerHelper.isHandlerInitialized(getHandler(thing)), is(false));
         return thing;
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,10 @@
  */
 package org.openhab.core.automation.module.timer.internal;
 
+import static org.eclipse.jdt.annotation.Checks.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -86,7 +88,9 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         }, 3000, 100);
 
         // start rule engine
-        ((RuleEngineImpl) getService(RuleManager.class)).onReadyMarkerAdded(new ReadyMarker("", ""));
+        RuleEngineImpl ruleEngine = requireNonNull((RuleEngineImpl) getService(RuleManager.class));
+        ruleEngine.onReadyMarkerAdded(new ReadyMarker("", ""));
+        waitForAssert(() -> assertTrue(ruleEngine.isStarted()));
     }
 
     @Test

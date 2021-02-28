@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,6 @@
  */
 package org.openhab.core.io.transport.modbus.internal;
 
-import org.apache.commons.lang.builder.StandardToStringStyle;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.transport.modbus.ModbusFailureCallback;
 import org.openhab.core.io.transport.modbus.ModbusWriteCallback;
@@ -29,11 +27,6 @@ import org.openhab.core.io.transport.modbus.endpoint.ModbusSlaveEndpoint;
  */
 @NonNullByDefault
 public class BasicWriteTask implements WriteTask {
-
-    private static final StandardToStringStyle TO_STRING_STYLE = new StandardToStringStyle();
-    static {
-        TO_STRING_STYLE.setUseShortClassName(true);
-    }
 
     private ModbusSlaveEndpoint endpoint;
     private ModbusWriteRequestBlueprint request;
@@ -71,7 +64,7 @@ public class BasicWriteTask implements WriteTask {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, TO_STRING_STYLE).append("request", request).append("endpoint", endpoint)
-                .append("resultCallback", resultCallback).append("failureCallback", failureCallback).toString();
+        return "BasicWriteTask [endpoint=" + endpoint + ", request=" + request + ", resultCallback=" + resultCallback
+                + ", failureCallback=" + failureCallback + "]";
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -58,7 +58,12 @@ public class SerialPortIdentifierImpl implements SerialPortIdentifier {
                         String.format("We expect an serial port instead of '%s'", cp.getClass()));
             }
         } catch (gnu.io.PortInUseException e) {
-            throw new PortInUseException();
+            String message = e.getMessage();
+            if (message != null) {
+                throw new PortInUseException(message, e);
+            } else {
+                throw new PortInUseException(e);
+            }
         }
     }
 

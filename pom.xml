@@ -11,7 +11,7 @@
 
   <groupId>org.openhab.core</groupId>
   <artifactId>org.openhab.core.reactor</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.1.0-SNAPSHOT</version>
 
   <packaging>pom</packaging>
 
@@ -69,7 +69,8 @@
     <maven.compiler.target>${oh.java.version}</maven.compiler.target>
     <maven.compiler.compilerVersion>${oh.java.version}</maven.compiler.compilerVersion>
 
-    <bnd.version>5.1.2</bnd.version>
+    <bnd.version>5.2.0</bnd.version>
+    <commons.net.version>3.7.2</commons.net.version>
     <eea.version>2.2.1</eea.version>
     <karaf.compile.version>4.2.1</karaf.compile.version>
     <karaf.tooling.version>4.2.7</karaf.tooling.version>
@@ -138,6 +139,7 @@ Import-Package: \\
   !*.impl.*, \\
   org.openhab.*,\\
   org.openhab.core.*
+-noimportjava: true
 -sources: false
 -contract: *
 -includeresource: -${.}/NOTICE, -${.}/*.xsd]]></bnd>
@@ -435,10 +437,11 @@ Import-Package: \\
               <exclude>target/**</exclude>
               <exclude>**/pom.xml</exclude>
               <exclude>_*.java</exclude>
+              <exclude>**/archetype/**/feature.xml</exclude>
             </excludes>
             <useDefaultExcludes>true</useDefaultExcludes>
             <properties>
-              <year>2020</year>
+              <year>2021</year>
             </properties>
             <encoding>UTF-8</encoding>
           </configuration>

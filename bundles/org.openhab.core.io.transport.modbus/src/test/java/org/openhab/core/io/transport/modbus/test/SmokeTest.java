@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -37,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,7 +91,8 @@ public class SmokeTest extends IntegrationTestSupport {
      * @return
      */
     private boolean isRunningInCI() {
-        return "true".equals(System.getenv("CI")) || StringUtils.isNotBlank(System.getenv("JENKINS_HOME"));
+        String jenkinsHome = System.getenv("JENKINS_HOME");
+        return "true".equals(System.getenv("CI")) || (jenkinsHome != null && !jenkinsHome.isBlank());
     }
 
     private void generateData() {
@@ -181,7 +181,7 @@ public class SmokeTest extends IntegrationTestSupport {
     public void testSlaveConnectionError() throws Exception {
         // In the test we have non-responding slave (see http://stackoverflow.com/a/904609), and we use short connection
         // timeout
-        ModbusSlaveEndpoint endpoint = new ModbusTCPSlaveEndpoint("10.255.255.1", 9999);
+        ModbusSlaveEndpoint endpoint = new ModbusTCPSlaveEndpoint("10.255.255.1", 9999, false);
         EndpointPoolConfiguration configuration = new EndpointPoolConfiguration();
         configuration.setConnectTimeoutMillis(100);
 

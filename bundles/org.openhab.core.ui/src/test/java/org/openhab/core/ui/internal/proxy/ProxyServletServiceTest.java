@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,24 +18,24 @@ import static org.mockito.Mockito.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Base64;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.util.B64Code;
-import org.eclipse.jetty.util.StringUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.StringType;
-import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.Switch;
 import org.openhab.core.model.sitemap.sitemap.Video;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.ui.items.ItemUIRegistry;
+import org.osgi.service.http.HttpService;
 
 /**
  * Unit tests for the {@link ProxyServletService} class.
@@ -66,7 +66,8 @@ public class ProxyServletServiceTest {
     private static ProxyServletService service;
 
     private ItemUIRegistry itemUIRegistry;
-    private ModelRepository modelRepository;
+    private HttpService httpService;
+    private SitemapProvider sitemapProvider;
     private Sitemap sitemap;
     private HttpServletRequest request;
     private Switch switchWidget;
@@ -75,15 +76,16 @@ public class ProxyServletServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new ProxyServletService();
-
         itemUIRegistry = mock(ItemUIRegistry.class);
-        modelRepository = mock(ModelRepository.class);
-        service.setModelRepository(modelRepository);
-        service.setItemUIRegistry(itemUIRegistry);
+        httpService = mock(HttpService.class);
+
+        service = new ProxyServletService(itemUIRegistry, httpService);
+
+        sitemapProvider = mock(SitemapProvider.class);
+        service.sitemapProviders.add(sitemapProvider);
 
         sitemap = mock(Sitemap.class);
-        when(modelRepository.getModel(eq(SITEMAP_NAME))).thenReturn(sitemap);
+        when(sitemapProvider.getSitemap(eq(SITEMAP_NAME))).thenReturn(sitemap);
 
         switchWidget = mock(Switch.class);
         when(itemUIRegistry.getWidget(eq(sitemap), eq(SWITCH_WIDGET_ID))).thenReturn(switchWidget);
@@ -111,7 +113,7 @@ public class ProxyServletServiceTest {
         URI uri = new URI("http://testuser:testpassword@127.0.0.1:8080/content");
         service.maybeAppendAuthHeader(uri, request);
         verify(request).header(HttpHeader.AUTHORIZATION,
-                "Basic " + B64Code.encode("testuser:testpassword", StringUtil.__ISO_8859_1));
+                "Basic " + Base64.getEncoder().encodeToString("testuser:testpassword".getBytes()));
     }
 
     @Test
@@ -120,7 +122,7 @@ public class ProxyServletServiceTest {
         URI uri = new URI("http://testuser@127.0.0.1:8080/content");
         service.maybeAppendAuthHeader(uri, request);
         verify(request).header(HttpHeader.AUTHORIZATION,
-                "Basic " + B64Code.encode("testuser:", StringUtil.__ISO_8859_1));
+                "Basic " + Base64.getEncoder().encodeToString("testuser:".getBytes()));
     }
 
     @Test

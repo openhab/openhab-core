@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -169,7 +169,9 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         }, 9000, 1000);
 
         // start rule engine
-        ((RuleEngineImpl) ruleManager).onReadyMarkerAdded(new ReadyMarker("", ""));
+        RuleEngineImpl ruleEngine = (RuleEngineImpl) ruleManager;
+        ruleEngine.onReadyMarkerAdded(new ReadyMarker("", ""));
+        waitForAssert(() -> assertTrue(ruleEngine.isStarted()));
 
         logger.info("@Before.finish");
     }

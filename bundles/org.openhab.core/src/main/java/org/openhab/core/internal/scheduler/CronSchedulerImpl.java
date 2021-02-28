@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -65,9 +65,7 @@ public class CronSchedulerImpl implements CronScheduler {
     public ScheduledCompletableFuture<@Nullable Void> schedule(CronJob job, Map<String, Object> config,
             String cronExpression) {
         final CronAdjuster cronAdjuster = new CronAdjuster(cronExpression);
-        final SchedulerRunnable runnable = () -> {
-            job.run(config);
-        };
+        final SchedulerRunnable runnable = () -> job.run(config);
 
         if (cronAdjuster.isReboot()) {
             return scheduler.at(runnable, Instant.ofEpochMilli(1));

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -64,6 +64,21 @@ public class TimerImplTest {
 
     @Test
     public void testTimerIsActiveAndTerminate() throws InterruptedException {
+        assertThat(subject.isActive(), is(true));
+        assertThat(subject.hasTerminated(), is(false));
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 1));
+        assertThat(subject.isActive(), is(false));
+        assertThat(subject.hasTerminated(), is(true));
+    }
+
+    @Test
+    public void testTimerHasTerminatedAndReschedule() throws InterruptedException {
+        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 1));
+        assertThat(subject.isActive(), is(false));
+        assertThat(subject.hasTerminated(), is(true));
+     
+        subject.reschedule(ZonedDateTime.now().plusSeconds(DEFAULT_TIMEOUT_SECONDS));
         assertThat(subject.isActive(), is(true));
         assertThat(subject.hasTerminated(), is(false));
 

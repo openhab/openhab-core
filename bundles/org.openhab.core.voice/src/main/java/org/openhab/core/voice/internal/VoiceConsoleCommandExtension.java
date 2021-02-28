@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -112,7 +112,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         if (defaultVoice == null) {
             TTSService tts = voiceManager.getTTS();
             if (tts != null) {
-                defaultVoice = voiceManager.getPreferredVoice(tts.getAvailableVoices());
+                return voiceManager.getPreferredVoice(tts.getAvailableVoices());
             }
         }
         return defaultVoice;

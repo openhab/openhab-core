@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-	Copyright (c) 2010-2020 Contributors to the openHAB project
+	Copyright (c) 2010-2021 Contributors to the openHAB project
 
 	See the NOTICE file(s) distributed with this work for additional
 	information.
@@ -32,7 +32,7 @@
 		<bundle dependency="true">mvn:tec.uom.lib/uom-lib-common/1.0.3</bundle>
 
 		<!-- TODO: Unbundled libraries -->
-		<bundle dependency="true">mvn:com.thoughtworks.xstream/xstream/1.4.13</bundle>
+		<bundle dependency="true">mvn:com.thoughtworks.xstream/xstream/1.4.15</bundle>
 	</feature>
 
 	<feature name="openhab.tp-coap" description="Californium CoAP library" version="${project.version}">
@@ -44,8 +44,8 @@
 	</feature>
 
 	<feature name="openhab.tp-commons-net" description="The Apache Commons Net library" version="${project.version}">
-		<capability>openhab.tp;feature=commons-net;version=3.3</capability>
-		<bundle dependency="true">mvn:commons-net/commons-net/3.3</bundle>
+		<capability>openhab.tp;feature=commons-net;version=3.7.2</capability>
+		<bundle dependency="true">mvn:commons-net/commons-net/3.7.2</bundle>
 	</feature>
 
 	<feature name="openhab.tp-gson" description="Gson" version="${project.version}">

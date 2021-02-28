@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -77,7 +77,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * on (low battery) and off (battery ok).
      */
     public static final ChannelType SYSTEM_CHANNEL_LOW_BATTERY = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "low-battery"), "Low Battery", "Switch").withCategory("Battery")
+            .state(new ChannelTypeUID(BINDING_ID, "low-battery"), "Low Battery", "Switch").withCategory("LowBattery")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build()).build();
 
     /**
@@ -135,7 +135,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_POWER = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "power"), "Power", "Switch")
-            .withDescription("Device is operable when channel has state ON").build();
+            .withDescription("Device is operable when channel has state ON").withCategory("Switch").build();
 
     /**
      * Location: default system wide {@link ChannelType} which displays a location
@@ -173,13 +173,23 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Controls the color of the light").withCategory("ColorLight").build();
 
     /**
-     * Color-temperature: default system wide {@link ChannelType} which allows changing the color temperature
+     * Color-temperature: default system wide {@link ChannelType} which allows changing the color temperature in percent
      */
     public static final ChannelType SYSTEM_COLOR_TEMPERATURE = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "color-temperature"), "Color Temperature", "Dimmer")
-            .withDescription("Controls the color temperature of the light").withCategory("ColorLight")
-            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
-                    .withMaximum(new BigDecimal(100)).withPattern("%d").build())
+            .withDescription("Controls the color temperature of the light from 0 (cold) to 100 (warm)")
+            .withCategory("ColorLight").withStateDescriptionFragment(StateDescriptionFragmentBuilder.create()
+                    .withMinimum(BigDecimal.ZERO).withMaximum(new BigDecimal(100)).withPattern("%.0f").build())
+            .build();
+
+    /**
+     * Color-temperature: default system wide {@link ChannelType} which allows changing the color temperature in Kelvin
+     */
+    public static final ChannelType SYSTEM_COLOR_TEMPERATURE_ABS = ChannelTypeBuilder
+            .state(new ChannelTypeUID(BINDING_ID, "color-temperature-abs"), "Color Temperature", "Number")
+            .withDescription("Controls the color temperature of the light in Kelvin").withCategory("ColorLight")
+            .isAdvanced(true).withStateDescriptionFragment(StateDescriptionFragmentBuilder.create()
+                    .withMinimum(new BigDecimal(1000)).withMaximum(new BigDecimal(10000)).withPattern("%.0f K").build())
             .build();
 
     // media channels
@@ -280,9 +290,9 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     private static final Collection<ChannelType> CHANNEL_TYPES = List.of(SYSTEM_CHANNEL_SIGNAL_STRENGTH,
             SYSTEM_CHANNEL_LOW_BATTERY, SYSTEM_CHANNEL_BATTERY_LEVEL, SYSTEM_TRIGGER, SYSTEM_RAWBUTTON, SYSTEM_BUTTON,
             SYSTEM_RAWROCKER, SYSTEM_POWER, SYSTEM_LOCATION, SYSTEM_MOTION, SYSTEM_BRIGHTNESS, SYSTEM_COLOR,
-            SYSTEM_COLOR_TEMPERATURE, SYSTEM_VOLUME, SYSTEM_MUTE, SYSTEM_MEDIA_CONTROL, SYSTEM_MEDIA_TITLE,
-            SYSTEM_MEDIA_ARTIST, SYSTEM_WIND_DIRECTION, SYSTEM_WIND_SPEED, SYSTEM_OUTDOOR_TEMPERATURE,
-            SYSTEM_ATMOSPHERIC_HUMIDITY, SYSTEM_BAROMETRIC_PRESSURE);
+            SYSTEM_COLOR_TEMPERATURE, SYSTEM_COLOR_TEMPERATURE_ABS, SYSTEM_VOLUME, SYSTEM_MUTE, SYSTEM_MEDIA_CONTROL,
+            SYSTEM_MEDIA_TITLE, SYSTEM_MEDIA_ARTIST, SYSTEM_WIND_DIRECTION, SYSTEM_WIND_SPEED,
+            SYSTEM_OUTDOOR_TEMPERATURE, SYSTEM_ATMOSPHERIC_HUMIDITY, SYSTEM_BAROMETRIC_PRESSURE);
 
     private final Map<LocalizedKey, ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
 

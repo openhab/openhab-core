@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -618,7 +618,7 @@ public class SitemapResource
         if (uri.getPort() >= 0) {
             sb.append(":").append(uri.getPort());
         }
-        sb.append("/proxy?sitemap=").append(sitemapName).append(".sitemap&widgetId=").append(wId);
+        sb.append("/proxy?sitemap=").append(sitemapName).append("&widgetId=").append(wId);
         return sb.toString();
     }
 

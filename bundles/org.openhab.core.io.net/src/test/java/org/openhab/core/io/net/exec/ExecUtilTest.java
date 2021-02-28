@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -61,5 +61,18 @@ public class ExecUtilTest {
     private boolean isWindowsSystem() {
         String osName = System.getProperty("os.name").toLowerCase();
         return osName.indexOf("windows") >= 0;
+    }
+
+    @Test
+    public void testExecuteCommandLineAndWaitStdErrRedirection() {
+        final String result;
+        if (isWindowsSystem()) {
+            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "cmd", "/c", "dir", "xxx.xxx",
+                    "1>", "nul");
+        } else {
+            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "ls", "xxx.xxx");
+        }
+        assertNotNull(result);
+        assertNotEquals("", result);
     }
 }

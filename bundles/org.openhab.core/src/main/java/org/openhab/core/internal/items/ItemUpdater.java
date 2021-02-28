@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -60,14 +60,15 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
                 // Look for class hierarchy
                 for (Class<? extends State> state : item.getAcceptedDataTypes()) {
                     try {
-                        if (!state.isEnum() && state.newInstance().getClass().isAssignableFrom(newState.getClass())) {
+                        if (!state.isEnum() && state.getDeclaredConstructor().newInstance().getClass()
+                                .isAssignableFrom(newState.getClass())) {
                             isAccepted = true;
                             break;
                         }
-                    } catch (InstantiationException e) {
-                        logger.warn("InstantiationException on {}", e.getMessage()); // Should never happen
-                    } catch (IllegalAccessException e) {
-                        logger.warn("IllegalAccessException on {}", e.getMessage()); // Should never happen
+                    } catch (ReflectiveOperationException e) {
+                        // Should never happen
+                        logger.warn("{} while creating {} instance: {}", e.getClass().getSimpleName(),
+                                state.getClass().getSimpleName(), e.getMessage());
                     }
                 }
             }

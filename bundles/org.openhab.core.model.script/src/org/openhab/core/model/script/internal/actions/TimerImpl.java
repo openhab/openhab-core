@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.core.model.script.internal.actions;
 
 import java.time.ZonedDateTime;
+import java.util.concurrent.TimeUnit;
 
 import org.openhab.core.model.script.actions.Timer;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
@@ -53,14 +54,15 @@ public class TimerImpl implements Timer {
 
     @Override
     public boolean reschedule(ZonedDateTime newTime) {
-        if (future.cancel(false)) {
-            cancelled = false;
-            future = scheduler.schedule(runnable, newTime.toInstant());
-            return true;
-        } else {
-            logger.warn("Rescheduling failed as execution has already started!");
-            return false;
-        }
+        future.cancel(false);
+        cancelled = false;
+        future = scheduler.schedule(runnable, newTime.toInstant());
+        return true;
+    }
+
+    @Override
+    public ZonedDateTime getExecutionTime() {
+        return cancelled ? null : ZonedDateTime.now().plusNanos(future.getDelay(TimeUnit.NANOSECONDS));
     }
 
     @Override

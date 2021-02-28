@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.openhab.core.bom</groupId>
     <artifactId>org.openhab.core.reactor.bom</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.openhab.core.bom.runtime</artifactId>
@@ -166,11 +166,6 @@
       <groupId>com.sun.xml.bind</groupId>
       <artifactId>jaxb-osgi</artifactId>
       <version>2.3.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.hk2</groupId>
-      <artifactId>osgi-resource-locator</artifactId>
-      <version>1.0.3</version>
     </dependency>
 
     <!-- Activation 1.2 API -->
@@ -418,7 +413,7 @@
     <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
-      <version>3.3</version>
+      <version>3.7.2</version>
       <scope>compile</scope>
     </dependency>
 
@@ -517,7 +512,7 @@
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
-      <version>1.4.13</version>
+      <version>1.4.15</version>
       <scope>compile</scope>
     </dependency>
 
@@ -900,7 +895,7 @@
     <dependency>
       <groupId>org.glassfish.hk2</groupId>
       <artifactId>osgi-resource-locator</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -1029,7 +1024,6 @@
       <version>0.9.12</version>
       <scope>compile</scope>
     </dependency>
-
   </dependencies>
 
 </project>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -62,10 +62,16 @@ public final class ScriptError {
     public ScriptError(final String message, final EObject atEObject) {
         this.message = message;
         INode node = NodeModelUtils.getNode(atEObject);
-        LineAndColumn lac = NodeModelUtils.getLineAndColumn(node, node.getOffset());
-        this.line = lac.getLine();
-        this.column = lac.getColumn();
-        this.length = node.getEndOffset() - node.getOffset();
+        if (node == null) {
+            this.line = 0;
+            this.column = 0;
+            this.length = -1;
+        } else {
+            LineAndColumn lac = NodeModelUtils.getLineAndColumn(node, node.getOffset());
+            this.line = lac.getLine();
+            this.column = lac.getColumn();
+            this.length = node.getEndOffset() - node.getOffset();
+        }
     }
 
     /**

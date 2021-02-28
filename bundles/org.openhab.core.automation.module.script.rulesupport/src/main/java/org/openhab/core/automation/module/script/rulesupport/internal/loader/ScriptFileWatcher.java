@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -77,6 +77,7 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
 
     private final ScriptEngineManager manager;
     private final ReadyService readyService;
+    private @Nullable DependencyTracker dependencyTracker;
     private @Nullable ScheduledExecutorService scheduler;
 
     private final Map<String, Set<URL>> urlsByScriptExtension = new ConcurrentHashMap<>();
@@ -95,6 +96,18 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
         super.activate();
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
                 .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_MODEL)));
+        dependencyTracker = new DependencyTracker() {
+            @Override
+            public void reimportScript(String scriptPath) {
+                logger.debug("Reimporting {}...", scriptPath);
+                try {
+                    importFile(new URL(scriptPath));
+                } catch (MalformedURLException e) {
+                    logger.warn("Failed to reimport {} as it cannot be parsed as a URL", scriptPath);
+                }
+            }
+        };
+        dependencyTracker.activate();
     }
 
     @Deactivate
@@ -106,6 +119,12 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
             localScheduler.shutdownNow();
             scheduler = null;
         }
+
+        if (dependencyTracker != null) {
+            dependencyTracker.deactivate();
+            dependencyTracker = null;
+        }
+
         super.deactivate();
     }
 
@@ -166,7 +185,9 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
 
     private void removeFile(URL url) {
         dequeueUrl(url);
-        manager.removeEngine(getScriptIdentifier(url));
+        String scriptIdentifier = getScriptIdentifier(url);
+        dependencyTracker.removeScript(scriptIdentifier);
+        manager.removeEngine(scriptIdentifier);
         loaded.remove(url);
     }
 
@@ -186,12 +207,13 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
                             StandardCharsets.UTF_8)) {
                         logger.info("Loading script '{}'", fileName);
 
-                        ScriptEngineContainer container = manager.createScriptEngine(scriptType,
-                                getScriptIdentifier(url));
+                        String scriptIdentifier = getScriptIdentifier(url);
+                        ScriptEngineContainer container = manager.createScriptEngine(scriptType, scriptIdentifier);
 
                         if (container != null) {
                             container.getScriptEngine().put(ScriptEngine.FILENAME, fileName);
-                            manager.loadScript(container.getIdentifier(), reader);
+                            manager.loadScript(container.getIdentifier(), reader,
+                                    dependency -> dependencyTracker.addLibForScript(scriptIdentifier, dependency));
                             loaded.add(url);
                             logger.debug("Script loaded: {}", fileName);
                         } else {

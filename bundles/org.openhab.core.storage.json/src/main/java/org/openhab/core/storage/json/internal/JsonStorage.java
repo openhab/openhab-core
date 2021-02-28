@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -216,6 +216,11 @@ public class JsonStorage<T> implements Storage<T> {
 
     @SuppressWarnings("unchecked")
     private @Nullable Map<String, StorageEntry> readDatabase(File inputFile) {
+        if (inputFile.length() == 0) {
+            logger.warn("Json storage file at '{}' is empty - ignoring corrupt file.", inputFile.getAbsolutePath());
+            return null;
+        }
+
         try {
             final Map<String, StorageEntry> inputMap = new ConcurrentHashMap<>();
 
