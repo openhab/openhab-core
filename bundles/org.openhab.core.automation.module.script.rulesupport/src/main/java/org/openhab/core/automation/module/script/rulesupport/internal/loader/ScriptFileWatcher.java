@@ -19,44 +19,32 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.script.ScriptEngine;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.common.NamedThreadFactory;
-import org.openhab.core.service.AbstractWatchService;
-import org.openhab.core.service.ReadyMarker;
-import org.openhab.core.service.ReadyMarkerFilter;
-import org.openhab.core.service.ReadyService;
-import org.openhab.core.service.ReadyService.ReadyTracker;
-import org.openhab.core.service.StartLevelService;
+import org.openhab.core.service.*;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link ScriptFileWatcher} watches the jsr223 directory for files. If a new/modified file is detected, the script
@@ -64,68 +52,63 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Kai Kreuzer - improved logging and removed thread pool
+ * @author Jonathan Gilbert - added dependency tracking & per-script start levels
  */
 @Component(immediate = true)
-public class ScriptFileWatcher extends AbstractWatchService implements ReadyTracker {
+public class ScriptFileWatcher extends AbstractWatchService
+        implements ReadyService.ReadyTracker, DependencyTracker.DependencyChangeListener {
 
-    private static final Set<String> EXCLUDED_FILE_EXTENSIONS = new HashSet<>(
-            Arrays.asList("txt", "old", "example", "backup", "md", "swp", "tmp", "bak"));
     private static final String FILE_DIRECTORY = "automation" + File.separator + "jsr223";
     private static final long RECHECK_INTERVAL = 20;
 
-    private boolean started = false;
+    private final Logger logger = LoggerFactory.getLogger(ScriptFileWatcher.class);
 
     private final ScriptEngineManager manager;
+    private final DependencyTracker dependencyTracker;
     private final ReadyService readyService;
-    private @Nullable DependencyTracker dependencyTracker;
-    private @Nullable ScheduledExecutorService scheduler;
 
-    private final Map<String, Set<URL>> urlsByScriptExtension = new ConcurrentHashMap<>();
-    private final Set<URL> loaded = new HashSet<>();
+    private @Nullable ScheduledExecutorService scheduler;
+    private Supplier<ScheduledExecutorService> executerFactory;
+
+    private final Set<ScriptFileReference> pending = new HashSet<>();
+    private final Set<ScriptFileReference> loaded = new HashSet<>();
+
+    private volatile int currentStartLevel = 0;
 
     @Activate
-    public ScriptFileWatcher(final @Reference ScriptEngineManager manager, final @Reference ReadyService readyService) {
+    public ScriptFileWatcher(final @Reference ScriptEngineManager manager,
+            final @Reference DependencyTracker dependencyTracker, final @Reference ReadyService readyService) {
         super(OpenHAB.getConfigFolder() + File.separator + FILE_DIRECTORY);
         this.manager = manager;
+        this.dependencyTracker = dependencyTracker;
         this.readyService = readyService;
-    }
+        this.executerFactory = () -> Executors
+                .newSingleThreadScheduledExecutor(new NamedThreadFactory("scriptwatcher"));
 
-    @Activate
-    @Override
-    public void activate() {
-        super.activate();
-        readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
-                .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_MODEL)));
-        dependencyTracker = new DependencyTracker() {
-            @Override
-            public void reimportScript(String scriptPath) {
-                logger.debug("Reimporting {}...", scriptPath);
-                try {
-                    importFile(new URL(scriptPath));
-                } catch (MalformedURLException e) {
-                    logger.warn("Failed to reimport {} as it cannot be parsed as a URL", scriptPath);
-                }
-            }
-        };
-        dependencyTracker.activate();
+        readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE));
     }
 
     @Deactivate
     @Override
     public void deactivate() {
         readyService.unregisterTracker(this);
+
         ScheduledExecutorService localScheduler = scheduler;
         if (localScheduler != null) {
             localScheduler.shutdownNow();
             scheduler = null;
         }
 
-        if (dependencyTracker != null) {
-            dependencyTracker.deactivate();
-            dependencyTracker = null;
-        }
-
         super.deactivate();
+    }
+
+    /**
+     * Override the executor service. Can be used for testing.
+     * 
+     * @param executerFactory supplier of ScheduledExecutorService
+     */
+    void setExecuterFactory(Supplier<ScheduledExecutorService> executerFactory) {
+        this.executerFactory = executerFactory;
     }
 
     /**
@@ -145,7 +128,7 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
             } else {
                 try {
                     URL url = file.toURI().toURL();
-                    importFile(url);
+                    importFileWhenReady(new ScriptFileReference(url));
                 } catch (MalformedURLException e) {
                     // can't happen for the 'file' protocol handler with a correctly formatted URI
                     logger.debug("Can't create a URL", e);
@@ -171,11 +154,11 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
             try {
                 URL fileUrl = file.toURI().toURL();
                 if (ENTRY_DELETE.equals(kind)) {
-                    removeFile(fileUrl);
+                    removeFile(new ScriptFileReference(fileUrl));
                 }
 
                 if (file.canRead() && (ENTRY_CREATE.equals(kind) || ENTRY_MODIFY.equals(kind))) {
-                    importFile(fileUrl);
+                    importFileWhenReady(new ScriptFileReference(fileUrl));
                 }
             } catch (MalformedURLException e) {
                 logger.error("malformed", e);
@@ -183,159 +166,141 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyTrac
         }
     }
 
-    private void removeFile(URL url) {
-        dequeueUrl(url);
-        String scriptIdentifier = getScriptIdentifier(url);
+    private void removeFile(ScriptFileReference ref) {
+        dequeueUrl(ref);
+        String scriptIdentifier = ref.getScriptIdentifier();
         dependencyTracker.removeScript(scriptIdentifier);
         manager.removeEngine(scriptIdentifier);
-        loaded.remove(url);
+        loaded.remove(ref);
     }
 
-    private synchronized void importFile(URL url) {
-        String fileName = url.getFile();
-        if (loaded.contains(url)) {
-            this.removeFile(url); // if already loaded, remove first
+    private synchronized void importFileWhenReady(ScriptFileReference ref) {
+
+        if (loaded.contains(ref)) {
+            this.removeFile(ref); // if already loaded, remove first
         }
 
-        String scriptType = getScriptType(url);
-        if (scriptType != null) {
-            if (!started) {
-                enqueueUrl(url, scriptType);
+        Optional<String> scriptType = ref.getScriptType();
+
+        scriptType.ifPresent(type -> {
+            if (ref.getStartLevel() <= currentStartLevel && manager.isSupported(type)) {
+                importFile(ref);
             } else {
-                if (manager.isSupported(scriptType)) {
-                    try (InputStreamReader reader = new InputStreamReader(new BufferedInputStream(url.openStream()),
-                            StandardCharsets.UTF_8)) {
-                        logger.info("Loading script '{}'", fileName);
-
-                        String scriptIdentifier = getScriptIdentifier(url);
-                        ScriptEngineContainer container = manager.createScriptEngine(scriptType, scriptIdentifier);
-
-                        if (container != null) {
-                            container.getScriptEngine().put(ScriptEngine.FILENAME, fileName);
-                            manager.loadScript(container.getIdentifier(), reader,
-                                    dependency -> dependencyTracker.addLibForScript(scriptIdentifier, dependency));
-                            loaded.add(url);
-                            logger.debug("Script loaded: {}", fileName);
-                        } else {
-                            logger.error("Script loading error, ignoring file: {}", fileName);
-                        }
-                    } catch (IOException e) {
-                        logger.error("Failed to load file '{}': {}", url.getFile(), e.getMessage());
-                    }
-                } else {
-                    enqueueUrl(url, scriptType);
-                    logger.info("ScriptEngine for {} not available", scriptType);
-                }
-            }
-        }
-    }
-
-    private void enqueueUrl(URL url, String scriptType) {
-        synchronized (urlsByScriptExtension) {
-            Set<URL> set = urlsByScriptExtension.get(scriptType);
-            if (set == null) {
-                set = new HashSet<>();
-                urlsByScriptExtension.put(scriptType, set);
-            }
-            set.add(url);
-            logger.debug("in queue: {}", urlsByScriptExtension);
-        }
-    }
-
-    private void dequeueUrl(URL url) {
-        String scriptType = getScriptType(url);
-        if (scriptType != null) {
-            synchronized (urlsByScriptExtension) {
-                Set<URL> set = urlsByScriptExtension.get(scriptType);
-                if (set != null) {
-                    set.remove(url);
-                    if (set.isEmpty()) {
-                        urlsByScriptExtension.remove(scriptType);
-                    }
-                }
-                logger.debug("in queue: {}", urlsByScriptExtension);
-            }
-        }
-    }
-
-    private @Nullable String getScriptType(URL url) {
-        String fileName = url.getPath();
-        int index = fileName.lastIndexOf(".");
-        if (index == -1) {
-            return null;
-        }
-        String fileExtension = fileName.substring(index + 1);
-
-        // ignore known file extensions for "temp" files
-        if (EXCLUDED_FILE_EXTENSIONS.contains(fileExtension) || fileExtension.endsWith("~")) {
-            return null;
-        }
-        return fileExtension;
-    }
-
-    private String getScriptIdentifier(URL url) {
-        return url.toString();
-    }
-
-    private void checkFiles() {
-        SortedSet<URL> reimportUrls = new TreeSet<URL>(new Comparator<URL>() {
-            @Override
-            public int compare(URL o1, URL o2) {
-                try {
-                    Path path1 = Paths.get(o1.toURI());
-                    String name1 = path1.getFileName().toString();
-                    logger.trace("o1 [{}], path1 [{}], name1 [{}]", o1, path1, name1);
-
-                    Path path2 = Paths.get(o2.toURI());
-                    String name2 = path2.getFileName().toString();
-                    logger.trace("o2 [{}], path2 [{}], name2 [{}]", o2, path2, name2);
-
-                    int nameCompare = name1.compareToIgnoreCase(name2);
-                    if (nameCompare != 0) {
-                        return nameCompare;
-                    } else {
-                        int pathCompare = path1.getParent().toString()
-                                .compareToIgnoreCase(path2.getParent().toString());
-                        return pathCompare;
-                    }
-                } catch (URISyntaxException e) {
-                    logger.error("URI syntax exception", e);
-                    return 0;
-                }
+                enqueue(ref);
             }
         });
+    }
 
-        synchronized (urlsByScriptExtension) {
-            Set<String> newlySupported = new HashSet<>();
-            for (String key : urlsByScriptExtension.keySet()) {
-                if (manager.isSupported(key)) {
-                    newlySupported.add(key);
-                }
-            }
+    private void importFile(ScriptFileReference ref) {
 
-            for (String key : newlySupported) {
-                reimportUrls.addAll(Objects.requireNonNullElse(urlsByScriptExtension.remove(key), Set.of()));
+        String fileName = ref.getScriptFileURL().getFile();
+        Optional<String> scriptType = ref.getScriptType();
+        assert scriptType.isPresent();
+
+        try (InputStreamReader reader = new InputStreamReader(
+                new BufferedInputStream(ref.getScriptFileURL().openStream()), StandardCharsets.UTF_8)) {
+            logger.info("Loading script '{}'", fileName);
+
+            String scriptIdentifier = ref.getScriptIdentifier();
+            ScriptEngineContainer container = manager.createScriptEngine(scriptType.get(), scriptIdentifier);
+
+            if (container != null) {
+                container.getScriptEngine().put(ScriptEngine.FILENAME, fileName);
+                manager.loadScript(container.getIdentifier(), reader,
+                        dependency -> dependencyTracker.addLibForScript(scriptIdentifier, dependency));
+
+                loaded.add(ref);
+                logger.debug("Script loaded: {}", fileName);
+            } else {
+                logger.error("Script loading error, ignoring file: {}", fileName);
             }
+        } catch (IOException e) {
+            logger.error("Failed to load file '{}': {}", ref.getScriptFileURL().getFile(), e.getMessage());
+        }
+    }
+
+    private void enqueue(ScriptFileReference ref) {
+        synchronized (pending) {
+            pending.add(ref);
         }
 
-        for (URL url : reimportUrls) {
-            importFile(url);
+        logger.debug("Enqueued {}", ref.getScriptIdentifier());
+    }
+
+    private void dequeueUrl(ScriptFileReference ref) {
+        synchronized (pending) {
+            pending.remove(ref);
+        }
+
+        logger.debug("Dequeued {}", ref.getScriptIdentifier());
+    }
+
+    private void checkFiles(int forLevel) {
+        List<ScriptFileReference> newlySupported;
+
+        synchronized (pending) {
+            newlySupported = pending.stream()
+                    .filter(ref -> manager.isSupported(ref.getScriptType().get()) && forLevel >= ref.getStartLevel())
+                    .sorted().collect(Collectors.toList());
+            pending.removeAll(newlySupported);
+        }
+
+        for (ScriptFileReference ref : newlySupported) {
+            importFileWhenReady(ref);
+        }
+    }
+
+    private synchronized void onStartLevelChanged(int newLevel) {
+        int previousLevel = currentStartLevel;
+        currentStartLevel = newLevel;
+
+        if (previousLevel < StartLevelService.STARTLEVEL_MODEL) { // not yet started
+            if (newLevel >= StartLevelService.STARTLEVEL_MODEL) { // start
+                ScheduledExecutorService localScheduler = executerFactory.get();
+                scheduler = localScheduler;
+                localScheduler.submit(() -> importResources(new File(pathToWatch)));
+                localScheduler.scheduleWithFixedDelay(() -> checkFiles(currentStartLevel), 0, RECHECK_INTERVAL,
+                        TimeUnit.SECONDS);
+            }
+        } else { // already started
+            assert scheduler != null;
+            if (newLevel < StartLevelService.STARTLEVEL_MODEL) { // stop
+                scheduler.shutdown();
+                scheduler = null;
+            } else if (newLevel > previousLevel) {
+                scheduler.submit(() -> checkFiles(newLevel));
+            }
         }
     }
 
     @Override
-    public void onReadyMarkerAdded(@NonNull ReadyMarker readyMarker) {
-        started = true;
-
-        ScheduledExecutorService localScheduler = Executors
-                .newSingleThreadScheduledExecutor(new NamedThreadFactory("scriptwatcher"));
-        scheduler = localScheduler;
-        localScheduler.submit(() -> importResources(new File(pathToWatch)));
-        localScheduler.scheduleWithFixedDelay(this::checkFiles, RECHECK_INTERVAL, RECHECK_INTERVAL, TimeUnit.SECONDS);
+    public void onDependencyChange(String scriptPath) {
+        logger.debug("Reimporting {}...", scriptPath);
+        try {
+            importFileWhenReady(new ScriptFileReference(new URL(scriptPath)));
+        } catch (MalformedURLException e) {
+            logger.warn("Failed to reimport {} as it cannot be parsed as a URL", scriptPath);
+        }
     }
 
     @Override
-    public void onReadyMarkerRemoved(@NonNull ReadyMarker readyMarker) {
-        started = false;
+    public synchronized void onReadyMarkerAdded(ReadyMarker readyMarker) {
+        int newLevel = Integer.parseInt(readyMarker.getIdentifier());
+
+        if (newLevel > currentStartLevel) {
+            onStartLevelChanged(newLevel);
+        }
+    }
+
+    @Override
+    public synchronized void onReadyMarkerRemoved(ReadyMarker readyMarker) {
+        int newLevel = Integer.parseInt(readyMarker.getIdentifier());
+
+        if (currentStartLevel > newLevel) {
+            while (newLevel-- > 0 && !readyService
+                    .isReady(new ReadyMarker(StartLevelService.STARTLEVEL_MARKER_TYPE, Integer.toString(newLevel)))) {
+            }
+            onStartLevelChanged(newLevel);
+        }
     }
 }
