@@ -44,7 +44,7 @@ public class PlayActionHandler extends BaseActionModuleHandler {
     private final AudioManager audioManager;
 
     private final String sound;
-    private final String sink;
+    private final @Nullable String sink;
     private final @Nullable PercentType volume;
 
     public PlayActionHandler(Action module, AudioManager audioManager) {
@@ -52,7 +52,9 @@ public class PlayActionHandler extends BaseActionModuleHandler {
         this.audioManager = audioManager;
 
         this.sound = module.getConfiguration().get(PARAM_SOUND).toString();
-        this.sink = module.getConfiguration().get(PARAM_SINK).toString();
+
+        Object sinkParam = module.getConfiguration().get(PARAM_SINK);
+        this.sink = sinkParam != null ? sinkParam.toString() : null;
 
         Object volumeParam = module.getConfiguration().get(PARAM_VOLUME);
         this.volume = volumeParam instanceof BigDecimal ? new PercentType((BigDecimal) volumeParam) : null;
