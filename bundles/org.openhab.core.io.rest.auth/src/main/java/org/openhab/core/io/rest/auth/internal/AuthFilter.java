@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.auth.internal;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -38,6 +39,7 @@ import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserApiTokenCredentials;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UsernamePasswordCredentials;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
@@ -51,6 +53,30 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+class SimpleUserRegistryCallback implements RegistryChangeListener<User> {
+
+    private Runnable callback;
+
+    public SimpleUserRegistryCallback(Runnable callback) {
+        this.callback = callback;
+    }
+
+    @Override
+    public void added(User element) {
+        return;
+    }
+
+    @Override
+    public void removed(User element) {
+        callback.run();
+    }
+
+    @Override
+    public void updated(User oldElement, User element) {
+        callback.run();
+    }
+}
 
 /**
  * This filter is responsible for parsing credentials provided with a request, and hydrating a {@link SecurityContext}
@@ -77,11 +103,13 @@ public class AuthFilter implements ContainerRequestFilter {
     private static final String CONFIG_ALLOW_BASIC_AUTH = "allowBasicAuth";
     private static final String CONFIG_IMPLICIT_USER_ROLE = "implicitUserRole";
 
+    private static final int authCacheSize = 10;
+
     private boolean allowBasicAuth = false;
     private boolean implicitUserRole = true;
 
-    private static HashMap<ByteBuffer, UserSecurityContext> authCache = new HashMap<ByteBuffer, UserSecurityContext>();
-    private static byte[] rndBytes = getRndBytes();
+    private HashMap<ByteBuffer, UserSecurityContext> authCache = new HashMap<ByteBuffer, UserSecurityContext>();
+    private byte[] rndBytes = getRndBytes();
 
     private static byte[] getRndBytes() {
         final Random rd = new Random();
@@ -90,17 +118,37 @@ public class AuthFilter implements ContainerRequestFilter {
         return rndBytes;
     }
 
-    private static ByteBuffer getCacheKey(String creds) {
+    @Nullable
+    private ByteBuffer getCacheKey(String creds) {
         try {
             final MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(AuthFilter.rndBytes);
+            md.update(rndBytes);
             return ByteBuffer.wrap(md.digest(creds.getBytes()));
         } catch (NoSuchAlgorithmException e) {
             // SHA-256 is available for all java distributions so this code will actually never run
             // If it does we'll just flood the cache with random values
-            return ByteBuffer.wrap(getRndBytes());
+            logger.warn("SHA-256 is not available. Cache for basic auth disabled!");
+            return null;
         }
     }
+
+    private RegistryChangeListener<User> cacheCleanListener = new RegistryChangeListener<User>() {
+
+        @Override
+        public void added(User element) {
+            return;
+        }
+
+        @Override
+        public void removed(User element) {
+            authCache.clear();
+        }
+
+        @Override
+        public void updated(User oldElement, User element) {
+            authCache.clear();
+        }
+    };
 
     @Reference
     private JwtHelper jwtHelper;
@@ -111,6 +159,8 @@ public class AuthFilter implements ContainerRequestFilter {
     @Activate
     protected void activate(Map<String, Object> config) {
         modified(config);
+
+        userRegistry.addRegistryChangeListener(cacheCleanListener);
     }
 
     @Modified
@@ -120,7 +170,7 @@ public class AuthFilter implements ContainerRequestFilter {
             allowBasicAuth = value != null && "true".equals(value.toString());
             value = properties.get(CONFIG_IMPLICIT_USER_ROLE);
             implicitUserRole = value == null || !"false".equals(value.toString());
-            AuthFilter.authCache.clear();
+            authCache.clear();
         }
     }
 
@@ -139,32 +189,47 @@ public class AuthFilter implements ContainerRequestFilter {
         }
     }
 
-    private SecurityContext authenticateUsernamePassword(String username, String password, String authCacheKey)
-            throws AuthenticationException {
-        final ByteBuffer cacheKey = getCacheKey(authCacheKey);
-        final UserSecurityContext cachedValue = AuthFilter.authCache.get(cacheKey);
-        if (cachedValue != null) {
-            return cachedValue;
+    private SecurityContext authenticateBasicAuth(String credentialString) throws AuthenticationException {
+        if (!allowBasicAuth) {
+            throw new AuthenticationException("Basic authentication with username/password is not allowed");
         }
 
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+        final ByteBuffer cacheKey = getCacheKey(credentialString);
+        if (cacheKey != null) {
+            final UserSecurityContext cachedValue = authCache.get(cacheKey);
+            if (cachedValue != null) {
+                return cachedValue;
+            }
+        }
+
+        String[] decodedCredentials;
+        try {
+            decodedCredentials = new String(Base64.getDecoder().decode(credentialString), "UTF-8").split(":");
+        } catch (UnsupportedEncodingException e) {
+            throw new AuthenticationException("Invalid base64 credentials for basic auth");
+        }
+        if (decodedCredentials.length != 2) {
+            throw new AuthenticationException("Invalid Basic authentication credential format");
+        }
+
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(decodedCredentials[0],
+                decodedCredentials[1]);
         Authentication auth = userRegistry.authenticate(credentials);
         User user = userRegistry.get(auth.getUsername());
         if (user == null) {
             throw new AuthenticationException("User not found in registry");
         }
 
-        // limit cache to a certain size
-        if (AuthFilter.authCache.size() > 20) {
-            Object remName = null;
-            for (Object obj : AuthFilter.authCache.keySet()) {
-                remName = obj;
-                break;
-            }
-            AuthFilter.authCache.remove(remName);
-        }
         UserSecurityContext context = new UserSecurityContext(user, auth, "Basic");
-        AuthFilter.authCache.put(cacheKey, context);
+
+        if (cacheKey != null) {
+            // limit the auth cache to a certain size
+            if (authCache.size() >= authCacheSize) {
+                authCache.remove(authCache.keySet().iterator().next());
+            }
+            authCache.put(cacheKey, context);
+        }
+
         return context;
     }
 
@@ -181,28 +246,14 @@ public class AuthFilter implements ContainerRequestFilter {
             if (authHeader != null) {
                 String[] authParts = authHeader.split(" ");
                 if (authParts.length == 2) {
-                    if ("Bearer".equalsIgnoreCase(authParts[0])) {
-                        requestContext.setSecurityContext(authenticateBearerToken(authParts[1]));
+                    String authType = authParts[0];
+                    String authValue = authParts[1];
+
+                    if ("Bearer".equalsIgnoreCase(authType)) {
+                        requestContext.setSecurityContext(authenticateBearerToken(authValue));
                         return;
-                    } else if ("Basic".equalsIgnoreCase(authParts[0])) {
-                        try {
-                            String[] decodedCredentials = new String(Base64.getDecoder().decode(authParts[1]), "UTF-8")
-                                    .split(":");
-                            if (decodedCredentials.length != 2) {
-                                throw new AuthenticationException("Invalid Basic authentication credential format");
-                            }
-                            if (!allowBasicAuth) {
-                                throw new AuthenticationException(
-                                        "Basic authentication with username/password is not allowed");
-                            }
-                            requestContext.setSecurityContext(
-                                    // use the base64 String as a key to the cache because it's long and already created
-                                    authenticateUsernamePassword(decodedCredentials[0], decodedCredentials[1],
-                                            authParts[1]));
-                            return;
-                        } catch (AuthenticationException e) {
-                            throw new AuthenticationException("Invalid Basic authentication credentials", e);
-                        }
+                    } else if ("Basic".equalsIgnoreCase(authType)) {
+                        requestContext.setSecurityContext(authenticateBasicAuth(authValue));
                     }
                 }
             }
