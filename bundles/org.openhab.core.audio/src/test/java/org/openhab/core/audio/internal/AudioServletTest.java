@@ -19,7 +19,6 @@ import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioFormat;
@@ -97,15 +96,13 @@ public class AudioServletTest extends AbstractAudioServletTest {
 
         String url = serveStream(audioStream);
 
-        Request request = getHttpRequest(url);
-
-        ContentResponse response = request.send();
+        ContentResponse response = getHttpRequest(url).send();
 
         assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.OK_200));
         assertThat("The response content was not as expected", response.getContent(), is(testByteArray));
         assertThat("The response media type was not as expected", response.getMediaType(), is(MEDIA_TYPE_AUDIO_MPEG));
 
-        response = request.send();
+        response = getHttpRequest(url).send();
 
         assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.NOT_FOUND_404));
     }
@@ -121,9 +118,7 @@ public class AudioServletTest extends AbstractAudioServletTest {
 
         String url = serveStream(audioStream, streamTimeout);
 
-        Request request = getHttpRequest(url);
-
-        ContentResponse response = request.send();
+        ContentResponse response = getHttpRequest(url).send();
 
         final long end = System.currentTimeMillis();
 
@@ -142,7 +137,7 @@ public class AudioServletTest extends AbstractAudioServletTest {
 
         waitForAssert(() -> {
             try {
-                request.send();
+                getHttpRequest(url).send();
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
@@ -150,7 +145,7 @@ public class AudioServletTest extends AbstractAudioServletTest {
                     audioServlet.getMultiTimeStreams().containsValue(audioStream), is(false));
         });
 
-        response = request.send();
+        response = getHttpRequest(url).send();
         assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.NOT_FOUND_404));
     }
 }
