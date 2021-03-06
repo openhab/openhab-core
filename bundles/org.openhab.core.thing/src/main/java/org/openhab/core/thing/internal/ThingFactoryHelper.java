@@ -134,32 +134,11 @@ public class ThingFactoryHelper {
 
     private static Channel createChannel(ChannelDefinition channelDefinition, ThingUID thingUID, String groupId,
             ConfigDescriptionRegistry configDescriptionRegistry) {
-        ChannelType type = withChannelTypeRegistry(channelTypeRegistry -> {
-            return (channelTypeRegistry != null)
-                    ? channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID())
-                    : null;
-        });
-        if (type == null) {
-            logger.warn(
-                    "Could not create channel '{}' for thing type '{}', because channel type '{}' could not be found.",
-                    channelDefinition.getId(), thingUID, channelDefinition.getChannelTypeUID());
-            return null;
-        }
-
         final ChannelUID channelUID = new ChannelUID(thingUID, groupId, channelDefinition.getId());
-        final ChannelBuilder channelBuilder = createChannelBuilder(channelUID, type, configDescriptionRegistry);
-
-        // If we want to override the label, add it...
-        final String label = channelDefinition.getLabel();
-        if (label != null) {
-            channelBuilder.withLabel(label);
-        }
-
-        // If we want to override the description, add it...
-        final String description = channelDefinition.getDescription();
-        if (description != null) {
-            channelBuilder.withDescription(description);
-        }
+        final ChannelBuilder channelBuilder = createChannelBuilder(channelUID, channelDefinition,
+                configDescriptionRegistry);
+        if (channelBuilder == null)
+            return null;
 
         return channelBuilder.withProperties(channelDefinition.getProperties()).build();
     }
@@ -188,9 +167,20 @@ public class ThingFactoryHelper {
         return channelBuilder;
     }
 
-    static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelType channelType,
-            ChannelDefinition channelDefinition, ConfigDescriptionRegistry configDescriptionRegistry,
-            ChannelTypeRegistry channelTypeRegistry) {
+    static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelDefinition channelDefinition,
+            ConfigDescriptionRegistry configDescriptionRegistry) {
+
+        ChannelType channelType = withChannelTypeRegistry(channelTypeRegistry -> {
+            return (channelTypeRegistry != null)
+                    ? channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID())
+                    : null;
+        });
+        if (channelType == null) {
+            logger.warn("Could not create channel '{}', because channel type '{}' could not be found.",
+                    channelDefinition.getId(), channelDefinition.getChannelTypeUID());
+            return null;
+        }
+
         String label = channelDefinition.getLabel();
         if (label == null)
             label = channelType.getLabel();
