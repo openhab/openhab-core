@@ -39,15 +39,17 @@ public class SayActionHandler extends BaseActionModuleHandler {
     private final VoiceManager voiceManager;
 
     private final String text;
-    private final String sink;
+    private final @Nullable String sink;
     private final @Nullable PercentType volume;
 
     public SayActionHandler(Action module, VoiceManager voiceManager) {
         super(module);
         this.voiceManager = voiceManager;
 
-        text = module.getConfiguration().get(PARAM_TEXT).toString();
-        sink = module.getConfiguration().get(PARAM_SINK).toString();
+        this.text = module.getConfiguration().get(PARAM_TEXT).toString();
+
+        Object sinkParam = module.getConfiguration().get(PARAM_SINK);
+        this.sink = sinkParam != null ? sinkParam.toString() : null;
 
         Object volumeParam = module.getConfiguration().get(PARAM_VOLUME);
         this.volume = volumeParam instanceof BigDecimal ? new PercentType((BigDecimal) volumeParam) : null;
