@@ -188,6 +188,38 @@ public class ThingFactoryHelper {
         return channelBuilder;
     }
 
+    static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelType channelType,
+            ChannelDefinition channelDefinition, ConfigDescriptionRegistry configDescriptionRegistry,
+            ChannelTypeRegistry channelTypeRegistry) {
+        String label = channelDefinition.getLabel();
+        if (label == null)
+            label = channelType.getLabel();
+
+        final ChannelBuilder channelBuilder = ChannelBuilder.create(channelUID, channelType.getItemType()) //
+                .withType(channelType.getUID()) //
+                .withDefaultTags(channelType.getTags()) //
+                .withKind(channelType.getKind()) //
+                .withLabel(label) //
+                .withAutoUpdatePolicy(channelType.getAutoUpdatePolicy());
+
+        String description = channelDefinition.getDescription();
+        if (description == null) {
+            description = channelType.getDescription();
+        }
+        if (description != null) {
+            channelBuilder.withDescription(description);
+        }
+
+        // Initialize channel configuration with default-values
+        if (channelType.getConfigDescriptionURI() != null) {
+            final Configuration configuration = new Configuration();
+            applyDefaultConfiguration(configuration, channelType, configDescriptionRegistry);
+            channelBuilder.withConfiguration(configuration);
+        }
+
+        return channelBuilder;
+    }
+
     /**
      * Apply the {@link ThingType}'s default values to the given {@link Configuration}.
      *
