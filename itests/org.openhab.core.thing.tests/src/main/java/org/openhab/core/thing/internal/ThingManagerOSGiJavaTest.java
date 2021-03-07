@@ -102,6 +102,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
     private static final String BINDING_ID = "binding";
     private static final String CHANNEL_ID = "channel";
+    private static final String CHANNEL2_ID = "channel2";
 
     private static final ChannelTypeUID CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID, CHANNEL_ID);
 
@@ -116,6 +117,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     private static final ThingUID BRIDGE_UID = new ThingUID(BRIDGE_TYPE_UID, "bridge");
 
     private static final ChannelUID CHANNEL_UID = new ChannelUID(THING_UID, CHANNEL_ID);
+    private static final ChannelUID CHANNEL2_UID = new ChannelUID(THING_UID, CHANNEL2_ID);
 
     private static final ChannelGroupUID CHANNEL_GROUP_UID = new ChannelGroupUID(THING_UID, CHANNEL_GROUP_ID);
 
@@ -291,18 +293,29 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         List<ChannelBuilder> channelBuilders = thc.get().createChannelBuilders(CHANNEL_GROUP_UID,
                 CHANNEL_GROUP_TYPE_UID);
         assertNotNull(channelBuilders);
-        assertEquals(1, channelBuilders.size());
+        assertEquals(2, channelBuilders.size());
 
-        for (ChannelBuilder channelBuilder : channelBuilders) {
-            assertNotNull(channelBuilder);
-            validateChannel(channelBuilder.build());
-        }
+        assertNotNull(channelBuilders.get(0));
+        validateChannel(channelBuilders.get(0).build());
+        assertNotNull(channelBuilders.get(1));
+        validateChannelOverridden(channelBuilders.get(1).build());
     }
 
     private void validateChannel(Channel channel) {
         assertNotNull(channel);
         assertEquals("Test Label", channel.getLabel());
         assertEquals("Test Description", channel.getDescription());
+        assertEquals("Switch", channel.getAcceptedItemType());
+        assertEquals(CHANNEL_TYPE_UID, channel.getChannelTypeUID());
+        assertNotNull(channel.getDefaultTags());
+        assertEquals(1, channel.getDefaultTags().size());
+        assertEquals("Test Tag", channel.getDefaultTags().iterator().next());
+    }
+
+    private void validateChannelOverridden(Channel channel) {
+        assertNotNull(channel);
+        assertEquals("Test Label Overridden", channel.getLabel());
+        assertEquals("Test Description Overridden", channel.getDescription());
         assertEquals("Switch", channel.getAcceptedItemType());
         assertEquals(CHANNEL_TYPE_UID, channel.getChannelTypeUID());
         assertNotNull(channel.getDefaultTags());
@@ -1035,7 +1048,9 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     private void registerChannelGroupTypeProvider() throws Exception {
         ChannelGroupType channelGroupType = ChannelGroupTypeBuilder.instance(CHANNEL_GROUP_TYPE_UID, "Test Group Label")
                 .withDescription("Test Group Description").withCategory("Test Group Category")
-                .withChannelDefinitions(List.of(new ChannelDefinitionBuilder(CHANNEL_ID, CHANNEL_TYPE_UID).build()))
+                .withChannelDefinitions(List.of(new ChannelDefinitionBuilder(CHANNEL_ID, CHANNEL_TYPE_UID).build(),
+                        new ChannelDefinitionBuilder(CHANNEL2_ID, CHANNEL_TYPE_UID).withLabel("Test Label Overridden")
+                                .withDescription("Test Description Overridden").build()))
                 .build();
 
         ChannelGroupTypeProvider mockChannelGroupTypeProvider = mock(ChannelGroupTypeProvider.class);
