@@ -19,7 +19,7 @@
     <jackson.version>2.12.2</jackson.version>
     <jetty.version>9.4.20.v20190813</jetty.version>
     <pax.web.version>7.2.19</pax.web.version>
-    <swagger.version>2.1.0</swagger.version>
+    <swagger.version>2.1.7</swagger.version>
   </properties>
 
   <dependencyManagement>
@@ -1021,13 +1021,7 @@
     <dependency>
       <groupId>org.javassist</groupId>
       <artifactId>javassist</artifactId>
-      <version>3.26.0-GA</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.reflections</groupId>
-      <artifactId>reflections</artifactId>
-      <version>0.9.12</version>
+      <version>3.27.0-GA</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
