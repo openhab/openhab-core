@@ -12,6 +12,7 @@
  */
 package org.openhab.core.net;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class HttpServiceUtil {
 
     private HttpServiceUtil() {
@@ -45,9 +47,6 @@ public class HttpServiceUtil {
 
     // Utility method that could be used for non-secure and secure port.
     private static int getHttpServicePortProperty(final BundleContext bc, final String propertyName) {
-        Object value;
-        int port = -1;
-
         // Try to find the port by using the service property (respect service ranking).
         final ServiceReference<?>[] refs;
         try {
@@ -58,6 +57,9 @@ public class HttpServiceUtil {
             logger.warn("This error should only be thrown if a filter could not be parsed. We don't use a filter...");
             return -1;
         }
+
+        Object value;
+        int port = -1;
 
         if (refs != null) {
             int candidate = Integer.MIN_VALUE;
