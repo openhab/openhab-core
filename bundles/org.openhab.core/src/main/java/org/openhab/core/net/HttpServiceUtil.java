@@ -13,7 +13,6 @@
 package org.openhab.core.net;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -38,77 +37,74 @@ public class HttpServiceUtil {
      * @param bc the bundle context used for lookup
      * @return the port if used, -1 if no port could be found
      */
-    public static int getHttpServicePort(final @Nullable BundleContext bc) {
+    public static int getHttpServicePort(final BundleContext bc) {
         return getHttpServicePortProperty(bc, "org.osgi.service.http.port");
     }
 
-    public static int getHttpServicePortSecure(final @Nullable BundleContext bc) {
+    public static int getHttpServicePortSecure(final BundleContext bc) {
         return getHttpServicePortProperty(bc, "org.osgi.service.http.port.secure");
     }
 
     // Utility method that could be used for non-secure and secure port.
-    private static int getHttpServicePortProperty(final @Nullable BundleContext bc, final String propertyName) {
-        if (bc != null) {
-            // Try to find the port by using the service property (respect service ranking).
-            final ServiceReference<?>[] refs;
-            try {
-                refs = bc.getAllServiceReferences("org.osgi.service.http.HttpService", null);
-            } catch (final InvalidSyntaxException ex) {
-                // This point of code should never be reached.
-                final Logger logger = LoggerFactory.getLogger(HttpServiceUtil.class);
-                logger.warn(
-                        "This error should only be thrown if a filter could not be parsed. We don't use a filter...");
-                return -1;
-            }
-
-            Object value;
-            int port = -1;
-
-            if (refs != null) {
-                int candidate = Integer.MIN_VALUE;
-                for (final ServiceReference<?> ref : refs) {
-                    value = ref.getProperty(propertyName);
-                    if (value == null) {
-                        continue;
-                    }
-                    final int servicePort;
-                    try {
-                        servicePort = Integer.parseInt(value.toString());
-                    } catch (final NumberFormatException ex) {
-                        continue;
-                    }
-                    value = ref.getProperty(Constants.SERVICE_RANKING);
-                    final int serviceRanking;
-                    if (value == null || !(value instanceof Integer)) {
-                        serviceRanking = 0;
-                    } else {
-                        serviceRanking = (Integer) value;
-                    }
-                    if (serviceRanking >= candidate) {
-                        candidate = serviceRanking;
-                        port = servicePort;
-                    }
-                }
-            }
-            if (port > 0) {
-                return port;
-            }
-
-            // If the service does not provide the port, try to use the system property.
-            value = bc.getProperty(propertyName);
-            if (value != null) {
-                if (value instanceof String) {
-                    try {
-                        return Integer.parseInt(value.toString());
-                    } catch (final NumberFormatException ex) {
-                        // If the property could not be parsed, the HTTP servlet itself has to care and warn about.
-                    }
-                } else if (value instanceof Integer) {
-                    return (Integer) value;
-                }
-            }
-
+    private static int getHttpServicePortProperty(final BundleContext bc, final String propertyName) {
+        // Try to find the port by using the service property (respect service ranking).
+        final ServiceReference<?>[] refs;
+        try {
+            refs = bc.getAllServiceReferences("org.osgi.service.http.HttpService", null);
+        } catch (final InvalidSyntaxException ex) {
+            // This point of code should never be reached.
+            final Logger logger = LoggerFactory.getLogger(HttpServiceUtil.class);
+            logger.warn("This error should only be thrown if a filter could not be parsed. We don't use a filter...");
+            return -1;
         }
+
+        Object value;
+        int port = -1;
+
+        if (refs != null) {
+            int candidate = Integer.MIN_VALUE;
+            for (final ServiceReference<?> ref : refs) {
+                value = ref.getProperty(propertyName);
+                if (value == null) {
+                    continue;
+                }
+                final int servicePort;
+                try {
+                    servicePort = Integer.parseInt(value.toString());
+                } catch (final NumberFormatException ex) {
+                    continue;
+                }
+                value = ref.getProperty(Constants.SERVICE_RANKING);
+                final int serviceRanking;
+                if (value == null || !(value instanceof Integer)) {
+                    serviceRanking = 0;
+                } else {
+                    serviceRanking = (Integer) value;
+                }
+                if (serviceRanking >= candidate) {
+                    candidate = serviceRanking;
+                    port = servicePort;
+                }
+            }
+        }
+        if (port > 0) {
+            return port;
+        }
+
+        // If the service does not provide the port, try to use the system property.
+        value = bc.getProperty(propertyName);
+        if (value != null) {
+            if (value instanceof String) {
+                try {
+                    return Integer.parseInt(value.toString());
+                } catch (final NumberFormatException ex) {
+                    // If the property could not be parsed, the HTTP servlet itself has to care and warn about.
+                }
+            } else if (value instanceof Integer) {
+                return (Integer) value;
+            }
+        }
+
         return -1;
     }
 }
