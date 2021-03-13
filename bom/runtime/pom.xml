@@ -761,7 +761,7 @@
 
     <!-- EMF, Xtext -->
     <dependency>
-      <groupId>de.maggu2810.p2redist</groupId>
+      <groupId>org.eclipse.orbit.bundles</groupId>
       <artifactId>org.antlr.runtime</artifactId>
       <version>3.2.0.v201101311130</version>
       <scope>compile</scope>
