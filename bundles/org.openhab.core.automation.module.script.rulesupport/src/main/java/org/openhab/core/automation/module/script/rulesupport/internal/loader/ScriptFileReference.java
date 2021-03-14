@@ -24,7 +24,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.jetbrains.annotations.NotNull;
 import org.openhab.core.service.StartLevelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +95,7 @@ public class ScriptFileReference implements Comparable<ScriptFileReference> {
     }
 
     @Override
-    public int compareTo(@NotNull ScriptFileReference other) {
+    public int compareTo(ScriptFileReference other) {
         try {
             Path path1 = Paths.get(scriptFileURL.toURI());
             String name1 = path1.getFileName().toString();
