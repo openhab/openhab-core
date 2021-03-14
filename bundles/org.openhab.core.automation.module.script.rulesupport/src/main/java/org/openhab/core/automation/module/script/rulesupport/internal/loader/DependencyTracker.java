@@ -14,8 +14,10 @@ package org.openhab.core.automation.module.script.rulesupport.internal.loader;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.openhab.core.automation.module.script.rulesupport.internal.loader.collection.BidiSetBag;
+import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +26,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jonathan Gilbert
  */
-public abstract class DependencyTracker {
+@Component(immediate = true, service = DependencyTracker.class)
+public class DependencyTracker {
 
     private final Logger logger = LoggerFactory.getLogger(DependencyTracker.class);
+
+    private final Set<DependencyChangeListener> dependencyChangeListeners = ConcurrentHashMap.newKeySet();
 
     private final BidiSetBag<String, String> scriptToLibs = new BidiSetBag<>();
     private final ScriptLibraryWatcher scriptLibraryWatcher = new ScriptLibraryWatcher() {
@@ -45,15 +50,15 @@ public abstract class DependencyTracker {
         }
     };
 
+    @Activate
     public void activate() {
         scriptLibraryWatcher.activate();
     }
 
+    @Deactivate
     public void deactivate() {
         scriptLibraryWatcher.deactivate();
     }
-
-    public abstract void reimportScript(String scriptPath);
 
     public void addLibForScript(String scriptPath, String libPath) {
         synchronized (scriptToLibs) {
@@ -65,5 +70,28 @@ public abstract class DependencyTracker {
         synchronized (scriptToLibs) {
             scriptToLibs.removeKey(scriptPath);
         }
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, unbind = "removeChangeTracker")
+    public void addChangeTracker(DependencyChangeListener listener) {
+        dependencyChangeListeners.add(listener);
+    }
+
+    public void removeChangeTracker(DependencyChangeListener listener) {
+        dependencyChangeListeners.remove(listener);
+    }
+
+    public void reimportScript(String scriptPath) {
+        for (DependencyChangeListener listener : dependencyChangeListeners) {
+            try {
+                listener.onDependencyChange(scriptPath);
+            } catch (Exception e) {
+                logger.warn("Failed to notify tracker of dependency change: {}: {}", e.getClass(), e.getMessage());
+            }
+        }
+    }
+
+    public interface DependencyChangeListener {
+        void onDependencyChange(String scriptPath);
     }
 }
