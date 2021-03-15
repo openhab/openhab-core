@@ -739,7 +739,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     Collections.sort(members, new Comparator<Item>() {
                         @Override
                         public int compare(Item u1, Item u2) {
-                            return u1.getName().compareTo(u2.getName());
+                            String u1Label = u1.getLabel();
+                            String u2Label = u2.getLabel();
+                            if (u1Label != null && u2Label != null) {
+                                return u1Label.compareTo(u2Label);
+                            } else {
+                                return u1.getName().compareTo(u2.getName());
+                            }
                         }
                     });
                     for (Item member : members) {
