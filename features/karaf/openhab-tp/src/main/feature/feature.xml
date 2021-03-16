@@ -24,7 +24,7 @@
 		<!-- Apache Commons -->
 		<bundle dependency="true">mvn:commons-codec/commons-codec/1.6</bundle>
 		<bundle dependency="true">mvn:commons-io/commons-io/2.2</bundle>
-		<bundle dependency="true">mvn:commons-lang/commons-lang/2.6</bundle>
+		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.12.0</bundle>
 
 		<!-- Measurement -->
 		<bundle dependency="true">mvn:javax.measure/unit-api/1.0</bundle>
@@ -249,7 +249,6 @@
 		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-jaxrs2/2.1.7</bundle>
 		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-models/2.1.7</bundle>
 		<bundle dependency="true">mvn:jakarta.validation/jakarta.validation-api/2.0.2</bundle>
-		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.12.0</bundle>
 		<bundle dependency="true">mvn:org.javassist/javassist/3.27.0-GA</bundle>
 	</feature>
 
