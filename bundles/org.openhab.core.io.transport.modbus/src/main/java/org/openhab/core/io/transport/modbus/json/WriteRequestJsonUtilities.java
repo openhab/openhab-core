@@ -62,8 +62,6 @@ public final class WriteRequestJsonUtilities {
      */
     public static final int DEFAULT_MAX_TRIES = 3;
 
-    private static final JsonParser PARSER = new JsonParser();
-
     private WriteRequestJsonUtilities() {
         throw new UnsupportedOperationException();
     }
@@ -93,7 +91,7 @@ public final class WriteRequestJsonUtilities {
      * @see WriteRequestJsonUtilities.JSON_MAX_TRIES
      */
     public static Collection<ModbusWriteRequestBlueprint> fromJson(int unitId, String jsonString) {
-        JsonArray jsonArray = PARSER.parse(jsonString).getAsJsonArray();
+        JsonArray jsonArray = JsonParser.parseString(jsonString).getAsJsonArray();
         if (jsonArray.size() == 0) {
             return new LinkedList<>();
         }
