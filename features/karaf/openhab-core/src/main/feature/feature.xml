@@ -115,16 +115,6 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http.auth/${project.version}</bundle>
 	</feature>
 
-	<feature name="openhab-core-io-http-auth-basic" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http.auth.basic/${project.version}</bundle>
-
-		<feature>openhab-core-io-http-auth</feature>
-		<config name="org.openhab.auth">
-			enabled = true
-		</config>
-	</feature>
-
 	<feature name="openhab-core-io-rest-auth" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-auth-jaas</feature>
