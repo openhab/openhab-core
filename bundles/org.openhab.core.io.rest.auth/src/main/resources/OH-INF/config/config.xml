@@ -11,7 +11,7 @@
 			<description>Allow the use of Basic authentication to access protected API resources, in addition to access tokens
 				and API tokens.</description>
 		</parameter>
-		<parameter name="cacheExpiration" type="integer">
+		<parameter name="cacheExpiration" type="integer" min="1">
 			<advanced>true</advanced>
 			<label>Cache Expiration Time</label>
 			<default>6</default>
