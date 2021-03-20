@@ -186,7 +186,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
         String[] decodedCredentials;
         try {
-            decodedCredentials = new String(Base64.getDecoder().decode(credentialString), "UTF-8").split(":");
+            decodedCredentials = new String(Base64.getDecoder().decode(credentialString), StandardCharsets.UTF_8).split(":");
         } catch (UnsupportedEncodingException e) {
             throw new AuthenticationException("Invalid base64 credentials for basic auth");
         }
