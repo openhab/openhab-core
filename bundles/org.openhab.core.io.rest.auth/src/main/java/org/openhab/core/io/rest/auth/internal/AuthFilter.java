@@ -147,8 +147,7 @@ public class AuthFilter implements ContainerRequestFilter {
         userRegistry.removeRegistryChangeListener(userRegistryListener);
     }
 
-    @Nullable
-    private String getCacheKey(String credentials) {
+    private @Nullable String getCacheKey(String credentials) {
         try {
             final MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(RANDOM_BYTES);
