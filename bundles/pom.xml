@@ -53,7 +53,6 @@
     <module>org.openhab.core.io.console.karaf</module>
     <module>org.openhab.core.io.http</module>
     <module>org.openhab.core.io.http.auth</module>
-    <module>org.openhab.core.io.http.auth.basic</module>
     <module>org.openhab.core.io.monitor</module>
     <module>org.openhab.core.io.net</module>
     <module>org.openhab.core.io.rest</module>
