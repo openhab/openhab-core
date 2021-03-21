@@ -15,6 +15,9 @@ package org.openhab.core.io.rest.auth.internal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This class provides a cache for up to 10 UserSecurityContexts.
  * Entries have a lifetime and are removed from the cache upon the next
@@ -23,6 +26,7 @@ import java.util.Map;
  * @author Kai Kreuzer - Initial contribution
  *
  */
+@NonNullByDefault
 public class ExpiringUserSecurityContextCache {
     final static private int MAX_SIZE = 10;
     final static private int CLEANUP_FREQUENCY = 10;
@@ -37,13 +41,13 @@ public class ExpiringUserSecurityContextCache {
         entryMap = new LinkedHashMap<>() {
             private static final long serialVersionUID = -1220310861591070462L;
 
-            protected boolean removeEldestEntry(Map.Entry<String, Entry> eldest) {
+            protected boolean removeEldestEntry(Map.@Nullable Entry<String, Entry> eldest) {
                 return size() > MAX_SIZE;
             }
         };
     }
 
-    synchronized UserSecurityContext get(String key) {
+    synchronized @Nullable UserSecurityContext get(String key) {
         calls++;
         if (calls >= CLEANUP_FREQUENCY) {
             entryMap.keySet().forEach(k -> getEntry(k));
@@ -64,7 +68,7 @@ public class ExpiringUserSecurityContextCache {
         entryMap.clear();
     }
 
-    private Entry getEntry(String key) {
+    private @Nullable Entry getEntry(String key) {
         Entry entry = entryMap.get(key);
         if (entry != null) {
             long entryAge = System.currentTimeMillis() - entry.timestamp;

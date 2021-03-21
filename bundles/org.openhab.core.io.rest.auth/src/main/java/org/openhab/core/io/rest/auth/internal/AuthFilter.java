@@ -13,7 +13,7 @@
 package org.openhab.core.io.rest.auth.internal;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
@@ -31,6 +31,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
@@ -61,6 +62,8 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - initial contribution
  * @author Yannick Schaus - Allow basic authentication
  * @author Yannick Schaus - Add support for API tokens
+ * @author Sebastian Gerber - Add basic auth caching
+ * @author Kai Kreuzer - Add null annotations, constructor initialization
  */
 @PreMatching
 @Component(configurationPid = "org.openhab.restauth", property = Constants.SERVICE_PID + "=org.openhab.restauth")
@@ -69,6 +72,7 @@ import org.slf4j.LoggerFactory;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @Priority(Priorities.AUTHENTICATION)
 @Provider
+@NonNullByDefault
 public class AuthFilter implements ContainerRequestFilter {
     private final Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
@@ -87,17 +91,10 @@ public class AuthFilter implements ContainerRequestFilter {
     private ExpiringUserSecurityContextCache authCache = new ExpiringUserSecurityContextCache(
             Duration.ofHours(cacheExpiration).toMillis());
 
-    static private byte[] RANDOM_BYTES = new byte[32];
-    static {
-        new Random().nextBytes(RANDOM_BYTES);
-        ;
-    }
+    private final byte[] RANDOM_BYTES = new byte[32];
 
-    @Reference
-    private JwtHelper jwtHelper;
-
-    @Reference
-    private UserRegistry userRegistry;
+    private final JwtHelper jwtHelper;
+    private final UserRegistry userRegistry;
 
     private RegistryChangeListener<User> userRegistryListener = new RegistryChangeListener<User>() {
 
@@ -116,6 +113,13 @@ public class AuthFilter implements ContainerRequestFilter {
             authCache.clear();
         }
     };
+
+    @Activate
+    public AuthFilter(@Reference JwtHelper jwtHelper, @Reference UserRegistry userRegistry) {
+        this.jwtHelper = jwtHelper;
+        this.userRegistry = userRegistry;
+        new Random().nextBytes(RANDOM_BYTES);
+    }
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -148,6 +152,10 @@ public class AuthFilter implements ContainerRequestFilter {
     }
 
     private @Nullable String getCacheKey(String credentials) {
+        if (cacheExpiration == 0) {
+            // caching is disabled
+            return null;
+        }
         try {
             final MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(RANDOM_BYTES);
@@ -184,12 +192,8 @@ public class AuthFilter implements ContainerRequestFilter {
             }
         }
 
-        String[] decodedCredentials;
-        try {
-            decodedCredentials = new String(Base64.getDecoder().decode(credentialString), StandardCharsets.UTF_8).split(":");
-        } catch (UnsupportedEncodingException e) {
-            throw new AuthenticationException("Invalid base64 credentials for basic auth");
-        }
+        String[] decodedCredentials = new String(Base64.getDecoder().decode(credentialString), StandardCharsets.UTF_8)
+                .split(":");
         if (decodedCredentials.length != 2) {
             throw new AuthenticationException("Invalid Basic authentication credential format");
         }
@@ -212,38 +216,40 @@ public class AuthFilter implements ContainerRequestFilter {
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
-        try {
-            String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
-            if (altTokenHeader != null) {
-                requestContext.setSecurityContext(authenticateBearerToken(altTokenHeader));
-                return;
-            }
-
-            String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
-            if (authHeader != null) {
-                String[] authParts = authHeader.split(" ");
-                if (authParts.length == 2) {
-                    String authType = authParts[0];
-                    String authValue = authParts[1];
-
-                    if ("Bearer".equalsIgnoreCase(authType)) {
-                        requestContext.setSecurityContext(authenticateBearerToken(authValue));
-                        return;
-                    } else if ("Basic".equalsIgnoreCase(authType)) {
-                        if (!allowBasicAuth) {
-                            throw new AuthenticationException(
-                                    "Basic authentication with username/password is not allowed");
-                        }
-                        requestContext.setSecurityContext(authenticateBasicAuth(authValue));
-                    }
+    public void filter(@Nullable ContainerRequestContext requestContext) throws IOException {
+        if (requestContext != null) {
+            try {
+                String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
+                if (altTokenHeader != null) {
+                    requestContext.setSecurityContext(authenticateBearerToken(altTokenHeader));
+                    return;
                 }
-            } else if (implicitUserRole) {
-                requestContext.setSecurityContext(new AnonymousUserSecurityContext());
+
+                String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+                if (authHeader != null) {
+                    String[] authParts = authHeader.split(" ");
+                    if (authParts.length == 2) {
+                        String authType = authParts[0];
+                        String authValue = authParts[1];
+
+                        if ("Bearer".equalsIgnoreCase(authType)) {
+                            requestContext.setSecurityContext(authenticateBearerToken(authValue));
+                            return;
+                        } else if ("Basic".equalsIgnoreCase(authType)) {
+                            if (!allowBasicAuth) {
+                                throw new AuthenticationException(
+                                        "Basic authentication with username/password is not allowed");
+                            }
+                            requestContext.setSecurityContext(authenticateBasicAuth(authValue));
+                        }
+                    }
+                } else if (implicitUserRole) {
+                    requestContext.setSecurityContext(new AnonymousUserSecurityContext());
+                }
+            } catch (AuthenticationException e) {
+                logger.warn("Unauthorized API request: {}", e.getMessage());
+                requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
             }
-        } catch (AuthenticationException e) {
-            logger.warn("Unauthorized API request: {}", e.getMessage());
-            requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
         }
     }
 }
