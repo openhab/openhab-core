@@ -13,6 +13,7 @@
 package org.openhab.core.automation.module.script.rulesupport.internal.loader;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -321,5 +322,23 @@ class ScriptFileWatcherTest {
 
         // verify the dependency was tracked
         verify(dependencyTracker).addLibForScript(p.toFile().toURI().toString(), "test");
+    }
+
+    @Test
+    public void testRemoveBeforeReAdd_bug2246() {
+        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
+        when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
+        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+
+        updateStartLevel(100);
+
+        Path p = getFile("script.js");
+
+        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
+        scriptFileWatcher.processWatchEvent(null, ENTRY_MODIFY, p);
+
+        verify(scriptEngineManager).removeEngine(p.toFile().toURI().toString());
+        verify(scriptEngineManager, times(2)).createScriptEngine("js", p.toFile().toURI().toString());
     }
 }
