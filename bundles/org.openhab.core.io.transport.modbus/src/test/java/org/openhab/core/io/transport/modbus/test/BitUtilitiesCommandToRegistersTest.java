@@ -168,7 +168,6 @@ public class BitUtilitiesCommandToRegistersTest {
      * @return
      */
     public static Stream<Object> data() {
-
         return concatTestArgs(//
 
                 a("1.0", BIT, IllegalArgumentException.class), a("1.0", INT8, IllegalArgumentException.class),

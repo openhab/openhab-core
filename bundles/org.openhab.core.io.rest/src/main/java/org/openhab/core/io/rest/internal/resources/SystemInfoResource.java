@@ -71,7 +71,6 @@ public class SystemInfoResource implements RESTResource {
     @Operation(operationId = "getSystemInformation", summary = "Gets information about the system.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SystemInfoBean.class))) })
     public Response getSystemInfo(@Context UriInfo uriInfo) {
-
         final SystemInfoBean bean = new SystemInfoBean();
         return Response.ok(bean).build();
     }

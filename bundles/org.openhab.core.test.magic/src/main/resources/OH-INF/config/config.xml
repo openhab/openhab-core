@@ -38,22 +38,22 @@
 			<default>42</default>
 		</parameter>
 
-		<parameter name="text_advanced" type="text" groupName="group_advanced">
+		<parameter name="textAdvanced" type="text" groupName="group_advanced">
 			<label>Text</label>
 			<description>A grouped text parameter.</description>
 			<default>myText</default>
 		</parameter>
-		<parameter name="boolean_advanced" type="boolean" groupName="group_advanced">
+		<parameter name="booleanAdvanced" type="boolean" groupName="group_advanced">
 			<label>Switch</label>
 			<description>A grouped boolean parameter.</description>
 			<default>false</default>
 		</parameter>
-		<parameter name="decimal_advanced" type="decimal" groupName="group_advanced">
+		<parameter name="decimalAdvanced" type="decimal" groupName="group_advanced">
 			<label>Decimal</label>
 			<description>A grouped decimal parameter.</description>
 			<default>3.141592</default>
 		</parameter>
-		<parameter name="integer_advanced" type="integer" groupName="group_advanced">
+		<parameter name="integerAdvanced" type="integer" groupName="group_advanced">
 			<label>Integer</label>
 			<description>A grouped integer parameter.</description>
 			<default>42</default>
@@ -68,7 +68,7 @@
 			<description>A text parameter which is required and must be verified by the user.</description>
 			<verify>true</verify>
 		</parameter>
-		<parameter name="select_limited" type="text" required="false">
+		<parameter name="selectLimited" type="text" required="false">
 			<label>Select limited</label>
 			<description>A select text parameter which is restricted to the given options.</description>
 			<options>
@@ -79,7 +79,7 @@
 			<limitToOptions>true</limitToOptions>
 			<default>value1</default>
 		</parameter>
-		<parameter name="select_variable" type="text" required="false">
+		<parameter name="selectVariable" type="text" required="false">
 			<label>Select variable</label>
 			<description>A select text parameter without limit.</description>
 			<options>
@@ -89,7 +89,7 @@
 			</options>
 			<limitToOptions>false</limitToOptions>
 		</parameter>
-		<parameter name="multiselect_integer_limit" type="integer" multiple="true">
+		<parameter name="multiselectIntegerLimit" type="integer" multiple="true">
 			<label>Multiselect Integer - limit</label>
 			<description>An integer parameter limited to </description>
 			<multipleLimit>3</multipleLimit>
@@ -107,7 +107,7 @@
 				<option value="0">Zero</option>
 			</options>
 		</parameter>
-		<parameter name="multiselect_text_limit" type="text" multiple="true">
+		<parameter name="multiselectTextLimit" type="text" multiple="true">
 			<label>Multiselect Text - limit</label>
 			<description>An integer parameter limited to </description>
 			<multipleLimit>3</multipleLimit>
@@ -125,7 +125,7 @@
 				<option value="value0">Zero</option>
 			</options>
 		</parameter>
-		<parameter name="select_decimal_limit" type="decimal">
+		<parameter name="selectDecimalLimit" type="decimal">
 			<label>Select Decimal - options from backend</label>
 			<description>A decimal parameter with options provided by the backend.</description>
 			<limitToOptions>true</limitToOptions>

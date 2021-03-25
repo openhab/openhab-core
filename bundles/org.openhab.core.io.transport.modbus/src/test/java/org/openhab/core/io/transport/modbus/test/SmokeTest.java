@@ -73,10 +73,10 @@ public class SmokeTest extends IntegrationTestSupport {
     private static final int DISCRETE_EVERY_N_TRUE = 3;
     private static final int HOLDING_REGISTER_MULTIPLIER = 1;
     private static final int INPUT_REGISTER_MULTIPLIER = 10;
-    private static final SpyingSocketFactory socketSpy = new SpyingSocketFactory();
+    private static final SpyingSocketFactory SOCKET_SPY = new SpyingSocketFactory();
     static {
         try {
-            Socket.setSocketImplFactory(socketSpy);
+            Socket.setSocketImplFactory(SOCKET_SPY);
         } catch (IOException e) {
             fail("Could not install socket spy in SmokeTest");
         }
@@ -138,7 +138,7 @@ public class SmokeTest extends IntegrationTestSupport {
 
     @BeforeEach
     public void setUpSocketSpy() throws IOException {
-        socketSpy.sockets.clear();
+        SOCKET_SPY.sockets.clear();
     }
 
     /**
@@ -844,7 +844,7 @@ public class SmokeTest extends IntegrationTestSupport {
         config.setReconnectAfterMillis(9_000_000);
 
         // 1. capture open connections at this point
-        long openSocketsBefore = getNumberOfOpenClients(socketSpy);
+        long openSocketsBefore = getNumberOfOpenClients(SOCKET_SPY);
         assertThat(openSocketsBefore, is(equalTo(0L)));
 
         // 2. make poll, binding opens the tcp connection
@@ -861,7 +861,7 @@ public class SmokeTest extends IntegrationTestSupport {
             }
             waitForAssert(() -> {
                 // 3. ensure one open connection
-                long openSocketsAfter = getNumberOfOpenClients(socketSpy);
+                long openSocketsAfter = getNumberOfOpenClients(SOCKET_SPY);
                 assertThat(openSocketsAfter, is(equalTo(1L)));
             });
             try (ModbusCommunicationInterface comms2 = modbusManager.newModbusCommunicationInterface(endpoint,
@@ -876,21 +876,21 @@ public class SmokeTest extends IntegrationTestSupport {
                             });
                     assertTrue(latch.await(60, TimeUnit.SECONDS));
                 }
-                assertThat(getNumberOfOpenClients(socketSpy), is(equalTo(1L)));
+                assertThat(getNumberOfOpenClients(SOCKET_SPY), is(equalTo(1L)));
                 // wait for moment (to check that no connections are closed)
                 Thread.sleep(1000);
                 // no more than 1 connection, even though requests are going through
-                assertThat(getNumberOfOpenClients(socketSpy), is(equalTo(1L)));
+                assertThat(getNumberOfOpenClients(SOCKET_SPY), is(equalTo(1L)));
             }
             Thread.sleep(1000);
             // Still one connection open even after closing second connection
-            assertThat(getNumberOfOpenClients(socketSpy), is(equalTo(1L)));
+            assertThat(getNumberOfOpenClients(SOCKET_SPY), is(equalTo(1L)));
 
         } // 4. close (the last) comms
           // ensure that open connections are closed
           // (despite huge "reconnect after millis")
         waitForAssert(() -> {
-            long openSocketsAfterClose = getNumberOfOpenClients(socketSpy);
+            long openSocketsAfterClose = getNumberOfOpenClients(SOCKET_SPY);
             assertThat(openSocketsAfterClose, is(equalTo(0L)));
         });
     }
@@ -909,7 +909,7 @@ public class SmokeTest extends IntegrationTestSupport {
         config.setReconnectAfterMillis(2_000);
 
         // 1. capture open connections at this point
-        long openSocketsBefore = getNumberOfOpenClients(socketSpy);
+        long openSocketsBefore = getNumberOfOpenClients(SOCKET_SPY);
         assertThat(openSocketsBefore, is(equalTo(0L)));
 
         // 2. make poll, binding opens the tcp connection
@@ -927,14 +927,14 @@ public class SmokeTest extends IntegrationTestSupport {
             // Right after the poll we should have one connection open
             waitForAssert(() -> {
                 // 3. ensure one open connection
-                long openSocketsAfter = getNumberOfOpenClients(socketSpy);
+                long openSocketsAfter = getNumberOfOpenClients(SOCKET_SPY);
                 assertThat(openSocketsAfter, is(equalTo(1L)));
             });
             // 4. Connection should close itself by the commons pool eviction policy (checking for old idle connection
             // every now and then)
             waitForAssert(() -> {
                 // 3. ensure one open connection
-                long openSocketsAfter = getNumberOfOpenClients(socketSpy);
+                long openSocketsAfter = getNumberOfOpenClients(SOCKET_SPY);
                 assertThat(openSocketsAfter, is(equalTo(0L)));
             }, 60_000, 50);
 

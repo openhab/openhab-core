@@ -14,7 +14,6 @@ package org.openhab.core.io.transport.modbus;
 
 import java.util.stream.Stream;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -115,9 +114,7 @@ public class ModbusConstants {
          * @return ValueType matching the config value
          * @throws IllegalArgumentException with unknown value types
          */
-        @SuppressWarnings("null")
-        public static @NonNull ValueType fromConfigValue(@Nullable String configValueType)
-                throws IllegalArgumentException {
+        public static ValueType fromConfigValue(@Nullable String configValueType) throws IllegalArgumentException {
             return Stream.of(ValueType.values()).filter(v -> v.getConfigValue().equals(configValueType)).findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Invalid valueType " + configValueType));
         }

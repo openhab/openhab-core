@@ -303,7 +303,7 @@ public class ThingResource implements RESTResource {
 
         Stream<EnrichedThingDTO> thingStream = thingRegistry.stream().map(t -> convertToEnrichedThingDTO(t, locale))
                 .distinct();
-        if (summary != null && summary == true) {
+        if (summary != null && summary) {
             thingStream = dtoMapper.limitToFields(thingStream,
                     "UID,label,bridgeUID,thingTypeUID,statusInfo,firmwareStatus,location,editable");
         }

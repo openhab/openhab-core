@@ -26,7 +26,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.NamedThreadFactory;
@@ -72,16 +71,16 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, configurationPid = "org.openhab.startlevel", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class StartLevelService {
 
-    public final static String STARTLEVEL_MARKER_TYPE = "startlevel";
+    public static final String STARTLEVEL_MARKER_TYPE = "startlevel";
 
-    public final static int STARTLEVEL_OSGI = 10;
-    public final static int STARTLEVEL_MODEL = 20;
-    public final static int STARTLEVEL_STATES = 30;
-    public final static int STARTLEVEL_RULES = 40;
-    public final static int STARTLEVEL_RULEENGINE = 50;
-    public final static int STARTLEVEL_UI = 70;
-    public final static int STARTLEVEL_THINGS = 80;
-    public final static int STARTLEVEL_COMPLETE = 100;
+    public static final int STARTLEVEL_OSGI = 10;
+    public static final int STARTLEVEL_MODEL = 20;
+    public static final int STARTLEVEL_STATES = 30;
+    public static final int STARTLEVEL_RULES = 40;
+    public static final int STARTLEVEL_RULEENGINE = 50;
+    public static final int STARTLEVEL_UI = 70;
+    public static final int STARTLEVEL_THINGS = 80;
+    public static final int STARTLEVEL_COMPLETE = 100;
 
     private final Logger logger = LoggerFactory.getLogger(StartLevelService.class);
 
@@ -91,7 +90,7 @@ public class StartLevelService {
 
     private final Set<ReadyMarker> markers = ConcurrentHashMap.newKeySet();
     private final Map<String, ReadyTracker> trackers = new ConcurrentHashMap<>();
-    private final Map<Integer, @NonNull ReadyMarker> slmarker = new ConcurrentHashMap<>();
+    private final Map<Integer, ReadyMarker> slmarker = new ConcurrentHashMap<>();
 
     private @Nullable ScheduledFuture<?> job;
     private final ScheduledExecutorService scheduler = Executors

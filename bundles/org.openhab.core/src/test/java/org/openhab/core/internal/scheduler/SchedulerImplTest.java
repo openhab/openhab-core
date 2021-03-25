@@ -81,7 +81,7 @@ public class SchedulerImplTest {
 
     @Test
     @Timeout(value = 300, unit = TimeUnit.MILLISECONDS)
-    public void testAfterResolvedWithException() throws Throwable {
+    public void testAfterResolvedWithException() throws InterruptedException {
         Callable<Void> callable = () -> {
             // Pass a exception not very likely thrown by the scheduler it self to avoid missing real exceptions.
             throw new FileNotFoundException("testBeforeTimeoutException");
@@ -103,7 +103,7 @@ public class SchedulerImplTest {
 
     @Test
     @Timeout(value = 300, unit = TimeUnit.MILLISECONDS)
-    public void testBeforeTimeoutException() throws Throwable {
+    public void testBeforeTimeoutException() throws InterruptedException, ExecutionException {
         CompletableFuture<Integer> d = new CompletableFuture<>();
         ScheduledCompletableFuture<Integer> before = scheduler.before(d, Duration.ofMillis(100));
         Thread.sleep(200);
@@ -145,7 +145,7 @@ public class SchedulerImplTest {
 
     @Test
     @Timeout(value = 300, unit = TimeUnit.MILLISECONDS)
-    public void testBeforeResolvedWithException() throws Throwable {
+    public void testBeforeResolvedWithException() throws InterruptedException {
         CompletableFuture<Integer> d = new CompletableFuture<>();
         ScheduledCompletableFuture<Integer> before = scheduler.before(d, Duration.ofMillis(100));
         // Pass an exception not very likely thrown by the scheduler it self to avoid missing real exceptions.
@@ -164,7 +164,7 @@ public class SchedulerImplTest {
 
     @Test
     @Timeout(value = 300, unit = TimeUnit.MILLISECONDS)
-    public void testAfterTimeoutException() throws Throwable {
+    public void testAfterTimeoutException() throws InterruptedException, ExecutionException {
         CompletableFuture<Integer> d = new CompletableFuture<>();
         ScheduledCompletableFuture<Integer> before = scheduler.before(d, Duration.ofMillis(100));
         Thread.sleep(200);

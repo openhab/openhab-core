@@ -75,7 +75,6 @@ public class ExecUtil {
      */
     public static @Nullable String executeCommandLineAndWaitResponse(@Nullable Duration timeout,
             String... commandLine) {
-
         Process processTemp = null;
         Future<String> outputFuture = null;
         cleanup: try {

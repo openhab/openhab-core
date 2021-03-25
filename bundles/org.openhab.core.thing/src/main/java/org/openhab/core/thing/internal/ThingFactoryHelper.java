@@ -137,8 +137,9 @@ public class ThingFactoryHelper {
         final ChannelUID channelUID = new ChannelUID(thingUID, groupId, channelDefinition.getId());
         final ChannelBuilder channelBuilder = createChannelBuilder(channelUID, channelDefinition,
                 configDescriptionRegistry);
-        if (channelBuilder == null)
+        if (channelBuilder == null) {
             return null;
+        }
 
         return channelBuilder.withProperties(channelDefinition.getProperties()).build();
     }
@@ -169,7 +170,6 @@ public class ThingFactoryHelper {
 
     static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelDefinition channelDefinition,
             ConfigDescriptionRegistry configDescriptionRegistry) {
-
         ChannelType channelType = withChannelTypeRegistry(channelTypeRegistry -> {
             return (channelTypeRegistry != null)
                     ? channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID())
@@ -182,8 +182,9 @@ public class ThingFactoryHelper {
         }
 
         String label = channelDefinition.getLabel();
-        if (label == null)
+        if (label == null) {
             label = channelType.getLabel();
+        }
 
         final ChannelBuilder channelBuilder = ChannelBuilder.create(channelUID, channelType.getItemType()) //
                 .withType(channelType.getUID()) //

@@ -157,7 +157,7 @@ public class RuleResource implements RESTResource {
 
         Stream<EnrichedRuleDTO> rules = ruleRegistry.stream().filter(p) // filter according to Predicates
                 .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider)); // map matching rules
-        if (summary != null && summary == true) {
+        if (summary != null && summary) {
             rules = dtoMapper.limitToFields(rules, "uid,templateUID,name,visibility,description,status,tags,editable");
         }
 
