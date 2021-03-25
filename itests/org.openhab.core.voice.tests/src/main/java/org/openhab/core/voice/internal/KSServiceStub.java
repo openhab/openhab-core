@@ -54,7 +54,7 @@ public class KSServiceStub implements KSService {
 
     @Override
     public Set<Locale> getSupportedLocales() {
-        return null;
+        return Set.of();
     }
 
     @Override

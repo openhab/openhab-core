@@ -12,11 +12,14 @@
  */
 package org.openhab.core.voice;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * General purpose TTS exception
  *
  * @author Kelly Davis - Initial contribution
  */
+@NonNullByDefault
 public class TTSException extends Exception {
 
     private static final long serialVersionUID = 1L;

@@ -14,11 +14,14 @@ package org.openhab.core.voice;
 
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This is the interface that a text-to-speech voice has to implement.
  *
  * @author Kelly Davis - Initial contribution
  */
+@NonNullByDefault
 public interface Voice {
 
     /**

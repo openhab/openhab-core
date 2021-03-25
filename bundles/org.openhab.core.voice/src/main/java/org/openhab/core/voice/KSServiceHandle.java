@@ -12,11 +12,14 @@
  */
 package org.openhab.core.voice;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * An handle to a {@link KSService}
  *
  * @author Kelly Davis - Initial contribution
  */
+@NonNullByDefault
 public interface KSServiceHandle {
     /**
      * Aborts keyword spotting in the associated {@link KSService}

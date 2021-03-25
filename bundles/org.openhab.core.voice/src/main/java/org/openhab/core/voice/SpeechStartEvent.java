@@ -12,10 +12,13 @@
  */
 package org.openhab.core.voice;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A {@link STTEvent} fired when the {@link STTService} starts hearing speech.
  *
  * @author Kelly Davis - Initial contribution
  */
+@NonNullByDefault
 public class SpeechStartEvent implements STTEvent {
 }

@@ -14,6 +14,7 @@ package org.openhab.core.voice;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Kelly Davis - Initial contribution
  */
+@NonNullByDefault
 public class TTSExceptionTest {
 
     /**
