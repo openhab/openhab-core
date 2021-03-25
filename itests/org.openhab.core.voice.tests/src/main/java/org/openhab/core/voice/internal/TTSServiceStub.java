@@ -14,10 +14,12 @@ package org.openhab.core.voice.internal;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.voice.TTSException;
@@ -33,6 +35,7 @@ import org.osgi.framework.ServiceReference;
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated from groovy to java
  */
+@NonNullByDefault
 public class TTSServiceStub implements TTSService {
 
     private static final Set<AudioFormat> SUPPORTED_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
@@ -40,14 +43,13 @@ public class TTSServiceStub implements TTSService {
     private static final String TTS_SERVICE_STUB_ID = "ttsServiceStubID";
     private static final String TTS_SERVICE_STUB_LABEL = "ttsServiceStubLabel";
 
-    private Set<Voice> availableVoices;
-    private BundleContext context;
+    private @Nullable BundleContext context;
+
+    public TTSServiceStub() {
+    }
 
     public TTSServiceStub(BundleContext context) {
         this.context = context;
-    }
-
-    public TTSServiceStub() {
     }
 
     @Override
@@ -56,29 +58,27 @@ public class TTSServiceStub implements TTSService {
     }
 
     @Override
-    public String getLabel(Locale locale) {
+    public String getLabel(@Nullable Locale locale) {
         return TTS_SERVICE_STUB_LABEL;
     }
 
     @Override
     public Set<Voice> getAvailableVoices() {
-        availableVoices = new HashSet<>();
-        Collection<ServiceReference<Voice>> refs;
+        BundleContext bundleContext = this.context;
+        if (bundleContext == null) {
+            return Set.of();
+        }
+
         try {
-            refs = context.getServiceReferences(Voice.class, null);
-            if (refs != null) {
-                for (ServiceReference<Voice> ref : refs) {
-                    Voice service = context.getService(ref);
-                    if (service.getUID().startsWith(getId())) {
-                        availableVoices.add(service);
-                    }
-                }
-            }
+            Collection<ServiceReference<Voice>> refs = bundleContext.getServiceReferences(Voice.class, null);
+            return refs.stream() //
+                    .map(ref -> bundleContext.getService(ref)) //
+                    .filter(service -> service.getUID().startsWith(getId())) //
+                    .collect(Collectors.toSet());
         } catch (InvalidSyntaxException e) {
             // If the specified filter contains an invalid filter expression that cannot be parsed.
-            return null;
+            return Set.of();
         }
-        return availableVoices;
     }
 
     @Override

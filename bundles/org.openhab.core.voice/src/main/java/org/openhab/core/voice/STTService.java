@@ -15,6 +15,8 @@ package org.openhab.core.voice;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 
@@ -23,6 +25,7 @@ import org.openhab.core.audio.AudioStream;
  *
  * @author Kelly Davis - Initial contribution
  */
+@NonNullByDefault
 public interface STTService {
 
     /**
@@ -38,7 +41,7 @@ public interface STTService {
      * @param locale the locale to provide the label for
      * @return a localized string to be used in UIs
      */
-    public String getLabel(Locale locale);
+    public String getLabel(@Nullable Locale locale);
 
     /**
      * Obtain the Locales available from this STTService

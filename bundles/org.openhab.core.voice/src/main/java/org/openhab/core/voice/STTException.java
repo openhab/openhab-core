@@ -12,11 +12,14 @@
  */
 package org.openhab.core.voice;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * General purpose STT exception
  *
  * @author Kelly Davis - Initial contribution
  */
+@NonNullByDefault
 public class STTException extends Exception {
 
     private static final long serialVersionUID = 1L;

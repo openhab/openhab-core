@@ -12,10 +12,13 @@
  */
 package org.openhab.core.voice;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A tagging interface for speech-to-text events.
  *
  * @author Kelly Davis - Initial contribution
  */
+@NonNullByDefault
 public interface STTEvent {
 }

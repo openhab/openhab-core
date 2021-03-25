@@ -12,11 +12,14 @@
  */
 package org.openhab.core.voice;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A {@link KSEvent} fired when the {@link KSService} encounters an error.
  *
  * @author Kelly Davis - Initial contribution
  */
+@NonNullByDefault
 public class KSErrorEvent implements KSEvent {
     /**
      * The message describing the error

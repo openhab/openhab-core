@@ -12,11 +12,14 @@
  */
 package org.openhab.core.voice;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A {@link STTEvent} fired when the {@link STTService} encounters an error.
  *
  * @author Kelly Davis - Initial contribution
  */
+@NonNullByDefault
 public class SpeechRecognitionErrorEvent implements STTEvent {
     /**
      * The message describing the error

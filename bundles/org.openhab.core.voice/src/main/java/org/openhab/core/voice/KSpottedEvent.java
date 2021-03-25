@@ -12,11 +12,14 @@
  */
 package org.openhab.core.voice;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A {@link KSEvent} fired when the {@link KSService} spots a keyword.
  *
  * @author Kelly Davis - Initial contribution
  * @author Yannick Schaus - Removed AudioSource information
  */
+@NonNullByDefault
 public class KSpottedEvent implements KSEvent {
 }
