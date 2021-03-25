@@ -101,13 +101,11 @@ public class ScriptExtensionManager implements ScriptExtensionAccessor {
 
     public void importDefaultPresets(ScriptEngineFactory engineProvider, ScriptEngine scriptEngine,
             String scriptIdentifier) {
-
         engineProvider.scopeValues(scriptEngine, findDefaultPresets(scriptIdentifier));
     }
 
     public Map<String, Object> importPreset(String preset, ScriptEngineFactory engineProvider,
             ScriptEngine scriptEngine, String scriptIdentifier) {
-
         Map<String, Object> rv = findPreset(preset, scriptIdentifier);
 
         engineProvider.scopeValues(scriptEngine, rv);
@@ -115,6 +113,7 @@ public class ScriptExtensionManager implements ScriptExtensionAccessor {
         return rv;
     }
 
+    @Override
     public Map<String, Object> findDefaultPresets(String scriptIdentifier) {
         Map<String, Object> allValues = new HashMap<>();
 
@@ -125,6 +124,7 @@ public class ScriptExtensionManager implements ScriptExtensionAccessor {
         return allValues;
     }
 
+    @Override
     public Map<String, Object> findPreset(String preset, String scriptIdentifier) {
         Map<String, Object> allValues = new HashMap<>();
         for (ScriptExtensionProvider provider : scriptExtensionProviders) {

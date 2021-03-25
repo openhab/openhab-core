@@ -58,7 +58,7 @@ public class ConfigDescriptionParameterGroupBuilder {
     /**
      * Sets the advanced flag for this group.
      *
-     * @param advanced - true if the group contains advanced properties
+     * @param advanced true if the group contains advanced properties
      * @return the updated builder instance
      */
     public ConfigDescriptionParameterGroupBuilder withAdvanced(@Nullable Boolean advanced) {

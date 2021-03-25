@@ -12,9 +12,7 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.internal.loader;
 
-import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import static java.nio.file.StandardWatchEventKinds.*;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -26,7 +24,7 @@ import org.openhab.core.service.AbstractWatchService;
 /**
  * Listens for changes to script libraries
  *
- * @author Jonathan Gilbert
+ * @author Jonathan Gilbert - Initial contribution
  */
 abstract class ScriptLibraryWatcher extends AbstractWatchService {
 

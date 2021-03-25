@@ -24,7 +24,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +41,11 @@ import org.openhab.core.OpenHAB;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.common.NamedThreadFactory;
-import org.openhab.core.service.*;
+import org.openhab.core.service.AbstractWatchService;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyMarkerFilter;
+import org.openhab.core.service.ReadyService;
+import org.openhab.core.service.StartLevelService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -104,7 +111,7 @@ public class ScriptFileWatcher extends AbstractWatchService
 
     /**
      * Override the executor service. Can be used for testing.
-     * 
+     *
      * @param executerFactory supplier of ScheduledExecutorService
      */
     void setExecuterFactory(Supplier<ScheduledExecutorService> executerFactory) {
@@ -175,7 +182,6 @@ public class ScriptFileWatcher extends AbstractWatchService
     }
 
     private synchronized void importFileWhenReady(ScriptFileReference ref) {
-
         if (loaded.contains(ref)) {
             this.removeFile(ref); // if already loaded, remove first
         }
@@ -192,7 +198,6 @@ public class ScriptFileWatcher extends AbstractWatchService
     }
 
     private void importFile(ScriptFileReference ref) {
-
         String fileName = ref.getScriptFileURL().getFile();
         Optional<String> scriptType = ref.getScriptType();
         assert scriptType.isPresent();

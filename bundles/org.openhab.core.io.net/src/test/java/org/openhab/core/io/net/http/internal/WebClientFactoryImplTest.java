@@ -101,7 +101,7 @@ public class WebClientFactoryImplTest {
 
     @Disabled("connecting to the outside world makes this test flaky")
     @Test
-    public void testCommonClientUsesExtensibleTrustManagerFailure() throws Throwable {
+    public void testCommonClientUsesExtensibleTrustManagerFailure() throws Exception {
         doThrow(new CertificateException()).when(extensibleTrustManager).checkServerTrusted(
                 ArgumentMatchers.any(X509Certificate[].class), anyString(), ArgumentMatchers.any(SSLEngine.class));
         HttpClient httpClient = webClientFactory.getCommonHttpClient();

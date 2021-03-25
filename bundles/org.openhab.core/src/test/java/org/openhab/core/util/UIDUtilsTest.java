@@ -32,9 +32,9 @@ public class UIDUtilsTest {
         Consumer<String> test = in -> {
             final String encoded = UIDUtils.encode(in);
             final String decoded = UIDUtils.decode(encoded);
-            System.out.printf("in: %s%n encoded: %s%n decoded: %s%n equals: %b%n", in, encoded, decoded,
-                    in.equals(decoded));
-            assertThat(decoded, IsEqual.equalTo(in));
+            final String reason = String.format("in: %s%n encoded: %s%n decoded: %s%n equals: %b%n", in, encoded,
+                    decoded, in.equals(decoded));
+            assertThat(reason, decoded, IsEqual.equalTo(in));
         };
         test.accept("test");
         test.accept("TEST");

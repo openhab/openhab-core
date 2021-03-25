@@ -85,14 +85,14 @@ public class IntegrationTestSupport extends JavaTest {
 
     // One can perhaps test SERIAL with https://github.com/freemed/tty0tty
     // and using those virtual ports? Not the same thing as real serial device of course
-    private static String SERIAL_SERVER_PORT = "/dev/pts/7";
-    private static String SERIAL_CLIENT_PORT = "/dev/pts/8";
+    private static final String SERIAL_SERVER_PORT = "/dev/pts/7";
+    private static final String SERIAL_CLIENT_PORT = "/dev/pts/8";
 
-    private static SerialParameters SERIAL_PARAMETERS_CLIENT = new SerialParameters(SERIAL_CLIENT_PORT, 115200,
+    private static final SerialParameters SERIAL_PARAMETERS_CLIENT = new SerialParameters(SERIAL_CLIENT_PORT, 115200,
             SerialPort.FLOWCONTROL_NONE, SerialPort.FLOWCONTROL_NONE, SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
             SerialPort.PARITY_NONE, Modbus.SERIAL_ENCODING_ASCII, false, 1000);
 
-    private static SerialParameters SERIAL_PARAMETERS_SERVER = new SerialParameters(SERIAL_SERVER_PORT,
+    private static final SerialParameters SERIAL_PARAMETERS_SERVER = new SerialParameters(SERIAL_SERVER_PORT,
             SERIAL_PARAMETERS_CLIENT.getBaudRate(), SERIAL_PARAMETERS_CLIENT.getFlowControlIn(),
             SERIAL_PARAMETERS_CLIENT.getFlowControlOut(), SERIAL_PARAMETERS_CLIENT.getDatabits(),
             SERIAL_PARAMETERS_CLIENT.getStopbits(), SERIAL_PARAMETERS_CLIENT.getParity(),
@@ -106,14 +106,14 @@ public class IntegrationTestSupport extends JavaTest {
     /**
      * Max time to wait for connections/requests from client
      */
-    protected int MAX_WAIT_REQUESTS_MILLIS = 1000;
+    protected static final int MAX_WAIT_REQUESTS_MILLIS = 1000;
 
     /**
      * The server runs in single thread, only one connection is accepted at a time.
      * This makes the tests as strict as possible -- connection must be closed.
      */
     private static final int SERVER_THREADS = 1;
-    protected static int SLAVE_UNIT_ID = 1;
+    protected static final int SLAVE_UNIT_ID = 1;
 
     private static AtomicCounter udpServerIndex = new AtomicCounter(0);
 

@@ -961,7 +961,6 @@ public class ModbusManagerImpl implements ModbusManager {
         synchronized (this) {
             KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> connectionPool = this.connectionPool;
             if (connectionPool != null) {
-
                 for (ModbusCommunicationInterface commInterface : this.communicationInterfaces) {
                     try {
                         commInterface.close();

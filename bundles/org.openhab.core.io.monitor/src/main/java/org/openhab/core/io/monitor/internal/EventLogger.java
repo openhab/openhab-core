@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
@@ -92,12 +91,12 @@ public class EventLogger implements EventSubscriber, ReadyTracker {
     }
 
     @Override
-    public void onReadyMarkerAdded(@NonNull ReadyMarker readyMarker) {
+    public void onReadyMarkerAdded(ReadyMarker readyMarker) {
         loggingActive = true;
     }
 
     @Override
-    public void onReadyMarkerRemoved(@NonNull ReadyMarker readyMarker) {
+    public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
         loggingActive = false;
     }
 }

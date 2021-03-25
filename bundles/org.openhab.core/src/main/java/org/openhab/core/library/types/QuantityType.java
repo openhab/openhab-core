@@ -72,7 +72,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
         UnitInitializer.init();
     }
 
-    private transient final Logger logger = LoggerFactory.getLogger(QuantityType.class);
+    private final transient Logger logger = LoggerFactory.getLogger(QuantityType.class);
 
     private final Quantity<T> quantity;
 

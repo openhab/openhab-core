@@ -35,14 +35,14 @@ import org.openhab.core.io.transport.modbus.json.WriteRequestJsonUtilities;
  */
 public class WriteRequestJsonUtilitiesTest {
 
-    private static List<String> MAX_REGISTERS = IntStream.range(0, MAX_REGISTERS_WRITE_COUNT).mapToObj(i -> "1")
+    private static final List<String> MAX_REGISTERS = IntStream.range(0, MAX_REGISTERS_WRITE_COUNT).mapToObj(i -> "1")
             .collect(Collectors.toList());
-    private static List<String> OVER_MAX_REGISTERS = IntStream.range(0, MAX_REGISTERS_WRITE_COUNT + 1)
+    private static final List<String> OVER_MAX_REGISTERS = IntStream.range(0, MAX_REGISTERS_WRITE_COUNT + 1)
             .mapToObj(i -> "1").collect(Collectors.toList());
 
-    private static List<String> MAX_COILS = IntStream.range(0, MAX_BITS_WRITE_COUNT).mapToObj(i -> "1")
+    private static final List<String> MAX_COILS = IntStream.range(0, MAX_BITS_WRITE_COUNT).mapToObj(i -> "1")
             .collect(Collectors.toList());
-    private static List<String> OVER_MAX_COILS = IntStream.range(0, MAX_BITS_WRITE_COUNT + 1).mapToObj(i -> "1")
+    private static final List<String> OVER_MAX_COILS = IntStream.range(0, MAX_BITS_WRITE_COUNT + 1).mapToObj(i -> "1")
             .collect(Collectors.toList());
 
     @Test

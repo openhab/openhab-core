@@ -293,7 +293,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         protected static final String COMMAND_PREFIX = "command=";
         protected static final String STATE_PREFIX = "state=";
 
-        protected static final Pattern durationPattern = Pattern
+        protected static final Pattern DURATION_PATTERN = Pattern
                 .compile("(?:([0-9]+)H)?\\s*(?:([0-9]+)M)?\\s*(?:([0-9]+)S)?", Pattern.CASE_INSENSITIVE);
 
         @Nullable
@@ -362,7 +362,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         }
 
         private Duration parseDuration(String durationString) throws IllegalArgumentException {
-            Matcher m = durationPattern.matcher(durationString);
+            Matcher m = DURATION_PATTERN.matcher(durationString);
             if (!m.matches() || (m.group(1) == null && m.group(2) == null && m.group(3) == null)) {
                 throw new IllegalArgumentException(
                         "Invalid duration: " + durationString + ". Expected something like: '1h 15m 30s'");

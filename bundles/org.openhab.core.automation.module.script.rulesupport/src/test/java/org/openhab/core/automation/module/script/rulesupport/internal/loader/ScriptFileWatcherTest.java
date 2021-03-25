@@ -14,6 +14,7 @@ package org.openhab.core.automation.module.script.rulesupport.internal.loader;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
@@ -206,7 +207,6 @@ class ScriptFileWatcherTest {
 
     @Test
     public void testLoadOneDefaultFileDelayedSupport() {
-
         // set an executor which captures the scheduled task
         ScheduledExecutorService scheduledExecutorService = spy(
                 new DelegatingScheduledExecutorService(Executors.newSingleThreadScheduledExecutor()));

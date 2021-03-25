@@ -110,7 +110,7 @@ public class UIResource implements RESTResource {
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         Stream<RootUIComponent> components = registry.getAll().stream();
-        if (summary != null && summary == true) {
+        if (summary != null && summary) {
             components = components.map(c -> {
                 RootUIComponent component = new RootUIComponent(c.getUID(), c.getType());
                 @Nullable

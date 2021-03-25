@@ -29,20 +29,20 @@ public class MagicServiceConfig {
     public BigDecimal decimal;
     public Integer integer;
 
-    public String text_advanced;
-    public boolean boolean_advanced;
-    public BigDecimal decimal_advanced;
-    public Integer integer_advanced;
+    public String textAdvanced;
+    public boolean booleanAdvanced;
+    public BigDecimal decimalAdvanced;
+    public Integer integerAdvanced;
 
     public String requiredTextParameter;
     public String verifiedTextParameter;
-    public String select_limited;
-    public String select_variable;
+    public String selectLimited;
+    public String selectVariable;
 
-    public List<String> multiselect_text_limit;
-    public List<BigDecimal> multiselect_integer_limit;
+    public List<String> multiselectTextLimit;
+    public List<BigDecimal> multiselectIntegerLimit;
 
-    public BigDecimal select_decimal_limit;
+    public BigDecimal selectDecimalLimit;
 
     @Override
     public String toString() {

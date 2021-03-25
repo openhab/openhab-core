@@ -16,8 +16,6 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 /**
  * This is the Access Token Response, a simple value-object that holds the result of the
  * from an Access Token Request, as listed in RFC 6749:
@@ -112,7 +110,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      *            by the authorization server.
      * @return true if object is not-initialized, or expired, or expired early due to buffer
      */
-    public boolean isExpired(@NonNull LocalDateTime givenTime, int tokenExpiresInBuffer) {
+    public boolean isExpired(LocalDateTime givenTime, int tokenExpiresInBuffer) {
         return createdOn == null
                 || createdOn.plusSeconds(expiresIn).minusSeconds(tokenExpiresInBuffer).isBefore(givenTime);
     }

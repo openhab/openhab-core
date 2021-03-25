@@ -17,14 +17,19 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.openhab.core.automation.module.script.rulesupport.internal.loader.collection.BidiSetBag;
-import org.osgi.service.component.annotations.*;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Tracks dependencies between scripts and reloads dependees
  *
- * @author Jonathan Gilbert
+ * @author Jonathan Gilbert - Initial contribution
  */
 @Component(immediate = true, service = DependencyTracker.class)
 public class DependencyTracker {

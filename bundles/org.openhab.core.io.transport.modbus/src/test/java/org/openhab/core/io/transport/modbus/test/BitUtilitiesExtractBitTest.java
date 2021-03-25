@@ -60,7 +60,6 @@ public class BitUtilitiesExtractBitTest {
 
     @Test
     public void testExtractBitWithRegisterIndexAndBitIndexOOB() {
-
         byte[] bytes = new byte[] { 0b00100001, // hi byte of 1st register
                 0b00100101, // lo byte of 1st register
                 0b00110001, // hi byte of 2nd register
