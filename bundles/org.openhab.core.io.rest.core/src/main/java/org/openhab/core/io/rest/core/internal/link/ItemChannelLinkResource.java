@@ -114,7 +114,7 @@ public class ItemChannelLinkResource implements RESTResource {
     @GET
     @Path("/{itemName}/{channelUID}")
     @Operation(operationId = "getItemLink", summary = "Retrieves an individual link.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ItemChannelLinkDTO.class))),
             @ApiResponse(responseCode = "404", description = "Content does not match the path") })
     public Response getLink(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
             @PathParam("channelUID") @Parameter(description = "channelUID") String channelUid) {

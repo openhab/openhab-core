@@ -22,8 +22,8 @@ import org.openhab.core.auth.User;
  * @author Yannick Schaus - initial contribution
  */
 public class UserDTO {
-    String name;
-    Collection<String> roles;
+    public String name;
+    public Collection<String> roles;
 
     public UserDTO(User user) {
         super();

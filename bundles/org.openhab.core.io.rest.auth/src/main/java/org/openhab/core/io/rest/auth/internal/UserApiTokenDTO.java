@@ -20,9 +20,9 @@ import java.util.Date;
  * @author Yannick Schaus - initial contribution
  */
 public class UserApiTokenDTO {
-    String name;
-    Date createdTime;
-    String scope;
+    public String name;
+    public Date createdTime;
+    public String scope;
 
     public UserApiTokenDTO(String name, Date createdTime, String scope) {
         super();

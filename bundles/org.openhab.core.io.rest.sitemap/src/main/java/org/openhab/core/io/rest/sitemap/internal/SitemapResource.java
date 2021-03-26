@@ -226,7 +226,7 @@ public class SitemapResource
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SitemapDTO.class)))) })
     public Response getSitemaps() {
         logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
-        Object responseObject = getSitemapBeans(uriInfo.getAbsolutePathBuilder().build());
+        Collection<SitemapDTO> responseObject = getSitemapBeans(uriInfo.getAbsolutePathBuilder().build());
         return Response.ok(responseObject).build();
     }
 
@@ -243,7 +243,7 @@ public class SitemapResource
         final Locale locale = localeService.getLocale(language);
         logger.debug("Received HTTP GET request from IP {} at '{}' for media type '{}'.", request.getRemoteAddr(),
                 uriInfo.getPath(), type);
-        Object responseObject = getSitemapBean(sitemapname, uriInfo.getBaseUriBuilder().build(), locale,
+        SitemapDTO responseObject = getSitemapBean(sitemapname, uriInfo.getBaseUriBuilder().build(), locale,
                 includeHiddenWidgets);
         return Response.ok(responseObject).build();
     }

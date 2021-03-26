@@ -574,7 +574,7 @@ public class ItemResource implements RESTResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(operationId = "addOrUpdateItemInRegistry", summary = "Adds a new item to the registry or updates the existing item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
                     @ApiResponse(responseCode = "201", description = "Item created."),
                     @ApiResponse(responseCode = "400", description = "Payload invalid."),
                     @ApiResponse(responseCode = "404", description = "Item not found or name in path invalid."),

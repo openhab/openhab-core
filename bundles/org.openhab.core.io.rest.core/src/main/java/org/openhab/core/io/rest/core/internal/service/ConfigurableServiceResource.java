@@ -121,8 +121,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @Operation(operationId = "getServices", summary = "Get all configurable services.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigurableServiceDTO.class)))) })
     public List<ConfigurableServiceDTO> getAll() {
-        List<ConfigurableServiceDTO> services = getConfigurableServices();
-        return services;
+        return getConfigurableServices();
     }
 
     @GET
@@ -172,8 +171,7 @@ public class ConfigurableServiceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigurableServiceDTO.class)))) })
     public List<ConfigurableServiceDTO> getMultiConfigServicesByFactoryPid(
             @PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
-        List<ConfigurableServiceDTO> services = collectServicesById(serviceId);
-        return services;
+        return collectServicesById(serviceId);
     }
 
     private List<ConfigurableServiceDTO> collectServicesById(String serviceId) {

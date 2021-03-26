@@ -66,6 +66,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -115,7 +116,7 @@ public class TokenResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @Operation(operationId = "getOAuthToken", summary = "Get access and refresh tokens.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TokenResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters") })
     public Response getToken(@FormParam("grant_type") String grantType, @FormParam("code") String code,
             @FormParam("redirect_uri") String redirectUri, @FormParam("client_id") String clientId,
@@ -145,7 +146,7 @@ public class TokenResource implements RESTResource {
     @GET
     @Path("/sessions")
     @Operation(operationId = "getSessionsForCurrentUser", summary = "List the sessions associated to the authenticated user.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserSessionDTO.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserSessionDTO.class)))),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User not found") })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -165,8 +166,8 @@ public class TokenResource implements RESTResource {
 
     @GET
     @Path("/apitokens")
-    @Operation(operationId = "getApiToken", summary = "List the API tokens associated to the authenticated user.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserApiTokenDTO.class))),
+    @Operation(operationId = "getApiTokens", summary = "List the API tokens associated to the authenticated user.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserApiTokenDTO.class)))),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User not found") })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -244,9 +245,8 @@ public class TokenResource implements RESTResource {
         ResponseBuilder response = Response.ok();
 
         if (sessionCookie != null && sessionCookie.getValue().equals(session.get().getSessionId())) {
-            URI domainUri;
             try {
-                domainUri = new URI(session.get().getRedirectUri());
+                URI domainUri = new URI(session.get().getRedirectUri());
                 NewCookie newCookie = new NewCookie(SESSIONID_COOKIE_NAME, null, "/", domainUri.getHost(), null, 0,
                         false, true);
                 response.cookie(newCookie);
