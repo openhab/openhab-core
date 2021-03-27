@@ -71,10 +71,13 @@ public class ExpiringUserSecurityContextCache {
     private @Nullable Entry getEntry(String key) {
         Entry entry = entryMap.get(key);
         if (entry != null) {
-            long entryAge = System.currentTimeMillis() - entry.timestamp;
+            final long curTimeMillis = System.currentTimeMillis();
+            long entryAge = curTimeMillis - entry.timestamp;
             if (entryAge < 0 || entryAge >= keepPeriod) {
                 entryMap.remove(key);
                 entry = null;
+            } else {
+                entry.timestamp = curTimeMillis;
             }
         }
         return entry;
