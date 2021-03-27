@@ -84,7 +84,7 @@ public class ExpiringUserSecurityContextCache {
     }
 
     static class Entry {
-        final public long timestamp;
+        public long timestamp;
         final public UserSecurityContext value;
 
         Entry(long timestamp, UserSecurityContext value) {
