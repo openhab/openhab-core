@@ -53,6 +53,7 @@ import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
+import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
@@ -133,7 +134,7 @@ public class PersistenceResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getPersistenceServices", summary = "Gets a list of persistence services.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))) })
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceServiceDTO.class)))) })
     public Response httpGetPersistenceServices(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
@@ -148,7 +149,7 @@ public class PersistenceResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getItemsForPersistenceService", summary = "Gets a list of items available via a specific persistence service.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))) })
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceItemInfo.class), uniqueItems = true))) })
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId) {
         return getServiceItemList(serviceId);
@@ -199,7 +200,7 @@ public class PersistenceResource implements RESTResource {
     @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "storeItemDataInPersistenceService", summary = "Stores item persistence data into the persistence service.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ItemHistoryDTO.class))),
+            @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service") })
     public Response httpPutPersistenceItemData(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,

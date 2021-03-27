@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -120,7 +121,7 @@ public class AddonResource implements RESTResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getAddons", summary = "Get all add-ons.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Addon.class)))) })
     public Response getAddon(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
@@ -132,7 +133,7 @@ public class AddonResource implements RESTResource {
     @Path("/types")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getAddonTypes", summary = "Get all add-on types.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AddonType.class)))) })
     public Response getTypes(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
@@ -145,7 +146,7 @@ public class AddonResource implements RESTResource {
     @Path("/{addonId: [a-zA-Z_0-9-:]+}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getAddonById", summary = "Get add-on with given ID.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Addon.class))),
             @ApiResponse(responseCode = "404", description = "Not found") })
     public Response getById(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,

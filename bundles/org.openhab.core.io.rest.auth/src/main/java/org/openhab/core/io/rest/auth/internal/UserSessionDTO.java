@@ -20,11 +20,11 @@ import java.util.Date;
  * @author Yannick Schaus - initial contribution
  */
 public class UserSessionDTO {
-    String sessionId;
-    Date createdTime;
-    Date lastRefreshTime;
-    String clientId;
-    String scope;
+    public String sessionId;
+    public Date createdTime;
+    public Date lastRefreshTime;
+    public String clientId;
+    public String scope;
 
     public UserSessionDTO(String sessionId, Date createdTime, Date lastRefreshTime, String clientId, String scope) {
         super();

@@ -214,7 +214,7 @@ public class RuleResource implements RESTResource {
     @Path("/{ruleUID}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "deleteRule", summary = "Removes an existing rule corresponding to the given UID.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
     public Response remove(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
         Rule removedRule = ruleRegistry.remove(ruleUID);
