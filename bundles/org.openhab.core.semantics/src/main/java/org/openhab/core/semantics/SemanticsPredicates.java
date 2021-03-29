@@ -16,11 +16,6 @@ import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.items.Item;
-import org.openhab.core.semantics.model.Equipment;
-import org.openhab.core.semantics.model.Location;
-import org.openhab.core.semantics.model.Point;
-import org.openhab.core.semantics.model.Property;
-import org.openhab.core.semantics.model.Tag;
 
 /**
  * This class provides predicates that allow filtering item streams with regards to their semantics.

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.semantics.model;
+package org.openhab.core.semantics;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
