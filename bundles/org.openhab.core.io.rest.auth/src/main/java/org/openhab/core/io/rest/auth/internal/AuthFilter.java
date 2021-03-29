@@ -231,16 +231,26 @@ public class AuthFilter implements ContainerRequestFilter {
                     if (authParts.length == 2) {
                         String authType = authParts[0];
                         String authValue = authParts[1];
-
                         if ("Bearer".equalsIgnoreCase(authType)) {
                             requestContext.setSecurityContext(authenticateBearerToken(authValue));
                             return;
                         } else if ("Basic".equalsIgnoreCase(authType)) {
-                            if (!allowBasicAuth) {
-                                throw new AuthenticationException(
-                                        "Basic authentication with username/password is not allowed");
+                            String[] decodedCredentials = new String(Base64.getDecoder().decode(authValue), "UTF-8")
+                                    .split(":");
+                            if (decodedCredentials.length > 2) {
+                                throw new AuthenticationException("Invalid Basic authentication credential format");
                             }
-                            requestContext.setSecurityContext(authenticateBasicAuth(authValue));
+                            switch (decodedCredentials.length) {
+                                case 1:
+                                    requestContext.setSecurityContext(authenticateBearerToken(decodedCredentials[0]));
+                                    break;
+                                case 2:
+                                    if (!allowBasicAuth) {
+                                        throw new AuthenticationException(
+                                                "Basic authentication with username/password is not allowed");
+                                    }
+                                    requestContext.setSecurityContext(authenticateBasicAuth(authValue));
+                            }
                         }
                     }
                 } else if (implicitUserRole) {
