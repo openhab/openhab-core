@@ -11,6 +11,18 @@
 			<description>Allow the use of Basic authentication to access protected API resources, in addition to access tokens
 				and API tokens.</description>
 		</parameter>
+		<parameter name="cacheExpiration" type="integer" min="0">
+			<advanced>true</advanced>
+			<label>Cache Expiration Time</label>
+			<default>6</default>
+			<unitLabel>h</unitLabel>
+			<description>When basic authentication is activated, credentials are put in a cache in order to speed up request
+				authorization.
+				The entries in the cache expire after a while in order to not keep credentials in memory indefinitely.
+				This value defines the expiration time in hours.
+				Set it to 0 for disabling the cache.
+			</description>
+		</parameter>
 		<parameter name="implicitUserRole" type="boolean" required="false">
 			<advanced>true</advanced>
 			<label>Implicit user role for unauthenticated requests</label>

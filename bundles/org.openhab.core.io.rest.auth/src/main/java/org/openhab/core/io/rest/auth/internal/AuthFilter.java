@@ -13,8 +13,13 @@
 package org.openhab.core.io.rest.auth.internal;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Random;
 
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
@@ -26,6 +31,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
@@ -33,12 +39,14 @@ import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserApiTokenCredentials;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UsernamePasswordCredentials;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
@@ -54,6 +62,8 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - initial contribution
  * @author Yannick Schaus - Allow basic authentication
  * @author Yannick Schaus - Add support for API tokens
+ * @author Sebastian Gerber - Add basic auth caching
+ * @author Kai Kreuzer - Add null annotations, constructor initialization
  */
 @PreMatching
 @Component(configurationPid = "org.openhab.restauth", property = Constants.SERVICE_PID + "=org.openhab.restauth")
@@ -62,6 +72,7 @@ import org.slf4j.LoggerFactory;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @Priority(Priorities.AUTHENTICATION)
 @Provider
+@NonNullByDefault
 public class AuthFilter implements ContainerRequestFilter {
     private final Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
@@ -71,19 +82,49 @@ public class AuthFilter implements ContainerRequestFilter {
     protected static final String CONFIG_URI = "system:restauth";
     private static final String CONFIG_ALLOW_BASIC_AUTH = "allowBasicAuth";
     private static final String CONFIG_IMPLICIT_USER_ROLE = "implicitUserRole";
+    private static final String CONFIG_CACHE_EXPIRATION = "cacheExpiration";
 
     private boolean allowBasicAuth = false;
     private boolean implicitUserRole = true;
+    private Long cacheExpiration = 6L;
 
-    @Reference
-    private JwtHelper jwtHelper;
+    private ExpiringUserSecurityContextCache authCache = new ExpiringUserSecurityContextCache(
+            Duration.ofHours(cacheExpiration).toMillis());
 
-    @Reference
-    private UserRegistry userRegistry;
+    private final byte[] RANDOM_BYTES = new byte[32];
+
+    private final JwtHelper jwtHelper;
+    private final UserRegistry userRegistry;
+
+    private RegistryChangeListener<User> userRegistryListener = new RegistryChangeListener<User>() {
+
+        @Override
+        public void added(User element) {
+            return;
+        }
+
+        @Override
+        public void removed(User element) {
+            authCache.clear();
+        }
+
+        @Override
+        public void updated(User oldElement, User element) {
+            authCache.clear();
+        }
+    };
+
+    @Activate
+    public AuthFilter(@Reference JwtHelper jwtHelper, @Reference UserRegistry userRegistry) {
+        this.jwtHelper = jwtHelper;
+        this.userRegistry = userRegistry;
+        new Random().nextBytes(RANDOM_BYTES);
+    }
 
     @Activate
     protected void activate(Map<String, Object> config) {
         modified(config);
+        userRegistry.addRegistryChangeListener(userRegistryListener);
     }
 
     @Modified
@@ -93,6 +134,37 @@ public class AuthFilter implements ContainerRequestFilter {
             allowBasicAuth = value != null && "true".equals(value.toString());
             value = properties.get(CONFIG_IMPLICIT_USER_ROLE);
             implicitUserRole = value == null || !"false".equals(value.toString());
+            value = properties.get(CONFIG_CACHE_EXPIRATION);
+            if (value != null) {
+                try {
+                    cacheExpiration = Long.valueOf(value.toString());
+                } catch (NumberFormatException e) {
+                    logger.warn("Ignoring invalid configuration value '{}' for cacheExpiration parameter.", value);
+                }
+            }
+            authCache.clear();
+        }
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        userRegistry.removeRegistryChangeListener(userRegistryListener);
+    }
+
+    private @Nullable String getCacheKey(String credentials) {
+        if (cacheExpiration == 0) {
+            // caching is disabled
+            return null;
+        }
+        try {
+            final MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(RANDOM_BYTES);
+            return new String(md.digest(credentials.getBytes()));
+        } catch (NoSuchAlgorithmException e) {
+            // SHA-256 is available for all java distributions so this code will actually never run
+            // If it does we'll just flood the cache with random values
+            logger.warn("SHA-256 is not available. Cache for basic auth disabled!");
+            return null;
         }
     }
 
@@ -111,36 +183,59 @@ public class AuthFilter implements ContainerRequestFilter {
         }
     }
 
-    private SecurityContext authenticateUsernamePassword(String username, String password)
-            throws AuthenticationException {
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+    private SecurityContext authenticateBasicAuth(String credentialString) throws AuthenticationException {
+        final String cacheKey = getCacheKey(credentialString);
+        if (cacheKey != null) {
+            final UserSecurityContext cachedValue = authCache.get(cacheKey);
+            if (cachedValue != null) {
+                return cachedValue;
+            }
+        }
+
+        String[] decodedCredentials = new String(Base64.getDecoder().decode(credentialString), StandardCharsets.UTF_8)
+                .split(":");
+        if (decodedCredentials.length != 2) {
+            throw new AuthenticationException("Invalid Basic authentication credential format");
+        }
+
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(decodedCredentials[0],
+                decodedCredentials[1]);
         Authentication auth = userRegistry.authenticate(credentials);
         User user = userRegistry.get(auth.getUsername());
         if (user == null) {
             throw new AuthenticationException("User not found in registry");
         }
-        return new UserSecurityContext(user, auth, "Basic");
+
+        UserSecurityContext context = new UserSecurityContext(user, auth, "Basic");
+
+        if (cacheKey != null) {
+            authCache.put(cacheKey, context);
+        }
+
+        return context;
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
-        try {
-            String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
-            if (altTokenHeader != null) {
-                requestContext.setSecurityContext(authenticateBearerToken(altTokenHeader));
-                return;
-            }
+    public void filter(@Nullable ContainerRequestContext requestContext) throws IOException {
+        if (requestContext != null) {
+            try {
+                String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
+                if (altTokenHeader != null) {
+                    requestContext.setSecurityContext(authenticateBearerToken(altTokenHeader));
+                    return;
+                }
 
-            String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
-            if (authHeader != null) {
-                String[] authParts = authHeader.split(" ");
-                if (authParts.length == 2) {
-                    if ("Bearer".equalsIgnoreCase(authParts[0])) {
-                        requestContext.setSecurityContext(authenticateBearerToken(authParts[1]));
-                        return;
-                    } else if ("Basic".equalsIgnoreCase(authParts[0])) {
-                        try {
-                            String[] decodedCredentials = new String(Base64.getDecoder().decode(authParts[1]), "UTF-8")
+                String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+                if (authHeader != null) {
+                    String[] authParts = authHeader.split(" ");
+                    if (authParts.length == 2) {
+                        String authType = authParts[0];
+                        String authValue = authParts[1];
+                        if ("Bearer".equalsIgnoreCase(authType)) {
+                            requestContext.setSecurityContext(authenticateBearerToken(authValue));
+                            return;
+                        } else if ("Basic".equalsIgnoreCase(authType)) {
+                            String[] decodedCredentials = new String(Base64.getDecoder().decode(authValue), "UTF-8")
                                     .split(":");
                             if (decodedCredentials.length > 2) {
                                 throw new AuthenticationException("Invalid Basic authentication credential format");
@@ -154,25 +249,17 @@ public class AuthFilter implements ContainerRequestFilter {
                                         throw new AuthenticationException(
                                                 "Basic authentication with username/password is not allowed");
                                     }
-                                    requestContext.setSecurityContext(
-                                            authenticateUsernamePassword(decodedCredentials[0], decodedCredentials[1]));
+                                    requestContext.setSecurityContext(authenticateBasicAuth(authValue));
                             }
-
-                            return;
-                        } catch (AuthenticationException e) {
-                            throw new AuthenticationException("Invalid Basic authentication credentials", e);
                         }
                     }
+                } else if (implicitUserRole) {
+                    requestContext.setSecurityContext(new AnonymousUserSecurityContext());
                 }
+            } catch (AuthenticationException e) {
+                logger.warn("Unauthorized API request: {}", e.getMessage());
+                requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
             }
-
-            if (implicitUserRole) {
-                requestContext.setSecurityContext(new AnonymousUserSecurityContext());
-            }
-
-        } catch (AuthenticationException e) {
-            logger.warn("Unauthorized API request: {}", e.getMessage());
-            requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
         }
     }
 }
