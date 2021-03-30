@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.semantics.model.Location;
+import org.openhab.core.semantics.Location;
 
 /**
  * This class provides a stream of all defined locations.

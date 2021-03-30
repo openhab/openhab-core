@@ -13,8 +13,8 @@
 package org.openhab.core.semantics.model.equipment;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.semantics.model.Equipment;
-import org.openhab.core.semantics.model.TagInfo;
+import org.openhab.core.semantics.Equipment;
+import org.openhab.core.semantics.TagInfo;
 
 /**
  * This class defines a Remote Control.

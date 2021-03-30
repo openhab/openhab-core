@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
-import org.openhab.core.semantics.model.Location;
 import org.openhab.core.semantics.model.equipment.CleaningRobot;
 import org.openhab.core.semantics.model.location.Bathroom;
 import org.openhab.core.semantics.model.location.Kitchen;

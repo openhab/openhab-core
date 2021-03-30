@@ -13,8 +13,8 @@
 package org.openhab.core.semantics.model.property;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.semantics.model.Property;
-import org.openhab.core.semantics.model.TagInfo;
+import org.openhab.core.semantics.Property;
+import org.openhab.core.semantics.TagInfo;
 
 /**
  * This class defines a Duration.

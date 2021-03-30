@@ -17,12 +17,12 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.model.script.engine.action.ActionDoc;
 import org.openhab.core.model.script.internal.engine.action.SemanticsActionService;
+import org.openhab.core.semantics.Equipment;
+import org.openhab.core.semantics.Location;
+import org.openhab.core.semantics.Point;
+import org.openhab.core.semantics.Property;
 import org.openhab.core.semantics.SemanticTags;
-import org.openhab.core.semantics.model.Equipment;
-import org.openhab.core.semantics.model.Location;
-import org.openhab.core.semantics.model.Point;
-import org.openhab.core.semantics.model.Property;
-import org.openhab.core.semantics.model.Tag;
+import org.openhab.core.semantics.Tag;
 
 /**
  * The static methods of this class are made available as functions in the scripts. This allows a script to use

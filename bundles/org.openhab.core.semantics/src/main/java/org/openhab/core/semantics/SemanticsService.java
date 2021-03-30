@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.items.Item;
-import org.openhab.core.semantics.model.Location;
 
 /**
  * This interface defines a service, which offers functionality regarding semantic tags.
