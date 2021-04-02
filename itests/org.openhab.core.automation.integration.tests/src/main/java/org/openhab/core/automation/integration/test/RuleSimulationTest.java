@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Test the simulation of rule executions with the {@link org.openhab.core.automation.internal.RuleExecutionSimulator}
- * 
+ *
  * @author Sönke Küper - Created tests for rule simulation
  */
 @NonNullByDefault
@@ -104,6 +104,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
         logger.info("assert that rules are simulated correct");
 
         final Rule cronRuleWithTimeOfDayCondition = createRuleWithCronExpressionTrigger();
+        final Rule disabledRule = createRuleWithCronExpressionTrigger();
         final Rule timeOfDayTriggerWithDayOfWeekCondition = createRuleWithTimeOfDayTrigger();
         final Rule timeOfDayTriggerWithEphemerisCondition = createRuleWithEphemerisCondition();
 
@@ -115,7 +116,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
             @Override
             public Collection<Rule> getAll() {
                 return Set.of(cronRuleWithTimeOfDayCondition, timeOfDayTriggerWithDayOfWeekCondition,
-                        timeOfDayTriggerWithEphemerisCondition);
+                        timeOfDayTriggerWithEphemerisCondition, disabledRule);
             }
 
             @Override
@@ -123,10 +124,16 @@ public class RuleSimulationTest extends JavaOSGiTest {
             }
         };
 
+        // Register the RuleProvider, so that the rules are registered within the ruleRegistry.
         registerService(ruleProvider);
         assertThat(ruleRegistry.get(cronRuleWithTimeOfDayCondition.getUID()), is(notNullValue()));
+        assertThat(ruleRegistry.get(disabledRule.getUID()), is(notNullValue()));
         assertThat(ruleRegistry.get(timeOfDayTriggerWithDayOfWeekCondition.getUID()), is(notNullValue()));
         assertThat(ruleRegistry.get(timeOfDayTriggerWithEphemerisCondition.getUID()), is(notNullValue()));
+
+        // Disable one rule, so it must not be contained within the simulation
+        ruleEngine.setEnabled(disabledRule.getUID(), false);
+        assertFalse(ruleEngine.isEnabled(disabledRule.getUID()));
 
         // Simulate for two weeks
         final ZonedDateTime from = ZonedDateTime.of(2021, 1, 4, 0, 0, 0, 0, ZoneId.systemDefault());

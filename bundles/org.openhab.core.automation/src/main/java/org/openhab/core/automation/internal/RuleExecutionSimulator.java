@@ -69,8 +69,11 @@ final class RuleExecutionSimulator {
     public Stream<RuleExecution> simulateRuleExecutions(ZonedDateTime fromDate, ZonedDateTime untilDate) {
         logger.debug("Simulating rules from {} until {}.", fromDate, untilDate);
 
-        return ruleRegistry.stream().filter(RulePredicates.hasAllTags(TAG_SCHEDULE))
-                .map((Rule r) -> simulateExecutionsForRule(r, fromDate, untilDate)).flatMap(List::stream).sorted();
+        return ruleRegistry.stream() //
+                .filter(RulePredicates.hasAllTags(TAG_SCHEDULE)) //
+                .filter((Rule r) -> ruleEngine.isEnabled(r.getUID())) //
+                .map((Rule r) -> simulateExecutionsForRule(r, fromDate, untilDate)) //
+                .flatMap(List::stream).sorted();
     }
 
     /**
