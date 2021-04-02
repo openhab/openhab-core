@@ -143,6 +143,7 @@
 
 	<feature name="openhab.tp-jaxws" description="JAX-WS (SOAP) bundles" version="${project.version}">
 		<capability>openhab.tp;feature=jax-ws;version=1.4.0</capability>
+		<bundle start-level="10">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.2.1/1.2.1_2</bundle>
 		<bundle start-level="10">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.saaj-api-1.4/1.4_2</bundle>
 		<bundle start-level="20">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saaj-impl/1.4.0_2</bundle>
 		<bundle start-level="20">mvn:org.jvnet.staxex/stax-ex/1.7.4</bundle>
@@ -161,6 +162,7 @@
 
 	<feature name="openhab.tp-jose4j" description="jose4j JWT library" version="${project.version}">
 		<capability>openhab.tp;feature=jose4j;version=0.7.0</capability>
+		<bundle start-level="10">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.2.1/1.2.1_2</bundle>
 		<bundle>mvn:org.bitbucket.b_c/jose4j/0.7.0</bundle>
 	</feature>
 

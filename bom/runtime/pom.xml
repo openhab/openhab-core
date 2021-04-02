@@ -17,8 +17,9 @@
 
   <properties>
     <jackson.version>2.12.2</jackson.version>
-    <jetty.version>9.4.20.v20190813</jetty.version>
-    <pax.web.version>7.2.19</pax.web.version>
+    <jetty.version>9.4.38.v20210224</jetty.version>
+    <pax.logging.version>2.0.8</pax.logging.version>
+    <pax.web.version>7.3.13</pax.web.version>
     <swagger.version>2.1.7</swagger.version>
   </properties>
 
@@ -47,7 +48,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
-      <version>3.13.100</version>
+      <version>3.16.200</version>
       <scope>compile</scope>
     </dependency>
 
@@ -55,7 +56,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr</artifactId>
-      <version>2.1.10</version>
+      <version>2.1.26</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -69,7 +70,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.configadmin</artifactId>
-      <version>1.9.8</version>
+      <version>1.9.20</version>
       <scope>compile</scope>
     </dependency>
 
@@ -151,7 +152,7 @@
     <dependency>
       <groupId>org.apache.aries.spec</groupId>
       <artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -224,7 +225,7 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.promise</artifactId>
-      <version>1.1.0</version>
+      <version>1.1.1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -300,26 +301,6 @@
       <version>1.2.3</version>
     </dependency>
 
-    <!-- Several implementations need to log using SLF4J -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.25</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.2.3</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-core</artifactId>
-      <version>1.2.3</version>
-      <scope>compile</scope>
-    </dependency>
-
     <!-- END: Slightly modified EnRoute implementation index artifacts -->
 
     <!-- BEG: Slightly modified EnRoute debug tools index artifacts -->
@@ -372,21 +353,15 @@
 
     <!-- BEG: logging -->
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.log</artifactId>
-      <version>1.2.0</version>
+      <groupId>org.ops4j.pax.logging</groupId>
+      <artifactId>pax-logging-api</artifactId>
+      <version>${pax.logging.version}</version>
       <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.osgi</groupId>
-          <artifactId>osgi.core</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.logback</artifactId>
-      <version>1.0.2</version>
+      <groupId>org.ops4j.pax.logging</groupId>
+      <artifactId>pax-logging-log4j2</artifactId>
+      <version>${pax.logging.version}</version>
       <scope>compile</scope>
     </dependency>
     <!-- END: logging -->
@@ -553,25 +528,6 @@
       <version>${pax.web.version}</version>
       <scope>compile</scope>
     </dependency>
-
-    <!-- Persistence -->
-    <!-- <dependency> -->
-    <!-- <groupId>org.hibernate</groupId> -->
-    <!-- <artifactId>hibernate-osgi</artifactId> -->
-    <!-- <version>5.2.12.Final</version> -->
-    <!-- </dependency> -->
-    <!-- BEG: Needed by Hibernate, but not present as OSGi bundles in Hibernate's dependencies -->
-    <!-- <dependency> -->
-    <!-- <groupId>org.apache.servicemix.bundles</groupId> -->
-    <!-- <artifactId>org.apache.servicemix.bundles.antlr</artifactId> -->
-    <!-- <version>2.7.7_5</version> -->
-    <!-- </dependency> -->
-    <!-- <dependency> -->
-    <!-- <groupId>org.apache.servicemix.bundles</groupId> -->
-    <!-- <artifactId>org.apache.servicemix.bundles.dom4j</artifactId> -->
-    <!-- <version>1.6.1_5</version> -->
-    <!-- </dependency> -->
-    <!-- END: Needed by Hibernate, but not present as OSGi bundles in Hibernate's dependencies -->
 
     <!-- Jetty -->
     <dependency>

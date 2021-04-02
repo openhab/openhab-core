@@ -72,8 +72,8 @@
     <bnd.version>5.3.0</bnd.version>
     <commons.net.version>3.7.2</commons.net.version>
     <eea.version>2.3.0</eea.version>
-    <karaf.compile.version>4.2.1</karaf.compile.version>
-    <karaf.tooling.version>4.2.7</karaf.tooling.version>
+    <karaf.compile.version>4.3.0</karaf.compile.version>
+    <karaf.tooling.version>4.3.1</karaf.tooling.version>
     <sat.version>0.10.0</sat.version>
     <slf4j.version>1.7.21</slf4j.version>
     <xtext.version>2.23.0</xtext.version>
