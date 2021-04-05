@@ -627,9 +627,15 @@ public class ModbusManagerImpl implements ModbusManager {
                                 "Last try {} failed when executing request ({}). Aborting. Error was I/O error, so reseting the connection. Error details: {} {} [operation ID {}]",
                                 tryIndex, request, e.getClass().getName(), e.getMessage(), operationId);
                     }
-                    // Invalidate connection, and empty (so that new connection is acquired before new retry)
-                    timer.connection.timeConsumer(c -> invalidate(endpoint, c), connection);
-                    connection = Optional.empty();
+                    if (endpoint instanceof ModbusSerialSlaveEndpoint) {
+                        // Workaround for https://github.com/openhab/openhab-core/issues/1842
+                        // Avoid disconnect/re-connect serial interfaces
+                        logger.debug("Skipping invalidation of serial connection to workaround openhab-core#1842.");
+                    } else {
+                        // Invalidate connection, and empty (so that new connection is acquired before new retry)
+                        timer.connection.timeConsumer(c -> invalidate(endpoint, c), connection);
+                        connection = Optional.empty();
+                    }
                     continue;
                 } catch (ModbusIOException e) {
                     lastError.set(new ModbusSlaveIOExceptionImpl(e));
@@ -644,9 +650,15 @@ public class ModbusManagerImpl implements ModbusManager {
                                 "Last try {} failed when executing request ({}). Aborting. Error was I/O error, so reseting the connection. Error details: {} {} [operation ID {}]",
                                 tryIndex, request, e.getClass().getName(), e.getMessage(), operationId);
                     }
-                    // Invalidate connection, and empty (so that new connection is acquired before new retry)
-                    timer.connection.timeConsumer(c -> invalidate(endpoint, c), connection);
-                    connection = Optional.empty();
+                    if (endpoint instanceof ModbusSerialSlaveEndpoint) {
+                        // Workaround for https://github.com/openhab/openhab-core/issues/1842
+                        // Avoid disconnect/re-connect serial interfaces
+                        logger.debug("Skipping invalidation of serial connection to workaround openhab-core#1842.");
+                    } else {
+                        // Invalidate connection, and empty (so that new connection is acquired before new retry)
+                        timer.connection.timeConsumer(c -> invalidate(endpoint, c), connection);
+                        connection = Optional.empty();
+                    }
                     continue;
                 } catch (ModbusSlaveException e) {
                     lastError.set(new ModbusSlaveErrorResponseExceptionImpl(e));
@@ -674,9 +686,15 @@ public class ModbusManagerImpl implements ModbusManager {
                                 "Last try {} failed when executing request ({}). Aborting. The response did not match the request. Reseting the connection. Error details: {} {} [operation ID {}]",
                                 tryIndex, request, e.getClass().getName(), e.getMessage(), operationId);
                     }
-                    // Invalidate connection, and empty (so that new connection is acquired before new retry)
-                    timer.connection.timeConsumer(c -> invalidate(endpoint, c), connection);
-                    connection = Optional.empty();
+                    if (endpoint instanceof ModbusSerialSlaveEndpoint) {
+                        // Workaround for https://github.com/openhab/openhab-core/issues/1842
+                        // Avoid disconnect/re-connect serial interfaces
+                        logger.debug("Skipping invalidation of serial connection to workaround openhab-core#1842.");
+                    } else {
+                        // Invalidate connection, and empty (so that new connection is acquired before new retry)
+                        timer.connection.timeConsumer(c -> invalidate(endpoint, c), connection);
+                        connection = Optional.empty();
+                    }
                     continue;
                 } catch (ModbusException e) {
                     lastError.set(e);
@@ -717,9 +735,15 @@ public class ModbusManagerImpl implements ModbusManager {
         } catch (InterruptedException e) {
             logger.warn("Poll task was canceled -- not executing/proceeding with the poll: {} [operation ID {}]",
                     e.getMessage(), operationId);
-            // Invalidate connection, and empty (so that new connection is acquired before new retry)
-            timer.connection.timeConsumer(c -> invalidate(endpoint, c), connection);
-            connection = Optional.empty();
+            if (endpoint instanceof ModbusSerialSlaveEndpoint) {
+                // Workaround for https://github.com/openhab/openhab-core/issues/1842
+                // Avoid disconnect/re-connect serial interfaces
+                logger.debug("Skipping invalidation of serial connection to workaround openhab-core#1842.");
+            } else {
+                // Invalidate connection, and empty (so that new connection is acquired before new retry)
+                timer.connection.timeConsumer(c -> invalidate(endpoint, c), connection);
+                connection = Optional.empty();
+            }
         } finally {
             timer.connection.timeConsumer(c -> returnConnection(endpoint, c), connection);
             logger.trace("Connection was returned to the pool, ending operation [operation ID {}]", operationId);
