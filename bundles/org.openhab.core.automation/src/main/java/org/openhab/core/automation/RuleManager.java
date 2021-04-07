@@ -13,7 +13,6 @@
 package org.openhab.core.automation;
 
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -100,7 +99,8 @@ public interface RuleManager {
      * Simulates the execution of all rules with tag 'Schedule' for the given time interval.
      * The result is sorted ascending by execution time.
      *
-     * @param untilDate {@link Date} until the executions should be simulated.
+     * @param from {@link ZonedDateTime} earliest time to be contained in the rule simulation.
+     * @param until {@link ZonedDateTime} latest time to be contained in the rule simulation.
      * @return A {@link Stream} with all expected {@link RuleExecution}.
      */
     Stream<RuleExecution> simulateRuleExecutions(ZonedDateTime from, ZonedDateTime until);

@@ -63,16 +63,17 @@ final class RuleExecutionSimulator {
      * Simulates the execution of all rules with tag 'Schedule' for the given time interval.
      * The result is sorted ascending by execution time.
      *
-     * @param untilDate {@link Date} until the executions should be simulated.
+     * @param from {@link ZonedDateTime} earliest time to be contained in the rule simulation.
+     * @param until {@link ZonedDateTime} latest time to be contained in the rule simulation.
      * @return A {@link Stream} with all expected {@link RuleExecution}.
      */
-    public Stream<RuleExecution> simulateRuleExecutions(ZonedDateTime fromDate, ZonedDateTime untilDate) {
-        logger.debug("Simulating rules from {} until {}.", fromDate, untilDate);
+    public Stream<RuleExecution> simulateRuleExecutions(ZonedDateTime from, ZonedDateTime until) {
+        logger.debug("Simulating rules from {} until {}.", from, until);
 
         return ruleRegistry.stream() //
                 .filter(RulePredicates.hasAllTags(TAG_SCHEDULE)) //
                 .filter((Rule r) -> ruleEngine.isEnabled(r.getUID())) //
-                .map((Rule r) -> simulateExecutionsForRule(r, fromDate, untilDate)) //
+                .map((Rule r) -> simulateExecutionsForRule(r, from, until)) //
                 .flatMap(List::stream).sorted();
     }
 
@@ -80,11 +81,11 @@ final class RuleExecutionSimulator {
      * Simulates the next executions for the given {@link Rule} until the given {@link Date}.
      *
      * @param rule {@link Rule} to be simulated.
-     * @param fromDate {@link Date} from when the executions should be simulated.
-     * @param untilDate {@link Date} until the executions should be simulated.
+     * @param from {@link ZonedDateTime} earliest time to be contained in the rule simulation.
+     * @param until {@link ZonedDateTime} latest time to be contained in the rule simulation.
      * @return List of expected {@link RuleExecution}.
      */
-    private List<RuleExecution> simulateExecutionsForRule(Rule rule, ZonedDateTime fromDate, ZonedDateTime untilDate) {
+    private List<RuleExecution> simulateExecutionsForRule(Rule rule, ZonedDateTime from, ZonedDateTime until) {
         final List<RuleExecution> executions = new ArrayList<>();
 
         for (Trigger trigger : rule.getTriggers()) {
@@ -96,7 +97,7 @@ final class RuleExecutionSimulator {
                 SchedulerTemporalAdjuster temporalAdjuster = ((TimeBasedTriggerHandler) triggerHandler)
                         .getTemporalAdjuster();
                 if (temporalAdjuster != null) {
-                    executions.addAll(simulateExecutionsForCronBasedRule(rule, fromDate, untilDate, temporalAdjuster));
+                    executions.addAll(simulateExecutionsForCronBasedRule(rule, from, until, temporalAdjuster));
                 }
             }
         }
@@ -108,18 +109,18 @@ final class RuleExecutionSimulator {
      * Simulates all {@link RuleExecution} for the given cron expression of the given rule.
      *
      * @param rule {@link Rule} to be simulated.
-     * @param startTime Time to start with simulation
-     * @param untilDate {@link Date} until the executions should be simulated.
+     * @param from {@link ZonedDateTime} earliest time to be contained in the rule simulation.
+     * @param until {@link ZonedDateTime} latest time to be contained in the rule simulation.
      * @param cron cron-expression to be evaluated for determining the execution times.
      * @return a list of expected executions.
      */
-    private List<RuleExecution> simulateExecutionsForCronBasedRule(Rule rule, ZonedDateTime startTime,
-            ZonedDateTime untilDate, SchedulerTemporalAdjuster temporalAdjuster) {
+    private List<RuleExecution> simulateExecutionsForCronBasedRule(Rule rule, ZonedDateTime from, ZonedDateTime until,
+            SchedulerTemporalAdjuster temporalAdjuster) {
 
         final List<RuleExecution> result = new ArrayList<>();
-        ZonedDateTime currentTime = ZonedDateTime.from(temporalAdjuster.adjustInto(startTime));
+        ZonedDateTime currentTime = ZonedDateTime.from(temporalAdjuster.adjustInto(from));
 
-        while (!temporalAdjuster.isDone(currentTime) && currentTime.isBefore(untilDate)) {
+        while (!temporalAdjuster.isDone(currentTime) && currentTime.isBefore(until)) {
             // if the current time satisfies all conditions add the instance to the result
             if (checkConditions(rule, currentTime)) {
                 result.add(new RuleExecution(Date.from(currentTime.toInstant()), rule));
