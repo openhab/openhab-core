@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Test the simulation of rule executions with the {@link org.openhab.core.automation.internal.RuleExecutionSimulator}
  *
- * @author Sönke Küper - Created tests for rule simulation
+ * @author Sönke Küper - Initial contribution
  */
 @NonNullByDefault
 public class RuleSimulationTest extends JavaOSGiTest {
