@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
@@ -85,7 +84,7 @@ public class GenericCronTriggerHandler extends BaseTriggerModuleHandler
     }
 
     @Override
-    public @NonNull CronAdjuster getTemporalAdjuster() {
+    public CronAdjuster getTemporalAdjuster() {
         return new CronAdjuster(expression);
     }
 }

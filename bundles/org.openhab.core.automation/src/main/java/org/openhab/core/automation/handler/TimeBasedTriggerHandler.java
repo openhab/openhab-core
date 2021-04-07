@@ -13,7 +13,6 @@
 package org.openhab.core.automation.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
 
 /**
@@ -27,6 +26,5 @@ public interface TimeBasedTriggerHandler extends TriggerHandler {
     /**
      * Returns the {@link SchedulerTemporalAdjuster} which can be used to determine the next execution times.
      */
-    @Nullable
-    public abstract SchedulerTemporalAdjuster getTemporalAdjuster();
+    abstract SchedulerTemporalAdjuster getTemporalAdjuster();
 }
