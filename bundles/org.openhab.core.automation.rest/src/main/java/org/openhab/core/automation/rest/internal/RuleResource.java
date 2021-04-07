@@ -344,9 +344,9 @@ public class RuleResource implements RESTResource {
     }
 
     @GET
-    @Path("/simulation")
+    @Path("/schedule/simulations")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getRuleSimulation", summary = "Simulates the executions for the rules within the schedule.", responses = {
+    @Operation(operationId = "getScheduleRuleSimulations", summary = "Simulates the executions of rules filtered by tag 'Schedule' within the given times.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RuleExecution.class)))) })
     public Response simulateRules(@QueryParam("from") String from, @QueryParam("until") String until) {
         final Stream<RuleExecution> ruleExecutions = ruleManager.simulateRuleExecutions(parseTime(from),
