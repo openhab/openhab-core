@@ -7,9 +7,9 @@
 	<!-- Sample Thing Type -->
 	<thing-type id="sample">
 		<!-- Comment this in for Things which need a Bridge to function.
-		<supported-bridge-type-refs>
+			<supported-bridge-type-refs>
 			<bridge-type-ref id="${bindingIdCamelCase}Bridge" />
-		</supported-bridge-type-refs>
+			</supported-bridge-type-refs>
 		-->
 
 		<label>${bindingIdCamelCase} Binding Thing</label>
@@ -30,13 +30,17 @@
 				<label>Password</label>
 				<description>Passwort to access the device</description>
 			</parameter>
+			<parameter name="refreshInterval" type="integer" unit="s" min="1">
+				<label>Refresh Interval</label>
+				<description>Interval the device is polled in sec.</description>
+			</parameter>
 		</config-description>
 	</thing-type>
 
 	<!-- Sample Channel Type -->
 	<channel-type id="sample-channel">
 		<item-type>Number:Temperature</item-type>
-		<label>Example Temperature</label> <!-- Use uppercase words for labels, except prepositions and so on -->
+		<label>Example Temperature</label><!-- Use uppercase words, except prepositions. 2-3 words, max 25 chars -->
 		<description>Sample channel for ${bindingIdCamelCase} Binding</description>
 	</channel-type>
 </thing:thing-descriptions>

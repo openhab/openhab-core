@@ -17,7 +17,6 @@ package ${package}.internal;
 
 import static ${package}.internal.${bindingIdCamelCase}BindingConstants.*;
 
-import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
