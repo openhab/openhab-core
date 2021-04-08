@@ -6,6 +6,12 @@
 
 	<!-- Sample Thing Type -->
 	<thing-type id="sample">
+		<!-- Comment this in for Things which need a Bridge to function.
+			<supported-bridge-type-refs>
+			<bridge-type-ref id="${bindingIdCamelCase}Bridge" />
+			</supported-bridge-type-refs>
+		-->
+
 		<label>${bindingIdCamelCase} Binding Thing</label>
 		<description>Sample thing for ${bindingIdCamelCase} Binding</description>
 
@@ -14,19 +20,27 @@
 		</channels>
 
 		<config-description>
-			<parameter name="config1" type="text" required="true">
-				<label>Sample Parameter</label>
-				<description>This is a sample text configuration parameter</description>
+			<parameter name="hostname" type="text" required="true">
+				<context>network-address</context>
+				<label>Hostname</label>
+				<description>Hostname or IP address of the device</description>
+			</parameter>
+			<parameter name="password" type="text" required="true">
+				<context>password</context>
+				<label>Password</label>
+				<description>Passwort to access the device</description>
+			</parameter>
+			<parameter name="refreshInterval" type="integer" unit="s" min="1">
+				<label>Refresh Interval</label>
+				<description>Interval the device is polled in sec.</description>
 			</parameter>
 		</config-description>
-
 	</thing-type>
 
 	<!-- Sample Channel Type -->
 	<channel-type id="sample-channel">
-		<item-type>${bindingId}Item</item-type>
-		<label>${bindingIdCamelCase} Binding Channel</label>
+		<item-type>Number:Temperature</item-type>
+		<label>Example Temperature</label><!-- Use uppercase words, except prepositions. 2-3 words, max 25 chars -->
 		<description>Sample channel for ${bindingIdCamelCase} Binding</description>
 	</channel-type>
-
 </thing:thing-descriptions>
