@@ -31,10 +31,12 @@ public class Properties {
 
     static {
         PROPERTIES.add(Property.class);
+        PROPERTIES.add(Angle.class);
         PROPERTIES.add(CO.class);
         PROPERTIES.add(CO2.class);
         PROPERTIES.add(ColorTemperature.class);
         PROPERTIES.add(Current.class);
+        PROPERTIES.add(Distance.class);
         PROPERTIES.add(Duration.class);
         PROPERTIES.add(Energy.class);
         PROPERTIES.add(Frequency.class);
