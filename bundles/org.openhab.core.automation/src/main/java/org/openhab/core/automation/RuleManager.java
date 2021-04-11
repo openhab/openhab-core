@@ -12,7 +12,9 @@
  */
 package org.openhab.core.automation;
 
+import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -92,4 +94,14 @@ public interface RuleManager {
      * @param context the context that is passed to the conditions and the actions of the rule.
      */
     void runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context);
+
+    /**
+     * Simulates the execution of all rules with tag 'Schedule' for the given time interval.
+     * The result is sorted ascending by execution time.
+     *
+     * @param from {@link ZonedDateTime} earliest time to be contained in the rule simulation.
+     * @param until {@link ZonedDateTime} latest time to be contained in the rule simulation.
+     * @return A {@link Stream} with all expected {@link RuleExecution}.
+     */
+    Stream<RuleExecution> simulateRuleExecutions(ZonedDateTime from, ZonedDateTime until);
 }

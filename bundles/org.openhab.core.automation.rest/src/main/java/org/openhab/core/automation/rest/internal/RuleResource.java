@@ -17,10 +17,12 @@ import static org.openhab.core.automation.RulePredicates.*;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -47,6 +49,7 @@ import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.ManagedRuleProvider;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.RuleExecution;
 import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.Trigger;
@@ -70,6 +73,7 @@ import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
+import org.openhab.core.library.types.DateTimeType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -337,6 +341,22 @@ public class RuleResource implements RESTResource {
         } else {
             return Response.status(Status.NOT_FOUND).build();
         }
+    }
+
+    @GET
+    @Path("/schedule/simulations")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getScheduleRuleSimulations", summary = "Simulates the executions of rules filtered by tag 'Schedule' within the given times.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RuleExecution.class)))) })
+    public Response simulateRules(@QueryParam("from") String from, @QueryParam("until") String until) {
+        final Stream<RuleExecution> ruleExecutions = ruleManager.simulateRuleExecutions(parseTime(from),
+                parseTime(until));
+        return Response.ok(ruleExecutions.collect(Collectors.toList())).build();
+    }
+
+    private static ZonedDateTime parseTime(String sTime) {
+        final DateTimeType dateTime = new DateTimeType(sTime);
+        return dateTime.getZonedDateTime();
     }
 
     @GET
