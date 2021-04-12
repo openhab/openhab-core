@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -347,16 +348,32 @@ public class RuleResource implements RESTResource {
     @Path("/schedule/simulations")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getScheduleRuleSimulations", summary = "Simulates the executions of rules filtered by tag 'Schedule' within the given times.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RuleExecution.class)))) })
-    public Response simulateRules(@QueryParam("from") String from, @QueryParam("until") String until) {
-        final Stream<RuleExecution> ruleExecutions = ruleManager.simulateRuleExecutions(parseTime(from),
-                parseTime(until));
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RuleExecution.class)))),
+            @ApiResponse(responseCode = "400", description = "The max. simulation duration of 180 days is exceeded.") })
+    public Response simulateRules(
+            @Parameter(description = "Start time of the simulated rule executions. Will default to the current time. ["
+                    + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]") @QueryParam("from") @Nullable String from,
+            @Parameter(description = "End time of the simulated rule executions. Will default to 30 days after the start time. Must be less than 180 days after the given start time. ["
+                    + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]") @QueryParam("until") @Nullable String until) {
+        final ZonedDateTime fromDate = from == null || from.isEmpty() ? ZonedDateTime.now() : parseTime(from);
+        final ZonedDateTime untilDate = until == null || until.isEmpty() ? fromDate.plusDays(31) : parseTime(until);
+
+        if (daysBetween(fromDate, untilDate) >= 180) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "Simulated time span must be smaller than 180 days.");
+        }
+
+        final Stream<RuleExecution> ruleExecutions = ruleManager.simulateRuleExecutions(fromDate, untilDate);
         return Response.ok(ruleExecutions.collect(Collectors.toList())).build();
     }
 
     private static ZonedDateTime parseTime(String sTime) {
         final DateTimeType dateTime = new DateTimeType(sTime);
         return dateTime.getZonedDateTime();
+    }
+
+    private static long daysBetween(ZonedDateTime d1, ZonedDateTime d2) {
+        return ChronoUnit.DAYS.between(d1, d2);
     }
 
     @GET
