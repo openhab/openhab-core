@@ -353,11 +353,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     @Override
     public boolean isRegistered(UpnpIOParticipant participant) {
-        if (upnpService.getRegistry().getDevice(new UDN(participant.getUDN()), true) != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return upnpService.getRegistry().getDevice(new UDN(participant.getUDN()), true) != null;
     }
 
     @Override

@@ -38,8 +38,6 @@ import org.osgi.framework.ServiceReference;
 @ExtendWith(MockitoExtension.class)
 public class MetadataRegistryImplTest {
 
-    private static final String ITEM_NAME = "itemName";
-
     @SuppressWarnings("rawtypes")
     private @Mock ServiceReference managedProviderRef;
     private @Mock BundleContext bundleContext;

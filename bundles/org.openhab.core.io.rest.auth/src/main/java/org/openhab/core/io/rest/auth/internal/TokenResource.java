@@ -38,7 +38,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -99,8 +98,6 @@ public class TokenResource implements RESTResource {
 
     /** The default lifetime of tokens in minutes before they expire */
     public static final int TOKEN_LIFETIME = 60;
-
-    private @Context @NonNullByDefault({}) UriInfo uriInfo;
 
     private final UserRegistry userRegistry;
     private final JwtHelper jwtHelper;

@@ -116,7 +116,6 @@ final class RuleExecutionSimulator {
      */
     private List<RuleExecution> simulateExecutionsForCronBasedRule(Rule rule, ZonedDateTime from, ZonedDateTime until,
             SchedulerTemporalAdjuster temporalAdjuster) {
-
         final List<RuleExecution> result = new ArrayList<>();
         ZonedDateTime currentTime = ZonedDateTime.from(temporalAdjuster.adjustInto(from));
 

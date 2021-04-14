@@ -75,10 +75,7 @@ public class PersistItemsJob implements SchedulerRunnable {
             }
         }
         // if no strategies are given, check the default strategies to use
-        if (config.getStrategies().isEmpty() && isDefault(defaults, strategyName)) {
-            return true;
-        }
-        return false;
+        return config.getStrategies().isEmpty() && isDefault(defaults, strategyName);
     }
 
     private boolean isDefault(List<PersistenceStrategy> defaults, String strategyName) {

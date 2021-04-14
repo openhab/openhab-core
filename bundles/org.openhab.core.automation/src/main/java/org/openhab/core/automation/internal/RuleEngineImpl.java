@@ -763,7 +763,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                     Set<String> rules = e.getValue();
                     if (rules.contains(rUID)) {
                         rules.remove(rUID);
-                        if (rules.size() < 1) {
+                        if (rules.isEmpty()) {
                             it.remove();
                         }
                     }

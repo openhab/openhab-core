@@ -157,11 +157,7 @@ public class ThingResource implements RESTResource {
     private final FirmwareRegistry firmwareRegistry;
     private final FirmwareUpdateService firmwareUpdateService;
     private final ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private final ItemFactory itemFactory;
-    private final ItemRegistry itemRegistry;
     private final LocaleService localeService;
-    private final ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
-    private final ManagedItemProvider managedItemProvider;
     private final ManagedThingProvider managedThingProvider;
     private final ThingManager thingManager;
     private final ThingRegistry thingRegistry;
@@ -195,11 +191,7 @@ public class ThingResource implements RESTResource {
         this.firmwareRegistry = firmwareRegistry;
         this.firmwareUpdateService = firmwareUpdateService;
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-        this.itemFactory = itemFactory;
-        this.itemRegistry = itemRegistry;
         this.localeService = localeService;
-        this.managedItemChannelLinkProvider = managedItemChannelLinkProvider;
-        this.managedItemProvider = managedItemProvider;
         this.managedThingProvider = managedThingProvider;
         this.thingManager = thingManager;
         this.thingRegistry = thingRegistry;

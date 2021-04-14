@@ -58,9 +58,7 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
     private ReadyService readyService;
     private Bundle bundle;
     private ThingHandlerFactory hueThingHandlerFactory;
-    private boolean finished;
     private int bridgeInitializeCounter;
-    private int thingInitializeCounter;
     boolean slowInit;
 
     private static final String TESTMODEL_NAME = "testModelX.things";
@@ -136,7 +134,6 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
             }
         };
 
-        finished = false;
         bundle = FrameworkUtil.getBundle(TestHueThingHandlerFactoryX.class);
 
         removeReadyMarker();
@@ -189,14 +186,12 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
     }
 
     private void finishLoading() {
-        finished = true;
         assertThat(bridgeInitializeCounter, is(0));
         readyService.markReady(new ReadyMarker("openhab.xmlThingTypes", bundle.getSymbolicName()));
     }
 
     private void unload() {
         unregisterService(thingTypeProvider);
-        finished = false;
     }
 
     @SuppressWarnings("null")

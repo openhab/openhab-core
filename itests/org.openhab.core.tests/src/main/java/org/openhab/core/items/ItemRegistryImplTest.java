@@ -78,8 +78,6 @@ public class ItemRegistryImplTest extends JavaTest {
 
     @BeforeEach
     public void beforeEach() {
-        ItemFactory coreItemFactory = new CoreItemFactory();
-
         GenericItem cameraItem1 = new SwitchItem(CAMERA_ITEM_NAME1);
         GenericItem cameraItem2 = new SwitchItem(CAMERA_ITEM_NAME2);
         GenericItem cameraItem3 = new NumberItem(CAMERA_ITEM_NAME3);

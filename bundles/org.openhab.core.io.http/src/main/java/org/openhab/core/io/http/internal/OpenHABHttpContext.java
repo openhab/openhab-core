@@ -56,11 +56,7 @@ public class OpenHABHttpContext implements WrappingHttpContext {
         DefaultHandlerContext handlerContext = new DefaultHandlerContext(queue);
         handlerContext.execute(request, response);
 
-        if (handlerContext.hasError()) {
-            return false;
-        }
-
-        return true;
+        return !handlerContext.hasError();
     }
 
     @Override

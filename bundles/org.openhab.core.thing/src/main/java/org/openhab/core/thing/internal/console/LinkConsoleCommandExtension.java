@@ -127,13 +127,13 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
             if (!channelUIDS.contains(itemChannelLink.getLinkedUID())) {
                 console.println("Thing channel missing: " + itemChannelLink.toString() + " "
                         + itemChannelLink.getConfiguration().toString());
-                if (action.equals("purge")) {
+                if ("purge".equals(action)) {
                     removeChannelLink(console, itemChannelLink.getUID());
                 }
             } else if (!itemNames.contains(itemChannelLink.getItemName())) {
                 console.println("Item missing: " + itemChannelLink.toString() + " "
                         + itemChannelLink.getConfiguration().toString());
-                if (action.equals("purge")) {
+                if ("purge".equals(action)) {
                     removeChannelLink(console, itemChannelLink.getUID());
                 }
             }

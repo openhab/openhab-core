@@ -34,7 +34,7 @@ public class MappingUriExtensionsTest {
     public @TempDir File folder;
     private File confFolder;
 
-    private static Collection<Object[]> data() {
+    public static Collection<Object[]> data() {
         return List.of(new Object[][] { //
                 { "conf", //
                         "file:///q:/conf", //
