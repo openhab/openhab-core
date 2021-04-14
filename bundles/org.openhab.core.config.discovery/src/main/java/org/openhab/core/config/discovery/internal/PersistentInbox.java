@@ -507,10 +507,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     }
 
     private boolean isInRegistry(ThingUID thingUID) {
-        if (thingRegistry.get(thingUID) == null) {
-            return false;
-        }
-        return true;
+        return thingRegistry.get(thingUID) != null;
     }
 
     private void removeResultsForBridge(ThingUID bridgeUID) {

@@ -54,8 +54,6 @@ public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescri
 
     @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-        ConfigDescription configDescription = null;
-
         // read attributes
         Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);
         String uriText = attributes.get("uri");

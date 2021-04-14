@@ -73,7 +73,6 @@ public class SafeCallerImplTest extends JavaTest {
     private TestInfo testInfo;
     private final List<AssertingThread> threads = new LinkedList<>();
 
-    private @Mock Runnable mockRunnable;
     private @Mock Runnable mockTimeoutHandler;
     private @Mock Consumer<Throwable> mockErrorHandler;
 

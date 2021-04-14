@@ -338,8 +338,9 @@ public class ThingManagerImpl
                     ChannelUID channelUID = new ChannelUID(channelGroupUID, channelDefinition.getId());
                     ChannelBuilder channelBuilder = ThingFactoryHelper.createChannelBuilder(channelUID,
                             channelDefinition, configDescriptionRegistry);
-                    if (channelBuilder != null)
+                    if (channelBuilder != null) {
                         channelBuilders.add(channelBuilder);
+                    }
                 }
             }
             return channelBuilders;

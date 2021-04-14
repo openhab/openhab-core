@@ -55,25 +55,33 @@ public class ServiceDescription {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ServiceDescription other = (ServiceDescription) obj;
         if (serviceName == null) {
-            if (other.serviceName != null)
+            if (other.serviceName != null) {
                 return false;
-        } else if (!serviceName.equals(other.serviceName))
+            }
+        } else if (!serviceName.equals(other.serviceName)) {
             return false;
-        if (servicePort != other.servicePort)
+        }
+        if (servicePort != other.servicePort) {
             return false;
+        }
         if (serviceType == null) {
-            if (other.serviceType != null)
+            if (other.serviceType != null) {
                 return false;
-        } else if (!serviceType.equals(other.serviceType))
+            }
+        } else if (!serviceType.equals(other.serviceType)) {
             return false;
+        }
         return true;
     }
 

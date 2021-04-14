@@ -144,12 +144,9 @@ public class ProfileTypeResource implements RESTResource {
 
     private boolean profileTypeMatchesItemType(ProfileType pt, String itemType) {
         Collection<String> supportedItemTypesOnProfileType = pt.getSupportedItemTypes();
-        if (supportedItemTypesOnProfileType.isEmpty()
+        return supportedItemTypesOnProfileType.isEmpty()
                 || supportedItemTypesOnProfileType.contains(ItemUtil.getMainItemType(itemType))
-                || supportedItemTypesOnProfileType.contains(itemType)) {
-            return true;
-        }
-        return false;
+                || supportedItemTypesOnProfileType.contains(itemType);
     }
 
     private boolean triggerProfileMatchesProfileType(ProfileType profileType, ChannelType channelType) {

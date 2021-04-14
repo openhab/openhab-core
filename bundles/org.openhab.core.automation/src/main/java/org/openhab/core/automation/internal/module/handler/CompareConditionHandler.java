@@ -81,11 +81,7 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
                     case "EQUALS":
                         // EQUALS
                         if (toCompare == null) {
-                            if ("null".equals(rightOperandString) || "".equals(rightOperandString)) {
-                                return true;
-                            } else {
-                                return false;
-                            }
+                            return "null".equals(rightOperandString) || "".equals(rightOperandString);
                         } else {
                             return toCompare.equals(rightValue);
                         }

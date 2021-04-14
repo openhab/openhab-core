@@ -301,7 +301,7 @@ public class ConfigDispatcher {
 
         // configuration file contains a PID Marker
         List<String> lines = Files.readAllLines(configFile.toPath(), StandardCharsets.UTF_8);
-        String exclusivePID = lines.size() > 0 ? getPIDFromLine(lines.get(0)) : null;
+        String exclusivePID = !lines.isEmpty() ? getPIDFromLine(lines.get(0)) : null;
         if (exclusivePID != null) {
             if (exclusivePIDMap.contains(exclusivePID)) {
                 logger.warn(

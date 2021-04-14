@@ -223,7 +223,7 @@ public class AbstractWatchServiceTest extends JavaTest {
     }
 
     private void fullEventAssertionsByKind(String fileName, Kind<?> kind, boolean osSpecific) throws Exception {
-        waitForAssert(() -> assertThat(watchService.allFullEvents.size() >= 1, is(true)), DFL_TIMEOUT * 2,
+        waitForAssert(() -> assertThat(!watchService.allFullEvents.isEmpty(), is(true)), DFL_TIMEOUT * 2,
                 DFL_SLEEP_TIME);
 
         if (osSpecific && ENTRY_DELETE.equals(kind)) {

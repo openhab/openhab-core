@@ -80,7 +80,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
     private RuleManager ruleManager;
     private ManagedRuleProvider managedRuleProvider;
     private ModuleTypeRegistry moduleTypeRegistry;
-    private Event ruleEvent;
+    private @SuppressWarnings("unused") Event ruleEvent;
     public Event itemEvent;
 
     // keep storage rules imported from json files
@@ -351,10 +351,12 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
         SwitchItem myPresenceItem = (SwitchItem) itemRegistry.getItem("myPresenceItem");
         myPresenceItem.setState(OnOffType.ON);
-        SwitchItem myLampItem = (SwitchItem) itemRegistry.getItem("myLampItem");
 
+        SwitchItem myLampItem = (SwitchItem) itemRegistry.getItem("myLampItem");
         assertThat(myLampItem.getState(), is(UnDefType.NULL));
+
         SwitchItem myMotionItem = (SwitchItem) itemRegistry.getItem("myMotionItem");
+        assertThat(myMotionItem.getState(), is(UnDefType.NULL));
 
         @NonNullByDefault
         EventSubscriber eventHandler = new EventSubscriber() {
