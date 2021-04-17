@@ -52,7 +52,8 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
     private static final String HELLO_MULTIPLE_NAMES_EN = "Hello openHAB, Hello thing, Hello rule!";
     private static final String HELLO_MULTIPLE_NAMES_FR = "Bonjour openHAB, Bonjour thing, Bonjour rule!";
 
-    private static final String BYE_DEFAULT = "Tschuess!";
+    private static final String BYE_DE = "Tschüß!";
+    private static final String BYE_EN = "Bye!";
 
     TranslationProvider translationProvider;
 
@@ -110,9 +111,13 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
         assertThat(text, is(notNullValue()));
         assertThat(text, is(equalTo("default")));
 
+        text = translationProvider.getText(bundle, KEY_BYE, "default", new Locale("de", "AT"));
+        assertThat(text, is(notNullValue()));
+        assertThat(text, is(equalTo(BYE_DE)));
+
         text = translationProvider.getText(bundle, KEY_BYE, "default", Locale.ENGLISH);
         assertThat(text, is(notNullValue()));
-        assertThat(text, is(equalTo(BYE_DEFAULT)));
+        assertThat(text, is(equalTo(BYE_EN)));
     }
 
     @Test
@@ -149,9 +154,13 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
         assertThat(text, is(notNullValue()));
         assertThat(text, is(equalTo("default")));
 
+        text = translationProvider.getText(bundle, KEY_BYE, "default", new Locale("de", "AT"), (Object[]) null);
+        assertThat(text, is(notNullValue()));
+        assertThat(text, is(equalTo(BYE_DE)));
+
         text = translationProvider.getText(bundle, KEY_BYE, "default", Locale.ENGLISH, (Object[]) null);
         assertThat(text, is(notNullValue()));
-        assertThat(text, is(equalTo(BYE_DEFAULT)));
+        assertThat(text, is(equalTo(BYE_EN)));
     }
 
     @Test
