@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -80,9 +81,9 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
         if (meterRegistry == null) {
             return;
         }
-        for (Meter meter : meterRegistry.getMeters()) {
+        for (Meter meter : Objects.requireNonNull(meterRegistry).getMeters()) {
             if (meter.getId().getTags().contains(CORE_RULE_METRIC_TAG)) {
-                meterRegistry.remove(meter);
+                Objects.requireNonNull(meterRegistry).remove(meter);
             }
         }
         meterRegistry = null;
@@ -124,7 +125,7 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
         if (ruleName != null) {
             tagsWithRule.add(Tag.of(RULE_NAME_TAG_NAME, ruleName));
         }
-        meterRegistry.counter(METRIC_NAME, tagsWithRule).increment();
+        Objects.requireNonNull(meterRegistry).counter(METRIC_NAME, tagsWithRule).increment();
     }
 
     private String getRuleName(String ruleId) {
