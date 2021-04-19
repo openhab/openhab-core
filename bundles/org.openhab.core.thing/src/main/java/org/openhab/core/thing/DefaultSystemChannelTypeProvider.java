@@ -14,7 +14,6 @@ package org.openhab.core.thing;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -66,7 +65,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withCategory("QualityOfService")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(4)).withStep(BigDecimal.ONE).withReadOnly(Boolean.TRUE)
-                    .withOptions(Arrays.asList(new StateOption("0", "no signal"), new StateOption("1", "weak"),
+                    .withOptions(List.of(new StateOption("0", "no signal"), new StateOption("1", "weak"),
                             new StateOption("2", "average"), new StateOption("3", "good"),
                             new StateOption("4", "excellent")))
                     .build())
@@ -100,8 +99,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * System wide trigger {@link ChannelType} which triggers "PRESSED" and "RELEASED" events.
      */
     public static final ChannelType SYSTEM_RAWBUTTON = ChannelTypeBuilder
-            .trigger(new ChannelTypeUID(BINDING_ID, "rawbutton"), "Raw button")
-            .withEventDescription(new EventDescription(Arrays.asList(new EventOption(CommonTriggerEvents.PRESSED, null),
+            .trigger(new ChannelTypeUID(BINDING_ID, "rawbutton"), "Raw Button")
+            .withEventDescription(new EventDescription(List.of(new EventOption(CommonTriggerEvents.PRESSED, null),
                     new EventOption(CommonTriggerEvents.RELEASED, null))))
             .build();
 
@@ -111,10 +110,9 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_BUTTON = ChannelTypeBuilder
             .trigger(new ChannelTypeUID(BINDING_ID, "button"), "Button")
-            .withEventDescription(
-                    new EventDescription(Arrays.asList(new EventOption(CommonTriggerEvents.SHORT_PRESSED, null),
-                            new EventOption(CommonTriggerEvents.DOUBLE_PRESSED, null),
-                            new EventOption(CommonTriggerEvents.LONG_PRESSED, null))))
+            .withEventDescription(new EventDescription(List.of(new EventOption(CommonTriggerEvents.SHORT_PRESSED, null),
+                    new EventOption(CommonTriggerEvents.DOUBLE_PRESSED, null),
+                    new EventOption(CommonTriggerEvents.LONG_PRESSED, null))))
             .build();
 
     /**
@@ -122,12 +120,11 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * "DIR2_RELEASED" events.
      */
     public static final ChannelType SYSTEM_RAWROCKER = ChannelTypeBuilder
-            .trigger(new ChannelTypeUID(BINDING_ID, "rawrocker"), "Raw rocker button")
-            .withEventDescription(
-                    new EventDescription(Arrays.asList(new EventOption(CommonTriggerEvents.DIR1_PRESSED, null),
-                            new EventOption(CommonTriggerEvents.DIR1_RELEASED, null),
-                            new EventOption(CommonTriggerEvents.DIR2_PRESSED, null),
-                            new EventOption(CommonTriggerEvents.DIR2_RELEASED, null))))
+            .trigger(new ChannelTypeUID(BINDING_ID, "rawrocker"), "Raw Rocker Button")
+            .withEventDescription(new EventDescription(List.of(new EventOption(CommonTriggerEvents.DIR1_PRESSED, null),
+                    new EventOption(CommonTriggerEvents.DIR1_RELEASED, null),
+                    new EventOption(CommonTriggerEvents.DIR2_PRESSED, null),
+                    new EventOption(CommonTriggerEvents.DIR2_RELEASED, null))))
             .build();
 
     /**
@@ -331,30 +328,21 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     }
 
     private ChannelType createLocalizedChannelType(Bundle bundle, ChannelType channelType, @Nullable Locale locale) {
-        LocalizedKey localizedKey = getLocalizedChannelTypeKey(channelType.getUID(), locale);
+        LocalizedKey localizedKey = new LocalizedKey(channelType.getUID(),
+                locale != null ? locale.toLanguageTag() : null);
 
         ChannelType cachedEntry = localizedChannelTypeCache.get(localizedKey);
         if (cachedEntry != null) {
             return cachedEntry;
         }
 
-        ChannelType localizedChannelType = localize(bundle, channelType, locale);
+        ChannelType localizedChannelType = channelTypeI18nLocalizationService.createLocalizedChannelType(bundle,
+                channelType, locale);
         if (localizedChannelType != null) {
             localizedChannelTypeCache.put(localizedKey, localizedChannelType);
             return localizedChannelType;
         } else {
             return channelType;
         }
-    }
-
-    private @Nullable ChannelType localize(Bundle bundle, ChannelType channelType, @Nullable Locale locale) {
-        if (channelTypeI18nLocalizationService == null) {
-            return null;
-        }
-        return channelTypeI18nLocalizationService.createLocalizedChannelType(bundle, channelType, locale);
-    }
-
-    private LocalizedKey getLocalizedChannelTypeKey(UID uid, @Nullable Locale locale) {
-        return new LocalizedKey(uid, locale != null ? locale.toLanguageTag() : null);
     }
 }
