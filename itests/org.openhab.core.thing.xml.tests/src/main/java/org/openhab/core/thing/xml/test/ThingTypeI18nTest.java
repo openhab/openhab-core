@@ -38,7 +38,7 @@ import org.openhab.core.thing.xml.test.LoadedTestBundle.StuffAddition;
 public class ThingTypeI18nTest extends JavaOSGiTest {
 
     private LoadedTestBundle loadedTestBundle() throws Exception {
-        return new LoadedTestBundle("yahooweather.bundle", bundleContext, this::getService,
+        return new LoadedTestBundle("acmeweather.bundle", bundleContext, this::getService,
                 new StuffAddition().thingTypes(2));
     }
 
@@ -63,13 +63,13 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
         try (final AutoCloseable unused = loadedTestBundle()) {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
-            ThingType weatherType = thingTypes.stream().filter(it -> "yahooweather:weather".equals(it.toString()))
+            ThingType weatherType = thingTypes.stream().filter(it -> "acmeweather:weather".equals(it.toString()))
                     .findFirst().get();
             assertNotNull(weatherType);
 
             assertThat(weatherType.getLabel(), is("Wetterinformation"));
             assertThat(weatherType.getDescription(),
-                    is("Stellt verschiedene Wetterdaten vom Yahoo Wetterdienst bereit"));
+                    is("Stellt verschiedene Wetterdaten vom ACME Wetterdienst bereit"));
         }
     }
 
@@ -79,7 +79,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
             ThingType weatherGroupType = thingTypes.stream()
-                    .filter(it -> "yahooweather:weather-with-group".equals(it.toString())).findFirst().get();
+                    .filter(it -> "acmeweather:weather-with-group".equals(it.toString())).findFirst().get();
             assertNotNull(weatherGroupType);
 
             ChannelGroupType channelGroupType = channelGroupTypeRegistry.getChannelGroupType(
@@ -97,7 +97,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
             ThingType weatherGroupType = thingTypes.stream()
-                    .filter(it -> "yahooweather:weather-with-group".equals(it.toString())).findFirst().get();
+                    .filter(it -> "acmeweather:weather-with-group".equals(it.toString())).findFirst().get();
             assertNotNull(weatherGroupType);
             assertThat(weatherGroupType.getChannelGroupDefinitions().size(), is(2));
 
@@ -126,7 +126,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
             ThingType weatherGroupType = thingTypes.stream()
-                    .filter(it -> "yahooweather:weather-with-group".equals(it.toString())).findFirst().get();
+                    .filter(it -> "acmeweather:weather-with-group".equals(it.toString())).findFirst().get();
             assertNotNull(weatherGroupType);
             assertEquals(2, weatherGroupType.getChannelGroupDefinitions().size());
 
@@ -170,7 +170,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
         try (final AutoCloseable unused = loadedTestBundle()) {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
-            ThingType weatherType = thingTypes.stream().filter(it -> "yahooweather:weather".equals(it.toString()))
+            ThingType weatherType = thingTypes.stream().filter(it -> "acmeweather:weather".equals(it.toString()))
                     .findFirst().get();
             assertNotNull(weatherType);
             assertThat(weatherType.getChannelDefinitions().size(), is(2));
@@ -193,7 +193,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
         try (final AutoCloseable unused = loadedTestBundle()) {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
-            ThingType weatherType = thingTypes.stream().filter(it -> "yahooweather:weather".equals(it.toString()))
+            ThingType weatherType = thingTypes.stream().filter(it -> "acmeweather:weather".equals(it.toString()))
                     .findFirst().get();
             assertNotNull(weatherType);
             assertThat(weatherType.getChannelDefinitions().size(), is(2));

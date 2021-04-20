@@ -23,7 +23,7 @@ Future plans:
 
 ## Discovery
 
-The Things provided by this bundle do not require discovery but can all be set up manually using PaperUI.
+The Things provided by this bundle do not require discovery but can all be set up manually using the UI.
 
 ## Bundle Configuration
 
