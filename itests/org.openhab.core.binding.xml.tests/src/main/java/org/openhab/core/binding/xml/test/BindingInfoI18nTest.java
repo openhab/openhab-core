@@ -35,7 +35,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  */
 public class BindingInfoI18nTest extends JavaOSGiTest {
 
-    private static final String TEST_BUNDLE_NAME = "yahooweather.bundle";
+    private static final String TEST_BUNDLE_NAME = "acmeweather.bundle";
 
     private BindingInfoRegistry bindingInfoRegistry;
     private BindingInstaller bindingInstaller;
@@ -54,9 +54,9 @@ public class BindingInfoI18nTest extends JavaOSGiTest {
             BindingInfo bindingInfo = bindingInfos.iterator().next();
 
             assertThat(bindingInfo, is(notNullValue()));
-            assertThat(bindingInfo.getName(), is("Yahoo Wetter Binding"));
+            assertThat(bindingInfo.getName(), is("ACME Wetter Binding"));
             assertThat(bindingInfo.getDescription(), is(
-                    "Das Yahoo Wetter Binding stellt verschiedene Wetterdaten wie die Temperatur, die Luftfeuchtigkeit und den Luftdruck für konfigurierbare Orte vom yahoo Wetterdienst bereit"));
+                    "Das ACME Wetter Binding stellt verschiedene Wetterdaten wie die Temperatur, die Luftfeuchtigkeit und den Luftdruck für konfigurierbare Orte vom ACME Wetterdienst bereit"));
         });
     }
 
@@ -67,9 +67,9 @@ public class BindingInfoI18nTest extends JavaOSGiTest {
             BindingInfo bindingInfo = bindingInfos.iterator().next();
 
             assertThat(bindingInfo, is(notNullValue()));
-            assertThat(bindingInfo.getName(), is("Yahoo Weer Binding"));
+            assertThat(bindingInfo.getName(), is("ACME Weer Binding"));
             assertThat(bindingInfo.getDescription(), is(
-                    "De Yahoo Weer Binding biedt verschillende meteorologische gegevens zoals temperatuur, vochtigheid en luchtdruk voor configureerbare locaties uit yahoo weerdienst klaar"));
+                    "De ACME Weer Binding biedt verschillende meteorologische gegevens zoals temperatuur, vochtigheid en luchtdruk voor configureerbare locaties uit ACME weerdienst klaar"));
         });
     }
 
@@ -80,9 +80,9 @@ public class BindingInfoI18nTest extends JavaOSGiTest {
             BindingInfo bindingInfo = bindingInfos.iterator().next();
 
             assertThat(bindingInfo, is(notNullValue()));
-            assertThat(bindingInfo.getName(), is("YahooWeather Binding"));
+            assertThat(bindingInfo.getName(), is("ACME Weather Binding"));
             assertThat(bindingInfo.getDescription(), is(
-                    "The Yahoo Weather Binding requests the Yahoo Weather Service to show the current temperature, humidity and pressure."));
+                    "The ACME Weather Binding requests the ACME Weather Service to show the current temperature, humidity and pressure."));
         });
     }
 
@@ -116,9 +116,9 @@ public class BindingInfoI18nTest extends JavaOSGiTest {
             Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos(null);
             BindingInfo bindingInfo = bindingInfos.iterator().next();
             assertThat(bindingInfo, is(notNullValue()));
-            assertThat(bindingInfo.getName(), is("Yahoo Wetter Binding"));
+            assertThat(bindingInfo.getName(), is("ACME Wetter Binding"));
             assertThat(bindingInfo.getDescription(), is(
-                    "Das Yahoo Wetter Binding stellt verschiedene Wetterdaten wie die Temperatur, die Luftfeuchtigkeit und den Luftdruck für konfigurierbare Orte vom yahoo Wetterdienst bereit"));
+                    "Das ACME Wetter Binding stellt verschiedene Wetterdaten wie die Temperatur, die Luftfeuchtigkeit und den Luftdruck für konfigurierbare Orte vom ACME Wetterdienst bereit"));
         });
     }
 }

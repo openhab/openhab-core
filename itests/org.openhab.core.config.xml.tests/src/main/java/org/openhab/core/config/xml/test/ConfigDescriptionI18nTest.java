@@ -40,7 +40,7 @@ import org.openhab.core.test.java.JavaOSGiTest;
  */
 public class ConfigDescriptionI18nTest extends JavaOSGiTest {
 
-    private static final String TEST_BUNDLE_NAME = "yahooweather.bundle";
+    private static final String TEST_BUNDLE_NAME = "acmeweather.bundle";
 
     private ConfigDescriptionProvider configDescriptionProvider;
 

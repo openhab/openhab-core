@@ -164,7 +164,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         assertThat(items, hasSize(0));
 
         String model = "Group Weather [TAG1]\n" + "Group Weather_Chart (Weather)\n"
-                + "Number Weather_Temperature      \"Outside Temperature [%.1f °C]\" <temperature> (Weather_Chart) [TAG1, TAG2] { channel=\"yahooweather:weather:berlin:temperature\" }\n"
+                + "Number Weather_Temperature      \"Outside Temperature [%.1f °C]\" <temperature> (Weather_Chart) [TAG1, TAG2] { channel=\"acmeweather:weather:berlin:temperature\" }\n"
                 + "Number Weather_Temp_Max         \"Todays Maximum [%.1f °C]\"  <temperature> (Weather_Chart)\n"
                 + "Number Weather_Temp_Min         \"Todays Minimum [%.1f °C]\"  <temperature> (Weather_Chart)\n"
                 + "Number Weather_Chart_Period     \"Chart Period\"\n"
