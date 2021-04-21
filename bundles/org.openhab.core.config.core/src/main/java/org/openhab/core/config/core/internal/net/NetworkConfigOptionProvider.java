@@ -48,17 +48,19 @@ public class NetworkConfigOptionProvider implements ConfigOptionProvider {
             return null;
         }
 
-        if (PARAM_PRIMARY_ADDRESS.equals(param)) {
-            Stream<CidrAddress> ipv4Addresses = NetUtil.getAllInterfaceAddresses().stream()
-                    .filter(a -> a.getAddress() instanceof Inet4Address);
-            return ipv4Addresses.map(a -> new ParameterOption(a.toString(), a.toString())).collect(Collectors.toList());
+        switch (param) {
+            case PARAM_PRIMARY_ADDRESS:
+                Stream<CidrAddress> ipv4Addresses = NetUtil.getAllInterfaceAddresses().stream()
+                        .filter(a -> a.getAddress() instanceof Inet4Address);
+                return ipv4Addresses.map(a -> new ParameterOption(a.toString(), a.toString()))
+                        .collect(Collectors.toList());
+            case PARAM_BROADCAST_ADDRESS:
+                List<String> broadcastAddrList = new ArrayList<>(NetUtil.getAllBroadcastAddresses());
+                broadcastAddrList.add("255.255.255.255");
+                return broadcastAddrList.stream().distinct().map(a -> new ParameterOption(a, a))
+                        .collect(Collectors.toList());
+            default:
+                return null;
         }
-
-        if (PARAM_BROADCAST_ADDRESS.equals(param)) {
-            List<String> broadcastAddrList = new ArrayList<>(NetUtil.getAllBroadcastAddresses());
-            broadcastAddrList.add("255.255.255.255");
-            return broadcastAddrList.stream().map(a -> new ParameterOption(a, a)).collect(Collectors.toList());
-        }
-        return null;
     }
 }
