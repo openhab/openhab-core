@@ -6,11 +6,11 @@
 		https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="system:audio">
-		<parameter name="defaultSource" type="text" required="false">
+		<parameter name="defaultSource" type="text">
 			<label>Default Source</label>
 			<description>The default audio source to use if no other is specified.</description>
 		</parameter>
-		<parameter name="defaultSink" type="text" required="false">
+		<parameter name="defaultSink" type="text">
 			<label>Default Sink</label>
 			<description>The default audio sink to use if no other is specified.</description>
 		</parameter>

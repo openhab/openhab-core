@@ -15,7 +15,7 @@
 			]]>
 			</description>
 		</parameter>
-		<parameter name="script" type="text" required="false">
+		<parameter name="script" type="text">
 			<label>Script</label>
 			<description><![CDATA[
 				<p>The script that should be used.</p>
@@ -25,7 +25,7 @@
 			</description>
 			<advanced>true</advanced>
 		</parameter>
-		<parameter name="region" type="text" required="false">
+		<parameter name="region" type="text">
 			<label>Country / Region</label>
 			<description><![CDATA[
 				<p>The region that should be used.</p>
@@ -34,7 +34,7 @@
 			]]>
 			</description>
 		</parameter>
-		<parameter name="variant" type="text" required="false">
+		<parameter name="variant" type="text">
 			<label>Variant</label>
 			<description><![CDATA[
 				<p>A variation of the locale.</p>
@@ -44,7 +44,7 @@
 			</description>
 			<advanced>true</advanced>
 		</parameter>
-		<parameter name="timezone" type="text" required="false">
+		<parameter name="timezone" type="text">
 			<label>Time Zone</label>
 			<description><![CDATA[
 				<p>A time zone can be set from the user interface.</p>
@@ -53,7 +53,7 @@
 			]]>
 			</description>
 		</parameter>
-		<parameter name="location" type="text" required="false">
+		<parameter name="location" type="text">
 			<context>location</context>
 			<label>Location</label>
 			<description><![CDATA[
@@ -63,8 +63,7 @@
 			]]>
 			</description>
 		</parameter>
-
-		<parameter name="measurementSystem" type="text" required="false">
+		<parameter name="measurementSystem" type="text">
 			<label>Measurement System</label>
 			<description>The measurement system is used for unit conversion.</description>
 			<advanced>true</advanced>
