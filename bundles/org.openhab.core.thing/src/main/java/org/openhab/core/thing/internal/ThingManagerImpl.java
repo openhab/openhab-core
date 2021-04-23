@@ -120,6 +120,7 @@ import org.slf4j.LoggerFactory;
  * @author Henning Sudbrock - Consider thing type properties when migrating to new thing type
  * @author Christoph Weitkamp - Added preconfigured ChannelGroupBuilder
  * @author Yordan Zhelev - Added thing disabling mechanism
+ * @author Björn Lange - Ignore illegal thing status transitions instead of throwing IllegalArgumentException
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ThingTypeMigrationService.class, ThingManager.class })
@@ -187,10 +188,11 @@ public class ThingManagerImpl
 
             if (ThingStatus.REMOVING.equals(oldStatusInfo.getStatus())
                     && !ThingStatus.REMOVED.equals(statusInfo.getStatus())) {
-                // only allow REMOVING -> REMOVED transition, all others are illegal
-                throw new IllegalArgumentException(MessageFormat.format(
-                        "Illegal status transition from REMOVING to {0}, only REMOVED would have been allowed.",
-                        statusInfo.getStatus()));
+                // only allow REMOVING -> REMOVED transition, all others are ignored because they are illegal
+                logger.warn(
+                        "Ignoring illegal status transition for thing {} from REMOVING to {}, only REMOVED would have been allowed.",
+                        thing.getUID(), statusInfo.getStatus());
+                return;
             }
 
             // update thing status and send event about new status
