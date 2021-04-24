@@ -51,7 +51,7 @@ public class TokenList {
      * @return the first token of the list
      */
     public String head() {
-        return (list.size() < 1 || head < 0 || head >= list.size()) ? null : list.get(head);
+        return (list.isEmpty() || head < 0 || head >= list.size()) ? null : list.get(head);
     }
 
     /**
@@ -60,7 +60,7 @@ public class TokenList {
      * @return the last token of the list
      */
     public String tail() {
-        return (list.size() < 1 || tail < 0 || tail >= list.size()) ? null : list.get(tail);
+        return (list.isEmpty() || tail < 0 || tail >= list.size()) ? null : list.get(tail);
     }
 
     /**

@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseModuleHandler;
-import org.openhab.core.automation.handler.ConditionHandler;
+import org.openhab.core.automation.handler.TimeBasedConditionHandler;
 import org.openhab.core.automation.internal.module.config.EphemerisConditionConfig;
 import org.openhab.core.ephemeris.EphemerisManager;
 
@@ -29,7 +29,7 @@ import org.openhab.core.ephemeris.EphemerisManager;
  * @author Christoph Weitkamp - Initial contribution
  */
 @NonNullByDefault
-public class EphemerisConditionHandler extends BaseModuleHandler<Condition> implements ConditionHandler {
+public class EphemerisConditionHandler extends BaseModuleHandler<Condition> implements TimeBasedConditionHandler {
 
     public static final String HOLIDAY_MODULE_TYPE_ID = "ephemeris.HolidayCondition";
     public static final String NOT_HOLIDAY_MODULE_TYPE_ID = "ephemeris.NotHolidayCondition";
@@ -62,24 +62,29 @@ public class EphemerisConditionHandler extends BaseModuleHandler<Condition> impl
     }
 
     @Override
-    public boolean isSatisfied(Map<String, Object> inputs) {
+    public boolean isSatisfiedAt(ZonedDateTime time) {
         switch (module.getTypeUID()) {
             case HOLIDAY_MODULE_TYPE_ID:
-                return ephemerisManager.isBankHoliday(target);
+                return ephemerisManager.isBankHoliday(time);
             case NOT_HOLIDAY_MODULE_TYPE_ID:
-                return !ephemerisManager.isBankHoliday(target);
+                return !ephemerisManager.isBankHoliday(time);
             case WEEKEND_MODULE_TYPE_ID:
-                return ephemerisManager.isWeekend(target);
+                return ephemerisManager.isWeekend(time);
             case WEEKDAY_MODULE_TYPE_ID:
-                return !ephemerisManager.isWeekend(target);
+                return !ephemerisManager.isWeekend(time);
             case DAYSET_MODULE_TYPE_ID:
                 final String dayset = this.dayset;
                 if (dayset != null) {
-                    return ephemerisManager.isInDayset(dayset, target);
+                    return ephemerisManager.isInDayset(dayset, time);
                 }
                 break;
         }
         // If none of these conditions apply false is returned.
         return false;
+    }
+
+    @Override
+    public boolean isSatisfied(Map<String, Object> inputs) {
+        return this.isSatisfiedAt(target);
     }
 }

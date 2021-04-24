@@ -17,7 +17,9 @@ import java.text.MessageFormat;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
+import org.openhab.core.automation.handler.TimeBasedTriggerHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
+import org.openhab.core.scheduler.CronAdjuster;
 import org.openhab.core.scheduler.CronScheduler;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.openhab.core.scheduler.SchedulerRunnable;
@@ -30,7 +32,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler implements SchedulerRunnable {
+public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
+        implements SchedulerRunnable, TimeBasedTriggerHandler {
 
     private final Logger logger = LoggerFactory.getLogger(TimeOfDayTriggerHandler.class);
 
@@ -47,10 +50,16 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler implements
         super(module);
         this.scheduler = scheduler;
         String time = module.getConfiguration().get(CFG_TIME).toString();
+        this.expression = buildExpressionFromConfigurationTime(time);
+    }
+
+    /**
+     * Creates an cron-Expression from the configured time.
+     */
+    private static String buildExpressionFromConfigurationTime(String time) {
         try {
             String[] parts = time.split(":");
-            expression = MessageFormat.format("0 {1} {0} * * *", Integer.parseInt(parts[0]),
-                    Integer.parseInt(parts[1]));
+            return MessageFormat.format("0 {1} {0} * * *", Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             throw new IllegalArgumentException("'time' parameter '" + time + "' is not in valid format 'hh:mm'.", e);
         }
@@ -80,5 +89,10 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler implements
             schedule.cancel(true);
             logger.debug("cancelled job for trigger '{}'.", module.getId());
         }
+    }
+
+    @Override
+    public CronAdjuster getTemporalAdjuster() {
+        return new CronAdjuster(expression);
     }
 }

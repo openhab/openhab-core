@@ -34,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -97,7 +96,6 @@ public class ItemUIRegistryImplTest {
     private @Mock ItemRegistry registry;
     private @Mock Widget widget;
     private @Mock Item item;
-    private @Mock UnitProvider unitProvider;
 
     @BeforeEach
     public void setup() throws Exception {

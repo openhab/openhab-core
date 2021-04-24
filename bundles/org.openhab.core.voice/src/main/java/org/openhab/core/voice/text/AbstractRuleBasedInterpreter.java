@@ -484,8 +484,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     protected String executeSingle(ResourceBundle language, String[] labelFragments, Command command)
             throws InterpretationException {
         List<Item> items = getMatchingItems(language, labelFragments, command.getClass());
-        if (items.size() < 1) {
-            if (getMatchingItems(language, labelFragments, null).size() >= 1) {
+        if (items.isEmpty()) {
+            if (!getMatchingItems(language, labelFragments, null).isEmpty()) {
                 throw new InterpretationException(
                         language.getString(COMMAND_NOT_ACCEPTED).replace("<cmd>", command.toString()));
             } else {

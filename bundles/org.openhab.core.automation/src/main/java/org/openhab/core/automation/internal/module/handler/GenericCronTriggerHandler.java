@@ -15,7 +15,9 @@ package org.openhab.core.automation.internal.module.handler;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
+import org.openhab.core.automation.handler.TimeBasedTriggerHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
+import org.openhab.core.scheduler.CronAdjuster;
 import org.openhab.core.scheduler.CronScheduler;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.openhab.core.scheduler.SchedulerRunnable;
@@ -30,7 +32,8 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Knauf - Initial contribution
  * @author Yordan Mihaylov - Remove Quarz lib dependency
  */
-public class GenericCronTriggerHandler extends BaseTriggerModuleHandler implements SchedulerRunnable {
+public class GenericCronTriggerHandler extends BaseTriggerModuleHandler
+        implements SchedulerRunnable, TimeBasedTriggerHandler {
 
     public static final String MODULE_TYPE_ID = "timer.GenericCronTrigger";
     public static final String CALLBACK_CONTEXT_NAME = "CALLBACK";
@@ -78,5 +81,10 @@ public class GenericCronTriggerHandler extends BaseTriggerModuleHandler implemen
         } else {
             logger.debug("Tried to trigger, but callback isn't available!");
         }
+    }
+
+    @Override
+    public CronAdjuster getTemporalAdjuster() {
+        return new CronAdjuster(expression);
     }
 }

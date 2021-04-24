@@ -942,9 +942,8 @@ public class SmokeTest extends IntegrationTestSupport {
     }
 
     private long getNumberOfOpenClients(SpyingSocketFactory socketSpy) {
-        final InetAddress testServerAddress;
         try {
-            testServerAddress = localAddress();
+            localAddress();
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }

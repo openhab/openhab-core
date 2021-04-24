@@ -117,7 +117,6 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     private static final ThingUID BRIDGE_UID = new ThingUID(BRIDGE_TYPE_UID, "bridge");
 
     private static final ChannelUID CHANNEL_UID = new ChannelUID(THING_UID, CHANNEL_ID);
-    private static final ChannelUID CHANNEL2_UID = new ChannelUID(THING_UID, CHANNEL2_ID);
 
     private static final ChannelGroupUID CHANNEL_GROUP_UID = new ChannelGroupUID(THING_UID, CHANNEL_GROUP_ID);
 

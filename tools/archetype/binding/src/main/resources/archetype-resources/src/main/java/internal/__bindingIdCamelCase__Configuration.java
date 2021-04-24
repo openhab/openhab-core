@@ -23,7 +23,9 @@ package ${package}.internal;
 public class ${bindingIdCamelCase}Configuration {
 
     /**
-     * Sample configuration parameter. Replace with your own.
+     * Sample configuration parameters. Replace with your own.
      */
-    public String config1;
+    public String hostname;
+    public String password;
+    public int refreshInterval;
 }

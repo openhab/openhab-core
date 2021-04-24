@@ -50,7 +50,6 @@ import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemProvider;
-import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
@@ -120,10 +119,6 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
     public void assertThatConditionWorksInRule() throws ItemNotFoundException {
         String testItemName1 = "TriggeredItem";
         String testItemName2 = "SwitchedItem";
-
-        ItemRegistry itemRegistry = getService(ItemRegistry.class);
-        SwitchItem triggeredItem = (SwitchItem) itemRegistry.getItem(testItemName1);
-        SwitchItem switchedItem = (SwitchItem) itemRegistry.getItem(testItemName2);
 
         /*
          * Create Rule

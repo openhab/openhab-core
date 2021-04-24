@@ -52,8 +52,8 @@
 
   <distributionManagement>
     <repository>
-      <id>bintray</id>
-      <url>${oh.repo.distBaseUrl}/openhab-core/;publish=1</url>
+      <id>jfrog-release</id>
+      <url>${oh.repo.distBaseUrl}/libs-release-local</url>
     </repository>
     <snapshotRepository>
       <id>jfrog</id>
@@ -74,9 +74,9 @@
     <eea.version>2.3.0</eea.version>
     <karaf.compile.version>4.3.0</karaf.compile.version>
     <karaf.tooling.version>4.3.1</karaf.tooling.version>
-    <sat.version>0.10.0</sat.version>
+    <sat.version>0.11.1</sat.version>
     <slf4j.version>1.7.21</slf4j.version>
-    <xtext.version>2.23.0</xtext.version>
+    <xtext.version>2.25.0</xtext.version>
     <spotless.version>2.0.3</spotless.version>
   </properties>
 

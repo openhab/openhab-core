@@ -71,7 +71,7 @@ public class VolumetricFlowRateTest {
         assertThat(parsedUnit, is(equalTo(unit)));
     }
 
-    private static Stream<Arguments> arguments() {
+    public static Stream<Arguments> arguments() {
         return Stream.of(Arguments.of(Units.LITRE_PER_MINUTE, "l/min", 100.0, 6.0),
                 Arguments.of(Units.CUBICMETRE_PER_SECOND, "m³/s", 100.0, 360000.0),
                 Arguments.of(Units.CUBICMETRE_PER_MINUTE, "m³/min", 100.0, 6000.0),

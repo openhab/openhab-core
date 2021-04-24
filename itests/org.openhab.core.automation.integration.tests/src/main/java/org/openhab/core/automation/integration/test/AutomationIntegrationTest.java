@@ -362,20 +362,12 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         Map<String, Object> params = new HashMap<>();
         params.put("itemName", "myMotionItem3");
         Configuration triggerConfig = new Configuration(params);
-        params = new HashMap<>();
-        params.put("itemName", "myMotionItem3");
-        params.put("state", "ON");
-        Configuration condition1Config = new Configuration(params);
-        Map<String, Object> eventInputs = Map.of("event", "ItemStateChangeTrigger3.event");
-        params = new HashMap<>();
-        params.put("operator", "=");
-        params.put("itemName", "myPresenceItem3");
-        params.put("state", "ON");
-        Configuration condition2Config = new Configuration(params);
+
         params = new HashMap<>();
         params.put("itemName", "myLampItem3");
         params.put("command", "ON");
         Configuration actionConfig = new Configuration(params);
+
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId("ItemStateChangeTrigger3")
                 .withTypeUID("core.ItemStateChangeTrigger").withConfiguration(triggerConfig).build());
         List<Action> actions = List.of(ModuleBuilder.createAction().withId("ItemPostCommandAction3")
@@ -461,8 +453,6 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(ruleEngine.getStatusInfo(rule.getUID()).getStatus(), is(RuleStatus.IDLE));
         }, 3000, 100);
-
-        Item myLampItem3 = itemRegistry.getItem("myLampItem3");
 
         EventSubscriber itemEventHandler = new EventSubscriber() {
             @Override
@@ -598,8 +588,6 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         });
 
         EventPublisher eventPublisher = getService(EventPublisher.class);
-        SwitchItem myPresenceItem = (SwitchItem) itemRegistry.getItem("myPresenceItem4");
-
         // prepare the presenceItems state to be on to match the second condition of the rule
         eventPublisher.post(ItemEventFactory.createStateEvent("myPresenceItem4", OnOffType.ON));
 
