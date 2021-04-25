@@ -203,7 +203,7 @@ public class ItemChannelLinkResource implements RESTResource {
         }
         ItemChannelLink result = itemChannelLinkRegistry.remove(linkId);
         if (result == null) {
-            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED, "Channel is read-only.");
+            return Response.status(Status.METHOD_NOT_ALLOWED).build();
         }
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
