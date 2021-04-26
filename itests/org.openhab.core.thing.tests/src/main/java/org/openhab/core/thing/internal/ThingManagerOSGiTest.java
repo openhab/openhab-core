@@ -970,7 +970,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void thingManagerPreventsRestoringThingStatusFromRemoving() {
+    public void thingManagerIgnoresRestoringOfThingStatusFromRemoving() {
         class ThingHandlerState {
             ThingHandlerCallback callback;
         }
