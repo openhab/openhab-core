@@ -23,13 +23,12 @@ import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import tec.uom.se.format.SimpleUnitFormat;
-import tec.uom.se.function.AddConverter;
-import tec.uom.se.function.MultiplyConverter;
-import tec.uom.se.function.RationalConverter;
-import tec.uom.se.unit.ProductUnit;
-import tec.uom.se.unit.TransformedUnit;
-import tec.uom.se.unit.Units;
+import tech.units.indriya.format.SimpleUnitFormat;
+import tech.units.indriya.function.AddConverter;
+import tech.units.indriya.function.MultiplyConverter;
+import tech.units.indriya.unit.ProductUnit;
+import tech.units.indriya.unit.TransformedUnit;
+import tech.units.indriya.unit.Units;
 
 /**
  * Imperial units used for the United States and Liberia.
@@ -45,30 +44,30 @@ public final class ImperialUnits extends CustomUnits {
 
     /** Additionally defined units to be used in openHAB **/
     public static final Unit<Pressure> INCH_OF_MERCURY = addUnit(new TransformedUnit<>("inHg", Units.PASCAL,
-            new RationalConverter(BigInteger.valueOf(3386388), BigInteger.valueOf(1000))));
+            MultiplyConverter.ofRational(BigInteger.valueOf(3386388), BigInteger.valueOf(1000))));
 
-    public static final Unit<Temperature> FAHRENHEIT = addUnit(new TransformedUnit<>("°F", Units.KELVIN,
-            new RationalConverter(BigInteger.valueOf(5), BigInteger.valueOf(9)).concatenate(new AddConverter(459.67))));
+    public static final Unit<Temperature> FAHRENHEIT = addUnit(
+            new TransformedUnit<>("°F", Units.KELVIN, MultiplyConverter
+                    .ofRational(BigInteger.valueOf(5), BigInteger.valueOf(9)).concatenate(new AddConverter(459.67))));
 
     public static final Unit<Speed> MILES_PER_HOUR = addUnit(new TransformedUnit<>("mph", Units.KILOMETRE_PER_HOUR,
-            new RationalConverter(BigInteger.valueOf(1609344), BigInteger.valueOf(1000000))));
+            MultiplyConverter.ofRational(BigInteger.valueOf(1609344), BigInteger.valueOf(1000000))));
 
     /** Length **/
     public static final Unit<Length> INCH = addUnit(new TransformedUnit<>("in", Units.METRE,
-            new RationalConverter(BigInteger.valueOf(254), BigInteger.valueOf(10000))));
+            MultiplyConverter.ofRational(BigInteger.valueOf(254), BigInteger.valueOf(10000))));
 
-    public static final Unit<Length> FOOT = addUnit(new TransformedUnit<>("ft", INCH, new MultiplyConverter(12.0)));
+    public static final Unit<Length> FOOT = addUnit(new TransformedUnit<>("ft", INCH, MultiplyConverter.of(12.0)));
 
-    public static final Unit<Length> YARD = addUnit(new TransformedUnit<>("yd", FOOT, new MultiplyConverter(3.0)));
+    public static final Unit<Length> YARD = addUnit(new TransformedUnit<>("yd", FOOT, MultiplyConverter.of(3.0)));
 
-    public static final Unit<Length> CHAIN = addUnit(new TransformedUnit<>("ch", YARD, new MultiplyConverter(22.0)));
+    public static final Unit<Length> CHAIN = addUnit(new TransformedUnit<>("ch", YARD, MultiplyConverter.of(22.0)));
 
-    public static final Unit<Length> FURLONG = addUnit(
-            new TransformedUnit<>("fur", CHAIN, new MultiplyConverter(10.0)));
+    public static final Unit<Length> FURLONG = addUnit(new TransformedUnit<>("fur", CHAIN, MultiplyConverter.of(10.0)));
 
-    public static final Unit<Length> MILE = addUnit(new TransformedUnit<>("mi", FURLONG, new MultiplyConverter(8.0)));
+    public static final Unit<Length> MILE = addUnit(new TransformedUnit<>("mi", FURLONG, MultiplyConverter.of(8.0)));
 
-    public static final Unit<Length> LEAGUE = addUnit(new TransformedUnit<>("lea", MILE, new MultiplyConverter(3.0)));
+    public static final Unit<Length> LEAGUE = addUnit(new TransformedUnit<>("lea", MILE, MultiplyConverter.of(3.0)));
 
     public static final Unit<Length> SQUARE_FOOT = addUnit(new ProductUnit<>(FOOT.multiply(FOOT)));
     public static final Unit<Length> CUBIC_FOOT = addUnit(new ProductUnit<>(SQUARE_FOOT.multiply(FOOT)));

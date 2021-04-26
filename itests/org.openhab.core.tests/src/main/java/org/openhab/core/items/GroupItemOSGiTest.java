@@ -67,7 +67,7 @@ import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 
-import tec.uom.se.unit.Units;
+import tech.units.indriya.unit.Units;
 
 /**
  * @author Stefan Triller - Initial contribution

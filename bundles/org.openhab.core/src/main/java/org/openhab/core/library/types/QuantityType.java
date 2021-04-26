@@ -24,6 +24,7 @@ import java.util.IllegalFormatConversionException;
 import javax.measure.Dimension;
 import javax.measure.IncommensurableException;
 import javax.measure.Quantity;
+import javax.measure.Quantity.Scale;
 import javax.measure.UnconvertibleException;
 import javax.measure.Unit;
 import javax.measure.UnitConverter;
@@ -41,9 +42,9 @@ import org.openhab.core.types.util.UnitUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tec.uom.se.AbstractUnit;
-import tec.uom.se.function.QuantityFunctions;
-import tec.uom.se.quantity.Quantities;
+import tech.units.indriya.AbstractUnit;
+import tech.units.indriya.quantity.Quantities;
+import tech.uom.lib.common.function.QuantityFunctions;
 
 /**
  * The measure type extends DecimalType to handle physical unit measurement
@@ -97,7 +98,13 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
         // getQuantity needs a space between numeric value and unit
         String formatted = String.join(" ", constituents);
-        quantity = (Quantity<T>) Quantities.getQuantity(formatted);
+        if (!formatted.contains(" ")) {
+            BigDecimal bd = new BigDecimal(value);
+            quantity = (Quantity<T>) Quantities.getQuantity(bd, AbstractUnit.ONE, Scale.RELATIVE);
+        } else {
+            Quantity<T> absoluteQuantity = (Quantity<T>) Quantities.getQuantity(formatted);
+            quantity = Quantities.getQuantity(absoluteQuantity.getValue(), absoluteQuantity.getUnit(), Scale.RELATIVE);
+        }
     }
 
     /**
@@ -111,7 +118,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
     public QuantityType(Number value, Unit<T> unit) {
         // Avoid scientific notation for double
         BigDecimal bd = new BigDecimal(value.toString());
-        quantity = (Quantity<T>) Quantities.getQuantity(bd, unit);
+        quantity = (Quantity<T>) Quantities.getQuantity(bd, unit, Scale.RELATIVE);
     }
 
     /**
@@ -156,7 +163,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
             return false;
         }
         QuantityType<?> other = (QuantityType<?>) obj;
-        if (!quantity.getUnit().getDimension().equals(other.quantity.getUnit().getDimension())) {
+        if (!quantity.getUnit().isCompatible(other.quantity.getUnit())) {
             return false;
         } else if (compareTo((QuantityType<T>) other) != 0) {
             return false;
@@ -363,7 +370,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return the negated value of this QuantityType.
      */
     public QuantityType<T> negate() {
-        return new QuantityType<>(quantity.multiply(-1));
+        return new QuantityType<>(quantity.negate());
     }
 
     /**

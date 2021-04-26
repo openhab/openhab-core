@@ -14,6 +14,7 @@ package org.openhab.core.library.dimension;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.stream.Stream;
 
@@ -26,8 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.util.UnitUtils;
 
-import tec.uom.se.ComparableQuantity;
-import tec.uom.se.quantity.Quantities;
+import tech.units.indriya.ComparableQuantity;
+import tech.units.indriya.quantity.Quantities;
 
 /**
  * Test for volumentric flow rate constants defined in {@link Units}.
@@ -56,7 +57,8 @@ public class VolumetricFlowRateTest {
 
         ComparableQuantity<VolumetricFlowRate> convertedQuantity = quantity.to(BASE_UNIT);
 
-        assertThat(convertedQuantity, is(equalTo(quantityInBase)));
+        assertThat(convertedQuantity.getValue().doubleValue(),
+                is(closeTo(quantityInBase.getValue().doubleValue(), 1e-10)));
     }
 
     /**
@@ -76,6 +78,6 @@ public class VolumetricFlowRateTest {
                 Arguments.of(Units.CUBICMETRE_PER_SECOND, "m³/s", 100.0, 360000.0),
                 Arguments.of(Units.CUBICMETRE_PER_MINUTE, "m³/min", 100.0, 6000.0),
                 Arguments.of(Units.CUBICMETRE_PER_HOUR, "m³/h", 100.0, 100.0),
-                Arguments.of(Units.CUBICMETRE_PER_DAY, "m³/d", 100.0, 4.166666666666667));
+                Arguments.of(Units.CUBICMETRE_PER_DAY, "m³/d", 100.0, 4.166666666666666666666666666666667));
     }
 }

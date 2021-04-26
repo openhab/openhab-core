@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.measure.MetricPrefix;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.UnitConverter;
@@ -36,9 +37,9 @@ import org.openhab.core.library.unit.Units;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tec.uom.se.quantity.Quantities;
-import tec.uom.se.unit.MetricPrefix;
-import tec.uom.se.unit.TransformedUnit;
+import tech.units.indriya.function.MultiplyConverter;
+import tech.units.indriya.quantity.Quantities;
+import tech.units.indriya.unit.TransformedUnit;
 
 /**
  * A utility for parsing dimensions to interface classes of {@link Quantity} and parsing units from format strings.
@@ -54,10 +55,11 @@ public class UnitUtils {
     public static final String UNIT_PERCENT_FORMAT_STRING = "%%";
 
     private static final String JAVAX_MEASURE_QUANTITY_PREFIX = "javax.measure.quantity.";
+    private static final String SI_DIMENSION_PREFIX = "si.uom.quantity.";
     private static final String FRAMEWORK_DIMENSION_PREFIX = "org.openhab.core.library.dimension.";
 
     private static final Collection<Class<? extends SystemOfUnits>> ALL_SYSTEM_OF_UNITS = Arrays.asList(SIUnits.class,
-            ImperialUnits.class, Units.class, tec.uom.se.unit.Units.class);
+            ImperialUnits.class, Units.class, tech.units.indriya.unit.Units.class);
 
     static {
         UnitInitializer.init();
@@ -84,8 +86,12 @@ public class UnitUtils {
             try {
                 return dimensionClass(JAVAX_MEASURE_QUANTITY_PREFIX, dimension);
             } catch (ClassNotFoundException e2) {
-                throw new IllegalArgumentException(
-                        "Error creating a dimension Class instance for name '" + dimension + "'.");
+                try {
+                    return dimensionClass(SI_DIMENSION_PREFIX, dimension);
+                } catch (ClassNotFoundException e3) {
+                    throw new IllegalArgumentException(
+                            "Error creating a dimension Class instance for name '" + dimension + "'.");
+                }
             }
         }
     }
@@ -201,7 +207,7 @@ public class UnitUtils {
 
     private static boolean isMetricConversion(UnitConverter converter) {
         for (MetricPrefix mp : MetricPrefix.values()) {
-            if (mp.getConverter().equals(converter)) {
+            if (MultiplyConverter.ofPrefix(mp).equals(converter)) {
                 return true;
             }
         }

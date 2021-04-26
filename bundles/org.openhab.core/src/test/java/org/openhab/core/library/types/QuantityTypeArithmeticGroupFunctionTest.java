@@ -119,7 +119,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<>("55.33 °C"), state);
+        assertEquals(new QuantityType<>("55.33333333333333333333333333333334 °C"), state);
     }
 
     @Test

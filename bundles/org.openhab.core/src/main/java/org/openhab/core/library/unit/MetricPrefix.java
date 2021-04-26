@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * The metric prefixes used to derive units by specific powers of 10. This delegates to the enum instances of
- * {@link tec.uom.se.unit.MetricPrefix}.
+ * {@link javax.measure.MetricPrefix}.
  *
  * @author Henning Treu - Initial contribution
  */
@@ -27,82 +27,82 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public class MetricPrefix {
 
     public static <T extends Quantity<T>> Unit<T> YOTTA(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.YOTTA(unit);
+        return javax.measure.MetricPrefix.YOTTA(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> ZETTA(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.ZETTA(unit);
+        return javax.measure.MetricPrefix.ZETTA(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> EXA(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.EXA(unit);
+        return javax.measure.MetricPrefix.EXA(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> PETA(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.PETA(unit);
+        return javax.measure.MetricPrefix.PETA(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> TERA(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.TERA(unit);
+        return javax.measure.MetricPrefix.TERA(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> GIGA(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.GIGA(unit);
+        return javax.measure.MetricPrefix.GIGA(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> MEGA(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.MEGA(unit);
+        return javax.measure.MetricPrefix.MEGA(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> KILO(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.KILO(unit);
+        return javax.measure.MetricPrefix.KILO(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> HECTO(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.HECTO(unit);
+        return javax.measure.MetricPrefix.HECTO(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> DEKA(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.DEKA(unit);
+        return javax.measure.MetricPrefix.DEKA(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> DECI(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.DECI(unit);
+        return javax.measure.MetricPrefix.DECI(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> CENTI(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.CENTI(unit);
+        return javax.measure.MetricPrefix.CENTI(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> MILLI(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.MILLI(unit);
+        return javax.measure.MetricPrefix.MILLI(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> MICRO(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.MICRO(unit);
+        return javax.measure.MetricPrefix.MICRO(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> NANO(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.NANO(unit);
+        return javax.measure.MetricPrefix.NANO(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> PICO(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.PICO(unit);
+        return javax.measure.MetricPrefix.PICO(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> FEMTO(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.FEMTO(unit);
+        return javax.measure.MetricPrefix.FEMTO(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> ATTO(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.ATTO(unit);
+        return javax.measure.MetricPrefix.ATTO(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> ZEPTO(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.ZEPTO(unit);
+        return javax.measure.MetricPrefix.ZEPTO(unit);
     }
 
     public static <T extends Quantity<T>> Unit<T> YOCTO(Unit<T> unit) {
-        return tec.uom.se.unit.MetricPrefix.YOCTO(unit);
+        return javax.measure.MetricPrefix.YOCTO(unit);
     }
 }

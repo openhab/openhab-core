@@ -142,22 +142,22 @@ public class PersistenceExtensionsTest {
                 ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertThat(historicItem.getState(), is(instanceOf(QuantityType.class)));
-        assertEquals("2012.0 °C", historicItem.getState().toString());
+        assertEquals("2012 °C", historicItem.getState().toString());
 
         historicItem = PersistenceExtensions.historicState(quantityItem,
                 ZonedDateTime.of(2011, 12, 31, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
         assertNotNull(historicItem);
-        assertEquals("2011.0 °C", historicItem.getState().toString());
+        assertEquals("2011 °C", historicItem.getState().toString());
 
         historicItem = PersistenceExtensions.historicState(quantityItem,
                 ZonedDateTime.of(2011, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
         assertNotNull(historicItem);
-        assertEquals("2011.0 °C", historicItem.getState().toString());
+        assertEquals("2011 °C", historicItem.getState().toString());
 
         historicItem = PersistenceExtensions.historicState(quantityItem,
                 ZonedDateTime.of(2000, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
         assertNotNull(historicItem);
-        assertEquals("2000.0 °C", historicItem.getState().toString());
+        assertEquals("2000 °C", historicItem.getState().toString());
 
         // default persistence service
         historicItem = PersistenceExtensions.historicState(quantityItem,
@@ -210,19 +210,19 @@ public class PersistenceExtensionsTest {
                 ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertThat(historicItem.getState(), is(instanceOf(QuantityType.class)));
-        assertEquals("1.0 °C", historicItem.getState().toString());
+        assertEquals("1 °C", historicItem.getState().toString());
 
         historicItem = PersistenceExtensions.maximumSince(quantityItem,
                 ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
         assertNotNull(historicItem);
-        assertEquals("2012.0 °C", historicItem.getState().toString());
+        assertEquals("2012 °C", historicItem.getState().toString());
         assertEquals(ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), historicItem.getTimestamp());
 
         // default persistence service
         historicItem = PersistenceExtensions.maximumSince(quantityItem,
                 ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()));
         assertNotNull(historicItem);
-        assertEquals("1.0 °C", historicItem.getState().toString());
+        assertEquals("1 °C", historicItem.getState().toString());
     }
 
     @Test
@@ -281,19 +281,19 @@ public class PersistenceExtensionsTest {
                 ZonedDateTime.of(1940, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertThat(historicItem.getState(), is(instanceOf(QuantityType.class)));
-        assertEquals("5000.0 °C", historicItem.getState().toString());
+        assertEquals("5000 °C", historicItem.getState().toString());
 
         historicItem = PersistenceExtensions.minimumSince(quantityItem,
                 ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
         assertNotNull(historicItem);
-        assertEquals("2005.0 °C", historicItem.getState().toString());
+        assertEquals("2005 °C", historicItem.getState().toString());
         assertEquals(ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), historicItem.getTimestamp());
 
         // default persistence service
         historicItem = PersistenceExtensions.minimumSince(quantityItem,
                 ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()));
         assertNotNull(historicItem);
-        assertEquals("5000.0 °C", historicItem.getState().toString());
+        assertEquals("5000 °C", historicItem.getState().toString());
     }
 
     @Test
@@ -601,22 +601,22 @@ public class PersistenceExtensionsTest {
                 TestPersistenceService.ID);
         assertNotNull(prevStateItem);
         assertThat(prevStateItem.getState(), is(instanceOf(QuantityType.class)));
-        assertEquals("2012.0 °C", prevStateItem.getState().toString());
+        assertEquals("2012 °C", prevStateItem.getState().toString());
 
         quantityItem.setState(QuantityType.valueOf(4321, SIUnits.CELSIUS));
         prevStateItem = PersistenceExtensions.previousState(quantityItem, false, TestPersistenceService.ID);
         assertNotNull(prevStateItem);
-        assertEquals("2012.0 °C", prevStateItem.getState().toString());
+        assertEquals("2012 °C", prevStateItem.getState().toString());
 
         quantityItem.setState(QuantityType.valueOf(2012, SIUnits.CELSIUS));
         prevStateItem = PersistenceExtensions.previousState(quantityItem, false, TestPersistenceService.ID);
         assertNotNull(prevStateItem);
-        assertEquals("2012.0 °C", prevStateItem.getState().toString());
+        assertEquals("2012 °C", prevStateItem.getState().toString());
 
         quantityItem.setState(QuantityType.valueOf(3025, SIUnits.CELSIUS));
         prevStateItem = PersistenceExtensions.previousState(quantityItem, false, TestPersistenceService.ID);
         assertNotNull(prevStateItem);
-        assertEquals("2012.0 °C", prevStateItem.getState().toString());
+        assertEquals("2012 °C", prevStateItem.getState().toString());
 
         // default persistence service
         prevStateItem = PersistenceExtensions.previousState(quantityItem, false);
@@ -640,7 +640,7 @@ public class PersistenceExtensionsTest {
         quantityItem.setState(QuantityType.valueOf(2012, SIUnits.CELSIUS));
         HistoricItem prevStateItem = PersistenceExtensions.previousState(quantityItem, true, TestPersistenceService.ID);
         assertNotNull(prevStateItem);
-        assertEquals("2011.0 °C", prevStateItem.getState().toString());
+        assertEquals("2011 °C", prevStateItem.getState().toString());
 
         // default persistence service
         prevStateItem = PersistenceExtensions.previousState(quantityItem, true);
