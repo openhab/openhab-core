@@ -111,6 +111,7 @@ import org.osgi.service.component.ComponentContext;
  *
  * @author Dennis Nobel - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
+ * @author Björn Lange - Ignore illegal thing status transitions instead of throwing IllegalArgumentException
  */
 public class ThingManagerOSGiTest extends JavaOSGiTest {
 
@@ -966,6 +967,45 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         final ThingStatusInfo removedNone = ThingStatusInfoBuilder.create(ThingStatus.REMOVED, ThingStatusDetail.NONE)
                 .build();
         expectException(() -> state.callback.statusUpdated(thing, removedNone), IllegalArgumentException.class);
+    }
+
+    @Test
+    public void thingManagerIgnoresRestoringOfThingStatusFromRemoving() {
+        class ThingHandlerState {
+            ThingHandlerCallback callback;
+        }
+
+        final ThingHandlerState state = new ThingHandlerState();
+
+        ThingHandler thingHandler = mock(ThingHandler.class);
+
+        managedThingProvider.add(thing);
+
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                state.callback = (ThingHandlerCallback) invocation.getArgument(0);
+                return null;
+            }
+        }).when(thingHandler).setCallback(any(ThingHandlerCallback.class));
+        when(thingHandler.getThing()).thenReturn(thing);
+
+        ThingHandlerFactory thingHandlerFactory = mock(ThingHandlerFactory.class);
+        when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
+        when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
+
+        registerService(thingHandlerFactory);
+
+        final ThingStatusInfo removingNone = ThingStatusInfoBuilder.create(ThingStatus.REMOVING, ThingStatusDetail.NONE)
+                .build();
+        final ThingStatusInfo onlineNone = ThingStatusInfoBuilder.create(ThingStatus.ONLINE, ThingStatusDetail.NONE)
+                .build();
+
+        thing.setStatusInfo(removingNone);
+
+        state.callback.statusUpdated(thing, onlineNone);
+
+        assertThat(thing.getStatusInfo(), is(removingNone));
     }
 
     private void expectException(Runnable runnable, Class<? extends Exception> exceptionType) {
