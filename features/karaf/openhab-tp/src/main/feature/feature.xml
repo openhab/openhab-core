@@ -54,14 +54,14 @@
 	</feature>
 
 	<feature name="openhab.tp-hivemqclient" description="MQTT Client" version="${project.version}">
-		<capability>openhab.tp;feature=hivemqclient;version=1.1.1</capability>
+		<capability>openhab.tp;feature=hivemqclient;version=1.2.2</capability>
 		<feature dependency="true">openhab.tp-netty</feature>
 		<bundle dependency="true">mvn:org.jctools/jctools-core/2.1.2</bundle>
-		<bundle dependency="true">mvn:io.reactivex.rxjava2/rxjava/2.2.5</bundle>
-		<bundle dependency="true">mvn:org.reactivestreams/reactive-streams/1.0.2</bundle>
-		<bundle dependency="true">mvn:org.openhab.osgiify/com.google.dagger/2.20</bundle>
+		<bundle dependency="true">mvn:io.reactivex.rxjava2/rxjava/2.2.19</bundle>
+		<bundle dependency="true">mvn:org.reactivestreams/reactive-streams/1.0.3</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/com.google.dagger/2.27</bundle>
 		<bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
-		<bundle>mvn:com.hivemq/hivemq-mqtt-client/1.1.2</bundle>
+		<bundle>mvn:com.hivemq/hivemq-mqtt-client/1.2.2</bundle>
 	</feature>
 
 	<feature name="openhab.tp-httpclient" version="${project.version}">
@@ -128,18 +128,21 @@
 	</feature>
 
 	<feature name="openhab.tp-netty" description="Netty bundles" version="${project.version}">
-		<capability>openhab.tp;feature=netty;version=4.1.42.Final</capability>
-		<bundle dependency="true">mvn:io.netty/netty-buffer/4.1.42.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-common/4.1.42.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec/4.1.42.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-http/4.1.42.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-http2/4.1.42.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-mqtt/4.1.42.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-handler/4.1.42.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-resolver/4.1.42.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport/4.1.42.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-native-epoll/4.1.42.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-native-unix-common/4.1.42.Final</bundle>
+		<capability>openhab.tp;feature=netty;version=4.1.63.Final</capability>
+		<bundle dependency="true">mvn:io.netty/netty-buffer/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-common/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-http/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-http2/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-mqtt/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-socks/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-handler/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-handler-proxy/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-resolver/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-native-epoll/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-native-kqueue/4.1.63.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-native-unix-common/4.1.63.Final</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jaxb" description="JAXB bundles" version="${project.version}">
