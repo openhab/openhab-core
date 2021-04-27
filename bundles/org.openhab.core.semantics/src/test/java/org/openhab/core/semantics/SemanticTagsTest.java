@@ -67,7 +67,7 @@ public class SemanticTagsTest {
     public void testByLabel() {
         assertEquals(Kitchen.class, SemanticTags.getByLabel("Kitchen", Locale.ENGLISH));
         assertEquals(Kitchen.class, SemanticTags.getByLabel("Küche", Locale.GERMAN));
-        assertNull(SemanticTags.getByLabel("Badezimmer", Locale.GERMAN));
+        assertNull(SemanticTags.getByLabel("Bad", Locale.GERMAN));
     }
 
     @Test
