@@ -65,7 +65,7 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
     }
 
     @Override
-    public void bindTo(@io.micrometer.core.lang.NonNull MeterRegistry meterRegistry) {
+    public void bindTo(MeterRegistry meterRegistry) {
         unbind();
         logger.debug("RuleMetric is being bound...");
         this.meterRegistry = meterRegistry;
@@ -77,18 +77,20 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
 
     @Override
     public void unbind() {
-        if (meterRegistry == null) {
+        MeterRegistry mReg = meterRegistry;
+        if (mReg == null) {
             return;
-        }
-        for (Meter meter : meterRegistry.getMeters()) {
-            if (meter.getId().getTags().contains(CORE_RULE_METRIC_TAG)) {
-                meterRegistry.remove(meter);
+        } else {
+            for (Meter meter : mReg.getMeters()) {
+                if (meter.getId().getTags().contains(CORE_RULE_METRIC_TAG)) {
+                    mReg.remove(meter);
+                }
             }
-        }
-        meterRegistry = null;
-        if (this.eventSubscriberRegistration != null) {
-            this.eventSubscriberRegistration.unregister();
-            this.eventSubscriberRegistration = null;
+            meterRegistry = null;
+            if (this.eventSubscriberRegistration != null) {
+                this.eventSubscriberRegistration.unregister();
+                this.eventSubscriberRegistration = null;
+            }
         }
     }
 
@@ -106,25 +108,27 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
 
     @Override
     public void receive(Event event) {
-        if (meterRegistry == null) {
+        MeterRegistry mReg = meterRegistry;
+        if (mReg == null) {
             logger.trace("Measurement not started. Skipping rule event processing");
             return;
-        }
-        String topic = event.getTopic();
-        String ruleId = topic.substring(RULES_TOPIC_PREFIX.length(), topic.indexOf(RULES_TOPIC_SUFFIX));
-        if (!event.getPayload().contains(RuleStatus.RUNNING.name())) {
-            logger.trace("Skipping rule status info with status other than RUNNING {}", event.getPayload());
-            return;
-        }
+        } else {
+            String topic = event.getTopic();
+            String ruleId = topic.substring(RULES_TOPIC_PREFIX.length(), topic.indexOf(RULES_TOPIC_SUFFIX));
+            if (!event.getPayload().contains(RuleStatus.RUNNING.name())) {
+                logger.trace("Skipping rule status info with status other than RUNNING {}", event.getPayload());
+                return;
+            }
 
-        logger.debug("Rule {} RUNNING - updating metric.", ruleId);
-        Set<Tag> tagsWithRule = new HashSet<>(tags);
-        tagsWithRule.add(Tag.of(RULE_ID_TAG_NAME, ruleId));
-        String ruleName = getRuleName(ruleId);
-        if (ruleName != null) {
-            tagsWithRule.add(Tag.of(RULE_NAME_TAG_NAME, ruleName));
+            logger.debug("Rule {} RUNNING - updating metric.", ruleId);
+            Set<Tag> tagsWithRule = new HashSet<>(tags);
+            tagsWithRule.add(Tag.of(RULE_ID_TAG_NAME, ruleId));
+            String ruleName = getRuleName(ruleId);
+            if (ruleName != null) {
+                tagsWithRule.add(Tag.of(RULE_NAME_TAG_NAME, ruleName));
+            }
+            mReg.counter(METRIC_NAME, tagsWithRule).increment();
         }
-        meterRegistry.counter(METRIC_NAME, tagsWithRule).increment();
     }
 
     private String getRuleName(String ruleId) {
