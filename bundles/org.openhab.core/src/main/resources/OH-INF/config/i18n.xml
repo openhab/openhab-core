@@ -8,63 +8,32 @@
 	<config-description uri="system:i18n">
 		<parameter name="language" type="text">
 			<label>Language</label>
-			<description><![CDATA[
-				<p>The default language that should be used. If not specified, the system default locale is used.</p>
-				<p>The ISO 639 alpha-2 or alpha-3 language code (if there is no alpha-2 one).</p>
-				<p>Example: "en" (English), "de" (German), "ja" (Japanese), "kok" (Konkani)</p>
-			]]>
-			</description>
+			<description>The default language that should be used. If not specified, the system default locale is used.</description>
 		</parameter>
-		<parameter name="script" type="text" required="false">
+		<parameter name="script" type="text">
 			<label>Script</label>
-			<description><![CDATA[
-				<p>The script that should be used.</p>
-				<p>ISO 15924 alpha-4 script code.</p>
-				<p>Example: "Latn" (Latin), "Cyrl" (Cyrillic)</p>
-			]]>
-			</description>
+			<description>The script that should be used.</description>
 			<advanced>true</advanced>
 		</parameter>
-		<parameter name="region" type="text" required="false">
+		<parameter name="region" type="text">
 			<label>Country / Region</label>
-			<description><![CDATA[
-				<p>The region that should be used.</p>
-				<p>ISO 3166 alpha-2 country code or UN M.49 numeric-3 area code.</p>
-				<p>Example: "US" (United States), "DE" (Germany), "FR" (France), "029" (Caribbean)</p>
-			]]>
-			</description>
+			<description>The region that should be used.</description>
 		</parameter>
-		<parameter name="variant" type="text" required="false">
+		<parameter name="variant" type="text">
 			<label>Variant</label>
-			<description><![CDATA[
-				<p>A variation of the locale.</p>
-				<p>Any arbitrary value used to indicate a variation of a Locale.</p>
-				<p>Example: "polyton" (Polytonic Greek), "POSIX"</p>
-			]]>
-			</description>
+			<description>A variation of the Locale. Any arbitrary value used to indicate a variation of a Locale.</description>
 			<advanced>true</advanced>
 		</parameter>
-		<parameter name="timezone" type="text" required="false">
+		<parameter name="timezone" type="text">
 			<label>Time Zone</label>
-			<description><![CDATA[
-				<p>A time zone can be set from the user interface.</p>
-				<p>The underlying system's time zone is the default.</p>
-				<p>Example: Asia/Tokyo, Europe/Berlin</p>
-			]]>
-			</description>
+			<description>A time zone can be set from the user interface. The underlying system's time zone is the default.</description>
 		</parameter>
-		<parameter name="location" type="text" required="false">
+		<parameter name="location" type="text">
 			<context>location</context>
 			<label>Location</label>
-			<description><![CDATA[
-				<p>The location of this installation.</p>
-				<p>Coordinates as &lt;latitude&gt;,&lt;longitude&gt;[&lt;altitude&gt;]</p>
-				<p>Example: "52.5200066,13.4049540" (Berlin)</p>
-			]]>
-			</description>
+			<description><![CDATA[The location of this installation.<br>Coordinates as &lt;latitude&gt;,&lt;longitude&gt;[&lt;altitude&gt;]<br>Example: "52.5200066,13.4049540" (Berlin)]]></description>
 		</parameter>
-
-		<parameter name="measurementSystem" type="text" required="false">
+		<parameter name="measurementSystem" type="text">
 			<label>Measurement System</label>
 			<description>The measurement system is used for unit conversion.</description>
 			<advanced>true</advanced>

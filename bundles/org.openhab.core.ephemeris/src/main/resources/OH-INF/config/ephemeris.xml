@@ -21,6 +21,8 @@
 		<parameter name="city" type="text">
 			<label>City</label>
 			<description>Get the holidays for a specific city (e.g. New York City = "nyc").</description>
+			<advanced>true</advanced>
 		</parameter>
 	</config-description>
+
 </config-description:config-descriptions>

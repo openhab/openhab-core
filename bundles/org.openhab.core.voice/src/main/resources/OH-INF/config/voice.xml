@@ -5,36 +5,36 @@
 	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="system:voice">
-		<parameter name="defaultTTS" type="text" required="false">
+		<parameter name="defaultTTS" type="text">
 			<label>Default Text-to-Speech</label>
 			<description>The default text-to-speech service to use if no other is specified.</description>
 		</parameter>
-		<parameter name="defaultSTT" type="text" required="false">
+		<parameter name="defaultSTT" type="text">
 			<label>Default Speech-to-Text</label>
 			<description>The default speech-to-text service to use if no other is specified.</description>
 		</parameter>
-		<parameter name="defaultVoice" type="text" required="false">
+		<parameter name="defaultVoice" type="text">
 			<label>Default Voice</label>
 			<description>The default voice to use if no specific TTS service or voice is specified.</description>
 		</parameter>
-		<parameter name="defaultHLI" type="text" required="false">
+		<parameter name="defaultHLI" type="text">
 			<label>Default Human Language Interpreter</label>
 			<description>The default human language interpreter to use if no other is specified.</description>
 		</parameter>
-		<parameter name="defaultKS" type="text" required="false">
+		<parameter name="defaultKS" type="text">
 			<label>Default Keyword Spotter</label>
 			<description>The default keyword spotting service to use if no other is specified.</description>
 		</parameter>
-		<parameter name="keyword" type="text" required="false">
+		<parameter name="keyword" type="text">
 			<label>Magic Word</label>
 			<description>The magic word to spot before initiating a dialog.</description>
 		</parameter>
-		<parameter name="listeningItem" type="text" required="false">
+		<parameter name="listeningItem" type="text">
 			<context>item</context>
 			<filter>
 				<criteria name="type">Switch</criteria>
 			</filter>
-			<label>Listening switch</label>
+			<label>Listening Switch</label>
 			<description>If provided, the item will be switched on during the period when the dialog processor has spotted the
 				keyword and is listening for commands.</description>
 		</parameter>

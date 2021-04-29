@@ -6,19 +6,19 @@
 		https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="system:json_storage">
-		<parameter name="backup_files" type="integer" min="0" max="100">
-			<label>Backup files</label>
+		<parameter name="backup_files" type="integer" min="0" max="100" step="1">
+			<label>Backup Files</label>
 			<description>Sets the number of backup files to keep.</description>
 			<default>5</default>
 		</parameter>
-		<parameter name="write_delay" type="integer" min="0" max="60000">
-			<label>Write delay</label>
+		<parameter name="write_delay" type="integer" min="0" max="60000" step="500" unit="ms">
+			<label>Write Delay</label>
 			<description>Sets the time to wait before writing changes to disk. This can reduce the number of writes when many
 				changes are being introduced within a short period. Time is defined in milliseconds.</description>
 			<default>500</default>
 		</parameter>
-		<parameter name="max_defer_delay" type="integer" min="1000" max="60000">
-			<label>Maximum write delay</label>
+		<parameter name="max_defer_delay" type="integer" min="1000" max="60000" step="500" unit="ms">
+			<label>Maximum Write Delay</label>
 			<description>Sets the maximum period the service will wait to write data to disk in the event that many changes are
 				happening continually.</description>
 			<default>30000</default>

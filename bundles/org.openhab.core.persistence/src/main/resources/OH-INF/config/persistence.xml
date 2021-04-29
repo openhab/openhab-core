@@ -6,7 +6,7 @@
 		https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="system:persistence">
-		<parameter name="default" type="text" required="false">
+		<parameter name="default" type="text">
 			<label>Default Service</label>
 			<description>The persistence service to use if no other is specified.</description>
 		</parameter>
