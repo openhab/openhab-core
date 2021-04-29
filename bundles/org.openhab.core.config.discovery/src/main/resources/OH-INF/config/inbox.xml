@@ -8,7 +8,7 @@
 	<config-description uri="system:inbox">
 		<parameter name="autoIgnore" type="boolean">
 			<label>Auto Ignore</label>
-			<description><![CDATA[If enabled, an Inbox result matching an existing thing is automatically ignored.<br/>If set to false, the Inbox may contain results although identical things already exist.]]></description>
+			<description><![CDATA[If enabled, an Inbox result matching an existing thing is automatically ignored.<br>If set to false, the Inbox may contain results although identical things already exist.]]></description>
 			<default>true</default>
 		</parameter>
 		<parameter name="autoApprove" type="boolean">
