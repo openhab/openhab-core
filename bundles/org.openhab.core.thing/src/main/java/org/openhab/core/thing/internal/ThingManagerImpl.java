@@ -604,6 +604,7 @@ public class ThingManagerImpl
         }
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     private @Nullable ThingHandler replaceThing(@Nullable Thing oldThing, Thing newThing) {
         final ThingHandler thingHandler = thingHandlers.get(newThing.getUID());
         if (oldThing != newThing) {

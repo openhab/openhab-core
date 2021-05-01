@@ -180,6 +180,7 @@ public class JavaTest {
      * @param sleepTime interval for checking the condition
      * @return the return value of the supplied assertion object's function on success
      */
+    @SuppressWarnings("PMD.AvoidCatchingNPE")
     private <T> T waitForAssert(Supplier<T> assertion, @Nullable Runnable beforeLastCall, long timeout,
             long sleepTime) {
         final long timeoutNs = TimeUnit.MILLISECONDS.toNanos(timeout);

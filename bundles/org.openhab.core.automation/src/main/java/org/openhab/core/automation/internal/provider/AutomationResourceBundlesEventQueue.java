@@ -125,8 +125,10 @@ public class AutomationResourceBundlesEventQueue<@NonNull E> implements Runnable
                             return;
                         }
                     }
+                } catch (IllegalStateException e) {
+                    continue;
                 } catch (Throwable t) {
-                    if (!closed && !(t instanceof IllegalStateException)) {
+                    if (!closed) {
                         logger.warn("Processing bundle event {}, for automation resource bundle '{}' failed",
                                 event.getType(), event.getBundle().getSymbolicName(), t);
                     }

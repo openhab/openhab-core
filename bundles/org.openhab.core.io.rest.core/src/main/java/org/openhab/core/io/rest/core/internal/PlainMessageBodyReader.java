@@ -57,7 +57,7 @@ public class PlainMessageBodyReader<T> implements MessageBodyReader<T> {
         } else if (type.equals(Byte[].class) || genericType.equals(Byte[].class)) {
             final Byte[] dataB = new Byte[data.length];
             for (int i = 0; i < data.length; ++i) {
-                dataB[i] = data[i];
+                dataB[i] = Byte.valueOf(data[i]);
             }
             return (T) dataB;
         } else {
