@@ -128,13 +128,15 @@ public class ChannelStateDescriptionProvider implements StateDescriptionFragment
         return null;
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     private @Nullable StateDescription getDynamicStateDescription(Channel channel,
             @Nullable StateDescription originalStateDescription, @Nullable Locale locale) {
         for (DynamicStateDescriptionProvider provider : dynamicStateDescriptionProviders) {
             StateDescription dynamicStateDescription = provider.getStateDescription(channel, originalStateDescription,
                     locale);
             if (dynamicStateDescription != null) {
-                if (dynamicStateDescription.equals(originalStateDescription)) {
+                // Compare by reference to make sure a new state description is returned
+                if (dynamicStateDescription == originalStateDescription) {
                     logger.error(
                             "Dynamic state description matches original state description. DynamicStateDescriptionProvider implementations must never return the original state description. {} has to be fixed.",
                             provider.getClass());
