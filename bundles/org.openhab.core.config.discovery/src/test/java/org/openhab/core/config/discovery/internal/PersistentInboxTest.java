@@ -172,7 +172,16 @@ public class PersistentInboxTest {
         when(storage.getValues()).thenReturn(List.of(result));
 
         inbox.activate();
-        assertNull(inbox.approve(THING_UID, "Test", "invalid:id"));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            inbox.approve(THING_UID, "Test", "invalid:id");
+        });
+        assertEquals("New Thing ID invalid:id must not contain multiple segments", exception.getMessage());
+
+        exception = assertThrows(IllegalArgumentException.class, () -> {
+            inbox.approve(THING_UID, "Test", "invalid$id");
+        });
+        assertTrue(exception.getMessage()
+                .startsWith("Cannot create thing UID: ID segment 'invalid$id' contains invalid characters."));
     }
 
     @Test
