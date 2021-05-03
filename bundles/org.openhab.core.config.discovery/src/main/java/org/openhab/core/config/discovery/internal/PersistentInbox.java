@@ -184,7 +184,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         if (results.isEmpty()) {
             throw new IllegalArgumentException("No Thing with UID " + thingUID.getAsString() + " in inbox");
         }
-        if (newThingId != null && newThingId.split(AbstractUID.SEPARATOR).length > 1) {
+        if (newThingId != null && newThingId.contains(AbstractUID.SEPARATOR)) {
             throw new IllegalArgumentException("New Thing ID " + newThingId + " must not contain multiple segments");
         }
         DiscoveryResult result = results.get(0);
@@ -195,11 +195,12 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         ThingTypeUID thingTypeUID = result.getThingTypeUID();
         ThingUID newThingUID = thingUID;
         if (newThingId != null) {
+            String newUID = thingUID.getAsString().substring(0,
+                    thingUID.getAsString().lastIndexOf(AbstractUID.SEPARATOR) + 1) + newThingId;
             try {
-                newThingUID = new ThingUID(thingUID.getAsString().substring(0,
-                        thingUID.getAsString().lastIndexOf(AbstractUID.SEPARATOR) + 1) + newThingId);
+                newThingUID = new ThingUID(newUID);
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Cannot create thing UID: " + e.getMessage());
+                throw new IllegalArgumentException("Invalid thing UID " + newUID, e);
             }
         }
         Thing newThing = ThingFactory.createThing(newThingUID, config, properties, result.getBridgeUID(), thingTypeUID,

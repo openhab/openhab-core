@@ -180,8 +180,7 @@ public class PersistentInboxTest {
         exception = assertThrows(IllegalArgumentException.class, () -> {
             inbox.approve(THING_UID, "Test", "invalid$id");
         });
-        assertTrue(exception.getMessage()
-                .startsWith("Cannot create thing UID: ID segment 'invalid$id' contains invalid characters."));
+        assertEquals("Invalid thing UID test:test:invalid$id", exception.getMessage());
     }
 
     @Test
