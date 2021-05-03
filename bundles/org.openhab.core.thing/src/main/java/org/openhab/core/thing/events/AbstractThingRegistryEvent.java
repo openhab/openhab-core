@@ -12,6 +12,8 @@
  */
 package org.openhab.core.thing.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEvent;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.dto.ThingDTO;
@@ -22,6 +24,7 @@ import org.openhab.core.thing.dto.ThingDTO;
  *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 public abstract class AbstractThingRegistryEvent extends AbstractEvent {
 
     private final ThingDTO thing;
@@ -34,14 +37,14 @@ public abstract class AbstractThingRegistryEvent extends AbstractEvent {
      * @param source the source, can be null
      * @param thing the thing
      */
-    protected AbstractThingRegistryEvent(String topic, String payload, String source, ThingDTO thing) {
+    protected AbstractThingRegistryEvent(String topic, String payload, @Nullable String source, ThingDTO thing) {
         super(topic, payload, source);
         this.thing = thing;
     }
 
     /**
      * Gets the thing.
-     * 
+     *
      * @return the thing
      */
     public ThingDTO getThing() {

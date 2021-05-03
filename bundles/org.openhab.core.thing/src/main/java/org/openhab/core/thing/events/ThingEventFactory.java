@@ -14,9 +14,10 @@ package org.openhab.core.thing.events;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEventFactory;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
@@ -26,16 +27,19 @@ import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.dto.ThingDTOMapper;
-import org.openhab.core.types.Type;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * A {@link ThingEventFactory} is responsible for creating thing event instances, e.g. {@link ThingStatusInfoEvent}s.
+ * A {@link ThingEventFactory} is responsible for creating thing event instances:
+ * <ul>
+ * <li>{@link ThingStatusInfoEvent#TYPE}</li>
+ * </ul>
  *
  * @author Stefan Bußweiler - Initial contribution
  * @author Dennis Nobel - Added status changed event
  */
 @Component(immediate = true, service = EventFactory.class)
+@NonNullByDefault
 public class ThingEventFactory extends AbstractEventFactory {
     static final String THING_STATUS_INFO_EVENT_TOPIC = "openhab/things/{thingUID}/status";
 
@@ -53,14 +57,13 @@ public class ThingEventFactory extends AbstractEventFactory {
      * Constructs a new ThingEventFactory.
      */
     public ThingEventFactory() {
-        super(Stream
-                .of(ThingStatusInfoEvent.TYPE, ThingStatusInfoChangedEvent.TYPE, ThingAddedEvent.TYPE,
-                        ThingRemovedEvent.TYPE, ThingUpdatedEvent.TYPE, ChannelTriggeredEvent.TYPE)
-                .collect(Collectors.toSet()));
+        super(Set.of(ThingStatusInfoEvent.TYPE, ThingStatusInfoChangedEvent.TYPE, ThingAddedEvent.TYPE,
+                ThingRemovedEvent.TYPE, ThingUpdatedEvent.TYPE, ChannelTriggeredEvent.TYPE));
     }
 
     @Override
-    protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
+    protected Event createEventByType(String eventType, String topic, String payload, @Nullable String source)
+            throws Exception {
         if (ThingStatusInfoEvent.TYPE.equals(eventType)) {
             return createStatusInfoEvent(topic, payload);
         } else if (ThingStatusInfoChangedEvent.TYPE.equals(eventType)) {
@@ -81,8 +84,8 @@ public class ThingEventFactory extends AbstractEventFactory {
      * This is a java bean that is used to serialize/deserialize trigger event payload.
      */
     public static class TriggerEventPayloadBean {
-        private String event;
-        private String channel;
+        private String event = "";
+        private @NonNullByDefault({}) String channel;
 
         /**
          * Default constructor for deserialization e.g. by Gson.
@@ -105,32 +108,29 @@ public class ThingEventFactory extends AbstractEventFactory {
     }
 
     /**
-     * Creates a trigger event from a {@link Type}.
+     * Creates a channel triggered event.
      *
-     * @param event Event.
-     * @param channel Channel which triggered the event.
-     * @return Created trigger event.
+     * @param event The event
+     * @param channelUID The channel UID
+     * @return the created channel triggered event
      */
-    public static ChannelTriggeredEvent createTriggerEvent(String event, ChannelUID channel) {
-        TriggerEventPayloadBean bean = new TriggerEventPayloadBean(event, channel.getAsString());
+    public static ChannelTriggeredEvent createTriggerEvent(String event, ChannelUID channelUID) {
+        checkNotNull(channelUID, "channelUID");
+        checkNotNull(event, "event");
+
+        String topic = buildTopic(CHANNEL_TRIGGERED_EVENT_TOPIC, channelUID);
+        TriggerEventPayloadBean bean = new TriggerEventPayloadBean(event, channelUID.getAsString());
         String payload = serializePayload(bean);
-        String topic = buildTopic(CHANNEL_TRIGGERED_EVENT_TOPIC, channel);
-        return new ChannelTriggeredEvent(topic, payload, null, event, channel);
+        return new ChannelTriggeredEvent(topic, payload, null, event, channelUID);
     }
 
-    /**
-     * Creates a trigger event from a payload.
-     *
-     * @param topic Event topic
-     * @param source Event source
-     * @param payload Payload
-     * @return created trigger event
-     */
-    public ChannelTriggeredEvent createTriggerEvent(String topic, String payload, String source) {
+    private Event createTriggerEvent(String topic, String payload, @Nullable String source) {
+        String[] topicElements = getTopicElements(topic);
+        if (topicElements.length != 4) {
+            throw new IllegalArgumentException("ChannelTriggeredEvent creation failed, invalid topic: " + topic);
+        }
+        ChannelUID channel = new ChannelUID(topicElements[2]);
         TriggerEventPayloadBean bean = deserializePayload(payload, TriggerEventPayloadBean.class);
-
-        ChannelUID channel = new ChannelUID(bean.getChannel());
-
         return new ChannelTriggeredEvent(topic, payload, source, bean.getEvent(), channel);
     }
 

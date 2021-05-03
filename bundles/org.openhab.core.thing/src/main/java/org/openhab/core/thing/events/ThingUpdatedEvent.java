@@ -12,14 +12,16 @@
  */
 package org.openhab.core.thing.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.dto.ThingDTO;
 
 /**
  * A {@link ThingUpdatedEvent} notifies subscribers that a thing has been updated.
  * Thing updated events must be created with the {@link ThingEventFactory}.
- * 
+ *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 public class ThingUpdatedEvent extends AbstractThingRegistryEvent {
 
     /**
@@ -49,7 +51,7 @@ public class ThingUpdatedEvent extends AbstractThingRegistryEvent {
 
     /**
      * Gets the old thing.
-     * 
+     *
      * @return the oldThing
      */
     public ThingDTO getOldThing() {

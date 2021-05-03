@@ -12,11 +12,14 @@
  */
 package org.openhab.core.thing;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Contains often used trigger events.
  *
  * @author Moritz Kammerer - Initial contribution
  */
+@NonNullByDefault
 public final class CommonTriggerEvents {
     /**
      * Static class - no instances allowed.

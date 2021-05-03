@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.link.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 
 /**
@@ -20,6 +21,7 @@ import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
  *
  * @author Dennis Nobel - Initial contribution
  */
+@NonNullByDefault
 public class ItemChannelLinkAddedEvent extends AbstractItemChannelLinkRegistryEvent {
 
     /**
