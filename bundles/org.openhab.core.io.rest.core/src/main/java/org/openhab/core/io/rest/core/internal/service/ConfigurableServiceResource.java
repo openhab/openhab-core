@@ -45,6 +45,9 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ConfigurableServiceUtil;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.i18n.I18nUtil;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.core.config.ConfigurationService;
@@ -105,15 +108,21 @@ public class ConfigurableServiceResource implements RESTResource {
     private final BundleContext bundleContext;
     private final ConfigDescriptionRegistry configDescRegistry;
     private final ConfigurationService configurationService;
+    private final TranslationProvider i18nProvider;
+    private final LocaleProvider localeProvider;
 
     @Activate
     public ConfigurableServiceResource( //
             final BundleContext bundleContext, //
-            final @Reference ConfigurationService configurationService,
-            final @Reference ConfigDescriptionRegistry configDescRegistry) {
+            final @Reference ConfigurationService configurationService, //
+            final @Reference ConfigDescriptionRegistry configDescRegistry, //
+            final @Reference TranslationProvider translationProvider, //
+            final @Reference LocaleProvider localeProvider) {
         this.bundleContext = bundleContext;
         this.configDescRegistry = configDescRegistry;
         this.configurationService = configurationService;
+        this.i18nProvider = translationProvider;
+        this.localeProvider = localeProvider;
     }
 
     @GET
@@ -278,11 +287,17 @@ public class ConfigurableServiceResource implements RESTResource {
                 ConfigurableService configurableService = ConfigurableServiceUtil
                         .asConfigurableService((key) -> serviceReference.getProperty(key));
 
-                String label = configurableService.label();
-                if (label.isEmpty()) { // for multi context services the label can be changed and must be read from
-                                       // config admin.
-                    label = configurationService.getProperty(id, OpenHAB.SERVICE_CONTEXT);
+                String defaultLabel = configurableService.label();
+                if (defaultLabel.isEmpty()) { // for multi context services the label can be changed and must be read
+                                              // from config admin.
+                    defaultLabel = configurationService.getProperty(id, OpenHAB.SERVICE_CONTEXT);
                 }
+
+                String key = I18nUtil.stripConstantOr(defaultLabel,
+                        () -> inferKey(configurableService.description_uri(), "label"));
+
+                String label = i18nProvider.getText(serviceReference.getBundle(), key, defaultLabel,
+                        localeProvider.getLocale());
 
                 String category = configurableService.category();
 
@@ -294,7 +309,8 @@ public class ConfigurableServiceResource implements RESTResource {
 
                 boolean multiple = configurableService.factory();
 
-                services.add(new ConfigurableServiceDTO(id, label, category, configDescriptionURI, multiple));
+                services.add(new ConfigurableServiceDTO(id, label == null ? defaultLabel : label, category,
+                        configDescriptionURI, multiple));
             }
         }
         return services;
@@ -379,5 +395,9 @@ public class ConfigurableServiceResource implements RESTResource {
                 }
                 return first;
         }
+    }
+
+    private String inferKey(String uri, String lastSegment) {
+        return "service." + uri.replaceAll(":", ".") + "." + lastSegment;
     }
 }
