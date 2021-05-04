@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0
+	https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="misc:lsp">
+		<parameter name="port" type="integer" min="1" max="65535">
+			<label>Port</label>
+			<description>The port the language server listens to.</description>
+			<default>5007</default>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>

@@ -3,13 +3,15 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0
-	https://openhab.org/schemas/config-description-1.0.0.xsd">
+		https://openhab.org/schemas/config-description-1.0.0.xsd">
 
-	<config-description uri="misc:lsp">
-		<parameter name="port" type="integer">
-			<label>Port</label>
-			<description>The port the language server listens to</description>
-			<default>5007</default>
+	<config-description uri="voice:rulehli">
+		<parameter name="item" type="text">
+			<context>item</context>
+			<filter><criteria name="type">String</criteria></filter>
+			<label>Voice Command Item</label>
+			<description>The String Item to pass voice commands to.</description>
+			<default>VoiceCommand</default>
 		</parameter>
 	</config-description>
 
