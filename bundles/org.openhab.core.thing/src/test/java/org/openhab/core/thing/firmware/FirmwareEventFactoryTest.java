@@ -35,9 +35,6 @@ public class FirmwareEventFactoryTest extends JavaTest {
 
     private static final ThingTypeUID THING_TYPE_UID1 = new ThingTypeUID("binding", "simpleID");
     private final ThingUID thingUID = new ThingUID(THING_TYPE_UID1, "idSample");
-    private final FirmwareStatusInfo nullFirmwareStatusInfo = null; // trick the null-annotation tooling
-    private final FirmwareUpdateProgressInfo nullFirmwareUpdateProgressInfo = null; // trick the null-annotation tooling
-    private final FirmwareUpdateResultInfo nullFirmwareUpdateResultInfo = null; // trick the null-annotation tooling
 
     private FirmwareEventFactory eventFactory;
 
@@ -56,24 +53,6 @@ public class FirmwareEventFactoryTest extends JavaTest {
     public void testCreateEventForUnknownType() throws Exception {
         assertThrows(IllegalArgumentException.class,
                 () -> eventFactory.createEventByType("unknownType", "topic", "somePayload", "Source"));
-    }
-
-    @Test
-    public void testNullStatusInfo() {
-        assertThrows(IllegalArgumentException.class,
-                () -> FirmwareEventFactory.createFirmwareStatusInfoEvent(nullFirmwareStatusInfo));
-    }
-
-    @Test
-    public void testNullUpdateProgressInfo() {
-        assertThrows(IllegalArgumentException.class,
-                () -> FirmwareEventFactory.createFirmwareUpdateProgressInfoEvent(nullFirmwareUpdateProgressInfo));
-    }
-
-    @Test
-    public void testNullUpdateResultInfo() {
-        assertThrows(IllegalArgumentException.class,
-                () -> FirmwareEventFactory.createFirmwareUpdateResultInfoEvent(nullFirmwareUpdateResultInfo));
     }
 
     @Test
