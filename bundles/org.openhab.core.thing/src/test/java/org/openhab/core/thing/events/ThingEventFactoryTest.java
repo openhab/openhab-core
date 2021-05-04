@@ -14,11 +14,12 @@ package org.openhab.core.thing.events;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
-import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.CommonTriggerEvents;
 import org.openhab.core.thing.Thing;
@@ -39,12 +40,10 @@ import com.google.gson.Gson;
  *
  * @author Stefan Bußweiler - Initial contribution
  */
-public class ThingEventFactoryTest extends JavaOSGiTest {
+public class ThingEventFactoryTest {
     private static final ThingStatusInfo THING_STATUS_INFO = ThingStatusInfoBuilder
             .create(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR).withDescription("Some description")
             .build();
-
-    private final ThingEventFactory factory = new ThingEventFactory();
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding:type");
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "id");
@@ -61,12 +60,28 @@ public class ThingEventFactoryTest extends JavaOSGiTest {
     private static final ChannelUID CHANNEL_UID = new ChannelUID(THING_UID, "channel");
     private static final String CHANNEL_TRIGGERED_EVENT_TOPIC = ThingEventFactory.CHANNEL_TRIGGERED_EVENT_TOPIC
             .replace("{channelUID}", CHANNEL_UID.getAsString());
-    private static final String CHANNEL_TRIGGERED_EVENT_PAYLOAD = new Gson()
+    private static final String CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD = new Gson()
             .toJson(new TriggerEventPayloadBean(CommonTriggerEvents.PRESSED, CHANNEL_UID.getAsString()));
+    private static final String CHANNEL_TRIGGERED_EMPTY_EVENT_PAYLOAD = new Gson()
+            .toJson(new TriggerEventPayloadBean("", CHANNEL_UID.getAsString()));
+
+    private ThingEventFactory eventFactory;
+
+    @BeforeEach
+    public void setUp() {
+        eventFactory = new ThingEventFactory();
+    }
+
+    @Test
+    public void testSupportedEventTypes() {
+        assertThat(eventFactory.getSupportedEventTypes(),
+                containsInAnyOrder(ThingStatusInfoEvent.TYPE, ThingStatusInfoChangedEvent.TYPE, ThingAddedEvent.TYPE,
+                        ThingRemovedEvent.TYPE, ThingUpdatedEvent.TYPE, ChannelTriggeredEvent.TYPE));
+    }
 
     @Test
     public void testCreateEventThingStatusInfoEvent() throws Exception {
-        Event event = factory.createEvent(ThingStatusInfoEvent.TYPE, THING_STATUS_EVENT_TOPIC,
+        Event event = eventFactory.createEvent(ThingStatusInfoEvent.TYPE, THING_STATUS_EVENT_TOPIC,
                 THING_STATUS_EVENT_PAYLOAD, null);
 
         assertThat(event, is(instanceOf(ThingStatusInfoEvent.class)));
@@ -91,7 +106,7 @@ public class ThingEventFactoryTest extends JavaOSGiTest {
 
     @Test
     public void testCreateEventThingAddedEvent() throws Exception {
-        Event event = factory.createEvent(ThingAddedEvent.TYPE, THING_ADDED_EVENT_TOPIC, THING_ADDED_EVENT_PAYLOAD,
+        Event event = eventFactory.createEvent(ThingAddedEvent.TYPE, THING_ADDED_EVENT_TOPIC, THING_ADDED_EVENT_PAYLOAD,
                 null);
 
         assertThat(event, is(instanceOf(ThingAddedEvent.class)));
@@ -115,27 +130,52 @@ public class ThingEventFactoryTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testCreateTriggerEvent() {
+    public void testCreateTriggerPressedEvent() {
         ChannelTriggeredEvent event = ThingEventFactory.createTriggerEvent(CommonTriggerEvents.PRESSED, CHANNEL_UID);
 
         assertEquals(ChannelTriggeredEvent.TYPE, event.getType());
         assertEquals(CHANNEL_TRIGGERED_EVENT_TOPIC, event.getTopic());
-        assertEquals(CHANNEL_TRIGGERED_EVENT_PAYLOAD, event.getPayload());
+        assertEquals(CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD, event.getPayload());
         assertNotNull(event.getEvent());
         assertEquals(CommonTriggerEvents.PRESSED, event.getEvent());
     }
 
     @Test
-    public void testCreateEventChannelTriggeredEvent() throws Exception {
-        Event event = factory.createEvent(ChannelTriggeredEvent.TYPE, CHANNEL_TRIGGERED_EVENT_TOPIC,
-                CHANNEL_TRIGGERED_EVENT_PAYLOAD, null);
+    public void testCreateEventChannelTriggeredPressedEvent() throws Exception {
+        Event event = eventFactory.createEvent(ChannelTriggeredEvent.TYPE, CHANNEL_TRIGGERED_EVENT_TOPIC,
+                CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD, null);
 
         assertThat(event, is(instanceOf(ChannelTriggeredEvent.class)));
         ChannelTriggeredEvent triggeredEvent = (ChannelTriggeredEvent) event;
         assertEquals(ChannelTriggeredEvent.TYPE, triggeredEvent.getType());
         assertEquals(CHANNEL_TRIGGERED_EVENT_TOPIC, triggeredEvent.getTopic());
-        assertEquals(CHANNEL_TRIGGERED_EVENT_PAYLOAD, triggeredEvent.getPayload());
+        assertEquals(CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD, triggeredEvent.getPayload());
         assertNotNull(triggeredEvent.getEvent());
         assertEquals(CommonTriggerEvents.PRESSED, triggeredEvent.getEvent());
+    }
+
+    @Test
+    public void testCreateTriggerEmptyEvent() {
+        ChannelTriggeredEvent event = ThingEventFactory.createTriggerEvent("", CHANNEL_UID);
+
+        assertEquals(ChannelTriggeredEvent.TYPE, event.getType());
+        assertEquals(CHANNEL_TRIGGERED_EVENT_TOPIC, event.getTopic());
+        assertEquals(CHANNEL_TRIGGERED_EMPTY_EVENT_PAYLOAD, event.getPayload());
+        assertNotNull(event.getEvent());
+        assertEquals("", event.getEvent());
+    }
+
+    @Test
+    public void testCreateEventChannelTriggeredEmptyEvent() throws Exception {
+        Event event = eventFactory.createEvent(ChannelTriggeredEvent.TYPE, CHANNEL_TRIGGERED_EVENT_TOPIC,
+                CHANNEL_TRIGGERED_EMPTY_EVENT_PAYLOAD, null);
+
+        assertThat(event, is(instanceOf(ChannelTriggeredEvent.class)));
+        ChannelTriggeredEvent triggeredEvent = (ChannelTriggeredEvent) event;
+        assertEquals(ChannelTriggeredEvent.TYPE, triggeredEvent.getType());
+        assertEquals(CHANNEL_TRIGGERED_EVENT_TOPIC, triggeredEvent.getTopic());
+        assertEquals(CHANNEL_TRIGGERED_EMPTY_EVENT_PAYLOAD, triggeredEvent.getPayload());
+        assertNotNull(triggeredEvent.getEvent());
+        assertEquals("", triggeredEvent.getEvent());
     }
 }

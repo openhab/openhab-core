@@ -12,9 +12,10 @@
  */
 package org.openhab.core.thing.link.events;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEventFactory;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
@@ -24,30 +25,32 @@ import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * This is an {@link EventFactory} for creating link events. The following event types are supported by this
- * factory:
- *
- * {@link ItemChannelLinkAddedEvent#TYPE}, {@link ItemChannelLinkRemovedEvent#TYPE}.
+ * This is an {@link EventFactory} for creating link events. The following event types are supported by this factory:
+ * <ul>
+ * <li>{@link ItemChannelLinkAddedEvent#TYPE}</li>
+ * <li>{@link ItemChannelLinkRemovedEvent#TYPE}</li>
+ * </ul>
  *
  * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - Removed Thing link events
  */
 @Component(immediate = true, service = EventFactory.class)
+@NonNullByDefault
 public class LinkEventFactory extends AbstractEventFactory {
+    static final String LINK_ADDED_EVENT_TOPIC = "openhab/links/{linkID}/added";
 
-    private static final String LINK_ADDED_EVENT_TOPIC = "openhab/links/{linkID}/added";
-
-    private static final String LINK_REMOVED_EVENT_TOPIC = "openhab/links/{linkID}/removed";
+    static final String LINK_REMOVED_EVENT_TOPIC = "openhab/links/{linkID}/removed";
 
     /**
      * Constructs a new LinkEventFactory.
      */
     public LinkEventFactory() {
-        super(Stream.of(ItemChannelLinkAddedEvent.TYPE, ItemChannelLinkRemovedEvent.TYPE).collect(Collectors.toSet()));
+        super(Set.of(ItemChannelLinkAddedEvent.TYPE, ItemChannelLinkRemovedEvent.TYPE));
     }
 
     @Override
-    protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
+    protected Event createEventByType(String eventType, String topic, String payload, @Nullable String source)
+            throws Exception {
         if (ItemChannelLinkAddedEvent.TYPE.equals(eventType)) {
             return createItemChannelLinkAddedEvent(topic, payload);
         } else if (ItemChannelLinkRemovedEvent.TYPE.equals(eventType)) {

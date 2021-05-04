@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.events.AbstractEvent;
 import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.ThingUID;
@@ -22,6 +23,7 @@ import org.openhab.core.thing.ThingUID;
  *
  * @author Dennis Nobel - Initial contribution
  */
+@NonNullByDefault
 public class ThingStatusInfoChangedEvent extends AbstractEvent {
 
     /**

@@ -18,7 +18,6 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,8 +33,8 @@ import org.openhab.core.thing.binding.firmware.ProgressStep;
  */
 public class FirmwareEventFactoryTest extends JavaTest {
 
-    static final ThingTypeUID THING_TYPE_UID1 = new ThingTypeUID("binding", "simpleID");
-    ThingUID thingUID = new ThingUID(THING_TYPE_UID1, "idSample");
+    private static final ThingTypeUID THING_TYPE_UID1 = new ThingTypeUID("binding", "simpleID");
+    private final ThingUID thingUID = new ThingUID(THING_TYPE_UID1, "idSample");
 
     private FirmwareEventFactory eventFactory;
 
@@ -46,8 +45,7 @@ public class FirmwareEventFactoryTest extends JavaTest {
 
     @Test
     public void testSupportedEventTypes() {
-        Set<String> supportedEventTypes = eventFactory.getSupportedEventTypes();
-        assertThat(supportedEventTypes, containsInAnyOrder(FirmwareStatusInfoEvent.TYPE,
+        assertThat(eventFactory.getSupportedEventTypes(), containsInAnyOrder(FirmwareStatusInfoEvent.TYPE,
                 FirmwareUpdateProgressInfoEvent.TYPE, FirmwareUpdateResultInfoEvent.TYPE));
     }
 
@@ -55,23 +53,6 @@ public class FirmwareEventFactoryTest extends JavaTest {
     public void testCreateEventForUnknownType() throws Exception {
         assertThrows(IllegalArgumentException.class,
                 () -> eventFactory.createEventByType("unknownType", "topic", "somePayload", "Source"));
-    }
-
-    @Test
-    public void testNullStatusInfo() {
-        assertThrows(IllegalArgumentException.class, () -> FirmwareEventFactory.createFirmwareStatusInfoEvent(null));
-    }
-
-    @Test
-    public void testNullUpdateProgressInfo() {
-        assertThrows(IllegalArgumentException.class,
-                () -> FirmwareEventFactory.createFirmwareUpdateProgressInfoEvent(null));
-    }
-
-    @Test
-    public void testNullUpdateResultInfo() {
-        assertThrows(IllegalArgumentException.class,
-                () -> FirmwareEventFactory.createFirmwareUpdateResultInfoEvent(null));
     }
 
     @Test

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.thing.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEvent;
 import org.openhab.core.thing.ChannelUID;
 
@@ -21,6 +23,7 @@ import org.openhab.core.thing.ChannelUID;
  *
  * @author Moritz Kammerer - Initial contribution
  */
+@NonNullByDefault
 public class ChannelTriggeredEvent extends AbstractEvent {
 
     /**
@@ -42,12 +45,14 @@ public class ChannelTriggeredEvent extends AbstractEvent {
      * Constructs a new thing trigger event.
      *
      * @param topic the topic. The topic includes the thing UID, see
-     *            {@link ThingEventFactory#THING_TRIGGERED_EVENT_TOPIC}
+     *            {@link ThingEventFactory#CHANNEL_TRIGGERED_EVENT_TOPIC}
      * @param payload the payload. Contains a serialized {@link ThingEventFactory.TriggerEventPayloadBean}.
      * @param source the source
+     * @param event the event
      * @param channel the channel which triggered the event
      */
-    protected ChannelTriggeredEvent(String topic, String payload, String source, String event, ChannelUID channel) {
+    protected ChannelTriggeredEvent(String topic, String payload, @Nullable String source, String event,
+            ChannelUID channel) {
         super(topic, payload, source);
         this.event = event;
         this.channel = channel;

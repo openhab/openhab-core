@@ -12,9 +12,10 @@
  */
 package org.openhab.core.thing.firmware;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEventFactory;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
@@ -33,6 +34,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Dimitar Ivanov - Consolidated all the event information into the FirmwareStatusInfoEvent
  */
 @Component(immediate = true, service = EventFactory.class)
+@NonNullByDefault
 public final class FirmwareEventFactory extends AbstractEventFactory {
 
     static final String THING_UID_TOPIC_KEY = "{thingUID}";
@@ -45,12 +47,13 @@ public final class FirmwareEventFactory extends AbstractEventFactory {
      * Creates a new firmware event factory.
      */
     public FirmwareEventFactory() {
-        super(Stream.of(FirmwareStatusInfoEvent.TYPE, FirmwareUpdateProgressInfoEvent.TYPE,
-                FirmwareUpdateResultInfoEvent.TYPE).collect(Collectors.toSet()));
+        super(Set.of(FirmwareStatusInfoEvent.TYPE, FirmwareUpdateProgressInfoEvent.TYPE,
+                FirmwareUpdateResultInfoEvent.TYPE));
     }
 
     @Override
-    protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
+    protected Event createEventByType(String eventType, String topic, String payload, @Nullable String source)
+            throws Exception {
         if (FirmwareStatusInfoEvent.TYPE.equals(eventType)) {
             return createFirmwareStatusInfoEvent(topic, payload);
         } else if (FirmwareUpdateProgressInfoEvent.TYPE.equals(eventType)) {
