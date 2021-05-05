@@ -104,6 +104,7 @@ public class InboxResource implements RESTResource {
     @Consumes(MediaType.TEXT_PLAIN)
     @Operation(operationId = "approveInboxItemById", summary = "Approves the discovery result by adding the thing to the registry.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "Invalid new thing ID."),
             @ApiResponse(responseCode = "404", description = "Thing unable to be approved."),
             @ApiResponse(responseCode = "409", description = "No binding found that supports this thing.") })
     public Response approve(
@@ -119,7 +120,11 @@ public class InboxResource implements RESTResource {
             thing = inbox.approve(thingUIDObject, notEmptyLabel, notEmptyNewThingId);
         } catch (IllegalArgumentException e) {
             logger.error("Thing {} unable to be approved: {}", thingUID, e.getLocalizedMessage());
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Thing unable to be approved.");
+            String errMsg = e.getMessage();
+            return errMsg != null
+                    && (errMsg.contains("must not contain multiple segments") || errMsg.startsWith("Invalid thing UID"))
+                            ? JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Invalid new thing ID.")
+                            : JSONResponse.createErrorResponse(Status.NOT_FOUND, "Thing unable to be approved.");
         }
 
         // inbox.approve returns null if no handler is found that supports this thing
