@@ -126,7 +126,7 @@ public class IconServlet extends OpenHABServlet {
                 if (provider == null) {
                     provider = provider2;
                     format = otherFormat;
-                } else if (provider2 != provider) {
+                } else if (!provider2.equals(provider)) {
                     Integer prio = provider.hasIcon(category, iconSetId, format);
                     Integer prio2 = provider2.hasIcon(category, iconSetId, otherFormat);
                     if ((prio != null && prio2 != null && prio < prio2) || (prio == null && prio2 != null)) {

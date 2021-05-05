@@ -83,6 +83,7 @@ public class ChannelCommandDescriptionProvider implements CommandDescriptionProv
         return null;
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     private @Nullable CommandDescription getDynamicCommandDescription(Channel channel,
             @Nullable CommandDescription originalCommandDescription, @Nullable Locale locale) {
         for (DynamicCommandDescriptionProvider dynamicCommandDescriptionProvider : dynamicCommandDescriptionProviders) {
@@ -90,6 +91,7 @@ public class ChannelCommandDescriptionProvider implements CommandDescriptionProv
                 CommandDescription dynamicCommandDescription = dynamicCommandDescriptionProvider
                         .getCommandDescription(channel, originalCommandDescription, locale);
                 if (dynamicCommandDescription != null) {
+                    // Compare by reference to make sure a new command description is returned
                     if (dynamicCommandDescription == originalCommandDescription) {
                         logger.error(
                                 "Dynamic command description matches original command description. DynamicCommandDescriptionProvider implementations must never return the original command description. {} has to be fixed.",

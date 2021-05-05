@@ -20,7 +20,7 @@ import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
  * This is an enriched data transfer object that is used to serialize items channel links with dynamic data like the
  * editable flag.
  *
- * @author Christoph Weitkamp- Initial contribution
+ * @author Christoph Weitkamp - Initial contribution
  */
 public class EnrichedItemChannelLinkDTO extends ItemChannelLinkDTO {
 

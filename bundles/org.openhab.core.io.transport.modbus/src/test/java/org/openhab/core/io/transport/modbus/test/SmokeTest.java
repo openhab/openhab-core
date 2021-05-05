@@ -677,7 +677,6 @@ public class SmokeTest extends IntegrationTestSupport {
                             } catch (AssertionError e) {
                                 unexpectedCount.incrementAndGet();
                             }
-
                         } else {
                             unexpectedCount.incrementAndGet();
                         }
@@ -885,7 +884,6 @@ public class SmokeTest extends IntegrationTestSupport {
             Thread.sleep(1000);
             // Still one connection open even after closing second connection
             assertThat(getNumberOfOpenClients(SOCKET_SPY), is(equalTo(1L)));
-
         } // 4. close (the last) comms
           // ensure that open connections are closed
           // (despite huge "reconnect after millis")
@@ -937,7 +935,6 @@ public class SmokeTest extends IntegrationTestSupport {
                 long openSocketsAfter = getNumberOfOpenClients(SOCKET_SPY);
                 assertThat(openSocketsAfter, is(equalTo(0L)));
             }, 60_000, 50);
-
         }
     }
 

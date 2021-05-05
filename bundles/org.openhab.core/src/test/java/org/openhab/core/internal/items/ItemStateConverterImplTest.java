@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.i18n.UnitProvider;
@@ -38,9 +39,10 @@ import org.openhab.core.types.UnDefType;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class ItemStateConverterImplTest {
 
-    private ItemStateConverterImpl itemStateConverter;
+    private @NonNullByDefault({}) ItemStateConverterImpl itemStateConverter;
 
     @BeforeEach
     public void setup() {
@@ -57,6 +59,7 @@ public class ItemStateConverterImplTest {
     }
 
     @Test
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public void testNoConversion() {
         Item item = new NumberItem("number");
         State originalState = new DecimalType(12.34);

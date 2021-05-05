@@ -565,7 +565,6 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     @Test
     public void testChainOfCompositeModules() throws ItemNotFoundException {
         Configuration triggerConfig = new Configuration(Map.of("itemName", "myMotionItem4"));
-        Map<String, Object> eventInputs = Map.of("event", "ItemStateChangeTrigger4.event");
         Map<String, Object> params = new HashMap<>();
         params.put("itemName", "myLampItem4");
         params.put("command", "ON");
@@ -818,7 +817,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         RuleTemplateProvider templateProvider = new RuleTemplateProvider() {
             @Override
             public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
-                if (UID == templateUID) {
+                if (UID.equals(templateUID)) {
                     return template;
                 } else {
                     return null;
@@ -860,9 +859,9 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
             @Override
             public <T extends ModuleType> @Nullable T getModuleType(String UID, @Nullable Locale locale) {
-                if (UID == triggerTypeUID) {
+                if (UID.equals(triggerTypeUID)) {
                     return (T) triggerType;
-                } else if (UID == actionTypeUID) {
+                } else if (UID.equals(actionTypeUID)) {
                     return (T) actionType;
                 } else {
                     return null;

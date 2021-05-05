@@ -298,6 +298,7 @@ public class ScriptFileWatcher extends AbstractWatchService
     }
 
     @Override
+    @SuppressWarnings("PMD.EmptyWhileStmt")
     public synchronized void onReadyMarkerRemoved(ReadyMarker readyMarker) {
         int newLevel = Integer.parseInt(readyMarker.getIdentifier());
 

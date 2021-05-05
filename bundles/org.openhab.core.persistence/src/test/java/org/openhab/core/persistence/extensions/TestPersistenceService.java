@@ -83,8 +83,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
             for (int i = 0; i <= 15; i++) {
                 final int hours = i;
                 final ZonedDateTime theDate = nowMinusFifteenHours.plusHours(hours);
-                if (theDate.isBefore(beginDate) || theDate.isAfter(endDate)) {
-                } else {
+                if (!theDate.isBefore(beginDate) && !theDate.isAfter(endDate)) {
                     results.add(new HistoricItem() {
                         @Override
                         public ZonedDateTime getTimestamp() {

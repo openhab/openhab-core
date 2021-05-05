@@ -38,6 +38,8 @@ import org.openhab.core.io.transport.modbus.endpoint.ModbusSlaveEndpoint;
 import org.openhab.core.io.transport.modbus.endpoint.ModbusTCPSlaveEndpoint;
 import org.openhab.core.io.transport.modbus.internal.ModbusManagerImpl;
 import org.openhab.core.test.java.JavaTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gnu.io.SerialPort;
 import net.wimpi.modbus.Modbus;
@@ -67,6 +69,8 @@ import net.wimpi.modbus.util.SerialParameters;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
 public class IntegrationTestSupport extends JavaTest {
+
+    private final Logger logger = LoggerFactory.getLogger(IntegrationTestSupport.class);
 
     public enum ServerType {
         TCP,
@@ -175,11 +179,9 @@ public class IntegrationTestSupport extends JavaTest {
             if (ServerType.TCP.equals(serverType)) {
                 verify(tcpConnectionFactory, times(expectedConnections)).create(any(Socket.class));
             } else if (ServerType.UDP.equals(serverType)) {
-                // No-op
-                // verify(udpTerminalFactory, times(expectedConnections)).create(any(InetAddress.class),
-                // any(Integer.class));
+                logger.debug("No-op, UDP server type");
             } else if (ServerType.SERIAL.equals(serverType)) {
-                // No-op
+                logger.debug("No-op, SERIAL server type");
             } else {
                 throw new UnsupportedOperationException();
             }
@@ -206,14 +208,15 @@ public class IntegrationTestSupport extends JavaTest {
     private void stopServer() {
         if (ServerType.TCP.equals(serverType)) {
             tcpListener.stop();
+            logger.debug("Stopped TCP listener, tcpModbusPort={}", tcpModbusPort);
         } else if (ServerType.UDP.equals(serverType)) {
             udpListener.stop();
-            System.err.println(udpModbusPort);
+            logger.debug("Stopped UDP listener, udpModbusPort={}", udpModbusPort);
         } else if (ServerType.SERIAL.equals(serverType)) {
             try {
                 serialServerThread.join(100);
             } catch (InterruptedException e) {
-                System.err.println("Serial server thread .join() interrupted! Will interrupt it now.");
+                logger.debug("Serial server thread .join() interrupted! Will interrupt it now.");
             }
             serialServerThread.interrupt();
         } else {

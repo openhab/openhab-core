@@ -100,14 +100,13 @@ public class BlockingProxyServlet extends HttpServlet {
                     HttpField header = iterator.next();
                     response.setHeader(header.getName(), header.getValue());
                 }
+            } catch (TimeoutException e) {
+                logger.warn("Proxy servlet failed to stream content due to a timeout");
+                response.sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT);
+                return;
             } catch (Exception e) {
-                if (e instanceof TimeoutException) {
-                    logger.warn("Proxy servlet failed to stream content due to a timeout");
-                    response.sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT);
-                } else {
-                    logger.warn("Proxy servlet failed to stream content: {}", e.getMessage());
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-                }
+                logger.warn("Proxy servlet failed to stream content: {}", e.getMessage());
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
                 return;
             }
             // now copy/stream the body content

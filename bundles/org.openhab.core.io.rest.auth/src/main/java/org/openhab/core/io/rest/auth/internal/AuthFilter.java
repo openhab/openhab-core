@@ -91,7 +91,7 @@ public class AuthFilter implements ContainerRequestFilter {
     private ExpiringUserSecurityContextCache authCache = new ExpiringUserSecurityContextCache(
             Duration.ofHours(cacheExpiration).toMillis());
 
-    private final byte[] RANDOM_BYTES = new byte[32];
+    private static final byte[] RANDOM_BYTES = new byte[32];
 
     private final JwtHelper jwtHelper;
     private final UserRegistry userRegistry;

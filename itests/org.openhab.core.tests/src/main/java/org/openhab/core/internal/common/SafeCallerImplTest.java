@@ -23,6 +23,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.text.MessageFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,11 +33,12 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +56,7 @@ import org.slf4j.LoggerFactory;
  * @author Simon Kaufmann - Initial contribution and API.
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class SafeCallerImplTest extends JavaTest {
 
     private static final int THREAD_POOL_SIZE = 3;
@@ -68,13 +72,14 @@ public class SafeCallerImplTest extends JavaTest {
 
     private final Logger logger = LoggerFactory.getLogger(SafeCallerImplTest.class);
 
-    private SafeCallerImpl safeCaller;
-    private QueueingThreadPoolExecutor scheduler;
-    private TestInfo testInfo;
     private final List<AssertingThread> threads = new LinkedList<>();
 
-    private @Mock Runnable mockTimeoutHandler;
-    private @Mock Consumer<Throwable> mockErrorHandler;
+    private @NonNullByDefault({}) SafeCallerImpl safeCaller;
+    private @NonNullByDefault({}) QueueingThreadPoolExecutor scheduler;
+    private @NonNullByDefault({}) TestInfo testInfo;
+
+    private @NonNullByDefault({}) @Mock Runnable timeoutHandlerMock;
+    private @NonNullByDefault({}) @Mock Consumer<Throwable> errorHandlerMock;
 
     public static interface ITarget {
         public String method();
@@ -135,9 +140,9 @@ public class SafeCallerImplTest extends JavaTest {
         Runnable mock = mock(Runnable.class);
         doThrow(RuntimeException.class).when(mock).run();
 
-        safeCaller.create(mock, Runnable.class).onException(mockErrorHandler).build().run();
+        safeCaller.create(mock, Runnable.class).onException(errorHandlerMock).build().run();
         waitForAssert(() -> {
-            verify(mockErrorHandler).accept(isA(Throwable.class));
+            verify(errorHandlerMock).accept(isA(Throwable.class));
         });
     }
 
@@ -146,9 +151,9 @@ public class SafeCallerImplTest extends JavaTest {
         Runnable mock = mock(Runnable.class);
         doAnswer(a -> sleep(BLOCK)).when(mock).run();
 
-        safeCaller.create(mock, Runnable.class).withTimeout(TIMEOUT).onTimeout(mockTimeoutHandler).build().run();
+        safeCaller.create(mock, Runnable.class).withTimeout(TIMEOUT).onTimeout(timeoutHandlerMock).build().run();
         waitForAssert(() -> {
-            verify(mockTimeoutHandler).run();
+            verify(timeoutHandlerMock).run();
         });
     }
 
@@ -294,10 +299,10 @@ public class SafeCallerImplTest extends JavaTest {
         doAnswer(a -> sleep(BLOCK)).when(mock).run();
 
         assertDurationAbove(BLOCK - GRACE, () -> {
-            safeCaller.create(mock, Runnable.class).withTimeout(BLOCK + GRACE * 2).onTimeout(mockTimeoutHandler).build()
+            safeCaller.create(mock, Runnable.class).withTimeout(BLOCK + GRACE * 2).onTimeout(timeoutHandlerMock).build()
                     .run();
         });
-        verifyNoMoreInteractions(mockTimeoutHandler);
+        verifyNoMoreInteractions(timeoutHandlerMock);
     }
 
     @Test
@@ -388,11 +393,11 @@ public class SafeCallerImplTest extends JavaTest {
 
         assertDurationBelow(GRACE, () -> {
             safeCaller.create(mock1, Runnable.class).withTimeout(TIMEOUT).withAsync().withIdentifier(identifier)
-                    .onTimeout(mockTimeoutHandler).onException(mockErrorHandler).build().run();
+                    .onTimeout(timeoutHandlerMock).onException(errorHandlerMock).build().run();
         });
         waitForAssert(() -> verify(mock1, times(1)).run());
-        waitForAssert(() -> verify(mockTimeoutHandler, times(1)).run());
-        verifyNoMoreInteractions(mockErrorHandler);
+        waitForAssert(() -> verify(timeoutHandlerMock, times(1)).run());
+        verifyNoMoreInteractions(errorHandlerMock);
     }
 
     @Test
@@ -403,12 +408,12 @@ public class SafeCallerImplTest extends JavaTest {
 
         assertDurationBelow(GRACE, () -> {
             safeCaller.create(mock1, Runnable.class).withTimeout(TIMEOUT).withAsync().withIdentifier(identifier)
-                    .onTimeout(mockTimeoutHandler).onException(mockErrorHandler).build().run();
+                    .onTimeout(timeoutHandlerMock).onException(errorHandlerMock).build().run();
         });
         waitForAssert(() -> verify(mock1, times(1)).run());
-        waitForAssert(() -> verify(mockErrorHandler, times(1)).accept(isA(Exception.class)));
-        verifyNoMoreInteractions(mockErrorHandler);
-        verifyNoMoreInteractions(mockTimeoutHandler);
+        waitForAssert(() -> verify(errorHandlerMock, times(1)).accept(isA(Exception.class)));
+        verifyNoMoreInteractions(errorHandlerMock);
+        verifyNoMoreInteractions(timeoutHandlerMock);
     }
 
     @Test
@@ -538,24 +543,28 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     private void assertDurationBetween(long low, long high, Runnable runnable) {
-        long startNanos = System.nanoTime();
+        Instant start = Instant.now();
         try {
             runnable.run();
         } finally {
-            long durationMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
-            try {
-                if (low > -1) {
-                    assertTrue(durationMillis >= low, MessageFormat
-                            .format("Duration should have been above {0} but was {1}", low, durationMillis));
-                }
-                if (high > -1) {
-                    assertTrue(durationMillis < high, MessageFormat
-                            .format("Duration should have been below {0} but was {1}", high, durationMillis));
-                }
-            } catch (AssertionError e) {
-                logger.debug("{}", createThreadDump(testInfo.getTestMethod().get().getName()));
-                throw e;
+            Duration duration = Duration.between(start, Instant.now());
+            assertDurationBetween(low, high, duration.toMillis());
+        }
+    }
+
+    private void assertDurationBetween(long low, long high, long durationMillis) throws AssertionError {
+        try {
+            if (low > -1) {
+                assertTrue(durationMillis >= low,
+                        MessageFormat.format("Duration should have been above {0} but was {1}", low, durationMillis));
             }
+            if (high > -1) {
+                assertTrue(durationMillis < high,
+                        MessageFormat.format("Duration should have been below {0} but was {1}", high, durationMillis));
+            }
+        } catch (AssertionError e) {
+            logger.debug("{}", createThreadDump(testInfo.getTestMethod().get().getName()));
+            throw e;
         }
     }
 
@@ -580,7 +589,7 @@ public class SafeCallerImplTest extends JavaTest {
         return sb.toString();
     }
 
-    private static Object sleep(int duration) {
+    private static @Nullable Object sleep(int duration) {
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {
@@ -632,8 +641,8 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     private static class AssertingThread extends Thread {
-        private AssertionError assertionError;
-        private RuntimeException runtimeException;
+        private @Nullable AssertionError assertionError;
+        private @Nullable RuntimeException runtimeException;
 
         public AssertingThread(Runnable runnable) {
             super(runnable);
