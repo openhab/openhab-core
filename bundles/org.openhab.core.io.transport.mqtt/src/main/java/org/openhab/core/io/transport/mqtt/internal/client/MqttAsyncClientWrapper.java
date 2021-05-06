@@ -14,6 +14,9 @@ package org.openhab.core.io.transport.mqtt.internal.client;
 
 import java.util.concurrent.CompletableFuture;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.mqtt.MqttWillAndTestament;
@@ -29,7 +32,7 @@ import com.hivemq.client.mqtt.datatypes.MqttQos;
  */
 
 @NonNullByDefault
-public abstract class MqttAsyncClientWrapper {
+public abstract class MqttAsyncClientWrapper implements HostnameVerifier {
     /**
      * connect this client
      *
@@ -96,5 +99,10 @@ public abstract class MqttAsyncClientWrapper {
             default:
                 throw new IllegalArgumentException("QoS needs to be 0, 1 or 2.");
         }
+    }
+
+    @Override
+    public boolean verify(@Nullable String hostname, @Nullable SSLSession sslSession) {
+        return true;
     }
 }

@@ -57,6 +57,7 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
  * @author David Graeff - All operations are async now. More flexible sslContextProvider and reconnectStrategy added.
  * @author Markus Rathgeb - added connection state callback
  * @author Jan N. Klug - changed from PAHO to HiveMQ client
+ * @author Mark Herwege - Added flag for hostname validation
  */
 @NonNullByDefault
 public class MqttBrokerConnection {
@@ -85,6 +86,7 @@ public class MqttBrokerConnection {
     protected final String host;
     protected final int port;
     protected final boolean secure;
+    protected final boolean hostnameValidated;
     protected final MqttVersion mqttVersion;
 
     private @Nullable TrustManagerFactory trustManagerFactory = InsecureTrustManagerFactory.INSTANCE;
@@ -197,7 +199,25 @@ public class MqttBrokerConnection {
      * @throws IllegalArgumentException If the client id or port is not valid.
      */
     public MqttBrokerConnection(String host, @Nullable Integer port, boolean secure, @Nullable String clientId) {
-        this(Protocol.TCP, MqttVersion.V3, host, port, secure, clientId);
+        this(host, port, secure, true, clientId);
+    }
+
+    /**
+     * Create a new TCP MQTT3 client connection to a server with the given host and port.
+     *
+     * @param host A host name or address
+     * @param port A port or null to select the default port for a secure or insecure connection
+     * @param secure A secure connection
+     * @param hostnameValidated Validate hostname from certificate against server hostname for secure connection
+     * @param clientId Client id. Each client on a MQTT server has a unique client id. Sometimes client ids are
+     *            used for access restriction implementations.
+     *            If none is specified, a default is generated. The client id cannot be longer than 65535
+     *            characters.
+     * @throws IllegalArgumentException If the client id or port is not valid.
+     */
+    public MqttBrokerConnection(String host, @Nullable Integer port, boolean secure, boolean hostnameValidated,
+            @Nullable String clientId) {
+        this(Protocol.TCP, MqttVersion.V3, host, port, secure, hostnameValidated, clientId);
     }
 
     /**
@@ -216,9 +236,30 @@ public class MqttBrokerConnection {
      */
     public MqttBrokerConnection(Protocol protocol, MqttVersion mqttVersion, String host, @Nullable Integer port,
             boolean secure, @Nullable String clientId) {
+        this(protocol, mqttVersion, host, port, secure, true, clientId);
+    }
+
+    /**
+     * Create a new MQTT client connection to a server with the given protocol, host and port.
+     *
+     * @param protocol The transport protocol
+     * @param mqttVersion The version of the MQTT client (v3 or v5)
+     * @param host A host name or address
+     * @param port A port or null to select the default port for a secure or insecure connection
+     * @param secure A secure connection
+     * @param hostnameValidated Validate hostname from certificate against server hostname for secure connection
+     * @param clientId Client id. Each client on a MQTT server has a unique client id. Sometimes client ids are
+     *            used for access restriction implementations.
+     *            If none is specified, a default is generated. The client id cannot be longer than 65535
+     *            characters.
+     * @throws IllegalArgumentException If the client id or port is not valid.
+     */
+    public MqttBrokerConnection(Protocol protocol, MqttVersion mqttVersion, String host, @Nullable Integer port,
+            boolean secure, boolean hostnameValidated, @Nullable String clientId) {
         this.protocol = protocol;
         this.host = host;
         this.secure = secure;
+        this.hostnameValidated = hostnameValidated;
         this.mqttVersion = mqttVersion;
         String newClientID = clientId;
         if (newClientID == null) {
@@ -318,6 +359,13 @@ public class MqttBrokerConnection {
      */
     public boolean isSecure() {
         return secure;
+    }
+
+    /**
+     * Return true if hostname in certificate is validated against server hostname for secure connection
+     */
+    public boolean isHostnameValidated() {
+        return secure & hostnameValidated;
     }
 
     /**
@@ -665,11 +713,11 @@ public class MqttBrokerConnection {
 
     protected MqttAsyncClientWrapper createClient() {
         if (mqttVersion == MqttVersion.V3) {
-            return new Mqtt3AsyncClientWrapper(host, port, clientId, protocol, secure, connectionCallback,
-                    trustManagerFactory);
+            return new Mqtt3AsyncClientWrapper(host, port, clientId, protocol, secure, hostnameValidated,
+                    connectionCallback, trustManagerFactory);
         } else {
-            return new Mqtt5AsyncClientWrapper(host, port, clientId, protocol, secure, connectionCallback,
-                    trustManagerFactory);
+            return new Mqtt5AsyncClientWrapper(host, port, clientId, protocol, secure, hostnameValidated,
+                    connectionCallback, trustManagerFactory);
         }
     }
 
