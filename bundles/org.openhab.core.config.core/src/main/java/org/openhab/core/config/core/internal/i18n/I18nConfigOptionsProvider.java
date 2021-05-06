@@ -39,6 +39,11 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true)
 public class I18nConfigOptionsProvider implements ConfigOptionProvider {
 
+    private static final String LANGUAGE = "language";
+    private static final String REGION = "region";
+    private static final String VARIANT = "variant";
+    private static final String TIMEZONE = "timezone";
+
     private static final String NO_OFFSET_FORMAT = "(GMT) %s";
     private static final String NEGATIVE_OFFSET_FORMAT = "(GMT%d:%02d) %s";
     private static final String POSITIVE_OFFSET_FORMAT = "(GMT+%d:%02d) %s";
@@ -46,37 +51,44 @@ public class I18nConfigOptionsProvider implements ConfigOptionProvider {
     @Override
     public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
             @Nullable Locale locale) {
-        if ("system:i18n".equals(uri.toString())) {
-            Locale translation = locale != null ? locale : Locale.getDefault();
-            return processParamType(param, locale, translation);
+        switch (uri.toString()) {
+            case "system:i18n":
+                return processParamType(param, locale, locale != null ? locale : Locale.getDefault());
+            case "profile:system:timestamp-offset":
+                return TIMEZONE.equals(param) ? processTimeZoneParam() : null;
+            default:
+                return null;
         }
-        return null;
     }
 
     private @Nullable Collection<ParameterOption> processParamType(String param, @Nullable Locale locale,
             Locale translation) {
         switch (param) {
-            case "language":
+            case LANGUAGE:
                 return getAvailable(locale,
                         l -> new ParameterOption(l.getLanguage(), l.getDisplayLanguage(translation)));
-            case "region":
+            case REGION:
                 return getAvailable(locale, l -> new ParameterOption(l.getCountry(), l.getDisplayCountry(translation)));
-            case "variant":
+            case VARIANT:
                 return getAvailable(locale, l -> new ParameterOption(l.getVariant(), l.getDisplayVariant(translation)));
-            case "timezone":
-                Comparator<TimeZone> byOffset = (t1, t2) -> {
-                    return t1.getRawOffset() - t2.getRawOffset();
-                };
-                Comparator<TimeZone> byID = (t1, t2) -> {
-                    return t1.getID().compareTo(t2.getID());
-                };
-                return ZoneId.getAvailableZoneIds().stream().map(TimeZone::getTimeZone)
-                        .sorted(byOffset.thenComparing(byID)).map(tz -> {
-                            return new ParameterOption(tz.getID(), getTimeZoneRepresentation(tz));
-                        }).collect(Collectors.toList());
+            case TIMEZONE:
+                return processTimeZoneParam();
             default:
                 return null;
         }
+    }
+
+    private Collection<ParameterOption> processTimeZoneParam() {
+        Comparator<TimeZone> byOffset = (t1, t2) -> {
+            return t1.getRawOffset() - t2.getRawOffset();
+        };
+        Comparator<TimeZone> byID = (t1, t2) -> {
+            return t1.getID().compareTo(t2.getID());
+        };
+        return ZoneId.getAvailableZoneIds().stream().map(TimeZone::getTimeZone).sorted(byOffset.thenComparing(byID))
+                .map(tz -> {
+                    return new ParameterOption(tz.getID(), getTimeZoneRepresentation(tz));
+                }).collect(Collectors.toList());
     }
 
     private static String getTimeZoneRepresentation(TimeZone tz) {

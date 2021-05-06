@@ -28,7 +28,6 @@ import org.openhab.core.i18n.LocalizedKey;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.DefaultSystemChannelTypeProvider;
-import org.openhab.core.thing.UID;
 import org.openhab.core.thing.profiles.Profile;
 import org.openhab.core.thing.profiles.ProfileAdvisor;
 import org.openhab.core.thing.profiles.ProfileCallback;
@@ -67,12 +66,12 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             OFFSET_TYPE, RANGE_TYPE, RAWBUTTON_ON_OFF_SWITCH_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE,
             RAWBUTTON_TOGGLE_SWITCH_TYPE, RAWROCKER_DIMMER_TYPE, RAWROCKER_NEXT_PREVIOUS_TYPE, RAWROCKER_ON_OFF_TYPE,
             RAWROCKER_PLAY_PAUSE_TYPE, RAWROCKER_REWIND_FASTFORWARD_TYPE, RAWROCKER_STOP_MOVE_TYPE,
-            RAWROCKER_UP_DOWN_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_UPDATE_TYPE);
+            RAWROCKER_UP_DOWN_TYPE, TIMESTAMP_OFFSET_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_UPDATE_TYPE);
 
     private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Set.of(DEFAULT, FOLLOW, HYSTERESIS, OFFSET,
             RANGE, RAWBUTTON_ON_OFF_SWITCH, RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER,
             RAWROCKER_NEXT_PREVIOUS, RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD,
-            RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE);
+            RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN, TIMESTAMP_OFFSET, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE);
 
     private final Map<LocalizedKey, ProfileType> localizedProfileTypeCache = new ConcurrentHashMap<>();
 
@@ -123,6 +122,8 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return new RawRockerStopMoveProfile(callback);
         } else if (RAWROCKER_UP_DOWN.equals(profileTypeUID)) {
             return new RawRockerUpDownProfile(callback);
+        } else if (TIMESTAMP_OFFSET.equals(profileTypeUID)) {
+            return new TimestampOffsetProfile(callback, context);
         } else if (TIMESTAMP_CHANGE.equals(profileTypeUID)) {
             return new TimestampChangeProfile(callback);
         } else if (TIMESTAMP_UPDATE.equals(profileTypeUID)) {
@@ -197,27 +198,21 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
     }
 
     private ProfileType createLocalizedProfileType(ProfileType profileType, @Nullable Locale locale) {
-        LocalizedKey localizedKey = getLocalizedProfileTypeKey(profileType.getUID(), locale);
+        LocalizedKey localizedKey = new LocalizedKey(profileType.getUID(),
+                locale != null ? locale.toLanguageTag() : null);
 
         ProfileType cachedEntry = localizedProfileTypeCache.get(localizedKey);
         if (cachedEntry != null) {
             return cachedEntry;
         }
 
-        ProfileType localizedProfileType = localize(profileType, locale);
+        ProfileType localizedProfileType = profileTypeI18nLocalizationService.createLocalizedProfileType(bundle,
+                profileType, locale);
         if (localizedProfileType != null) {
             localizedProfileTypeCache.put(localizedKey, localizedProfileType);
             return localizedProfileType;
         } else {
             return profileType;
         }
-    }
-
-    private @Nullable ProfileType localize(ProfileType profileType, @Nullable Locale locale) {
-        return profileTypeI18nLocalizationService.createLocalizedProfileType(bundle, profileType, locale);
-    }
-
-    private LocalizedKey getLocalizedProfileTypeKey(UID uid, @Nullable Locale locale) {
-        return new LocalizedKey(uid, locale != null ? locale.toLanguageTag() : null);
     }
 }

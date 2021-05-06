@@ -12,6 +12,8 @@
  */
 package org.openhab.core.thing.internal.profiles;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -69,10 +71,10 @@ public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
     @Test
     public void systemProfileTypesAndUidsShouldBeAvailable() {
         Collection<ProfileTypeUID> systemProfileTypeUIDs = profileFactory.getSupportedProfileTypeUIDs();
-        assertEquals(17, systemProfileTypeUIDs.size());
+        assertThat(systemProfileTypeUIDs, hasSize(18));
 
         Collection<ProfileType> systemProfileTypes = profileFactory.getProfileTypes(null);
-        assertEquals(systemProfileTypeUIDs.size(), systemProfileTypes.size());
+        assertThat(systemProfileTypes, hasSize(systemProfileTypeUIDs.size()));
     }
 
     @Test
