@@ -152,9 +152,9 @@ public class SseItemStatesEventBuilder {
                             try {
                                 displayState = state.format(pattern);
                             } catch (IllegalArgumentException e) {
-                                logger.warn("Exception while formatting value '{}' of item {} with format '{}': {}",
+                                logger.info("Unable to format value '{}' of item {} with format '{}': {}, displaying raw state",
                                         state, item.getName(), pattern, e.getMessage());
-                                displayState = new String("Err");
+                                displayState = state.toString();
                             }
                         }
                     }
