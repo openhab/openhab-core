@@ -72,7 +72,7 @@ public class TimestampOffsetProfile implements StateProfile {
         }
 
         String timeZoneParam = toStringOrNull(context.getConfiguration().get(TIMEZONE_PARAM));
-        logger.info("Configuring profile with {} parameter '{}'", TIMEZONE_PARAM, timeZoneParam);
+        logger.debug("Configuring profile with {} parameter '{}'", TIMEZONE_PARAM, timeZoneParam);
         if (timeZoneParam == null || timeZoneParam.isBlank()) {
             timeZone = null;
         } else {
