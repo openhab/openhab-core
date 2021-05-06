@@ -152,4 +152,10 @@
 		</event>
 	</channel-type>
 
+	<channel-type id="timestamp">
+		<item-type>DateTime</item-type>
+		<label>Timestamp</label>
+		<category>time</category>
+	</channel-type>
+
 </thing:thing-descriptions>
