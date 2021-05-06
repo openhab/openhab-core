@@ -18,6 +18,7 @@ import static org.mockito.Mockito.*;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.openhab.core.library.types.DateTimeType;
@@ -31,6 +32,7 @@ import org.openhab.core.types.State;
  *
  * @author Gaël L'hopital - Initial contribution
  */
+@NonNullByDefault
 public class TimestampProfileTest extends JavaTest {
 
     @Test
