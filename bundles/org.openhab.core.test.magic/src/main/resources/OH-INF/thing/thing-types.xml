@@ -17,6 +17,7 @@
 
 		<channels>
 			<channel id="switch" typeId="switch"/>
+			<channel id="timestamp" typeId="timestamp"/>
 			<channel id="trigger" typeId="trigger"/>
 		</channels>
 
