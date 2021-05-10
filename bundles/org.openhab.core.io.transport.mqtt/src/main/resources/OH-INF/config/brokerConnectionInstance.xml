@@ -43,7 +43,7 @@
 			<default>false</default>
 		</parameter>
 		<parameter name="hostnameValidated" type="boolean" required="true" groupName="group_connection">
-			<label>Secure Connection?</label>
+			<label>Hostname Validated?</label>
 			<description>For a secure TLS connection, defines if the server hostname is validated against the hostname in the
 				certificate.</description>
 			<default>true</default>
