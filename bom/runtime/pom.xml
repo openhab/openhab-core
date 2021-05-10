@@ -16,7 +16,7 @@
   <name>openHAB Core :: BOM :: Runtime</name>
 
   <properties>
-    <jackson.version>2.12.2</jackson.version>
+    <jackson.version>2.12.3</jackson.version>
     <jetty.version>9.4.38.v20210224</jetty.version>
     <pax.logging.version>2.0.8</pax.logging.version>
     <pax.web.version>7.3.13</pax.web.version>
