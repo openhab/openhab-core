@@ -25,9 +25,14 @@
 		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.12.0</bundle>
 
 		<!-- Measurement -->
-		<bundle dependency="true">mvn:javax.measure/unit-api/1.0</bundle>
-		<bundle dependency="true">mvn:tec.uom/uom-se/1.0.10</bundle>
-		<bundle dependency="true">mvn:tec.uom.lib/uom-lib-common/1.0.3</bundle>
+		<bundle dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/2.0.0</bundle>
+		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/2.0.0</bundle>
+		<bundle dependency="true">mvn:javax.measure/unit-api/2.1.2</bundle>
+		<!-- The si.uom:si-units manifest has no Export-Package entry. As workaround this OSGi-ify bundle is used. -->
+		<bundle dependency="true">mvn:org.openhab.osgiify/si.uom.si-units/2.0.1</bundle>
+		<bundle dependency="true">mvn:si.uom/si-quantity/2.0.1</bundle>
+		<bundle dependency="true">mvn:tech.units/indriya/2.1.2</bundle>
+		<bundle dependency="true">mvn:tech.uom.lib/uom-lib-common/2.1</bundle>
 
 		<!-- TODO: Unbundled libraries -->
 		<bundle dependency="true">mvn:com.thoughtworks.xstream/xstream/1.4.15</bundle>

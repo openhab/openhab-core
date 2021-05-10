@@ -92,8 +92,11 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                             sum = itemState; // initialise the sum from the first item
                             count++;
                         } else {
-                            sum = sum.add(itemState);
-                            count++;
+                            itemState = itemState.toUnit(sum.getUnit());
+                            if (itemState != null) {
+                                sum = sum.add(itemState);
+                                count++;
+                            }
                         }
                     }
                 }
@@ -131,8 +134,11 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                     if (itemState != null) {
                         if (sum == null) {
                             sum = itemState; // initialise the sum from the first item
-                        } else if (sum.getUnit().isCompatible(itemState.getUnit())) {
-                            sum = sum.add(itemState);
+                        } else {
+                            itemState = itemState.toUnit(sum.getUnit());
+                            if (itemState != null) {
+                                sum = sum.add(itemState);
+                            }
                         }
                     }
                 }

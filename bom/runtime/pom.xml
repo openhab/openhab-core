@@ -437,21 +437,40 @@
 
     <!-- Measurement -->
     <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <version>2.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.inject</groupId>
+      <artifactId>jakarta.inject-api</artifactId>
+      <version>2.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>javax.measure</groupId>
       <artifactId>unit-api</artifactId>
-      <version>1.0</version>
+      <version>2.1.2</version>
+      <scope>compile</scope>
+    </dependency>
+    <!-- The si.uom:si-units manifest has no Export-Package entry. As workaround this OSGi-ify bundle is used. -->
+    <dependency>
+      <groupId>org.openhab.osgiify</groupId>
+      <artifactId>si.uom.si-units</artifactId>
+      <version>2.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>tec.uom</groupId>
-      <artifactId>uom-se</artifactId>
-      <version>1.0.10</version>
+      <groupId>si.uom</groupId>
+      <artifactId>si-quantity</artifactId>
+      <version>2.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>tec.uom.lib</groupId>
-      <artifactId>uom-lib-common</artifactId>
-      <version>1.0.3</version>
+      <groupId>tech.units</groupId>
+      <artifactId>indriya</artifactId>
+      <version>2.1.2</version>
       <scope>compile</scope>
     </dependency>
 

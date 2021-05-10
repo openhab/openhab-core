@@ -117,7 +117,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         State numberState = itemRegistry.get(NUMBER_ITEM_TEMPERATURE).getState();
         assertNotNull(numberState);
         assertEquals("org.openhab.core.library.types.QuantityType", numberState.getClass().getName());
-        assertEquals("20.0 °C", numberState.toString());
+        assertEquals("20 °C", numberState.toString());
     }
 
     @SuppressWarnings("null")

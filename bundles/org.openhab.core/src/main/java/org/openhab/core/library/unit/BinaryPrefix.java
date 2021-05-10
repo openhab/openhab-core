@@ -20,9 +20,9 @@ import javax.measure.UnitConverter;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import tec.uom.lib.common.function.SymbolSupplier;
-import tec.uom.lib.common.function.UnitConverterSupplier;
-import tec.uom.se.function.RationalConverter;
+import tech.units.indriya.function.MultiplyConverter;
+import tech.uom.lib.common.function.SymbolSupplier;
+import tech.uom.lib.common.function.UnitConverterSupplier;
 
 /**
  * The binary prefixes used to derive units by specific powers of 2.
@@ -31,14 +31,14 @@ import tec.uom.se.function.RationalConverter;
  */
 @NonNullByDefault
 public enum BinaryPrefix implements SymbolSupplier, UnitConverterSupplier {
-    YOBI("Yi", new RationalConverter(BigInteger.valueOf(2).pow(80), BigInteger.ONE)),
-    ZEBI("Zi", new RationalConverter(BigInteger.valueOf(2).pow(70), BigInteger.ONE)),
-    EXBI("Ei", new RationalConverter(BigInteger.valueOf(2).pow(60), BigInteger.ONE)),
-    PEBI("Pi", new RationalConverter(BigInteger.valueOf(2).pow(50), BigInteger.ONE)),
-    TEBI("Ti", new RationalConverter(BigInteger.valueOf(2).pow(40), BigInteger.ONE)),
-    GIBI("Gi", new RationalConverter(BigInteger.valueOf(2).pow(30), BigInteger.ONE)),
-    MEBI("Mi", new RationalConverter(BigInteger.valueOf(2).pow(20), BigInteger.ONE)),
-    KIBI("Ki", new RationalConverter(BigInteger.valueOf(2).pow(10), BigInteger.ONE));
+    YOBI("Yi", MultiplyConverter.ofRational(BigInteger.valueOf(2).pow(80), BigInteger.ONE)),
+    ZEBI("Zi", MultiplyConverter.ofRational(BigInteger.valueOf(2).pow(70), BigInteger.ONE)),
+    EXBI("Ei", MultiplyConverter.ofRational(BigInteger.valueOf(2).pow(60), BigInteger.ONE)),
+    PEBI("Pi", MultiplyConverter.ofRational(BigInteger.valueOf(2).pow(50), BigInteger.ONE)),
+    TEBI("Ti", MultiplyConverter.ofRational(BigInteger.valueOf(2).pow(40), BigInteger.ONE)),
+    GIBI("Gi", MultiplyConverter.ofRational(BigInteger.valueOf(2).pow(30), BigInteger.ONE)),
+    MEBI("Mi", MultiplyConverter.ofRational(BigInteger.valueOf(2).pow(20), BigInteger.ONE)),
+    KIBI("Ki", MultiplyConverter.ofRational(BigInteger.valueOf(2).pow(10), BigInteger.ONE));
 
     /**
      * The symbol of this prefix, as returned by {@link #getSymbol}.
@@ -61,7 +61,7 @@ public enum BinaryPrefix implements SymbolSupplier, UnitConverterSupplier {
      * @param symbol the symbol of this prefix.
      * @param converter the associated unit converter.
      */
-    BinaryPrefix(String symbol, RationalConverter converter) {
+    BinaryPrefix(String symbol, MultiplyConverter converter) {
         this.symbol = symbol;
         this.converter = converter;
     }
