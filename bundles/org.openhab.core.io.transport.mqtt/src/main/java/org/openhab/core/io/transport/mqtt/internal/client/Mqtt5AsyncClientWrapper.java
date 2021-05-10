@@ -38,13 +38,15 @@ import com.hivemq.client.mqtt.mqtt5.message.unsubscribe.Mqtt5Unsubscribe;
  * The {@link Mqtt5AsyncClientWrapper} provides the wrapper for Mqttv5 async clients
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Mark Herwege - Added flag for hostname validation
  */
 @NonNullByDefault
 public class Mqtt5AsyncClientWrapper extends MqttAsyncClientWrapper {
     private final Mqtt5AsyncClient client;
 
     public Mqtt5AsyncClientWrapper(String host, int port, String clientId, Protocol protocol, boolean secure,
-            ConnectionCallback connectionCallback, @Nullable TrustManagerFactory trustManagerFactory) {
+            boolean hostnameValidated, ConnectionCallback connectionCallback,
+            @Nullable TrustManagerFactory trustManagerFactory) {
         Mqtt5ClientBuilder clientBuilder = Mqtt5Client.builder().serverHost(host).serverPort(port).identifier(clientId)
                 .addConnectedListener(connectionCallback).addDisconnectedListener(connectionCallback);
 
@@ -52,7 +54,13 @@ public class Mqtt5AsyncClientWrapper extends MqttAsyncClientWrapper {
             clientBuilder.webSocketWithDefaultConfig();
         }
         if (secure) {
-            clientBuilder.sslWithDefaultConfig().sslConfig().trustManagerFactory(trustManagerFactory).applySslConfig();
+            if (hostnameValidated) {
+                clientBuilder.sslWithDefaultConfig().sslConfig().trustManagerFactory(trustManagerFactory)
+                        .applySslConfig();
+            } else {
+                clientBuilder.sslWithDefaultConfig().sslConfig().trustManagerFactory(trustManagerFactory)
+                        .hostnameVerifier(this).applySslConfig();
+            }
         }
 
         client = clientBuilder.buildAsync();

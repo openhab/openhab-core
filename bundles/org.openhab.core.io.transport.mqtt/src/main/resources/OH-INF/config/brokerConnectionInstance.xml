@@ -42,6 +42,12 @@
 			<description>A broker connection is either a non-secure TCP connection or a TLS secure connection.</description>
 			<default>false</default>
 		</parameter>
+		<parameter name="hostnameValidated" type="boolean" required="true" groupName="group_connection">
+			<label>Hostname Validated?</label>
+			<description>For a secure TLS connection, defines if the server hostname is validated against the hostname in the
+				certificate.</description>
+			<default>true</default>
+		</parameter>
 		<parameter name="username" type="text" groupName="group_connection">
 			<label>Broker Username</label>
 			<description>Broker username.</description>

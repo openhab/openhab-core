@@ -45,8 +45,9 @@ public class MqttBrokerConnectionEx extends MqttBrokerConnection {
     public boolean connectSuccess = true;
     public boolean connectTimeout = false;
 
-    public MqttBrokerConnectionEx(String host, @Nullable Integer port, boolean secure, String clientId) {
-        super(host, port, secure, clientId);
+    public MqttBrokerConnectionEx(String host, @Nullable Integer port, boolean secure, boolean hostnameValidated,
+            String clientId) {
+        super(host, port, secure, hostnameValidated, clientId);
     }
 
     public Map<String, Subscription> getSubscribers() {

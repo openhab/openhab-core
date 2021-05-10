@@ -90,7 +90,8 @@ public class MqttServiceImpl implements MqttService {
             }
             String host = config.host;
             if (host != null && !host.isBlank()) {
-                connection = new MqttBrokerConnection(host, config.port, config.secure, config.clientID);
+                connection = new MqttBrokerConnection(host, config.port, config.secure, config.hostnameValidated,
+                        config.clientID);
                 brokerConnections.put(brokerID, connection);
             } else {
                 throw new ConfigurationException("host", "You need to provide a hostname/IP!");

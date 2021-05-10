@@ -19,15 +19,17 @@ import org.eclipse.jdt.annotation.Nullable;
  * Contains configuration for a MqttBrokerConnection. Necessary to add a new broker connection the {@link MqttService}.
  *
  * @author David Graeff - Initial contribution
+ * @author Mark Herwege - Added flag for hostname validation
  */
 @NonNullByDefault
 public class MqttBrokerConnectionConfig {
     // Optional connection name
     public @Nullable String name;
-    // Connection parameters (host+port+secure)
+    // Connection parameters (host+port+secure+hostnameValidated)
     public @Nullable String host;
     public @Nullable Integer port;
     public boolean secure = true;
+    public boolean hostnameValidated = true;
     // Authentication parameters
     public @Nullable String username;
     public @Nullable String password;
@@ -68,7 +70,7 @@ public class MqttBrokerConnectionConfig {
     }
 
     /**
-     * Output the name, host, port and secure flag
+     * Output the name, host, port, secure flag and hostname validation flag
      */
     @Override
     public String toString() {
@@ -87,6 +89,9 @@ public class MqttBrokerConnectionConfig {
         }
         if (secure) {
             b.append(":s");
+        }
+        if (hostnameValidated) {
+            b.append(":v");
         }
         return b.toString();
     }
