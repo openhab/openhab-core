@@ -14,6 +14,8 @@ package org.openhab.core.internal.scheduler;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -36,24 +38,26 @@ public class CronSchedulerImplTest {
     private final CronSchedulerImpl cronScheduler = new CronSchedulerImpl(new SchedulerImpl());
 
     @Test
-    @Timeout(value = 1, unit = TimeUnit.SECONDS)
-    public void testCronReboot() throws Exception {
-        long now = System.currentTimeMillis();
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    public void testCronReboot() throws InterruptedException {
+        Instant start = Instant.now();
         Semaphore s = new Semaphore(0);
         ScheduledCompletableFuture<Void> future = cronScheduler.schedule(() -> {
         }, "@reboot");
         future.getPromise().thenAccept(x -> s.release());
         s.acquire(1);
 
-        long diff = System.currentTimeMillis() - now;
-        assertTrue(diff < 200, "Time difference should be less 200 but was: " + diff);
+        Duration duration = Duration.between(start, Instant.now());
+        Duration maxDuration = Duration.ofSeconds(2);
+        assertTrue(duration.compareTo(maxDuration) < 0,
+                "Reboot call should occur within " + maxDuration + " but was called after: " + duration);
         assertTrue(future.isDone(), "Scheduler should be done once reboot call done.");
     }
 
     @Test
-    @Timeout(value = 6, unit = TimeUnit.SECONDS)
-    public void testCronScheduling() throws Exception {
-        long now = System.currentTimeMillis();
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
+    public void testCronScheduling() throws InterruptedException {
+        Instant start = Instant.now();
         AtomicReference<Object> ref = new AtomicReference<>();
 
         Semaphore s = new Semaphore(0);
@@ -64,11 +68,22 @@ public class CronSchedulerImplTest {
                 + "\n" //
                 + " foo = bar \n" //
                 + "# bla bla foo=foo\n" //
-                + "0/2 * * * * *");
+                + "*/5 * * * * *");
         s.acquire(2);
 
-        long diff = (System.currentTimeMillis() - now + 50) / 1000;
-        assertTrue(diff >= 3 && diff <= 4, "Difference calculation should be between 3 and 4 but was: " + diff);
+        Duration duration = Duration.between(start, Instant.now());
+
+        // The call should occur every 5 seconds.
+        // So the fastest execution of 2 calls would be immediately and after 5 seconds.
+        Duration minDuration = Duration.ofSeconds(5);
+
+        // The slowest execution of 2 calls would be after 2*5 seconds.
+        // When the load is high, it can be a bit slower, so we account for this by adding another 2 seconds.
+        Duration maxDuration = Duration.ofSeconds(12);
+
+        assertTrue(minDuration.compareTo(duration) < 0 && duration.compareTo(maxDuration) < 0,
+                "The two calls should be executed between " + minDuration + " and " + maxDuration
+                        + " but the total duration was: " + duration);
         assertEquals("bar", ref.get(), "Environment variable 'foo' should be correctly set");
     }
 
