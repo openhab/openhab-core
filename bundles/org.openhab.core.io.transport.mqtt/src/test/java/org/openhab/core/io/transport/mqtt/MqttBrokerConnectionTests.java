@@ -215,7 +215,7 @@ public class MqttBrokerConnectionTests extends JavaTest {
         connection.start();
         assertNotNull(connection.timeoutFuture);
 
-        assertThat(latch.await(500, TimeUnit.MILLISECONDS), is(true));
+        assertThat(latch.await(5, TimeUnit.SECONDS), is(true));
     }
 
     @Test
@@ -238,7 +238,7 @@ public class MqttBrokerConnectionTests extends JavaTest {
         verify(connection.connectionCallback, times(0)).onDisconnected(any(MqttClientDisconnectedContext.class));
         assertNotNull(connection.timeoutFuture);
 
-        assertThat(future.get(70, TimeUnit.MILLISECONDS), is(false));
+        assertThat(future.get(5, TimeUnit.SECONDS), is(false));
     }
 
     @Test
