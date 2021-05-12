@@ -337,6 +337,14 @@ Import-Package: \\
               ]]>
             </bottom>
           </configuration>
+          <dependencies>
+            <!-- This newer version fixes issues with resolving tech.units:indriya packages -->
+            <dependency>
+              <groupId>org.codehaus.plexus</groupId>
+              <artifactId>plexus-java</artifactId>
+              <version>1.0.7</version>
+            </dependency>
+          </dependencies>
         </plugin>
 
         <plugin>
