@@ -17,12 +17,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+import java.util.Locale;
+import java.util.stream.Stream;
+
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.items.NumberItem;
@@ -44,6 +48,19 @@ public class ItemStateConverterImplTest {
 
     private @NonNullByDefault({}) ItemStateConverterImpl itemStateConverter;
 
+    /**
+     * Locales having a different decimal separator to test string parsing and generation.
+     */
+    static Stream<Locale> locales() {
+        return Stream.of(
+                // ٫ (Arabic, Egypt)
+                Locale.forLanguageTag("ar-EG"),
+                // , (German, Germany)
+                Locale.forLanguageTag("de-DE"),
+                // . (English, United States)
+                Locale.forLanguageTag("en-US"));
+    }
+
     @BeforeEach
     public void setup() {
         UnitProvider unitProvider = mock(UnitProvider.class);
@@ -51,16 +68,22 @@ public class ItemStateConverterImplTest {
         itemStateConverter = new ItemStateConverterImpl(unitProvider);
     }
 
-    @Test
-    public void testNullState() {
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void testNullState(Locale locale) {
+        Locale.setDefault(locale);
+
         State undef = itemStateConverter.convertToAcceptedState(null, null);
 
         assertThat(undef, is(UnDefType.NULL));
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("locales")
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
-    public void testNoConversion() {
+    public void testNoConversion(Locale locale) {
+        Locale.setDefault(locale);
+
         Item item = new NumberItem("number");
         State originalState = new DecimalType(12.34);
         State state = itemStateConverter.convertToAcceptedState(originalState, item);
@@ -68,8 +91,11 @@ public class ItemStateConverterImplTest {
         assertTrue(originalState == state);
     }
 
-    @Test
-    public void testStateConversion() {
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void testStateConversion(Locale locale) {
+        Locale.setDefault(locale);
+
         Item item = new NumberItem("number");
         State originalState = new PercentType("42");
         State convertedState = itemStateConverter.convertToAcceptedState(originalState, item);
@@ -77,8 +103,11 @@ public class ItemStateConverterImplTest {
         assertThat(convertedState, is(new DecimalType("0.42")));
     }
 
-    @Test
-    public void numberItemWithoutDimensionShouldConvertToDecimalType() {
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void numberItemWithoutDimensionShouldConvertToDecimalType(Locale locale) {
+        Locale.setDefault(locale);
+
         Item item = new NumberItem("number");
         State originalState = new QuantityType<>("12.34 °C");
         State convertedState = itemStateConverter.convertToAcceptedState(originalState, item);
@@ -86,8 +115,11 @@ public class ItemStateConverterImplTest {
         assertThat(convertedState, is(new DecimalType("12.34")));
     }
 
-    @Test
-    public void numberItemWitDimensionShouldConvertToItemStateDescriptionUnit() {
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void numberItemWitDimensionShouldConvertToItemStateDescriptionUnit(Locale locale) {
+        Locale.setDefault(locale);
+
         NumberItem item = mock(NumberItem.class);
         StateDescription stateDescription = mock(StateDescription.class);
         when(item.getStateDescription()).thenReturn(stateDescription);
@@ -100,8 +132,11 @@ public class ItemStateConverterImplTest {
         assertThat(convertedState, is(new QuantityType<>("285.49 K")));
     }
 
-    @Test
-    public void numberItemWitDimensionShouldConvertToLocaleBasedUnit() {
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void numberItemWitDimensionShouldConvertToLocaleBasedUnit(Locale locale) {
+        Locale.setDefault(locale);
+
         NumberItem item = mock(NumberItem.class);
         doReturn(Temperature.class).when(item).getDimension();
 
@@ -111,8 +146,11 @@ public class ItemStateConverterImplTest {
         assertThat(convertedState, is(new QuantityType<>("54.212 °F")));
     }
 
-    @Test
-    public void numberItemShouldNotConvertUnitsWhereMeasurmentSystemEquals() {
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void numberItemShouldNotConvertUnitsWhereMeasurmentSystemEquals(Locale locale) {
+        Locale.setDefault(locale);
+
         NumberItem item = mock(NumberItem.class);
         doReturn(Length.class).when(item).getDimension();
 
