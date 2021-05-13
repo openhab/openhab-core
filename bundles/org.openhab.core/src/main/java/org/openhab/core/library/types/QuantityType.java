@@ -15,6 +15,7 @@ package org.openhab.core.library.types;
 import static org.eclipse.jdt.annotation.DefaultLocation.*;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormatSymbols;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -58,6 +59,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
         implements PrimitiveType, State, Command, Comparable<QuantityType<T>> {
 
     private static final long serialVersionUID = 8828949721938234629L;
+    private static final char DOT_DECIMAL_SEPARATOR = '.';
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
 
     public static final QuantityType<Dimensionless> ZERO = new QuantityType<>(0, AbstractUnit.ONE);
@@ -102,6 +104,14 @@ public class QuantityType<T extends Quantity<T>> extends Number
             BigDecimal bd = new BigDecimal(value);
             quantity = (Quantity<T>) Quantities.getQuantity(bd, AbstractUnit.ONE, Scale.RELATIVE);
         } else {
+            char defaultDecimalSeparator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
+            // The quantity is parsed using a NumberFormat based on the default locale.
+            // To prevent issues, any dot decimal separators are replaced by the default locale decimal separator.
+            if (DOT_DECIMAL_SEPARATOR != defaultDecimalSeparator
+                    && formatted.contains(String.valueOf(DOT_DECIMAL_SEPARATOR))) {
+                formatted = formatted.replace(DOT_DECIMAL_SEPARATOR, defaultDecimalSeparator);
+            }
+
             Quantity<T> absoluteQuantity = (Quantity<T>) Quantities.getQuantity(formatted);
             quantity = Quantities.getQuantity(absoluteQuantity.getValue(), absoluteQuantity.getUnit(), Scale.RELATIVE);
         }
