@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Applies the given parameter "offset" to a QuantityType or DecimalType state
+ * Applies the given parameter "offset" to a {@link QuantityType} or {@link DecimalType} state.
  *
  * @author Stefan Triller - Initial contribution
  */

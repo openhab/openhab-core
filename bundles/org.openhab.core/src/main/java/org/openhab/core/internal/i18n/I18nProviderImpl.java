@@ -66,7 +66,8 @@ import org.slf4j.LoggerFactory;
  * using one certain {@link LanguageResourceBundleManager} which is responsible for the translation.
  * <p>
  * <p>
- * It reads a user defined configuration to set a locale and a location for this installation.
+ * It reads a user defined configuration to set a locale and a location for this installation. Options for the
+ * parameters "language", "region", "variant" and "timezone" are provided by the I18nConfigOptionsProvider.
  *
  * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added getText operation with arguments
