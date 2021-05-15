@@ -66,7 +66,7 @@ public class TimestampOffsetProfile implements StateProfile {
             offset = Duration.ofSeconds(Long.valueOf(s));
         } else {
             logger.error(
-                    "Parameter '{}' is not of type String or Number. Please make sure it is one of both, e.g. 3 or \"-1.4\".",
+                    "Parameter '{}' is not of type String or Number. Please make sure it is one of both, e.g. 3 or \"-1\".",
                     OFFSET_PARAM);
             offset = Duration.ZERO;
         }

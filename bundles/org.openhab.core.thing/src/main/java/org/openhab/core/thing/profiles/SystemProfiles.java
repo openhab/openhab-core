@@ -49,8 +49,8 @@ public interface SystemProfiles {
             "rawrocker-to-rewind-fastforward");
     public static final ProfileTypeUID RAWROCKER_STOP_MOVE = new ProfileTypeUID(SYSTEM_SCOPE, "rawrocker-to-stop-move");
     public static final ProfileTypeUID RAWROCKER_UP_DOWN = new ProfileTypeUID(SYSTEM_SCOPE, "rawrocker-to-up-down");
-    public static final ProfileTypeUID TIMESTAMP_OFFSET = new ProfileTypeUID(SYSTEM_SCOPE, "timestamp-offset");
     public static final ProfileTypeUID TIMESTAMP_CHANGE = new ProfileTypeUID(SYSTEM_SCOPE, "timestamp-change");
+    public static final ProfileTypeUID TIMESTAMP_OFFSET = new ProfileTypeUID(SYSTEM_SCOPE, "timestamp-offset");
     public static final ProfileTypeUID TIMESTAMP_UPDATE = new ProfileTypeUID(SYSTEM_SCOPE, "timestamp-update");
 
     static final ProfileType DEFAULT_TYPE = ProfileTypeBuilder.newState(DEFAULT, "Default").build();
@@ -124,12 +124,12 @@ public interface SystemProfiles {
             .withSupportedItemTypes(CoreItemFactory.ROLLERSHUTTER)
             .withSupportedChannelTypeUIDs(DefaultSystemChannelTypeProvider.SYSTEM_RAWROCKER.getUID()).build();
 
+    static final ProfileType TIMESTAMP_CHANGE_TYPE = ProfileTypeBuilder
+            .newState(TIMESTAMP_CHANGE, "Timestamp on change").withSupportedItemTypes(CoreItemFactory.DATETIME).build();
+
     static final ProfileType TIMESTAMP_OFFSET_TYPE = ProfileTypeBuilder.newState(TIMESTAMP_OFFSET, "Timestamp Offset")
             .withSupportedItemTypes(CoreItemFactory.DATETIME).withSupportedItemTypesOfChannel(CoreItemFactory.DATETIME)
             .build();
-
-    static final ProfileType TIMESTAMP_CHANGE_TYPE = ProfileTypeBuilder
-            .newState(TIMESTAMP_CHANGE, "Timestamp on change").withSupportedItemTypes(CoreItemFactory.DATETIME).build();
 
     static final ProfileType TIMESTAMP_UPDATE_TYPE = ProfileTypeBuilder
             .newState(TIMESTAMP_UPDATE, "Timestamp on update").withSupportedItemTypes(CoreItemFactory.DATETIME).build();
