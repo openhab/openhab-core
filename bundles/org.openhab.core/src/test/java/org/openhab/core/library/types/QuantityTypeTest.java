@@ -14,6 +14,7 @@ package org.openhab.core.library.types;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.library.unit.MetricPrefix.CENTI;
 
@@ -23,7 +24,6 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.stream.Stream;
 
-import javax.measure.format.MeasurementParseException;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Energy;
 import javax.measure.quantity.Length;
@@ -54,15 +54,15 @@ import tech.units.indriya.unit.UnitDimension;
 public class QuantityTypeTest {
 
     /**
-     * Locales having a different decimal separator to test string parsing and generation.
+     * Locales having a different decimal and grouping separators to test string parsing and generation.
      */
     static Stream<Locale> locales() {
         return Stream.of(
-                // ٫ (Arabic, Egypt)
+                // ٫٬ (Arabic, Egypt)
                 Locale.forLanguageTag("ar-EG"),
-                // , (German, Germany)
+                // ,. (German, Germany)
                 Locale.forLanguageTag("de-DE"),
-                // . (English, United States)
+                // ., (English, United States)
                 Locale.forLanguageTag("en-US"));
     }
 
@@ -77,24 +77,101 @@ public class QuantityTypeTest {
         assertTrue(dt0.getUnit().getDimension() == UnitDimension.NONE);
     }
 
-    @Test
-    public void testKnownInvalidConstructors() {
-        assertThrows(MeasurementParseException.class, () -> new QuantityType<>("123 Hello World"));
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void testKnownInvalidConstructors(Locale locale) {
+        Locale.setDefault(locale);
+
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123 Hello World"));
+
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("°C"));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>(". °C"));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("1 2 °C"));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123..56 °C"));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123abc56 °C"));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123.123,56 °C"));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123٬123٫56 °C"));
+
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("°C", Locale.ENGLISH));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>(". °C", Locale.ENGLISH));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("1 2 °C", Locale.ENGLISH));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123..56 °C", Locale.ENGLISH));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123abc56 °C", Locale.ENGLISH));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123.123,56 °C", Locale.ENGLISH));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123٬123٫56 °C", Locale.ENGLISH));
+
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("°C", Locale.GERMAN));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>(", °C", Locale.GERMAN));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("1 2 °C", Locale.GERMAN));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123,,56 °C", Locale.GERMAN));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123abc56 °C", Locale.GERMAN));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123,123.56 °C", Locale.GERMAN));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123٬123٫56 °C", Locale.GERMAN));
     }
 
-    @Test
-    public void testValidConstructors() throws Exception {
-        // Testing various quantities in order to ensure split and parsing is working
-        // as expected
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void testValidConstructors(Locale locale) {
+        Locale.setDefault(locale);
+
+        // Testing various quantities in order to ensure split and parsing is working as expected
+        new QuantityType<>("-2,000.5°C");
+        new QuantityType<>("-2.5°C");
+        new QuantityType<>("-2°C");
+        new QuantityType<>("-0°");
+        new QuantityType<>("0°");
         new QuantityType<>("2°");
         new QuantityType<>("2°C");
+        new QuantityType<>("2.5°C");
+        new QuantityType<>("2,000.5°C");
+        new QuantityType<>("10 dBm");
         new QuantityType<>("3 µs");
         new QuantityType<>("3km/h");
         new QuantityType<>("1084 hPa");
+        new QuantityType<>("-10E3");
+        new QuantityType<>("-10E-3");
+        new QuantityType<>("-0E-22 m");
+        new QuantityType<>("-0E0");
+        new QuantityType<>("-0E-0 m");
+        new QuantityType<>("0E0");
         new QuantityType<>("0E-22 m");
         new QuantityType<>("10E-3");
         new QuantityType<>("10E3");
         QuantityType.valueOf("2m");
+    }
+
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void testLocalizedStringConstruction(Locale defaultLocale) {
+        Locale.setDefault(defaultLocale);
+
+        // Construction for each locale should always return the same result regardless of the current default locale
+        Stream.of(Locale.ENGLISH, Locale.GERMAN).forEach(locale -> {
+            char ds = DecimalFormatSymbols.getInstance(locale).getDecimalSeparator();
+            char gs = DecimalFormatSymbols.getInstance(locale).getGroupingSeparator();
+
+            // Without unit
+            assertEquals(new QuantityType<>("123"), new QuantityType<>("123", locale));
+            assertEquals(new QuantityType<>("123.56"), new QuantityType<>(String.format("123%s56", ds), locale));
+            assertEquals(new QuantityType<>("123123123"), new QuantityType<>("123123123", locale));
+            assertEquals(new QuantityType<>("123123123"),
+                    new QuantityType<>(String.format("123%s123%s123", gs, gs), locale));
+            assertEquals(new QuantityType<>("123123123.56"),
+                    new QuantityType<>(String.format("123123123%s56", ds), locale));
+            assertEquals(new QuantityType<>("123123123.56"),
+                    new QuantityType<>(String.format("123%s123%s123%s56", gs, gs, ds), locale));
+
+            // With unit
+            assertEquals(new QuantityType<>("123 °C"), new QuantityType<>("123 °C", locale));
+            assertEquals(new QuantityType<>("123.56 °C"), new QuantityType<>(String.format("123%s56 °C", ds), locale));
+            assertEquals(new QuantityType<>("123123123 °C"), new QuantityType<>("123123123 °C", locale));
+            assertEquals(new QuantityType<>("123123123 °C"),
+                    new QuantityType<>(String.format("123%s123%s123 °C", gs, gs), locale));
+            assertEquals(new QuantityType<>("123123123.56 °C"),
+                    new QuantityType<>(String.format("123123123%s56 °C", ds), locale));
+            assertEquals(new QuantityType<>("123123123.56 °C"),
+                    new QuantityType<>(String.format("123%s123%s123%s56 °C", gs, gs, ds), locale));
+        });
     }
 
     @Test
@@ -128,12 +205,8 @@ public class QuantityTypeTest {
         assertEquals("2 kg", dt4.toString());
         // check that beside the fact that we've got the same value, we don't have the same unit
         assertFalse(dt2.equals(dt4));
-        try {
-            dt2.compareTo(dt4);
-            fail();
-        } catch (Exception e) {
-            // That's what we expect.
-        }
+
+        assertThrows(IllegalArgumentException.class, () -> dt2.compareTo(dt4));
     }
 
     @Test
@@ -142,14 +215,14 @@ public class QuantityTypeTest {
         QuantityType<Time> millis = seconds.toUnit(MetricPrefix.MILLI(Units.SECOND));
         QuantityType<Time> minutes = seconds.toUnit(Units.MINUTE);
 
-        char sep = new DecimalFormatSymbols().getDecimalSeparator();
+        char ds = new DecimalFormatSymbols().getDecimalSeparator();
 
-        assertThat(seconds.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80" + sep + "0 s"));
-        assertThat(millis.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80000" + sep + "0 ms"));
-        assertThat(minutes.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("1" + sep + "3 min"));
+        assertThat(seconds.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80" + ds + "0 s"));
+        assertThat(millis.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80000" + ds + "0 ms"));
+        assertThat(minutes.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("1" + ds + "3 min"));
 
-        assertThat(seconds.format("%.1f"), is("80" + sep + "0"));
-        assertThat(minutes.format("%.1f"), is("1" + sep + "3"));
+        assertThat(seconds.format("%.1f"), is("80" + ds + "0"));
+        assertThat(minutes.format("%.1f"), is("1" + ds + "3"));
 
         assertThat(seconds.format("%1$tH:%1$tM:%1$tS"), is("00:01:20"));
         assertThat(millis.format("%1$tHh %1$tMm %1$tSs"), is("00h 01m 20s"));

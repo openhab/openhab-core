@@ -14,22 +14,89 @@ package org.openhab.core.library.types;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+import java.util.stream.Stream;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.openhab.core.library.unit.Units;
 
 /**
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class PercentTypeTest {
 
-    @Test
-    public void negativeNumber() {
-        assertThrows(IllegalArgumentException.class, () -> new PercentType(-3));
+    /**
+     * Locales having a different decimal and grouping separators to test string parsing and generation.
+     */
+    static Stream<Locale> locales() {
+        return Stream.of(
+                // ٫٬ (Arabic, Egypt)
+                Locale.forLanguageTag("ar-EG"),
+                // ,. (German, Germany)
+                Locale.forLanguageTag("de-DE"),
+                // ., (English, United States)
+                Locale.forLanguageTag("en-US"));
     }
 
-    @Test
-    public void moreThan100() {
+    @ParameterizedTest
+    @ValueSource(strings = { "0", "0.000", "0.001", "2", "2.5", "0E0", "0E-22", "10E-3", "1E2" })
+    public void testValidConstructors(String value) {
+        new PercentType(value);
+        PercentType.valueOf(value);
+    }
+
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void testLocalizedStringConstruction(Locale defaultLocale) {
+        Locale.setDefault(defaultLocale);
+
+        // Construction for each locale should always return the same result regardless of the current default locale
+        Stream.of(Locale.ENGLISH, Locale.GERMAN).forEach(locale -> {
+            char ds = DecimalFormatSymbols.getInstance(locale).getDecimalSeparator();
+            char gs = DecimalFormatSymbols.getInstance(locale).getGroupingSeparator();
+
+            assertEquals(new PercentType("0"), new PercentType("0", locale));
+            assertEquals(new PercentType("0.000"), new PercentType(String.format("0%s000", ds), locale));
+            assertEquals(new PercentType("0.001"), new PercentType(String.format("0%s001", ds), locale));
+            assertEquals(new PercentType("1.56E-10"), new PercentType(String.format("1%s56E-10", ds), locale));
+            assertEquals(new PercentType("1E0"), new PercentType("1E0", locale));
+            assertEquals(new PercentType("1"), new PercentType("1", locale));
+            assertEquals(new PercentType("12"), new PercentType("12", locale));
+            assertEquals(new PercentType("12.56"), new PercentType(String.format("12%s56", ds), locale));
+            assertEquals(new PercentType("100"), new PercentType(String.format("100", gs, gs), locale));
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void negativeNumber(Locale defaultLocale) {
+        Locale.setDefault(defaultLocale);
+
+        assertThrows(IllegalArgumentException.class, () -> new PercentType(-3));
+        assertThrows(IllegalArgumentException.class, () -> new PercentType("-0.003"));
+        assertThrows(IllegalArgumentException.class, () -> new PercentType("-0.1E1"));
+        assertThrows(IllegalArgumentException.class, () -> new PercentType("-1,000"));
+        assertThrows(IllegalArgumentException.class, () -> new PercentType("-0,1E1", Locale.GERMAN));
+        assertThrows(IllegalArgumentException.class, () -> new PercentType("-1.000", Locale.GERMAN));
+    }
+
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void moreThan100(Locale defaultLocale) {
+        Locale.setDefault(defaultLocale);
+
+        assertThrows(IllegalArgumentException.class, () -> new PercentType(101));
         assertThrows(IllegalArgumentException.class, () -> new PercentType("100.2"));
+        assertThrows(IllegalArgumentException.class, () -> new PercentType("1.1E2"));
+        assertThrows(IllegalArgumentException.class, () -> new PercentType("1,000"));
+        assertThrows(IllegalArgumentException.class, () -> new PercentType("1.000", Locale.GERMAN));
+        assertThrows(IllegalArgumentException.class, () -> new PercentType("1,1E2", Locale.GERMAN));
     }
 
     @Test

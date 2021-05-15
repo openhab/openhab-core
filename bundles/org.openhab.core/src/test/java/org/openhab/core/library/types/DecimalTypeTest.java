@@ -15,14 +15,63 @@ package org.openhab.core.library.types;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.text.DecimalFormatSymbols;
+import java.util.IllegalFormatConversionException;
+import java.util.Locale;
+import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Stefan Triller - more tests for type conversions
  */
+@NonNullByDefault
 public class DecimalTypeTest {
+
+    /**
+     * Locales having a different decimal and grouping separators to test string parsing and generation.
+     */
+    static Stream<Locale> locales() {
+        return Stream.of(
+                // ٫٬ (Arabic, Egypt)
+                Locale.forLanguageTag("ar-EG"),
+                // ,. (German, Germany)
+                Locale.forLanguageTag("de-DE"),
+                // ., (English, United States)
+                Locale.forLanguageTag("en-US"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "-2,000.5", "-2.5", "-2", "-0", "0", "2", "2.5", "2,000.5", "-10E3", "-10E-3", "-0E-22",
+            "-0E0", "-0E-0", "0E0", "0E-22", "10E-3", "10E3" })
+    public void testValidConstructors(String value) throws Exception {
+        new DecimalType(value);
+        DecimalType.valueOf(value);
+    }
+
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void testLocalizedStringConstruction(Locale defaultLocale) {
+        Locale.setDefault(defaultLocale);
+
+        // Construction for each locale should always return the same result regardless of the current default locale
+        Stream.of(Locale.ENGLISH, Locale.GERMAN).forEach(locale -> {
+            char ds = DecimalFormatSymbols.getInstance(locale).getDecimalSeparator();
+            char gs = DecimalFormatSymbols.getInstance(locale).getGroupingSeparator();
+
+            assertEquals(new DecimalType("123"), new DecimalType("123", locale));
+            assertEquals(new DecimalType("123.56"), new DecimalType(String.format("123%s56", ds), locale));
+            assertEquals(new DecimalType("123123123"), new DecimalType("123123123", locale));
+            assertEquals(new DecimalType("123123123"), new DecimalType(String.format("123%s123%s123", gs, gs), locale));
+            assertEquals(new DecimalType("123123123.56"), new DecimalType(String.format("123123123%s56", ds), locale));
+            assertEquals(new DecimalType("123123123.56"),
+                    new DecimalType(String.format("123%s123%s123%s56", gs, gs, ds), locale));
+        });
+    }
 
     @Test
     public void testEquals() {
@@ -55,13 +104,7 @@ public class DecimalTypeTest {
         assertEquals("0x57", dt.format("%#x"));
 
         // A float value cannot be converted into hex.
-        dt = new DecimalType("87.5");
-        try {
-            dt.format("%x");
-            fail();
-        } catch (Exception e) {
-            // That's what we expect.
-        }
+        assertThrows(IllegalFormatConversionException.class, () -> new DecimalType("87.5").format("%x"));
 
         // An integer (with different representation) with int conversion.
         dt = new DecimalType("11.0");

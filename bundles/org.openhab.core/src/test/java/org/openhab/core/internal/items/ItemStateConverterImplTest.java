@@ -49,15 +49,15 @@ public class ItemStateConverterImplTest {
     private @NonNullByDefault({}) ItemStateConverterImpl itemStateConverter;
 
     /**
-     * Locales having a different decimal separator to test string parsing and generation.
+     * Locales having a different decimal and grouping separators to test string parsing and generation.
      */
     static Stream<Locale> locales() {
         return Stream.of(
-                // ٫ (Arabic, Egypt)
+                // ٫٬ (Arabic, Egypt)
                 Locale.forLanguageTag("ar-EG"),
-                // , (German, Germany)
+                // ,. (German, Germany)
                 Locale.forLanguageTag("de-DE"),
-                // . (English, United States)
+                // ., (English, United States)
                 Locale.forLanguageTag("en-US"));
     }
 

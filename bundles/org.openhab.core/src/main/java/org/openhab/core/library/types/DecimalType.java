@@ -13,7 +13,11 @@
 package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.util.IllegalFormatConversionException;
+import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -53,7 +57,18 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
     }
 
     public DecimalType(String value) {
-        this.value = new BigDecimal(value);
+        this(value, Locale.ENGLISH);
+    }
+
+    public DecimalType(String value, Locale locale) {
+        DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(locale);
+        df.setParseBigDecimal(true);
+        ParsePosition position = new ParsePosition(0);
+        BigDecimal parsedValue = (BigDecimal) df.parseObject(value, position);
+        if (parsedValue == null || position.getErrorIndex() != -1 || position.getIndex() < value.length()) {
+            throw new IllegalArgumentException("Invalid BigDecimal value: " + value);
+        }
+        this.value = parsedValue;
     }
 
     @Override

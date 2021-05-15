@@ -15,12 +15,15 @@ package org.openhab.core.library.types;
 import static org.eclipse.jdt.annotation.DefaultLocation.*;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormatSymbols;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.IllegalFormatConversionException;
+import java.util.Locale;
 
 import javax.measure.Dimension;
 import javax.measure.IncommensurableException;
@@ -29,6 +32,7 @@ import javax.measure.Quantity.Scale;
 import javax.measure.UnconvertibleException;
 import javax.measure.Unit;
 import javax.measure.UnitConverter;
+import javax.measure.format.MeasurementParseException;
 import javax.measure.quantity.Dimensionless;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -44,6 +48,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tech.units.indriya.AbstractUnit;
+import tech.units.indriya.format.NumberDelimiterQuantityFormat;
+import tech.units.indriya.format.SimpleUnitFormat;
 import tech.units.indriya.quantity.Quantities;
 import tech.uom.lib.common.function.QuantityFunctions;
 
@@ -59,7 +65,6 @@ public class QuantityType<T extends Quantity<T>> extends Number
         implements PrimitiveType, State, Command, Comparable<QuantityType<T>> {
 
     private static final long serialVersionUID = 8828949721938234629L;
-    private static final char DOT_DECIMAL_SEPARATOR = '.';
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
 
     public static final QuantityType<Dimensionless> ZERO = new QuantityType<>(0, AbstractUnit.ONE);
@@ -90,30 +95,59 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     /**
      * Creates a new {@link QuantityType} with the given value. The value may contain a unit. The specific
-     * {@link Quantity} is obtained by {@link Quantities#getQuantity(CharSequence)}.
+     * {@link Quantity} is obtained by {@link NumberDelimiterQuantityFormat#parse(CharSequence)}.
+     * The English locale is used to determine (decimal/grouping) separator characters.
      *
      * @param value the non null value representing a quantity with an optional unit.
      */
-    @SuppressWarnings("unchecked")
     public QuantityType(String value) {
+        this(value, Locale.ENGLISH);
+    }
+
+    /**
+     * Creates a new {@link QuantityType} with the given value. The value may contain a unit. The specific
+     * {@link Quantity} is obtained by {@link NumberDelimiterQuantityFormat#parse(CharSequence)}.
+     *
+     * @param value the non null value representing a quantity with an optional unit.
+     * @param locale the locale used to determine (decimal/grouping) separator characters.
+     */
+    @SuppressWarnings("unchecked")
+    public QuantityType(String value, Locale locale) {
         String[] constituents = value.split(UNIT_PATTERN);
 
         // getQuantity needs a space between numeric value and unit
         String formatted = String.join(" ", constituents);
         if (!formatted.contains(" ")) {
-            BigDecimal bd = new BigDecimal(value);
-            quantity = (Quantity<T>) Quantities.getQuantity(bd, AbstractUnit.ONE, Scale.RELATIVE);
-        } else {
-            char defaultDecimalSeparator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
-            // The quantity is parsed using a NumberFormat based on the default locale.
-            // To prevent issues, any dot decimal separators are replaced by the default locale decimal separator.
-            if (DOT_DECIMAL_SEPARATOR != defaultDecimalSeparator
-                    && formatted.contains(String.valueOf(DOT_DECIMAL_SEPARATOR))) {
-                formatted = formatted.replace(DOT_DECIMAL_SEPARATOR, defaultDecimalSeparator);
+            DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(locale);
+            df.setParseBigDecimal(true);
+            ParsePosition position = new ParsePosition(0);
+            BigDecimal parsedValue = (BigDecimal) df.parseObject(value, position);
+            if (parsedValue == null || position.getErrorIndex() != -1 || position.getIndex() < value.length()) {
+                throw new IllegalArgumentException("Invalid BigDecimal value: " + value);
             }
-
-            Quantity<T> absoluteQuantity = (Quantity<T>) Quantities.getQuantity(formatted);
-            quantity = Quantities.getQuantity(absoluteQuantity.getValue(), absoluteQuantity.getUnit(), Scale.RELATIVE);
+            quantity = (Quantity<T>) Quantities.getQuantity(parsedValue, AbstractUnit.ONE, Scale.RELATIVE);
+        } else {
+            SimpleUnitFormat unitFormat = SimpleUnitFormat.getInstance();
+            NumberDelimiterQuantityFormat quantityFormat = new NumberDelimiterQuantityFormat.Builder()
+                    .setNumberFormat(NumberFormat.getInstance(locale)).setUnitFormat(unitFormat)
+                    .setLocaleSensitive(true).build();
+            ParsePosition position = new ParsePosition(0);
+            try {
+                Quantity<T> absoluteQuantity = (Quantity<T>) quantityFormat.parse(formatted, position);
+                Unit<T> unit = absoluteQuantity.getUnit();
+                if (position.getErrorIndex() != -1 || (position.getIndex() < value.length())) {
+                    // The position is now at the end of the parsed number. Because it does not always fully
+                    // parse the whole number, an exception is thrown if the remaining string cannot be
+                    // parsed to a unit that equals the parsed unit.
+                    if (!unit.equals(unitFormat.parse(value.substring(position.getIndex()).trim()))) {
+                        throw new IllegalArgumentException("Invalid Quantity value: " + value);
+                    }
+                }
+                quantity = Quantities.getQuantity(absoluteQuantity.getValue(), absoluteQuantity.getUnit(),
+                        Scale.RELATIVE);
+            } catch (MeasurementParseException e) {
+                throw new IllegalArgumentException("Invalid Quantity value: " + value, e);
+            }
         }
     }
 
