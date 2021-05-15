@@ -17,9 +17,9 @@
 
   <properties>
     <jackson.version>2.12.3</jackson.version>
-    <jetty.version>9.4.38.v20210224</jetty.version>
-    <pax.logging.version>2.0.8</pax.logging.version>
-    <pax.web.version>7.3.13</pax.web.version>
+    <jetty.version>9.4.40.v20210413</jetty.version>
+    <pax.logging.version>2.0.9</pax.logging.version>
+    <pax.web.version>7.3.16</pax.web.version>
     <swagger.version>2.1.9</swagger.version>
   </properties>
 
@@ -70,7 +70,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.configadmin</artifactId>
-      <version>1.9.20</version>
+      <version>1.9.22</version>
       <scope>compile</scope>
     </dependency>
 
@@ -710,13 +710,13 @@
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.18</version>
+      <version>4.19</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.18</version>
+      <version>4.19</version>
       <scope>compile</scope>
     </dependency>
 
