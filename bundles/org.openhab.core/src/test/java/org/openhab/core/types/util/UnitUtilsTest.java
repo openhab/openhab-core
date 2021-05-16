@@ -97,6 +97,12 @@ public class UnitUtilsTest {
     }
 
     @Test
+    public void testParseUnknownUnit() {
+        assertNull(UnitUtils.parseUnit("123 Hello World"));
+        assertNull(UnitUtils.parseUnit("Lux"));
+    }
+
+    @Test
     public void testGetDimensionName() {
         assertThat(UnitUtils.getDimensionName(SIUnits.CELSIUS), is(Temperature.class.getSimpleName()));
         assertThat(UnitUtils.getDimensionName(Units.KILOWATT_HOUR), is(Energy.class.getSimpleName()));
