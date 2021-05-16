@@ -12,8 +12,6 @@
  */
 package org.openhab.core.types.util;
 
-import static java.util.stream.Collectors.toSet;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -21,11 +19,13 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.measure.MetricPrefix;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.UnitConverter;
+import javax.measure.format.MeasurementParseException;
 import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -165,7 +165,7 @@ public class UnitUtils {
             try {
                 Quantity<?> quantity = Quantities.getQuantity("1 " + unitSymbol);
                 return quantity.getUnit();
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | MeasurementParseException e) {
                 // we expect this exception in case the extracted string does not match any known unit
                 LOGGER.debug("Unknown unit from pattern: {}", unitSymbol);
             }
@@ -195,8 +195,8 @@ public class UnitUtils {
 
         // Compare the unit symbols. For product units (e.g. 1km / 1h) the equality is not given in the Sets above.
         if (!differentSystems) {
-            Set<String> siSymbols = siUnits.stream().map(Unit::getSymbol).collect(toSet());
-            Set<String> usSymbols = usUnits.stream().map(Unit::getSymbol).collect(toSet());
+            Set<String> siSymbols = siUnits.stream().map(Unit::getSymbol).collect(Collectors.toSet());
+            Set<String> usSymbols = usUnits.stream().map(Unit::getSymbol).collect(Collectors.toSet());
 
             differentSystems = (siSymbols.contains(thisUnit.getSymbol()) && usSymbols.contains(thatUnit.getSymbol())) //
                     || (siSymbols.contains(thatUnit.getSymbol()) && usSymbols.contains(thisUnit.getSymbol()));
