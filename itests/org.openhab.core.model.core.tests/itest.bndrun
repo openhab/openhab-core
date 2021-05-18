@@ -107,4 +107,5 @@ Fragment-Host: org.openhab.core.model.core
 	org.ops4j.pax.web.pax-web-api;version='[7.3.16,7.3.17)',\
 	org.ops4j.pax.web.pax-web-jetty;version='[7.3.16,7.3.17)',\
 	org.ops4j.pax.web.pax-web-runtime;version='[7.3.16,7.3.17)',\
-	org.ops4j.pax.web.pax-web-spi;version='[7.3.16,7.3.17)'
+	org.ops4j.pax.web.pax-web-spi;version='[7.3.16,7.3.17)',\
+	org.openhab.core.model.rule.runtime;version='[3.1.0,3.1.1)'
