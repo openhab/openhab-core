@@ -12,19 +12,22 @@
  */
 package org.openhab.core.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link TopicEventFilter} is a default openHAB {@link EventFilter} implementation that ensures filtering
  * of events based on an event topic.
- * 
+ *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 public class TopicEventFilter implements EventFilter {
 
     private final String topicRegex;
 
     /**
      * Constructs a new topic event filter.
-     * 
+     *
      * @param topicRegex the regular expression of a topic
      * @see <a href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html">Java Regex</a>
      */

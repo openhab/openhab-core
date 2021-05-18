@@ -181,16 +181,6 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testValidationEvent() {
-        try {
-            eventPublisher.post(null);
-            fail("IllegalArgumentException expected!");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Argument 'event' must not be null.", e.getMessage());
-        }
-    }
-
-    @Test
     public void testValidationType() {
         Event event = createEvent(null, "{a: 'A', b: 'B'}", TOPIC);
         try {

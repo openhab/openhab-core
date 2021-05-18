@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.items.dto.ItemDTO;
 
 /**
@@ -20,6 +21,7 @@ import org.openhab.core.items.dto.ItemDTO;
  *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 public class ItemUpdatedEvent extends AbstractItemRegistryEvent {
 
     private final ItemDTO oldItem;
@@ -49,7 +51,7 @@ public class ItemUpdatedEvent extends AbstractItemRegistryEvent {
 
     /**
      * Gets the old item.
-     * 
+     *
      * @return the oldItem
      */
     public ItemDTO getOldItem() {

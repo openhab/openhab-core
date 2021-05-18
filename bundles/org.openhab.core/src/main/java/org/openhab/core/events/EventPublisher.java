@@ -12,17 +12,20 @@
  */
 package org.openhab.core.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link EventPublisher} posts {@link Event}s through the openHAB event bus in an asynchronous way.
  * Posted events can be received by implementing the {@link EventSubscriber} callback interface.
  *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 public interface EventPublisher {
 
     /**
      * Posts an event through the event bus in an asynchronous way.
-     * 
+     *
      * @param event the event posted through the event bus
      * @throws IllegalArgumentException if the event is null
      * @throws IllegalArgumentException if one of the event properties type, payload or topic is null
