@@ -21,15 +21,19 @@ import org.openhab.core.thing.profiles.StateProfile;
 import org.openhab.core.thing.profiles.SystemProfiles;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the default implementation for a change timestamp profile.
- * The timestamp updates to now each time the channel or item state changes.
+ * The timestamp updates to now each time the Channel state changes.
  *
  * @author Gaël L'hopital - Initial contribution
  */
 @NonNullByDefault
 public class TimestampChangeProfile implements StateProfile {
+
+    private final Logger logger = LoggerFactory.getLogger(TimestampChangeProfile.class);
     private final ProfileCallback callback;
 
     private @Nullable State previousState;
@@ -43,19 +47,17 @@ public class TimestampChangeProfile implements StateProfile {
         return SystemProfiles.TIMESTAMP_CHANGE;
     }
 
-    @SuppressWarnings("null")
     @Override
     public void onStateUpdateFromItem(State state) {
-        if (previousState == null || !state.equals(previousState.as(state.getClass()))) {
-            previousState = state;
-            callback.sendUpdate(new DateTimeType());
-        }
+        // no-op
     }
 
     @SuppressWarnings("null")
     @Override
     public void onStateUpdateFromHandler(State state) {
+        logger.debug("Received state update from Handler");
         if (previousState == null || !state.equals(previousState.as(state.getClass()))) {
+            logger.debug("Item state changed, sending timestamp to callback");
             previousState = state;
             callback.sendUpdate(new DateTimeType());
         }
