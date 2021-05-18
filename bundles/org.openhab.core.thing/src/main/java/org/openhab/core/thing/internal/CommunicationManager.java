@@ -92,6 +92,20 @@ import org.slf4j.LoggerFactory;
 @Component(service = { EventSubscriber.class, CommunicationManager.class }, immediate = true)
 public class CommunicationManager implements EventSubscriber, RegistryChangeListener<ItemChannelLink> {
 
+    private static final Profile NO_OP_PROFILE = new Profile() {
+        private final ProfileTypeUID noOpProfileUID = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "noop");
+
+        @Override
+        public ProfileTypeUID getProfileTypeUID() {
+            return noOpProfileUID;
+        }
+
+        @Override
+        public void onStateUpdateFromItem(State state) {
+            // no-op
+        }
+    };
+
     // how long to cache profile safe call instances
     private static final Duration CACHE_EXPIRATION = Duration.ofMinutes(30);
 
@@ -185,7 +199,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         synchronized (profiles) {
             Profile profile = profiles.get(link.getUID());
             if (profile != null) {
-                logger.trace("using profile '{}' from cache", profile.getProfileTypeUID());
+                logger.trace("Using profile '{}' from cache for link '{}'", profile.getProfileTypeUID(), link);
                 return profile;
             }
             ProfileTypeUID profileTypeUID = determineProfileTypeUID(link, item, thing);
@@ -196,7 +210,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                     return profile;
                 }
             }
-            return new NoOpProfile();
+            logger.trace("No Profile found for link '{}', using NoOpProfile", link);
+            return NO_OP_PROFILE;
         }
     }
 
@@ -223,7 +238,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
             if (profileTypeUID == null) {
                 // ask default advisor
-                logger.trace("No profile advisor found for link {}, falling back to the defaults", link);
+                logger.trace("No profile advisor found for link '{}', falling back to the defaults", link);
                 profileTypeUID = defaultProfileFactory.getSuggestedProfileTypeUID(channel, item.getType());
             }
         }
@@ -262,16 +277,17 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             ProfileCallback callback) {
         ProfileContextImpl context = new ProfileContextImpl(link.getConfiguration());
         if (supportsProfileTypeUID(defaultProfileFactory, profileTypeUID)) {
-            logger.trace("using the default ProfileFactory to create profile '{}'", profileTypeUID);
+            logger.trace("Using the default ProfileFactory to create profile '{}' for link '{}'", profileTypeUID, link);
             return defaultProfileFactory.createProfile(profileTypeUID, callback, context);
         }
         for (Entry<ProfileFactory, Set<String>> entry : profileFactories.entrySet()) {
             ProfileFactory factory = entry.getKey();
             if (supportsProfileTypeUID(factory, profileTypeUID)) {
-                logger.trace("using ProfileFactory '{}' to create profile '{}'", factory, profileTypeUID);
+                logger.trace("Using ProfileFactory '{}' to create profile '{}' for link '{}'", factory, profileTypeUID,
+                        link);
                 Profile profile = factory.createProfile(profileTypeUID, callback, context);
                 if (profile == null) {
-                    logger.error("ProfileFactory '{}' returned 'null' although it claimed it supports item type '{}'",
+                    logger.error("ProfileFactory '{}' returned 'null' although it claimed to support profile '{}'",
                             factory, profileTypeUID);
                 } else {
                     entry.getValue().add(link.getUID());
@@ -279,7 +295,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                 }
             }
         }
-        logger.debug("no ProfileFactory found which supports '{}'", profileTypeUID);
+        logger.warn("No ProfileFactory found which supports profile '{}'", profileTypeUID);
         return null;
     }
 
@@ -310,7 +326,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                         if (p instanceof StateProfile) {
                             ((StateProfile) p).onCommandFromItem(convertedCommand);
                         } else {
-                            throw new IllegalStateException("Expiringcache didn't provide a StateProfile instance!");
+                            throw new IllegalStateException("ExpiringCache didn't provide a StateProfile instance!");
                         }
                     }
                 });
@@ -332,7 +348,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                     if (p != null) {
                         p.onStateUpdateFromItem(convertedState);
                     } else {
-                        throw new IllegalStateException("Expiringcache didn't provide a Profile instance!");
+                        throw new IllegalStateException("ExpiringCache didn't provide a Profile instance!");
                     }
                 });
     }
@@ -618,15 +634,4 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         }
     }
 
-    private static class NoOpProfile implements Profile {
-        @Override
-        public ProfileTypeUID getProfileTypeUID() {
-            return new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "noop");
-        }
-
-        @Override
-        public void onStateUpdateFromItem(State state) {
-            // no-op
-        }
-    }
 }
