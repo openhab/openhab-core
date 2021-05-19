@@ -101,6 +101,7 @@
     <module>org.openhab.core.test.magic</module>
     <module>org.openhab.core.ui</module>
     <module>org.openhab.core.ui.icon</module>
+    <module>org.openhab.core.updater</module>
   </modules>
 
   <properties>
