@@ -474,7 +474,7 @@ public abstract class BaseUpdater implements Runnable {
         }
         // update parameters
         dto.targetNewVersionType = targetNewVersionType.name();
-        dto.newVersionAvailable = getRemoteVersionHigher().toString();
+        dto.newVersionAvailable = getRemoteVersionHigher().label;
 
         return dto;
     }
