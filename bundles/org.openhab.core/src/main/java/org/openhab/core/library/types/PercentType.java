@@ -14,6 +14,7 @@ package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -43,7 +44,11 @@ public class PercentType extends DecimalType {
     }
 
     public PercentType(String value) {
-        super(value);
+        this(value, Locale.ENGLISH);
+    }
+
+    public PercentType(String value, Locale locale) {
+        super(value, locale);
         validateValue(this.value);
     }
 
