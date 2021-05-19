@@ -13,8 +13,10 @@
 package org.openhab.core.thing.link.events;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.thing.ChannelUID;
@@ -28,6 +30,7 @@ import com.google.gson.Gson;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class LinkEventFactoryTest {
     private static final Gson JSONCONVERTER = new Gson();
 

@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.thing.ChannelUID;
@@ -44,6 +45,7 @@ import com.google.gson.Gson;
  * @author Stefan Bußweiler - Initial contribution
  * @author Christoph Weitkamp - Added ChannelStateDescriptionChangedEvent
  */
+@NonNullByDefault
 public class ThingEventFactoryTest {
     private static final Gson JSONCONVERTER = new Gson();
 

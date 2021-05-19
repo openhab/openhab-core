@@ -89,7 +89,7 @@ public class ThingEventFactory extends AbstractEventFactory {
     public static class ChannelDescriptionChangedEventPayloadBean {
         public @NonNullByDefault({}) String field;
         public @NonNullByDefault({}) String channelUID;
-        public @NonNullByDefault({}) Set<String> linkedItemNames;
+        public Set<String> linkedItemNames = Set.of();
 
         /**
          * Default constructor for deserialization e.g. by Gson.
@@ -97,7 +97,6 @@ public class ThingEventFactory extends AbstractEventFactory {
         protected ChannelDescriptionChangedEventPayloadBean() {
         }
 
-        @SuppressWarnings("null")
         public ChannelDescriptionChangedEventPayloadBean(String field, String channelUID, Set<String> linkedItemNames) {
             this.field = field;
             this.channelUID = channelUID;
@@ -115,6 +114,10 @@ public class ThingEventFactory extends AbstractEventFactory {
      */
     public static ChannelDescriptionChangedEvent createChannelDescriptionChangedEvent(String field,
             ChannelUID channelUID, Set<String> linkedItemNames) {
+        checkNotNull(linkedItemNames, "linkedItemNames");
+        checkNotNull(channelUID, "channelUID");
+        checkNotNull(field, "field");
+
         ChannelDescriptionChangedEventPayloadBean bean = new ChannelDescriptionChangedEventPayloadBean(field,
                 channelUID.getAsString(), linkedItemNames);
         String payload = serializePayload(bean);
@@ -123,9 +126,14 @@ public class ThingEventFactory extends AbstractEventFactory {
     }
 
     private ChannelDescriptionChangedEvent createChannelDescriptionChangedEvent(String topic, String payload) {
+        String[] topicElements = getTopicElements(topic);
+        if (topicElements.length != 4) {
+            throw new IllegalArgumentException(
+                    "ChannelDescriptionChangedEvent creation failed, invalid topic: " + topic);
+        }
+        ChannelUID channelUID = new ChannelUID(topicElements[2]);
         ChannelDescriptionChangedEventPayloadBean bean = deserializePayload(payload,
                 ChannelDescriptionChangedEventPayloadBean.class);
-        ChannelUID channelUID = new ChannelUID(bean.channelUID);
         return new ChannelDescriptionChangedEvent(topic, payload, bean.field, channelUID, bean.linkedItemNames);
     }
 
@@ -267,7 +275,7 @@ public class ThingEventFactory extends AbstractEventFactory {
      * @throws IllegalArgumentException if thing is null
      */
     public static ThingAddedEvent createAddedEvent(Thing thing) {
-        assertValidArgument(thing);
+        assertValidThing(thing);
         String topic = buildTopic(THING_ADDED_EVENT_TOPIC, thing.getUID());
         ThingDTO thingDTO = map(thing);
         String payload = serializePayload(thingDTO);
@@ -282,7 +290,7 @@ public class ThingEventFactory extends AbstractEventFactory {
      * @throws IllegalArgumentException if thing is null
      */
     public static ThingRemovedEvent createRemovedEvent(Thing thing) {
-        assertValidArgument(thing);
+        assertValidThing(thing);
         String topic = buildTopic(THING_REMOVED_EVENT_TOPIC, thing.getUID());
         ThingDTO thingDTO = map(thing);
         String payload = serializePayload(thingDTO);
@@ -298,8 +306,8 @@ public class ThingEventFactory extends AbstractEventFactory {
      * @throws IllegalArgumentException if thing or oldThing is null
      */
     public static ThingUpdatedEvent createUpdateEvent(Thing thing, Thing oldThing) {
-        assertValidArgument(thing);
-        assertValidArgument(oldThing);
+        assertValidThing(thing);
+        assertValidThing(oldThing);
         String topic = buildTopic(THING_UPDATED_EVENT_TOPIC, thing.getUID());
         ThingDTO thingDTO = map(thing);
         ThingDTO oldThingDTO = map(oldThing);
@@ -310,7 +318,7 @@ public class ThingEventFactory extends AbstractEventFactory {
         return new ThingUpdatedEvent(topic, payload, thingDTO, oldThingDTO);
     }
 
-    private static void assertValidArgument(Thing thing) {
+    private static void assertValidThing(Thing thing) {
         checkNotNull(thing, "thing");
         checkNotNull(thing.getUID(), "thingUID of the thing");
     }

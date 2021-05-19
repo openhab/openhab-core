@@ -48,8 +48,8 @@ public abstract class AbstractDynamicDescriptionProvider {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected @NonNullByDefault({}) BundleContext bundleContext;
-    protected @NonNullByDefault({}) EventPublisher eventPublisher;
-    protected @NonNullByDefault({}) ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
+    protected @Nullable EventPublisher eventPublisher;
+    protected @Nullable ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
     protected @Nullable ItemChannelLinkRegistry itemChannelLinkRegistry;
 
     /**
