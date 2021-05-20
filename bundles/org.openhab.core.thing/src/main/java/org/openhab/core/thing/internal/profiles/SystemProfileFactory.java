@@ -181,7 +181,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
                 case STATE:
                     return DEFAULT;
                 case TRIGGER:
-                    return TIMESTAMP_TRIGGER;
+                    return null;
                 default:
                     throw new IllegalArgumentException("Unsupported channel kind: " + channel.getKind());
             }
