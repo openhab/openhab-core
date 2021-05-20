@@ -21,8 +21,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public enum PackageManager {
-    UNKNOWN_PACKAGE_MANAGER,
-    DEBIAN_PACKAGE_MANAGER,
-    REDHAT_PACKAGE_MANAGER,
-    GENTOO_PACKAGE_MANAGER;
+    UNKNOWN,
+    DEBIAN_APT,
+    REDHAT_YUM,
+    GENTOO_PORTAGE,
+    ARCH_PACMAN;
 }

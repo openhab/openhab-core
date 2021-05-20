@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
 
 /**
- * The {@link WindowsUpdater} is the shell script for updating OpenHab on this OS
+ * The {@link WindowsUpdater} is the shell script for updating OpenHab on this OS resp. Package Manager.
  *
  * @author AndrewFG - Initial contribution
  */

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# OpenHAB Auto Update Script for Linux / Debian
+# OpenHAB Auto Update Script for Linux / Debian / Apt
 
 # Execute command: [EXEC_COMMAND]
 
