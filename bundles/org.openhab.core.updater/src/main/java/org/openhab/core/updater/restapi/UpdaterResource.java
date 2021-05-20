@@ -31,6 +31,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.updater.dto.DoUpdateDTO;
 import org.openhab.core.updater.dto.StatusDTO;
 import org.openhab.core.updater.updaterclasses.BaseUpdater;
 import org.openhab.core.updater.updaterfactory.UpdaterFactory;
@@ -53,15 +54,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  */
 @Component
 @JaxrsResource
-@JaxrsName(UpdaterResource.URL_PATH)
+@JaxrsName(UpdaterResource.URL_BASE_PATH)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path(UpdaterResource.URL_PATH)
+@Path(UpdaterResource.URL_BASE_PATH)
 @RolesAllowed({ Role.USER, Role.ADMIN })
-@Tag(name = UpdaterResource.URL_PATH)
+@Tag(name = UpdaterResource.URL_BASE_PATH)
 @NonNullByDefault
 public class UpdaterResource implements RESTResource {
 
+    // HTML paramaters
     private static final String HTML_SELECTED = " selected";
     private static final String HTML_VER_NAME = "%id";
     private static final String HTML_VER_TYPE = "%type";
@@ -69,18 +71,8 @@ public class UpdaterResource implements RESTResource {
     private static final String HTML_VERSION_FIELD = "<p>&ensp;&bull;&ensp;" + HTML_VER_NAME + "&emsp;(" + HTML_VER_TYPE
             + ")</p>";
 
-    private static final String RESPONSE_OK = "Request succeeded!";
-    private static final String RESPONSE_STARTED_UPDATE = "Started OpenHAB self update process";
-
-    private static final String BAD_REQUEST = "Bad request!";
-    private static final String BAD_QUERYPARAM_PASSWORD = "Invalid 'password' query parameter (must be without white space and not longer than 20 characters).";
-    private static final Object BAD_QUERYPARAM_USER = "Invalid 'user' query parameter (must be aplha-numeric characters only and not longer than 20 characters).";
-
-    private static final String SERVER_ERROR_UPDATER_MISSING = "Updater class not initialized.";
-
-    public static final String URL_PATH = "updater";
-
-    private static final String HTML_ROOT =
+    // HTML pages
+    private static final String HTML_ROOT_PAGE =
     // @formatter:off
             "<html>"
             + "<body>"
@@ -91,7 +83,7 @@ public class UpdaterResource implements RESTResource {
             + "</html>";
     // @formatter:on
 
-    private static final String HTML_DO_UPDATE =
+    private static final String HTML_DO_UPDATE_PAGE =
     // @formatter:off
             "<html>"
             + "<body>"
@@ -123,68 +115,107 @@ public class UpdaterResource implements RESTResource {
             + "</html>";
     // @formatter:on
 
+    // HTTP 200 OK messages
+    private static final String OK_SUCCESS = "Request succeeded!";
+    private static final String OK_UPDATE_STARTED = "Started OpenHAB self update process";
+
+    // HTTP 400 BAD REQUEST messages
+    private static final String BAD_REQUEST = "Bad request!";
+    private static final String BAD_PASSWORD = "Invalid 'password' parameter (must be without white space and not longer than 20 characters).";
+    private static final String BAD_USER = "Invalid 'user' parameter (must be aplha-numeric characters only and not longer than 20 characters).";
+    private static final String BAD_VERSION = "Invalid 'targetVersion' parameter (must be STABLE / MILSETONE/ SNAPSHOT).";
+    private static final String BAD_DTO = "Missing JSON DTO.";
+
+    // HTTP 500 INTERNAL SERVER ERROR messages
+    private static final String INT_SERV_ERR_UPDATER_NULL = "Updater class not initialized.";
+
+    public static final String URL_BASE_PATH = "updater";
+
     private @Nullable BaseUpdater updater;
 
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    /**
+     * We use a <strong>static</strong> and <strong>single thread</strong> executor here, in order to synchronise
+     * multiple doUpdate method calls both a) within the same class instance, and b) across multiple class instances.
+     */
+    private static final ExecutorService updateExecutor = Executors.newSingleThreadExecutor();
 
     @Activate
     public UpdaterResource() {
         this.updater = UpdaterFactory.newUpdater();
     }
 
+    /**
+     * This method handles HTTP GET on the updater resource's root '/' path.
+     * It serves an HTML page with links to its two sub- paths.
+     *
+     * @return HTTP 200 OK, or HTTP 500 INTERNAL SERVER ERROR if the updater is null.
+     */
     @GET
     @Path("/")
     @Produces(MediaType.TEXT_HTML)
-    @Operation(operationId = "rootGET", summary = "Root page.", responses = {
-            @ApiResponse(responseCode = "200", description = RESPONSE_OK),
-            @ApiResponse(responseCode = "500", description = SERVER_ERROR_UPDATER_MISSING) })
-    public Response rootGET() {
+    @Operation(operationId = "rootGet", summary = "Root page.", responses = {
+            @ApiResponse(responseCode = "200", description = OK_SUCCESS),
+            @ApiResponse(responseCode = "500", description = INT_SERV_ERR_UPDATER_NULL) })
+    public Response rootGet() {
         BaseUpdater updater = this.updater;
 
         // return server error if updater is null
         if (updater == null) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(SERVER_ERROR_UPDATER_MISSING).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(INT_SERV_ERR_UPDATER_NULL).build();
         }
 
         // return the HTML form
-        return Response.status(Response.Status.OK).entity(HTML_ROOT).type(MediaType.TEXT_HTML).build();
+        return Response.status(Response.Status.OK).entity(HTML_ROOT_PAGE).type(MediaType.TEXT_HTML).build();
     }
 
+    /**
+     * This method handles HTTP GET on the updater resource's getStatus path.
+     * It serves a JSON DTO containing the updater status.
+     *
+     * @return HTTP 200 OK, or HTTP 500 INTERNAL SERVER ERROR if the updater is null.
+     */
     @GET
     @Path("/getStatus")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getStatus", summary = "Get the updater status.", responses = {
-            @ApiResponse(responseCode = "200", description = RESPONSE_OK),
-            @ApiResponse(responseCode = "500", description = SERVER_ERROR_UPDATER_MISSING) })
-    public Response getStatus() {
+    @Operation(operationId = "getStatusGet", summary = "Get the updater status.", responses = {
+            @ApiResponse(responseCode = "200", description = OK_SUCCESS),
+            @ApiResponse(responseCode = "500", description = INT_SERV_ERR_UPDATER_NULL) })
+    public Response getStatusGet() {
         BaseUpdater updater = this.updater;
 
         // return server error if updater is null
         if (updater == null) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(SERVER_ERROR_UPDATER_MISSING).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(INT_SERV_ERR_UPDATER_NULL).build();
         }
 
         // populate and return the DTO
         return Response.ok(updater.getStatusDTO()).build();
     }
 
+    /**
+     * This method handles HTTP GET on the updater resource's '/doUpdate' path.
+     * It serves an HTML page containing an HTML FORM for submitting a request to the updater for starting the update
+     * process.
+     *
+     * @return HTTP 200 OK, or HTTP 500 INTERNAL SERVER ERROR if the updater is null.
+     */
     @GET
     @Path("/doUpdate")
     @Produces(MediaType.TEXT_HTML)
     @Operation(operationId = "doUpdateGET", summary = "Initiate update of OpenHAB.", responses = {
-            @ApiResponse(responseCode = "200", description = RESPONSE_OK),
-            @ApiResponse(responseCode = "500", description = SERVER_ERROR_UPDATER_MISSING) })
+            @ApiResponse(responseCode = "200", description = OK_SUCCESS),
+            @ApiResponse(responseCode = "500", description = INT_SERV_ERR_UPDATER_NULL) })
     public Response doUpdateGET() {
         BaseUpdater updater = this.updater;
 
         // return server error if updater is null
         if (updater == null) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(SERVER_ERROR_UPDATER_MISSING).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(INT_SERV_ERR_UPDATER_NULL).build();
         }
 
         // construct the html form
         StatusDTO dto = updater.getStatusDTO();
-        String html = HTML_DO_UPDATE;
+        String html = HTML_DO_UPDATE_PAGE;
         html = html.replaceFirst(HTML_VER_NAME, dto.actualVersion.versionName);
         html = html.replaceFirst(HTML_VER_TYPE, dto.actualVersion.versionType);
         String newVerType = dto.targetNewVersionType;
@@ -200,23 +231,32 @@ public class UpdaterResource implements RESTResource {
         return Response.status(Response.Status.OK).entity(html).type(MediaType.TEXT_HTML).build();
     }
 
+    /**
+     * This method handles HTTP POST on the updater resource's '/doUpdate' path.
+     * It specifically handles the case where the posted content is type 'APPLICATION_FORM_URLENCODED'.
+     * It accepts the respective Form Parameters, and if they are OK starts the updater's update process.
+     * It serves a PLAIN TEXT response indicating success or failure.
+     *
+     * @return HTTP 200 OK, HTTP 400 BAD REQUEST if the Form Parameters have errors, or HTTP 500 INTERNAL SERVER ERROR
+     *         if the updater is null.
+     */
     @POST
     // FOR RELEASE BUILD: un-comment the following line
     // @ RolesAllowed({ Role.ADMIN })
     @Path("/doUpdate")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "doUpdatePOST", summary = "Initiate update of OpenHAB.", responses = {
-            @ApiResponse(responseCode = "200", description = RESPONSE_OK),
+    @Operation(operationId = "doUpdatePostForm", summary = "Initiate update of OpenHAB.", responses = {
+            @ApiResponse(responseCode = "200", description = OK_SUCCESS),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST),
-            @ApiResponse(responseCode = "500", description = SERVER_ERROR_UPDATER_MISSING) })
-    public Response doUpdatePOST(@FormParam("targetNewVersionType") @Nullable String targetNewVersionType,
+            @ApiResponse(responseCode = "500", description = INT_SERV_ERR_UPDATER_NULL) })
+    public Response doUpdatePostForm(@FormParam("targetNewVersionType") @Nullable String targetNewVersionType,
             @FormParam("user") @Nullable String user, @FormParam("password") @Nullable String password) {
         BaseUpdater updater = this.updater;
 
         // return server error if updater is null
         if (updater == null) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(SERVER_ERROR_UPDATER_MISSING).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(INT_SERV_ERR_UPDATER_NULL).build();
         }
 
         // check user name e.g. on Linux
@@ -224,30 +264,94 @@ public class UpdaterResource implements RESTResource {
             try {
                 updater.setNewVersionType(targetNewVersionType);
             } catch (IllegalArgumentException e) {
-                return Response.status(Status.BAD_REQUEST).entity(BAD_QUERYPARAM_USER).build();
+                return Response.status(Status.BAD_REQUEST).entity(BAD_VERSION).build();
             }
         }
 
-        // check user name e.g. on Linux
+        // check user name
         if (user != null) {
             try {
                 updater.setUserName(user);
             } catch (IllegalArgumentException e) {
-                return Response.status(Status.BAD_REQUEST).entity(BAD_QUERYPARAM_USER).build();
+                return Response.status(Status.BAD_REQUEST).entity(BAD_USER).build();
             }
         }
 
-        // check password e.g. on Linux
+        // check password
         if (password != null) {
             try {
                 updater.setPassword(password);
             } catch (IllegalArgumentException e) {
-                return Response.status(Status.BAD_REQUEST).entity(BAD_QUERYPARAM_PASSWORD).build();
+                return Response.status(Status.BAD_REQUEST).entity(BAD_PASSWORD).build();
             }
         }
 
-        // start the update process
-        executorService.submit(updater);
-        return Response.ok(RESPONSE_STARTED_UPDATE).build();
+        // submit the updater's run() method for execution
+        updateExecutor.submit(updater);
+        return Response.ok(OK_UPDATE_STARTED).build();
+    }
+
+    /**
+     * This method handles HTTP POST on the updater resource's '/doUpdate' path.
+     * It specifically handles the case where the posted content is type 'APPLICATION_JSON'.
+     * It accepts the respective JSON DTO, and if the parameters are OK starts the updater's update process.
+     * It serves a PLAIN TEXT response indicating success or failure.
+     *
+     * @return HTTP 200 OK, HTTP 400 BAD REQUEST if the JSON DTO parameters have errors, or HTTP 500 INTERNAL SERVER
+     *         ERROR if the updater is null.
+     */
+    @POST
+    // FOR RELEASE BUILD: un-comment the following line
+    // @ RolesAllowed({ Role.ADMIN })
+    @Path("/doUpdate")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "doUpdatePostJson", summary = "Initiate update of OpenHAB.", responses = {
+            @ApiResponse(responseCode = "200", description = OK_SUCCESS),
+            @ApiResponse(responseCode = "400", description = BAD_REQUEST),
+            @ApiResponse(responseCode = "500", description = INT_SERV_ERR_UPDATER_NULL) })
+    public Response doUpdatePostJson(@Nullable DoUpdateDTO dto) {
+        BaseUpdater updater = this.updater;
+
+        // return server error if updater is null
+        if (updater == null) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(INT_SERV_ERR_UPDATER_NULL).build();
+        }
+
+        // return bad request error if JSON DTO is null
+        if (dto == null) {
+            return Response.status(Status.BAD_REQUEST).entity(BAD_DTO).build();
+        }
+
+        // check targetNewVersionType
+        if (dto.targetNewVersionType != null) {
+            try {
+                updater.setNewVersionType(dto.targetNewVersionType);
+            } catch (IllegalArgumentException e) {
+                return Response.status(Status.BAD_REQUEST).entity(BAD_VERSION).build();
+            }
+        }
+
+        // check user name
+        if (dto.user != null) {
+            try {
+                updater.setUserName(dto.user);
+            } catch (IllegalArgumentException e) {
+                return Response.status(Status.BAD_REQUEST).entity(BAD_USER).build();
+            }
+        }
+
+        // check password
+        if (dto.password != null) {
+            try {
+                updater.setPassword(dto.password);
+            } catch (IllegalArgumentException e) {
+                return Response.status(Status.BAD_REQUEST).entity(BAD_PASSWORD).build();
+            }
+        }
+
+        // submit the updater's run() method for execution
+        updateExecutor.submit(updater);
+        return Response.ok(OK_UPDATE_STARTED).build();
     }
 }
