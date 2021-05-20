@@ -107,7 +107,7 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
             parameterOptionsList.add(new ParameterOption(entry.getKey(), entry.getValue()));
         }
         final ConfigDescriptionParameter scriptType = ConfigDescriptionParameterBuilder.create("type", Type.TEXT)
-                .withRequired(true).withReadOnly(true).withMultiple(false).withLabel("Script Type")
+                .withRequired(true).withMultiple(false).withLabel("Script Type")
                 .withDescription("the scripting language used").withOptions(parameterOptionsList)
                 .withLimitToOptions(true).build();
         final ConfigDescriptionParameter script = ConfigDescriptionParameterBuilder.create("script", Type.TEXT)
