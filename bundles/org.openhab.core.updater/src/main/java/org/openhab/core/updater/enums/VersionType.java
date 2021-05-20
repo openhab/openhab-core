@@ -22,8 +22,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public enum VersionType {
     STABLE("stable"),
-    MILESTONE("unstable"),
-    SNAPSHOT("testing"),
+    MILESTONE("testing"),
+    SNAPSHOT("unstable"),
     UNKNOWN("unkown");
 
     public final String label;
