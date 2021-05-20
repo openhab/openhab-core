@@ -15,7 +15,7 @@ package org.openhab.core.updater.updaterclasses;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link YumUpdater} is the shell script for updating OpenHab on this OS
+ * The {@link YumUpdater} is the shell script for updating OpenHab on this OS resp. Package Manager.
  *
  * @author AndrewFG - Initial contribution
  */
