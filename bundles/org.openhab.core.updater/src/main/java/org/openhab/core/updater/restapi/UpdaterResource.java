@@ -137,7 +137,7 @@ public class UpdaterResource implements RESTResource {
      * We use a <strong>static</strong> and <strong>single thread</strong> executor here, in order to synchronise
      * multiple doUpdate method calls both a) within the same class instance, and b) across multiple class instances.
      */
-    private static final ExecutorService updateExecutor = Executors.newSingleThreadExecutor();
+    private static final ExecutorService UPDATE_EXECUTOR = Executors.newSingleThreadExecutor();
 
     @Activate
     public UpdaterResource() {
@@ -287,7 +287,7 @@ public class UpdaterResource implements RESTResource {
         }
 
         // submit the updater's run() method for execution
-        updateExecutor.submit(updater);
+        UPDATE_EXECUTOR.submit(updater);
         return Response.ok(OK_UPDATE_STARTED).build();
     }
 
@@ -351,7 +351,7 @@ public class UpdaterResource implements RESTResource {
         }
 
         // submit the updater's run() method for execution
-        updateExecutor.submit(updater);
+        UPDATE_EXECUTOR.submit(updater);
         return Response.ok(OK_UPDATE_STARTED).build();
     }
 }
