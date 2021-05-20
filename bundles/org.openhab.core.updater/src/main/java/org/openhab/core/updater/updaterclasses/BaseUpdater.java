@@ -66,8 +66,9 @@ public abstract class BaseUpdater implements Runnable {
 
     private static final String TITLE = "OpenHAB Updater";
 
-    private static final String RELEASE_ARTIFACT_URL = "https://openhab.jfrog.io/artifactory/libs-release-local/org/openhab/distro/openhab/maven-metadata.xml";
-    private static final String MILESTONE_ARTIFACT_URL = "https://openhab.jfrog.io/artifactory/libs-milestone-local/org/openhab/distro/openhab/maven-metadata.xml";
+    private static final String ARTIFACT_URL_RELEASE = "https://openhab.jfrog.io/artifactory/libs-release-local/org/openhab/distro/openhab/maven-metadata.xml";
+    private static final String ARTIFACT_URL_MILESTONE = "https://openhab.jfrog.io/artifactory/libs-milestone-local/org/openhab/distro/openhab/maven-metadata.xml";
+    private static final String ARTIFACT_URL_SNAPSHOT = "https://openhab.jfrog.io/artifactory/libs-snapshot-local/org/openhab/distro/openhab/maven-metadata.xml";
 
     private static final String SNAPSHOT = "SNAPSHOT";
 
@@ -215,17 +216,20 @@ public abstract class BaseUpdater implements Runnable {
      */
     public void setPassword(String password) throws IllegalArgumentException {
         boolean fail = false;
+
         // prevent buffer overrun by checking that the string length is <= 20 (say)
         if (password.length() > 20) {
             fail = true;
-        }
-        // prevent script injection by checking that the string contains no whitespace
-        for (int i = 0; i < password.length(); i++) {
-            if (Character.isWhitespace(password.charAt(i))) {
-                fail = true;
-                break;
+        } else {
+            // prevent script injection by checking that the string contains no whitespace
+            for (int i = 0; i < password.length(); i++) {
+                if (Character.isWhitespace(password.charAt(i))) {
+                    fail = true;
+                    break;
+                }
             }
         }
+
         if (fail) {
             IllegalArgumentException e = new IllegalArgumentException(
                     String.format("Password %s is invalid.", password));
@@ -243,17 +247,20 @@ public abstract class BaseUpdater implements Runnable {
      */
     public void setUserName(String userName) throws IllegalArgumentException {
         boolean fail = false;
+
         // prevent buffer overrun by checking that the string length is <= 20 (say)
         if (userName.length() > 20) {
             fail = true;
-        }
-        // prevent script injection by checking that the string contains only alpha-numeric characters
-        for (int i = 0; i < userName.length(); i++) {
-            if (!Character.isLetterOrDigit(userName.charAt(i))) {
-                fail = true;
-                break;
+        } else {
+            // prevent script injection by checking that the string contains only alpha-numeric characters
+            for (int i = 0; i < userName.length(); i++) {
+                if (!Character.isLetterOrDigit(userName.charAt(i))) {
+                    fail = true;
+                    break;
+                }
             }
         }
+
         if (fail) {
             IllegalArgumentException e = new IllegalArgumentException(
                     String.format("User name %s is invalid.", userName));
@@ -295,17 +302,11 @@ public abstract class BaseUpdater implements Runnable {
     private String getRemoteLatestVersion(VersionType verType) {
         switch (verType) {
             case STABLE:
-                return getArtifactoryLatestVersion(RELEASE_ARTIFACT_URL);
+                return getArtifactoryLatestVersion(ARTIFACT_URL_RELEASE);
             case MILESTONE:
-                return getArtifactoryLatestVersion(MILESTONE_ARTIFACT_URL);
+                return getArtifactoryLatestVersion(ARTIFACT_URL_MILESTONE);
             case SNAPSHOT:
-                String actVer = getActualVersion();
-                if (!VERSION_NOT_DEFINED.equals(actVer) && !actVer.isEmpty()) {
-                    if (actVer.chars().filter(ch -> ch == '.').count() < 3) {
-                        return actVer + "-" + SNAPSHOT;
-                    }
-                    return actVer.substring(0, actVer.lastIndexOf(".")) + "-" + SNAPSHOT;
-                }
+                return getArtifactoryLatestVersion(ARTIFACT_URL_SNAPSHOT);
             default:
         }
         return VERSION_NOT_DEFINED;
@@ -357,6 +358,7 @@ public abstract class BaseUpdater implements Runnable {
                 new BigInteger(actVer.substring(actVer.lastIndexOf(".") + 1));
                 return VersionType.SNAPSHOT;
             } catch (NumberFormatException e) {
+                // it's not a valid snapshot suffix
             }
         }
         return VersionType.STABLE;
@@ -433,23 +435,28 @@ public abstract class BaseUpdater implements Runnable {
      * @return latest available OpenHAB version or UNKNOWN_VERSION
      */
     private String getArtifactoryLatestVersion(String url) {
-        String result = VERSION_NOT_DEFINED;
-        XMLStreamReader reader;
+        XMLStreamReader reader = null;
         try {
             reader = XMLInputFactory.newInstance().createXMLStreamReader(new URL(url).openStream());
             while (reader.hasNext()) {
                 if (reader.next() == XMLStreamConstants.START_ELEMENT) {
                     if ("latest".equals(reader.getLocalName())) {
-                        result = reader.getElementText();
-                        break;
+                        return reader.getElementText();
                     }
                 }
             }
-            reader.close();
         } catch (IOException | XMLStreamException e) {
-            logger.debug("Error reading maven metadata from artifactory: {}", e.getMessage());
+            logger.debug("Error reading maven metadata file: {}", e.getMessage());
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (XMLStreamException e) {
+                    logger.debug("Error closing maven metadata file: {}", e.getMessage());
+                }
+            }
         }
-        return result;
+        return VERSION_NOT_DEFINED;
     }
 
     /**
@@ -506,11 +513,12 @@ public abstract class BaseUpdater implements Runnable {
      * @return true if all place holders are non empty strings
      */
     private boolean checkPlaceHoldersExist() {
-        boolean fail = false;
         for (PlaceHolder placeHolder : PlaceHolder.values()) {
-            fail = fail || (placeHolders.get(placeHolder) == null);
+            if (placeHolders.get(placeHolder) == null) {
+                return false;
+            }
         }
-        return !fail;
+        return true;
     }
 
     /**
