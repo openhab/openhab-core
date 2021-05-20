@@ -10,9 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.updater;
+package org.openhab.core.updater.test;
 
-import org.junit.Test;
+import static org.junit.Assert.*;
+
+import org.junit.jupiter.api.Test;
 import org.openhab.core.updater.dto.StatusDTO;
 import org.openhab.core.updater.updaterclasses.BaseUpdater;
 import org.openhab.core.updater.updaterclasses.WindowsUpdater;
@@ -25,8 +27,14 @@ import org.openhab.core.updater.updaterclasses.WindowsUpdater;
 class Tester {
 
     @Test
-    void test() {
+    void testDto() throws Exception {
         BaseUpdater uu = new WindowsUpdater();
         StatusDTO dto = uu.getStatusDTO();
+        assertNotNull(dto);
+        assertEquals("VERSION_NOT_DEFINED", dto.actualVersion.versionName);
+        assertEquals(3, dto.latestVersionCount.intValue());
+        assertEquals("SNAPSHOT", dto.latestVersions[2].versionType);
+        assertEquals("no", dto.newVersionAvailable);
+        assertEquals("UNKNOWN", dto.targetNewVersionType);
     }
 }
