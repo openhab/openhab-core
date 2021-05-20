@@ -99,6 +99,9 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * The English locale is used to determine (decimal/grouping) separator characters.
      *
      * @param value the non null value representing a quantity with an optional unit.
+     *
+     * @throws NumberFormatException when a quantity without a unit could not be parsed
+     * @throws IllegalArgumentException when a quantity with a unit could not be parsed
      */
     public QuantityType(String value) {
         this(value, Locale.ENGLISH);
@@ -110,6 +113,9 @@ public class QuantityType<T extends Quantity<T>> extends Number
      *
      * @param value the non null value representing a quantity with an optional unit.
      * @param locale the locale used to determine (decimal/grouping) separator characters.
+     *
+     * @throws NumberFormatException when a quantity without a unit could not be parsed
+     * @throws IllegalArgumentException when a quantity with a unit could not be parsed
      */
     @SuppressWarnings("unchecked")
     public QuantityType(String value, Locale locale) {
@@ -123,7 +129,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
             ParsePosition position = new ParsePosition(0);
             BigDecimal parsedValue = (BigDecimal) df.parseObject(value, position);
             if (parsedValue == null || position.getErrorIndex() != -1 || position.getIndex() < value.length()) {
-                throw new IllegalArgumentException("Invalid BigDecimal value: " + value);
+                throw new NumberFormatException("Invalid BigDecimal value: " + value);
             }
             quantity = (Quantity<T>) Quantities.getQuantity(parsedValue, AbstractUnit.ONE, Scale.RELATIVE);
         } else {
@@ -190,6 +196,15 @@ public class QuantityType<T extends Quantity<T>> extends Number
         return toFullString();
     }
 
+    /**
+     * Static access to {@link QuantityType#QuantityType(String)}.
+     *
+     * @param value the non null value representing a quantity with an optional unit
+     * @return a new {@link QuantityType}
+     *
+     * @throws NumberFormatException when a quantity without a unit could not be parsed
+     * @throws IllegalArgumentException when a quantity with a unit could not be parsed
+     */
     public static QuantityType<? extends Quantity<?>> valueOf(String value) {
         return new QuantityType<>(value);
     }

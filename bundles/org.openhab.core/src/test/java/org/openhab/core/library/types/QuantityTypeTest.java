@@ -84,7 +84,8 @@ public class QuantityTypeTest {
 
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123 Hello World"));
 
-        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("°C"));
+        assertThrows(NumberFormatException.class, () -> new QuantityType<>("abc"));
+        assertThrows(NumberFormatException.class, () -> new QuantityType<>("°C"));
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>(". °C"));
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("1 2 °C"));
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123..56 °C"));
@@ -92,7 +93,8 @@ public class QuantityTypeTest {
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123.123,56 °C"));
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123٬123٫56 °C"));
 
-        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("°C", Locale.ENGLISH));
+        assertThrows(NumberFormatException.class, () -> new QuantityType<>("abc", Locale.ENGLISH));
+        assertThrows(NumberFormatException.class, () -> new QuantityType<>("°C", Locale.ENGLISH));
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>(". °C", Locale.ENGLISH));
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("1 2 °C", Locale.ENGLISH));
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123..56 °C", Locale.ENGLISH));
@@ -100,7 +102,8 @@ public class QuantityTypeTest {
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123.123,56 °C", Locale.ENGLISH));
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123٬123٫56 °C", Locale.ENGLISH));
 
-        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("°C", Locale.GERMAN));
+        assertThrows(NumberFormatException.class, () -> new QuantityType<>("abc", Locale.GERMAN));
+        assertThrows(NumberFormatException.class, () -> new QuantityType<>("°C", Locale.GERMAN));
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>(", °C", Locale.GERMAN));
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("1 2 °C", Locale.GERMAN));
         assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123,,56 °C", Locale.GERMAN));

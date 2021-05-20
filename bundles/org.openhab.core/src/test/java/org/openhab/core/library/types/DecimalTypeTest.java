@@ -12,6 +12,7 @@
  */
 package org.openhab.core.library.types;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.text.DecimalFormatSymbols;
@@ -43,6 +44,38 @@ public class DecimalTypeTest {
                 Locale.forLanguageTag("de-DE"),
                 // ., (English, United States)
                 Locale.forLanguageTag("en-US"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void testKnownInvalidConstructors(Locale locale) {
+        Locale.setDefault(locale);
+
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123 Hello World"));
+
+        assertThrows(NumberFormatException.class, () -> new DecimalType(""));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("."));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("1 2"));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123..56"));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123abc56"));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123.123,56"));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123٬123٫56"));
+
+        assertThrows(NumberFormatException.class, () -> new DecimalType("", Locale.ENGLISH));
+        assertThrows(NumberFormatException.class, () -> new DecimalType(".", Locale.ENGLISH));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("1 2", Locale.ENGLISH));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123..56", Locale.ENGLISH));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123abc56", Locale.ENGLISH));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123.123,56", Locale.ENGLISH));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123٬123٫56", Locale.ENGLISH));
+
+        assertThrows(NumberFormatException.class, () -> new DecimalType("", Locale.GERMAN));
+        assertThrows(NumberFormatException.class, () -> new DecimalType(",", Locale.GERMAN));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("1 2", Locale.GERMAN));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123,,56", Locale.GERMAN));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123abc56", Locale.GERMAN));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123,123.56", Locale.GERMAN));
+        assertThrows(NumberFormatException.class, () -> new DecimalType("123٬123٫56", Locale.GERMAN));
     }
 
     @ParameterizedTest

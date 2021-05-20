@@ -56,17 +56,33 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         this.value = BigDecimal.valueOf(value);
     }
 
+    /**
+     * Creates a new {@link DecimalType} with the given value.
+     * The English locale is used to determine (decimal/grouping) separator characters.
+     *
+     * @param value the non null value representing a number
+     *
+     * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
+     */
     public DecimalType(String value) {
         this(value, Locale.ENGLISH);
     }
 
+    /**
+     * Creates a new {@link DecimalType} with the given value.
+     *
+     * @param value the non null value representing a number
+     * @param locale the locale used to determine (decimal/grouping) separator characters
+     *
+     * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
+     */
     public DecimalType(String value, Locale locale) {
         DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(locale);
         df.setParseBigDecimal(true);
         ParsePosition position = new ParsePosition(0);
         BigDecimal parsedValue = (BigDecimal) df.parseObject(value, position);
         if (parsedValue == null || position.getErrorIndex() != -1 || position.getIndex() < value.length()) {
-            throw new IllegalArgumentException("Invalid BigDecimal value: " + value);
+            throw new NumberFormatException("Invalid BigDecimal value: " + value);
         }
         this.value = parsedValue;
     }
@@ -81,6 +97,14 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         return value.toPlainString();
     }
 
+    /**
+     * Static access to {@link DecimalType#DecimalType(String)}.
+     *
+     * @param value the non null value representing a number
+     * @return a new {@link DecimalType}
+     *
+     * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
+     */
     public static DecimalType valueOf(String value) {
         return new DecimalType(value);
     }
