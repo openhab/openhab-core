@@ -28,7 +28,7 @@ public class PacManUpdater extends DebianUpdater {
      */
 
     /**
-     * This updater's methods are not yet implemented, so log it and throw an exception.
+     * This updater's script has not yet been implemented, so log an error and throw an exception.
      *
      * @throws UnsupportedOperationException
      */
