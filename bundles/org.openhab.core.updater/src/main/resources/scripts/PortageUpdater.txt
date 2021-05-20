@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# OpenHAB Auto Update Script for Linux / Gentoo / Portage
+
+# Execute command: [EXEC_COMMAND]
+
+# newline for clean log output
+echo
+
+# ignore SIGTERM so this script isn't killed when OpenHAB shuts down
+trap "" 15
+
+# stop OpenHAB
+systemctl stop openhab.service <<<"[PASSWORD]"
+
+# place holder for future implementation 
+echo "Updater not yet implemented. => Please request!"
+
+# start OpenHAB
+systemctl start openhab.service <<<"[PASSWORD]"

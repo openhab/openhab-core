@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
 
 /**
- * The {@link MacUpdater} is the shell script for updating OpenHab on this OS
+ * The {@link MacUpdater} is the shell script for updating OpenHab on this OS resp. Package Manager.
  *
  * @author AndrewFG - initial contribution
  */
@@ -29,11 +29,16 @@ public class MacUpdater extends BaseUpdater {
             + EXEC_FILENAME + " >/dev/null 2>&1";
     private static final String RUNTIME_FOLDER = OpenHAB.getUserDataFolder().replace("userdata", "runtime");
 
+    /**
+     * This updater class is not been fully implemented and tested, so in the meantime log this fact.
+     */
     @Override
-    protected void initializeExtendedPlaceholders() {
+    protected void initializeExtendedPlaceholders() throws UnsupportedOperationException {
         placeHolders.put(PlaceHolder.EXEC_FOLDER, EXEC_FOLDER);
         placeHolders.put(PlaceHolder.EXEC_FILENAME, EXEC_FILENAME);
         placeHolders.put(PlaceHolder.EXEC_COMMAND, EXEC_COMMAND);
         placeHolders.put(PlaceHolder.RUNTIME_FOLDER, RUNTIME_FOLDER);
+        // TODO complete this class
+        logger.warn("This class of updater has not yet been implemented. Please request!");
     }
 }

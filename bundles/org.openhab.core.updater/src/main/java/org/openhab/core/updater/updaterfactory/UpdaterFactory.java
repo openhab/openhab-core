@@ -24,7 +24,10 @@ import org.openhab.core.updater.enums.PackageManager;
 import org.openhab.core.updater.updaterclasses.BaseUpdater;
 import org.openhab.core.updater.updaterclasses.DebianUpdater;
 import org.openhab.core.updater.updaterclasses.MacUpdater;
+import org.openhab.core.updater.updaterclasses.PacManUpdater;
+import org.openhab.core.updater.updaterclasses.PortageUpdater;
 import org.openhab.core.updater.updaterclasses.WindowsUpdater;
+import org.openhab.core.updater.updaterclasses.YumUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,13 +59,13 @@ public class UpdaterFactory {
             for (String propertyKey : PROPERTY_KEYS) {
                 if (properties.containsKey(propertyKey)) {
                     if (properties.getProperty(propertyKey).contains("debian")) {
-                        return PackageManager.DEBIAN_PACKAGE_MANAGER;
+                        return PackageManager.DEBIAN_APT;
                     }
                     if (properties.getProperty(propertyKey).contains("fedora")) {
-                        return PackageManager.REDHAT_PACKAGE_MANAGER;
+                        return PackageManager.REDHAT_YUM;
                     }
                     if (properties.getProperty(propertyKey).contains("gentoo")) {
-                        return PackageManager.GENTOO_PACKAGE_MANAGER;
+                        return PackageManager.GENTOO_PORTAGE;
                     }
                 }
             }
@@ -70,7 +73,7 @@ public class UpdaterFactory {
         } catch (IOException e) {
             LOGGER.debug("Errror reading property file: {}, '{}'", PROPERTY_FILE, e.getMessage());
         }
-        return PackageManager.UNKNOWN_PACKAGE_MANAGER;
+        return PackageManager.UNKNOWN;
     }
 
     /**
@@ -83,22 +86,28 @@ public class UpdaterFactory {
      * @return an instance of the respective xxxUpdater class
      */
     public static @Nullable BaseUpdater newUpdater() {
-        switch (OperatingSystem.getOperatingSystemVersion()) {
+        OperatingSystem opSys = OperatingSystem.getOperatingSystemVersion();
+        switch (opSys) {
             case WINDOWS:
                 return new WindowsUpdater();
             case MAC:
                 return new MacUpdater();
             case UNIX:
-                switch (getLinuxPackageManager()) {
-                    case DEBIAN_PACKAGE_MANAGER:
+                PackageManager pkgMan = getLinuxPackageManager();
+                switch (pkgMan) {
+                    case DEBIAN_APT:
                         return new DebianUpdater();
-                    case REDHAT_PACKAGE_MANAGER:
-                        // TODO return new RedHatUpdater();
-                    case GENTOO_PACKAGE_MANAGER:
-                        // TODO return new GentooUpdater();
+                    case REDHAT_YUM:
+                        return new YumUpdater();
+                    case GENTOO_PORTAGE:
+                        return new PortageUpdater();
+                    case ARCH_PACMAN:
+                        return new PacManUpdater();
                     default:
+                        LOGGER.debug("Updater not yet available for {} {}. => Please request.", opSys, pkgMan);
                 }
             default:
+                LOGGER.debug("Updater not yet available for {}. => Please request.", opSys);
         }
         return null;
     }
