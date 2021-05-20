@@ -14,6 +14,7 @@ package org.openhab.core.updater.test;
 
 import static org.junit.Assert.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.updater.dto.StatusDTO;
 import org.openhab.core.updater.updaterclasses.BaseUpdater;
@@ -24,6 +25,7 @@ import org.openhab.core.updater.updaterclasses.WindowsUpdater;
  *
  * @author AndrewFG - Initial contribution
  */
+@NonNullByDefault
 class Tester {
 
     @Test

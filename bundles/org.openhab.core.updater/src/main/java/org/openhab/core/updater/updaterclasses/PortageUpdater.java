@@ -35,10 +35,9 @@ public class PortageUpdater extends DebianUpdater {
      */
     @Override
     protected void initializeExtendedPlaceholders() throws UnsupportedOperationException {
-        // TODO complete this class
         UnsupportedOperationException e = new UnsupportedOperationException(
                 "This class of updater has not yet been implemented. Please request!");
-        logger.warn(e.getMessage());
+        logger.warn("{}", e.getMessage());
         throw e;
     }
 }
