@@ -45,6 +45,32 @@ public class PercentTypeTest {
     }
 
     @ParameterizedTest
+    @MethodSource("locales")
+    public void testKnownInvalidConstructors(Locale locale) {
+        Locale.setDefault(locale);
+
+        assertThrows(NumberFormatException.class, () -> new PercentType("123 Hello World"));
+
+        assertThrows(NumberFormatException.class, () -> new PercentType(""));
+        assertThrows(NumberFormatException.class, () -> new PercentType("."));
+        assertThrows(NumberFormatException.class, () -> new PercentType("1 2"));
+        assertThrows(NumberFormatException.class, () -> new PercentType("1..56"));
+        assertThrows(NumberFormatException.class, () -> new PercentType("1abc"));
+
+        assertThrows(NumberFormatException.class, () -> new PercentType("", Locale.ENGLISH));
+        assertThrows(NumberFormatException.class, () -> new PercentType(".", Locale.ENGLISH));
+        assertThrows(NumberFormatException.class, () -> new PercentType("1 2", Locale.ENGLISH));
+        assertThrows(NumberFormatException.class, () -> new PercentType("1..56", Locale.ENGLISH));
+        assertThrows(NumberFormatException.class, () -> new PercentType("1abc", Locale.ENGLISH));
+
+        assertThrows(NumberFormatException.class, () -> new PercentType("", Locale.GERMAN));
+        assertThrows(NumberFormatException.class, () -> new PercentType(",", Locale.GERMAN));
+        assertThrows(NumberFormatException.class, () -> new PercentType("1 2", Locale.GERMAN));
+        assertThrows(NumberFormatException.class, () -> new PercentType("1,,56", Locale.GERMAN));
+        assertThrows(NumberFormatException.class, () -> new PercentType("1abc", Locale.GERMAN));
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = { "0", "0.000", "0.001", "2", "2.5", "0E0", "0E-22", "10E-3", "1E2" })
     public void testValidConstructors(String value) {
         new PercentType(value);
