@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.updater.dto.StatusDTO;
+import org.openhab.core.updater.dto.GetStateDTO;
 import org.openhab.core.updater.updaterclasses.BaseUpdater;
 import org.openhab.core.updater.updaterclasses.WindowsUpdater;
 
@@ -31,7 +31,7 @@ class Tester {
     @Test
     void testDto() throws Exception {
         BaseUpdater uu = new WindowsUpdater();
-        StatusDTO dto = uu.getStatusDTO();
+        GetStateDTO dto = uu.getStatusDTO();
         assertNotNull(dto);
         assertEquals("VERSION_NOT_DEFINED", dto.actualVersion.versionName);
         assertEquals(3, dto.latestVersionCount.intValue());

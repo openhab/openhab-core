@@ -17,7 +17,7 @@ package org.openhab.core.updater.dto;
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
-public class DoUpdateDTO {
+public class StartUpdateDTO {
     public String targetNewVersionType;
     public String user;
     public String password;

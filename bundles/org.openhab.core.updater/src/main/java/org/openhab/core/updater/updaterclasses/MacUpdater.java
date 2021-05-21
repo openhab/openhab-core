@@ -38,7 +38,7 @@ public class MacUpdater extends BaseUpdater {
         placeHolders.put(PlaceHolder.EXEC_FILENAME, EXEC_FILENAME);
         placeHolders.put(PlaceHolder.EXEC_COMMAND, EXEC_COMMAND);
         placeHolders.put(PlaceHolder.RUNTIME_FOLDER, RUNTIME_FOLDER);
-        // TODO complete this class
-        logger.warn("This class of updater has not yet been implemented. Please request!");
+
+        logger.warn("This class of updater has not yet been completed. Please request!");
     }
 }
