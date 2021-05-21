@@ -38,7 +38,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
-import org.openhab.core.updater.dto.StatusDTO;
+import org.openhab.core.updater.dto.GetStateDTO;
 import org.openhab.core.updater.dto.VersionDTO;
 import org.openhab.core.updater.enums.TriState;
 import org.openhab.core.updater.enums.VersionType;
@@ -464,8 +464,8 @@ public abstract class BaseUpdater implements Runnable {
      *
      * @return the DTO
      */
-    public StatusDTO getStatusDTO() {
-        StatusDTO dto = new StatusDTO();
+    public GetStateDTO getStatusDTO() {
+        GetStateDTO dto = new GetStateDTO();
         // actual running version
         dto.actualVersion = new VersionDTO();
         dto.actualVersion.versionName = getActualVersion();

@@ -17,7 +17,7 @@ package org.openhab.core.updater.dto;
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
-public class StatusDTO {
+public class GetStateDTO {
     public VersionDTO actualVersion;
     public Integer latestVersionCount;
     public VersionDTO[] latestVersions;
