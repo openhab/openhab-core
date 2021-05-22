@@ -18,8 +18,6 @@
 					"type": "TEXT",
 					"label": "Operator",
 					"description": "the compare operator (one of =,<,>,!=,>=,<=)",
-					"required": false,
-					"limitToOptions": true,
 					"options": [
 						{
 							"label": "=",
@@ -46,7 +44,7 @@
 							"value": "<="
 						}
 					],
-					"default": "="
+					"defaultValue": "="
 				},
 				{
 					"name": "state",

@@ -20,7 +20,7 @@
 					"label": "Consider Conditions",
 					"description": "Specifies whether the conditions of the target rule(s) to be executed should be considered or not.",
 					"required": true,
-					"default": true,
+					"defaultValue": true,
 					"options": [
 						{
 							"label": "Yes",

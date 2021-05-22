@@ -66,7 +66,7 @@
 					"type": "TEXT",
 					"description": "the compare operator, allowed are <,>,=,!=,>=,<= matches",
 					"required": true,
-					"default": "="
+					"defaultValue": "="
 				}
 			],
 			"inputs": [

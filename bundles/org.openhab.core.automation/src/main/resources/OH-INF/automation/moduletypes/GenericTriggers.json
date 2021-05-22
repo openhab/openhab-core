@@ -12,23 +12,21 @@
 					"label": "Topic",
 					"description": "This is the topic, the trigger will listen to: >>openhab/*<<",
 					"required": true,
-					"default": "openhab/*"
+					"defaultValue": "openhab/*"
 				},
 				{
 					"name": "eventSource",
 					"type": "TEXT",
 					"label": "Source",
 					"description": "This is the source of the event (eg. item name)",
-					"required": true,
-					"default": ""
+					"required": true
 				},
 				{
 					"name": "eventTypes",
 					"type": "TEXT",
 					"label": "Event Type",
 					"description": "the event type, the trigger should listen to. Multiple types can be specified comma-separated",
-					"required": true,
-					"default": ""
+					"required": true
 				}
 			],
 			"outputs": [
