@@ -27,6 +27,7 @@ import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.dto.ThingDTOMapper;
+import org.openhab.core.thing.events.ChannelDescriptionChangedEvent.CommonChannelDescriptionField;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -87,9 +88,11 @@ public class ThingEventFactory extends AbstractEventFactory {
     }
 
     public static class ChannelDescriptionChangedEventPayloadBean {
-        public @NonNullByDefault({}) String field;
+        public @NonNullByDefault({}) CommonChannelDescriptionField field;
         public @NonNullByDefault({}) String channelUID;
         public Set<String> linkedItemNames = Set.of();
+        public @NonNullByDefault({}) Object value;
+        public @Nullable Object oldValue;
 
         /**
          * Default constructor for deserialization e.g. by Gson.
@@ -97,10 +100,13 @@ public class ThingEventFactory extends AbstractEventFactory {
         protected ChannelDescriptionChangedEventPayloadBean() {
         }
 
-        public ChannelDescriptionChangedEventPayloadBean(String field, String channelUID, Set<String> linkedItemNames) {
+        public ChannelDescriptionChangedEventPayloadBean(CommonChannelDescriptionField field, String channelUID,
+                Set<String> linkedItemNames, Object value, @Nullable Object oldvalue) {
             this.field = field;
             this.channelUID = channelUID;
             this.linkedItemNames = linkedItemNames;
+            this.value = value;
+            this.oldValue = oldvalue;
         }
     }
 
@@ -110,19 +116,23 @@ public class ThingEventFactory extends AbstractEventFactory {
      * @param field the changed field
      * @param channelUID the {@link ChannelUID}
      * @param linkedItemNames a {@link Set} of linked item names
+     * @param value the new value
+     * @param oldValue the old value
      * @return Created {@link ChannelDescriptionChangedEvent}
      */
-    public static ChannelDescriptionChangedEvent createChannelDescriptionChangedEvent(String field,
-            ChannelUID channelUID, Set<String> linkedItemNames) {
+    public static ChannelDescriptionChangedEvent createChannelDescriptionChangedEvent(
+            CommonChannelDescriptionField field, ChannelUID channelUID, Set<String> linkedItemNames, Object value,
+            @Nullable Object oldValue) {
         checkNotNull(linkedItemNames, "linkedItemNames");
         checkNotNull(channelUID, "channelUID");
         checkNotNull(field, "field");
+        checkNotNull(value, "value");
 
         ChannelDescriptionChangedEventPayloadBean bean = new ChannelDescriptionChangedEventPayloadBean(field,
-                channelUID.getAsString(), linkedItemNames);
+                channelUID.getAsString(), linkedItemNames, value, oldValue);
         String payload = serializePayload(bean);
         String topic = buildTopic(CHANNEL_DESCRIPTION_CHANGED_TOPIC, channelUID);
-        return new ChannelDescriptionChangedEvent(topic, payload, field, channelUID, linkedItemNames);
+        return new ChannelDescriptionChangedEvent(topic, payload, field, channelUID, linkedItemNames, value, oldValue);
     }
 
     private ChannelDescriptionChangedEvent createChannelDescriptionChangedEvent(String topic, String payload) {
@@ -134,7 +144,8 @@ public class ThingEventFactory extends AbstractEventFactory {
         ChannelUID channelUID = new ChannelUID(topicElements[2]);
         ChannelDescriptionChangedEventPayloadBean bean = deserializePayload(payload,
                 ChannelDescriptionChangedEventPayloadBean.class);
-        return new ChannelDescriptionChangedEvent(topic, payload, bean.field, channelUID, bean.linkedItemNames);
+        return new ChannelDescriptionChangedEvent(topic, payload, bean.field, channelUID, bean.linkedItemNames,
+                bean.value, bean.oldValue);
     }
 
     /**

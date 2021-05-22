@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.events.ChannelDescriptionChangedEvent.CommonChannelDescriptionField;
 import org.openhab.core.thing.i18n.ChannelTypeI18nLocalizationService;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeUID;
@@ -57,7 +58,8 @@ public abstract class BaseDynamicCommandDescriptionProvider extends AbstractDyna
         List<CommandOption> oldOptions = channelOptionsMap.get(channelUID);
         if (!options.equals(oldOptions)) {
             channelOptionsMap.put(channelUID, options);
-            postChannelDescriptionChangedEvent("command-options", channelUID);
+            postChannelDescriptionChangedEvent(CommonChannelDescriptionField.COMMAND_OPTIONS, channelUID, options,
+                    oldOptions);
         }
     }
 

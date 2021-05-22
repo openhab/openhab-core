@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEvent;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.types.CommandDescription;
@@ -31,6 +32,13 @@ import org.openhab.core.types.StateDescription;
 @NonNullByDefault
 public class ChannelDescriptionChangedEvent extends AbstractEvent {
 
+    public enum CommonChannelDescriptionField {
+        ALL,
+        COMMAND_OPTIONS,
+        PATTERN,
+        STATE_OPTIONS
+    };
+
     /**
      * The channel description changed event type.
      */
@@ -39,7 +47,7 @@ public class ChannelDescriptionChangedEvent extends AbstractEvent {
     /**
      * The changed field.
      */
-    private String field;
+    private CommonChannelDescriptionField field;
 
     /**
      * The channel which triggered the event.
@@ -52,6 +60,16 @@ public class ChannelDescriptionChangedEvent extends AbstractEvent {
     private final Set<String> linkedItemNames;
 
     /**
+     * The new value.
+     */
+    private final Object value;
+
+    /**
+     * The old value.
+     */
+    private final @Nullable Object oldValue;
+
+    /**
      * Creates a new instance.
      *
      * @param topic the topic
@@ -60,12 +78,14 @@ public class ChannelDescriptionChangedEvent extends AbstractEvent {
      * @param channelUID the {@link ChannelUID}
      * @param linkedItemNames a {@link Set} of linked item names
      */
-    protected ChannelDescriptionChangedEvent(String topic, String payload, String field, ChannelUID channelUID,
-            Set<String> linkedItemNames) {
+    protected ChannelDescriptionChangedEvent(String topic, String payload, CommonChannelDescriptionField field,
+            ChannelUID channelUID, Set<String> linkedItemNames, Object value, @Nullable Object oldValue) {
         super(topic, payload, null);
         this.field = field;
         this.channelUID = channelUID;
         this.linkedItemNames = linkedItemNames;
+        this.value = value;
+        this.oldValue = oldValue;
     }
 
     @Override
@@ -78,7 +98,7 @@ public class ChannelDescriptionChangedEvent extends AbstractEvent {
      *
      * @return the changed field
      */
-    public String getField() {
+    public CommonChannelDescriptionField getField() {
         return field;
     }
 
@@ -100,9 +120,28 @@ public class ChannelDescriptionChangedEvent extends AbstractEvent {
         return linkedItemNames;
     }
 
+    /**
+     * Gets the new value.
+     *
+     * @return the new value.
+     */
+    public Object getValue() {
+        return value;
+    }
+
+    /**
+     * Gets the old value.
+     *
+     * @return the old value.
+     */
+    public @Nullable Object getOldValue() {
+        return oldValue;
+    }
+
     @Override
     public String toString() {
-        return String.format("Description for '%s' of channel '%s' changed for linked items: %s", field, channelUID,
-                linkedItemNames.stream().collect(Collectors.joining(",", "[", "]")));
+        return String.format(
+                "Description for field '%s' of channel '%s' changed from '%s' to '%s' for linked items: %s", field,
+                channelUID, oldValue, value, linkedItemNames.stream().collect(Collectors.joining(",", "[", "]")));
     }
 }

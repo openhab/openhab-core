@@ -20,6 +20,7 @@ import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.events.ChannelDescriptionChangedEvent;
+import org.openhab.core.thing.events.ChannelDescriptionChangedEvent.CommonChannelDescriptionField;
 import org.openhab.core.thing.events.ThingEventFactory;
 import org.openhab.core.thing.i18n.ChannelTypeI18nLocalizationService;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
@@ -59,9 +60,11 @@ public abstract class AbstractDynamicDescriptionProvider {
      * @param field the changed field
      * @param channelUID the {@link ChannelUID}
      */
-    protected void postChannelDescriptionChangedEvent(String field, ChannelUID channelUID) {
+    protected void postChannelDescriptionChangedEvent(CommonChannelDescriptionField field, ChannelUID channelUID,
+            Object value, @Nullable Object oldValue) {
         postEvent(ThingEventFactory.createChannelDescriptionChangedEvent(field, channelUID,
-                itemChannelLinkRegistry != null ? itemChannelLinkRegistry.getLinkedItemNames(channelUID) : Set.of()));
+                itemChannelLinkRegistry != null ? itemChannelLinkRegistry.getLinkedItemNames(channelUID) : Set.of(),
+                value, oldValue));
     }
 
     /**
