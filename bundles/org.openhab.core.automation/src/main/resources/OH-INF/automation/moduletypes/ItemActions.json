@@ -53,7 +53,10 @@
 					"name": "command",
 					"type": "command",
 					"label": "Command",
-					"description": "command that will be sent to the item."
+					"description": "command that will be sent to the item.",
+					"tags": [
+						"command"
+					]
 				}
 			]
 		},
@@ -110,7 +113,10 @@
 					"name": "state",
 					"type": "state",
 					"label": "State",
-					"description": "state that the item will be set to."
+					"description": "state that the item will be set to.",
+					"tags": [
+						"state"
+					]
 				}
 			]
 		}
