@@ -22,13 +22,8 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.io.rest</artifactId>
+      <artifactId>org.openhab.core.io.http</artifactId>
       <version>3.1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.8.5</version>
     </dependency>
     <dependency>
       <groupId>com.jcraft</groupId>
