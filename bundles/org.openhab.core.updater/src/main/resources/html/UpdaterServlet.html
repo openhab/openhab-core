@@ -101,28 +101,33 @@ input.field {
     <div class="message">
         <label>HTML_TOP_MESSAGE</label>
     </div>
-    <div class="message" HTML_HIDE_ALL>
-        <label>Current Running Version:</label><br>
-        <br>HTML_VER_NAME&ensp;HTML_VER_TYPE
-    </div>
-    <form method="POST" action="HTML_ACTION_URL" HTML_HIDE_ALL>
+    <form method="POST" action="HTML_SUBMIT_URL" HTML_FORM_HIDDEN>
+        <div class="message">
+            <label>Enter <b>OpenHAB</b> credentials:</label><br><br>
+            <input class="field" autocomplete="off" type="text" placeholder="User name" name="openhabuser"/><br>
+            <input class="field" type="password" placeholder="Password" name="openhabpassword"/>
+        </div>
+	    <div class="message">
+	        <label>Current Running Version:</label><br>
+	        <br>&bull;&ensp;HTML_VERSION_NAME&emsp;(HTML_VERSION_TYPE)
+	    </div>
         <div class="message">
             <label>Select Target Update Version:</label><br>
-            <br><input type="radio" id="stable" name="targetNewVersionType" value="STABLE" HTML_CHECKED><label for="stable">&ensp;HTML_VER_NAME&ensp;HTML_VER_TYPE</label>
-            <br><input type="radio" id="milestone" name="targetNewVersionType" value="MILESTONE" HTML_CHECKED><label for="milestone">&ensp;HTML_VER_NAME&ensp;HTML_VER_TYPE</label>
-            <br><input type="radio" id="snapshot" name="targetNewVersionType" value="SNAPSHOT" HTML_CHECKED><label for="snapshot">&ensp;HTML_VER_NAME&ensp;HTML_VER_TYPE</label>
+            <br><input type="radio" id="stable" name="targetNewVersionType" value="STABLE" HTML_VERSION_CHECKED><label for="stable">&ensp;HTML_VERSION_NAME&emsp;(HTML_VERSION_TYPE)</label>
+            <br><input type="radio" id="milestone" name="targetNewVersionType" value="MILESTONE" HTML_VERSION_CHECKED><label for="milestone">&ensp;HTML_VERSION_NAME&emsp;(HTML_VERSION_TYPE)</label>
+            <br><input type="radio" id="snapshot" name="targetNewVersionType" value="SNAPSHOT" HTML_VERSION_CHECKED><label for="snapshot">&ensp;HTML_VERSION_NAME&emsp;(HTML_VERSION_TYPE)</label>
         </div>
-        <div class="message" HTML_HIDE_CREDS>
-            <label>Enter System Credentials (if applicable):</label><br><br>
-            <input class="field" autocomplete="off" type="text" placeholder="system user name" name="user"/><br>
-            <input class="field" type="password" placeholder="system password" name="password"/>
+        <div class="message" HTML_CREDENTIALS_HIDDEN>
+            <label>Enter <b>System</b> credentials (if applicable):</label><br><br>
+            <input class="field" autocomplete="off" type="text" placeholder="System user name" name="systemuser"/><br>
+            <input class="field" type="password" placeholder="System password" name="systempassword"/>
         </div>
         <div>   
             <input class="submit" type="Submit" value="Start Updating" />
         </div>
     </form>
     <div>
-        <a class="submit" type="button" href="/">HTML_RET_BUT_LABEL</a>
+        <a class="submit" type="button" href="/">HTML_BOTTOM_BUTTON_LABEL</a>
     </div>
 </body>
 </html>
