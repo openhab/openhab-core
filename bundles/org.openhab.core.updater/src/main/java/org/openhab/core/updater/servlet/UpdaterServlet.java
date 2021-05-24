@@ -207,7 +207,7 @@ public class UpdaterServlet extends OpenHABServlet {
 
             // the credentials can be hidden on some Operating Systems (e.g. Windows)
             html = html.replaceFirst(HTML_CREDENTIALS_HIDDEN,
-                    OperatingSystem.getOperatingSystemVersion() == OperatingSystem.WINDOWS ? "hidden=\"true\"" : "");
+                    OperatingSystem.getOperatingSystemVersion().requiresCredentials() ? "" : "hidden=\"true\"");
 
             // apply action url on submit button
             html = html.replaceFirst(HTML_SUBMIT_URL, URI_START_UPDATE);

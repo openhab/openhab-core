@@ -46,4 +46,8 @@ public enum OperatingSystem {
         }
         return OperatingSystem.UNKNOWN;
     }
+
+    public boolean requiresCredentials() {
+        return (this != WINDOWS) && (this != MAC);
+    }
 }
