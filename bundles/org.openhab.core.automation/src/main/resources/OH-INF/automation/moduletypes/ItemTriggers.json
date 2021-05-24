@@ -53,7 +53,10 @@
 					"name": "command",
 					"type": "command",
 					"description": "the received command",
-					"label": "Command"
+					"label": "Command",
+					"tags": [
+						"command"
+					]
 				},
 				{
 					"name": "event",

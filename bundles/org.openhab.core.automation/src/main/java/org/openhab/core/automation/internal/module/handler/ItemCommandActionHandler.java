@@ -107,14 +107,16 @@ public class ItemCommandActionHandler extends BaseActionModuleHandler {
                 Item item = itemRegistry.getItem(itemName);
 
                 Command commandObj = null;
-                Object cmd = inputs.get(COMMAND);
-
-                if (cmd instanceof Command) {
-                    if (item.getAcceptedCommandTypes().contains(cmd.getClass())) {
-                        commandObj = (Command) cmd;
-                    }
-                } else {
+                if (command != null) {
                     commandObj = TypeParser.parseCommand(item.getAcceptedCommandTypes(), command);
+                } else {
+                    Object cmd = inputs.get(COMMAND);
+
+                    if (cmd instanceof Command) {
+                        if (item.getAcceptedCommandTypes().contains(cmd.getClass())) {
+                            commandObj = (Command) cmd;
+                        }
+                    }
                 }
                 if (commandObj != null) {
                     ItemCommandEvent itemCommandEvent = ItemEventFactory.createCommandEvent(itemName, commandObj);
@@ -122,7 +124,7 @@ public class ItemCommandActionHandler extends BaseActionModuleHandler {
                             itemCommandEvent.getItemName(), itemCommandEvent.getItemCommand());
                     eventPublisher.post(itemCommandEvent);
                 } else {
-                    logger.warn("Command '{}' is not valid for item '{}'.", command, itemName);
+                    logger.debug("Command '{}' is not valid for item '{}'.", command, itemName);
                 }
             } catch (ItemNotFoundException e) {
                 logger.error("Item with name {} not found in ItemRegistry.", itemName);
