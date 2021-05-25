@@ -12,7 +12,6 @@
  */
 package org.openhab.core.config.discovery.internal;
 
-import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -113,23 +112,23 @@ public class InboxOSGiTest extends JavaOSGiTest {
     private static final ThingUID OTHER_BRIDGE_THING_UID = new ThingUID(THING_TYPE_UID, "id5");
 
     private static final DiscoveryResult BRIDGE = DiscoveryResultBuilder.create(BRIDGE_THING_UID)
-            .withThingType(BRIDGE_THING_TYPE_UID).withRepresentationProperty("Bridge1").withLabel("bridge")
-            .withTTL(DEFAULT_TTL).build();
+            .withThingType(BRIDGE_THING_TYPE_UID).withProperty("Bridge1", "12345").withRepresentationProperty("Bridge1")
+            .withLabel("bridge").withTTL(DEFAULT_TTL).build();
     private static final DiscoveryResult THING1_WITH_BRIDGE = DiscoveryResultBuilder
             .create(new ThingUID(THING_TYPE_UID, BRIDGE_THING_UID, "id1")).withThingType(THING_TYPE_UID)
-            .withBridge(BRIDGE_THING_UID).withRepresentationProperty("Thing1").withLabel("thing1").withTTL(DEFAULT_TTL)
-            .build();
+            .withBridge(BRIDGE_THING_UID).withRepresentationProperty("Thing1").withProperty("Thing1", "12345")
+            .withLabel("thing1").withTTL(DEFAULT_TTL).build();
     private static final DiscoveryResult THING2_WITH_BRIDGE = DiscoveryResultBuilder
             .create(new ThingUID(THING_TYPE_UID, BRIDGE_THING_UID, "id2")).withThingType(THING_TYPE_UID)
-            .withBridge(BRIDGE_THING_UID).withRepresentationProperty("Thing2").withLabel("thing2").withTTL(DEFAULT_TTL)
-            .build();
+            .withBridge(BRIDGE_THING_UID).withRepresentationProperty("Thing2").withProperty("Thing2", "12345")
+            .withLabel("thing2").withTTL(DEFAULT_TTL).build();
     private static final DiscoveryResult THING_WITHOUT_BRIDGE = DiscoveryResultBuilder
-            .create(new ThingUID(THING_TYPE_UID, "id3")).withThingType(THING_TYPE_UID)
+            .create(new ThingUID(THING_TYPE_UID, "id3")).withThingType(THING_TYPE_UID).withProperty("Thing3", "12345")
             .withRepresentationProperty("Thing3").withLabel("thing3").withTTL(DEFAULT_TTL).build();
     private static final DiscoveryResult THING_WITH_OTHER_BRIDGE = DiscoveryResultBuilder
             .create(new ThingUID(THING_TYPE_UID, OTHER_BRIDGE_THING_UID, "id4")).withThingType(THING_TYPE_UID)
-            .withBridge(OTHER_BRIDGE_THING_UID).withRepresentationProperty("Thing4").withLabel("thing4")
-            .withTTL(DEFAULT_TTL).build();
+            .withBridge(OTHER_BRIDGE_THING_UID).withProperty("Thing4", "12345").withRepresentationProperty("Thing4")
+            .withLabel("thing4").withTTL(DEFAULT_TTL).build();
 
     private final URI testURI = createURI("http:dummy");
     private final String testThingLabel = "dummy_thing";
@@ -158,10 +157,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
     private final ThingType testThingType = ThingTypeBuilder.instance(testTypeUID, "label")
             .withConfigDescriptionURI(testURI).build();
     private final ConfigDescription testConfigDescription = ConfigDescriptionBuilder.create(testURI)
-            .withParameters(Stream.of(
+            .withParameters(List.of(
                     ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.get(0), Type.TEXT).build(),
-                    ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.get(1), Type.INTEGER).build())
-                    .collect(toList()))
+                    ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.get(1), Type.INTEGER).build()))
             .build();
     private final String[] keysInConfigDescription = new String[] { discoveryResultPropertyKeys.get(0),
             discoveryResultPropertyKeys.get(1) };
@@ -688,7 +686,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(InboxAddedEvent.TYPE, InboxRemovedEvent.TYPE, InboxUpdatedEvent.TYPE).collect(toSet());
+                return Set.of(InboxAddedEvent.TYPE, InboxRemovedEvent.TYPE, InboxUpdatedEvent.TYPE);
             }
 
             @Override
@@ -733,7 +731,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(InboxAddedEvent.TYPE, InboxRemovedEvent.TYPE, InboxUpdatedEvent.TYPE).collect(toSet());
+                return Set.of(InboxAddedEvent.TYPE, InboxRemovedEvent.TYPE, InboxUpdatedEvent.TYPE);
             }
 
             @Override
@@ -759,7 +757,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
                 .anyMatch(forThingUID(THING1_WITH_BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
         assertFalse(inbox.stream()
                 .anyMatch(forThingUID(THING2_WITH_BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
-        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(toList()),
+        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()),
                 hasItems(THING_WITHOUT_BRIDGE, THING_WITH_OTHER_BRIDGE));
         waitForAssert(() -> {
             assertThat(receivedEvents.size(), is(3));
@@ -781,7 +779,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(InboxAddedEvent.TYPE, InboxRemovedEvent.TYPE, InboxUpdatedEvent.TYPE).collect(toSet());
+                return Set.of(InboxAddedEvent.TYPE, InboxRemovedEvent.TYPE, InboxUpdatedEvent.TYPE);
             }
 
             @Override
@@ -801,7 +799,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
         registry.add(BridgeBuilder.create(BRIDGE_THING_TYPE_UID, BRIDGE_THING_UID).build());
         assertFalse(inbox.stream().anyMatch(forThingUID(BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
-        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(toList()),
+        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()),
                 hasItems(THING1_WITH_BRIDGE, THING2_WITH_BRIDGE, THING_WITHOUT_BRIDGE));
         waitForAssert(() -> {
             assertThat(receivedEvents.size(), is(1));
@@ -823,7 +821,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(InboxAddedEvent.TYPE, InboxRemovedEvent.TYPE, InboxUpdatedEvent.TYPE).collect(toSet());
+                return Set.of(InboxAddedEvent.TYPE, InboxRemovedEvent.TYPE, InboxUpdatedEvent.TYPE);
             }
 
             @Override
@@ -840,7 +838,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         inbox.add(THING2_WITH_BRIDGE);
         inbox.add(THING_WITHOUT_BRIDGE);
         inbox.add(THING_WITH_OTHER_BRIDGE);
-        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(toList()),
+        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()),
                 hasItems(THING1_WITH_BRIDGE, THING2_WITH_BRIDGE, THING_WITHOUT_BRIDGE, THING_WITH_OTHER_BRIDGE));
 
         registry.forceRemove(BRIDGE.getThingUID());
@@ -850,7 +848,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
                     .anyMatch(forThingUID(THING1_WITH_BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
             assertFalse(inbox.stream()
                     .anyMatch(forThingUID(THING2_WITH_BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
-            assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(toList()),
+            assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()),
                     hasItems(THING_WITHOUT_BRIDGE, THING_WITH_OTHER_BRIDGE));
         });
     }
