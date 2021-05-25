@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Map;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -136,8 +138,8 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
         callback.statusUpdated(thing, ThingStatusInfoBuilder.create(ThingStatus.ONLINE).build());
 
         DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(THING_UID).withThingType(THING_TYPE_UID)
-                .withProperty(cfgIpAddressKey, cfgIpAddressValue).withRepresentationProperty("DummyRepr")
-                .withLabel("DummyLabel1").withTTL(DEFAULT_TTL).build();
+                .withProperties(Map.of(cfgIpAddressKey, cfgIpAddressValue, "DummyRepr", "12345"))
+                .withRepresentationProperty("DummyRepr").withLabel("DummyLabel1").withTTL(DEFAULT_TTL).build();
 
         inbox.add(discoveryResult);
 
