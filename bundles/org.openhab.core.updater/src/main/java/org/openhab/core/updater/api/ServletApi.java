@@ -10,13 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.updater.servlet;
+package org.openhab.core.updater.api;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +28,7 @@ import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.openhab.core.io.http.servlet.OpenHABServlet;
-import org.openhab.core.updater.dto.GetStateDTO;
+import org.openhab.core.updater.dto.UpdaterStatusDTO;
 import org.openhab.core.updater.enums.OperatingSystem;
 import org.openhab.core.updater.updaterclasses.BaseUpdater;
 import org.openhab.core.updater.updaterfactory.UpdaterFactory;
@@ -50,10 +48,10 @@ import com.google.gson.Gson;
  */
 @Component(immediate = true)
 @NonNullByDefault
-public class UpdaterServlet extends OpenHABServlet {
+public class ServletApi extends OpenHABServlet {
     private static final long serialVersionUID = 5439260400198671435L;
 
-    // User texts
+    // ui texts
     private static final String TOP_MESSAGE_INITIAL = "OpenHAB Self- Updater";
     private static final String TOP_MESSAGE_TRY_AGAIN = "<b>Input error: Please try again..</b>";
     private static final String TOP_MESSAGE_UPDATE_STARTED = "<b>Update process has started..</b>";
@@ -61,37 +59,30 @@ public class UpdaterServlet extends OpenHABServlet {
     private static final String BOTTOM_BUTTON_HOME = "Home";
 
     // error messages
-    private static final String ERR_UNSECURE = "Unsecure access forbidden!";
     private static final String ERR_UPDATER_NULL = "Updater not found!";
     private static final String ERR_NOT_FOUND = "Resource not found!";
 
     // HTML customisation parameters
     private static final String HTML_TOP_MESSAGE = "HTML_TOP_MESSAGE";
-    private static final String HTML_SUBMIT_URL = "HTML_SUBMIT_URL";
     private static final String HTML_FORM_HIDDEN = "HTML_FORM_HIDDEN";
     private static final String HTML_VERSION_NAME = "HTML_VERSION_NAME";
     private static final String HTML_VERSION_TYPE = "HTML_VERSION_TYPE";
     private static final String HTML_VERSION_CHECKED = "HTML_VERSION_CHECKED";
     private static final String HTML_CREDENTIALS_HIDDEN = "HTML_CREDENTIALS_HIDDEN";
     private static final String HTML_BOTTOM_BUTTON_LABEL = "HTML_BOTTOM_BUTTON_LABEL";
+    private static final String HTML_URL_CHOICE_0 = "HTML_URL_CHOICE_0";
+    private static final String HTML_URL_CHOICE_1 = "HTML_URL_CHOICE_1";
+    private static final String HTML_URL_CHOICE_HIDDEN = "HTML_URL_CHOICE_HIDDEN";
 
     // the port number of the OpenHAB HTTPS server
-    private static final int OPENHAB_HTTPS_PORT = 8443;
+    // private static final int OPENHAB_HTTPS_PORT = 8443;
 
-    // the URIs that the servlet accepts
-    public static final String URI_BASE = "/updater/";
-    public static final String URI_ALIAS = URI_BASE + "*";
-    public static final String URI_GET_STATUS = URI_BASE + "getstatus";
-    public static final String URI_START_UPDATE = URI_BASE + "startupdate";
+    private static final String URI_ALIAS = "/" + ApiConstants.URI_BASE + "/*";
+    private static final String URI_STATUS = "/" + ApiConstants.URI_BASE + ApiConstants.URI_STATUS;
+    private static final String URI_EXECUTE = "/" + ApiConstants.URI_BASE + ApiConstants.URI_EXECUTE;
 
-    /**
-     * We use a <strong>static</strong> and <strong>single thread</strong> executor here, in order to synchronise
-     * multiple doUpdate method calls both a) within the same class instance, and b) across multiple class instances.
-     */
-    private static final ExecutorService UPDATE_EXECUTOR = Executors.newSingleThreadExecutor();
-
-    private static final boolean HIDE = true;
-    private static final boolean SHOW = !HIDE;
+    private static final boolean HIDE_FORM = true;
+    private static final boolean SHOW_FORM = !HIDE_FORM;
 
     private String htmlTemplate = "";
     private @Nullable BaseUpdater updater;
@@ -100,7 +91,7 @@ public class UpdaterServlet extends OpenHABServlet {
     // =============== Constructor ===============
 
     @Activate
-    public UpdaterServlet(@Reference HttpService httpService, @Reference HttpContext httpContext,
+    public ServletApi(@Reference HttpService httpService, @Reference HttpContext httpContext,
             @Reference UserRegistry userRegistry) {
         super(httpService, httpContext);
         this.userRegistry = userRegistry;
@@ -140,12 +131,12 @@ public class UpdaterServlet extends OpenHABServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String uri = request.getRequestURI();
-        if (URI_GET_STATUS.equals(uri)) {
-            doGetState(request, response);
+        if (URI_STATUS.equals(uri)) {
+            doGetStatus(request, response);
             return;
         }
-        if (URI_START_UPDATE.equals(uri)) {
-            doGetStartUpdate(request, response);
+        if (URI_EXECUTE.equals(uri)) {
+            doGetExecute(request, response);
             return;
         }
         setResponse(HttpStatus.NOT_FOUND_404, ERR_NOT_FOUND, response);
@@ -159,8 +150,8 @@ public class UpdaterServlet extends OpenHABServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String uri = request.getRequestURI();
-        if (URI_START_UPDATE.equals(uri)) {
-            doPostStartUpdate(request, response);
+        if (URI_EXECUTE.equals(uri)) {
+            doPostExecute(request, response);
             return;
         }
         setResponse(HttpStatus.NOT_FOUND_404, ERR_NOT_FOUND, response);
@@ -172,24 +163,27 @@ public class UpdaterServlet extends OpenHABServlet {
      * Creates and formats the HTML form. It starts off with the htmlTemplate and replaces all the HTML_xxx markers in
      * it depending on the input parameters below.
      *
-     * @param topMessage the message at the top of the form.
-     * @param middleElementsHidden selects if the HTML elements between top message and bottom button are hidden; if
+     * @param message the message at the top of the form.
+     * @param formHidden selects if the HTML elements between top message and bottom button are hidden; if
      *            true then only top message and bottom button can be seen.
-     * @param bottomButtonLabel the label on the bottom button.
+     * @param buttonLabel the label on the bottom button.
+     * @param urlChoice0 choice 0 for the form action submit url
+     * @param urlChoice1 choice 1 for the form action submit url
      * @return
      */
-    private String getFormattedPageHTML(String topMessage, boolean middleElementsHidden, String bottomButtonLabel) {
+    private String getFormattedExecutePageHTML(HttpServletRequest request, String message, boolean formHidden,
+            String buttonLabel) {
         String html = "";
         if (updater != null) {
-            GetStateDTO dto = updater.getStatusDTO();
+            UpdaterStatusDTO dto = updater.getStatusDTO();
 
             html = htmlTemplate;
 
             // top message text
-            html = html.replaceFirst(HTML_TOP_MESSAGE, topMessage);
+            html = html.replaceFirst(HTML_TOP_MESSAGE, message);
 
             // apply hidden attribute on all fields except return button
-            html = html.replace(HTML_FORM_HIDDEN, middleElementsHidden ? "hidden=\"true\"" : "");
+            html = html.replace(HTML_FORM_HIDDEN, formHidden ? "hidden=\"true\"" : "");
 
             // current version text
             html = html.replaceFirst(HTML_VERSION_NAME, dto.actualVersion.versionName);
@@ -209,11 +203,24 @@ public class UpdaterServlet extends OpenHABServlet {
             html = html.replaceFirst(HTML_CREDENTIALS_HIDDEN,
                     OperatingSystem.getOperatingSystemVersion().requiresCredentials() ? "" : "hidden=\"true\"");
 
-            // apply action url on submit button
-            html = html.replaceFirst(HTML_SUBMIT_URL, URI_START_UPDATE);
+            // form submit action url choices both default to the same URI as the GET was received on
+            String thisUrl = request.getRequestURI();
+            String urlChoice0 = thisUrl != null ? thisUrl : URI_EXECUTE;
+            String urlChoice1 = urlChoice0;
+
+            if (!request.isSecure()) {
+                // the urlChoice1 submit action url is explicitly set to the matching url on the HTTPS server
+                urlChoice1 = String.format("https://%s:%s%s", request.getServerName(), System.getenv("HTTPS_PORT"),
+                        request.getRequestURI());
+            }
+
+            // apply the submit action url choices
+            html = html.replaceFirst(HTML_URL_CHOICE_0, urlChoice0);
+            html = html.replaceFirst(HTML_URL_CHOICE_1, urlChoice1);
+            html = html.replaceFirst(HTML_URL_CHOICE_HIDDEN, urlChoice1.equals(urlChoice0) ? "hidden=\"true\"" : "");
 
             // apply label on return button
-            html = html.replaceFirst(HTML_BOTTOM_BUTTON_LABEL, bottomButtonLabel);
+            html = html.replaceFirst(HTML_BOTTOM_BUTTON_LABEL, buttonLabel);
         }
         return html;
     }
@@ -236,10 +243,10 @@ public class UpdaterServlet extends OpenHABServlet {
     // =============== Private Processing Methods ===============
 
     /**
-     * This method handles HTTP GET on the servlet's getStatus path. It serves a JSON DTO containing the updater status.
+     * This method handles HTTP GET on the servlet's status path. It serves a JSON DTO containing the updater status.
      *
      */
-    private void doGetState(HttpServletRequest request, HttpServletResponse response)
+    private void doGetStatus(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         BaseUpdater updater = this.updater;
 
@@ -258,12 +265,11 @@ public class UpdaterServlet extends OpenHABServlet {
     }
 
     /**
-     * This method handles HTTP GET on the servlet's '/startUpdate' path. It serves an HTML page containing an HTML FORM
-     * for submitting a request to the updater for starting the update process. If the request is not secure (on HTTP
-     * only) it redirects to the OpenHAB HTTPS server.
+     * This method handles HTTP GET on the servlet's execute path. It serves an HTML page containing an HTML form for
+     * submitting a request to the updater to start the update process.
      *
      */
-    private void doGetStartUpdate(HttpServletRequest request, HttpServletResponse response)
+    private void doGetExecute(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         BaseUpdater updater = this.updater;
 
@@ -273,16 +279,8 @@ public class UpdaterServlet extends OpenHABServlet {
             return;
         }
 
-        // redirect insecure requests (i.e. HTTP) to the OpenHAB HTTPS server port
-        if (!request.isSecure()) {
-            String httpsPath = String.format("https://%s:%d%s", request.getServerName(), OPENHAB_HTTPS_PORT,
-                    request.getRequestURI());
-            response.sendRedirect(httpsPath); // returns HttpStatus.FOUND_302
-            return;
-        }
-
-        // get and format the HTML page; the HTML shows all elements and a bottom 'Cancel' button
-        String html = getFormattedPageHTML(TOP_MESSAGE_INITIAL, SHOW, BOTTOM_BUTTON_CANCEL);
+        // get and format the execute page HTML; formatted so the form is shown, and the bottom button says 'Cancel'
+        String html = getFormattedExecutePageHTML(request, TOP_MESSAGE_INITIAL, SHOW_FORM, BOTTOM_BUTTON_CANCEL);
 
         // serve the HTML page
         response.setStatus(HttpStatus.OK_200);
@@ -292,22 +290,16 @@ public class UpdaterServlet extends OpenHABServlet {
     }
 
     /**
-     * This method handles HTTP POST on the servlet's '/startUpdate' path. It accepts the respective form parameters,
-     * and if they are OK starts the updater's update process.
+     * This method handles HTTP POST on the servlet's execut path. It accepts the respective form parameters, and if
+     * they are OK starts the updater's update process.
      */
-    private void doPostStartUpdate(HttpServletRequest request, HttpServletResponse response)
+    private void doPostExecute(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         BaseUpdater updater = this.updater;
 
         // return server error if updater is null
         if (updater == null) {
             setResponse(HttpStatus.INTERNAL_SERVER_ERROR_500, ERR_UPDATER_NULL, response);
-            return;
-        }
-
-        // return forbidden error if the connection is not secure
-        if (!request.isSecure()) {
-            setResponse(HttpStatus.FORBIDDEN_403, ERR_UNSECURE, response);
             return;
         }
 
@@ -353,14 +345,14 @@ public class UpdaterServlet extends OpenHABServlet {
             }
         }
 
-        // get and format the HTML page
+        // get and format the execute page HTML
         String html;
         if (paramsOk) {
-            // the HTML hides all elements except a bottom 'Home' button
-            html = getFormattedPageHTML(TOP_MESSAGE_UPDATE_STARTED, HIDE, BOTTOM_BUTTON_HOME);
+            // formatted so the form is hidden, and the bottom button says 'Home'
+            html = getFormattedExecutePageHTML(request, TOP_MESSAGE_UPDATE_STARTED, HIDE_FORM, BOTTOM_BUTTON_HOME);
         } else {
-            // the HTML shows all elements and a bottom 'Cancel' button
-            html = getFormattedPageHTML(TOP_MESSAGE_TRY_AGAIN, SHOW, BOTTOM_BUTTON_CANCEL);
+            // formatted so the form is shown, and the bottom button says 'Cancel'
+            html = getFormattedExecutePageHTML(request, TOP_MESSAGE_TRY_AGAIN, SHOW_FORM, BOTTOM_BUTTON_CANCEL);
         }
 
         // serve the HTML page
@@ -369,9 +361,9 @@ public class UpdaterServlet extends OpenHABServlet {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.getWriter().append(html).close();
 
-        // finally submit the updater's run() method for execution
+        // finally submit the updater for execution
         if (paramsOk) {
-            UPDATE_EXECUTOR.submit(updater);
+            updater.submit();
         }
     }
 }

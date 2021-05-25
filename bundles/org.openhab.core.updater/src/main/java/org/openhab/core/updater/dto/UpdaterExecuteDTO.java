@@ -12,12 +12,18 @@
  */
 package org.openhab.core.updater.dto;
 
+import javax.validation.constraints.Pattern;
+
 /**
- * This is a DTO for OpenHAB self updater versions.
+ * This is a DTO for OpenHAB self updating features.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
-public class VersionDTO {
-    public String versionName;
-    public String versionType;
+public class UpdaterExecuteDTO {
+    @Pattern(regexp = "^(STABLE|MILESTONE|SNAPSHOT)$")
+    public String targetNewVersionType;
+    @Pattern(regexp = "^[a-zA-Z0-9_]{0,20}$")
+    public String user;
+    @Pattern(regexp = "^\\S{0,20}$")
+    public String password;
 }

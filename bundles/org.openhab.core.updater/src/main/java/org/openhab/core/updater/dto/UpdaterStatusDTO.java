@@ -17,10 +17,10 @@ package org.openhab.core.updater.dto;
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
-public class GetStateDTO {
-    public VersionDTO actualVersion;
+public class UpdaterStatusDTO {
+    public OpenHabVersionDTO actualVersion;
     public Integer latestVersionCount;
-    public VersionDTO[] latestVersions;
+    public OpenHabVersionDTO[] latestVersions;
     public String targetNewVersionType;
     public String newVersionAvailable;
 }

@@ -29,6 +29,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import javax.xml.stream.XMLInputFactory;
@@ -38,8 +40,8 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
-import org.openhab.core.updater.dto.GetStateDTO;
-import org.openhab.core.updater.dto.VersionDTO;
+import org.openhab.core.updater.dto.OpenHabVersionDTO;
+import org.openhab.core.updater.dto.UpdaterStatusDTO;
 import org.openhab.core.updater.enums.TriState;
 import org.openhab.core.updater.enums.VersionType;
 import org.osgi.framework.FrameworkUtil;
@@ -116,6 +118,17 @@ public abstract class BaseUpdater implements Runnable {
     protected final Map<PlaceHolder, String> placeHolders = new HashMap<>();
 
     public static final String VERSION_NOT_DEFINED = "VERSION_NOT_DEFINED";
+
+    /**
+     * It must be totally impossible to initiate two updates in parallel from different Api instances. So we create just
+     * one single static singleThreadExecutor here, that will only allow one update method call through itself at any
+     * time.
+     */
+    private static final ExecutorService UPDATE_EXECUTOR = Executors.newSingleThreadExecutor();
+
+    public void submit() {
+        UPDATE_EXECUTOR.submit(this);
+    }
 
     /**
      * Constructor.
@@ -464,17 +477,17 @@ public abstract class BaseUpdater implements Runnable {
      *
      * @return the DTO
      */
-    public GetStateDTO getStatusDTO() {
-        GetStateDTO dto = new GetStateDTO();
+    public UpdaterStatusDTO getStatusDTO() {
+        UpdaterStatusDTO dto = new UpdaterStatusDTO();
         // actual running version
-        dto.actualVersion = new VersionDTO();
+        dto.actualVersion = new OpenHabVersionDTO();
         dto.actualVersion.versionName = getActualVersion();
         dto.actualVersion.versionType = getActualVersionType().name();
         // latest available online versions
         dto.latestVersionCount = VersionType.values().length - 1; // ignore last value 'UNKNOWN'
-        dto.latestVersions = new VersionDTO[dto.latestVersionCount];
+        dto.latestVersions = new OpenHabVersionDTO[dto.latestVersionCount];
         for (int i = 0; i < dto.latestVersions.length; i++) {
-            VersionDTO lv = dto.latestVersions[i] = new VersionDTO();
+            OpenHabVersionDTO lv = dto.latestVersions[i] = new OpenHabVersionDTO();
             VersionType ver = VersionType.values()[i];
             lv.versionName = getRemoteLatestVersion(ver);
             lv.versionType = VERSION_NOT_DEFINED.equals(lv.versionName) ? VersionType.UNKNOWN.name() : ver.name();
