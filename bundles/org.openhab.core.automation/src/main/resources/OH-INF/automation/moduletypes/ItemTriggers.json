@@ -53,7 +53,10 @@
 					"name": "command",
 					"type": "command",
 					"description": "the received command",
-					"label": "Command"
+					"label": "Command",
+					"tags": [
+						"command"
+					]
 				},
 				{
 					"name": "event",
@@ -117,7 +120,10 @@
 					"name": "state",
 					"type": "state",
 					"description": "the item state",
-					"label": "State"
+					"label": "State",
+					"tags": [
+						"state"
+					]
 				},
 				{
 					"name": "event",
@@ -215,7 +221,10 @@
 					"name": "newState",
 					"type": "state",
 					"description": "the new item state",
-					"label": "New State"
+					"label": "New State",
+					"tags": [
+						"state"
+					]
 				},
 				{
 					"name": "oldState",
@@ -285,13 +294,19 @@
 					"name": "triggeringItem",
 					"type": "org.openhab.core.items.Item",
 					"description": "the member of the group that received the command",
-					"label": "Triggering Item"
+					"label": "Triggering Item",
+					"tags": [
+						"item"
+					]
 				},
 				{
 					"name": "command",
 					"type": "command",
 					"description": "the received command",
-					"label": "Command"
+					"label": "Command",
+					"tags": [
+						"command"
+					]
 				},
 				{
 					"name": "event",
@@ -355,13 +370,19 @@
 					"name": "triggeringItem",
 					"type": "org.openhab.core.items.Item",
 					"description": "the member of the group that updated its state",
-					"label": "Triggering Item"
+					"label": "Triggering Item",
+					"tags": [
+						"item"
+					]
 				},
 				{
 					"name": "state",
 					"type": "state",
 					"description": "the item state",
-					"label": "State"
+					"label": "State",
+					"tags": [
+						"state"
+					]
 				},
 				{
 					"name": "event",
@@ -459,13 +480,19 @@
 					"name": "triggeringItem",
 					"type": "org.openhab.core.items.Item",
 					"description": "the member of the group that changed its state",
-					"label": "Triggering Item"
+					"label": "Triggering Item",
+					"tags": [
+						"item"
+					]
 				},
 				{
 					"name": "newState",
 					"type": "state",
 					"description": "the new item state",
-					"label": "New State"
+					"label": "New State",
+					"tags": [
+						"state"
+					]
 				},
 				{
 					"name": "oldState",
