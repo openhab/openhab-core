@@ -112,11 +112,6 @@ function submitForm() {
         <label>HTML_TOP_MESSAGE</label>
     </div>
     <form name="updateForm" method="POST" onSubmit="return submitForm();" HTML_FORM_HIDDEN>
-        <div class="message">
-            <label>Enter <b>OpenHAB</b> credentials:</label><br><br>
-            <input class="field" autocomplete="off" type="text" placeholder="User name" name="openhabuser"/><br>
-            <input class="field" type="password" placeholder="Password" name="openhabpassword"/>
-        </div>
 	    <div class="message">
 	        Current Running Version:<br><br>
 	        &#9673;&ensp;HTML_VERSION_NAME&emsp;(HTML_VERSION_TYPE)
@@ -126,6 +121,11 @@ function submitForm() {
             <input type="radio" id="stable" name="targetNewVersionType" value="STABLE" HTML_VERSION_CHECKED>&ensp;HTML_VERSION_NAME&emsp;(HTML_VERSION_TYPE)<br>
             <input type="radio" id="milestone" name="targetNewVersionType" value="MILESTONE" HTML_VERSION_CHECKED>&ensp;HTML_VERSION_NAME&emsp;(HTML_VERSION_TYPE)<br>
             <input type="radio" id="snapshot" name="targetNewVersionType" value="SNAPSHOT" HTML_VERSION_CHECKED>&ensp;HTML_VERSION_NAME&emsp;(HTML_VERSION_TYPE)
+        </div>
+        <div class="message">
+            <label>Enter <b>OpenHAB</b> credentials:</label><br><br>
+            <input class="field" autocomplete="off" type="text" placeholder="User name" name="openhabuser"/><br>
+            <input class="field" type="password" placeholder="Password" name="openhabpassword"/>
         </div>
         <div class="message" HTML_CREDENTIALS_HIDDEN>
             Enter <b>System</b> credentials:<br><br>
