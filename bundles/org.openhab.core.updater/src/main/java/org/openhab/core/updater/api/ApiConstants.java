@@ -10,15 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.updater.dto;
+package org.openhab.core.updater.api;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This is a DTO for OpenHAB self updating features.
+ * This contains common API constants for different Api classes
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
-public class StartUpdateDTO {
-    public String targetNewVersionType;
-    public String user;
-    public String password;
+@NonNullByDefault
+public class ApiConstants {
+
+    // Api URIs
+    public static final String URI_BASE = "updater";
+    public static final String URI_STATUS = "/status";
+    public static final String URI_EXECUTE = "/execute";
 }
