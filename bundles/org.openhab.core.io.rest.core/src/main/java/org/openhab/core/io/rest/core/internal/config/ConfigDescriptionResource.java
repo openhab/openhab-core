@@ -121,7 +121,8 @@ public class ConfigDescriptionResource implements RESTResource {
         URI uriObject = UriBuilder.fromPath(uri).build();
         ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(uriObject, locale);
         return configDescription != null
-                ? Response.ok(EnrichedConfigDescriptionDTOMapper.map(configDescription)).build()
+                ? JSONResponse.createResponse(Status.OK, EnrichedConfigDescriptionDTOMapper.map(configDescription),
+                        null)
                 : JSONResponse.createErrorResponse(Status.NOT_FOUND, "Configuration not found: " + uri);
     }
 }

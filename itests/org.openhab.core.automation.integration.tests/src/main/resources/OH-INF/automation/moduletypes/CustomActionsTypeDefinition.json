@@ -26,6 +26,17 @@
 					"defaultValue": 5,
 					"required": false
 				}
+			],
+			"configDescriptions": [
+				{
+					"name": "offset",
+					"type": "INTEGER",
+					"label": "Offset",
+					"description": "Today +/- offset days (+1 = tomorrow, -1 = yesterday).",
+					"default": 0,
+					"stepsize": 1,
+					"required": false
+				}
 			]
 		}
 	]

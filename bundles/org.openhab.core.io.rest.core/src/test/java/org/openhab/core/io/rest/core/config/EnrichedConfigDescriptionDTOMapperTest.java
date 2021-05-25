@@ -71,7 +71,6 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         assertThat(ecdpdto.defaultValues, is(nullValue()));
     }
 
-    @SuppressWarnings("null")
     @Test
     public void testThatDefaultValuesAreAList() {
         ConfigDescriptionParameter configDescriptionParameter = ConfigDescriptionParameterBuilder

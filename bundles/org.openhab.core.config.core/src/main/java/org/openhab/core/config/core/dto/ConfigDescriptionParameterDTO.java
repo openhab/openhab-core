@@ -17,9 +17,10 @@ import java.util.List;
 
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
- * This is a data transfer object that is used to serialize parameter of a
- * configuration description.
+ * This is a data transfer object that is used to serialize parameter of a configuration description.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Alex Tugarev - Extended for options and filter criteria
@@ -29,6 +30,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 public class ConfigDescriptionParameterDTO {
 
     public String context;
+    @SerializedName(value = "default")
     public String defaultValue;
     public String description;
     public String label;
