@@ -59,6 +59,8 @@ public abstract class AbstractDynamicDescriptionProvider {
      *
      * @param field the changed field
      * @param channelUID the {@link ChannelUID}
+     * @param value the new value
+     * @param oldValue the old value
      */
     protected void postChannelDescriptionChangedEvent(CommonChannelDescriptionField field, ChannelUID channelUID,
             Object value, @Nullable Object oldValue) {

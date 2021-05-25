@@ -77,6 +77,8 @@ public class ChannelDescriptionChangedEvent extends AbstractEvent {
      * @param field the changed field
      * @param channelUID the {@link ChannelUID}
      * @param linkedItemNames a {@link Set} of linked item names
+     * @param value the new value
+     * @param oldValue the old value
      */
     protected ChannelDescriptionChangedEvent(String topic, String payload, CommonChannelDescriptionField field,
             ChannelUID channelUID, Set<String> linkedItemNames, Object value, @Nullable Object oldValue) {
