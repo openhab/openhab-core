@@ -10,18 +10,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.items.events;
+package org.openhab.core.events;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.events.AbstractEventFactory;
+import org.openhab.core.items.events.ItemEventFactory;
 
 /**
  * {@link AbstractEventFactoryTests} tests the {@link AbstractEventFactory}.
  *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 public class AbstractEventFactoryTest {
     private final ItemEventFactory factory = new ItemEventFactory();
 

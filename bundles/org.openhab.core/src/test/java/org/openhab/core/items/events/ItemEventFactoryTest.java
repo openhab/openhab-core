@@ -16,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.items.Item;
@@ -36,6 +37,7 @@ import com.google.gson.Gson;
  *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 public class ItemEventFactoryTest {
     private final ItemEventFactory factory = new ItemEventFactory();
 
