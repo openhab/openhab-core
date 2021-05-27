@@ -30,7 +30,7 @@ import com.google.gson.annotations.SerializedName;
 public class ConfigDescriptionParameterDTO {
 
     public String context;
-    @SerializedName(value = "default")
+    @SerializedName(value = "default", alternate = "defaultValue")
     public String defaultValue;
     public String description;
     public String label;

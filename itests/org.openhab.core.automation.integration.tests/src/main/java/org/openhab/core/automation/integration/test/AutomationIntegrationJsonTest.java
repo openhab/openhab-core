@@ -209,13 +209,17 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
                     .filter(o -> "customActionOutput3".equals(o.getName())).findFirst();
             assertThat(output3.isPresent(), is(true));
             assertThat(output3.get().getDefaultValue(), is("{\"command\":\"OFF\"}"));
+            Optional<ConfigDescriptionParameter> configDescription = moduleType3.getConfigurationDescriptions().stream()
+                    .filter(o -> "offset".equals(o.getName())).findFirst();
+            assertThat(configDescription.isPresent(), is(true));
+            assertThat(configDescription.get().getDefault(), is("1"));
 
             assertThat(moduleType4.getInputs(), is(notNullValue()));
             Optional<Input> input = moduleType4.getInputs().stream()
                     .filter(o -> "customActionInput".equals(o.getName())).findFirst();
             assertThat(input.isPresent(), is(true));
             assertThat(input.get().getDefaultValue(), is("5"));
-            Optional<ConfigDescriptionParameter> configDescription = moduleType4.getConfigurationDescriptions().stream()
+            configDescription = moduleType4.getConfigurationDescriptions().stream()
                     .filter(o -> "offset".equals(o.getName())).findFirst();
             assertThat(configDescription.isPresent(), is(true));
             assertThat(configDescription.get().getDefault(), is("0"));
