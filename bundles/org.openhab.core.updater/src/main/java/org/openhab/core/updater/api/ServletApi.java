@@ -73,6 +73,7 @@ public class ServletApi extends OpenHABServlet {
     private static final String HTML_URL_CHOICE_0 = "HTML_URL_CHOICE_0";
     private static final String HTML_URL_CHOICE_1 = "HTML_URL_CHOICE_1";
     private static final String HTML_URL_CHOICE_HIDDEN = "HTML_URL_CHOICE_HIDDEN";
+    private static final String HTML_SPINNER_HIDDEN = "HTML_SPINNER_HIDDEN";
 
     // the port number of the OpenHAB HTTPS server
     // private static final int OPENHAB_HTTPS_PORT = 8443;
@@ -218,6 +219,9 @@ public class ServletApi extends OpenHABServlet {
             html = html.replaceFirst(HTML_URL_CHOICE_0, urlChoice0);
             html = html.replaceFirst(HTML_URL_CHOICE_1, urlChoice1);
             html = html.replaceFirst(HTML_URL_CHOICE_HIDDEN, urlChoice1.equals(urlChoice0) ? "hidden=\"true\"" : "");
+
+            // hide or show the spinner
+            html = html.replace(HTML_SPINNER_HIDDEN, formHidden ? "" : "hidden=\"true\"");
 
             // apply label on return button
             html = html.replaceFirst(HTML_BOTTOM_BUTTON_LABEL, buttonLabel);
