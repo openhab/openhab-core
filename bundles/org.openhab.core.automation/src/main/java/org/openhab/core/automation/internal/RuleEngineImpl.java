@@ -637,18 +637,21 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             TriggerHandler triggerHandler = trigger.getModuleHandler();
             if (triggerHandler != null) {
                 triggerHandler.setCallback(thCallback);
+                triggerHandler.initialize();
             }
         });
         rule.getConditions().forEach(condition -> {
             ConditionHandler conditionHandler = condition.getModuleHandler();
             if (conditionHandler != null) {
                 conditionHandler.setCallback(moduleHandlerCallback);
+                conditionHandler.initialize();
             }
         });
         rule.getActions().forEach(action -> {
             ActionHandler actionHandler = action.getModuleHandler();
             if (actionHandler != null) {
                 actionHandler.setCallback(moduleHandlerCallback);
+                actionHandler.initialize();
             }
         });
     }
