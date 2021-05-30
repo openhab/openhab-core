@@ -14,6 +14,8 @@ package org.openhab.core.items.events;
 
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
@@ -28,6 +30,7 @@ import org.openhab.core.events.EventSubscriber;
  *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 public abstract class AbstractItemEventSubscriber implements EventSubscriber {
 
     private final Set<String> subscribedEventTypes = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE);
@@ -38,7 +41,7 @@ public abstract class AbstractItemEventSubscriber implements EventSubscriber {
     }
 
     @Override
-    public EventFilter getEventFilter() {
+    public @Nullable EventFilter getEventFilter() {
         return null;
     }
 

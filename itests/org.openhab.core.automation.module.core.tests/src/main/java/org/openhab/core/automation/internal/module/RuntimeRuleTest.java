@@ -59,6 +59,7 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.test.storage.VolatileStorageService;
+import org.openhab.core.types.Command;
 import org.openhab.core.types.TypeParser;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -417,8 +418,11 @@ public class RuntimeRuleTest extends JavaOSGiTest {
             final ItemRegistry itemRegistry = getService(ItemRegistry.class);
             final EventPublisher eventPublisher = getService(EventPublisher.class);
             final Item myMotionItem = itemRegistry.getItem("myMotionItem3");
-            eventPublisher.post(ItemEventFactory.createCommandEvent("myMotionItem3",
-                    TypeParser.parseCommand(myMotionItem.getAcceptedCommandTypes(), "ON")));
+            Command command = TypeParser.parseCommand(myMotionItem.getAcceptedCommandTypes(), "ON");
+            assertNotNull(command);
+            if (command != null) {
+                eventPublisher.post(ItemEventFactory.createCommandEvent("myMotionItem3", command));
+            }
 
             waitForAssert(() -> {
                 assertEquals(RuleStatusDetail.DISABLED, ruleEngine.getStatusInfo(firstRuleUID).getStatusDetail());
@@ -438,8 +442,11 @@ public class RuntimeRuleTest extends JavaOSGiTest {
                     .build();
             ruleRegistry.add(rule2);
 
-            eventPublisher.post(ItemEventFactory.createCommandEvent("myMotionItem3",
-                    TypeParser.parseCommand(myMotionItem.getAcceptedCommandTypes(), "OFF")));
+            command = TypeParser.parseCommand(myMotionItem.getAcceptedCommandTypes(), "OFF");
+            assertNotNull(command);
+            if (command != null) {
+                eventPublisher.post(ItemEventFactory.createCommandEvent("myMotionItem3", command));
+            }
 
             waitForAssert(() -> {
                 assertEquals(RuleStatus.IDLE, ruleEngine.getStatus(firstRuleUID));
