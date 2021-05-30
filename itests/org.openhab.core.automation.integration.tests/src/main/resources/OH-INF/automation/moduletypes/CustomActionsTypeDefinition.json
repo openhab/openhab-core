@@ -12,6 +12,17 @@
 					"defaultValue": "{\"command\":\"OFF\"}",
 					"required": false
 				}
+			],
+			"configDescriptions": [
+				{
+					"name": "offset",
+					"type": "INTEGER",
+					"label": "Offset",
+					"description": "Today +/- offset days (+1 = tomorrow, -1 = yesterday).",
+					"defaultValue": 1,
+					"stepsize": 1,
+					"required": false
+				}
 			]
 		},
 		{
@@ -24,6 +35,17 @@
 					"label": "CustomActionOutput2 label",
 					"description": "Custom action output.",
 					"defaultValue": 5,
+					"required": false
+				}
+			],
+			"configDescriptions": [
+				{
+					"name": "offset",
+					"type": "INTEGER",
+					"label": "Offset",
+					"description": "Today +/- offset days (+1 = tomorrow, -1 = yesterday).",
+					"default": 0,
+					"stepsize": 1,
 					"required": false
 				}
 			]

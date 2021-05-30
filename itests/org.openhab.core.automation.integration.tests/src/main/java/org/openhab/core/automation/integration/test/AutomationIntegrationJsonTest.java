@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -43,6 +42,7 @@ import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.Output;
 import org.openhab.core.automation.type.TriggerType;
 import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventPublisher;
@@ -101,20 +101,12 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                Set<Item> items = new HashSet<>();
-                items.add(new SwitchItem("myMotionItem"));
-                items.add(new SwitchItem("myPresenceItem"));
-                items.add(new SwitchItem("myLampItem"));
-                items.add(new SwitchItem("myMotionItem2"));
-                items.add(new SwitchItem("myPresenceItem2"));
-                items.add(new SwitchItem("myLampItem2"));
-                items.add(new SwitchItem("myMotionItem11"));
-                items.add(new SwitchItem("myLampItem11"));
-                items.add(new SwitchItem("myMotionItem3"));
-                items.add(new SwitchItem("templ_MotionItem"));
-                items.add(new SwitchItem("templ_LampItem"));
-
-                return items;
+                return Set.of(new SwitchItem("myMotionItem"), new SwitchItem("myPresenceItem"),
+                        new SwitchItem("myLampItem"), new SwitchItem("myMotionItem2"),
+                        new SwitchItem("myPresenceItem2"), new SwitchItem("myLampItem2"),
+                        new SwitchItem("myMotionItem11"), new SwitchItem("myLampItem11"),
+                        new SwitchItem("myMotionItem3"), new SwitchItem("templ_MotionItem"),
+                        new SwitchItem("templ_LampItem"));
             }
 
             @Override
@@ -212,17 +204,25 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             assertThat(output2.isPresent(), is(true));
             assertThat(output2.get().getDefaultValue(), is("event"));
 
-            assertThat(moduleType4.getInputs(), is(notNullValue()));
-            Optional<Input> input = moduleType4.getInputs().stream()
-                    .filter(o -> "customActionInput".equals(o.getName())).findFirst();
-            assertThat(input.isPresent(), is(true));
-            assertThat(input.get().getDefaultValue(), is("5"));
-
             assertThat(moduleType3.getOutputs(), is(notNullValue()));
             Optional<Output> output3 = moduleType3.getOutputs().stream()
                     .filter(o -> "customActionOutput3".equals(o.getName())).findFirst();
             assertThat(output3.isPresent(), is(true));
             assertThat(output3.get().getDefaultValue(), is("{\"command\":\"OFF\"}"));
+            Optional<ConfigDescriptionParameter> configDescription = moduleType3.getConfigurationDescriptions().stream()
+                    .filter(o -> "offset".equals(o.getName())).findFirst();
+            assertThat(configDescription.isPresent(), is(true));
+            assertThat(configDescription.get().getDefault(), is("1"));
+
+            assertThat(moduleType4.getInputs(), is(notNullValue()));
+            Optional<Input> input = moduleType4.getInputs().stream()
+                    .filter(o -> "customActionInput".equals(o.getName())).findFirst();
+            assertThat(input.isPresent(), is(true));
+            assertThat(input.get().getDefaultValue(), is("5"));
+            configDescription = moduleType4.getConfigurationDescriptions().stream()
+                    .filter(o -> "offset".equals(o.getName())).findFirst();
+            assertThat(configDescription.isPresent(), is(true));
+            assertThat(configDescription.get().getDefault(), is("0"));
         }, 10000, 200);
     }
 
