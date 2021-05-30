@@ -18,7 +18,7 @@ Fragment-Host: org.openhab.core.config.discovery.mdns
 	com.sun.xml.bind.jaxb-osgi;version='[2.3.3,2.3.4)',\
 	jakarta.xml.bind-api;version='[2.3.3,2.3.4)',\
 	org.apache.servicemix.specs.activation-api-1.2.1;version='[1.2.1,1.2.2)',\
-	javax.jmdns;version='[3.5.6,3.5.7)',\
+	javax.jmdns;version='[3.5.7,3.5.8)',\
 	org.openhab.core;version='[3.1.0,3.1.1)',\
 	org.openhab.core.config.core;version='[3.1.0,3.1.1)',\
 	org.openhab.core.config.discovery;version='[3.1.0,3.1.1)',\
