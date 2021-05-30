@@ -62,6 +62,7 @@ public class ThreadPoolManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadPoolManager.class);
 
     protected static final int DEFAULT_THREAD_POOL_SIZE = 5;
+    protected static final boolean DEFAULT_THREAD_POOL_ENABLE = true;
 
     protected static final long THREAD_TIMEOUT = 65L;
     protected static final long THREAD_MONITOR_SLEEP = 60000;
@@ -69,12 +70,14 @@ public class ThreadPoolManager {
     protected static Map<String, ExecutorService> pools = new WeakHashMap<>();
 
     private static Map<String, Integer> configs = new ConcurrentHashMap<>();
+    private static Map<String, Boolean> enabled = new ConcurrentHashMap<>();
 
     protected void activate(Map<String, Object> properties) {
         modified(properties);
     }
 
     protected void modified(Map<String, Object> properties) {
+        LOGGER.debug("Processing threadpool configurations");
         for (Entry<String, Object> entry : properties.entrySet()) {
             if (Constants.SERVICE_PID.equals(entry.getKey()) || ComponentConstants.COMPONENT_ID.equals(entry.getKey())
                     || ComponentConstants.COMPONENT_NAME.equals(entry.getKey())) {
@@ -82,6 +85,7 @@ public class ThreadPoolManager {
             }
             String poolName = entry.getKey();
             Object config = entry.getValue();
+            LOGGER.debug("Thread pool config for pool '{}' value '{}'", poolName, config);
             if (config == null) {
                 configs.remove(poolName);
             }
@@ -96,10 +100,23 @@ public class ThreadPoolManager {
                     } else if (pool instanceof QueueingThreadPoolExecutor) {
                         pool.setMaximumPoolSize(poolSize);
                         LOGGER.debug("Updated queuing thread pool '{}' to size {}", poolName, poolSize);
+                    } else {
+                        LOGGER.debug("Thread pool '{}' configured as {}", poolName, poolSize);
                     }
+                    enabled.put(poolName, true);
+                    continue;
                 } catch (NumberFormatException e) {
-                    LOGGER.warn("Ignoring invalid configuration for pool '{}': {} - value must be an integer", poolName,
-                            config);
+                    LOGGER.warn("Ignoring invalid configuration for pool '{}': {}.  Comparing as a boolean next.",
+                            poolName, config);
+                }
+                try {
+                    Boolean enable = Boolean.valueOf((String) config);
+                    enabled.put(poolName, enable);
+                    LOGGER.debug("Thread pool '{}' configured as {}", poolName, enable);
+                } catch (Exception e) {
+                    LOGGER.debug(
+                            "Configuration of {} for pool {} is not a boolean.  Config must be either an integer or boolean.",
+                            config, poolName);
                     continue;
                 }
             }
@@ -121,6 +138,7 @@ public class ThreadPoolManager {
                 pool = pools.get(poolName);
                 if (pool == null) {
                     int cfg = getConfig(poolName);
+                    LOGGER.debug("Size for thread pool '{}' configured as {}", poolName, cfg);
                     pool = new WrappedScheduledExecutorService(cfg,
                             new NamedThreadFactory(poolName, true, Thread.NORM_PRIORITY));
                     ((ThreadPoolExecutor) pool).setKeepAliveTime(THREAD_TIMEOUT, TimeUnit.SECONDS);
@@ -153,6 +171,7 @@ public class ThreadPoolManager {
                 pool = pools.get(poolName);
                 if (pool == null) {
                     int cfg = getConfig(poolName);
+                    LOGGER.debug("Size for thread pool '{}' configured as {}", poolName, cfg);
                     pool = QueueingThreadPoolExecutor.createInstance(poolName, cfg);
                     ((ThreadPoolExecutor) pool).setKeepAliveTime(THREAD_TIMEOUT, TimeUnit.SECONDS);
                     ((ThreadPoolExecutor) pool).allowCoreThreadTimeOut(true);
@@ -164,9 +183,14 @@ public class ThreadPoolManager {
         return pool;
     }
 
-    protected static int getConfig(String poolName) {
+    public static int getConfig(String poolName) {
         Integer cfg = configs.get(poolName);
         return (cfg != null) ? cfg : DEFAULT_THREAD_POOL_SIZE;
+    }
+
+    public static boolean getEnabled(String poolName) {
+        Boolean enable = enabled.get(poolName);
+        return (enable != null) ? enable : DEFAULT_THREAD_POOL_ENABLE;
     }
 
     public static Set<String> getPoolNames() {

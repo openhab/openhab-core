@@ -24,6 +24,7 @@ import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.common.NamedThreadFactory;
+import org.openhab.core.common.ThreadPoolManager;
 
 /**
  * This class is implementation of {@link TriggerHandlerCallback} used by the {@link Trigger}s to notify rule engine
@@ -35,6 +36,12 @@ import org.openhab.core.common.NamedThreadFactory;
  */
 public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
 
+    private static final String AUTOMATION_THREADPOOL_NAME = "automation";
+
+    private final int maxItterations = 100;
+
+    private final int itterationWait = 200;
+
     private final String ruleUID;
 
     private ExecutorService executor;
@@ -43,21 +50,59 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
 
     private final RuleEngineImpl re;
 
+    private final int threadPoolSize;
+    private final boolean threadPoolEnabled;
+
     protected TriggerHandlerCallbackImpl(RuleEngineImpl re, String ruleUID) {
         this.re = re;
         this.ruleUID = ruleUID;
-        executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("rule-" + ruleUID));
+        this.threadPoolSize = ThreadPoolManager.getConfig(AUTOMATION_THREADPOOL_NAME);
+        this.threadPoolEnabled = ThreadPoolManager.getEnabled(AUTOMATION_THREADPOOL_NAME);
+        re.logger.debug("Automation threadpool configured as {} {}", threadPoolSize, threadPoolEnabled);
+        if (threadPoolEnabled == false) {
+            re.logger.debug("Firing rule {} using single thread.", ruleUID);
+            executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("rule-" + ruleUID));
+        } else {
+            re.logger.debug("Firing rule {} using threadpool.", ruleUID);
+            executor = ThreadPoolManager.getPool(AUTOMATION_THREADPOOL_NAME);
+        }
     }
 
     @Override
     public void triggered(Trigger trigger, Map<String, ?> outputs) {
+        triggered(trigger, outputs, 0);
+    }
+
+    private void triggered(Trigger trigger, Map<String, ?> outputs, int itteration) {
+        RuleStatus ruleStatus = re.getRuleStatus(ruleUID);
         synchronized (this) {
             if (executor == null) {
                 return;
             }
-            future = executor.submit(new TriggerData(trigger, outputs));
+            if ((threadPoolEnabled == false) || (RuleStatus.IDLE.equals(ruleStatus))) {
+                future = executor.submit(new TriggerData(trigger, outputs));
+                re.logger.debug("The trigger '{}' of rule '{}' is triggered. - Rule Status: '{}' - Rule Executed.",
+                        trigger.getId(), ruleUID, ruleStatus);
+            } else if ((RuleStatus.RUNNING.equals(ruleStatus)) && (itteration < maxItterations)) {
+                itteration++;
+                re.logger.debug("The trigger '{}' of rule '{}' is triggered.  Rule execution paused ({}/{})",
+                        trigger.getId(), ruleUID, itteration, maxItterations);
+                try {
+                    Thread.sleep(itterationWait);
+                    triggered(trigger, outputs, itteration);
+                } catch (InterruptedException e) {
+                    re.logger.debug(
+                            "Failed to wait for itteration.  The trigger '{}' of rule '{}' is triggered but not executed.",
+                            trigger.getId(), ruleUID);
+                    return;
+                }
+            } else {
+                re.logger.debug(
+                        "The trigger '{}' of rule '{}' is triggered.  Rule failed to execute due to maximum itterations.",
+                        trigger.getId(), ruleUID);
+                return;
+            }
         }
-        re.logger.debug("The trigger '{}' of rule '{}' is triggered.", trigger.getId(), ruleUID);
     }
 
     public boolean isRunning() {
@@ -91,11 +136,15 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     }
 
     public void dispose() {
-        synchronized (this) {
-            AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-                executor.shutdownNow();
-                return null;
-            });
+        if (threadPoolEnabled == false) {
+            synchronized (this) {
+                AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+                    executor.shutdownNow();
+                    return null;
+                });
+                executor = null;
+            }
+        } else {
             executor = null;
         }
     }
