@@ -40,11 +40,6 @@ public class BaseModuleHandler<T extends Module> implements ModuleHandler {
     }
 
     @Override
-    public void initialize() {
-        // can be overridden by subclasses
-    }
-
-    @Override
     public void dispose() {
         this.callback = null;
     }

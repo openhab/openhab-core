@@ -94,11 +94,6 @@ public abstract class AbstractCompositeModuleHandler<M extends Module, MT extend
     }
 
     @Override
-    public void initialize() {
-        // can be overridden by subclasses
-    }
-
-    @Override
     public void dispose() {
         List<M> children = getChildren();
         for (M child : children) {

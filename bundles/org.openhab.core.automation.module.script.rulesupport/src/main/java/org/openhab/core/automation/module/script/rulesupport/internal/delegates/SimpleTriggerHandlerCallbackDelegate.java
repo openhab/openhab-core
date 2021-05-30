@@ -13,6 +13,7 @@
 package org.openhab.core.automation.module.script.rulesupport.internal.delegates;
 
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
@@ -42,6 +43,11 @@ public class SimpleTriggerHandlerCallbackDelegate implements SimpleTriggerHandle
     @Override
     public void triggered(Map<String, ?> context) {
         callback.triggered(this.trigger, context);
+    }
+
+    @Override
+    public ScheduledExecutorService getScheduler() {
+        return callback.getScheduler();
     }
 
     @Override

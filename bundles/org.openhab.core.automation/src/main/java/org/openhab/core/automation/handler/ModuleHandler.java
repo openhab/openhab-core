@@ -26,16 +26,6 @@ import org.openhab.core.automation.ModuleHandlerCallback;
 public interface ModuleHandler {
 
     /**
-     * Initializes the module handler, e.g. schedules jobs.
-     * <p>
-     * This method is only called, if the {@link ModuleHandlerCallback} is set.
-     * <p>
-     * The framework expects this method to be non-blocking and return quickly. For longer running initializations,
-     * the implementation has to take care of scheduling a separate job.
-     */
-    public void initialize();
-
-    /**
      * The method is called by RuleManager to free resources when {@link ModuleHandler} is released.
      */
     public void dispose();
