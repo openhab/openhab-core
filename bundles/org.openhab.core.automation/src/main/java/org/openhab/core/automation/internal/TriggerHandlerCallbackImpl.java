@@ -15,9 +15,9 @@ package org.openhab.core.automation.internal;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
@@ -32,12 +32,13 @@ import org.openhab.core.common.NamedThreadFactory;
  *
  * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - improved stability
+ * @author Fabian Wolter - Change executor to ScheduledExecutorService and expose it
  */
 public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
 
     private final String ruleUID;
 
-    private ExecutorService executor;
+    private ScheduledExecutorService executor;
 
     private Future<?> future;
 
@@ -46,7 +47,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     protected TriggerHandlerCallbackImpl(RuleEngineImpl re, String ruleUID) {
         this.re = re;
         this.ruleUID = ruleUID;
-        executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("rule-" + ruleUID));
+        executor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("rule-" + ruleUID));
     }
 
     @Override
@@ -128,5 +129,10 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     @Override
     public void runNow(String uid, boolean considerConditions, Map<String, Object> context) {
         re.runNow(uid, considerConditions, context);
+    }
+
+    @Override
+    public ScheduledExecutorService getScheduler() {
+        return executor;
     }
 }
