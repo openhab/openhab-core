@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.updater.api;
+package org.openhab.core.updater.userinterface;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,13 +42,13 @@ import org.osgi.service.http.HttpService;
 import com.google.gson.Gson;
 
 /**
- * This is a REST resource for OpenHAB self updating features.
+ * This is a web User Interface Servlet for OpenHAB self updating features.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @Component(immediate = true)
 @NonNullByDefault
-public class ServletApi extends OpenHABServlet {
+public class ServletUi extends OpenHABServlet {
     private static final long serialVersionUID = 5439260400198671435L;
 
     // ui texts
@@ -78,9 +78,9 @@ public class ServletApi extends OpenHABServlet {
     // the port number of the OpenHAB HTTPS server
     // private static final int OPENHAB_HTTPS_PORT = 8443;
 
-    private static final String URI_ALIAS = "/" + ApiConstants.URI_BASE + "/*";
-    private static final String URI_STATUS = "/" + ApiConstants.URI_BASE + ApiConstants.URI_STATUS;
-    private static final String URI_EXECUTE = "/" + ApiConstants.URI_BASE + ApiConstants.URI_EXECUTE;
+    private static final String URI_ALIAS = "/" + UiConstants.URI_BASE + "/*";
+    private static final String URI_STATUS = "/" + UiConstants.URI_BASE + UiConstants.URI_STATUS;
+    private static final String URI_EXECUTE = "/" + UiConstants.URI_BASE + UiConstants.URI_EXECUTE;
 
     private static final boolean HIDE_FORM = true;
     private static final boolean SHOW_FORM = !HIDE_FORM;
@@ -92,7 +92,7 @@ public class ServletApi extends OpenHABServlet {
     // =============== Constructor ===============
 
     @Activate
-    public ServletApi(@Reference HttpService httpService, @Reference HttpContext httpContext,
+    public ServletUi(@Reference HttpService httpService, @Reference HttpContext httpContext,
             @Reference UserRegistry userRegistry) {
         super(httpService, httpContext);
         this.userRegistry = userRegistry;

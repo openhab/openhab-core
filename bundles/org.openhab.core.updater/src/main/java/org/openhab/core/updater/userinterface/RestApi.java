@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.updater.api;
+package org.openhab.core.updater.userinterface;
 
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
@@ -54,12 +54,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  */
 @Component
 @JaxrsResource
-@JaxrsName(ApiConstants.URI_BASE)
+@JaxrsName(UiConstants.URI_BASE)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path(ApiConstants.URI_BASE)
+@Path(UiConstants.URI_BASE)
 @RolesAllowed({ Role.USER, Role.ADMIN })
-@Tag(name = ApiConstants.URI_BASE)
+@Tag(name = UiConstants.URI_BASE)
 @NonNullByDefault
 public class RestApi implements RESTResource {
 
@@ -86,7 +86,7 @@ public class RestApi implements RESTResource {
      * @return HTTP 200 OK, or HTTP 500 INTERNAL SERVER ERROR if the updater is null.
      */
     @GET
-    @Path(ApiConstants.URI_STATUS)
+    @Path(UiConstants.URI_STATUS)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "status", summary = "Get the updater status.", responses = {
             @ApiResponse(responseCode = "200", description = OK_SUCCESS, content = @Content(schema = @Schema(implementation = UpdaterStatusDTO.class))),
@@ -114,7 +114,7 @@ public class RestApi implements RESTResource {
      */
     @POST
     @RolesAllowed({ Role.ADMIN })
-    @Path(ApiConstants.URI_EXECUTE)
+    @Path(UiConstants.URI_EXECUTE)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "execute", summary = "Start updating OpenHAB to a newer version.", responses = {
