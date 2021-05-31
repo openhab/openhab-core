@@ -219,6 +219,7 @@ public abstract class BaseUpdater implements Runnable {
     public void setNewVersionType(String newVersionTypeString) throws IllegalArgumentException {
         targetNewVersionType = VersionType.valueOf(newVersionTypeString.toUpperCase());
         placeHolders.put(PlaceHolder.TARGET_TYPE, targetNewVersionType.label);
+        logger.debug("setNewVersionType: {}", targetNewVersionType.label);
     }
 
     /**
@@ -250,6 +251,7 @@ public abstract class BaseUpdater implements Runnable {
             throw e;
         }
         placeHolders.put(PlaceHolder.PASSWORD, password);
+        logger.debug("setPassword: new value set");
     }
 
     /**
@@ -281,6 +283,7 @@ public abstract class BaseUpdater implements Runnable {
             throw e;
         }
         placeHolders.put(PlaceHolder.USER_NAME, userName);
+        logger.debug("setUserName: {}", userName);
     }
 
     /**
