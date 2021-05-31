@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.updater.api;
+package org.openhab.core.updater.userinterface;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This contains common API constants for different Api classes
+ * This contains common constants for different UI classes
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public class ApiConstants {
+public class UiConstants {
 
     // Api URIs
     public static final String URI_BASE = "updater";
