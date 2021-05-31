@@ -18,7 +18,8 @@ echo "deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg [TARGET_TYPE] ma
 
 # update OpenHAB
 apt-get update
-apt-get install --yes --option Dpkg::Options::="--force-confnew" openhab openhab-addons
+openhabVersion="$(apt-cache madison openhab | head -n 1 | cut -d'|' -f2 | xargs)"
+apt-get install --allow-downgrades --yes --option Dpkg::Options::="--force-confnew" "openhab=${openhabVersion}" "openhab-addons=${openhabVersion}"
 
 # start OpenHAB
 systemctl start openhab.service <<<"[PASSWORD]"
