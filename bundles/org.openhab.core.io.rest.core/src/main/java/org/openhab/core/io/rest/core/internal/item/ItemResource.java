@@ -236,7 +236,8 @@ public class ItemResource implements RESTResource {
 
         // if it exists
         if (item != null) {
-            EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, true, null, uriBuilder(uriInfo, httpHeaders), locale);
+            UriBuilder uriBuilder = uriBuilder(uriInfo, httpHeaders).replacePath("rest/items/{itemName}");
+            EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, true, null, uriBuilder, locale);
             addMetadata(dto, namespaces, null);
             dto.editable = isEditable(dto.name);
             return JSONResponse.createResponse(Status.OK, dto, null);
