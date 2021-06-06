@@ -54,6 +54,7 @@ import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.transform.TransformationException;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -105,15 +106,17 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
         UriBuilder uriBuilder = mock(UriBuilder.class);
         when(uriBuilder.build(any())).thenReturn(URI.create(""));
+        when(uriBuilder.path(anyString())).thenReturn(uriBuilder);
         uriInfo = mock(UriInfo.class);
         when(uriInfo.getAbsolutePathBuilder()).thenReturn(uriBuilder);
+        when(uriInfo.getBaseUriBuilder()).thenReturn(uriBuilder);
         when(uriInfo.getPath()).thenReturn("");
         httpHeaders = mock(HttpHeaders.class);
         when(httpHeaders.getHeaderString(anyString())).thenReturn(null);
     }
 
     @Test
-    public void shouldReturnUnicodeItems() throws IOException {
+    public void shouldReturnUnicodeItems() throws IOException, TransformationException {
         item4.setLabel(ITEM_LABEL4);
 
         Response response = itemResource.getItems(uriInfo, httpHeaders, null, null, null, null, false, null);
@@ -121,7 +124,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void shouldReturnUnicodeItem() throws IOException {
+    public void shouldReturnUnicodeItem() throws IOException, TransformationException {
         item4.setLabel(ITEM_LABEL4);
 
         Response response = itemResource.getItemData(uriInfo, httpHeaders, null, null, ITEM_NAME4);
@@ -207,7 +210,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         return JsonPath.read(jsonResponse, "$..name");
     }
 
-    private List<String> readItemLabelsFromResponse(Response response) throws IOException {
+    private List<String> readItemLabelsFromResponse(Response response) throws IOException, TransformationException {
         String jsonResponse = new String(((InputStream) response.getEntity()).readAllBytes(), StandardCharsets.UTF_8);
         return JsonPath.read(jsonResponse, "$..label");
     }
