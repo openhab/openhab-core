@@ -186,7 +186,7 @@ public class ItemResource implements RESTResource {
     }
 
     private UriBuilder uriBuilder(final UriInfo uriInfo, final HttpHeaders httpHeaders) {
-        final UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
+        final UriBuilder uriBuilder = uriInfo.getBaseUriBuilder().path(PATH_ITEMS).path("{itemName}");
         respectForwarded(uriBuilder, httpHeaders);
         return uriBuilder;
     }
@@ -207,7 +207,6 @@ public class ItemResource implements RESTResource {
         final Set<String> namespaces = splitAndFilterNamespaces(namespaceSelector, locale);
 
         final UriBuilder uriBuilder = uriBuilder(uriInfo, httpHeaders);
-        uriBuilder.path("{itemName}");
 
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                 .map(item -> EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder, locale)) //
