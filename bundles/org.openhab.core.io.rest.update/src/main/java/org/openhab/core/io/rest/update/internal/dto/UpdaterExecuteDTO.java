@@ -15,7 +15,7 @@ package org.openhab.core.io.rest.update.internal.dto;
 import javax.validation.constraints.Pattern;
 
 /**
- * This is a DTO for OpenHAB self updating features.
+ * This is a DTO for openHAB self updating features.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */

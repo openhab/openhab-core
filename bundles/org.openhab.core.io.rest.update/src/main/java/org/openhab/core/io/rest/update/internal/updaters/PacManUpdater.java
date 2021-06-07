@@ -15,7 +15,7 @@ package org.openhab.core.io.rest.update.internal.updaters;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link PacManUpdater} is the shell script for updating OpenHab on this OS resp. Package Manager.
+ * The {@link PacManUpdater} is the shell script for updating openHAB on this OS resp. Package Manager.
  *
  * @author AndrewFG - Initial contribution
  */

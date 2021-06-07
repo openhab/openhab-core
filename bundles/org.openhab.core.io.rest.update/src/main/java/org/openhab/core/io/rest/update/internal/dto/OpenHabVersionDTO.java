@@ -13,7 +13,7 @@
 package org.openhab.core.io.rest.update.internal.dto;
 
 /**
- * This is a DTO for OpenHAB self updater versions.
+ * This is a DTO for openHAB self updater versions.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
