@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# OpenHAB Auto Update Script for Linux / RedHat (YUM)
+# openHAB Auto Update Script for Linux / RedHat (YUM)
 
 # Execute command: [EXEC_COMMAND]
 
 # newline for clean log output
 echo
 
-# ignore SIGTERM so this script isn't killed when OpenHAB shuts down
+# ignore SIGTERM so this script isn't killed when openHAB shuts down
 trap "" 15
 
-# stop OpenHAB
+# stop openHAB
 systemctl stop openhab.service <<<"[PASSWORD]"
 
 # create the YUM updater file
@@ -24,9 +24,9 @@ cat > /etc/yum.repos.d/openhab.repo <<EOF
 >enabled=1
 >EOF
 
-# update OpenHAB
+# update openHAB
 sudo yum install openhab
 sudo yum install openhab-addons
 
-# start OpenHAB
+# start openHAB
 systemctl start openhab.service <<<"[PASSWORD]"

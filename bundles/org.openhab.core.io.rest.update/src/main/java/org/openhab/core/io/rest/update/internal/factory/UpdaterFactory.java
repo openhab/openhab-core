@@ -82,7 +82,7 @@ public class UpdaterFactory {
      *
      * @param targetVersion target version type to upgrade to (STABLE, MILESTONE, SNAPSHOT)
      * @param password system 'sudo' password on Linux systems
-     * @param sleepTime number of seconds that scripts shall sleep while OpenHAB shuts down
+     * @param sleepTime number of seconds that scripts shall sleep while openHAB shuts down
      * @return an instance of the respective xxxUpdater class
      */
     public static @Nullable BaseUpdater newUpdater() {

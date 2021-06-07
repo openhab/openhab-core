@@ -48,7 +48,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * This is a REST resource for OpenHAB self updating features.
+ * This is a REST resource for openHAB self updating features.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
@@ -69,7 +69,7 @@ public class UpdaterRestResource implements RESTResource {
 
     // response messages
     private static final String OK_SUCCESS = "Request succeeded!";
-    private static final String OK_UPDATE_STARTED = "Started OpenHAB self update process";
+    private static final String OK_UPDATE_STARTED = "Started openHAB self update process";
     private static final String BAD_REQUEST = "Bad request!";
     private static final String BAD_PASSWORD = "Invalid 'password' parameter (must be without white space and not longer than 20 characters).";
     private static final String BAD_USER = "Invalid 'user' parameter (must be aplha-numeric characters only and not longer than 20 characters).";
@@ -121,7 +121,7 @@ public class UpdaterRestResource implements RESTResource {
     @Path(UpdaterRestResource.URI_EXECUTE)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "execute", summary = "Start updating OpenHAB to a newer version.", responses = {
+    @Operation(operationId = "execute", summary = "Start updating openHAB to a newer version.", responses = {
             @ApiResponse(responseCode = "200", description = OK_SUCCESS),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST),
             @ApiResponse(responseCode = "500", description = INT_SERV_ERR_UPDATER_NULL) })

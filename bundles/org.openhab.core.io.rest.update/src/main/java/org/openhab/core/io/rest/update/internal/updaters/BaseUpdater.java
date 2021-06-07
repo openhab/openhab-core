@@ -54,7 +54,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
 /**
- * The {@link BaseUpdater} is a base for extending classes that will update OpenHAB.
+ * The {@link BaseUpdater} is a base for extending classes that will update openHAB.
  *
  * For each different operating system (resp. Linux package manager variety) there will be a different class that
  * extends this class and executes the respective update process for the target system.
@@ -66,7 +66,7 @@ public abstract class BaseUpdater implements Runnable {
 
     protected final Logger logger = LoggerFactory.getLogger(BaseUpdater.class);
 
-    private static final String TITLE = "OpenHAB Updater";
+    private static final String TITLE = "openHAB Updater";
 
     private static final String ARTIFACT_URL_RELEASE = "https://openhab.jfrog.io/artifactory/libs-release-local/org/openhab/distro/openhab/maven-metadata.xml";
     private static final String ARTIFACT_URL_MILESTONE = "https://openhab.jfrog.io/artifactory/libs-milestone-local/org/openhab/distro/openhab/maven-metadata.xml";
@@ -186,7 +186,7 @@ public abstract class BaseUpdater implements Runnable {
 
             // create the update script file
             if (!createScriptFile()) {
-                logger.debug("Failed to create OpenHAB update script file");
+                logger.debug("Failed to create openHAB update script file");
                 return;
             }
 
@@ -198,7 +198,7 @@ public abstract class BaseUpdater implements Runnable {
 
             // execute the update script
             if (!runScript()) {
-                logger.debug("Failed to run OpenHAB update script");
+                logger.debug("Failed to run openHAB update script");
                 deletePriorFiles();
                 return;
             }
@@ -311,7 +311,7 @@ public abstract class BaseUpdater implements Runnable {
     // ================== Getters ==================
 
     /**
-     * Get the latest online available OpenHAB version for the given upgrade type.
+     * Get the latest online available openHAB version for the given upgrade type.
      *
      * @return version e.g. 3.0.2, 3.1.0.M4, 3.1.0-SNAPSHOT, or VERSION_NOT_DEFINED
      */
@@ -329,7 +329,7 @@ public abstract class BaseUpdater implements Runnable {
     }
 
     /**
-     * Get the latest online available OpenHAB version for the target new upgrade type.
+     * Get the latest online available openHAB version for the target new upgrade type.
      *
      * @return version e.g. 3.0.2, 3.1.0.M4, 3.1.0-SNAPSHOT, or VERSION_NOT_DEFINED
      */
@@ -340,7 +340,7 @@ public abstract class BaseUpdater implements Runnable {
     }
 
     /**
-     * Get the actual version of OpenHAB running on this system.
+     * Get the actual version of openHAB running on this system.
      *
      * @return the version number, or VERSION_NOT_DEFINED
      */
@@ -354,7 +354,7 @@ public abstract class BaseUpdater implements Runnable {
     }
 
     /**
-     * Get the actual version type of OpenHAB running on this system.
+     * Get the actual version type of openHAB running on this system.
      *
      * @return the version type, or unknown
      */
@@ -445,10 +445,10 @@ public abstract class BaseUpdater implements Runnable {
 
     /**
      * Get the latest version available on the Artifactory web site. Download maven-metadata.xml from the given url and
-     * extract its latest OpenHAB version.
+     * extract its latest openHAB version.
      *
      * @param url source of a maven-metadata.xml file
-     * @return latest available OpenHAB version or UNKNOWN_VERSION
+     * @return latest available openHAB version or UNKNOWN_VERSION
      */
     private String getArtifactoryLatestVersion(String url) {
         XMLStreamReader reader = null;
@@ -514,7 +514,7 @@ public abstract class BaseUpdater implements Runnable {
      * <li>EXECUTE_FOLDER = the folder where the update script shall be run from
      * <li>EXECUTE_FILENAME = the file name of the update script
      * <li>EXECUTE_COMMAND = the shell command use to execute the update script
-     * <li>RUNTIME_FOLDER = the OpenHAB runtime folder
+     * <li>RUNTIME_FOLDER = the openHAB runtime folder
      * <p>
      * NOTE: classes that extend from BaseUpdater **MAY** set the following place holder values
      * <li>STD_OUT_FILENAME = the STDOUT and STDERR redirect file
@@ -621,7 +621,7 @@ public abstract class BaseUpdater implements Runnable {
         String filename = placeHolders.get(PlaceHolder.LOGBACK_FILENAME);
         try {
             Files.write(Paths.get(folder + File.separator + filename),
-                    Arrays.asList(String.format("Update [%s => %s] was started on %tc; OpenHAB was restarted now",
+                    Arrays.asList(String.format("Update [%s => %s] was started on %tc; openHAB was restarted now",
                             getActualVersion(), placeHolders.get(PlaceHolder.TARGET_VERSION), Calendar.getInstance())));
             return true;
         } catch (IOException e) {
@@ -696,7 +696,7 @@ public abstract class BaseUpdater implements Runnable {
      * <p>
      * On Linux systems {@link org.openhab.core.io.rest.update.internal.updaters.BaseUpdater#runScriptViaProcessBuilder}
      * may
-     * not be able to run at root level, so this alternate technique has to be used. The technique is that the OpenHAB
+     * not be able to run at root level, so this alternate technique has to be used. The technique is that the openHAB
      * Java application opens an SSH loop- back connection with its host machine, and injects the command via that
      * connection.
      *
@@ -804,7 +804,7 @@ public abstract class BaseUpdater implements Runnable {
      * @param latestVersion
      */
     protected void loggerInfoUpdateStarted() {
-        logger.info("Stopping OpenHAB; Starting update [{} => {}]", getActualVersion(),
+        logger.info("Stopping openHAB; Starting update [{} => {}]", getActualVersion(),
                 placeHolders.get(PlaceHolder.TARGET_VERSION));
     }
 }

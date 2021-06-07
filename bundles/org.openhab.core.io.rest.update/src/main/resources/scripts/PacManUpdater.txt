@@ -1,20 +1,20 @@
 #!/bin/bash
 
-# OpenHAB Auto Update Script for Linux / Arch / PacMan
+# openHAB Auto Update Script for Linux / Arch / PacMan
 
 # Execute command: [EXEC_COMMAND]
 
 # newline for clean log output
 echo
 
-# ignore SIGTERM so this script isn't killed when OpenHAB shuts down
+# ignore SIGTERM so this script isn't killed when openHAB shuts down
 trap "" 15
 
-# stop OpenHAB
+# stop openHAB
 systemctl stop openhab.service <<<"[PASSWORD]"
 
 # place holder for future implementation 
 echo "Updater not yet implemented. => Please request!"
 
-# start OpenHAB
+# start openHAB
 systemctl start openhab.service <<<"[PASSWORD]"

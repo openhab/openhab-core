@@ -1,25 +1,25 @@
 #!/bin/sh
 
-# OpenHAB Auto Update Script for Mac OS
+# openHAB Auto Update Script for Mac OS
 
 # Execute command: [EXEC_COMMAND]
 
 # newline for clean log output
 echo
 
-# don't terminate when OpenHAB shuts down (i.e. ignore SIGTERM)
+# don't terminate when openHAB shuts down (i.e. ignore SIGTERM)
 trap "" 15
 
-# stop OpenHAB
+# stop openHAB
 . "[RUNTIME_FOLDER]/bin/stop" >nul 2>&1
 
-# sleep if OpenHAB was running
+# sleep if openHAB was running
 if [ $? -eq 0 ]; then
    sleep [SLEEP_TIME]
 fi
 
-# update OpenHAB
+# update openHAB 
 . "[RUNTIME_FOLDER]/bin/update" [TARGET_VERSION]
 
-# start OpenHAB
+# start openHAB
 exec "[EXEC_FOLDER]/start.sh"
