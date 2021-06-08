@@ -15,13 +15,16 @@ package org.openhab.core.library.unit;
 import java.math.BigInteger;
 
 import javax.measure.Unit;
+import javax.measure.quantity.Area;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
+import javax.measure.quantity.Volume;
 import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.library.dimension.VolumetricFlowRate;
 
 import tech.units.indriya.format.SimpleUnitFormat;
 import tech.units.indriya.function.AddConverter;
@@ -69,8 +72,21 @@ public final class ImperialUnits extends CustomUnits {
 
     public static final Unit<Length> LEAGUE = addUnit(new TransformedUnit<>("lea", MILE, MultiplyConverter.of(3.0)));
 
-    public static final Unit<Length> SQUARE_FOOT = addUnit(new ProductUnit<>(FOOT.multiply(FOOT)));
-    public static final Unit<Length> CUBIC_FOOT = addUnit(new ProductUnit<>(SQUARE_FOOT.multiply(FOOT)));
+    /** Area **/
+    public static final Unit<Area> SQUARE_INCH = addUnit(new ProductUnit<>(INCH.multiply(INCH)));
+
+    public static final Unit<Area> SQUARE_FOOT = addUnit(new ProductUnit<>(FOOT.multiply(FOOT)));
+
+    /** Volume **/
+    public static final Unit<Volume> CUBIC_INCH = addUnit(new ProductUnit<>(SQUARE_INCH.multiply(INCH)));
+
+    public static final Unit<Volume> CUBIC_FOOT = addUnit(new ProductUnit<>(SQUARE_FOOT.multiply(FOOT)));
+
+    public static final Unit<Volume> GALLON_LIQUID_US = addUnit(
+            new TransformedUnit<>("gal", CUBIC_INCH, MultiplyConverter.of(231.0)));
+
+    public static final Unit<VolumetricFlowRate> GALLON_PER_MINUTE = addUnit(
+            new ProductUnit<VolumetricFlowRate>(GALLON_LIQUID_US.divide(tech.units.indriya.unit.Units.MINUTE)));
 
     /**
      * Add unit symbols for imperial units.
@@ -86,6 +102,8 @@ public final class ImperialUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(FURLONG, FURLONG.getSymbol());
         SimpleUnitFormat.getInstance().label(MILE, MILE.getSymbol());
         SimpleUnitFormat.getInstance().label(LEAGUE, LEAGUE.getSymbol());
+        SimpleUnitFormat.getInstance().label(GALLON_LIQUID_US, GALLON_LIQUID_US.getSymbol());
+        SimpleUnitFormat.getInstance().label(GALLON_PER_MINUTE, "gal/min");
     }
 
     private ImperialUnits() {
