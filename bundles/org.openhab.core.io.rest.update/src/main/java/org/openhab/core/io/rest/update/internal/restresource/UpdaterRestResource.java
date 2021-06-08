@@ -24,7 +24,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
@@ -32,7 +31,6 @@ import org.openhab.core.io.rest.update.internal.dto.UpdaterExecuteDTO;
 import org.openhab.core.io.rest.update.internal.dto.UpdaterStatusDTO;
 import org.openhab.core.io.rest.update.internal.factory.UpdaterFactory;
 import org.openhab.core.io.rest.update.internal.updaters.BaseUpdater;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
@@ -74,14 +72,8 @@ public class UpdaterRestResource implements RESTResource {
     private static final String BAD_PASSWORD = "Invalid 'password' parameter (must be without white space and not longer than 20 characters).";
     private static final String BAD_USER = "Invalid 'user' parameter (must be aplha-numeric characters only and not longer than 20 characters).";
     private static final String BAD_VERSION = "Invalid 'targetNewVersionType' parameter (must be STABLE / MILSETONE/ SNAPSHOT).";
-    private static final String INT_SERV_ERR_UPDATER_NULL = "Updater class not initialized.";
 
-    private @Nullable BaseUpdater updater;
-
-    @Activate
-    public UpdaterRestResource() {
-        this.updater = UpdaterFactory.newUpdater();
-    }
+    private BaseUpdater updater = new UpdaterFactory().newUpdater();
 
     /**
      * This method handles HTTP GET on the updater resource's 'status' path. It serves a JSON DTO containing the updater
@@ -94,15 +86,9 @@ public class UpdaterRestResource implements RESTResource {
     @Path(UpdaterRestResource.URI_STATUS)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "status", summary = "Get the updater status.", responses = {
-            @ApiResponse(responseCode = "200", description = OK_SUCCESS, content = @Content(schema = @Schema(implementation = UpdaterStatusDTO.class))),
-            @ApiResponse(responseCode = "500", description = INT_SERV_ERR_UPDATER_NULL) })
+            @ApiResponse(responseCode = "200", description = OK_SUCCESS, content = @Content(schema = @Schema(implementation = UpdaterStatusDTO.class))) })
     public Response status() {
         BaseUpdater updater = this.updater;
-
-        // return server error if updater is null
-        if (updater == null) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(INT_SERV_ERR_UPDATER_NULL).build();
-        }
 
         // populate and return the DTO
         return Response.ok(updater.getStatusDTO()).build();
@@ -123,16 +109,10 @@ public class UpdaterRestResource implements RESTResource {
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "execute", summary = "Start updating openHAB to a newer version.", responses = {
             @ApiResponse(responseCode = "200", description = OK_SUCCESS),
-            @ApiResponse(responseCode = "400", description = BAD_REQUEST),
-            @ApiResponse(responseCode = "500", description = INT_SERV_ERR_UPDATER_NULL) })
+            @ApiResponse(responseCode = "400", description = BAD_REQUEST) })
     public Response execute(
             @Parameter(description = "Update command settings", required = true) @Valid UpdaterExecuteDTO dto) {
         BaseUpdater updater = this.updater;
-
-        // return server error if updater is null
-        if (updater == null) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(INT_SERV_ERR_UPDATER_NULL).build();
-        }
 
         // check targetNewVersionType
         if (dto.targetNewVersionType != null) {

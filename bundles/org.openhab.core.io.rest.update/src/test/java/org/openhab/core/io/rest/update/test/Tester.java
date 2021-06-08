@@ -23,7 +23,7 @@ import org.openhab.core.io.rest.update.internal.updaters.WindowsUpdater;
 /**
  * Tests
  *
- * @author AndrewFG - Initial contribution
+ * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
 class Tester {
@@ -36,7 +36,7 @@ class Tester {
         assertEquals("VERSION_NOT_DEFINED", dto.actualVersion.versionName);
         assertEquals(3, dto.latestVersionCount.intValue());
         assertEquals("SNAPSHOT", dto.latestVersions[2].versionType);
-        assertEquals("no", dto.newVersionAvailable);
+        assertFalse(dto.newVersionAvailable);
         assertEquals("UNKNOWN", dto.targetNewVersionType);
     }
 }

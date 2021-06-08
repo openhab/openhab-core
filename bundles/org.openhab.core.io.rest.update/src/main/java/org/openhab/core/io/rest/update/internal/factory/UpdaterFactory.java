@@ -18,11 +18,11 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.rest.update.internal.enums.OperatingSystem;
 import org.openhab.core.io.rest.update.internal.enums.PackageManager;
 import org.openhab.core.io.rest.update.internal.updaters.BaseUpdater;
 import org.openhab.core.io.rest.update.internal.updaters.DebianUpdater;
+import org.openhab.core.io.rest.update.internal.updaters.DummyUpdater;
 import org.openhab.core.io.rest.update.internal.updaters.MacUpdater;
 import org.openhab.core.io.rest.update.internal.updaters.PacManUpdater;
 import org.openhab.core.io.rest.update.internal.updaters.PortageUpdater;
@@ -35,12 +35,12 @@ import org.slf4j.LoggerFactory;
  * The {@link UpdaterFactory} creates a xxxUpdater class based on the Operating System (and its respective package
  * manager if the Operating System is Linux).
  *
- * @author AndrewFG - initial contribution
+ * @author Andrew Fiddian-Green - initial contribution
  */
 @NonNullByDefault
 public class UpdaterFactory {
-    // logger must be static because the class needs to log within static methods
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpdaterFactory.class);
+
+    private final Logger logger = LoggerFactory.getLogger(UpdaterFactory.class);
 
     private static final String PROPERTY_FILE = "/etc/os-release";
     private static final String[] PROPERTY_KEYS = new String[] { "ID_LIKE", "ID" };
@@ -49,10 +49,11 @@ public class UpdaterFactory {
      * Reads the properties in the '/etc/os-release' file and returns the package manager based on the 'ID_LIKE' or 'ID'
      * properties.
      *
-     * @return
+     * @return the PackageManager enum value corresponding to the type of Package Manger supported by the current
+     *         Operating System.
      */
     @SuppressWarnings("null")
-    private static PackageManager getLinuxPackageManager() {
+    private PackageManager getLinuxPackageManager() {
         try (InputStream stream = new FileInputStream(PROPERTY_FILE)) {
             Properties properties = new Properties();
             properties.load(stream);
@@ -69,9 +70,9 @@ public class UpdaterFactory {
                     }
                 }
             }
-            LOGGER.debug("Property values ID_LIKE or ID not found");
+            logger.debug("Property values ID_LIKE or ID not found");
         } catch (IOException e) {
-            LOGGER.debug("Errror reading property file: {}, '{}'", PROPERTY_FILE, e.getMessage());
+            logger.debug("Errror reading property file: {}, '{}'", PROPERTY_FILE, e.getMessage());
         }
         return PackageManager.UNKNOWN;
     }
@@ -85,7 +86,7 @@ public class UpdaterFactory {
      * @param sleepTime number of seconds that scripts shall sleep while openHAB shuts down
      * @return an instance of the respective xxxUpdater class
      */
-    public static @Nullable BaseUpdater newUpdater() {
+    public BaseUpdater newUpdater() {
         OperatingSystem opSys = OperatingSystem.getOperatingSystemVersion();
         switch (opSys) {
             case WINDOWS:
@@ -104,11 +105,11 @@ public class UpdaterFactory {
                     case ARCH_PACMAN:
                         return new PacManUpdater();
                     default:
-                        LOGGER.debug("Updater not yet available for {} {}. => Please request.", opSys, pkgMan);
+                        logger.debug("Updater not yet available for {} {}. => Please request.", opSys, pkgMan);
                 }
             default:
-                LOGGER.debug("Updater not yet available for {}. => Please request.", opSys);
+                logger.debug("Updater not yet available for {}. => Please request.", opSys);
         }
-        return null;
+        return new DummyUpdater();
     }
 }

@@ -19,27 +19,22 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermissions;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link DebianUpdater} is the shell script for updating openHAB on this OS resp. Package Manager.
  *
- * @author AndrewFG - Initial contribution
+ * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
 public class DebianUpdater extends BaseUpdater {
 
+    private final Logger logger = LoggerFactory.getLogger(DebianUpdater.class);
+
     private static final String EXEC_FOLDER = "/usr/share/openhab";
     private static final String EXEC_FILENAME = FILE_ID + ".sh";
     private static final String RUNTIME_FOLDER = EXEC_FOLDER + "/runtime";
-
-    /*
-     * TESTING: plain shell (works for scripts that require no credentials)
-     * private static final String EXECUTE_COMMAND = "/bin/bash -c ./" + EXECUTE_FILENAME;
-     */
-
-    /*
-     * TESTING: inject credentials into sudo command
-     */
     private static final String EXEC_COMMAND = "sudo -k -S <<<\"" + PlaceHolder.PASSWORD.key + "\" /bin/bash -c ./"
             + EXEC_FILENAME;
 

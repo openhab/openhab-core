@@ -12,3 +12,9 @@ https://www.eclipse.org/legal/epl-2.0/.
 
 https://github.com/openhab/openhab-core
 
+== Third-party Content
+
+JSch
+* License: BSD-style license.
+* Project: http://www.jcraft.com/jsch/
+* Source:  https://sourceforge.net/projects/jsch/

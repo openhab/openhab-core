@@ -13,11 +13,13 @@
 package org.openhab.core.io.rest.update.internal.updaters;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link PacManUpdater} is the shell script for updating openHAB on this OS resp. Package Manager.
  *
- * @author AndrewFG - Initial contribution
+ * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
 public class PacManUpdater extends DebianUpdater {
@@ -27,6 +29,8 @@ public class PacManUpdater extends DebianUpdater {
      * the respective resource).
      */
 
+    private final Logger logger = LoggerFactory.getLogger(PacManUpdater.class);
+
     /**
      * This updater's script has not yet been implemented, so log an error and throw an exception.
      *
@@ -35,7 +39,7 @@ public class PacManUpdater extends DebianUpdater {
     @Override
     protected void initializeExtendedPlaceholders() throws UnsupportedOperationException {
         UnsupportedOperationException e = new UnsupportedOperationException(
-                "This class of updater has not yet been implemented. Please request!");
+                "Sorry, the updater for the 'PacMan' Package Manager has not yet been implemented.");
         logger.warn("{}", e.getMessage());
         throw e;
     }

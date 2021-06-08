@@ -14,14 +14,18 @@ package org.openhab.core.io.rest.update.internal.updaters;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link WindowsUpdater} is the shell script for updating openHAB on this OS resp. Package Manager.
  *
- * @author AndrewFG - Initial contribution
+ * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
 public class WindowsUpdater extends BaseUpdater {
+
+    private final Logger logger = LoggerFactory.getLogger(WindowsUpdater.class);
 
     private static final String EXEC_FOLDER = OpenHAB.getUserDataFolder().replace("\\userdata", "");
     private static final String EXEC_FILENAME = FILE_ID + ".cmd";

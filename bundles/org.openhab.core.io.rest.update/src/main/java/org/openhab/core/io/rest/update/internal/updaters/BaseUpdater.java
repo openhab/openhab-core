@@ -23,6 +23,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -42,7 +45,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.io.rest.update.internal.dto.OpenHabVersionDTO;
 import org.openhab.core.io.rest.update.internal.dto.UpdaterStatusDTO;
-import org.openhab.core.io.rest.update.internal.enums.TriState;
 import org.openhab.core.io.rest.update.internal.enums.VersionType;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -59,18 +61,19 @@ import com.jcraft.jsch.Session;
  * For each different operating system (resp. Linux package manager variety) there will be a different class that
  * extends this class and executes the respective update process for the target system.
  *
- * @author AndrewFG - Initial contribution
+ * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
 public abstract class BaseUpdater implements Runnable {
 
-    protected final Logger logger = LoggerFactory.getLogger(BaseUpdater.class);
+    private final Logger logger = LoggerFactory.getLogger(BaseUpdater.class);
 
     private static final String TITLE = "openHAB Updater";
 
     private static final String ARTIFACT_URL_RELEASE = "https://openhab.jfrog.io/artifactory/libs-release-local/org/openhab/distro/openhab/maven-metadata.xml";
     private static final String ARTIFACT_URL_MILESTONE = "https://openhab.jfrog.io/artifactory/libs-milestone-local/org/openhab/distro/openhab/maven-metadata.xml";
     private static final String ARTIFACT_URL_SNAPSHOT = "https://openhab.jfrog.io/artifactory/libs-snapshot-local/org/openhab/distro/openhab/maven-metadata.xml";
+    private static final String ARTIFACT_URL_SNAPSHOT_DRILLDOWN = "https://openhab.jfrog.io/artifactory/libs-snapshot-local/org/openhab/distro/openhab/%s/maven-metadata.xml";
 
     private static final String SNAPSHOT = "SNAPSHOT";
 
@@ -147,7 +150,7 @@ public abstract class BaseUpdater implements Runnable {
         // call the extending class method to initialise the EXTENDED place holders
         initializeExtendedPlaceholders();
         // log the prior log-back file entries
-        logggerInfoLogbackFile();
+        loggerInfoLogbackFile();
         // delete prior files
         deletePriorFiles();
     }
@@ -313,30 +316,45 @@ public abstract class BaseUpdater implements Runnable {
     /**
      * Get the latest online available openHAB version for the given upgrade type.
      *
-     * @return version e.g. 3.0.2, 3.1.0.M4, 3.1.0-SNAPSHOT, or VERSION_NOT_DEFINED
+     * @param versionType the type of version (stable, milestone, snapshot) whose data shall be downloaded
+     * @param refreshPlaceHolder flag to determine whether the placeholder shall be refreshed
+     * @return version string e.g. 3.0.2 (stable), 3.1.0.M4 (milestone), 3.1.0.202106080623 (snapshot), or
+     *         VERSION_NOT_DEFINED
      */
-    private String getRemoteLatestVersion(VersionType verType) {
-        switch (verType) {
+    private String getRemoteLatestVersion(VersionType versionType, boolean refreshPlaceHolder) {
+        String versionId;
+        String versionIdWithTimestamp = null;
+        switch (versionType) {
             case STABLE:
-                return getArtifactoryLatestVersion(ARTIFACT_URL_RELEASE);
+                versionId = getArtifactoryLatestVersion(ARTIFACT_URL_RELEASE);
+                break;
             case MILESTONE:
-                return getArtifactoryLatestVersion(ARTIFACT_URL_MILESTONE);
+                versionId = getArtifactoryLatestVersion(ARTIFACT_URL_MILESTONE);
+                break;
             case SNAPSHOT:
-                return getArtifactoryLatestVersion(ARTIFACT_URL_SNAPSHOT);
+                versionId = getArtifactoryLatestVersion(ARTIFACT_URL_SNAPSHOT);
+                if (!VERSION_NOT_DEFINED.equals(versionId)) {
+                    String timestamp = getArtifactorySnapshotTimestamp(
+                            String.format(ARTIFACT_URL_SNAPSHOT_DRILLDOWN, versionId));
+                    versionIdWithTimestamp = versionId.replace(SNAPSHOT, timestamp).replace("-", ".");
+                }
+                break;
             default:
+                versionId = VERSION_NOT_DEFINED;
         }
-        return VERSION_NOT_DEFINED;
+        if (refreshPlaceHolder) {
+            placeHolders.put(PlaceHolder.TARGET_VERSION, versionId);
+        }
+        return versionIdWithTimestamp != null ? versionIdWithTimestamp : versionId;
     }
 
     /**
      * Get the latest online available openHAB version for the target new upgrade type.
      *
-     * @return version e.g. 3.0.2, 3.1.0.M4, 3.1.0-SNAPSHOT, or VERSION_NOT_DEFINED
+     * @return version e.g. 3.0.2 (stable), 3.1.0.M4 (milestone), 3.1.0.202106080623 (snapshot), or VERSION_NOT_DEFINED
      */
     private String getRemoteLatestTargetVersion() {
-        String result = getRemoteLatestVersion(targetNewVersionType);
-        placeHolders.put(PlaceHolder.TARGET_VERSION, result);
-        return result;
+        return getRemoteLatestVersion(targetNewVersionType, true);
     }
 
     /**
@@ -348,7 +366,7 @@ public abstract class BaseUpdater implements Runnable {
         try {
             return FrameworkUtil.getBundle(OpenHAB.class).getVersion().toString();
         } catch (NullPointerException e) {
-            // in JUnit tests FrameworkUtil.getBundle() throws an NPE so ignore it
+            // in JUnit tests FrameworkUtil.getBundle() throws an NPE so catch and ignore it
         }
         return VERSION_NOT_DEFINED;
     }
@@ -400,47 +418,68 @@ public abstract class BaseUpdater implements Runnable {
      * Get whether an update is available. Compares the actual running version against the latest remote version, and
      * returns whether the latter is a higher version than the former.
      * <p>
-     * e.g. compares two strings such as 3.2.1 / 3.2.1.M1 / 3.2.1-SNAPSHOT against each other.
+     * e.g. compares two strings such as 3.2.1 / 3.2.1.M1 / 3.2.1.202106080623 against each other.
      * <p>
      * The comparison behaves differently depending on the value of {@link VersionType} ..
      * <li>{@link VersionType.STABLE} compares each integer part of the two version strings
      * <li>{@link VersionType.MILESTONE} as 'STABLE' and if the same, compares 'M' parts
-     * <li>{@link VersionType.SNAPSHOT} as for 'STABLE' and if the same, returns {@link TriState.DONT_KNOW}
+     * <li>{@link VersionType.SNAPSHOT} as for 'STABLE' and if the same, compare the time stamps
      *
-     * @return {@link TriState.YES}, or {@link TriState.NO}, or {@link TriState.DONT_KNOW}
+     * @return true if the remote version number is higher than the actual version (i.e. an update is available)
      */
-    private TriState getRemoteVersionHigher() {
+    private Boolean isRemoteVersionHigher() {
+        String actVer = getActualVersion();
+        String remVer = getRemoteLatestTargetVersion();
+
+        if (VERSION_NOT_DEFINED.equals(actVer) || VERSION_NOT_DEFINED.equals(remVer)) {
+            return false;
+        }
+
         // split the version strings into parts
-        String[] actVerParts = getActualVersion().replace("-", ".").split("\\.");
-        String[] remVerParts = getRemoteLatestTargetVersion().replace("-", ".").split("\\.");
+        String[] actVerParts = actVer.replace("-", ".").split("\\.");
+        String[] remVerParts = remVer.replace("-", ".").split("\\.");
 
         // compare the first three parts e.g. 3.0.0 <=> 3.0.1
         int compareOverall = 0;
         for (int i = 0; i < 3; i++) {
-            int compareResult = convertStringArrayElementToInteger(actVerParts, i)
-                    .compareTo(convertStringArrayElementToInteger(remVerParts, i));
+            int compareResult = convertStringArrayElementToInteger(remVerParts, i)
+                    .compareTo(convertStringArrayElementToInteger(actVerParts, i));
             if (compareResult != 0) {
                 compareOverall = compareResult;
                 break;
             }
         }
 
-        // if the first three parts are all equal, compare the fourth part
-        if (compareOverall == 0) {
-            switch (targetNewVersionType) {
-                case SNAPSHOT:
-                    // can't say if one snapshot is newer than another e.g. 3.0.0-SNAPSHOT
-                    return TriState.DONT_KNOW;
-                case MILESTONE:
-                    // compare the fourth part e.g. 3.0.0.M1 <=> 3.0.0.M2
-                    if (remVerParts.length > 3) {
-                        // alpha numeric compare (works until M9)
-                        compareOverall = actVerParts.length > 3 ? actVerParts[3].compareTo(remVerParts[3]) : 1;
-                    }
-                default:
+        // if the first three parts are all equal, compare the suffixes
+        if (compareOverall == 0 && remVerParts.length > 3) {
+            if (actVerParts.length <= 3) {
+                // local version without a suffix (stable) is above a remote version with a snapshot or milestone suffix
+                compareOverall = -1;
+            } else {
+                switch (targetNewVersionType) {
+                    case SNAPSHOT:
+                        if (actVerParts[3].contains("M")) {
+                            // remote snapshot suffix always beats a local milestone suffix
+                            compareOverall = 1;
+                        } else {
+                            // compare the suffixes e.g. 3.0.0.202106080623 <=> 3.0.0.202106080624
+                            compareOverall = remVerParts[3].compareTo(actVerParts[3]);
+                        }
+                        break;
+                    case MILESTONE:
+                        if (!actVerParts[3].contains("M")) {
+                            // remote milestone suffix always beats a local snapshot suffix
+                            compareOverall = 1;
+                        } else {
+                            // compare the suffixes e.g. 3.0.0.M1 <=> 3.0.0.M2
+                            // note: alpha numeric compare only works until M9
+                            compareOverall = remVerParts[3].compareTo(actVerParts[3]);
+                        }
+                    default:
+                }
             }
         }
-        return compareOverall < 0 ? TriState.YES : TriState.NO;
+        return compareOverall > 0;
     }
 
     /**
@@ -476,6 +515,47 @@ public abstract class BaseUpdater implements Runnable {
     }
 
     /**
+     * Get the latest SNAPSHOT's time-stamp on the Artifactory web site. Download maven-metadata.xml from the given
+     * url and extract the 'timestamp' element.
+     *
+     * @param url source of a maven-metadata.xml file
+     * @return the time stamp (if found and valid)
+     */
+    private String getArtifactorySnapshotTimestamp(String url) {
+        XMLStreamReader reader = null;
+        try {
+            reader = XMLInputFactory.newInstance().createXMLStreamReader(new URL(url).openStream());
+            while (reader.hasNext()) {
+                if (reader.next() == XMLStreamConstants.START_ELEMENT) {
+                    if ("timestamp".equals(reader.getLocalName())) {
+                        String timeStamp = reader.getElementText();
+                        /*
+                         * the maven artifactory time-stamp format is '20210608.062321' so re-format the value to the
+                         * openHAB versioning time-stamp format '202106080623'
+                         */
+                        DateTimeFormatter fmtIn = DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss");
+                        DateTimeFormatter fmtOut = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+                        return fmtOut.format(LocalDateTime.from(fmtIn.parse(timeStamp)));
+                    }
+                }
+            }
+        } catch (IOException | XMLStreamException e) {
+            logger.debug("Error reading maven metadata file: {}", e.getMessage());
+        } catch (DateTimeException e) {
+            logger.debug("Error parsing time stamp: {}", e.getMessage());
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (XMLStreamException e) {
+                    logger.debug("Error closing maven metadata file: {}", e.getMessage());
+                }
+            }
+        }
+        return "";
+    }
+
+    /**
      * Create a DTO from the updater's current state.
      *
      * @return the DTO
@@ -492,13 +572,12 @@ public abstract class BaseUpdater implements Runnable {
         for (int i = 0; i < dto.latestVersions.length; i++) {
             OpenHabVersionDTO lv = dto.latestVersions[i] = new OpenHabVersionDTO();
             VersionType ver = VersionType.values()[i];
-            lv.versionName = getRemoteLatestVersion(ver);
+            lv.versionName = getRemoteLatestVersion(ver, false);
             lv.versionType = VERSION_NOT_DEFINED.equals(lv.versionName) ? VersionType.UNKNOWN.name() : ver.name();
         }
         // update parameters
         dto.targetNewVersionType = targetNewVersionType.name();
-        dto.newVersionAvailable = getRemoteVersionHigher().label;
-
+        dto.newVersionAvailable = isRemoteVersionHigher();
         return dto;
     }
 
@@ -754,7 +833,7 @@ public abstract class BaseUpdater implements Runnable {
     /**
      * Read the log-back file (if present) and log its contents to INFO.
      */
-    private void logggerInfoLogbackFile() {
+    private void loggerInfoLogbackFile() {
         if (logger.isInfoEnabled()) {
             String folder = placeHolders.get(PlaceHolder.EXEC_FOLDER);
             String filename = placeHolders.get(PlaceHolder.LOGBACK_FILENAME);
