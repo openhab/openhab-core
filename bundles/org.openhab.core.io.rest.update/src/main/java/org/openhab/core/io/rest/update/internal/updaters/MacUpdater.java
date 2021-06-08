@@ -14,14 +14,18 @@ package org.openhab.core.io.rest.update.internal.updaters;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link MacUpdater} is the shell script for updating openHAB on this OS resp. Package Manager.
  *
- * @author AndrewFG - initial contribution
+ * @author Andrew Fiddian-Green - initial contribution
  */
 @NonNullByDefault
 public class MacUpdater extends BaseUpdater {
+
+    private final Logger logger = LoggerFactory.getLogger(MacUpdater.class);
 
     private static final String EXEC_FOLDER = OpenHAB.getUserDataFolder().replace("/userdata", "");
     private static final String EXEC_FILENAME = FILE_ID + ".sh";
@@ -39,6 +43,6 @@ public class MacUpdater extends BaseUpdater {
         placeHolders.put(PlaceHolder.EXEC_COMMAND, EXEC_COMMAND);
         placeHolders.put(PlaceHolder.RUNTIME_FOLDER, RUNTIME_FOLDER);
 
-        logger.warn("This class of updater has not yet been completed. Please request!");
+        logger.warn("Sorry, the updater for macOS has not yet been fully implemented.");
     }
 }

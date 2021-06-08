@@ -13,11 +13,13 @@
 package org.openhab.core.io.rest.update.internal.updaters;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link YumUpdater} is the shell script for updating openHAB on this OS resp. Package Manager.
  *
- * @author AndrewFG - Initial contribution
+ * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
 public class YumUpdater extends DebianUpdater {
@@ -26,4 +28,19 @@ public class YumUpdater extends DebianUpdater {
      * script in the '/scripts/YumUpdater.txt' resource (which is why we need it to have a different class name to find
      * the respective resource).
      */
+
+    private final Logger logger = LoggerFactory.getLogger(YumUpdater.class);
+
+    /**
+     * This updater's script has not yet been implemented, so log an error and throw an exception.
+     *
+     * @throws UnsupportedOperationException
+     */
+    @Override
+    protected void initializeExtendedPlaceholders() throws UnsupportedOperationException {
+        UnsupportedOperationException e = new UnsupportedOperationException(
+                "Sorry, the updater for the 'Yum' Package Manager has not yet been implemented.");
+        logger.warn("{}", e.getMessage());
+        throw e;
+    }
 }

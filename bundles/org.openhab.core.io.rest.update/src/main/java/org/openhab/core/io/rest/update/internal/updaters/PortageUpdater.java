@@ -13,20 +13,23 @@
 package org.openhab.core.io.rest.update.internal.updaters;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link PortageUpdater} is the shell script for updating openHAB on this OS resp. Package Manager.
  *
- * @author AndrewFG - Initial contribution
+ * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
 public class PortageUpdater extends DebianUpdater {
-
     /*
      * This updater operates exactly the same way as the Debian updater. The only difference is that it uses a different
      * script in the '/scripts/YumUpdater.txt' resource (which is why we need it to have a different class name to find
      * the respective resource).
      */
+
+    private final Logger logger = LoggerFactory.getLogger(PortageUpdater.class);
 
     /**
      * This updater's script has not yet been implemented, so log an error and throw an exception.
@@ -36,7 +39,7 @@ public class PortageUpdater extends DebianUpdater {
     @Override
     protected void initializeExtendedPlaceholders() throws UnsupportedOperationException {
         UnsupportedOperationException e = new UnsupportedOperationException(
-                "This class of updater has not yet been implemented. Please request!");
+                "Sorry, the updater for the 'Portage' Package Manager has not yet been implemented.");
         logger.warn("{}", e.getMessage());
         throw e;
     }

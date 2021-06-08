@@ -10,24 +10,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.update.internal.enums;
+package org.openhab.core.io.rest.update.internal.updaters;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This is an enum that can have three values.
+ * The {@link DummyUpdater} is a 'do nothing' (place holder) updater class implementation.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public enum TriState {
-    DONT_KNOW("don't know"),
-    NO("no"),
-    YES("yes");
+public class DummyUpdater extends BaseUpdater {
 
-    public final String label;
+    @Override
+    protected void initializeExtendedPlaceholders() {
+    }
 
-    TriState(String label) {
-        this.label = label;
+    @Override
+    public void run() {
     }
 }

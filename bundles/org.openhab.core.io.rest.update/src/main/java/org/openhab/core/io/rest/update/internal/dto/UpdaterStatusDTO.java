@@ -22,5 +22,5 @@ public class UpdaterStatusDTO {
     public Integer latestVersionCount;
     public OpenHabVersionDTO[] latestVersions;
     public String targetNewVersionType;
-    public String newVersionAvailable;
+    public Boolean newVersionAvailable;
 }
