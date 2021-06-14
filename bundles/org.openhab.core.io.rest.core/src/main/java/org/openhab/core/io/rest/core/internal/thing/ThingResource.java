@@ -287,7 +287,8 @@ public class ThingResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getThings", summary = "Get all available things.", responses = {
+    @Operation(operationId = "getThings", summary = "Get all available things.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedThingDTO.class), uniqueItems = true))) })
     public Response getAll(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
