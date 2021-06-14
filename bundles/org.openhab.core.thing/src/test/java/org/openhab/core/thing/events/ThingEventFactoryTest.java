@@ -18,6 +18,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -36,7 +37,10 @@ import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.openhab.core.thing.dto.ThingDTOMapper;
 import org.openhab.core.thing.events.ChannelDescriptionChangedEvent.CommonChannelDescriptionField;
 import org.openhab.core.thing.events.ThingEventFactory.ChannelDescriptionChangedEventPayloadBean;
+import org.openhab.core.thing.events.ThingEventFactory.ChannelDescriptionPatternPayloadBean;
+import org.openhab.core.thing.events.ThingEventFactory.ChannelDescriptionStateOptionsPayloadBean;
 import org.openhab.core.thing.events.ThingEventFactory.TriggerEventPayloadBean;
+import org.openhab.core.types.StateOption;
 
 import com.google.gson.Gson;
 
@@ -71,12 +75,29 @@ public class ThingEventFactoryTest {
     private static final ChannelUID CHANNEL_UID = new ChannelUID(THING_UID, "channel");
     private static final String CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC = ThingEventFactory.CHANNEL_DESCRIPTION_CHANGED_TOPIC
             .replace("{channelUID}", CHANNEL_UID.getAsString());
+    private static final String CHANNEL_DESCRIPTION_PATTERN_PAYLOAD = JSONCONVERTER
+            .toJson(new ChannelDescriptionPatternPayloadBean("%s"));
+    private static final String CHANNEL_DESCRIPTION_OLD_PATTERN_PAYLOAD = JSONCONVERTER
+            .toJson(new ChannelDescriptionPatternPayloadBean("%unit%"));
     private static final String CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_ONLY_NEW_VALUE = JSONCONVERTER
             .toJson(new ChannelDescriptionChangedEventPayloadBean(CommonChannelDescriptionField.PATTERN,
-                    CHANNEL_UID.getAsString(), Set.of("item1", "item2"), "%s", null));
+                    CHANNEL_UID.getAsString(), Set.of("item1", "item2"), CHANNEL_DESCRIPTION_PATTERN_PAYLOAD, null));
     private static final String CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_NEW_AND_OLD_VALUE = JSONCONVERTER
             .toJson(new ChannelDescriptionChangedEventPayloadBean(CommonChannelDescriptionField.PATTERN,
-                    CHANNEL_UID.getAsString(), Set.of("item1", "item2"), "%s", "%unit%"));
+                    CHANNEL_UID.getAsString(), Set.of("item1", "item2"), CHANNEL_DESCRIPTION_PATTERN_PAYLOAD,
+                    CHANNEL_DESCRIPTION_OLD_PATTERN_PAYLOAD));
+    private static final String CHANNEL_DESCRIPTION_STATE_OPTIONS_PAYLOAD = JSONCONVERTER
+            .toJson(new ChannelDescriptionStateOptionsPayloadBean(List.of(new StateOption("offline", "Offline"))));
+    private static final String CHANNEL_DESCRIPTION_OLD_STATE_OPTIONS_PAYLOAD = JSONCONVERTER
+            .toJson(new ChannelDescriptionStateOptionsPayloadBean(List.of(new StateOption("online", "Online"))));
+    private static final String CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_ONLY_NEW_OPTIONS = JSONCONVERTER
+            .toJson(new ChannelDescriptionChangedEventPayloadBean(CommonChannelDescriptionField.STATE_OPTIONS,
+                    CHANNEL_UID.getAsString(), Set.of("item1", "item2"), CHANNEL_DESCRIPTION_STATE_OPTIONS_PAYLOAD,
+                    null));
+    private static final String CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_NEW_AND_OLD_OPTIONS = JSONCONVERTER
+            .toJson(new ChannelDescriptionChangedEventPayloadBean(CommonChannelDescriptionField.STATE_OPTIONS,
+                    CHANNEL_UID.getAsString(), Set.of("item1", "item2"), CHANNEL_DESCRIPTION_STATE_OPTIONS_PAYLOAD,
+                    CHANNEL_DESCRIPTION_OLD_STATE_OPTIONS_PAYLOAD));
     private static final String CHANNEL_TRIGGERED_EVENT_TOPIC = ThingEventFactory.CHANNEL_TRIGGERED_EVENT_TOPIC
             .replace("{channelUID}", CHANNEL_UID.getAsString());
     private static final String CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD = new Gson()
@@ -144,7 +165,7 @@ public class ThingEventFactoryTest {
 
     @Test
     public void testCreateChannelDescriptionChangedEventOnlyNewValue() {
-        ChannelDescriptionChangedEvent event = ThingEventFactory.createChannelDescriptionChangedEvent(
+        ChannelDescriptionChangedEvent event = ThingEventFactory.createChannelDescriptionPatternChangedEvent(
                 CommonChannelDescriptionField.PATTERN, CHANNEL_UID, Set.of("item1", "item2"), "%s", null);
 
         assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
@@ -153,13 +174,13 @@ public class ThingEventFactoryTest {
         assertEquals(CommonChannelDescriptionField.PATTERN, event.getField());
         assertEquals(CHANNEL_UID, event.getChannelUID());
         assertThat(event.getLinkedItemNames(), hasSize(2));
-        assertEquals("%s", event.getValue());
+        assertEquals(CHANNEL_DESCRIPTION_PATTERN_PAYLOAD, event.getValue());
         assertNull(event.getOldValue());
     }
 
     @Test
     public void testCreateChannelDescriptionChangedEventNewAndOldValue() {
-        ChannelDescriptionChangedEvent event = ThingEventFactory.createChannelDescriptionChangedEvent(
+        ChannelDescriptionChangedEvent event = ThingEventFactory.createChannelDescriptionPatternChangedEvent(
                 CommonChannelDescriptionField.PATTERN, CHANNEL_UID, Set.of("item1", "item2"), "%s", "%unit%");
 
         assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
@@ -168,8 +189,8 @@ public class ThingEventFactoryTest {
         assertEquals(CommonChannelDescriptionField.PATTERN, event.getField());
         assertEquals(CHANNEL_UID, event.getChannelUID());
         assertThat(event.getLinkedItemNames(), hasSize(2));
-        assertEquals("%s", event.getValue());
-        assertEquals("%unit%", event.getOldValue());
+        assertEquals(CHANNEL_DESCRIPTION_PATTERN_PAYLOAD, event.getValue());
+        assertEquals(CHANNEL_DESCRIPTION_OLD_PATTERN_PAYLOAD, event.getOldValue());
     }
 
     @Test
@@ -185,7 +206,7 @@ public class ThingEventFactoryTest {
         assertEquals(CommonChannelDescriptionField.PATTERN, triggeredEvent.getField());
         assertEquals(CHANNEL_UID, triggeredEvent.getChannelUID());
         assertThat(triggeredEvent.getLinkedItemNames(), hasSize(2));
-        assertEquals("%s", triggeredEvent.getValue());
+        assertEquals(CHANNEL_DESCRIPTION_PATTERN_PAYLOAD, triggeredEvent.getValue());
         assertNull(triggeredEvent.getOldValue());
     }
 
@@ -202,8 +223,92 @@ public class ThingEventFactoryTest {
         assertEquals(CommonChannelDescriptionField.PATTERN, triggeredEvent.getField());
         assertEquals(CHANNEL_UID, triggeredEvent.getChannelUID());
         assertThat(triggeredEvent.getLinkedItemNames(), hasSize(2));
-        assertEquals("%s", triggeredEvent.getValue());
-        assertEquals("%unit%", triggeredEvent.getOldValue());
+        assertEquals(CHANNEL_DESCRIPTION_PATTERN_PAYLOAD, triggeredEvent.getValue());
+        assertEquals(CHANNEL_DESCRIPTION_OLD_PATTERN_PAYLOAD, triggeredEvent.getOldValue());
+    }
+
+    @Test
+    public void testCreateChannelDescriptionChangedEventOnlyNewOptions() {
+        Set<String> itemNames = Set.of("item1", "item2");
+        List<StateOption> options = List.of(new StateOption("offline", "Offline"));
+        ChannelDescriptionChangedEvent event = ThingEventFactory.createChannelDescriptionStateOptionsChangedEvent(
+                CommonChannelDescriptionField.STATE_OPTIONS, CHANNEL_UID, itemNames, options, null);
+
+        assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
+        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, event.getTopic());
+        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_ONLY_NEW_OPTIONS, event.getPayload());
+        assertEquals(CommonChannelDescriptionField.STATE_OPTIONS, event.getField());
+        assertEquals(CHANNEL_UID, event.getChannelUID());
+        assertEquals(itemNames, event.getLinkedItemNames());
+        assertEquals(CHANNEL_DESCRIPTION_STATE_OPTIONS_PAYLOAD, event.getValue());
+        assertEquals(options,
+                JSONCONVERTER.fromJson(event.getValue(), ChannelDescriptionStateOptionsPayloadBean.class).options);
+        assertNull(event.getOldValue());
+    }
+
+    @Test
+    public void testCreateEventChannelDescriptionChangedEventOnlyNewOptions() throws Exception {
+        List<StateOption> options = List.of(new StateOption("offline", "Offline"));
+        Event event = factory.createEvent(ChannelDescriptionChangedEvent.TYPE, CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC,
+                CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_ONLY_NEW_OPTIONS, null);
+
+        assertThat(event, is(instanceOf(ChannelDescriptionChangedEvent.class)));
+        ChannelDescriptionChangedEvent triggeredEvent = (ChannelDescriptionChangedEvent) event;
+        assertEquals(ChannelDescriptionChangedEvent.TYPE, triggeredEvent.getType());
+        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, triggeredEvent.getTopic());
+        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_ONLY_NEW_OPTIONS, triggeredEvent.getPayload());
+        assertEquals(CommonChannelDescriptionField.STATE_OPTIONS, triggeredEvent.getField());
+        assertEquals(CHANNEL_UID, triggeredEvent.getChannelUID());
+        assertEquals(Set.of("item1", "item2"), triggeredEvent.getLinkedItemNames());
+        assertEquals(CHANNEL_DESCRIPTION_STATE_OPTIONS_PAYLOAD, triggeredEvent.getValue());
+        assertEquals(options, JSONCONVERTER.fromJson(triggeredEvent.getValue(),
+                ChannelDescriptionStateOptionsPayloadBean.class).options);
+        assertNull(triggeredEvent.getOldValue());
+    }
+
+    @Test
+    public void testCreateChannelDescriptionChangedEventOldAndNewOptions() {
+        Set<String> itemNames = Set.of("item1", "item2");
+        List<StateOption> options = List.of(new StateOption("offline", "Offline"));
+        List<StateOption> oldOptions = List.of(new StateOption("online", "Online"));
+        ChannelDescriptionChangedEvent event = ThingEventFactory.createChannelDescriptionStateOptionsChangedEvent(
+                CommonChannelDescriptionField.STATE_OPTIONS, CHANNEL_UID, itemNames, options, oldOptions);
+
+        assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
+        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, event.getTopic());
+        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_NEW_AND_OLD_OPTIONS, event.getPayload());
+        assertEquals(CommonChannelDescriptionField.STATE_OPTIONS, event.getField());
+        assertEquals(CHANNEL_UID, event.getChannelUID());
+        assertEquals(itemNames, event.getLinkedItemNames());
+        assertEquals(CHANNEL_DESCRIPTION_STATE_OPTIONS_PAYLOAD, event.getValue());
+        assertEquals(options,
+                JSONCONVERTER.fromJson(event.getValue(), ChannelDescriptionStateOptionsPayloadBean.class).options);
+        assertEquals(CHANNEL_DESCRIPTION_OLD_STATE_OPTIONS_PAYLOAD, event.getOldValue());
+        assertEquals(oldOptions,
+                JSONCONVERTER.fromJson(event.getOldValue(), ChannelDescriptionStateOptionsPayloadBean.class).options);
+    }
+
+    @Test
+    public void testCreateEventChannelDescriptionChangedEventOldAndNewOptions() throws Exception {
+        List<StateOption> options = List.of(new StateOption("offline", "Offline"));
+        List<StateOption> oldOptions = List.of(new StateOption("online", "Online"));
+        Event event = factory.createEvent(ChannelDescriptionChangedEvent.TYPE, CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC,
+                CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_NEW_AND_OLD_OPTIONS, null);
+
+        assertThat(event, is(instanceOf(ChannelDescriptionChangedEvent.class)));
+        ChannelDescriptionChangedEvent triggeredEvent = (ChannelDescriptionChangedEvent) event;
+        assertEquals(ChannelDescriptionChangedEvent.TYPE, triggeredEvent.getType());
+        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, triggeredEvent.getTopic());
+        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_NEW_AND_OLD_OPTIONS, triggeredEvent.getPayload());
+        assertEquals(CommonChannelDescriptionField.STATE_OPTIONS, triggeredEvent.getField());
+        assertEquals(CHANNEL_UID, triggeredEvent.getChannelUID());
+        assertEquals(Set.of("item1", "item2"), triggeredEvent.getLinkedItemNames());
+        assertEquals(CHANNEL_DESCRIPTION_STATE_OPTIONS_PAYLOAD, triggeredEvent.getValue());
+        assertEquals(options, JSONCONVERTER.fromJson(triggeredEvent.getValue(),
+                ChannelDescriptionStateOptionsPayloadBean.class).options);
+        assertEquals(CHANNEL_DESCRIPTION_OLD_STATE_OPTIONS_PAYLOAD, triggeredEvent.getOldValue());
+        assertEquals(oldOptions, JSONCONVERTER.fromJson(triggeredEvent.getOldValue(),
+                ChannelDescriptionStateOptionsPayloadBean.class).options);
     }
 
     @Test

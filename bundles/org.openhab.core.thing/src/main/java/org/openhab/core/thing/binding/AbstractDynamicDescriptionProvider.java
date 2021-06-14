@@ -12,16 +12,11 @@
  */
 package org.openhab.core.thing.binding;
 
-import java.util.Set;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.events.ChannelDescriptionChangedEvent;
-import org.openhab.core.thing.events.ChannelDescriptionChangedEvent.CommonChannelDescriptionField;
-import org.openhab.core.thing.events.ThingEventFactory;
 import org.openhab.core.thing.i18n.ChannelTypeI18nLocalizationService;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.osgi.framework.BundleContext;
@@ -52,22 +47,6 @@ public abstract class AbstractDynamicDescriptionProvider {
     protected @Nullable EventPublisher eventPublisher;
     protected @Nullable ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
     protected @Nullable ItemChannelLinkRegistry itemChannelLinkRegistry;
-
-    /**
-     * This method can be used in a subclass in order to create a {@link ChannelDescriptionChangedEvent} and post it
-     * through the openHAB events bus.
-     *
-     * @param field the changed field
-     * @param channelUID the {@link ChannelUID}
-     * @param value the new value
-     * @param oldValue the old value
-     */
-    protected void postChannelDescriptionChangedEvent(CommonChannelDescriptionField field, ChannelUID channelUID,
-            Object value, @Nullable Object oldValue) {
-        postEvent(ThingEventFactory.createChannelDescriptionChangedEvent(field, channelUID,
-                itemChannelLinkRegistry != null ? itemChannelLinkRegistry.getLinkedItemNames(channelUID) : Set.of(),
-                value, oldValue));
-    }
 
     /**
      * This method can be used in a subclass in order to post events through the openHAB events bus. A common use case

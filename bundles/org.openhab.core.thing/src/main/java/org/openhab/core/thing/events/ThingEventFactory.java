@@ -28,6 +28,8 @@ import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.dto.ThingDTOMapper;
 import org.openhab.core.thing.events.ChannelDescriptionChangedEvent.CommonChannelDescriptionField;
+import org.openhab.core.types.CommandOption;
+import org.openhab.core.types.StateOption;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -91,8 +93,8 @@ public class ThingEventFactory extends AbstractEventFactory {
         public @NonNullByDefault({}) CommonChannelDescriptionField field;
         public @NonNullByDefault({}) String channelUID;
         public Set<String> linkedItemNames = Set.of();
-        public @NonNullByDefault({}) Object value;
-        public @Nullable Object oldValue;
+        public @NonNullByDefault({}) String value;
+        public @Nullable String oldValue;
 
         /**
          * Default constructor for deserialization e.g. by Gson.
@@ -101,38 +103,152 @@ public class ThingEventFactory extends AbstractEventFactory {
         }
 
         public ChannelDescriptionChangedEventPayloadBean(CommonChannelDescriptionField field, String channelUID,
-                Set<String> linkedItemNames, Object value, @Nullable Object oldvalue) {
+                Set<String> linkedItemNames, String value, @Nullable String oldValue) {
             this.field = field;
             this.channelUID = channelUID;
             this.linkedItemNames = linkedItemNames;
             this.value = value;
-            this.oldValue = oldvalue;
+            this.oldValue = oldValue;
+        }
+    }
+
+    public static interface CommonChannelDescriptionFieldPayloadBean {
+    }
+
+    public static class ChannelDescriptionPatternPayloadBean implements CommonChannelDescriptionFieldPayloadBean {
+        public @NonNullByDefault({}) String pattern;
+
+        /**
+         * Default constructor for deserialization e.g. by Gson.
+         */
+        protected ChannelDescriptionPatternPayloadBean() {
+        }
+
+        public ChannelDescriptionPatternPayloadBean(String pattern) {
+            this.pattern = pattern;
+        }
+    }
+
+    public static class ChannelDescriptionStateOptionsPayloadBean implements CommonChannelDescriptionFieldPayloadBean {
+        public @NonNullByDefault({}) List<StateOption> options;
+
+        /**
+         * Default constructor for deserialization e.g. by Gson.
+         */
+        protected ChannelDescriptionStateOptionsPayloadBean() {
+        }
+
+        public ChannelDescriptionStateOptionsPayloadBean(List<StateOption> options) {
+            this.options = options;
+        }
+    }
+
+    public static class ChannelDescriptionCommandOptionsPayloadBean
+            implements CommonChannelDescriptionFieldPayloadBean {
+        public @NonNullByDefault({}) List<CommandOption> options;
+
+        /**
+         * Default constructor for deserialization e.g. by Gson.
+         */
+        protected ChannelDescriptionCommandOptionsPayloadBean() {
+        }
+
+        public ChannelDescriptionCommandOptionsPayloadBean(List<CommandOption> options) {
+            this.options = options;
         }
     }
 
     /**
-     * Creates a {@link ChannelDescriptionChangedEvent}.
+     * Creates a {@link ChannelDescriptionChangedEvent} for a changed pattern. New and optional old value will be
+     * serialized to a JSON string from the {@link ChannelDescriptionPatternPayloadBean} object.
      *
      * @param field the changed field
      * @param channelUID the {@link ChannelUID}
      * @param linkedItemNames a {@link Set} of linked item names
-     * @param value the new value
-     * @param oldValue the old value
+     * @param pattern the new pattern
+     * @param oldPattern the old pattern
      * @return Created {@link ChannelDescriptionChangedEvent}
      */
-    public static ChannelDescriptionChangedEvent createChannelDescriptionChangedEvent(
-            CommonChannelDescriptionField field, ChannelUID channelUID, Set<String> linkedItemNames, Object value,
-            @Nullable Object oldValue) {
+    public static ChannelDescriptionChangedEvent createChannelDescriptionPatternChangedEvent(
+            CommonChannelDescriptionField field, ChannelUID channelUID, Set<String> linkedItemNames, String pattern,
+            @Nullable String oldPattern) {
         checkNotNull(linkedItemNames, "linkedItemNames");
         checkNotNull(channelUID, "channelUID");
         checkNotNull(field, "field");
-        checkNotNull(value, "value");
+        checkNotNull(pattern, "pattern");
 
+        String patternPayload = serializePayload(new ChannelDescriptionPatternPayloadBean(pattern));
+        String oldPatternPayload = oldPattern != null
+                ? serializePayload(new ChannelDescriptionPatternPayloadBean(oldPattern))
+                : null;
         ChannelDescriptionChangedEventPayloadBean bean = new ChannelDescriptionChangedEventPayloadBean(field,
-                channelUID.getAsString(), linkedItemNames, value, oldValue);
+                channelUID.getAsString(), linkedItemNames, patternPayload, oldPatternPayload);
         String payload = serializePayload(bean);
         String topic = buildTopic(CHANNEL_DESCRIPTION_CHANGED_TOPIC, channelUID);
-        return new ChannelDescriptionChangedEvent(topic, payload, field, channelUID, linkedItemNames, value, oldValue);
+        return new ChannelDescriptionChangedEvent(topic, payload, field, channelUID, linkedItemNames, patternPayload,
+                oldPatternPayload);
+    }
+
+    /**
+     * Creates a {@link ChannelDescriptionChangedEvent} for changed {@link StateOption}s. New and optional old value
+     * will be serialized to a JSON string from the {@link ChannelDescriptionStateOptionsPayloadBean} object.
+     *
+     * @param field the changed field
+     * @param channelUID the {@link ChannelUID}
+     * @param linkedItemNames a {@link Set} of linked item names
+     * @param options the new {@link StateOption}s
+     * @param oldOptions the old {@link StateOption}s
+     * @return Created {@link ChannelDescriptionChangedEvent}
+     */
+    public static ChannelDescriptionChangedEvent createChannelDescriptionStateOptionsChangedEvent(
+            CommonChannelDescriptionField field, ChannelUID channelUID, Set<String> linkedItemNames,
+            List<StateOption> options, @Nullable List<StateOption> oldOptions) {
+        checkNotNull(linkedItemNames, "linkedItemNames");
+        checkNotNull(channelUID, "channelUID");
+        checkNotNull(field, "field");
+        checkNotNull(options, "options");
+
+        String stateOptionsPayload = serializePayload(new ChannelDescriptionStateOptionsPayloadBean(options));
+        String oldStateOptionsPayload = oldOptions != null
+                ? serializePayload(new ChannelDescriptionStateOptionsPayloadBean(oldOptions))
+                : null;
+        ChannelDescriptionChangedEventPayloadBean bean = new ChannelDescriptionChangedEventPayloadBean(field,
+                channelUID.getAsString(), linkedItemNames, stateOptionsPayload, oldStateOptionsPayload);
+        String payload = serializePayload(bean);
+        String topic = buildTopic(CHANNEL_DESCRIPTION_CHANGED_TOPIC, channelUID);
+        return new ChannelDescriptionChangedEvent(topic, payload, field, channelUID, linkedItemNames,
+                stateOptionsPayload, oldStateOptionsPayload);
+    }
+
+    /**
+     * Creates a {@link ChannelDescriptionChangedEvent} for change {@link CommandOption}s. New and optional old value
+     * will be serialized to a JSON string from the {@link ChannelDescriptionCommandOptionsPayloadBean} object.
+     *
+     * @param field the changed field
+     * @param channelUID the {@link ChannelUID}
+     * @param linkedItemNames a {@link Set} of linked item names
+     * @param options the new {@link CommandOption}s
+     * @param oldOptions the old {@link CommandOption}s
+     * @return Created {@link ChannelDescriptionChangedEvent}
+     */
+    public static ChannelDescriptionChangedEvent createChannelDescriptionCommandOptionsChangedEvent(
+            CommonChannelDescriptionField field, ChannelUID channelUID, Set<String> linkedItemNames,
+            List<CommandOption> options, @Nullable List<CommandOption> oldOptions) {
+        checkNotNull(linkedItemNames, "linkedItemNames");
+        checkNotNull(channelUID, "channelUID");
+        checkNotNull(field, "field");
+        checkNotNull(options, "options");
+
+        String commandOptionsPayload = serializePayload(new ChannelDescriptionCommandOptionsPayloadBean(options));
+        String oldCommandOptionsPayload = oldOptions != null
+                ? serializePayload(new ChannelDescriptionCommandOptionsPayloadBean(oldOptions))
+                : null;
+        ChannelDescriptionChangedEventPayloadBean bean = new ChannelDescriptionChangedEventPayloadBean(field,
+                channelUID.getAsString(), linkedItemNames, commandOptionsPayload, oldCommandOptionsPayload);
+        String payload = serializePayload(bean);
+        String topic = buildTopic(CHANNEL_DESCRIPTION_CHANGED_TOPIC, channelUID);
+        return new ChannelDescriptionChangedEvent(topic, payload, field, channelUID, linkedItemNames,
+                commandOptionsPayload, oldCommandOptionsPayload);
     }
 
     private ChannelDescriptionChangedEvent createChannelDescriptionChangedEvent(String topic, String payload) {

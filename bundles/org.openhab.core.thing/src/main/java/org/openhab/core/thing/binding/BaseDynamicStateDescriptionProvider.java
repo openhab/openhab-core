@@ -15,6 +15,7 @@ package org.openhab.core.thing.binding;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -22,6 +23,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.events.ChannelDescriptionChangedEvent.CommonChannelDescriptionField;
+import org.openhab.core.thing.events.ThingEventFactory;
 import org.openhab.core.thing.i18n.ChannelTypeI18nLocalizationService;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeUID;
@@ -60,7 +62,10 @@ public abstract class BaseDynamicStateDescriptionProvider extends AbstractDynami
         String oldPattern = channelPatternMap.get(channelUID);
         if (!pattern.equals(oldPattern)) {
             channelPatternMap.put(channelUID, pattern);
-            postChannelDescriptionChangedEvent(CommonChannelDescriptionField.PATTERN, channelUID, pattern, oldPattern);
+            postEvent(ThingEventFactory.createChannelDescriptionPatternChangedEvent(
+                    CommonChannelDescriptionField.PATTERN, channelUID,
+                    itemChannelLinkRegistry != null ? itemChannelLinkRegistry.getLinkedItemNames(channelUID) : Set.of(),
+                    pattern, oldPattern));
         }
     }
 
@@ -75,8 +80,10 @@ public abstract class BaseDynamicStateDescriptionProvider extends AbstractDynami
         List<StateOption> oldOptions = channelOptionsMap.get(channelUID);
         if (!options.equals(oldOptions)) {
             channelOptionsMap.put(channelUID, options);
-            postChannelDescriptionChangedEvent(CommonChannelDescriptionField.STATE_OPTIONS, channelUID, options,
-                    oldOptions);
+            postEvent(ThingEventFactory.createChannelDescriptionStateOptionsChangedEvent(
+                    CommonChannelDescriptionField.STATE_OPTIONS, channelUID,
+                    itemChannelLinkRegistry != null ? itemChannelLinkRegistry.getLinkedItemNames(channelUID) : Set.of(),
+                    options, oldOptions));
         }
     }
 

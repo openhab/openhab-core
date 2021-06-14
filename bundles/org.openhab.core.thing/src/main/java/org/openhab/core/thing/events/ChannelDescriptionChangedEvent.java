@@ -60,14 +60,14 @@ public class ChannelDescriptionChangedEvent extends AbstractEvent {
     private final Set<String> linkedItemNames;
 
     /**
-     * The new value.
+     * The new value (represented as JSON string).
      */
-    private final Object value;
+    private final String value;
 
     /**
-     * The old value.
+     * The old value (represented as JSON string).
      */
-    private final @Nullable Object oldValue;
+    private final @Nullable String oldValue;
 
     /**
      * Creates a new instance.
@@ -77,11 +77,11 @@ public class ChannelDescriptionChangedEvent extends AbstractEvent {
      * @param field the changed field
      * @param channelUID the {@link ChannelUID}
      * @param linkedItemNames a {@link Set} of linked item names
-     * @param value the new value
-     * @param oldValue the old value
+     * @param value the new value (represented as JSON string)
+     * @param oldValue the old value represented as JSON string)
      */
     protected ChannelDescriptionChangedEvent(String topic, String payload, CommonChannelDescriptionField field,
-            ChannelUID channelUID, Set<String> linkedItemNames, Object value, @Nullable Object oldValue) {
+            ChannelUID channelUID, Set<String> linkedItemNames, String value, @Nullable String oldValue) {
         super(topic, payload, null);
         this.field = field;
         this.channelUID = channelUID;
@@ -123,20 +123,20 @@ public class ChannelDescriptionChangedEvent extends AbstractEvent {
     }
 
     /**
-     * Gets the new value.
+     * Gets the new value (represented as JSON string).
      *
      * @return the new value.
      */
-    public Object getValue() {
+    public String getValue() {
         return value;
     }
 
     /**
-     * Gets the old value.
+     * Gets the old value (represented as JSON string).
      *
      * @return the old value.
      */
-    public @Nullable Object getOldValue() {
+    public @Nullable String getOldValue() {
         return oldValue;
     }
 
