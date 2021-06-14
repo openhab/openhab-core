@@ -34,7 +34,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
@@ -49,8 +48,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @JaxrsName(UUIDResource.PATH_UUID)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @Path(UUIDResource.PATH_UUID)
-@RolesAllowed({ Role.ADMIN })
-@SecurityRequirement(name = "oauth2", scopes = { "admin" })
+@RolesAllowed({ Role.ADMIN, Role.USER })
 @Tag(name = UUIDResource.PATH_UUID)
 @NonNullByDefault
 public class UUIDResource implements RESTResource {
