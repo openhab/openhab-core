@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A {@link MarketplaceExtensionHandler} implementation, which handles add-ons as jar files (specifically, OSGi
+ * A {@link MarketplaceAddonHandler} implementation, which handles add-ons as jar files (specifically, OSGi
  * bundles) and installs
  * them through the standard OSGi bundle installation mechanism.
  * The information, which installed bundle corresponds to which add-on is written to a file in the bundle's data
@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * We might want to move this class into a separate bundle in future, when we add support for further add-on types.
  *
  * @author Kai Kreuzer - Initial contribution and API
+ * @author Yannick Schaus - refactoring
  *
  */
 @Component(immediate = true)
@@ -55,7 +56,7 @@ public class CommunityBundleAddonHandler implements MarketplaceAddonHandler {
 
     private static final String BUNDLE_CONTENTTYPE = "application/java-archive";
 
-    private static final String DOWNLOAD_LINK_PROPERTY = "jar_download_url";
+    private static final String JAR_DOWNLOAD_URL_PROPERTY = "jar_download_url";
 
     private final Logger logger = LoggerFactory.getLogger(CommunityBundleAddonHandler.class);
 
@@ -89,7 +90,7 @@ public class CommunityBundleAddonHandler implements MarketplaceAddonHandler {
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
         try {
-            String url = (String) addon.getProperties().get(DOWNLOAD_LINK_PROPERTY);
+            String url = (String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY);
             Bundle bundle = bundleContext.installBundle(url);
             try {
                 bundle.start();

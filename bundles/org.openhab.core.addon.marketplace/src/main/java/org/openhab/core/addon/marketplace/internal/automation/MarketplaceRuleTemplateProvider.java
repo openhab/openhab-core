@@ -41,8 +41,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 /**
- * This is a {@link RuleTemplateProvider}, which gets its content from the marketplace extension service
- * and stores it through the ESH storage service.
+ * This is a {@link RuleTemplateProvider}, which gets its content from the marketplace add-on service
+ * and stores it through the OH storage service.
  *
  * @author Kai Kreuzer - Initial contribution and API
  * @author Yannick Schaus - refactoring
@@ -145,7 +145,7 @@ public class MarketplaceRuleTemplateProvider extends AbstractManagedProvider<Rul
                     entry.getConfigurationDescriptions(), entry.getVisibility());
             add(template);
         } catch (IOException e) {
-            logger.error("Unable to parse YAML: {}", e);
+            logger.error("Unable to parse YAML: {}", e.getMessage());
             throw new IllegalArgumentException("Unable to parse YAML");
         }
     }

@@ -75,7 +75,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private final Logger logger = LoggerFactory.getLogger(CommunityMarketplaceAddonService.class);
 
     private static final String COMMUNITY_BASE_URL = "https://community.openhab.org";
-    private static final String COMMUNITY_GALLERY_URL = COMMUNITY_BASE_URL + "/c/marketplace/69/l/latest";
+    private static final String COMMUNITY_MARKETPLACE_URL = COMMUNITY_BASE_URL + "/c/marketplace/69/l/latest";
     private static final String COMMUNITY_TOPIC_URL = COMMUNITY_BASE_URL + "/t/";
 
     private static final String ADDON_ID_PREFIX = "marketplace:";
@@ -155,7 +155,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
         try {
             List<DiscourseCategoryResponse> pages = new ArrayList<DiscourseCategoryResponse>();
 
-            URL url = new URL(COMMUNITY_GALLERY_URL);
+            URL url = new URL(COMMUNITY_MARKETPLACE_URL);
             int pageNb = 1;
             while (url != null) {
                 URLConnection connection = url.openConnection();
@@ -170,7 +170,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
                     if (parsed.topic_list.more_topics_url != null) {
                         // Discourse URL for next page is wrong
-                        url = new URL(COMMUNITY_GALLERY_URL + "?page=" + pageNb++);
+                        url = new URL(COMMUNITY_MARKETPLACE_URL + "?page=" + pageNb++);
                     } else {
                         url = null;
                     }

@@ -8,7 +8,9 @@
 	<config-description uri="system:marketplace">
 		<parameter name="apiKey" type="text">
 			<label>API Key for community.openhab.org</label>
-			<description>Specify the API key to use on the community forum (for staff and curators - this allows for instance to see content which is not yet reviewed or otherwise hidden from the general public). Leave blank if you don't have one.</description>
+			<description>Specify the API key to use on the community forum (for staff and curators - this allows for instance to
+				see content which is not yet reviewed or otherwise hidden from the general public). Leave blank if you don't have
+				one.</description>
 		</parameter>
 	</config-description>
 

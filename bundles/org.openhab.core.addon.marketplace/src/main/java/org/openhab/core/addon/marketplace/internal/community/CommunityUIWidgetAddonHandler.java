@@ -21,8 +21,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
-import org.openhab.core.automation.template.RuleTemplateProvider;
-import org.openhab.core.storage.Storage;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponentRegistry;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
@@ -36,11 +34,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 /**
- * A {@link MarketplaceExtensionHandler} implementation, which handles rule templates as JSON files and installs
- * them by adding them to a {@link Storage}. The templates are then served from this storage through a dedicated
- * {@link RuleTemplateProvider}.
+ * A {@link MarketplaceAddonHandler} implementation, which handles UI widgets as YAML files and installs
+ * them by adding them to the {@link UIComponentRegistry} for the ui:widget namespace.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Yannick Schaus - Initial contribution and API
  *
  */
 @Component
@@ -63,7 +60,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public boolean supports(String type, String contentType) {
-        return type.equals("ui") && contentType.equals(UIWIDGETS_CONTENT_TYPE);
+        return "ui".equals(type) && UIWIDGETS_CONTENT_TYPE.equals(contentType);
     }
 
     @Override

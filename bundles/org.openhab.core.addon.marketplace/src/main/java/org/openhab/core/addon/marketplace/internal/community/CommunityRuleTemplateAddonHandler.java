@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A {@link MarketplaceExtensionHandler} implementation, which handles rule templates as JSON files and installs
+ * A {@link MarketplaceAddonHandler} implementation, which handles rule templates as JSON files and installs
  * them by adding them to a {@link Storage}. The templates are then served from this storage through a dedicated
  * {@link RuleTemplateProvider}.
  *
@@ -62,7 +62,7 @@ public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandle
 
     @Override
     public boolean supports(String type, String contentType) {
-        return type.equals("automation") && contentType.equals(RULETEMPLATES_CONTENT_TYPE);
+        return "automation".equals(type) && RULETEMPLATES_CONTENT_TYPE.equals(contentType);
     }
 
     @Override
