@@ -64,6 +64,12 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sse/${project.version}</bundle>
 	</feature>
 
+	<feature name="openhab-core-addon-marketplace" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<feature dependency="true">openhab-core-ui</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.addon.marketplace/${project.version}</bundle>
+	</feature>
+
 	<feature name="openhab-core-auth-jaas" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.auth.jaas/${project.version}</bundle>
@@ -361,6 +367,7 @@
 
 	<feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
 		<feature>openhab-core-base</feature>
+		<feature>openhab-core-addon-marketplace</feature>
 		<feature>openhab-core-auth-jaas</feature>
 		<feature>openhab-core-automation-rest</feature>
 		<feature>openhab-core-automation-module-script</feature>

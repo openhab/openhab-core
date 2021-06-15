@@ -14,6 +14,7 @@ package org.openhab.core.automation.template;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -122,7 +123,7 @@ public class RuleTemplate implements Template {
         this.configDescriptions = configDescriptions == null ? Collections.emptyList()
                 : Collections.unmodifiableList(configDescriptions);
         this.visibility = visibility == null ? Visibility.VISIBLE : visibility;
-        this.tags = tags == null ? Collections.emptySet() : Collections.unmodifiableSet(tags);
+        this.tags = tags == null ? new HashSet<>() : new HashSet<>(tags);
     }
 
     /**

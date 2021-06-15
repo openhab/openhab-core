@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0
+		https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="system:marketplace">
+		<parameter name="apiKey" type="text">
+			<label>API Key for community.openhab.org</label>
+			<description>Specify the API key to use on the community forum (for staff and curators - this allows for instance to see content which is not yet reviewed or otherwise hidden from the general public). Leave blank if you don't have one.</description>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>

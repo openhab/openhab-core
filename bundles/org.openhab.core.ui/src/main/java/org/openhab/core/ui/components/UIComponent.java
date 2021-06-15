@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * An UIComponent represents a piece of UI element for a client frontend to render; it is kept very simple and delegates
  * the actual rendering and behavior to the frontend.
@@ -43,7 +46,8 @@ public class UIComponent {
      *
      * @param componentType type of the component as known to the frontend
      */
-    public UIComponent(String componentType) {
+    @JsonCreator
+    public UIComponent(@JsonProperty("component") String componentType) {
         super();
         this.component = componentType;
         this.config = new HashMap<String, Object>();

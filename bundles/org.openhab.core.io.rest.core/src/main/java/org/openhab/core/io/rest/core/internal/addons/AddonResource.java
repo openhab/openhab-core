@@ -29,6 +29,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -37,6 +38,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonEventFactory;
 import org.openhab.core.addon.AddonService;
@@ -79,6 +81,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Yannick Schaus - Add service-related parameters & operations
  */
 @Component
 @JaxrsResource
@@ -95,6 +98,8 @@ public class AddonResource implements RESTResource {
     private static final String THREAD_POOL_NAME = "addonService";
 
     public static final String PATH_ADDONS = "addons";
+
+    public static final String DEFAULT_ADDON_SERVICE = "karaf";
 
     private final Logger logger = LoggerFactory.getLogger(AddonResource.class);
     private final Set<AddonService> addonServices = new CopyOnWriteArraySet<>();
@@ -121,25 +126,61 @@ public class AddonResource implements RESTResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getAddons", summary = "Get all add-ons.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Addon.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Addon.class)))),
+            @ApiResponse(responseCode = "404", description = "Service not found") })
     public Response getAddon(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
+            @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
+        logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
+        Locale locale = localeService.getLocale(language);
+        if (serviceId == "all") {
+            return Response.ok(new Stream2JSONInputStream(getAllAddons(locale))).build();
+        } else {
+            AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
+            if (addonService == null) {
+                return Response.status(HttpStatus.NOT_FOUND_404).build();
+            }
+            return Response.ok(new Stream2JSONInputStream(addonService.getAddons(locale).stream())).build();
+        }
+    }
+
+    @GET
+    @Path("/services")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getAddonTypes", summary = "Get all add-on types.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AddonType.class)))) })
+    public Response getServices(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
-        return Response.ok(new Stream2JSONInputStream(getAllAddons(locale))).build();
+        Stream<AddonServiceDTO> addonTypeStream = addonServices.stream().map(s -> convertToAddonServiceDTO(s, locale));
+        return Response.ok(new Stream2JSONInputStream(addonTypeStream)).build();
     }
 
     @GET
     @Path("/types")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getAddonTypes", summary = "Get all add-on types.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AddonType.class)))) })
+    @Operation(operationId = "getAddonServices", summary = "Get add-on services.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AddonType.class)))),
+            @ApiResponse(responseCode = "404", description = "Service not found") })
     public Response getTypes(
-            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
+            @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
-        Stream<AddonType> addonTypeStream = getAllAddonTypes(locale).stream().distinct();
-        return Response.ok(new Stream2JSONInputStream(addonTypeStream)).build();
+        if (serviceId != null) {
+            @Nullable
+            AddonService service = getServiceById(serviceId);
+            if (service != null) {
+                Stream<AddonType> addonTypeStream = getAddonTypesForService(service, locale).stream().distinct();
+                return Response.ok(new Stream2JSONInputStream(addonTypeStream)).build();
+            } else {
+                return Response.status(HttpStatus.NOT_FOUND_404).build();
+            }
+        } else {
+            Stream<AddonType> addonTypeStream = getAllAddonTypes(locale).stream().distinct();
+            return Response.ok(new Stream2JSONInputStream(addonTypeStream)).build();
+        }
     }
 
     @GET
@@ -150,26 +191,35 @@ public class AddonResource implements RESTResource {
             @ApiResponse(responseCode = "404", description = "Not found") })
     public Response getById(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
-            @PathParam("addonId") @Parameter(description = "addon ID") String addonId) {
+            @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
+            @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         logger.debug("Received HTTP GET request at '{}'.", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
-        AddonService addonService = getAddonService(addonId);
+        AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
+        if (addonService == null) {
+            return Response.status(HttpStatus.NOT_FOUND_404).build();
+        }
         Addon responseObject = addonService.getAddon(addonId, locale);
         if (responseObject != null) {
             return Response.ok(responseObject).build();
         }
 
-        return Response.status(404).build();
+        return Response.status(HttpStatus.NOT_FOUND_404).build();
     }
 
     @POST
     @Path("/{addonId: [a-zA-Z_0-9-:]+}/install")
     @Operation(operationId = "installAddonById", summary = "Installs the add-on with the given ID.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK") })
-    public Response installAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId) {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Not found") })
+    public Response installAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
+            @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
+        AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
+        if (addonService == null) {
+            return Response.status(HttpStatus.NOT_FOUND_404).build();
+        }
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
-                AddonService addonService = getAddonService(addonId);
                 addonService.install(addonId);
             } catch (Exception e) {
                 logger.error("Exception while installing add-on: {}", e.getMessage());
@@ -189,7 +239,7 @@ public class AddonResource implements RESTResource {
         try {
             URI addonURI = new URI(url);
             String addonId = getAddonId(addonURI);
-            installAddon(addonId);
+            installAddon(addonId, getAddonServiceForAddonId(addonURI));
         } catch (URISyntaxException | IllegalArgumentException e) {
             logger.error("Exception while parsing the addon URL '{}': {}", url, e.getMessage());
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "The given URL is malformed or not valid.");
@@ -201,11 +251,16 @@ public class AddonResource implements RESTResource {
     @POST
     @Path("/{addonId: [a-zA-Z_0-9-:]+}/uninstall")
     @Operation(operationId = "uninstallAddon", summary = "Uninstalls the add-on with the given ID.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK") })
-    public Response uninstallAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId) {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Not found") })
+    public Response uninstallAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
+            @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
+        AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
+        if (addonService == null) {
+            return Response.status(HttpStatus.NOT_FOUND_404).build();
+        }
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
-                AddonService addonService = getAddonService(addonId);
                 addonService.uninstall(addonId);
             } catch (Exception e) {
                 logger.error("Exception while uninstalling add-on: {}", e.getMessage());
@@ -218,6 +273,15 @@ public class AddonResource implements RESTResource {
     private void postFailureEvent(String addonId, @Nullable String msg) {
         Event event = AddonEventFactory.createAddonFailureEvent(addonId, msg);
         eventPublisher.post(event);
+    }
+
+    private AddonService getDefaultService() {
+        for (AddonService addonService : addonServices) {
+            if (addonService.getId().equals(DEFAULT_ADDON_SERVICE)) {
+                return addonService;
+            }
+        }
+        return addonServices.iterator().next();
     }
 
     private Stream<Addon> getAllAddons(Locale locale) {
@@ -239,15 +303,26 @@ public class AddonResource implements RESTResource {
         return ret;
     }
 
-    private AddonService getAddonService(final String addonId) {
+    private Set<AddonType> getAddonTypesForService(AddonService addonService, Locale locale) {
+        final Collator coll = Collator.getInstance(locale);
+        coll.setStrength(Collator.PRIMARY);
+        Set<AddonType> ret = new TreeSet<>(new Comparator<AddonType>() {
+            @Override
+            public int compare(AddonType o1, AddonType o2) {
+                return coll.compare(o1.getLabel(), o2.getLabel());
+            }
+        });
+        ret.addAll(addonService.getTypes(locale));
+        return ret;
+    }
+
+    private @Nullable AddonService getServiceById(final String serviceId) {
         for (AddonService addonService : addonServices) {
-            for (Addon addon : addonService.getAddons(Locale.getDefault())) {
-                if (addonId.equals(addon.getId())) {
-                    return addonService;
-                }
+            if (addonService.getId().equals(serviceId)) {
+                return addonService;
             }
         }
-        throw new IllegalArgumentException("No add-on service registered for " + addonId);
+        return null;
     }
 
     private String getAddonId(URI addonURI) {
@@ -259,5 +334,21 @@ public class AddonResource implements RESTResource {
         }
 
         throw new IllegalArgumentException("No add-on service registered for URI " + addonURI);
+    }
+
+    private String getAddonServiceForAddonId(URI addonURI) {
+        for (AddonService addonService : addonServices) {
+            String addonId = addonService.getAddonId(addonURI);
+            if (addonId != null && !addonId.isBlank()) {
+                return addonService.getId();
+            }
+        }
+
+        throw new IllegalArgumentException("No add-on service registered for URI " + addonURI);
+    }
+
+    private AddonServiceDTO convertToAddonServiceDTO(AddonService addonService, Locale locale) {
+        return new AddonServiceDTO(addonService.getId(), addonService.getName(),
+                getAddonTypesForService(addonService, locale));
     }
 }

@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = "org.openhab.core.karafaddons")
 public class KarafAddonService implements AddonService {
+    private static final String ADDONS_CONTENTTYPE = "application/java-archive";
+    private static final String ADDONS_AUTHOR = "openHAB";
 
     private final Logger logger = LoggerFactory.getLogger(KarafAddonService.class);
 
@@ -61,6 +63,20 @@ public class KarafAddonService implements AddonService {
             typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION, "Transformations"));
             typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_UI, "User Interfaces"));
         }
+    }
+
+    @Override
+    public String getId() {
+        return "karaf";
+    }
+
+    @Override
+    public String getName() {
+        return "openHAB Distribution";
+    }
+
+    @Override
+    public void refreshSource() {
     }
 
     @Override
@@ -133,7 +149,7 @@ public class KarafAddonService implements AddonService {
                 break;
         }
         boolean installed = featuresService.isInstalled(feature);
-        return new Addon(extId, type, label, version, link, installed);
+        return new Addon(extId, type, label, version, ADDONS_CONTENTTYPE, link, ADDONS_AUTHOR, true, installed);
     }
 
     @Override
