@@ -66,8 +66,9 @@
 
 	<feature name="openhab-core-addon-marketplace" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature dependency="true">openhab-core-ui</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.addon.marketplace/${project.version}</bundle>
+		<requirement>openhab.tp;filter:="(feature=jackson)"</requirement>
+		<feature dependency="true">openhab-core-ui</feature>
 	</feature>
 
 	<feature name="openhab-core-auth-jaas" version="${project.version}">

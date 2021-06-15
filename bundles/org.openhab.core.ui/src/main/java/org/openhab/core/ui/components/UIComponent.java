@@ -17,9 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * An UIComponent represents a piece of UI element for a client frontend to render; it is kept very simple and delegates
  * the actual rendering and behavior to the frontend.
@@ -41,13 +38,18 @@ public class UIComponent {
     Map<String, List<UIComponent>> slots = null;
 
     /**
+     * Empty constructor for deserialization.
+     */
+    public UIComponent() {
+    }
+
+    /**
      * Constructs a component by its type name - component names are not arbitrary, they are defined by the target
      * frontend.
      *
      * @param componentType type of the component as known to the frontend
      */
-    @JsonCreator
-    public UIComponent(@JsonProperty("component") String componentType) {
+    public UIComponent(String componentType) {
         super();
         this.component = componentType;
         this.config = new HashMap<String, Object>();
@@ -63,12 +65,39 @@ public class UIComponent {
     }
 
     /**
+     * Retrieves the type of the component.
+     *
+     * @return the component type
+     */
+    public String getComponent() {
+        return component;
+    }
+
+    /**
+     * Sets the type of the component.
+     *
+     * @return the component type
+     */
+    public void setComponent(String component) {
+        this.component = component;
+    }
+
+    /**
      * Gets all the configuration parameters of the component
      *
      * @return the map of configuration parameters
      */
     public Map<String, Object> getConfig() {
         return config;
+    }
+
+    /**
+     * Sets all the configuration parameters of the component
+     *
+     * @param config the map of configuration parameters
+     */
+    public void setConfig(Map<String, Object> config) {
+        this.config = config;
     }
 
     /**
@@ -82,12 +111,21 @@ public class UIComponent {
     }
 
     /**
-     * Returns all the slots of the components including their sub-components
+     * Returns all the slots of the component including their sub-components
      *
      * @return the slots and their sub-components
      */
     public Map<String, List<UIComponent>> getSlots() {
         return slots;
+    }
+
+    /**
+     * Sets all the slots of the component
+     *
+     * @param slots the slots and their sub-components
+     */
+    public void setSlots(Map<String, List<UIComponent>> slots) {
+        this.slots = slots;
     }
 
     /**

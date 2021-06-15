@@ -25,9 +25,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * A root component is a special type of {@link Component} at the root of the hierarchy.
  * It has a number of specific parameters, a set of tags, a timestamp, some configurable
@@ -47,9 +44,16 @@ public class RootUIComponent extends UIComponent implements Identifiable<String>
     Date timestamp;
 
     /**
+     * Empty constructor for deserialization.
+     */
+    public RootUIComponent() {
+        this("");
+    }
+
+    /**
      * Constructs a root component.
      *
-     * @param name the name of the UI component to render the card on client frontends, ie. "HbCard"
+     * @param name the name of the UI component to render on client frontends, ie. "oh-block"
      */
     public RootUIComponent(String name) {
         super(name);
@@ -61,10 +65,9 @@ public class RootUIComponent extends UIComponent implements Identifiable<String>
      * Constructs a root component with a specific UID.
      *
      * @param uid the UID of the new card
-     * @param name the name of the UI component to render the card on client frontends, ie. "HbCard"
+     * @param name the name of the UI component to render on client frontends, ie. "oh-block"
      */
-    @JsonCreator
-    public RootUIComponent(@JsonProperty("uid") String uid, @JsonProperty("component") String name) {
+    public RootUIComponent(String uid, String name) {
         super(name);
         this.uid = uid;
         this.props = new ConfigDescriptionDTO(null, new ArrayList<>(), new ArrayList<>());
