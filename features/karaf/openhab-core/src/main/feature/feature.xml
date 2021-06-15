@@ -68,6 +68,7 @@
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.addon.marketplace/${project.version}</bundle>
 		<requirement>openhab.tp;filter:="(feature=jackson)"</requirement>
+		<feature dependency="true">openhab.tp-jackson</feature>
 		<feature dependency="true">openhab-core-ui</feature>
 	</feature>
 
