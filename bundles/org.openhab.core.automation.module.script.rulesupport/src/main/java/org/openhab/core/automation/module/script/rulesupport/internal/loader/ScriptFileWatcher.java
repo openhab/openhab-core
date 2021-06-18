@@ -59,12 +59,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Kai Kreuzer - improved logging and removed thread pool
- * @author Jonathan Gilbert - added dependency tracking & per-script start levels
+ * @author Jonathan Gilbert - added dependency tracking, per-script start levels & ignore lib dirs
  */
 @Component(immediate = true)
 public class ScriptFileWatcher extends AbstractWatchService
         implements ReadyService.ReadyTracker, DependencyTracker.DependencyChangeListener {
 
+    private static final Set<String> KNOWN_LIB_NAMES = Set.of("node_modules");
     private static final String FILE_DIRECTORY = "automation" + File.separator + "jsr223";
     private static final long RECHECK_INTERVAL = 20;
 
@@ -151,7 +152,20 @@ public class ScriptFileWatcher extends AbstractWatchService
 
     @Override
     protected Kind<?>[] getWatchEventKinds(Path subDir) {
+        if (isLibDirectory(subDir)) {
+            return null; // don't watch libraries
+        }
+
         return new Kind<?>[] { ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY };
+    }
+
+    private Boolean isLibDirectory(Path subDir) {
+        for (Path segment : subDir) {
+            if (KNOWN_LIB_NAMES.contains(segment.toString())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
