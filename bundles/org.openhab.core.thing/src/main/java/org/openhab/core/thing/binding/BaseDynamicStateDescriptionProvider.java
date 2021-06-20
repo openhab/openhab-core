@@ -22,7 +22,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
-import org.openhab.core.thing.events.ChannelDescriptionChangedEvent.CommonChannelDescriptionField;
 import org.openhab.core.thing.events.ThingEventFactory;
 import org.openhab.core.thing.i18n.ChannelTypeI18nLocalizationService;
 import org.openhab.core.thing.type.ChannelType;
@@ -62,8 +61,7 @@ public abstract class BaseDynamicStateDescriptionProvider extends AbstractDynami
         String oldPattern = channelPatternMap.get(channelUID);
         if (!pattern.equals(oldPattern)) {
             channelPatternMap.put(channelUID, pattern);
-            postEvent(ThingEventFactory.createChannelDescriptionPatternChangedEvent(
-                    CommonChannelDescriptionField.PATTERN, channelUID,
+            postEvent(ThingEventFactory.createChannelDescriptionPatternChangedEvent(channelUID,
                     itemChannelLinkRegistry != null ? itemChannelLinkRegistry.getLinkedItemNames(channelUID) : Set.of(),
                     pattern, oldPattern));
         }
@@ -80,8 +78,7 @@ public abstract class BaseDynamicStateDescriptionProvider extends AbstractDynami
         List<StateOption> oldOptions = channelOptionsMap.get(channelUID);
         if (!options.equals(oldOptions)) {
             channelOptionsMap.put(channelUID, options);
-            postEvent(ThingEventFactory.createChannelDescriptionStateOptionsChangedEvent(
-                    CommonChannelDescriptionField.STATE_OPTIONS, channelUID,
+            postEvent(ThingEventFactory.createChannelDescriptionStateOptionsChangedEvent(channelUID,
                     itemChannelLinkRegistry != null ? itemChannelLinkRegistry.getLinkedItemNames(channelUID) : Set.of(),
                     options, oldOptions));
         }

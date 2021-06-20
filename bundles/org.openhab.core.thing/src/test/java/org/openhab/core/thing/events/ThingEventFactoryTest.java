@@ -165,8 +165,8 @@ public class ThingEventFactoryTest {
 
     @Test
     public void testCreateChannelDescriptionChangedEventOnlyNewValue() {
-        ChannelDescriptionChangedEvent event = ThingEventFactory.createChannelDescriptionPatternChangedEvent(
-                CommonChannelDescriptionField.PATTERN, CHANNEL_UID, Set.of("item1", "item2"), "%s", null);
+        ChannelDescriptionChangedEvent event = ThingEventFactory
+                .createChannelDescriptionPatternChangedEvent(CHANNEL_UID, Set.of("item1", "item2"), "%s", null);
 
         assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
         assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, event.getTopic());
@@ -180,8 +180,8 @@ public class ThingEventFactoryTest {
 
     @Test
     public void testCreateChannelDescriptionChangedEventNewAndOldValue() {
-        ChannelDescriptionChangedEvent event = ThingEventFactory.createChannelDescriptionPatternChangedEvent(
-                CommonChannelDescriptionField.PATTERN, CHANNEL_UID, Set.of("item1", "item2"), "%s", "%unit%");
+        ChannelDescriptionChangedEvent event = ThingEventFactory
+                .createChannelDescriptionPatternChangedEvent(CHANNEL_UID, Set.of("item1", "item2"), "%s", "%unit%");
 
         assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
         assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, event.getTopic());
@@ -227,12 +227,13 @@ public class ThingEventFactoryTest {
         assertEquals(CHANNEL_DESCRIPTION_OLD_PATTERN_PAYLOAD, triggeredEvent.getOldValue());
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testCreateChannelDescriptionChangedEventOnlyNewOptions() {
         Set<String> itemNames = Set.of("item1", "item2");
         List<StateOption> options = List.of(new StateOption("offline", "Offline"));
-        ChannelDescriptionChangedEvent event = ThingEventFactory.createChannelDescriptionStateOptionsChangedEvent(
-                CommonChannelDescriptionField.STATE_OPTIONS, CHANNEL_UID, itemNames, options, null);
+        ChannelDescriptionChangedEvent event = ThingEventFactory
+                .createChannelDescriptionStateOptionsChangedEvent(CHANNEL_UID, itemNames, options, null);
 
         assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
         assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, event.getTopic());
@@ -246,6 +247,7 @@ public class ThingEventFactoryTest {
         assertNull(event.getOldValue());
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testCreateEventChannelDescriptionChangedEventOnlyNewOptions() throws Exception {
         List<StateOption> options = List.of(new StateOption("offline", "Offline"));
@@ -266,13 +268,14 @@ public class ThingEventFactoryTest {
         assertNull(triggeredEvent.getOldValue());
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testCreateChannelDescriptionChangedEventOldAndNewOptions() {
         Set<String> itemNames = Set.of("item1", "item2");
         List<StateOption> options = List.of(new StateOption("offline", "Offline"));
         List<StateOption> oldOptions = List.of(new StateOption("online", "Online"));
-        ChannelDescriptionChangedEvent event = ThingEventFactory.createChannelDescriptionStateOptionsChangedEvent(
-                CommonChannelDescriptionField.STATE_OPTIONS, CHANNEL_UID, itemNames, options, oldOptions);
+        ChannelDescriptionChangedEvent event = ThingEventFactory
+                .createChannelDescriptionStateOptionsChangedEvent(CHANNEL_UID, itemNames, options, oldOptions);
 
         assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
         assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, event.getTopic());
@@ -288,6 +291,7 @@ public class ThingEventFactoryTest {
                 JSONCONVERTER.fromJson(event.getOldValue(), ChannelDescriptionStateOptionsPayloadBean.class).options);
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testCreateEventChannelDescriptionChangedEventOldAndNewOptions() throws Exception {
         List<StateOption> options = List.of(new StateOption("offline", "Offline"));
