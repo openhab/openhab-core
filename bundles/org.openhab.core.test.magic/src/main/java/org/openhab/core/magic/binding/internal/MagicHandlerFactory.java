@@ -63,10 +63,13 @@ public class MagicHandlerFactory extends BaseThingHandlerFactory {
             THING_TYPE_CHATTY_THING, THING_TYPE_ROLLERSHUTTER, THING_TYPE_PLAYER, THING_TYPE_IMAGE,
             THING_TYPE_ACTION_MODULE, THING_TYPE_DYNAMIC_STATE_DESCRIPTION, THING_TYPE_ONLINE_OFFLINE);
 
+    private final MagicDynamicCommandDescriptionProvider commandDescriptionProvider;
     private final MagicDynamicStateDescriptionProvider stateDescriptionProvider;
 
     @Activate
-    public MagicHandlerFactory(final @Reference MagicDynamicStateDescriptionProvider stateDescriptionProvider) {
+    public MagicHandlerFactory(final @Reference MagicDynamicCommandDescriptionProvider commandDescriptionProvider, //
+            final @Reference MagicDynamicStateDescriptionProvider stateDescriptionProvider) {
+        this.commandDescriptionProvider = commandDescriptionProvider;
         this.stateDescriptionProvider = stateDescriptionProvider;
     }
 
@@ -128,7 +131,8 @@ public class MagicHandlerFactory extends BaseThingHandlerFactory {
             return new MagicActionModuleThingHandler(thing);
         }
         if (THING_TYPE_DYNAMIC_STATE_DESCRIPTION.equals(thingTypeUID)) {
-            return new MagicDynamicStateDescriptionThingHandler(thing, stateDescriptionProvider);
+            return new MagicDynamicStateDescriptionThingHandler(thing, commandDescriptionProvider,
+                    stateDescriptionProvider);
         }
         if (THING_TYPE_ONLINE_OFFLINE.equals(thingTypeUID)) {
             return new MagicOnlineOfflineHandler(thing);

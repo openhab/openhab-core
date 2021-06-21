@@ -38,7 +38,8 @@ public class MagicHandlerFactoryTest {
 
     @BeforeEach
     public void setup() {
-        factory = new MagicHandlerFactory(mock(MagicDynamicStateDescriptionProvider.class));
+        factory = new MagicHandlerFactory(mock(MagicDynamicCommandDescriptionProvider.class),
+                mock(MagicDynamicStateDescriptionProvider.class));
     }
 
     @Test

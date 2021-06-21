@@ -14,25 +14,25 @@ package org.openhab.core.magic.binding.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.thing.binding.BaseDynamicStateDescriptionProvider;
+import org.openhab.core.thing.binding.BaseDynamicCommandDescriptionProvider;
 import org.openhab.core.thing.i18n.ChannelTypeI18nLocalizationService;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
-import org.openhab.core.thing.type.DynamicStateDescriptionProvider;
+import org.openhab.core.thing.type.DynamicCommandDescriptionProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * Dynamic provider of state options while leaving other state description fields as original.
+ * Dynamic provider of command options.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
-@Component(service = { DynamicStateDescriptionProvider.class, MagicDynamicStateDescriptionProvider.class })
+@Component(service = { DynamicCommandDescriptionProvider.class, MagicDynamicCommandDescriptionProvider.class })
 @NonNullByDefault
-public class MagicDynamicStateDescriptionProvider extends BaseDynamicStateDescriptionProvider {
+public class MagicDynamicCommandDescriptionProvider extends BaseDynamicCommandDescriptionProvider {
 
     @Activate
-    public MagicDynamicStateDescriptionProvider(final @Reference EventPublisher eventPublisher, //
+    public MagicDynamicCommandDescriptionProvider(final @Reference EventPublisher eventPublisher, //
             final @Reference ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService, //
             final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry) {
         this.eventPublisher = eventPublisher;

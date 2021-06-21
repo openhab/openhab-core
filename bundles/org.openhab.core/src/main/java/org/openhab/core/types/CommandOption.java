@@ -89,6 +89,6 @@ public class CommandOption {
 
     @Override
     public String toString() {
-        return "CommandOption [command=" + command + ", label=" + label + "]";
+        return String.format("CommandOption [command=%s, label=%s]", command, label);
     }
 }

@@ -27,6 +27,9 @@ import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.dto.ThingDTOMapper;
+import org.openhab.core.thing.events.ChannelDescriptionChangedEvent.CommonChannelDescriptionField;
+import org.openhab.core.types.CommandOption;
+import org.openhab.core.types.StateOption;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -37,6 +40,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Stefan Bußweiler - Initial contribution
  * @author Dennis Nobel - Added status changed event
+ * @author Christoph Weitkamp - Added ChannelDescriptionChangedEvent
  */
 @Component(immediate = true, service = EventFactory.class)
 @NonNullByDefault
@@ -51,6 +55,8 @@ public class ThingEventFactory extends AbstractEventFactory {
 
     static final String THING_UPDATED_EVENT_TOPIC = "openhab/things/{thingUID}/updated";
 
+    static final String CHANNEL_DESCRIPTION_CHANGED_TOPIC = "openhab/channels/{channelUID}/descriptionchanged";
+
     static final String CHANNEL_TRIGGERED_EVENT_TOPIC = "openhab/channels/{channelUID}/triggered";
 
     /**
@@ -58,7 +64,8 @@ public class ThingEventFactory extends AbstractEventFactory {
      */
     public ThingEventFactory() {
         super(Set.of(ThingStatusInfoEvent.TYPE, ThingStatusInfoChangedEvent.TYPE, ThingAddedEvent.TYPE,
-                ThingRemovedEvent.TYPE, ThingUpdatedEvent.TYPE, ChannelTriggeredEvent.TYPE));
+                ThingRemovedEvent.TYPE, ThingUpdatedEvent.TYPE, ChannelDescriptionChangedEvent.TYPE,
+                ChannelTriggeredEvent.TYPE));
     }
 
     @Override
@@ -74,10 +81,182 @@ public class ThingEventFactory extends AbstractEventFactory {
             return createRemovedEvent(topic, payload);
         } else if (ThingUpdatedEvent.TYPE.equals(eventType)) {
             return createUpdatedEvent(topic, payload);
+        } else if (ChannelDescriptionChangedEvent.TYPE.equals(eventType)) {
+            return createChannelDescriptionChangedEvent(topic, payload);
         } else if (ChannelTriggeredEvent.TYPE.equals(eventType)) {
             return createTriggerEvent(topic, payload, source);
         }
         throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");
+    }
+
+    public static class ChannelDescriptionChangedEventPayloadBean {
+        public @NonNullByDefault({}) CommonChannelDescriptionField field;
+        public @NonNullByDefault({}) String channelUID;
+        public Set<String> linkedItemNames = Set.of();
+        public @NonNullByDefault({}) String value;
+        public @Nullable String oldValue;
+
+        /**
+         * Default constructor for deserialization e.g. by Gson.
+         */
+        protected ChannelDescriptionChangedEventPayloadBean() {
+        }
+
+        public ChannelDescriptionChangedEventPayloadBean(CommonChannelDescriptionField field, String channelUID,
+                Set<String> linkedItemNames, String value, @Nullable String oldValue) {
+            this.field = field;
+            this.channelUID = channelUID;
+            this.linkedItemNames = linkedItemNames;
+            this.value = value;
+            this.oldValue = oldValue;
+        }
+    }
+
+    public static interface CommonChannelDescriptionFieldPayloadBean {
+    }
+
+    public static class ChannelDescriptionPatternPayloadBean implements CommonChannelDescriptionFieldPayloadBean {
+        public @NonNullByDefault({}) String pattern;
+
+        /**
+         * Default constructor for deserialization e.g. by Gson.
+         */
+        protected ChannelDescriptionPatternPayloadBean() {
+        }
+
+        public ChannelDescriptionPatternPayloadBean(String pattern) {
+            this.pattern = pattern;
+        }
+    }
+
+    public static class ChannelDescriptionStateOptionsPayloadBean implements CommonChannelDescriptionFieldPayloadBean {
+        public @NonNullByDefault({}) List<StateOption> options;
+
+        /**
+         * Default constructor for deserialization e.g. by Gson.
+         */
+        protected ChannelDescriptionStateOptionsPayloadBean() {
+        }
+
+        public ChannelDescriptionStateOptionsPayloadBean(List<StateOption> options) {
+            this.options = options;
+        }
+    }
+
+    public static class ChannelDescriptionCommandOptionsPayloadBean
+            implements CommonChannelDescriptionFieldPayloadBean {
+        public @NonNullByDefault({}) List<CommandOption> options;
+
+        /**
+         * Default constructor for deserialization e.g. by Gson.
+         */
+        protected ChannelDescriptionCommandOptionsPayloadBean() {
+        }
+
+        public ChannelDescriptionCommandOptionsPayloadBean(List<CommandOption> options) {
+            this.options = options;
+        }
+    }
+
+    /**
+     * Creates a {@link ChannelDescriptionChangedEvent} for a changed pattern. New and optional old value will be
+     * serialized to a JSON string from the {@link ChannelDescriptionPatternPayloadBean} object.
+     *
+     * @param channelUID the {@link ChannelUID}
+     * @param linkedItemNames a {@link Set} of linked item names
+     * @param pattern the new pattern
+     * @param oldPattern the old pattern
+     * @return Created {@link ChannelDescriptionChangedEvent}
+     */
+    public static ChannelDescriptionChangedEvent createChannelDescriptionPatternChangedEvent(ChannelUID channelUID,
+            Set<String> linkedItemNames, String pattern, @Nullable String oldPattern) {
+        checkNotNull(linkedItemNames, "linkedItemNames");
+        checkNotNull(channelUID, "channelUID");
+        checkNotNull(pattern, "pattern");
+
+        String patternPayload = serializePayload(new ChannelDescriptionPatternPayloadBean(pattern));
+        String oldPatternPayload = oldPattern != null
+                ? serializePayload(new ChannelDescriptionPatternPayloadBean(oldPattern))
+                : null;
+        ChannelDescriptionChangedEventPayloadBean bean = new ChannelDescriptionChangedEventPayloadBean(
+                CommonChannelDescriptionField.PATTERN, channelUID.getAsString(), linkedItemNames, patternPayload,
+                oldPatternPayload);
+        String payload = serializePayload(bean);
+        String topic = buildTopic(CHANNEL_DESCRIPTION_CHANGED_TOPIC, channelUID);
+        return new ChannelDescriptionChangedEvent(topic, payload, CommonChannelDescriptionField.PATTERN, channelUID,
+                linkedItemNames, patternPayload, oldPatternPayload);
+    }
+
+    /**
+     * Creates a {@link ChannelDescriptionChangedEvent} for changed {@link StateOption}s. New and optional old value
+     * will be serialized to a JSON string from the {@link ChannelDescriptionStateOptionsPayloadBean} object.
+     *
+     * @param channelUID the {@link ChannelUID}
+     * @param linkedItemNames a {@link Set} of linked item names
+     * @param options the new {@link StateOption}s
+     * @param oldOptions the old {@link StateOption}s
+     * @return Created {@link ChannelDescriptionChangedEvent}
+     */
+    public static ChannelDescriptionChangedEvent createChannelDescriptionStateOptionsChangedEvent(ChannelUID channelUID,
+            Set<String> linkedItemNames, List<StateOption> options, @Nullable List<StateOption> oldOptions) {
+        checkNotNull(linkedItemNames, "linkedItemNames");
+        checkNotNull(channelUID, "channelUID");
+        checkNotNull(options, "options");
+
+        String stateOptionsPayload = serializePayload(new ChannelDescriptionStateOptionsPayloadBean(options));
+        String oldStateOptionsPayload = oldOptions != null
+                ? serializePayload(new ChannelDescriptionStateOptionsPayloadBean(oldOptions))
+                : null;
+        ChannelDescriptionChangedEventPayloadBean bean = new ChannelDescriptionChangedEventPayloadBean(
+                CommonChannelDescriptionField.STATE_OPTIONS, channelUID.getAsString(), linkedItemNames,
+                stateOptionsPayload, oldStateOptionsPayload);
+        String payload = serializePayload(bean);
+        String topic = buildTopic(CHANNEL_DESCRIPTION_CHANGED_TOPIC, channelUID);
+        return new ChannelDescriptionChangedEvent(topic, payload, CommonChannelDescriptionField.STATE_OPTIONS,
+                channelUID, linkedItemNames, stateOptionsPayload, oldStateOptionsPayload);
+    }
+
+    /**
+     * Creates a {@link ChannelDescriptionChangedEvent} for change {@link CommandOption}s. New and optional old value
+     * will be serialized to a JSON string from the {@link ChannelDescriptionCommandOptionsPayloadBean} object.
+     *
+     * @param channelUID the {@link ChannelUID}
+     * @param linkedItemNames a {@link Set} of linked item names
+     * @param options the new {@link CommandOption}s
+     * @param oldOptions the old {@link CommandOption}s
+     * @return Created {@link ChannelDescriptionChangedEvent}
+     */
+    public static ChannelDescriptionChangedEvent createChannelDescriptionCommandOptionsChangedEvent(
+            ChannelUID channelUID, Set<String> linkedItemNames, List<CommandOption> options,
+            @Nullable List<CommandOption> oldOptions) {
+        checkNotNull(linkedItemNames, "linkedItemNames");
+        checkNotNull(channelUID, "channelUID");
+        checkNotNull(options, "options");
+
+        String commandOptionsPayload = serializePayload(new ChannelDescriptionCommandOptionsPayloadBean(options));
+        String oldCommandOptionsPayload = oldOptions != null
+                ? serializePayload(new ChannelDescriptionCommandOptionsPayloadBean(oldOptions))
+                : null;
+        ChannelDescriptionChangedEventPayloadBean bean = new ChannelDescriptionChangedEventPayloadBean(
+                CommonChannelDescriptionField.COMMAND_OPTIONS, channelUID.getAsString(), linkedItemNames,
+                commandOptionsPayload, oldCommandOptionsPayload);
+        String payload = serializePayload(bean);
+        String topic = buildTopic(CHANNEL_DESCRIPTION_CHANGED_TOPIC, channelUID);
+        return new ChannelDescriptionChangedEvent(topic, payload, CommonChannelDescriptionField.COMMAND_OPTIONS,
+                channelUID, linkedItemNames, commandOptionsPayload, oldCommandOptionsPayload);
+    }
+
+    private ChannelDescriptionChangedEvent createChannelDescriptionChangedEvent(String topic, String payload) {
+        String[] topicElements = getTopicElements(topic);
+        if (topicElements.length != 4) {
+            throw new IllegalArgumentException(
+                    "ChannelDescriptionChangedEvent creation failed, invalid topic: " + topic);
+        }
+        ChannelUID channelUID = new ChannelUID(topicElements[2]);
+        ChannelDescriptionChangedEventPayloadBean bean = deserializePayload(payload,
+                ChannelDescriptionChangedEventPayloadBean.class);
+        return new ChannelDescriptionChangedEvent(topic, payload, bean.field, channelUID, bean.linkedItemNames,
+                bean.value, bean.oldValue);
     }
 
     /**
@@ -108,11 +287,11 @@ public class ThingEventFactory extends AbstractEventFactory {
     }
 
     /**
-     * Creates a channel triggered event.
+     * Creates a {@link ChannelTriggeredEvent}
      *
-     * @param event The event
-     * @param channelUID The channel UID
-     * @return the created channel triggered event
+     * @param event the event
+     * @param channel the {@link ChannelUID}
+     * @return Created {@link ChannelTriggeredEvent}
      */
     public static ChannelTriggeredEvent createTriggerEvent(String event, ChannelUID channelUID) {
         checkNotNull(channelUID, "channelUID");
@@ -218,7 +397,7 @@ public class ThingEventFactory extends AbstractEventFactory {
      * @throws IllegalArgumentException if thing is null
      */
     public static ThingAddedEvent createAddedEvent(Thing thing) {
-        assertValidArgument(thing);
+        assertValidThing(thing);
         String topic = buildTopic(THING_ADDED_EVENT_TOPIC, thing.getUID());
         ThingDTO thingDTO = map(thing);
         String payload = serializePayload(thingDTO);
@@ -233,7 +412,7 @@ public class ThingEventFactory extends AbstractEventFactory {
      * @throws IllegalArgumentException if thing is null
      */
     public static ThingRemovedEvent createRemovedEvent(Thing thing) {
-        assertValidArgument(thing);
+        assertValidThing(thing);
         String topic = buildTopic(THING_REMOVED_EVENT_TOPIC, thing.getUID());
         ThingDTO thingDTO = map(thing);
         String payload = serializePayload(thingDTO);
@@ -249,8 +428,8 @@ public class ThingEventFactory extends AbstractEventFactory {
      * @throws IllegalArgumentException if thing or oldThing is null
      */
     public static ThingUpdatedEvent createUpdateEvent(Thing thing, Thing oldThing) {
-        assertValidArgument(thing);
-        assertValidArgument(oldThing);
+        assertValidThing(thing);
+        assertValidThing(oldThing);
         String topic = buildTopic(THING_UPDATED_EVENT_TOPIC, thing.getUID());
         ThingDTO thingDTO = map(thing);
         ThingDTO oldThingDTO = map(oldThing);
@@ -261,7 +440,7 @@ public class ThingEventFactory extends AbstractEventFactory {
         return new ThingUpdatedEvent(topic, payload, thingDTO, oldThingDTO);
     }
 
-    private static void assertValidArgument(Thing thing) {
+    private static void assertValidThing(Thing thing) {
         checkNotNull(thing, "thing");
         checkNotNull(thing.getUID(), "thingUID of the thing");
     }
