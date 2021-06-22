@@ -29,6 +29,8 @@ import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.dto.ThingDTOMapper;
 import org.openhab.core.thing.events.ChannelDescriptionChangedEvent.CommonChannelDescriptionField;
 import org.openhab.core.types.CommandOption;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateOption;
 import org.osgi.service.component.annotations.Component;
 
@@ -156,6 +158,34 @@ public class ThingEventFactory extends AbstractEventFactory {
         public ChannelDescriptionCommandOptionsPayloadBean(List<CommandOption> options) {
             this.options = options;
         }
+    }
+
+    /**
+     * Creates a {@link ChannelDescriptionChangedEvent} for a changed {@link StateDescription}. New and optional old
+     * value will be serialized to a JSON string from the {@link StateDescriptionFragment} object.
+     *
+     * @param channelUID the {@link ChannelUID}
+     * @param linkedItemNames a {@link Set} of linked item names
+     * @param stateDescription the new {@link StateDescriptionFragment}
+     * @param oldStateDescription the old {@link StateDescriptionFragment}
+     * @return Created {@link ChannelDescriptionChangedEvent}
+     */
+    public static ChannelDescriptionChangedEvent createChannelDescriptionChangedEvent(ChannelUID channelUID,
+            Set<String> linkedItemNames, StateDescriptionFragment stateDescription,
+            @Nullable StateDescriptionFragment oldStateDescription) {
+        checkNotNull(linkedItemNames, "linkedItemNames");
+        checkNotNull(channelUID, "channelUID");
+        checkNotNull(stateDescription, "stateDescription");
+
+        String stateDescriptionPayload = serializePayload(stateDescription);
+        String oldStateDescriptionPayload = oldStateDescription != null ? serializePayload(oldStateDescription) : null;
+        ChannelDescriptionChangedEventPayloadBean bean = new ChannelDescriptionChangedEventPayloadBean(
+                CommonChannelDescriptionField.ALL, channelUID.getAsString(), linkedItemNames, stateDescriptionPayload,
+                oldStateDescriptionPayload);
+        String payload = serializePayload(bean);
+        String topic = buildTopic(CHANNEL_DESCRIPTION_CHANGED_TOPIC, channelUID);
+        return new ChannelDescriptionChangedEvent(topic, payload, CommonChannelDescriptionField.ALL, channelUID,
+                linkedItemNames, stateDescriptionPayload, oldStateDescriptionPayload);
     }
 
     /**
