@@ -114,7 +114,7 @@ public class StateDescriptionServiceImplTest {
 
         StateDescription stateDescription = item.getStateDescription();
 
-        assertThat(stateDescription.isReadOnly(), is(stateDescriptionFragment1.isReadOnly()));
+        assertThat(stateDescription.isReadOnly(), is(stateDescriptionFragment2.isReadOnly()));
     }
 
     @Test
@@ -167,8 +167,7 @@ public class StateDescriptionServiceImplTest {
                 .withMinimum(BigDecimal.ZERO) //
                 .withMaximum(BigDecimal.TEN) //
                 .withPattern("pattern") //
-                .withReadOnly(Boolean.TRUE) //
-                .withOptions(options).build();
+                .withReadOnly(Boolean.TRUE).build();
         registerStateDescriptionFragmentProvider(stateDescriptionFragment1, -1);
 
         StateDescriptionFragment stateDescriptionFragment2 = StateDescriptionFragmentBuilder.create()
@@ -187,6 +186,8 @@ public class StateDescriptionServiceImplTest {
         assertThat(stateDescription.getPattern(), is("pattern"));
         assertThat(stateDescription.isReadOnly(), is(true));
         assertThat(stateDescription.getOptions(), is(options));
+        // check that fragement2 is not merged into fragement1
+        assertThat(stateDescriptionFragment1.getOptions().size(), is(0));
     }
 
     private void registerStateDescriptionFragmentProvider(StateDescriptionFragment stateDescriptionFragment,
