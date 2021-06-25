@@ -18,6 +18,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 
+import org.openhab.core.OpenHAB;
 import org.openhab.core.service.AbstractWatchService;
 
 /**
@@ -27,8 +28,11 @@ import org.openhab.core.service.AbstractWatchService;
  */
 abstract class ScriptLibraryWatcher extends AbstractWatchService {
 
-    ScriptLibraryWatcher(String libPath) {
-        super(libPath);
+    public static final String LIB_PATH = String.join(File.separator, OpenHAB.getConfigFolder(), "automation", "lib",
+            "javascript");
+
+    ScriptLibraryWatcher() {
+        super(LIB_PATH);
     }
 
     @Override
