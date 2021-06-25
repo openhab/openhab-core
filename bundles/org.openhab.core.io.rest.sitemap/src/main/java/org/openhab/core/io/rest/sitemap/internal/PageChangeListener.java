@@ -222,37 +222,43 @@ public class PageChangeListener implements StateChangeListener {
                 skipWidget = chartWidget.getRefresh() > 0;
             }
             if (!skipWidget || definesVisibilityOrColor(w, item.getName())) {
-                SitemapWidgetEvent event = new SitemapWidgetEvent();
-                event.sitemapName = sitemapName;
-                event.pageId = pageId;
-                event.label = itemUIRegistry.getLabel(w);
-                event.labelcolor = itemUIRegistry.getLabelColor(w);
-                event.valuecolor = itemUIRegistry.getValueColor(w);
-                event.widgetId = itemUIRegistry.getWidgetId(w);
-                event.visibility = itemUIRegistry.getVisiblity(w);
-                // event.item contains the (potentially changed) data of the item belonging to
-                // the widget including its state (in event.item.state)
-                final Item itemToBeSent = itemBelongsToWidget ? item : getItemForWidget(w);
-                if (itemToBeSent != null) {
-                    String widgetTypeName = w.eClass().getInstanceTypeName()
-                            .substring(w.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
-                    boolean drillDown = "mapview".equalsIgnoreCase(widgetTypeName);
-                    Predicate<Item> itemFilter = (i -> CoreItemFactory.LOCATION.equals(i.getType()));
-                    event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null);
-
-                    // event.state is an adjustment of the item state to the widget type.
-                    final State stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();
-                    event.state = itemUIRegistry.convertState(w, itemToBeSent, stateToBeSent).toFullString();
-                    // In case this state is identical to the item state, its value is set to null.
-                    if (event.state != null && event.state.equals(event.item.state)) {
-                        event.state = null;
-                    }
-                }
-
+                SitemapWidgetEvent event = constructSitemapEventForWidget(item, state, w);
                 events.add(event);
             }
         }
         return events;
+    }
+
+    private SitemapWidgetEvent constructSitemapEventForWidget(Item item, State state, Widget widget) {
+        SitemapWidgetEvent event = new SitemapWidgetEvent();
+        event.sitemapName = sitemapName;
+        event.pageId = pageId;
+        event.label = itemUIRegistry.getLabel(widget);
+        event.labelcolor = itemUIRegistry.getLabelColor(widget);
+        event.valuecolor = itemUIRegistry.getValueColor(widget);
+        event.widgetId = itemUIRegistry.getWidgetId(widget);
+        event.visibility = itemUIRegistry.getVisiblity(widget);
+        event.descriptionChanged = false;
+        // event.item contains the (potentially changed) data of the item belonging to
+        // the widget including its state (in event.item.state)
+        boolean itemBelongsToWidget = widget.getItem() != null && widget.getItem().equals(item.getName());
+        final Item itemToBeSent = itemBelongsToWidget ? item : getItemForWidget(widget);
+        if (itemToBeSent != null) {
+            String widgetTypeName = widget.eClass().getInstanceTypeName()
+                    .substring(widget.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
+            boolean drillDown = "mapview".equalsIgnoreCase(widgetTypeName);
+            Predicate<Item> itemFilter = (i -> CoreItemFactory.LOCATION.equals(i.getType()));
+            event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null);
+
+            // event.state is an adjustment of the item state to the widget type.
+            final State stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();
+            event.state = itemUIRegistry.convertState(widget, itemToBeSent, stateToBeSent).toFullString();
+            // In case this state is identical to the item state, its value is set to null.
+            if (event.state != null && event.state.equals(event.item.state)) {
+                event.state = null;
+            }
+        }
+        return event;
     }
 
     private Item getItemForWidget(Widget w) {
@@ -304,5 +310,38 @@ public class PageChangeListener implements StateChangeListener {
         for (SitemapSubscriptionCallback callback : distinctCallbacks) {
             callback.onEvent(aliveEvent);
         }
+    }
+
+    public void descriptionChanged(String itemName) {
+        try {
+            Item item = itemUIRegistry.getItem(itemName);
+
+            Set<SitemapEvent> events = constructSitemapEventsForUpdatedDescr(item, widgets);
+
+            for (SitemapEvent event : events) {
+                for (SitemapSubscriptionCallback callback : distinctCallbacks) {
+                    callback.onEvent(event);
+                }
+            }
+        } catch (ItemNotFoundException e) {
+            // ignore
+        }
+    }
+
+    private Set<SitemapEvent> constructSitemapEventsForUpdatedDescr(Item item, List<Widget> widgets) {
+        Set<SitemapEvent> events = new HashSet<>();
+        for (Widget w : widgets) {
+            if (w instanceof Frame) {
+                events.addAll(constructSitemapEventsForUpdatedDescr(item, itemUIRegistry.getChildren((Frame) w)));
+            }
+
+            boolean itemBelongsToWidget = w.getItem() != null && w.getItem().equals(item.getName());
+            if (itemBelongsToWidget) {
+                SitemapWidgetEvent event = constructSitemapEventForWidget(item, item.getState(), w);
+                event.descriptionChanged = true;
+                events.add(event);
+            }
+        }
+        return events;
     }
 }

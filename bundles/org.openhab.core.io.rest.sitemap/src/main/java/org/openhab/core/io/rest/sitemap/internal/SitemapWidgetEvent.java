@@ -30,6 +30,7 @@ public class SitemapWidgetEvent extends SitemapEvent {
     public boolean visibility;
     public String state;
     public EnrichedItemDTO item;
+    public boolean descriptionChanged;
 
     public SitemapWidgetEvent() {
     }
