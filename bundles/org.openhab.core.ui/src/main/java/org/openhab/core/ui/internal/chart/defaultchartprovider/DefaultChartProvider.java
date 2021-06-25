@@ -77,7 +77,7 @@ public class DefaultChartProvider implements ChartProvider {
     private int legendPosition = 0;
 
     private static final ChartTheme[] CHART_THEMES_AVAILABLE = { new ChartThemeWhite(), new ChartThemeBright(),
-            new ChartThemeDark(), new ChartThemeBlack() };
+            new ChartThemeDark(), new ChartThemeBlack(), new ChartThemeDarkTransparent() };
     public static final String CHART_THEME_DEFAULT_NAME = "bright";
     private Map<String, ChartTheme> chartThemes = null;
 
