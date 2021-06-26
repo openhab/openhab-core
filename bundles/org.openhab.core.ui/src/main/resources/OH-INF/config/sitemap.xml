@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0
+	https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="system:sitemap">
+		<parameter name="groupMembersSorting" type="text">
+			<label>Group Members Sorting</label>
+			<description>Defines how the members of a group are sorted in UI.</description>
+			<limitToOptions>true</limitToOptions>
+			<options>
+				<option value="NONE">No sorting</option>
+				<option value="LABEL">Sorted by label</option>
+				<option value="NAME">Sorted by name</option>
+			</options>
+			<default>NONE</default>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>

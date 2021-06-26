@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.regex.Matcher;
@@ -37,6 +38,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -87,8 +89,10 @@ import org.openhab.core.types.util.UnitUtils;
 import org.openhab.core.ui.internal.UIActivator;
 import org.openhab.core.ui.items.ItemUIProvider;
 import org.openhab.core.ui.items.ItemUIRegistry;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -106,10 +110,12 @@ import org.slf4j.LoggerFactory;
  * @author Erdoan Hadzhiyusein - Adapted the class to work with the new DateTimeType
  */
 @NonNullByDefault
-@Component
+@Component(immediate = true, configurationPid = "org.openhab.sitemap", //
+        property = Constants.SERVICE_PID + "=org.openhab.sitemap")
+@ConfigurableService(category = "system", label = "Sitemap", description_uri = ItemUIRegistryImpl.CONFIG_URI)
 public class ItemUIRegistryImpl implements ItemUIRegistry {
 
-    private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
+    protected static final String CONFIG_URI = "system:sitemap";
 
     /* the image location inside the installation folder */
     protected static final String IMAGE_LOCATION = "./webapps/images/";
@@ -123,11 +129,17 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private static final Pattern LABEL_PATTERN = Pattern.compile(".*?\\[.*? (.*?)\\]");
     private static final int MAX_BUTTONS = 4;
 
+    private static final String DEFAULT_SORTING = "NONE";
+
+    private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
+
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
     private final ItemRegistry itemRegistry;
 
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
+
+    private String groupMembersSorting = DEFAULT_SORTING;
 
     @Activate
     public ItemUIRegistryImpl(@Reference ItemRegistry itemRegistry) {
@@ -141,6 +153,30 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     public void removeItemUIProvider(ItemUIProvider itemUIProvider) {
         itemUIProviders.remove(itemUIProvider);
+    }
+
+    @Activate
+    protected void activate(Map<String, Object> config) {
+        applyConfig(config);
+    }
+
+    @Modified
+    protected void modified(@Nullable Map<String, Object> config) {
+        applyConfig(config);
+    }
+
+    /**
+     * Handle the initial or a changed configuration.
+     *
+     * @param config the configuration
+     */
+    private void applyConfig(@Nullable Map<String, Object> config) {
+        if (config != null) {
+            final String groupMembersSortingString = Objects.toString(config.get("groupMembersSorting"), null);
+            if (groupMembersSortingString != null) {
+                groupMembersSorting = groupMembersSortingString;
+            }
+        }
     }
 
     @Override
@@ -736,18 +772,32 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 if (item instanceof GroupItem) {
                     GroupItem groupItem = (GroupItem) item;
                     List<Item> members = new ArrayList<>(groupItem.getMembers());
-                    Collections.sort(members, new Comparator<Item>() {
-                        @Override
-                        public int compare(Item u1, Item u2) {
-                            String u1Label = u1.getLabel();
-                            String u2Label = u2.getLabel();
-                            if (u1Label != null && u2Label != null) {
-                                return u1Label.compareTo(u2Label);
-                            } else {
-                                return u1.getName().compareTo(u2.getName());
-                            }
-                        }
-                    });
+                    switch (groupMembersSorting) {
+                        case "LABEL":
+                            Collections.sort(members, new Comparator<Item>() {
+                                @Override
+                                public int compare(Item u1, Item u2) {
+                                    String u1Label = u1.getLabel();
+                                    String u2Label = u2.getLabel();
+                                    if (u1Label != null && u2Label != null) {
+                                        return u1Label.compareTo(u2Label);
+                                    } else {
+                                        return u1.getName().compareTo(u2.getName());
+                                    }
+                                }
+                            });
+                            break;
+                        case "NAME":
+                            Collections.sort(members, new Comparator<Item>() {
+                                @Override
+                                public int compare(Item u1, Item u2) {
+                                    return u1.getName().compareTo(u2.getName());
+                                }
+                            });
+                            break;
+                        default:
+                            break;
+                    }
                     for (Item member : members) {
                         Widget widget = getDefaultWidget(member.getClass(), member.getName());
                         if (widget != null) {
