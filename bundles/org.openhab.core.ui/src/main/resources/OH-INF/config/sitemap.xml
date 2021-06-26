@@ -11,11 +11,11 @@
 			<description>Defines how the members of a group are sorted in UI.</description>
 			<limitToOptions>true</limitToOptions>
 			<options>
-				<option value="NONE">No sorting applied (same behavior as in openHAB 2.x and 3.0).</option>
-				<option value="LABEL">Group members sorted by their label.</option>
-				<option value="NAME">Group members sorted by their name.</option>
+				<option value="NONE">No sorting</option>
+				<option value="LABEL">Sorted by label</option>
+				<option value="NAME">Sorted by name</option>
 			</options>
-			<default>LABEL</default>
+			<default>NONE</default>
 		</parameter>
 	</config-description>
 
