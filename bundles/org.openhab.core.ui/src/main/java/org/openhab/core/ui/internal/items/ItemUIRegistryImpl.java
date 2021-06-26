@@ -129,7 +129,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private static final Pattern LABEL_PATTERN = Pattern.compile(".*?\\[.*? (.*?)\\]");
     private static final int MAX_BUTTONS = 4;
 
-    private static final String SERVLET_SORTING = "LABEL";
+    private static final String DEFAULT_SORTING = "NONE";
 
     private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
 
@@ -139,7 +139,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
-    private String groupMembersSorting = SERVLET_SORTING;
+    private String groupMembersSorting = DEFAULT_SORTING;
 
     @Activate
     public ItemUIRegistryImpl(@Reference ItemRegistry itemRegistry) {
