@@ -54,7 +54,7 @@ public class ThingDTOTest {
                         ChannelBuilder.create(new ChannelUID(THING_UID, "channel2"), CoreItemFactory.STRING).build())
                 .withConfiguration(new Configuration(Map.of("param1", "value1"))).withProperties(properties)
                 .withLocation("Somewhere over the rainbow").build();
-        Thing result = ThingDTOMapper.map(ThingDTOMapper.map(subject), false);
+        Thing result = ThingDTOMapper.map(ThingDTOMapper.map(subject));
         assertThat(result, is(instanceOf(ThingImpl.class)));
         assertThat(result.getThingTypeUID(), is(THING_TYPE_UID));
         assertThat(result.getUID(), is(THING_UID));
@@ -70,7 +70,7 @@ public class ThingDTOTest {
     @Test
     public void testBridgeDTOMappingIsBidirectional() {
         Bridge subject = BridgeBuilder.create(THING_TYPE_UID, THING_UID).build();
-        Thing result = ThingDTOMapper.map(ThingDTOMapper.map(subject), true);
+        Thing result = ThingDTOMapper.map(ThingDTOMapper.map(subject));
         assertThat(result, is(instanceOf(BridgeImpl.class)));
     }
 

@@ -33,12 +33,13 @@ public class ThingDTO {
     public String thingTypeUID;
     public List<ChannelDTO> channels;
     public String location;
+    public Boolean isBridge;
 
     public ThingDTO() {
     }
 
     protected ThingDTO(String thingTypeUID, String UID, String label, String bridgeUID, List<ChannelDTO> channels,
-            Map<String, Object> configuration, Map<String, String> properties, String location) {
+            Map<String, Object> configuration, Map<String, String> properties, String location, Boolean isBridge) {
         this.thingTypeUID = thingTypeUID;
         this.UID = UID;
         this.label = label;
@@ -47,5 +48,6 @@ public class ThingDTO {
         this.configuration = configuration;
         this.properties = properties;
         this.location = location;
+        this.isBridge = isBridge;
     }
 }

@@ -12,10 +12,12 @@
  */
 package org.openhab.core.test.storage;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.StorageMigration;
 import org.openhab.core.storage.StorageService;
 
 /**
@@ -42,6 +44,11 @@ public class VolatileStorageService implements StorageService {
 
     @Override
     public <T> Storage<T> getStorage(String name, ClassLoader classLoader) {
+        return getStorage(name);
+    }
+
+    @Override
+    public <T> Storage<T> getStorage(String name, ClassLoader classLoader, List<StorageMigration> storageMigrations) {
         return getStorage(name);
     }
 }

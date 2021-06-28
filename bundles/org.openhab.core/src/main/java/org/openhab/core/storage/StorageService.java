@@ -12,6 +12,8 @@
  */
 package org.openhab.core.storage;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -49,4 +51,16 @@ public interface StorageService {
      * @return a ready to use {@link Storage}, never {@code null}
      */
     <T> Storage<T> getStorage(String name, @Nullable ClassLoader classLoader);
+
+    /**
+     * Returns the {@link Storage} with the given {@code name} and a given {@link ClassLoader}. If no {@link Storage}
+     * with this name exists a new initialized instance is returned.
+     *
+     * @param name the name of the {@link StorageService} to return
+     * @param classLoader the class loader which should be used by the {@link Storage}
+     * @param storageMigrations a list of storage migrations to apply
+     * @param <T> The type of the storage service
+     * @return a ready to use {@link Storage}, never {@code null}
+     */
+    <T> Storage<T> getStorage(String name, @Nullable ClassLoader classLoader, List<StorageMigration> storageMigrations);
 }

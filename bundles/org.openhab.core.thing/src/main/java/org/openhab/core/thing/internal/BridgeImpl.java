@@ -99,4 +99,9 @@ public class BridgeImpl extends ThingImpl implements Bridge {
         }
         return bridgeHandler;
     }
+
+    @Override
+    public boolean isBridge() {
+        return true;
+    }
 }

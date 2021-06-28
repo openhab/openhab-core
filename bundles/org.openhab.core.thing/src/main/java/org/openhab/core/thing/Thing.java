@@ -230,4 +230,11 @@ public interface Thing extends Identifiable<ThingUID> {
      * @return Returns {@code true} if the thing is enabled. Return {@code false} otherwise.
      */
     boolean isEnabled();
+
+    /**
+     * Returns information whether the {@link Thing} is a bridge or not.
+     *
+     * @return Returns {@code true} if the thing is a bridge. Return {@code false} otherwise.
+     */
+    boolean isBridge();
 }

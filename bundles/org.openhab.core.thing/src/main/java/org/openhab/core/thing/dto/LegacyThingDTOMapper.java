@@ -19,22 +19,32 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.Configuration;
-import org.openhab.core.thing.Channel;
-import org.openhab.core.thing.Thing;
-import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
-import org.openhab.core.thing.binding.builder.BridgeBuilder;
-import org.openhab.core.thing.binding.builder.ThingBuilder;
-import org.openhab.core.thing.util.ThingHelper;
+import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
- * The {@link ThingDTOMapper} is an utility class to map things into data transfer objects (DTO).
+ * The {@link LegacyThingDTOMapper} is an utility class to map things in the old structure to things in the new
+ * structure.
  *
- * @author Stefan Bußweiler - Initial contribution
- * @author Kai Kreuzer - Added DTO to Thing mapping
+ * @author Simon Lamon - Initial contribution
  */
 @NonNullByDefault
-public class ThingDTOMapper {
+@Deprecated
+public class LegacyThingDTOMapper {
+
+    /**
+     * Maps channel into channel DTO object.
+     *
+     * @param channel the channel
+     * @return the channel DTO object
+     */
+    public static ChannelDTO map(LegacyChannelDTO channel) {
+        ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
+        String channelTypeUIDValue = channelTypeUID != null ? channelTypeUID.getAsString() : null;
+        return new ChannelDTO(channel.getUid(), channelTypeUIDValue, channel.getAcceptedItemType(), channel.getKind(),
+                channel.getLabel(), channel.getDescription(), channel.getProperties(), channel.getConfiguration(),
+                channel.getDefaultTags(), channel.getAutoUpdatePolicy());
+    }
 
     /**
      * Maps thing into thing data transfer object (DTO).
@@ -42,10 +52,10 @@ public class ThingDTOMapper {
      * @param thing the thing
      * @return the thing DTO object
      */
-    public static ThingDTO map(Thing thing) {
+    public static ThingDTO map(LegacyThingDTO thing, boolean isBridge) {
         List<ChannelDTO> channelDTOs = new ArrayList<>();
-        for (Channel channel : thing.getChannels()) {
-            ChannelDTO channelDTO = ChannelDTOMapper.map(channel);
+        for (LegacyChannelDTO channel : thing.getChannels()) {
+            ChannelDTO channelDTO = map(channel);
             channelDTOs.add(channelDTO);
         }
 
@@ -54,28 +64,7 @@ public class ThingDTOMapper {
         final ThingUID bridgeUID = thing.getBridgeUID();
 
         return new ThingDTO(thingTypeUID, thingUID, thing.getLabel(), bridgeUID != null ? bridgeUID.toString() : null,
-                channelDTOs, toMap(thing.getConfiguration()), thing.getProperties(), thing.getLocation(),
-                thing.isBridge());
-    }
-
-    /**
-     * Maps thing DTO into thing
-     *
-     * @param thingDTO the thingDTO
-     * @param isBridge flag if the thing DTO identifies a bridge
-     * @return the corresponding thing
-     */
-    public static Thing map(ThingDTO thingDTO) {
-        ThingUID thingUID = new ThingUID(thingDTO.UID);
-        ThingTypeUID thingTypeUID = thingDTO.thingTypeUID == null ? new ThingTypeUID("")
-                : new ThingTypeUID(thingDTO.thingTypeUID);
-        final Thing thing;
-        if (thingDTO.isBridge) {
-            thing = BridgeBuilder.create(thingTypeUID, thingUID).build();
-        } else {
-            thing = ThingBuilder.create(thingTypeUID, thingUID).build();
-        }
-        return ThingHelper.merge(thing, thingDTO);
+                channelDTOs, toMap(thing.getConfiguration()), thing.getProperties(), thing.getLocation(), isBridge);
     }
 
     private static Map<String, Object> toMap(Configuration configuration) {

@@ -12,9 +12,17 @@
  */
 package org.openhab.core.thing;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.common.registry.DefaultAbstractManagedProvider;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.AbstractManagedProvider;
 import org.openhab.core.storage.StorageService;
+import org.openhab.core.thing.dto.ThingDTO;
+import org.openhab.core.thing.dto.ThingDTOMapper;
+import org.openhab.core.thing.internal.ChangeBridgeStructureStorageMigration;
+import org.openhab.core.thing.internal.ChangeThingStructureStorageMigration;
+import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -31,11 +39,16 @@ import org.osgi.service.component.annotations.Reference;
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ThingProvider.class, ManagedThingProvider.class })
-public class ManagedThingProvider extends DefaultAbstractManagedProvider<Thing, ThingUID> implements ThingProvider {
+public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUID, ThingDTO> implements ThingProvider {
+
+    private final ThingTypeRegistry thingTypeRegistry;
 
     @Activate
-    public ManagedThingProvider(final @Reference StorageService storageService) {
-        super(storageService);
+    public ManagedThingProvider(final @Reference StorageService storageService,
+            final @Reference ThingTypeRegistry thingTypeRegistry) {
+        super(storageService,
+                List.of(new ChangeThingStructureStorageMigration(), new ChangeBridgeStructureStorageMigration()));
+        this.thingTypeRegistry = thingTypeRegistry;
     }
 
     @Override
@@ -46,5 +59,15 @@ public class ManagedThingProvider extends DefaultAbstractManagedProvider<Thing, 
     @Override
     protected String keyToString(ThingUID key) {
         return key.toString();
+    }
+
+    @Override
+    protected @Nullable Thing toElement(String key, ThingDTO persistableElement) {
+        return ThingDTOMapper.map(persistableElement);
+    }
+
+    @Override
+    protected ThingDTO toPersistableElement(Thing element) {
+        return ThingDTOMapper.map(element);
     }
 }

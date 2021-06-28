@@ -42,9 +42,12 @@ import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.dto.ThingDTO;
+import org.openhab.core.thing.dto.ThingDTOMapper;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 import org.openhab.core.thing.type.ChannelDefinition;
@@ -68,6 +71,7 @@ import org.osgi.service.component.ComponentContext;
 @SuppressWarnings("null")
 public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
 
+    private ThingRegistry thingRegistry;
     private ManagedThingProvider managedThingProvider;
     private SampleThingHandlerFactory thingHandlerFactory;
     private boolean selfChanging = false;
@@ -113,6 +117,9 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
     @BeforeEach
     public void setup() throws URISyntaxException {
         registerVolatileStorageService();
+        thingRegistry = getService(ThingRegistry.class);
+        assertThat(thingRegistry, is(notNullValue()));
+
         managedThingProvider = getService(ManagedThingProvider.class);
         assertThat(managedThingProvider, is(notNullValue()));
 
@@ -317,9 +324,10 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
 
         StorageService storage = getService(StorageService.class);
         Map<String, Object> properties = Map.of("providedspecific", "there");
-        Thing persistedThing = ThingFactory.createThing(thingTypeSpecific,
+        Thing thingToPersist = ThingFactory.createThing(thingTypeSpecific,
                 new ThingUID("testBinding", "persistedThing"), new Configuration(properties), null, null);
-        persistedThing.setProperty("universal", "survives");
+        thingToPersist.setProperty("universal", "survives");
+        ThingDTO persistedThing = ThingDTOMapper.map(thingToPersist);
         storage.getStorage(Thing.class.getName()).put("testBinding::persistedThing", persistedThing);
         selfChanging = true;
 
@@ -331,7 +339,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         managedThingProvider = getService(ManagedThingProvider.class);
         assertThat(managedThingProvider, is(notNullValue()));
 
-        Collection<Thing> res = managedThingProvider.getAll();
+        Collection<Thing> res = thingRegistry.getAll();
         assertThat(res.size(), is(1));
 
         Thing thing = res.iterator().next();
@@ -396,9 +404,9 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         assertThat(thing.getStatus(), is(ThingStatus.ONLINE));
 
         // Ensure the new thing type has been persisted into the database
-        Storage<Thing> storage = getService(StorageService.class).getStorage(Thing.class.getName());
-        Thing persistedThing = storage.get("testBinding::testThing");
-        assertThat(persistedThing.getThingTypeUID().getAsString(), is("testBinding:specific"));
+        Storage<ThingDTO> storage = getService(StorageService.class).getStorage(Thing.class.getName());
+        ThingDTO persistedThing = storage.get("testBinding::testThing");
+        assertThat(persistedThing.thingTypeUID, is("testBinding:specific"));
     }
 
     private ThingType registerThingTypeAndConfigDescription(ThingTypeUID thingTypeUID,

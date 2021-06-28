@@ -30,6 +30,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.ConfigurationDeserializer;
 import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.StorageMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +83,11 @@ public class JsonStorage<T> implements Storage<T> {
 
     public JsonStorage(File file, @Nullable ClassLoader classLoader, int maxBackupFiles, int writeDelay,
             int maxDeferredPeriod) {
+        this(file, classLoader, maxBackupFiles, writeDelay, maxDeferredPeriod, null);
+    }
+
+    public JsonStorage(File file, @Nullable ClassLoader classLoader, int maxBackupFiles, int writeDelay,
+            int maxDeferredPeriod, @Nullable List<StorageMigration> migrations) {
         this.file = file;
         this.classLoader = classLoader;
         this.maxBackupFiles = maxBackupFiles;
@@ -96,6 +102,64 @@ public class JsonStorage<T> implements Storage<T> {
 
         commitTimer = new Timer();
 
+        // Apply migrations if any
+        if (migrations != null) {
+            Map<String, StorageEntry> migrationMap = this.applyMigrations(migrations);
+            if (migrationMap != null) {
+                map.putAll(migrationMap);
+                dirty = true;
+                flush();
+                map.clear();
+            }
+        }
+
+        // Read database
+        Map<String, StorageEntry> inputMap = this.readDatabase();
+        // If we've read data from a file, then add it to the map
+        if (inputMap != null) {
+            map.putAll(inputMap);
+            logger.debug("Opened Json storage file at '{}'.", file.getAbsolutePath());
+        }
+    }
+
+    private @Nullable Map<String, StorageEntry> applyMigrations(List<StorageMigration> migrations) {
+        Map<String, StorageEntry> storageEntries = this.readDatabase();
+        if (storageEntries != null) {
+            for (Map.Entry<String, StorageEntry> storageEntryInMap : storageEntries.entrySet()) {
+                StorageEntry storageEntry = storageEntryInMap.getValue();
+                for (StorageMigration md : migrations) {
+                    String oldEntityClassName = md.getOldEntityClassName();
+                    String newEntityClassName = md.getNewEntityClassName();
+
+                    Class<?> oldEntityType = md.getOldEntityClass();
+                    Class<?> newEntityType = md.getNewEntityClass();
+
+                    if (oldEntityClassName == null) {
+                        oldEntityClassName = oldEntityType.getTypeName();
+                    }
+
+                    if (newEntityClassName == null) {
+                        newEntityClassName = newEntityType.getTypeName();
+                    }
+
+                    if (storageEntry.getEntityClassName().equals(oldEntityClassName)) {
+                        Object valueFromDatabase = this.entityMapper.fromJson((JsonElement) storageEntry.getValue(),
+                                oldEntityType);
+                        if (valueFromDatabase != null) {
+                            Object convertedValue = md.migrate(valueFromDatabase);
+                            storageEntry = new StorageEntry(newEntityClassName,
+                                    entityMapper.toJsonTree(convertedValue));
+                            storageEntries.put(storageEntryInMap.getKey(), storageEntry);
+                        }
+                    }
+                }
+            }
+        }
+
+        return storageEntries;
+    }
+
+    private @Nullable Map<String, StorageEntry> readDatabase() {
         Map<String, StorageEntry> inputMap = null;
         if (file.exists()) {
             // Read the file
@@ -124,11 +188,7 @@ public class JsonStorage<T> implements Storage<T> {
             }
         }
 
-        // If we've read data from a file, then add it to the map
-        if (inputMap != null) {
-            map.putAll(inputMap);
-            logger.debug("Opened Json storage file at '{}'.", file.getAbsolutePath());
-        }
+        return inputMap;
     }
 
     @Override
