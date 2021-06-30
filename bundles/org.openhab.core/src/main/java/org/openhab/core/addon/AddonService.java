@@ -22,11 +22,34 @@ import java.util.Locale;
  * The REST API offers an uri that exposes this functionality.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Yannick Schaus - Add id, name and refreshSource
  */
 public interface AddonService {
 
     /**
-     * Retrieves all add-ons
+     * Returns the ID of the service.
+     *
+     * @return the service identifier
+     */
+    String getId();
+
+    /**
+     * Returns the name of the service.
+     *
+     * @return the service name
+     */
+    String getName();
+
+    /**
+     * Refreshes the source used for providing the add-ons.
+     *
+     * This can be called before getAddons to ensure the add-on information is up-to-date; otherwise they might be
+     * retrieved from a cache.
+     */
+    void refreshSource();
+
+    /**
+     * Retrieves all add-ons.
      *
      * It is expected that this method is rather cheap to call and will return quickly, i.e. some caching should be
      * implemented if required.
