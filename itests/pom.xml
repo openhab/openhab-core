@@ -43,6 +43,7 @@
     <module>org.openhab.core.thing.tests</module>
     <module>org.openhab.core.thing.xml.tests</module>
     <module>org.openhab.core.voice.tests</module>
+    <module>org.openhab.core.rulestest.tests</module>
   </modules>
 
   <properties>
