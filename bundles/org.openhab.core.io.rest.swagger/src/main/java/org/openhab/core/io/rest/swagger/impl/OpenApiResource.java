@@ -159,7 +159,6 @@ public class OpenApiResource implements RESTResource {
         flows.setAuthorizationCode(authorizationCode);
 
         SecurityScheme securityScheme = new SecurityScheme();
-        securityScheme.setName("oauth2");
         securityScheme.setType(SecurityScheme.Type.OAUTH2);
         securityScheme.setFlows(flows);
 
