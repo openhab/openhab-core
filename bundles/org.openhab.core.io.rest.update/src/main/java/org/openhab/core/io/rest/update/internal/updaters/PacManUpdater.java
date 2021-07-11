@@ -13,8 +13,6 @@
 package org.openhab.core.io.rest.update.internal.updaters;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link PacManUpdater} is the shell script for updating openHAB on this OS resp. Package Manager.
@@ -28,8 +26,6 @@ public class PacManUpdater extends DebianUpdater {
      * script in the '/scripts/YumUpdater.txt' resource (which is why we need it to have a different class name to find
      * the respective resource).
      */
-
-    private final Logger logger = LoggerFactory.getLogger(PacManUpdater.class);
 
     /**
      * This updater's script has not yet been implemented, so log an error and throw an exception.

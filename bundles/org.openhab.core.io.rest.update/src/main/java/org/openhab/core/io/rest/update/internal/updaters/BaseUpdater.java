@@ -15,6 +15,7 @@ package org.openhab.core.io.rest.update.internal.updaters;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,6 +23,7 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
@@ -32,6 +34,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -66,20 +70,35 @@ import com.jcraft.jsch.Session;
 @NonNullByDefault
 public abstract class BaseUpdater implements Runnable {
 
-    private final Logger logger = LoggerFactory.getLogger(BaseUpdater.class);
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static final String TITLE = "openHAB Updater";
 
-    private static final String ARTIFACT_URL_RELEASE = "https://openhab.jfrog.io/artifactory/libs-release-local/org/openhab/distro/openhab/maven-metadata.xml";
-    private static final String ARTIFACT_URL_MILESTONE = "https://openhab.jfrog.io/artifactory/libs-milestone-local/org/openhab/distro/openhab/maven-metadata.xml";
-    private static final String ARTIFACT_URL_SNAPSHOT = "https://openhab.jfrog.io/artifactory/libs-snapshot-local/org/openhab/distro/openhab/maven-metadata.xml";
-    private static final String ARTIFACT_URL_SNAPSHOT_DRILLDOWN = "https://openhab.jfrog.io/artifactory/libs-snapshot-local/org/openhab/distro/openhab/%s/maven-metadata.xml";
+    private static final String PROP_FILE_NAME = "version.properties";
+    private static final String PROP_FILE_FOLDER = "etc";
+
+    private static final String ART_URL_RELEASE = "artificatory-url-release";
+    private static final String ART_URL_MILESTONE = "artificatory-url-milestone";
+    private static final String ART_URL_SNAPSHOT = "artificatory-url-snapshot";
+    private static final String ART_URL_DRILLDOWN = "artificatory-url-snapshot-drilldown";
+
+    /**
+     * The urls are pre-loaded with hard coded values in case the property file or its respective entries don't exist
+     */
+    private final Map<String, String> URLS = Map.of(
+    // @formatter:off
+        ART_URL_RELEASE,    "https://openhab.jfrog.io/artifactory/libs-release-local/org/openhab/distro/openhab/maven-metadata.xml",
+        ART_URL_MILESTONE,  "https://openhab.jfrog.io/artifactory/libs-milestone-local/org/openhab/distro/openhab/maven-metadata.xml",
+        ART_URL_SNAPSHOT,   "https://openhab.jfrog.io/artifactory/libs-snapshot-local/org/openhab/distro/openhab/maven-metadata.xml",
+        ART_URL_DRILLDOWN,  "https://openhab.jfrog.io/artifactory/libs-snapshot-local/org/openhab/distro/openhab/%s/maven-metadata.xml"
+    // @formatter:on
+    );
 
     private static final String SNAPSHOT = "SNAPSHOT";
 
     private static final Boolean RUN_LOCK = Boolean.valueOf(true);
 
-    private static final Integer MIN_SLEEP_SECS = 5; // seconds
+    private static final Integer MIN_SLEEP_SECS = 5;
     private static final Integer DEFAULT_SLEEP_SECS = 20;
     private static final Integer MAX_SLEEP_SECS = 60;
 
@@ -137,6 +156,8 @@ public abstract class BaseUpdater implements Runnable {
      * Constructor.
      */
     public BaseUpdater() {
+        // initialize artifactory urls
+        initializeArtifactoryUrls();
         // initialise COMMON place holders
         placeHolders.put(PlaceHolder.TITLE, TITLE);
         placeHolders.put(PlaceHolder.USER_NAME, "");
@@ -199,15 +220,15 @@ public abstract class BaseUpdater implements Runnable {
                 return;
             }
 
+            // inform the user via the log file
+            loggerInfoUpdateStarted();
+
             // execute the update script
             if (!runScript()) {
                 logger.debug("Failed to run openHAB update script");
                 deletePriorFiles();
                 return;
             }
-
-            // inform the user via the log file
-            loggerInfoUpdateStarted();
         }
     }
 
@@ -326,17 +347,21 @@ public abstract class BaseUpdater implements Runnable {
         String versionIdWithTimestamp = null;
         switch (versionType) {
             case STABLE:
-                versionId = getArtifactoryLatestVersion(ARTIFACT_URL_RELEASE);
+                versionId = getArtifactoryLatestVersion(URLS.getOrDefault(ART_URL_RELEASE, ""));
                 break;
             case MILESTONE:
-                versionId = getArtifactoryLatestVersion(ARTIFACT_URL_MILESTONE);
+                versionId = getArtifactoryLatestVersion(URLS.getOrDefault(ART_URL_MILESTONE, ""));
                 break;
             case SNAPSHOT:
-                versionId = getArtifactoryLatestVersion(ARTIFACT_URL_SNAPSHOT);
+                versionId = getArtifactoryLatestVersion(URLS.getOrDefault(ART_URL_SNAPSHOT, ""));
                 if (!VERSION_NOT_DEFINED.equals(versionId)) {
-                    String timestamp = getArtifactorySnapshotTimestamp(
-                            String.format(ARTIFACT_URL_SNAPSHOT_DRILLDOWN, versionId));
-                    versionIdWithTimestamp = versionId.replace(SNAPSHOT, timestamp).replace("-", ".");
+                    String drillDownUrl = URLS.getOrDefault(ART_URL_DRILLDOWN, "");
+                    if (!drillDownUrl.isEmpty()) {
+                        String timestamp = getArtifactorySnapshotTimestamp(String.format(drillDownUrl, versionId));
+                        versionIdWithTimestamp = versionId.replace(SNAPSHOT, timestamp).replace("-", ".");
+                    } else {
+                        versionId = VERSION_NOT_DEFINED;
+                    }
                 }
                 break;
             default:
@@ -490,24 +515,26 @@ public abstract class BaseUpdater implements Runnable {
      * @return latest available openHAB version or UNKNOWN_VERSION
      */
     private String getArtifactoryLatestVersion(String url) {
-        XMLStreamReader reader = null;
-        try {
-            reader = XMLInputFactory.newInstance().createXMLStreamReader(new URL(url).openStream());
-            while (reader.hasNext()) {
-                if (reader.next() == XMLStreamConstants.START_ELEMENT) {
-                    if ("latest".equals(reader.getLocalName())) {
-                        return reader.getElementText();
+        if (!url.isBlank()) {
+            XMLStreamReader reader = null;
+            try {
+                reader = XMLInputFactory.newInstance().createXMLStreamReader(new URL(url).openStream());
+                while (reader.hasNext()) {
+                    if (reader.next() == XMLStreamConstants.START_ELEMENT) {
+                        if ("latest".equals(reader.getLocalName())) {
+                            return reader.getElementText();
+                        }
                     }
                 }
-            }
-        } catch (IOException | XMLStreamException e) {
-            logger.debug("Error reading maven metadata file: {}", e.getMessage());
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (XMLStreamException e) {
-                    logger.debug("Error closing maven metadata file: {}", e.getMessage());
+            } catch (IOException | XMLStreamException e) {
+                logger.debug("Error reading maven metadata file: {}", e.getMessage());
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (XMLStreamException e) {
+                        logger.debug("Error closing maven metadata file: {}", e.getMessage());
+                    }
                 }
             }
         }
@@ -522,33 +549,35 @@ public abstract class BaseUpdater implements Runnable {
      * @return the time stamp (if found and valid)
      */
     private String getArtifactorySnapshotTimestamp(String url) {
-        XMLStreamReader reader = null;
-        try {
-            reader = XMLInputFactory.newInstance().createXMLStreamReader(new URL(url).openStream());
-            while (reader.hasNext()) {
-                if (reader.next() == XMLStreamConstants.START_ELEMENT) {
-                    if ("timestamp".equals(reader.getLocalName())) {
-                        String timeStamp = reader.getElementText();
-                        /*
-                         * the maven artifactory time-stamp format is '20210608.062321' so re-format the value to the
-                         * openHAB versioning time-stamp format '202106080623'
-                         */
-                        DateTimeFormatter fmtIn = DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss");
-                        DateTimeFormatter fmtOut = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-                        return fmtOut.format(LocalDateTime.from(fmtIn.parse(timeStamp)));
+        if (!url.isBlank()) {
+            XMLStreamReader reader = null;
+            try {
+                reader = XMLInputFactory.newInstance().createXMLStreamReader(new URL(url).openStream());
+                while (reader.hasNext()) {
+                    if (reader.next() == XMLStreamConstants.START_ELEMENT) {
+                        if ("timestamp".equals(reader.getLocalName())) {
+                            String timeStamp = reader.getElementText();
+                            /*
+                             * the maven artifactory time-stamp format is '20210608.062321' so re-format the value to
+                             * the openHAB versioning time-stamp format '202106080623'
+                             */
+                            DateTimeFormatter fmtIn = DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss");
+                            DateTimeFormatter fmtOut = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+                            return fmtOut.format(LocalDateTime.from(fmtIn.parse(timeStamp)));
+                        }
                     }
                 }
-            }
-        } catch (IOException | XMLStreamException e) {
-            logger.debug("Error reading maven metadata file: {}", e.getMessage());
-        } catch (DateTimeException e) {
-            logger.debug("Error parsing time stamp: {}", e.getMessage());
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (XMLStreamException e) {
-                    logger.debug("Error closing maven metadata file: {}", e.getMessage());
+            } catch (IOException | XMLStreamException e) {
+                logger.debug("Error reading maven metadata file: {}", e.getMessage());
+            } catch (DateTimeException e) {
+                logger.debug("Error parsing time stamp: {}", e.getMessage());
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (XMLStreamException e) {
+                        logger.debug("Error closing maven metadata file: {}", e.getMessage());
+                    }
                 }
             }
         }
@@ -883,7 +912,27 @@ public abstract class BaseUpdater implements Runnable {
      * @param latestVersion
      */
     protected void loggerInfoUpdateStarted() {
-        logger.info("Stopping openHAB; Starting update [{} => {}]", getActualVersion(),
+        logger.info("Stopping openHAB; Attempting update [{} => {}]", getActualVersion(),
                 placeHolders.get(PlaceHolder.TARGET_VERSION));
+    }
+
+    /**
+     * Initialize the artifactory urls from a configuration file if such a file exists, and such entries exist in it.
+     * Otherwise revert to the pre- loaded hard coded values.
+     */
+    private void initializeArtifactoryUrls() {
+        Path filePath = Paths.get(OpenHAB.getUserDataFolder(), PROP_FILE_FOLDER, PROP_FILE_NAME);
+        try (FileInputStream fileStream = new FileInputStream(filePath.toFile())) {
+            Properties props = new Properties();
+            props.load(fileStream);
+            for (Entry<String, String> url : URLS.entrySet()) {
+                String propVal = props.getProperty(url.getKey(), "");
+                if (!propVal.isBlank() && !propVal.equals(url.getValue())) {
+                    // JDOC says Map$Entry.setValue() writes through to Map
+                    url.setValue(propVal);
+                }
+            }
+        } catch (Exception e) {
+        }
     }
 }

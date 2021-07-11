@@ -14,8 +14,6 @@ package org.openhab.core.io.rest.update.internal.updaters;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link MacUpdater} is the shell script for updating openHAB on this OS resp. Package Manager.
@@ -24,8 +22,6 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class MacUpdater extends BaseUpdater {
-
-    private final Logger logger = LoggerFactory.getLogger(MacUpdater.class);
 
     private static final String EXEC_FOLDER = OpenHAB.getUserDataFolder().replace("/userdata", "");
     private static final String EXEC_FILENAME = FILE_ID + ".sh";

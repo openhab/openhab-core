@@ -19,8 +19,6 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermissions;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link DebianUpdater} is the shell script for updating openHAB on this OS resp. Package Manager.
@@ -29,8 +27,6 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class DebianUpdater extends BaseUpdater {
-
-    private final Logger logger = LoggerFactory.getLogger(DebianUpdater.class);
 
     private static final String EXEC_FOLDER = "/usr/share/openhab";
     private static final String EXEC_FILENAME = FILE_ID + ".sh";
