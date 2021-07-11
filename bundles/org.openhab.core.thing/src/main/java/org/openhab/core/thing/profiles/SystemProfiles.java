@@ -28,6 +28,8 @@ public interface SystemProfiles {
 
     public static final ProfileTypeUID DEFAULT = new ProfileTypeUID(SYSTEM_SCOPE, "default");
     public static final ProfileTypeUID FOLLOW = new ProfileTypeUID(SYSTEM_SCOPE, "follow");
+    public static final ProfileTypeUID INCOMING = new ProfileTypeUID(SYSTEM_SCOPE, "incoming");
+    public static final ProfileTypeUID OUTGOING = new ProfileTypeUID(SYSTEM_SCOPE, "outgoing");
     public static final ProfileTypeUID OFFSET = new ProfileTypeUID(SYSTEM_SCOPE, "offset");
     public static final ProfileTypeUID HYSTERESIS = new ProfileTypeUID(SYSTEM_SCOPE, "hysteresis");
     public static final ProfileTypeUID RANGE = new ProfileTypeUID(SYSTEM_SCOPE, "range");
@@ -57,6 +59,10 @@ public interface SystemProfiles {
     static final ProfileType DEFAULT_TYPE = ProfileTypeBuilder.newState(DEFAULT, "Default").build();
 
     static final ProfileType FOLLOW_TYPE = ProfileTypeBuilder.newState(FOLLOW, "Follow").build();
+
+    static final ProfileType INCOMING_TYPE = ProfileTypeBuilder.newState(INCOMING, "Incoming").build();
+
+    static final ProfileType OUTGOING_TYPE = ProfileTypeBuilder.newState(OUTGOING, "Outgoing").build();
 
     static final ProfileType OFFSET_TYPE = ProfileTypeBuilder.newState(OFFSET, "Offset")
             .withSupportedItemTypes(CoreItemFactory.NUMBER).withSupportedItemTypesOfChannel(CoreItemFactory.NUMBER)
