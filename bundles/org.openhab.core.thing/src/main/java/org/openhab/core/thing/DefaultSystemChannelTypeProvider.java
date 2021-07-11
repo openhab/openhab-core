@@ -119,7 +119,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .state(SYSTEM_CHANNEL_TYPE_UID_LOW_BATTERY, "Low Battery", CoreItemFactory.SWITCH)
             .withCategory("LowBattery")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build())
-            .withTags(List.of("LowBattery", "Level")).build();
+            .withTags(List.of("LowBattery", "Energy")).build();
 
     /**
      * Battery level default system wide {@link ChannelType}. Represents the battery level as a percentage.
@@ -130,7 +130,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withReadOnly(true).withPattern("%.0f %%")
                     .build())
-            .withTags(List.of("Measurement", "Level")).build();
+            .withTags(List.of("Measurement", "Energy")).build();
 
     /**
      * System wide trigger {@link ChannelType} without event options.
@@ -223,7 +223,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withCategory("ColorLight")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(100)).withPattern("%.0f").build())
-            .withTags(List.of("Control", "Light")).build();
+            .withTags(List.of("Control", "ColorTemperature")).build();
 
     /**
      * Color-temperature: default system wide {@link ChannelType} which allows changing the color temperature in Kelvin
@@ -234,7 +234,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .isAdvanced(true)
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(new BigDecimal(1000))
                     .withMaximum(new BigDecimal(10000)).withPattern("%.0f K").build())
-            .withTags(List.of("Control", "Light")).build();
+            .withTags(List.of("Control", "ColorTemperature")).build();
 
     // media channels
 
