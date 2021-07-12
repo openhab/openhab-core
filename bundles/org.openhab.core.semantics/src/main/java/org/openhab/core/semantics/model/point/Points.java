@@ -33,6 +33,7 @@ public class Points {
         POINTS.add(Point.class);
         POINTS.add(Alarm.class);
         POINTS.add(Control.class);
+        POINTS.add(Forecast.class);
         POINTS.add(LowBattery.class);
         POINTS.add(Measurement.class);
         POINTS.add(OpenLevel.class);
