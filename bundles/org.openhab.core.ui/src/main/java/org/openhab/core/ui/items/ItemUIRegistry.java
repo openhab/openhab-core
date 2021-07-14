@@ -158,6 +158,16 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
     boolean getVisiblity(Widget w);
 
     /**
+     * Get the value of a metadata associated to an item
+     *
+     * @param key metadata key
+     * @param itemName item name
+     * @return the metadata value for this item and key, or null if undefined
+     */
+    @Nullable
+    String getItemMetadata(String key, String itemName);
+
+    /**
      * Gets the item state
      *
      * @param itemName item name

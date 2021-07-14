@@ -44,6 +44,9 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemNotUniqueException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.RegistryHook;
 import org.openhab.core.library.items.CallItem;
 import org.openhab.core.library.items.ColorItem;
@@ -136,14 +139,16 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
     private final ItemRegistry itemRegistry;
+    private final MetadataRegistry metadataRegistry;
 
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
     private String groupMembersSorting = DEFAULT_SORTING;
 
     @Activate
-    public ItemUIRegistryImpl(@Reference ItemRegistry itemRegistry) {
+    public ItemUIRegistryImpl(@Reference ItemRegistry itemRegistry, @Reference MetadataRegistry metadataRegistry) {
         this.itemRegistry = itemRegistry;
+        this.metadataRegistry = metadataRegistry;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -1270,6 +1275,16 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         public String toString() {
             return this.value;
         }
+    }
+
+    @Override
+    public @Nullable String getItemMetadata(String key, String itemName) {
+        MetadataKey metadataKey = new MetadataKey(key, itemName);
+        Metadata metadata = metadataRegistry.get(metadataKey);
+        if (metadata != null && !metadata.getValue().isBlank()) {
+            return metadata.getValue();
+        }
+        return null;
     }
 
     @Override

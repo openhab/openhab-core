@@ -38,6 +38,9 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.items.CallItem;
 import org.openhab.core.library.items.ColorItem;
 import org.openhab.core.library.items.ContactItem;
@@ -94,12 +97,13 @@ public class ItemUIRegistryImplTest {
     private ItemUIRegistryImpl uiRegistry;
 
     private @Mock ItemRegistry registry;
+    private @Mock MetadataRegistry metadataRegistry;
     private @Mock Widget widget;
     private @Mock Item item;
 
     @BeforeEach
     public void setup() throws Exception {
-        uiRegistry = new ItemUIRegistryImpl(registry);
+        uiRegistry = new ItemUIRegistryImpl(registry, metadataRegistry);
 
         when(widget.getItem()).thenReturn(ITEM_NAME);
         when(registry.getItem(ITEM_NAME)).thenReturn(item);
@@ -913,5 +917,24 @@ public class ItemUIRegistryImplTest {
         String unit = uiRegistry.getUnitForWidget(widget);
 
         assertThat(unit, is(equalTo("°C")));
+    }
+
+    @Test
+    public void isItemAutoUpdateOffWithNoMetadata() throws Exception {
+        MetadataKey key = new MetadataKey("autoupdate", ITEM_NAME);
+        when(metadataRegistry.get(key)).thenReturn(null);
+
+        String result = uiRegistry.getItemMetadata("autoupdate", ITEM_NAME);
+        assertEquals(null, result);
+    }
+
+    @Test
+    public void isItemAutoUpdateOffWithMetadata() throws Exception {
+        MetadataKey key = new MetadataKey("autoupdate", ITEM_NAME);
+        Metadata metadata = new Metadata(key, "false", null);
+        when(metadataRegistry.get(key)).thenReturn(metadata);
+
+        String result = uiRegistry.getItemMetadata("autoupdate", ITEM_NAME);
+        assertEquals("false", result);
     }
 }
