@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.internal;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -31,7 +30,7 @@ import org.openhab.core.config.core.Configuration;
 @NonNullByDefault
 public class ConditionImpl extends ModuleImpl implements Condition {
 
-    private Map<String, String> inputs = Collections.emptyMap();
+    private Map<String, String> inputs = Map.of();
 
     /**
      * Constructor of {@link Condition} module object.
@@ -46,7 +45,7 @@ public class ConditionImpl extends ModuleImpl implements Condition {
     public ConditionImpl(String id, String typeUID, @Nullable Configuration configuration, @Nullable String label,
             @Nullable String description, @Nullable Map<String, String> inputs) {
         super(id, typeUID, configuration, label, description);
-        this.inputs = inputs == null ? Collections.emptyMap() : Collections.unmodifiableMap(inputs);
+        this.inputs = inputs == null ? Map.of() : Map.copyOf(inputs);
     }
 
     /**

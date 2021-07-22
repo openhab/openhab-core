@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.internal;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -33,7 +32,7 @@ import org.openhab.core.config.core.Configuration;
 @NonNullByDefault
 public class ActionImpl extends ModuleImpl implements Action {
 
-    private Map<String, String> inputs = Collections.emptyMap();
+    private Map<String, String> inputs = Map.of();
 
     /**
      * Constructor of Action object.
@@ -48,7 +47,7 @@ public class ActionImpl extends ModuleImpl implements Action {
     public ActionImpl(String UID, String typeUID, @Nullable Configuration configuration, @Nullable String label,
             @Nullable String description, @Nullable Map<String, String> inputs) {
         super(UID, typeUID, configuration, label, description);
-        this.inputs = inputs == null ? Collections.emptyMap() : Collections.unmodifiableMap(inputs);
+        this.inputs = inputs == null ? Map.of() : Map.copyOf(inputs);
     }
 
     /**

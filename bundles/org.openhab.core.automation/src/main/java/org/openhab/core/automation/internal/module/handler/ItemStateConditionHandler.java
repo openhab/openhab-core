@@ -14,12 +14,15 @@ package org.openhab.core.automation.internal.module.handler;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
 import org.slf4j.Logger;
@@ -31,21 +34,21 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - refactored and simplified customized module handling
  */
+@NonNullByDefault
 public class ItemStateConditionHandler extends BaseConditionModuleHandler {
 
     /**
-     * Constants for Config-Parameters corresponding to Definition in
-     * ItemModuleTypeDefinition.json
+     * Constants for Config-Parameters corresponding to Definition in ItemModuleTypeDefinition.json
      */
-    private static final String ITEM_NAME = "itemName";
-    private static final String OPERATOR = "operator";
-    private static final String STATE = "state";
+    public static final String ITEM_NAME = "itemName";
+    public static final String OPERATOR = "operator";
+    public static final String STATE = "state";
 
     private final Logger logger = LoggerFactory.getLogger(ItemStateConditionHandler.class);
 
     public static final String ITEM_STATE_CONDITION = "core.ItemStateCondition";
 
-    private ItemRegistry itemRegistry;
+    private @Nullable ItemRegistry itemRegistry;
 
     public ItemStateConditionHandler(Condition condition) {
         super(condition);
@@ -74,6 +77,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler {
         itemRegistry = null;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public boolean isSatisfied(Map<String, Object> inputs) {
         String itemName = (String) module.getConfiguration().get(ITEM_NAME);
@@ -92,44 +96,118 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler {
             Item item = itemRegistry.getItem(itemName);
             State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);
             State itemState = item.getState();
-            DecimalType decimalState = itemState.as(DecimalType.class);
             logger.debug("ItemStateCondition '{}'checking if {} (State={}) {} {}", module.getId(), itemName, itemState,
                     operator, compareState);
             switch (operator) {
                 case "=":
-                    logger.debug("ConditionSatisfied --> {}", itemState.equals(compareState));
                     return itemState.equals(compareState);
                 case "!=":
                     return !itemState.equals(compareState);
                 case "<":
-                    if (null != decimalState && compareState instanceof DecimalType) {
-                        return decimalState.compareTo((DecimalType) compareState) < 0;
+                    if (itemState instanceof QuantityType) {
+                        QuantityType qtState = (QuantityType) itemState;
+                        if (compareState instanceof DecimalType) {
+                            // allow compareState without unit -> implicitly assume its the same as the one from the
+                            // state, but warn the user
+                            logger.warn(
+                                    "Received a QuantityType state '{}' with unit, but the condition is defined as a plain number without unit ({}), please consider adding a unit to the condition.",
+                                    qtState, state);
+                            return qtState.compareTo(new QuantityType<>(((DecimalType) compareState).toBigDecimal(),
+                                    qtState.getUnit())) < 0;
+                        } else if (compareState instanceof QuantityType) {
+                            return qtState.compareTo((QuantityType) compareState) < 0;
+                        } else {
+                            logger.warn(
+                                    "Condition '{}' cannot be compared to the incompatible state '{}' from the item.",
+                                    state, qtState);
+                        }
+                    } else if (itemState instanceof DecimalType && null != compareState) {
+                        DecimalType decimalState = compareState.as(DecimalType.class);
+                        if (null != decimalState) {
+                            return ((DecimalType) itemState).compareTo(decimalState) < 0;
+                        }
                     }
-
                     break;
                 case "<=":
                 case "=<":
-                    if (null != decimalState && compareState instanceof DecimalType) {
-                        return decimalState.compareTo((DecimalType) compareState) <= 0;
+                    if (itemState instanceof QuantityType) {
+                        QuantityType qtState = (QuantityType) itemState;
+                        if (compareState instanceof DecimalType) {
+                            // allow compareState without unit -> implicitly assume its the same as the one from the
+                            // state, but warn the user
+                            logger.warn(
+                                    "Received a QuantityType state '{}' with unit, but the condition is defined as a plain number without unit ({}), please consider adding a unit to the condition.",
+                                    qtState, state);
+                            return qtState.compareTo(new QuantityType<>(((DecimalType) compareState).toBigDecimal(),
+                                    qtState.getUnit())) <= 0;
+                        } else if (compareState instanceof QuantityType) {
+                            return qtState.compareTo((QuantityType) compareState) <= 0;
+                        } else {
+                            logger.warn(
+                                    "Condition '{}' cannot be compared to the incompatible state '{}' from the item.",
+                                    state, qtState);
+                        }
+                    } else if (itemState instanceof DecimalType && null != compareState) {
+                        DecimalType decimalState = compareState.as(DecimalType.class);
+                        if (null != decimalState) {
+                            return ((DecimalType) itemState).compareTo(decimalState) <= 0;
+                        }
                     }
                     break;
                 case ">":
-                    if (null != decimalState && compareState instanceof DecimalType) {
-                        return decimalState.compareTo((DecimalType) compareState) > 0;
+                    if (itemState instanceof QuantityType) {
+                        QuantityType qtState = (QuantityType) itemState;
+                        if (compareState instanceof DecimalType) {
+                            // allow compareState without unit -> implicitly assume its the same as the one from the
+                            // state, but warn the user
+                            logger.warn(
+                                    "Received a QuantityType state '{}' with unit, but the condition is defined as a plain number without unit ({}), please consider adding a unit to the condition.",
+                                    qtState, state);
+                            return qtState.compareTo(new QuantityType<>(((DecimalType) compareState).toBigDecimal(),
+                                    qtState.getUnit())) > 0;
+                        } else if (compareState instanceof QuantityType) {
+                            return qtState.compareTo((QuantityType) compareState) > 0;
+                        } else {
+                            logger.warn(
+                                    "Condition '{}' cannot be compared to the incompatible state '{}' from the item.",
+                                    state, qtState);
+                        }
+                    } else if (itemState instanceof DecimalType && null != compareState) {
+                        DecimalType decimalState = compareState.as(DecimalType.class);
+                        if (null != decimalState) {
+                            return ((DecimalType) itemState).compareTo(decimalState) > 0;
+                        }
                     }
                     break;
                 case ">=":
                 case "=>":
-                    if (null != decimalState && compareState instanceof DecimalType) {
-                        return decimalState.compareTo((DecimalType) compareState) >= 0;
+                    if (itemState instanceof QuantityType) {
+                        QuantityType qtState = (QuantityType) itemState;
+                        if (compareState instanceof DecimalType) {
+                            // allow compareState without unit -> implicitly assume its the same as the one from the
+                            // state, but warn the user
+                            logger.warn(
+                                    "Received a QuantityType state '{}' with unit, but the condition is defined as a plain number without unit ({}), please consider adding a unit to the condition.",
+                                    qtState, state);
+                            return qtState.compareTo(new QuantityType<>(((DecimalType) compareState).toBigDecimal(),
+                                    qtState.getUnit())) >= 0;
+                        } else if (compareState instanceof QuantityType) {
+                            return qtState.compareTo((QuantityType) compareState) >= 0;
+                        } else {
+                            logger.warn(
+                                    "Condition '{}' cannot be compared to the incompatible state '{}' from the item.",
+                                    state, qtState);
+                        }
+                    } else if (itemState instanceof DecimalType && null != compareState) {
+                        DecimalType decimalState = compareState.as(DecimalType.class);
+                        if (null != decimalState) {
+                            return ((DecimalType) itemState).compareTo(decimalState) >= 0;
+                        }
                     }
-                    break;
-                default:
                     break;
             }
         } catch (ItemNotFoundException e) {
             logger.error("Item with Name {} not found in itemRegistry", itemName);
-            return false;
         }
         return false;
     }
