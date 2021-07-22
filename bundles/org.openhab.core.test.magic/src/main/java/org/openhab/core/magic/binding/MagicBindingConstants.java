@@ -30,6 +30,7 @@ public class MagicBindingConstants {
 
     // generic thing types
     public static final ThingTypeUID THING_TYPE_EXTENSIBLE_THING = new ThingTypeUID(BINDING_ID, "extensible-thing");
+    public static final ThingTypeUID THING_TYPE_BUTTON = new ThingTypeUID(BINDING_ID, "button");
     public static final ThingTypeUID THING_TYPE_ON_OFF_LIGHT = new ThingTypeUID(BINDING_ID, "onoff-light");
     public static final ThingTypeUID THING_TYPE_DIMMABLE_LIGHT = new ThingTypeUID(BINDING_ID, "dimmable-light");
     public static final ThingTypeUID THING_TYPE_COLOR_LIGHT = new ThingTypeUID(BINDING_ID, "color-light");
@@ -54,6 +55,8 @@ public class MagicBindingConstants {
     public static final ThingTypeUID THING_TYPE_BRIDGED_THING = new ThingTypeUID(BINDING_ID, "bridgedThing");
 
     // List all channels
+    public static final String CHANNEL_RAWBUTTON = "rawbutton";
+    public static final String CHANNEL_BUTTON = "button";
     public static final String CHANNEL_SWITCH = "switch";
     public static final String CHANNEL_BRIGHTNESS = "brightness";
     public static final String CHANNEL_COLOR = "color";
@@ -61,6 +64,7 @@ public class MagicBindingConstants {
     public static final String CHANNEL_LOCATION = "location";
     public static final String CHANNEL_TEMPERATURE = "temperature";
     public static final String CHANNEL_SET_TEMPERATURE = "set-temperature";
+    public static final String CHANNEL_BATTERY_LEVEL = "battery-level";
     public static final String CHANNEL_SYSTEM_COMMAND = "systemcommand";
     public static final String CHANNEL_SIGNAL_STRENGTH = "signal-strength";
 

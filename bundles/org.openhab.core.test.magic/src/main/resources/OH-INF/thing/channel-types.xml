@@ -101,13 +101,15 @@
 	<channel-type id="temperature">
 		<item-type>Number:Temperature</item-type>
 		<label>Current Temperature</label>
+		<category>temperature</category>
 		<state readOnly="true" pattern="%.1f %unit%"/>
 	</channel-type>
 
 	<channel-type id="set-temperature">
 		<item-type>Number:Temperature</item-type>
-		<label>Set Point</label>
-		<state readOnly="false" pattern="%.1f %unit%" min="12" max="38" step="0.5"/>
+		<label>Set Point Temperature</label>
+		<category>heating</category>
+		<state pattern="%.1f %unit%" min="12" max="38" step="0.5"/>
 		<autoUpdatePolicy>recommend</autoUpdatePolicy>
 	</channel-type>
 

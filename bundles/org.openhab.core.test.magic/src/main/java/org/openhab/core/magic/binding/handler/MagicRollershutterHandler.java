@@ -20,15 +20,15 @@ import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.types.Command;
 
 /**
- * The {@link MagicRolllershutterHandler} is responsible for handling commands, which are
+ * The {@link MagicRollershutterHandler} is responsible for handling commands, which are
  * sent to one of the channels.
  *
  * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
-public class MagicRolllershutterHandler extends BaseThingHandler {
+public class MagicRollershutterHandler extends BaseThingHandler {
 
-    public MagicRolllershutterHandler(Thing thing) {
+    public MagicRollershutterHandler(Thing thing) {
         super(thing);
     }
 
