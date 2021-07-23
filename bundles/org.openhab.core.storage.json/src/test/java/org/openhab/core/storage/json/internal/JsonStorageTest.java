@@ -12,6 +12,7 @@
  */
 package org.openhab.core.storage.json.internal;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
@@ -26,10 +27,15 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.test.java.JavaTest;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
 /**
  * This test makes sure that the JsonStorage loads all stored numbers as BigDecimal
  *
  * @author Stefan Triller - Initial contribution
+ * @author Samie Salonen - test for ensuring ordering of keys in json
  */
 public class JsonStorageTest extends JavaTest {
 
@@ -127,6 +133,48 @@ public class JsonStorageTest extends JavaTest {
         String storageString2 = Files.readString(tmpFile.toPath());
 
         assertEquals(storageString1, storageString2);
+    }
+
+    @SuppressWarnings("null")
+    @Test
+    public void testOrdering() throws IOException {
+        objectStorage.put("DummyObject", new DummyObject());
+        {
+            objectStorage.put("a", new DummyObject());
+            objectStorage.put("b", new DummyObject());
+            persistAndReadAgain();
+        }
+        String storageStringAB = Files.readString(tmpFile.toPath());
+
+        {
+            objectStorage.remove("a");
+            objectStorage.remove("b");
+            objectStorage.put("b", new DummyObject());
+            objectStorage.put("a", new DummyObject());
+            persistAndReadAgain();
+        }
+        String storageStringBA = Files.readString(tmpFile.toPath());
+        assertEquals(storageStringAB, storageStringBA);
+
+        {
+            objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0);
+            objectStorage.flush();
+        }
+        String storageStringReserialized = Files.readString(tmpFile.toPath());
+        assertEquals(storageStringAB, storageStringReserialized);
+        Gson gson = new GsonBuilder().create();
+
+        // Parse json. Gson preserves json object key ordering when we parse only JsonObject
+        JsonObject orderedMap = gson.fromJson(storageStringAB, JsonObject.class);
+        // Assert ordering of top level keys (uppercase first in alphabetical order, then lowercase items in
+        // alphabetical order)
+        assertArrayEquals(new String[] { "DummyObject", "a", "b" }, orderedMap.keySet().toArray());
+        // Ordering is ensured also for sub-keys of Configuration object
+        assertArrayEquals(
+                new String[] { "multiInt", "testBigDecimal", "testBoolean", "testDouble", "testFloat", "testInt",
+                        "testLong", "testShort", "testString" },
+                orderedMap.getAsJsonObject("DummyObject").getAsJsonObject("value").getAsJsonObject("configuration")
+                        .getAsJsonObject("properties").keySet().toArray());
     }
 
     private static class DummyObject {
