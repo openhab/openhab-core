@@ -61,5 +61,4 @@ public class OrderingSetSerializer implements JsonSerializer<Set<@Nullable Objec
         possiblySortedStream.map(context::serialize).forEachOrdered(ordered::add);
         return ordered;
     }
-
 }
