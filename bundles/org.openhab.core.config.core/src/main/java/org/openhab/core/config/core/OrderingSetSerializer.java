@@ -14,8 +14,10 @@ package org.openhab.core.config.core;
 
 import java.lang.reflect.Type;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -28,12 +30,36 @@ import com.google.gson.JsonSerializer;
  * @author Sami Salonen - Initial contribution
  */
 @NonNullByDefault
-public class OrderingSetSerializer implements JsonSerializer<Set<Object>> {
+public class OrderingSetSerializer implements JsonSerializer<Set<@Nullable Object>> {
+
+    public static boolean allSameClassAndComparable(Set<@Nullable Object> src) {
+        Class<?> expectedClass = null;
+        for (Object object : src) {
+            if (!(object instanceof Comparable<?>)) {
+                // not comparable or simply null
+                return false;
+            } else if (expectedClass == null) {
+                // first item
+                expectedClass = object.getClass();
+            } else if (!object.getClass().equals(expectedClass)) {
+                // various classes in the Set, let's not try to sort
+                return false;
+            }
+        }
+        return true;
+    }
 
     @Override
-    public JsonElement serialize(Set<Object> src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(Set<@Nullable Object> src, Type typeOfSrc, JsonSerializationContext context) {
         JsonArray ordered = new JsonArray();
-        src.stream().map(context::serialize).sorted().forEachOrdered(ordered::add);
+        final Stream<@Nullable Object> possiblySortedStream;
+        if (allSameClassAndComparable(src)) {
+            possiblySortedStream = src.stream().sorted();
+        } else {
+            possiblySortedStream = src.stream();
+        }
+        possiblySortedStream.map(context::serialize).forEachOrdered(ordered::add);
         return ordered;
     }
+
 }

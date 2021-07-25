@@ -94,15 +94,14 @@ public class JsonStorage<T> implements Storage<T> {
         this.maxDeferredPeriod = maxDeferredPeriod;
 
         this.internalMapper = new GsonBuilder() //
-                .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer()) //
-                .registerTypeAdapter(Set.class, new OrderingSetSerializer()) //
-                .registerTypeHierarchyAdapter(Configuration.class, new OrderingConfigurationSerializer()) //
+                .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//
+                .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer())//
                 .registerTypeHierarchyAdapter(Map.class, new StorageEntryMapDeserializer()) //
                 .setPrettyPrinting() //
                 .create();
         this.entityMapper = new GsonBuilder() //
-                .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer()) //
-                .registerTypeAdapter(Set.class, new OrderingSetSerializer()) //
+                .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//
+                .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer())//
                 .registerTypeAdapter(Configuration.class, new ConfigurationDeserializer()) //
                 .setPrettyPrinting() //
                 .create();
