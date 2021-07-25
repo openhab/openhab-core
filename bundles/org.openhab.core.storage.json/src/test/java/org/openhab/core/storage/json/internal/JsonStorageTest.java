@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -142,15 +141,6 @@ public class JsonStorageTest extends JavaTest {
         String storageString2 = Files.readString(tmpFile.toPath());
 
         assertEquals(storageString1, storageString2);
-    }
-
-    @Test
-    public void typeTests() {
-        TypeToken tt = TypeToken.getParameterized(TypeToken.get(Set.class).getType(),
-                TypeToken.get(Comparable.class).getType());
-        Type t = tt.getType();
-        // TypeToken<Class<? extends Comparable<?>>>;
-        System.err.print("");
     }
 
     @SuppressWarnings({ "null", "unchecked" })
