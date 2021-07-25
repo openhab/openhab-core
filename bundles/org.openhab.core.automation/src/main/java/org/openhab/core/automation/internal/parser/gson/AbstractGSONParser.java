@@ -49,8 +49,8 @@ public abstract class AbstractGSONParser<T> implements Parser<T> {
             .registerTypeAdapter(CompositeTriggerType.class, new TriggerInstanceCreator()) //
             .registerTypeAdapter(Configuration.class, new ConfigurationDeserializer()) //
             .registerTypeAdapter(Configuration.class, new ConfigurationSerializer()) //
-            .registerTypeAdapter(Map.class, new OrderingMapSerializer()) //
-            .registerTypeAdapter(Set.class, new OrderingSetSerializer()) //
+            .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer()) //
+            .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer()) //
             .create();
 
     @Override
