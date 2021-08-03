@@ -177,6 +177,7 @@ public class ScriptedAutomationManager {
             actions.add(scriptedAction);
         }
 
+        builder.withConfiguration(element.getConfiguration());
         builder.withActions(actions);
 
         Rule rule = builder.build();
@@ -184,9 +185,9 @@ public class ScriptedAutomationManager {
         return rule;
     }
 
-    public void addConditionType(ConditionType condititonType) {
-        modules.add(condititonType.getUID());
-        scriptedCustomModuleTypeProvider.addModuleType(condititonType);
+    public void addConditionType(ConditionType conditionType) {
+        modules.add(conditionType.getUID());
+        scriptedCustomModuleTypeProvider.addModuleType(conditionType);
     }
 
     public void addConditionHandler(String uid, ScriptedHandler conditionHandler) {
