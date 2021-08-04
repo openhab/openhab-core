@@ -15,6 +15,7 @@ package org.openhab.core.automation.module.script.internal.defaultscope;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.openhab.core.automation.module.script.defaultscope.ScriptThingActions;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingUID;
@@ -29,12 +30,12 @@ import org.openhab.core.thing.binding.ThingHandler;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-public class ScriptThingActions {
+public class ScriptThingActionsImpl implements ScriptThingActions {
 
     private static final Map<String, ThingActions> THING_ACTIONS_MAP = new HashMap<>();
     private ThingRegistry thingRegistry;
 
-    ScriptThingActions(ThingRegistry thingRegistry) {
+    ScriptThingActionsImpl(ThingRegistry thingRegistry) {
         this.thingRegistry = thingRegistry;
     }
 
@@ -42,14 +43,7 @@ public class ScriptThingActions {
         this.thingRegistry = null;
     }
 
-    /**
-     * Gets an actions instance of a certain scope for a given thing UID
-     *
-     * @param scope the action scope
-     * @param thingUid the UID of the thing
-     *
-     * @return actions the actions instance or null, if not available
-     */
+    @Override
     public ThingActions get(String scope, String thingUid) {
         ThingUID uid = new ThingUID(thingUid);
         Thing thing = thingRegistry.get(uid);
