@@ -18,7 +18,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
-import org.openhab.core.automation.module.script.ScriptEngineFactory;
+import org.openhab.core.automation.module.script.ScriptExtensionManagerWrapper;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
 
 /**
@@ -26,12 +26,12 @@ import org.openhab.core.automation.module.script.ScriptExtensionProvider;
  * @author Simon Merschjohann - Initial contribution
  */
 @NonNullByDefault
-public class ScriptExtensionManagerWrapper {
+public class ScriptExtensionManagerWrapperImpl implements ScriptExtensionManagerWrapper {
 
     private final ScriptEngineContainer container;
     private final ScriptExtensionManager manager;
 
-    public ScriptExtensionManagerWrapper(ScriptExtensionManager manager, ScriptEngineContainer container) {
+    public ScriptExtensionManagerWrapperImpl(ScriptExtensionManager manager, ScriptEngineContainer container) {
         this.manager = manager;
         this.container = container;
     }
@@ -44,38 +44,32 @@ public class ScriptExtensionManagerWrapper {
         manager.removeExtension(provider);
     }
 
+    @Override
     public List<String> getTypes() {
         return manager.getTypes();
     }
 
+    @Override
+    public String getScriptIdentifier() {
+        return container.getIdentifier();
+    }
+
+    @Override
     public List<String> getPresets() {
         return manager.getPresets();
     }
 
+    @Override
     public @Nullable Object get(String type) {
         return manager.get(type, container.getIdentifier());
     }
 
+    @Override
     public List<String> getDefaultPresets() {
         return manager.getDefaultPresets();
     }
 
-    /**
-     * Imports a collection of named host objects/classes into a script engine instance. Sets of objects are provided
-     * under their object name, and categorized by preset name. This method will import all named objects for a specific
-     * preset name.
-     *
-     * @implNote This call both returns the imported objects, and requests that the {@link ScriptEngineFactory} import
-     *           them. The mechanism of how they are imported by the ScriptEngineFactory, or whether they are imported
-     *           at all (aside from eing returned by this call) is dependent of the implementation of the
-     *           ScriptEngineFactory.
-     *
-     * @apiNote Objects may appear in multiple named presets.
-     * @see ScriptExtensionManager
-     *
-     * @param preset the name of the preset to import
-     * @return a map of host object names to objects
-     */
+    @Override
     public Map<String, Object> importPreset(String preset) {
         return manager.importPreset(preset, container.getFactory(), container.getScriptEngine(),
                 container.getIdentifier());
