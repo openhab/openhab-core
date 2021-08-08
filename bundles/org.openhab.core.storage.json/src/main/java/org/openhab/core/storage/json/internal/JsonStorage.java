@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +30,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.ConfigurationDeserializer;
+import org.openhab.core.config.core.OrderingMapSerializer;
+import org.openhab.core.config.core.OrderingSetSerializer;
 import org.openhab.core.storage.Storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +54,8 @@ import com.google.gson.JsonSyntaxException;
  * @author Stefan Triller - Removed dependency to internal GSon packages
  * @author Simon Kaufmann - Distinguish between inner and outer
  *         de-/serialization, keep json structures in map
+ * @author Sami Salonen - ordered inner and outer serialization of Maps,
+ *         Sets and properties of Configuration
  */
 @NonNullByDefault
 public class JsonStorage<T> implements Storage<T> {
@@ -88,11 +93,18 @@ public class JsonStorage<T> implements Storage<T> {
         this.writeDelay = writeDelay;
         this.maxDeferredPeriod = maxDeferredPeriod;
 
-        this.internalMapper = new GsonBuilder()
-                .registerTypeHierarchyAdapter(Map.class, new StorageEntryMapDeserializer()).setPrettyPrinting()
+        this.internalMapper = new GsonBuilder() //
+                .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//
+                .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer())//
+                .registerTypeHierarchyAdapter(Map.class, new StorageEntryMapDeserializer()) //
+                .setPrettyPrinting() //
                 .create();
-        this.entityMapper = new GsonBuilder().registerTypeAdapter(Configuration.class, new ConfigurationDeserializer())
-                .setPrettyPrinting().create();
+        this.entityMapper = new GsonBuilder() //
+                .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//
+                .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer())//
+                .registerTypeAdapter(Configuration.class, new ConfigurationDeserializer()) //
+                .setPrettyPrinting() //
+                .create();
 
         commitTimer = new Timer();
 

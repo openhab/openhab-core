@@ -28,6 +28,7 @@ import com.google.gson.JsonSerializer;
  *
  * @author Yordan Mihaylov - Initial contribution
  * @author Ana Dimova - provide serialization of multiple configuration values.
+ * @author Sami Salonen - property names are sorted for serialization for minimal diffs
  */
 public class ConfigurationSerializer implements JsonSerializer<Configuration> {
 
@@ -35,7 +36,7 @@ public class ConfigurationSerializer implements JsonSerializer<Configuration> {
     @Override
     public JsonElement serialize(Configuration src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject result = new JsonObject();
-        for (String propName : src.keySet()) {
+        src.keySet().stream().sorted().forEachOrdered((String propName) -> {
             Object value = src.get(propName);
             if (value instanceof List) {
                 JsonArray array = new JsonArray();
@@ -46,7 +47,7 @@ public class ConfigurationSerializer implements JsonSerializer<Configuration> {
             } else {
                 result.add(propName, serializePrimitive(value));
             }
-        }
+        });
         return result;
     }
 

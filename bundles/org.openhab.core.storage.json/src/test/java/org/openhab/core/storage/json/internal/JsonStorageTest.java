@@ -12,24 +12,38 @@
  */
 package org.openhab.core.storage.json.internal;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.test.java.JavaTest;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
 /**
  * This test makes sure that the JsonStorage loads all stored numbers as BigDecimal
  *
  * @author Stefan Triller - Initial contribution
+ * @author Samie Salonen - test for ensuring ordering of keys in json
  */
 public class JsonStorageTest extends JavaTest {
 
@@ -129,8 +143,82 @@ public class JsonStorageTest extends JavaTest {
         assertEquals(storageString1, storageString2);
     }
 
+    @SuppressWarnings({ "null", "unchecked" })
+    @Test
+    public void testOrdering() throws IOException {
+        objectStorage.put("DummyObject", new DummyObject());
+        {
+            objectStorage.put("a", new DummyObject());
+            objectStorage.put("b", new DummyObject());
+            persistAndReadAgain();
+        }
+        String storageStringAB = Files.readString(tmpFile.toPath());
+
+        {
+            objectStorage.remove("a");
+            objectStorage.remove("b");
+            objectStorage.put("b", new DummyObject());
+            objectStorage.put("a", new DummyObject());
+            persistAndReadAgain();
+        }
+        String storageStringBA = Files.readString(tmpFile.toPath());
+        assertEquals(storageStringAB, storageStringBA);
+
+        {
+            objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0);
+            objectStorage.flush();
+        }
+        String storageStringReserialized = Files.readString(tmpFile.toPath());
+        assertEquals(storageStringAB, storageStringReserialized);
+        Gson gson = new GsonBuilder().create();
+
+        // Parse json. Gson preserves json object key ordering when we parse only JsonObject
+        JsonObject orderedMap = gson.fromJson(storageStringAB, JsonObject.class);
+        // Assert ordering of top level keys (uppercase first in alphabetical order, then lowercase items in
+        // alphabetical order)
+        assertArrayEquals(new String[] { "DummyObject", "a", "b" }, orderedMap.keySet().toArray());
+        // Ordering is ensured also for sub-keys of Configuration object
+        assertArrayEquals(
+                new String[] { "multiInt", "testBigDecimal", "testBoolean", "testDouble", "testFloat", "testInt",
+                        "testLong", "testShort", "testString" },
+                orderedMap.getAsJsonObject("DummyObject").getAsJsonObject("value").getAsJsonObject("configuration")
+                        .getAsJsonObject("properties").keySet().toArray());
+        // Set having non-comparable items remains unordered
+        assertArrayEquals(
+                new String[] { "http://www.example.com/key2", "http://www.example.com/key1",
+                        "http://www.example.com/key3" },
+                gson.fromJson(orderedMap.getAsJsonObject("DummyObject").getAsJsonObject("value")
+                        .getAsJsonArray("innerSetWithNonComparableElements"), LinkedList.class).toArray());
+        // ...while Set having all Comparable keys is ordered:
+        assertArrayEquals(new Object[] { -5, 0, 3, 50 },
+                ((LinkedList<Integer>) gson.fromJson(
+                        orderedMap.getAsJsonObject("DummyObject").getAsJsonObject("value")
+                                .getAsJsonArray("innerSetWithComparableElements"),
+                        TypeToken.getParameterized(LinkedList.class, Integer.class).getType())).toArray());
+
+        // Map having non-comparable items remains unordered
+        assertArrayEquals(
+                new String[] { "http://www.example.com/key2", "http://www.example.com/key1",
+                        "http://www.example.com/key3" },
+                gson.fromJson(orderedMap.getAsJsonObject("DummyObject").getAsJsonObject("value")
+                        .getAsJsonObject("innerMapWithNonComparableKeys"), LinkedHashMap.class).keySet().toArray());
+        // ...while Map with Comparable keys is ordered
+        assertArrayEquals(new Integer[] { -5, 0, 3, 50 },
+                ((LinkedHashMap<Integer, Object>) gson.fromJson(
+                        orderedMap.getAsJsonObject("DummyObject").getAsJsonObject("value")
+                                .getAsJsonObject("innerMapWithComparableKeys"),
+                        TypeToken.getParameterized(LinkedHashMap.class, Integer.class, Object.class).getType()))
+                                .keySet().toArray());
+    }
+
     private static class DummyObject {
 
+        // For the test here we use Linked variants of Map and Set which preserve the insertion order
+        // In tests we verify that collections having Comparable items (keys) are ordered on serialization
+        private final Map<URL, Object> innerMapWithNonComparableKeys = new LinkedHashMap<>();
+        private final Map<Integer, Object> innerMapWithComparableKeys = new LinkedHashMap<>();
+        private final Set<URL> innerSetWithNonComparableElements = new LinkedHashSet<>();
+        private final Set<Integer> innerSetWithComparableElements = new LinkedHashSet<>();
         private final Configuration configuration = new Configuration();
         public List<InnerObject> channels = new ArrayList<>();
 
@@ -148,6 +236,27 @@ public class JsonStorageTest extends JavaTest {
             InnerObject inner = new InnerObject();
             inner.configuration.put("testChildLong", Long.valueOf("12"));
             channels.add(inner);
+            innerMapWithComparableKeys.put(3, 1);
+            innerMapWithComparableKeys.put(0, 2);
+            innerMapWithComparableKeys.put(50, 3);
+            innerMapWithComparableKeys.put(-5, 4);
+
+            innerSetWithComparableElements.add(3);
+            innerSetWithComparableElements.add(0);
+            innerSetWithComparableElements.add(50);
+            innerSetWithComparableElements.add(-5);
+
+            try {
+                innerMapWithNonComparableKeys.put(new URL("http://www.example.com/key2"), 1);
+                innerMapWithNonComparableKeys.put(new URL("http://www.example.com/key1"), 2);
+                innerMapWithNonComparableKeys.put(new URL("http://www.example.com/key3"), 3);
+
+                innerSetWithNonComparableElements.add(new URL("http://www.example.com/key2"));
+                innerSetWithNonComparableElements.add(new URL("http://www.example.com/key1"));
+                innerSetWithNonComparableElements.add(new URL("http://www.example.com/key3"));
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

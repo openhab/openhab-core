@@ -13,6 +13,7 @@
 package org.openhab.core.automation.internal.parser.gson;
 
 import java.io.OutputStreamWriter;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -23,6 +24,8 @@ import org.openhab.core.automation.type.CompositeTriggerType;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.ConfigurationDeserializer;
 import org.openhab.core.config.core.ConfigurationSerializer;
+import org.openhab.core.config.core.OrderingMapSerializer;
+import org.openhab.core.config.core.OrderingSetSerializer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -32,6 +35,7 @@ import com.google.gson.GsonBuilder;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Ana Dimova - add Instance Creators
+ * @author Sami Salonen - add sorting for maps and sets for minimal diffs
  *
  * @param <T> the type of the entities to parse
  */
@@ -45,6 +49,8 @@ public abstract class AbstractGSONParser<T> implements Parser<T> {
             .registerTypeAdapter(CompositeTriggerType.class, new TriggerInstanceCreator()) //
             .registerTypeAdapter(Configuration.class, new ConfigurationDeserializer()) //
             .registerTypeAdapter(Configuration.class, new ConfigurationSerializer()) //
+            .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer()) //
+            .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer()) //
             .create();
 
     @Override
