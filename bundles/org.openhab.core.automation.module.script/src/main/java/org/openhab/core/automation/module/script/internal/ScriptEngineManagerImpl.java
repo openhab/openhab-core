@@ -16,8 +16,10 @@ import static org.openhab.core.automation.module.script.ScriptEngineFactory.*;
 
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.script.Invocable;
 import javax.script.ScriptContext;
@@ -54,6 +56,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     private final Map<String, ScriptEngineFactory> customSupport = new HashMap<>();
     private final Map<String, ScriptEngineFactory> genericSupport = new HashMap<>();
     private final ScriptExtensionManager scriptExtensionManager;
+    private final Set<FactoryChangeListener> listeners = new HashSet<>();
 
     @Activate
     public ScriptEngineManagerImpl(final @Reference ScriptExtensionManager scriptExtensionManager) {
@@ -70,6 +73,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             } else {
                 this.genericSupport.put(scriptType, engineFactory);
             }
+            listeners.forEach(listener -> listener.factoryAdded(scriptType));
         }
         if (logger.isDebugEnabled()) {
             if (!scriptTypes.isEmpty()) {
@@ -99,6 +103,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             } else {
                 this.genericSupport.remove(scriptType, engineFactory);
             }
+            listeners.forEach(listener -> listener.factoryRemoved(scriptType));
         }
         logger.debug("Removed {}", engineFactory.getClass().getSimpleName());
     }
@@ -247,5 +252,15 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         }
 
         scriptContext.setAttribute(name, value, ScriptContext.ENGINE_SCOPE);
+    }
+
+    @Override
+    public void addFactoryChangeListener(FactoryChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeFactoryChangeListener(FactoryChangeListener listener) {
+        listeners.remove(listener);
     }
 }

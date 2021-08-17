@@ -24,10 +24,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -62,8 +62,8 @@ import org.slf4j.LoggerFactory;
  * @author Jonathan Gilbert - added dependency tracking & per-script start levels
  */
 @Component(immediate = true)
-public class ScriptFileWatcher extends AbstractWatchService
-        implements ReadyService.ReadyTracker, DependencyTracker.DependencyChangeListener {
+public class ScriptFileWatcher extends AbstractWatchService implements ReadyService.ReadyTracker,
+        DependencyTracker.DependencyChangeListener, ScriptEngineManager.FactoryChangeListener {
 
     private static final String FILE_DIRECTORY = "automation" + File.separator + "jsr223";
     private static final long RECHECK_INTERVAL = 20;
@@ -75,10 +75,10 @@ public class ScriptFileWatcher extends AbstractWatchService
     private final ReadyService readyService;
 
     private @Nullable ScheduledExecutorService scheduler;
-    private Supplier<ScheduledExecutorService> executerFactory;
+    private Supplier<ScheduledExecutorService> executorFactory;
 
-    private final Set<ScriptFileReference> pending = new HashSet<>();
-    private final Set<ScriptFileReference> loaded = new HashSet<>();
+    private final Set<ScriptFileReference> pending = ConcurrentHashMap.newKeySet();
+    private final Set<ScriptFileReference> loaded = ConcurrentHashMap.newKeySet();
 
     private volatile int currentStartLevel = 0;
 
@@ -89,15 +89,17 @@ public class ScriptFileWatcher extends AbstractWatchService
         this.manager = manager;
         this.dependencyTracker = dependencyTracker;
         this.readyService = readyService;
-        this.executerFactory = () -> Executors
+        this.executorFactory = () -> Executors
                 .newSingleThreadScheduledExecutor(new NamedThreadFactory("scriptwatcher"));
 
+        manager.addFactoryChangeListener(this);
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE));
     }
 
     @Deactivate
     @Override
     public void deactivate() {
+        manager.removeFactoryChangeListener(this);
         readyService.unregisterTracker(this);
 
         ScheduledExecutorService localScheduler = scheduler;
@@ -112,10 +114,10 @@ public class ScriptFileWatcher extends AbstractWatchService
     /**
      * Override the executor service. Can be used for testing.
      *
-     * @param executerFactory supplier of ScheduledExecutorService
+     * @param executorFactory supplier of ScheduledExecutorService
      */
-    void setExecuterFactory(Supplier<ScheduledExecutorService> executerFactory) {
-        this.executerFactory = executerFactory;
+    void setExecutorFactory(Supplier<ScheduledExecutorService> executorFactory) {
+        this.executorFactory = executorFactory;
     }
 
     /**
@@ -261,7 +263,7 @@ public class ScriptFileWatcher extends AbstractWatchService
 
         if (previousLevel < StartLevelService.STARTLEVEL_MODEL) { // not yet started
             if (newLevel >= StartLevelService.STARTLEVEL_MODEL) { // start
-                ScheduledExecutorService localScheduler = executerFactory.get();
+                ScheduledExecutorService localScheduler = executorFactory.get();
                 scheduler = localScheduler;
                 localScheduler.submit(() -> importResources(new File(pathToWatch)));
                 localScheduler.scheduleWithFixedDelay(() -> checkFiles(currentStartLevel), 0, RECHECK_INTERVAL,
@@ -308,5 +310,17 @@ public class ScriptFileWatcher extends AbstractWatchService
             }
             onStartLevelChanged(newLevel);
         }
+    }
+
+    @Override
+    public void factoryAdded(@Nullable String scriptType) {
+    }
+
+    @Override
+    public void factoryRemoved(@Nullable String scriptType) {
+        if (scriptType == null) {
+            return;
+        }
+        loaded.stream().filter(ref -> scriptType.equals(ref.getScriptType().get())).forEach(this::importFileWhenReady);
     }
 }

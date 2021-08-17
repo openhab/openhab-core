@@ -69,4 +69,36 @@ public interface ScriptEngineManager {
      * @return true, if supported, else false
      */
     boolean isSupported(String scriptType);
+
+    /**
+     * Add a listener that is notified when a ScriptEngineFactory is added or removed
+     *
+     * @param listener an object that implements {@link FactoryChangeListener}
+     */
+    void addFactoryChangeListener(FactoryChangeListener listener);
+
+    /**
+     * Remove a listener that is notified when a ScriptEngineFactory is added or removed
+     *
+     * @param listener an object that implements {@link FactoryChangeListener}
+     */
+    void removeFactoryChangeListener(FactoryChangeListener listener);
+
+    interface FactoryChangeListener {
+
+        /**
+         * Called by the {@link ScriptEngineManager} when a ScriptEngineFactory is added
+         *
+         * @param scriptType the script type supported by the newly added factory
+         */
+        void factoryAdded(String scriptType);
+
+
+        /**
+         * Called by the {@link ScriptEngineManager} when a ScriptEngineFactory is removed
+         *
+         * @param scriptType the script type supported by the removed factory
+         */
+        void factoryRemoved(String scriptType);
+    }
 }
