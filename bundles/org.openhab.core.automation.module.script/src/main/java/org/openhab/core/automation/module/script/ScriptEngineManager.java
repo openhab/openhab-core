@@ -93,7 +93,6 @@ public interface ScriptEngineManager {
          */
         void factoryAdded(String scriptType);
 
-
         /**
          * Called by the {@link ScriptEngineManager} when a ScriptEngineFactory is removed
          *
