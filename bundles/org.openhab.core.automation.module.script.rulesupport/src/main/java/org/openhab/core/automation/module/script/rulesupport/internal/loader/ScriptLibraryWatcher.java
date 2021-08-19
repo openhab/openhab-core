@@ -28,8 +28,7 @@ import org.openhab.core.service.AbstractWatchService;
  */
 abstract class ScriptLibraryWatcher extends AbstractWatchService {
 
-    public static final String LIB_PATH = String.join(File.separator, OpenHAB.getConfigFolder(), "automation", "lib",
-            "javascript");
+    public static final String LIB_PATH = String.join(File.separator, OpenHAB.getConfigFolder(), "automation", "lib");
 
     ScriptLibraryWatcher() {
         super(LIB_PATH);
