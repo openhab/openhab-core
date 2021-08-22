@@ -212,7 +212,7 @@ class ScriptFileWatcherTest {
         ScheduledExecutorService scheduledExecutorService = spy(
                 new DelegatingScheduledExecutorService(Executors.newSingleThreadScheduledExecutor()));
         ArgumentCaptor<Runnable> scheduledTask = ArgumentCaptor.forClass(Runnable.class);
-        scriptFileWatcher.setExecuterFactory(() -> scheduledExecutorService);
+        scriptFileWatcher.setExecutorFactory(() -> scheduledExecutorService);
 
         when(scriptEngineManager.isSupported("js")).thenReturn(false);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
