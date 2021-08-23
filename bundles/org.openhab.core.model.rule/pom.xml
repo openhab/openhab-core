@@ -47,19 +47,16 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.4.0</version>
         <configuration>
-          <includeProjectDependencies>true</includeProjectDependencies>
-          <includePluginDependencies>true</includePluginDependencies>
+          <executable>java</executable>
           <classpathScope>compile</classpathScope>
-          <mainClass>org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher</mainClass>
-          <cleanupDaemonThreads>false</cleanupDaemonThreads>
           <arguments>
+            <argument>-classpath</argument>
+            <classpath/>
+            <argument>org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher</argument>
             <argument>file://${project.basedir}/src/org/openhab/core/model/rule/GenerateRules.mwe2</argument>
             <argument>-p</argument>
             <argument>rootPath=/${project.basedir}/..</argument>
           </arguments>
-          <additionalClasspathElements>
-            <additionalClasspathElement>/${basedir}/../antlr-generator-3.2.0-patch.jar</additionalClasspathElement>
-          </additionalClasspathElements>
         </configuration>
         <dependencies>
           <dependency>
@@ -72,11 +69,18 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.6.4</version>
           </dependency>
+          <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr-runtime</artifactId>
+            <version>3.2</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../antlr-generator-3.2.0-patch.jar</systemPath>
+          </dependency>
         </dependencies>
         <executions>
           <execution>
             <goals>
-              <goal>java</goal>
+              <goal>exec</goal>
             </goals>
             <phase>generate-sources</phase>
           </execution>
