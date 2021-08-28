@@ -35,13 +35,16 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.openhab.core.common.ThreadPoolManager;
 import org.slf4j.Logger;
@@ -65,7 +68,7 @@ public class WatchQueueReader implements Runnable {
     protected WatchService watchService;
 
     private final Map<WatchKey, Path> registeredKeys = new HashMap<>();
-    private final Map<WatchKey, AbstractWatchService> keyToService = new HashMap<>();
+    private final Map<WatchKey, Set<AbstractWatchService>> keyToService = new HashMap<>();
     private final Map<AbstractWatchService, Map<Path, byte[]>> hashes = new HashMap<>();
     private final Map<WatchKey, Map<Path, ScheduledFuture<?>>> futures = new ConcurrentHashMap<>();
 
@@ -159,7 +162,9 @@ public class WatchQueueReader implements Runnable {
         }
         if (registrationKey != null) {
             registeredKeys.put(registrationKey, directory);
-            keyToService.put(registrationKey, service);
+            Set<AbstractWatchService> services = keyToService.computeIfAbsent(registrationKey,
+                    k -> new HashSet<>());
+            services.add(service);
         } else {
             logger.debug("The directory '{}' was not registered in the watch service", directory);
         }
@@ -167,13 +172,15 @@ public class WatchQueueReader implements Runnable {
 
     public synchronized void stopWatchService(AbstractWatchService service) {
         if (watchService != null) {
-            List<WatchKey> keys = new LinkedList<>();
+            List<WatchKey> keysToRemove = new LinkedList<>();
             for (WatchKey key : keyToService.keySet()) {
-                if (keyToService.get(key) == service) {
-                    keys.add(key);
+                Set<AbstractWatchService> services = keyToService.get(key);
+                services.remove(service);
+                if (services.isEmpty()) {
+                    keysToRemove.add(key);
                 }
             }
-            if (keys.size() == keyToService.size()) {
+            if (keysToRemove.size() == keyToService.size()) {
                 try {
                     watchService.close();
                 } catch (IOException e) {
@@ -186,7 +193,7 @@ public class WatchQueueReader implements Runnable {
                 futures.values().forEach(keyFutures -> keyFutures.values().forEach(future -> future.cancel(true)));
                 futures.clear();
             } else {
-                for (WatchKey key : keys) {
+                for (WatchKey key : keysToRemove) {
                     key.cancel();
                     keyToService.remove(key);
                     registeredKeys.remove(key);
@@ -224,25 +231,29 @@ public class WatchQueueReader implements Runnable {
                     Path resolvedPath = resolvePath(key, event);
                     if (resolvedPath != null) {
                         // Process the event only when a relative path to it is resolved
-                        AbstractWatchService service;
+                        Set<AbstractWatchService> services;
                         synchronized (this) {
-                            service = keyToService.get(key);
+                            services = keyToService.get(key);
                         }
-                        if (service != null) {
+                        if (services != null) {
                             File f = resolvedPath.toFile();
                             if (kind == ENTRY_MODIFY && f.isDirectory()) {
                                 logger.trace("Skipping modification event for directory: {}", f);
                             } else {
                                 if (kind == ENTRY_MODIFY) {
-                                    processModificationEvent(key, event, resolvedPath, service);
+                                    processModificationEvent(key, event, resolvedPath, services);
                                 } else {
-                                    service.processWatchEvent(event, kind, resolvedPath);
+                                    services.forEach(s -> s.processWatchEvent(event, kind, resolvedPath));
                                 }
                             }
-                            if (kind == ENTRY_CREATE && f.isDirectory() && service.watchSubDirectories()
-                                    && service.getWatchEventKinds(resolvedPath) != null) {
-                                registerDirectoryInternal(service, service.getWatchEventKinds(resolvedPath),
-                                        resolvedPath);
+                            if (kind == ENTRY_CREATE && f.isDirectory()) {
+                                for (AbstractWatchService service : services) {
+                                    if (service.watchSubDirectories()
+                                            && service.getWatchEventKinds(resolvedPath) != null) {
+                                        registerDirectoryInternal(service, service.getWatchEventKinds(resolvedPath),
+                                                resolvedPath);
+                                    }
+                                }
                             } else if (kind == ENTRY_DELETE) {
                                 synchronized (this) {
                                     WatchKey toCancel = null;
@@ -257,7 +268,7 @@ public class WatchQueueReader implements Runnable {
                                         keyToService.remove(toCancel);
                                         toCancel.cancel();
                                     }
-                                    forgetChecksum(service, resolvedPath);
+                                    services.forEach(service -> forgetChecksum(service, resolvedPath));
                                     Map<Path, ScheduledFuture<?>> keyFutures = futures.get(key);
                                     if (keyFutures != null) {
                                         ScheduledFuture<?> future = keyFutures.remove(resolvedPath);
@@ -299,10 +310,10 @@ public class WatchQueueReader implements Runnable {
      * @param key
      * @param event
      * @param resolvedPath
-     * @param service
+     * @param services
      */
     private void processModificationEvent(WatchKey key, WatchEvent<?> event, Path resolvedPath,
-            AbstractWatchService service) {
+            Set<AbstractWatchService> services) {
         synchronized (futures) {
             logger.trace("Modification event for {} ", resolvedPath);
             ScheduledFuture<?> previousFuture = removeScheduledJob(key, resolvedPath);
@@ -318,10 +329,12 @@ public class WatchQueueReader implements Runnable {
                 } else {
                     logger.trace("Job couldn't find itself for {}", resolvedPath);
                 }
-                if (checkAndTrackContent(service, resolvedPath)) {
-                    service.processWatchEvent(event, event.kind(), resolvedPath);
-                } else {
-                    logger.trace("File content '{}' has not changed, skipping modification event", resolvedPath);
+                for (AbstractWatchService service : services) {
+                    if (checkAndTrackContent(service, resolvedPath)) {
+                        service.processWatchEvent(event, event.kind(), resolvedPath);
+                    } else {
+                        logger.trace("File content '{}' has not changed, skipping modification event", resolvedPath);
+                    }
                 }
             }, PROCESSING_DELAY, TimeUnit.MILLISECONDS);
             logger.trace("Scheduled processing of {}", resolvedPath);
@@ -333,10 +346,11 @@ public class WatchQueueReader implements Runnable {
         WatchEvent<Path> ev = cast(event);
         // Context for directory entry event is the file name of entry.
         Path contextPath = ev.context();
-        Path baseWatchedDir = null;
+        List<Path> baseWatchedDir = null;
         Path registeredPath = null;
         synchronized (this) {
-            baseWatchedDir = keyToService.get(key).getSourcePath();
+            baseWatchedDir = keyToService.get(key).stream().map(AbstractWatchService::getSourcePath)
+                    .collect(Collectors.toList());
             registeredPath = registeredKeys.get(key);
         }
         if (registeredPath != null) {
