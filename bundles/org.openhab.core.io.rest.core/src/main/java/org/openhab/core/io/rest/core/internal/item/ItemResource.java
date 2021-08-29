@@ -145,8 +145,11 @@ public class ItemResource implements RESTResource {
      */
     private static void respectForwarded(final UriBuilder uriBuilder, final @Context HttpHeaders httpHeaders) {
         Optional.ofNullable(httpHeaders.getHeaderString("X-Forwarded-Host")).ifPresent(host -> {
-            final String[] parts = host.split(":");
-            uriBuilder.host(parts[0]);
+            final int pos1 = host.indexOf("[");
+            final int pos2 = host.indexOf("]");
+            final String hostWithIpv6 = (pos1 >= 0 && pos2 > pos1) ? host.substring(pos1, pos2 + 1) : null;
+            final String[] parts = hostWithIpv6 == null ? host.split(":") : host.substring(pos2 + 1).split(":");
+            uriBuilder.host(hostWithIpv6 != null ? hostWithIpv6 : parts[0]);
             if (parts.length > 1) {
                 uriBuilder.port(Integer.parseInt(parts[1]));
             }
