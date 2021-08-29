@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -121,6 +122,7 @@ public class ItemChannelLinkResource implements RESTResource {
 
     @GET
     @Path("/{itemName}/{channelUID}")
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getItemLink", summary = "Retrieves an individual link.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemChannelLinkDTO.class))),
             @ApiResponse(responseCode = "404", description = "Content does not match the path") })
@@ -143,6 +145,7 @@ public class ItemChannelLinkResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName}/{channelUID}")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(operationId = "linkItemToChannel", summary = "Links an item to a channel.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),

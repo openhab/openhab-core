@@ -540,6 +540,7 @@ public class ThingResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/enable")
+    @Consumes(MediaType.TEXT_PLAIN)
     @Operation(operationId = "enableThing", summary = "Sets the thing enabled status.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedThingDTO.class))),
