@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -148,6 +149,7 @@ public class UIResource implements RESTResource {
     @POST
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "addUIComponentToNamespace", summary = "Add an UI component in the specified namespace.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
@@ -162,6 +164,7 @@ public class UIResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "updateUIComponentInNamespace", summary = "Update a specific UI component in the specified namespace.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
