@@ -36,11 +36,13 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -70,7 +72,7 @@ public class WatchQueueReader implements Runnable {
     private final Map<WatchKey, Path> registeredKeys = new HashMap<>();
     private final Map<WatchKey, Set<AbstractWatchService>> keyToService = new HashMap<>();
     private final Map<AbstractWatchService, Map<Path, byte[]>> hashes = new HashMap<>();
-    private final Map<WatchKey, Map<Path, ScheduledFuture<?>>> futures = new ConcurrentHashMap<>();
+    private final List<Notification> notifications = new CopyOnWriteArrayList<>();
 
     private Thread qr;
 
@@ -162,8 +164,7 @@ public class WatchQueueReader implements Runnable {
         }
         if (registrationKey != null) {
             registeredKeys.put(registrationKey, directory);
-            Set<AbstractWatchService> services = keyToService.computeIfAbsent(registrationKey,
-                    k -> new HashSet<>());
+            Set<AbstractWatchService> services = keyToService.computeIfAbsent(registrationKey, k -> new HashSet<>());
             services.add(service);
         } else {
             logger.debug("The directory '{}' was not registered in the watch service", directory);
@@ -180,6 +181,15 @@ public class WatchQueueReader implements Runnable {
                     keysToRemove.add(key);
                 }
             }
+
+            Iterator<Notification> it = notifications.iterator();
+            while (it.hasNext()) {
+                Notification notification = it.next();
+                if (notification.service.equals(service)) {
+                    notification.future.cancel(true);
+                    it.remove();
+                }
+            }
             if (keysToRemove.size() == keyToService.size()) {
                 try {
                     watchService.close();
@@ -190,18 +200,14 @@ public class WatchQueueReader implements Runnable {
                 keyToService.clear();
                 registeredKeys.clear();
                 hashes.clear();
-                futures.values().forEach(keyFutures -> keyFutures.values().forEach(future -> future.cancel(true)));
-                futures.clear();
+                notifications.forEach(notification -> notification.future.cancel(true));
+                notifications.clear();
             } else {
                 for (WatchKey key : keysToRemove) {
                     key.cancel();
                     keyToService.remove(key);
                     registeredKeys.remove(key);
                     hashes.remove(service);
-                    Map<Path, ScheduledFuture<?>> keyFutures = futures.remove(key);
-                    if (keyFutures != null) {
-                        keyFutures.values().forEach(future -> future.cancel(true));
-                    }
                 }
             }
         }
@@ -269,11 +275,12 @@ public class WatchQueueReader implements Runnable {
                                         toCancel.cancel();
                                     }
                                     services.forEach(service -> forgetChecksum(service, resolvedPath));
-                                    Map<Path, ScheduledFuture<?>> keyFutures = futures.get(key);
-                                    if (keyFutures != null) {
-                                        ScheduledFuture<?> future = keyFutures.remove(resolvedPath);
-                                        if (future != null) {
-                                            future.cancel(true);
+                                    Iterator<Notification> it = notifications.iterator();
+                                    while (it.hasNext()) {
+                                        Notification notification = it.next();
+                                        if (notification.path.equals(resolvedPath)) {
+                                            notification.future.cancel(true);
+                                            it.remove();
                                         }
                                     }
                                 }
@@ -292,7 +299,7 @@ public class WatchQueueReader implements Runnable {
     }
 
     /**
-     * Schedules forwarding of the event to the listeners (if appliccable).
+     * Schedules forwarding of the event to the listeners (if applicable).
      * <p>
      * By delaying the forwarding, duplicate modification events and those where the actual file-content is not
      * consistent or empty in between will get skipped and the file system gets a chance to "settle" before the
@@ -306,7 +313,6 @@ public class WatchQueueReader implements Runnable {
      * "https://stackoverflow.com/questions/16777869/java-7-watchservice-ignoring-multiple-occurrences-of-the-same-event">this
      * discussion</a> on Stack Overflow.
      *
-     *
      * @param key
      * @param event
      * @param resolvedPath
@@ -314,32 +320,39 @@ public class WatchQueueReader implements Runnable {
      */
     private void processModificationEvent(WatchKey key, WatchEvent<?> event, Path resolvedPath,
             Set<AbstractWatchService> services) {
-        synchronized (futures) {
-            logger.trace("Modification event for {} ", resolvedPath);
-            ScheduledFuture<?> previousFuture = removeScheduledJob(key, resolvedPath);
-            if (previousFuture != null) {
-                previousFuture.cancel(true);
-                logger.trace("Cancelled previous for {} ", resolvedPath);
-            }
-            ScheduledFuture<?> future = scheduler.schedule(() -> {
-                logger.trace("Executing job for {}", resolvedPath);
-                ScheduledFuture<?> res = removeScheduledJob(key, resolvedPath);
-                if (res != null) {
-                    logger.trace("Job removed itself for {}", resolvedPath);
-                } else {
-                    logger.trace("Job couldn't find itself for {}", resolvedPath);
-                }
-                for (AbstractWatchService service : services) {
+        synchronized (notifications) {
+            for (AbstractWatchService service : services) {
+                logger.trace("Modification event for {} ", resolvedPath);
+                removeScheduledNotifications(key, service, resolvedPath);
+                ScheduledFuture<?> future = scheduler.schedule(() -> {
+                    logger.trace("Executing job for {}", resolvedPath);
+                    if (removeScheduledNotifications(key, service, resolvedPath)) {
+                        logger.trace("Job removed itself for {}", resolvedPath);
+                    } else {
+                        logger.trace("Job couldn't find itself for {}", resolvedPath);
+                    }
                     if (checkAndTrackContent(service, resolvedPath)) {
                         service.processWatchEvent(event, event.kind(), resolvedPath);
                     } else {
                         logger.trace("File content '{}' has not changed, skipping modification event", resolvedPath);
                     }
-                }
-            }, PROCESSING_DELAY, TimeUnit.MILLISECONDS);
-            logger.trace("Scheduled processing of {}", resolvedPath);
-            rememberScheduledJob(key, resolvedPath, future);
+
+                }, PROCESSING_DELAY, TimeUnit.MILLISECONDS);
+                logger.trace("Scheduled processing of {}", resolvedPath);
+                notifications.add(new Notification(key, service, resolvedPath, future));
+            }
         }
+    }
+
+    private boolean removeScheduledNotifications(WatchKey key, AbstractWatchService service, Path path) {
+        Set<Notification> notifications = this.notifications.stream().filter(f -> f.matches(key, service, path))
+                .collect(Collectors.toSet());
+        if (notifications.size() > 1) {
+            logger.warn("Found more than one notification for {} / {} / {}. This is a bug.", key, service, path);
+        }
+        notifications.forEach(notification -> notification.future.cancel(true));
+        this.notifications.removeAll(notifications);
+        return !notifications.isEmpty();
     }
 
     private Path resolvePath(WatchKey key, WatchEvent<?> event) {
@@ -400,11 +413,7 @@ public class WatchQueueReader implements Runnable {
         if (newHash == null) {
             return true;
         }
-        Map<Path, byte[]> keyHashes = hashes.get(service);
-        if (keyHashes == null) {
-            keyHashes = new HashMap<>();
-            hashes.put(service, keyHashes);
-        }
+        Map<Path, byte[]> keyHashes = hashes.computeIfAbsent(service, s -> new HashMap<>());
         byte[] oldHash = keyHashes.put(resolvedPath, newHash);
         return oldHash == null || !Arrays.equals(oldHash, newHash);
     }
@@ -416,22 +425,40 @@ public class WatchQueueReader implements Runnable {
         }
     }
 
-    private Map<Path, ScheduledFuture<?>> getKeyFutures(WatchKey key) {
-        Map<Path, ScheduledFuture<?>> keyFutures = futures.get(key);
-        if (keyFutures == null) {
-            keyFutures = new ConcurrentHashMap<>();
-            futures.put(key, keyFutures);
+    /**
+     * The {@link Notification} stores the information of a single notification
+     */
+    private static class Notification {
+        public final WatchKey key;
+        public final AbstractWatchService service;
+        public final Path path;
+        public final ScheduledFuture<?> future;
+
+        private Notification(WatchKey key, AbstractWatchService service, Path path, ScheduledFuture<?> future) {
+            this.key = key;
+            this.service = service;
+            this.path = path;
+            this.future = future;
         }
-        return keyFutures;
-    }
 
-    private ScheduledFuture<?> removeScheduledJob(WatchKey key, Path resolvedPath) {
-        Map<Path, ScheduledFuture<?>> keyFutures = getKeyFutures(key);
-        return keyFutures.remove(resolvedPath);
-    }
+        public boolean matches(WatchKey key, AbstractWatchService service, Path path) {
+            return this.key.equals(key) && this.service.equals(service) && this.path.equals(path);
+        }
 
-    private void rememberScheduledJob(WatchKey key, Path resolvedPath, ScheduledFuture<?> future) {
-        Map<Path, ScheduledFuture<?>> keyFutures = getKeyFutures(key);
-        keyFutures.put(resolvedPath, future);
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            Notification notification = (Notification) o;
+            return key.equals(notification.key) && service.equals(notification.service)
+                    && path.equals(notification.path) && future.equals(notification.future);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(key, service, path, future);
+        }
     }
 }
