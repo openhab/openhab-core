@@ -181,13 +181,10 @@ public class WatchQueueReader implements Runnable {
                     keysToRemove.add(key);
                 }
             }
-
-            Iterator<Notification> it = notifications.iterator();
-            while (it.hasNext()) {
-                Notification notification = it.next();
+            for (Notification notification : notifications) {
                 if (notification.service.equals(service)) {
                     notification.future.cancel(true);
-                    it.remove();
+                    notifications.remove(notification);
                 }
             }
             if (keysToRemove.size() == keyToService.size()) {
