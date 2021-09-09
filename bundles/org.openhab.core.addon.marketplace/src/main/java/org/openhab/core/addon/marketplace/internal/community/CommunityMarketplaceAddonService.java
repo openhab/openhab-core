@@ -255,7 +255,9 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
     @Override
     public String getAddonId(URI addonURI) {
-        // TODO Auto-generated method stub
+        if (addonURI.toString().startsWith(COMMUNITY_TOPIC_URL)) {
+            return addonURI.toString().substring(0, addonURI.toString().indexOf("/", COMMUNITY_BASE_URL.length()));
+        }
         return "";
     }
 

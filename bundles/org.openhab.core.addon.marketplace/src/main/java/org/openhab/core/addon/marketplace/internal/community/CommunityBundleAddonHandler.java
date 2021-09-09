@@ -54,7 +54,7 @@ public class CommunityBundleAddonHandler implements MarketplaceAddonHandler {
     // add-on types supported by this handler
     private static final List<String> SUPPORTED_EXT_TYPES = Arrays.asList("binding");
 
-    private static final String BUNDLE_CONTENTTYPE = "application/java-archive";
+    private static final String BUNDLE_CONTENTTYPE = "application/vnd.openhab.bundle";
 
     private static final String JAR_DOWNLOAD_URL_PROPERTY = "jar_download_url";
 

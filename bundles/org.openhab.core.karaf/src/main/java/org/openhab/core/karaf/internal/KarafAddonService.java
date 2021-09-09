@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = "org.openhab.core.karafaddons")
 public class KarafAddonService implements AddonService {
-    private static final String ADDONS_CONTENTTYPE = "application/java-archive";
+    private static final String ADDONS_CONTENTTYPE = "application/vnd.openhab.feature;type=karaf";
     private static final String ADDONS_AUTHOR = "openHAB";
 
     private final Logger logger = LoggerFactory.getLogger(KarafAddonService.class);

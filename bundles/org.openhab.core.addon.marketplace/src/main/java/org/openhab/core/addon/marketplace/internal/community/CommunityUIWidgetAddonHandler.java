@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.addon.Addon;
@@ -56,6 +57,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
         this.widgetRegistry = uiComponentRegistryFactory.getRegistry("ui:widget");
         this.yamlMapper = new ObjectMapper(new YAMLFactory());
         yamlMapper.findAndRegisterModules();
+        this.yamlMapper.setDateFormat(new SimpleDateFormat("MMM d, yyyy, hh:mm:ss aa"));
     }
 
     @Override
