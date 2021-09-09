@@ -18,6 +18,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,8 +90,10 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private static final Integer RULETEMPLATES_CATEGORY = 74;
     private static final Integer UIWIDGETS_CATEGORY = 75;
 
+    private static final String PUBLISHED_TAG = "published";
+
     private HashMap<String, String> contentTypes = new HashMap<String, String>(3);
-    private static final String BINDINGS_CONTENT_TYPE = "application/java-archive";
+    private static final String BINDINGS_CONTENT_TYPE = "application/vnd.openhab.bundle";
     private static final String RULETEMPLATES_CONTENT_TYPE = "application/vnd.openhab.ruletemplate";
     private static final String UIWIDGETS_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=widget";
 
@@ -179,6 +182,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
             List<DiscourseUser> users = pages.stream().flatMap(p -> Stream.of(p.users)).collect(Collectors.toList());
             return pages.stream().flatMap(p -> Stream.of(p.topic_list.topics))
+                    .filter(t -> Arrays.asList(t.tags).contains(PUBLISHED_TAG))
                     .map(t -> convertTopicItemToAddon(t, users)).collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("Unable to retrieve marketplace add-ons", e);
