@@ -33,11 +33,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A {@link MarketplaceAddonHandler} implementation, which handles add-ons as jar files (specifically, OSGi
- * bundles) and installs
- * them through the standard OSGi bundle installation mechanism.
- * The information, which installed bundle corresponds to which add-on is written to a file in the bundle's data
- * store. It is therefore wiped together with the bundles upon an OSGi "clean".
- * We might want to move this class into a separate bundle in future, when we add support for further add-on types.
+ * bundles) and installs them through the standard OSGi bundle installation mechanism.
+ * The bundles installed this way have their location set to the add-on ID to identify them and determine their
+ * installation status.
  *
  * @author Kai Kreuzer - Initial contribution and API
  * @author Yannick Schaus - refactoring
