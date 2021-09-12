@@ -325,6 +325,17 @@ public class CommunityMarketplaceAddonService implements AddonService {
     }
 
     /**
+     * Unescapes occurrences of XML entities found in the supplied content.
+     *
+     * @param content the content with potentially escaped entities
+     * @return the unescaped content
+     */
+    private String unescapeEntities(String content) {
+        return content.replace("&quot;", "\"").replace("&amp;", "&").replace("&apos;", "'").replace("&lt;", "<")
+                .replace("&gt;", ">");
+    }
+
+    /**
      * Transforms a {@link DiscourseTopicResponse} to a {@link Addon}
      *
      * @param topic the topic
@@ -378,13 +389,13 @@ public class CommunityMarketplaceAddonService implements AddonService {
             String jsonContent = detailedDescription.substring(
                     detailedDescription.indexOf(JSON_CODE_MARKUP_START) + JSON_CODE_MARKUP_START.length(),
                     detailedDescription.indexOf(CODE_MARKUP_END, detailedDescription.indexOf(JSON_CODE_MARKUP_START)));
-            properties.put("json_content", HtmlUnescapeUtil.unescapeHtml3(jsonContent));
+            properties.put("json_content", unescapeEntities(jsonContent));
         }
         if (detailedDescription.contains(YAML_CODE_MARKUP_START)) {
             String yamlContent = detailedDescription.substring(
                     detailedDescription.indexOf(YAML_CODE_MARKUP_START) + YAML_CODE_MARKUP_START.length(),
                     detailedDescription.indexOf(CODE_MARKUP_END, detailedDescription.indexOf(YAML_CODE_MARKUP_START)));
-            properties.put("yaml_content", HtmlUnescapeUtil.unescapeHtml3(yamlContent));
+            properties.put("yaml_content", unescapeEntities(yamlContent));
         }
 
         // try to use an handler to determine if the add-on is installed
