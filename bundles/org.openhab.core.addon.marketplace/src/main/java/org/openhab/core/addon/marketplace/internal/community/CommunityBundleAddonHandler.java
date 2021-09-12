@@ -12,16 +12,12 @@
  */
 package org.openhab.core.addon.marketplace.internal.community;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
@@ -49,7 +45,6 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true)
 public class CommunityBundleAddonHandler implements MarketplaceAddonHandler {
-    private static final String BUNDLE_FILE = "installedBundlesMap.csv";
 
     // add-on types supported by this handler
     private static final List<String> SUPPORTED_EXT_TYPES = Arrays.asList("binding");
@@ -67,12 +62,10 @@ public class CommunityBundleAddonHandler implements MarketplaceAddonHandler {
     @Activate
     protected void activate(BundleContext bundleContext, Map<String, Object> config) {
         this.bundleContext = bundleContext;
-        installedBundles = loadInstalledBundlesMap();
     }
 
     @Deactivate
     protected void deactivate() {
-        this.installedBundles = null;
         this.bundleContext = null;
     }
 
@@ -84,22 +77,21 @@ public class CommunityBundleAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public boolean isInstalled(String id) {
-        return installedBundles.containsKey(id);
+        return bundleContext.getBundle(id) != null;
     }
 
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
         try {
-            String url = (String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY);
-            Bundle bundle = bundleContext.installBundle(url);
+            URL url = new URL((String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY));
+            InputStream inputStream = url.openStream();
+            Bundle bundle = bundleContext.installBundle(addon.getId(), inputStream);
             try {
                 bundle.start();
             } catch (BundleException e) {
                 logger.warn("Installed bundle, but failed to start it: {}", e.getMessage());
             }
-            installedBundles.put(addon.getId(), bundle.getBundleId());
-            persistInstalledBundlesMap(installedBundles);
-        } catch (BundleException e) {
+        } catch (BundleException | IOException e) {
             logger.debug("Failed to install bundle from marketplace.", e);
             throw new MarketplaceHandlerException("Bundle cannot be installed: " + e.getMessage());
         }
@@ -107,76 +99,16 @@ public class CommunityBundleAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public void uninstall(Addon addon) throws MarketplaceHandlerException {
-        Long id = installedBundles.get(addon.getId());
-        if (id != null) {
-            Bundle bundle = bundleContext.getBundle(id);
-            if (bundle != null) {
-                try {
-                    bundle.stop();
-                    bundle.uninstall();
-                    installedBundles.remove(addon.getId());
-                    persistInstalledBundlesMap(installedBundles);
-                } catch (BundleException e) {
-                    throw new MarketplaceHandlerException("Failed deinstalling bundle: " + e.getMessage());
-                }
-            } else {
-                // we do not have such a bundle, so let's remove it from our internal map
-                installedBundles.remove(addon.getId());
-                persistInstalledBundlesMap(installedBundles);
-                throw new MarketplaceHandlerException("Id not known.");
+        Bundle bundle = bundleContext.getBundle(addon.getId());
+        if (bundle != null) {
+            try {
+                bundle.stop();
+                bundle.uninstall();
+            } catch (BundleException e) {
+                throw new MarketplaceHandlerException("Failed deinstalling bundle: " + e.getMessage());
             }
         } else {
             throw new MarketplaceHandlerException("Id not known.");
-        }
-    }
-
-    private Map<String, Long> loadInstalledBundlesMap() {
-        File dataFile = bundleContext.getDataFile(BUNDLE_FILE);
-        if (dataFile != null && dataFile.exists()) {
-            return loadInstalledBundlesFile(dataFile);
-        }
-        return new HashMap<>();
-    }
-
-    private Map<String, Long> loadInstalledBundlesFile(File dataFile) {
-        try (FileReader reader = new FileReader(dataFile)) {
-            BufferedReader bufferedReader = new BufferedReader(reader);
-            Map<String, Long> map = new HashMap<>();
-            String line = bufferedReader.readLine();
-            while (line != null) {
-                String[] parts = line.split(";");
-                if (parts.length == 2) {
-                    try {
-                        map.put(parts[0], Long.valueOf(parts[1]));
-                    } catch (NumberFormatException e) {
-                        logger.debug("Cannot parse '{}' as a number in file {} - ignoring it.", parts[1],
-                                dataFile.getName());
-                    }
-                } else {
-                    logger.debug("Invalid line in file {} - ignoring it:\n{}", dataFile.getName(), line);
-                }
-                line = bufferedReader.readLine();
-            }
-            return map;
-        } catch (IOException e) {
-            logger.debug("File '{}' for installed bundles does not exist.", dataFile.getName());
-            // ignore and just return an empty map
-        }
-        return new HashMap<>();
-    }
-
-    private synchronized void persistInstalledBundlesMap(Map<String, Long> map) {
-        File dataFile = bundleContext.getDataFile(BUNDLE_FILE);
-        if (dataFile != null) {
-            try (FileWriter writer = new FileWriter(dataFile)) {
-                for (Entry<String, Long> entry : map.entrySet()) {
-                    writer.write(entry.getKey() + ";" + entry.getValue() + System.lineSeparator());
-                }
-            } catch (IOException e) {
-                logger.warn("Failed writing file '{}': {}", dataFile.getName(), e.getMessage());
-            }
-        } else {
-            logger.debug("System does not support bundle data files -> not persisting installed bundle info");
         }
     }
 }
