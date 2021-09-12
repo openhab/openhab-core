@@ -55,8 +55,6 @@ public class CommunityBundleAddonHandler implements MarketplaceAddonHandler {
 
     private final Logger logger = LoggerFactory.getLogger(CommunityBundleAddonHandler.class);
 
-    private Map<String, Long> installedBundles;
-
     private BundleContext bundleContext;
 
     @Activate
@@ -82,9 +80,8 @@ public class CommunityBundleAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
-        try {
-            URL url = new URL((String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY));
-            InputStream inputStream = url.openStream();
+        try (InputStream inputStream = new URL((String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY))
+                .openStream()) {
             Bundle bundle = bundleContext.installBundle(addon.getId(), inputStream);
             try {
                 bundle.start();
