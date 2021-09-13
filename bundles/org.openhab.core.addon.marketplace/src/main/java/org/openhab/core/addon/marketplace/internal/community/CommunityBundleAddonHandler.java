@@ -12,8 +12,7 @@
  */
 package org.openhab.core.addon.marketplace.internal.community;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -21,10 +20,9 @@ import java.util.Map;
 
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
+import org.openhab.core.addon.marketplace.MarketplaceBundleInstaller;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -42,7 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(immediate = true)
-public class CommunityBundleAddonHandler implements MarketplaceAddonHandler {
+public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller implements MarketplaceAddonHandler {
 
     // add-on types supported by this handler
     private static final List<String> SUPPORTED_EXT_TYPES = Arrays.asList("binding");
@@ -58,6 +56,7 @@ public class CommunityBundleAddonHandler implements MarketplaceAddonHandler {
     @Activate
     protected void activate(BundleContext bundleContext, Map<String, Object> config) {
         this.bundleContext = bundleContext;
+        ensureCachedBundlesAreInstalled(bundleContext);
     }
 
     @Deactivate
@@ -73,37 +72,23 @@ public class CommunityBundleAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public boolean isInstalled(String id) {
-        return bundleContext.getBundle(id) != null;
+        return isBundleInstalled(bundleContext, id);
     }
 
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
-        try (InputStream inputStream = new URL((String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY))
-                .openStream()) {
-            Bundle bundle = bundleContext.installBundle(addon.getId(), inputStream);
-            try {
-                bundle.start();
-            } catch (BundleException e) {
-                logger.warn("Installed bundle, but failed to start it: {}", e.getMessage());
-            }
-        } catch (BundleException | IOException e) {
-            logger.debug("Failed to install bundle from marketplace.", e);
-            throw new MarketplaceHandlerException("Bundle cannot be installed: " + e.getMessage());
+        URL sourceUrl;
+        try {
+            sourceUrl = new URL((String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY));
+            addBundleToCache(addon.getId(), sourceUrl);
+            installFromCache(bundleContext, addon.getId());
+        } catch (MalformedURLException e) {
+            throw new MarketplaceHandlerException("Malformed source URL" + e.getMessage());
         }
     }
 
     @Override
     public void uninstall(Addon addon) throws MarketplaceHandlerException {
-        Bundle bundle = bundleContext.getBundle(addon.getId());
-        if (bundle != null) {
-            try {
-                bundle.stop();
-                bundle.uninstall();
-            } catch (BundleException e) {
-                throw new MarketplaceHandlerException("Failed deinstalling bundle: " + e.getMessage());
-            }
-        } else {
-            throw new MarketplaceHandlerException("Id not known.");
-        }
+        uninstallBundle(bundleContext, addon.getId());
     }
 }
