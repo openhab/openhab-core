@@ -89,7 +89,7 @@ public abstract class MarketplaceBundleInstaller {
                 try {
                     bundle.start();
                 } catch (BundleException e) {
-                    logger.warn("The marketplace bundle was successfully installed but doesn't start: ",
+                    logger.warn("The marketplace bundle was successfully installed but doesn't start: {}",
                             e.getMessage());
                 }
 
@@ -105,7 +105,6 @@ public abstract class MarketplaceBundleInstaller {
      *
      * @param bundleContext the {@link BundleContext} to use to look up the bundle
      * @param addonId the add-on ID
-     * @throws MarketplaceHandlerException
      */
     protected boolean isBundleInstalled(BundleContext bundleContext, String addonId) {
         return bundleContext.getBundle(addonId) != null;
@@ -116,7 +115,6 @@ public abstract class MarketplaceBundleInstaller {
      *
      * @param bundleContext the {@link BundleContext} to use to look up the bundle
      * @param addonId the add-on ID
-     * @throws MarketplaceHandlerException
      */
     protected void uninstallBundle(BundleContext bundleContext, String addonId) throws MarketplaceHandlerException {
         File addonPath = getAddonCacheDirectory(addonId);
@@ -142,7 +140,6 @@ public abstract class MarketplaceBundleInstaller {
      * Iterates over the local cache entries and re-installs bundles that are missing
      *
      * @param bundleContext the {@link BundleContext} to use to look up the bundles
-     * @throws MarketplaceHandlerException
      */
     protected void ensureCachedBundlesAreInstalled(BundleContext bundleContext) {
         File addonPath = new File(BUNDLE_CACHE_PATH);

@@ -83,7 +83,7 @@ public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller impl
             addBundleToCache(addon.getId(), sourceUrl);
             installFromCache(bundleContext, addon.getId());
         } catch (MalformedURLException e) {
-            throw new MarketplaceHandlerException("Malformed source URL" + e.getMessage());
+            throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage());
         }
     }
 
