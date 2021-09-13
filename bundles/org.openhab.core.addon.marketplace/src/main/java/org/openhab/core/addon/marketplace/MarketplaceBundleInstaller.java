@@ -89,7 +89,8 @@ public abstract class MarketplaceBundleInstaller {
                 try {
                     bundle.start();
                 } catch (BundleException e) {
-                    uninstallBundle(bundleContext, addonId);
+                    logger.warn("The marketplace bundle was successfully installed but doesn't start: ",
+                            e.getMessage());
                 }
 
             } catch (IOException | BundleException e) {
