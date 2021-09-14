@@ -29,6 +29,9 @@ public class ConfigDescriptionDTO {
 
     public List<ConfigDescriptionParameterGroupDTO> parameterGroups;
 
+    public ConfigDescriptionDTO() {
+    }
+
     public ConfigDescriptionDTO(String uri, List<ConfigDescriptionParameterDTO> parameters,
             List<ConfigDescriptionParameterGroupDTO> parameterGroups) {
         this.uri = uri;

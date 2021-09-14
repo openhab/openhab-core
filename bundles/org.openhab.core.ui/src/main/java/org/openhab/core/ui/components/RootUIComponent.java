@@ -44,9 +44,16 @@ public class RootUIComponent extends UIComponent implements Identifiable<String>
     Date timestamp;
 
     /**
+     * Empty constructor for deserialization.
+     */
+    public RootUIComponent() {
+        this("");
+    }
+
+    /**
      * Constructs a root component.
      *
-     * @param name the name of the UI component to render the card on client frontends, ie. "HbCard"
+     * @param name the name of the UI component to render on client frontends, ie. "oh-block"
      */
     public RootUIComponent(String name) {
         super(name);
@@ -58,7 +65,7 @@ public class RootUIComponent extends UIComponent implements Identifiable<String>
      * Constructs a root component with a specific UID.
      *
      * @param uid the UID of the new card
-     * @param name the name of the UI component to render the card on client frontends, ie. "HbCard"
+     * @param name the name of the UI component to render on client frontends, ie. "oh-block"
      */
     public RootUIComponent(String uid, String name) {
         super(name);

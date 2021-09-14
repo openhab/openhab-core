@@ -17,6 +17,7 @@
   <name>openHAB Core :: Bundles</name>
 
   <modules>
+    <module>org.openhab.core.addon.marketplace</module>
     <module>org.openhab.core.auth.jaas</module>
     <module>org.openhab.core.auth.oauth2client</module>
     <module>org.openhab.core.automation</module>
