@@ -1,5 +1,6 @@
 Bundle-SymbolicName: ${project.artifactId}
 Import-Package: \
+ javax.management.*,\
  org.eclipse.jdt.annotation.*;resolution:=optional,\
  org.openhab.*;version=!,\
  org.osgi.framework,\
