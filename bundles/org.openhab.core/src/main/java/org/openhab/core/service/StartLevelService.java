@@ -20,7 +20,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +31,7 @@ import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.system.StartlevelEvent;
 import org.openhab.core.events.system.SystemEventFactory;
+import org.openhab.core.internal.common.WrappedScheduledExecutorService;
 import org.openhab.core.service.ReadyService.ReadyTracker;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
@@ -93,8 +93,8 @@ public class StartLevelService {
     private final Map<Integer, ReadyMarker> slmarker = new ConcurrentHashMap<>();
 
     private @Nullable ScheduledFuture<?> job;
-    private final ScheduledExecutorService scheduler = Executors
-            .newSingleThreadScheduledExecutor(new NamedThreadFactory("startlevel"));
+    private final ScheduledExecutorService scheduler = new WrappedScheduledExecutorService(1,
+            new NamedThreadFactory("startlevel"));
 
     private int openHABStartLevel = 0;
 
