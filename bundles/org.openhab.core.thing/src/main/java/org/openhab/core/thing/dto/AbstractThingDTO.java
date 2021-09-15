@@ -12,7 +12,6 @@
  */
 package org.openhab.core.thing.dto;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,16 +23,27 @@ import java.util.Map;
  * @author Simon Kaufmann - Added label
  * @author Wouter Born - Let (Enriched)ThingDTO extend AbstractThingDTO so both can define their own "channels" type
  */
-public class ThingDTO extends AbstractThingDTO {
+public abstract class AbstractThingDTO {
 
-    public List<ChannelDTO> channels;
+    public String label;
+    public String bridgeUID;
+    public Map<String, Object> configuration;
+    public Map<String, String> properties;
+    public String UID;
+    public String thingTypeUID;
+    public String location;
 
-    public ThingDTO() {
+    public AbstractThingDTO() {
     }
 
-    protected ThingDTO(String thingTypeUID, String UID, String label, String bridgeUID, List<ChannelDTO> channels,
+    protected AbstractThingDTO(String thingTypeUID, String UID, String label, String bridgeUID,
             Map<String, Object> configuration, Map<String, String> properties, String location) {
-        super(thingTypeUID, UID, label, bridgeUID, configuration, properties, location);
-        this.channels = channels;
+        this.thingTypeUID = thingTypeUID;
+        this.UID = UID;
+        this.label = label;
+        this.bridgeUID = bridgeUID;
+        this.configuration = configuration;
+        this.properties = properties;
+        this.location = location;
     }
 }

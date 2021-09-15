@@ -15,7 +15,7 @@ package org.openhab.core.io.rest.core.thing;
 import java.util.List;
 
 import org.openhab.core.thing.ThingStatusInfo;
-import org.openhab.core.thing.dto.ChannelDTO;
+import org.openhab.core.thing.dto.AbstractThingDTO;
 import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
 
@@ -25,9 +25,11 @@ import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
  * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - Removed links and items
  * @author Chris Jackson - Added 'editable' flag
+ * @author Wouter Born - Let (Enriched)ThingDTO extend AbstractThingDTO so both can define their own "channels" type
  */
-public class EnrichedThingDTO extends ThingDTO {
+public class EnrichedThingDTO extends AbstractThingDTO {
 
+    public List<EnrichedChannelDTO> channels;
     public ThingStatusInfo statusInfo;
     public final FirmwareStatusDTO firmwareStatus;
     public boolean editable;
@@ -41,10 +43,11 @@ public class EnrichedThingDTO extends ThingDTO {
      * @param firmwareStatus {@link FirmwareStatusDTO} for this thing
      * @param editable true if this thing can be edited
      */
-    EnrichedThingDTO(ThingDTO thingDTO, List<ChannelDTO> channels, ThingStatusInfo statusInfo,
+    EnrichedThingDTO(ThingDTO thingDTO, List<EnrichedChannelDTO> channels, ThingStatusInfo statusInfo,
             FirmwareStatusDTO firmwareStatus, boolean editable) {
-        super(thingDTO.thingTypeUID, thingDTO.UID, thingDTO.label, thingDTO.bridgeUID, channels, thingDTO.configuration,
+        super(thingDTO.thingTypeUID, thingDTO.UID, thingDTO.label, thingDTO.bridgeUID, thingDTO.configuration,
                 thingDTO.properties, thingDTO.location);
+        this.channels = channels;
         this.statusInfo = statusInfo;
         this.firmwareStatus = firmwareStatus;
         this.editable = editable;

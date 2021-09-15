@@ -47,7 +47,7 @@ public class EnrichedThingDTOMapper extends ThingDTOMapper {
             Map<String, Set<String>> linkedItemsMap, boolean editable) {
         ThingDTO thingDTO = ThingDTOMapper.map(thing);
 
-        List<ChannelDTO> channels = new ArrayList<>();
+        List<EnrichedChannelDTO> channels = new ArrayList<>();
         for (ChannelDTO channel : thingDTO.channels) {
             Set<String> linkedItems = linkedItemsMap != null ? linkedItemsMap.get(channel.id) : Collections.emptySet();
             channels.add(new EnrichedChannelDTO(channel, linkedItems));
