@@ -72,6 +72,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     // constants for the configuration properties
     static final String CONFIG_URI = "system:marketplace";
     static final String CONFIG_API_KEY = "apiKey";
+    static final String CONFIG_SHOW_UNPUBLISHED_ENTRIES_KEY = "showUnpublished";
 
     private final Logger logger = LoggerFactory.getLogger(CommunityMarketplaceAddonService.class);
 
@@ -102,6 +103,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private final Set<MarketplaceAddonHandler> addonHandlers = new HashSet<>();
     private EventPublisher eventPublisher;
     private String apiKey = null;
+    private boolean showUnpublished = false;
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -118,6 +120,9 @@ public class CommunityMarketplaceAddonService implements AddonService {
     void modified(@Nullable Map<String, Object> config) {
         if (config != null) {
             this.apiKey = (String) config.get(CONFIG_API_KEY);
+            Object showUnpublishedConfigValue = config.get(CONFIG_SHOW_UNPUBLISHED_ENTRIES_KEY);
+            this.showUnpublished = showUnpublishedConfigValue != null
+                    && "true".equals(showUnpublishedConfigValue.toString());
         }
     }
 
@@ -182,7 +187,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
             List<DiscourseUser> users = pages.stream().flatMap(p -> Stream.of(p.users)).collect(Collectors.toList());
             return pages.stream().flatMap(p -> Stream.of(p.topic_list.topics))
-                    .filter(t -> Arrays.asList(t.tags).contains(PUBLISHED_TAG))
+                    .filter(t -> showUnpublished || Arrays.asList(t.tags).contains(PUBLISHED_TAG))
                     .map(t -> convertTopicItemToAddon(t, users)).collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("Unable to retrieve marketplace add-ons", e);
