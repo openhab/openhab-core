@@ -38,8 +38,7 @@ public class ThreadPoolMetric implements OpenhabCoreMeterBinder {
     public static final Tag CORE_THREADPOOL_METRIC_TAG = Tag.of("metric", "openhab.core.metric.threadpools");
     private static final String POOLNAME_TAG_NAME = "pool";
     private final Set<Tag> tags = new HashSet<>();
-    @Nullable
-    private MeterRegistry meterRegistry;
+    private @Nullable MeterRegistry meterRegistry;
 
     public ThreadPoolMetric(Collection<Tag> tags) {
         this.tags.addAll(tags);
@@ -70,6 +69,7 @@ public class ThreadPoolMetric implements OpenhabCoreMeterBinder {
 
     @Override
     public void unbind() {
+        MeterRegistry meterRegistry = this.meterRegistry;
         if (meterRegistry == null) {
             return;
         }
@@ -78,6 +78,6 @@ public class ThreadPoolMetric implements OpenhabCoreMeterBinder {
                 meterRegistry.remove(meter);
             }
         }
-        meterRegistry = null;
+        this.meterRegistry = null;
     }
 }

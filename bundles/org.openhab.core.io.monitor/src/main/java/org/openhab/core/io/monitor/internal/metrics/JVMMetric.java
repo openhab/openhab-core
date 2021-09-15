@@ -39,8 +39,7 @@ public class JVMMetric implements OpenhabCoreMeterBinder {
     private final Logger logger = LoggerFactory.getLogger(JVMMetric.class);
     private static final Tag CORE_JVM_METRIC_TAG = Tag.of("metric", "openhab.core.metric.jvm");
     private final Set<Tag> tags = new HashSet<>();
-    @Nullable
-    private MeterRegistry meterRegistry;
+    private @Nullable MeterRegistry meterRegistry;
 
     public JVMMetric(Collection<Tag> tags) {
         this.tags.addAll(tags);
@@ -61,6 +60,7 @@ public class JVMMetric implements OpenhabCoreMeterBinder {
 
     @Override
     public void unbind() {
+        MeterRegistry meterRegistry = this.meterRegistry;
         if (meterRegistry == null) {
             return;
         }
@@ -69,6 +69,6 @@ public class JVMMetric implements OpenhabCoreMeterBinder {
                 meterRegistry.remove(meter);
             }
         }
-        meterRegistry = null;
+        this.meterRegistry = null;
     }
 }

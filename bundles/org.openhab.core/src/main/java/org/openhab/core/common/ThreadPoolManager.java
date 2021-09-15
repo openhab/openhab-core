@@ -12,6 +12,7 @@
  */
 package org.openhab.core.common;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -166,10 +167,10 @@ public class ThreadPoolManager {
 
     protected static int getConfig(String poolName) {
         Integer cfg = configs.get(poolName);
-        return (cfg != null) ? cfg : DEFAULT_THREAD_POOL_SIZE;
+        return cfg != null ? cfg : DEFAULT_THREAD_POOL_SIZE;
     }
 
     public static Set<String> getPoolNames() {
-        return pools.keySet();
+        return new HashSet<>(pools.keySet());
     }
 }

@@ -74,7 +74,7 @@ public class ThingStateMetric implements OpenhabCoreMeterBinder, EventSubscriber
                 thing -> createOrUpdateMetricForBundleState(thing.getUID().getId(), thing.getStatus().ordinal()));
         Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("event.topics", "openhab/things/*");
-        this.eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
+        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);
     }
 
@@ -92,16 +92,20 @@ public class ThingStateMetric implements OpenhabCoreMeterBinder, EventSubscriber
 
     @Override
     public void unbind() {
+        MeterRegistry meterRegistry = this.meterRegistry;
         if (meterRegistry == null) {
             return;
         }
+
+        ServiceRegistration<?> eventSubscriberRegistration = this.eventSubscriberRegistration;
         if (eventSubscriberRegistration != null) {
             eventSubscriberRegistration.unregister();
-            eventSubscriberRegistration = null;
+            this.eventSubscriberRegistration = null;
         }
         registeredMeters.keySet().forEach(meterRegistry::remove);
         registeredMeters.clear();
-        meterRegistry = null;
+
+        this.meterRegistry = null;
     }
 
     @Override

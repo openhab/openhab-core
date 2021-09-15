@@ -42,8 +42,7 @@ public class BundleStateMetric implements OpenhabCoreMeterBinder, BundleListener
     private static final String BUNDLE_TAG_NAME = "bundle";
     private final Meter.Id commonMeterId;
     private final Map<Meter.Id, AtomicInteger> registeredMeters = new HashMap<>();
-    @Nullable
-    private MeterRegistry meterRegistry = null;
+    private @Nullable MeterRegistry meterRegistry;
     private final BundleContext bundleContext;
 
     public BundleStateMetric(BundleContext bundleContext, Collection<Tag> tags) {
@@ -87,12 +86,13 @@ public class BundleStateMetric implements OpenhabCoreMeterBinder, BundleListener
 
     @Override
     public void unbind() {
+        MeterRegistry meterRegistry = this.meterRegistry;
         if (meterRegistry == null) {
             return;
         }
         bundleContext.removeBundleListener(this);
         registeredMeters.keySet().forEach(meterRegistry::remove);
         registeredMeters.clear();
-        meterRegistry = null;
+        this.meterRegistry = null;
     }
 }
