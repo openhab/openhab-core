@@ -45,8 +45,7 @@ public class EventCountMetric implements OpenhabCoreMeterBinder, EventSubscriber
     private final Logger logger = LoggerFactory.getLogger(EventCountMetric.class);
     private static final Tag CORE_EVENT_COUNT_METRIC_TAG = Tag.of("metric", "openhab.core.metric.eventcount");
     private static final String TOPIC_TAG_NAME = "topic";
-    @Nullable
-    private MeterRegistry meterRegistry;
+    private @Nullable MeterRegistry meterRegistry;
     private final Set<Tag> tags = new HashSet<>();
     private ServiceRegistration<?> eventSubscriberRegistration;
     private BundleContext bundleContext;
@@ -70,6 +69,7 @@ public class EventCountMetric implements OpenhabCoreMeterBinder, EventSubscriber
 
     @Override
     public void unbind() {
+        MeterRegistry meterRegistry = this.meterRegistry;
         if (meterRegistry == null) {
             return;
         }
@@ -78,19 +78,18 @@ public class EventCountMetric implements OpenhabCoreMeterBinder, EventSubscriber
                 meterRegistry.remove(meter);
             }
         }
-        meterRegistry = null;
-        if (this.eventSubscriberRegistration != null) {
-            this.eventSubscriberRegistration.unregister();
+        this.meterRegistry = null;
+
+        ServiceRegistration<?> eventSubscriberRegistration = this.eventSubscriberRegistration;
+        if (eventSubscriberRegistration != null) {
+            eventSubscriberRegistration.unregister();
             this.eventSubscriberRegistration = null;
         }
     }
 
     @Override
     public Set<String> getSubscribedEventTypes() {
-        HashSet<String> subscribedEvents = new HashSet<>();
-        subscribedEvents.add(ItemCommandEvent.TYPE);
-        subscribedEvents.add(ItemStateEvent.TYPE);
-        return subscribedEvents;
+        return Set.of(ItemCommandEvent.TYPE, ItemStateEvent.TYPE);
     }
 
     @Override
@@ -100,6 +99,7 @@ public class EventCountMetric implements OpenhabCoreMeterBinder, EventSubscriber
 
     @Override
     public void receive(Event event) {
+        MeterRegistry meterRegistry = this.meterRegistry;
         if (meterRegistry == null) {
             logger.trace("Measurement not started. Skipping event processing");
             return;

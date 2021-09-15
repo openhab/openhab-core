@@ -71,34 +71,33 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
         this.meterRegistry = meterRegistry;
         Dictionary<String, Object> properties = new Hashtable<>();
         properties.put(SUBSCRIPTION_PROPERTY_TOPIC, RULES_TOPIC_FILTER);
-        this.eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
+        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);
     }
 
     @Override
     public void unbind() {
-        MeterRegistry mReg = meterRegistry;
-        if (mReg == null) {
+        MeterRegistry meterRegistry = this.meterRegistry;
+        if (meterRegistry == null) {
             return;
-        } else {
-            for (Meter meter : mReg.getMeters()) {
-                if (meter.getId().getTags().contains(CORE_RULE_METRIC_TAG)) {
-                    mReg.remove(meter);
-                }
+        }
+        for (Meter meter : meterRegistry.getMeters()) {
+            if (meter.getId().getTags().contains(CORE_RULE_METRIC_TAG)) {
+                meterRegistry.remove(meter);
             }
-            meterRegistry = null;
-            if (this.eventSubscriberRegistration != null) {
-                this.eventSubscriberRegistration.unregister();
-                this.eventSubscriberRegistration = null;
-            }
+        }
+        this.meterRegistry = null;
+
+        ServiceRegistration<?> eventSubscriberRegistration = this.eventSubscriberRegistration;
+        if (eventSubscriberRegistration != null) {
+            eventSubscriberRegistration.unregister();
+            this.eventSubscriberRegistration = null;
         }
     }
 
     @Override
     public Set<String> getSubscribedEventTypes() {
-        HashSet<String> subscribedEvents = new HashSet<>();
-        subscribedEvents.add(RuleStatusInfoEvent.TYPE);
-        return subscribedEvents;
+        return Set.of(RuleStatusInfoEvent.TYPE);
     }
 
     @Override
@@ -108,34 +107,31 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
 
     @Override
     public void receive(Event event) {
-        MeterRegistry mReg = meterRegistry;
-        if (mReg == null) {
+        MeterRegistry meterRegistry = this.meterRegistry;
+        if (meterRegistry == null) {
             logger.trace("Measurement not started. Skipping rule event processing");
             return;
-        } else {
-            String topic = event.getTopic();
-            String ruleId = topic.substring(RULES_TOPIC_PREFIX.length(), topic.indexOf(RULES_TOPIC_SUFFIX));
-            if (!event.getPayload().contains(RuleStatus.RUNNING.name())) {
-                logger.trace("Skipping rule status info with status other than RUNNING {}", event.getPayload());
-                return;
-            }
-
-            logger.debug("Rule {} RUNNING - updating metric.", ruleId);
-            Set<Tag> tagsWithRule = new HashSet<>(tags);
-            tagsWithRule.add(Tag.of(RULE_ID_TAG_NAME, ruleId));
-            String ruleName = getRuleName(ruleId);
-            if (ruleName != null) {
-                tagsWithRule.add(Tag.of(RULE_NAME_TAG_NAME, ruleName));
-            }
-            mReg.counter(METRIC_NAME, tagsWithRule).increment();
         }
+
+        String topic = event.getTopic();
+        String ruleId = topic.substring(RULES_TOPIC_PREFIX.length(), topic.lastIndexOf(RULES_TOPIC_SUFFIX));
+        if (!event.getPayload().contains(RuleStatus.RUNNING.name())) {
+            logger.trace("Skipping rule status info with status other than RUNNING {}", event.getPayload());
+            return;
+        }
+
+        logger.debug("Rule {} RUNNING - updating metric.", ruleId);
+        Set<Tag> tagsWithRule = new HashSet<>(tags);
+        tagsWithRule.add(Tag.of(RULE_ID_TAG_NAME, ruleId));
+        String ruleName = getRuleName(ruleId);
+        if (ruleName != null) {
+            tagsWithRule.add(Tag.of(RULE_NAME_TAG_NAME, ruleName));
+        }
+        meterRegistry.counter(METRIC_NAME, tagsWithRule).increment();
     }
 
     private String getRuleName(String ruleId) {
         Rule rule = ruleRegistry.get(ruleId);
-        if (rule != null) {
-            return rule.getName();
-        }
-        return null;
+        return rule == null ? null : rule.getName();
     }
 }
