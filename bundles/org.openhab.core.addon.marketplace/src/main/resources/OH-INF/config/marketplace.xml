@@ -6,7 +6,14 @@
 		https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="system:marketplace">
+		<parameter name="showUnpublished" type="boolean">
+			<label>Show Unpublished Entries</label>
+			<default>false</default>
+			<description>Include entries which have not been tagged as published. Warning: this may include entries that are not
+				ready and might not work or harm your installation. Enable at your own risk, for testing purposes only.</description>
+		</parameter>
 		<parameter name="apiKey" type="text">
+			<advanced>true</advanced>
 			<label>API Key for community.openhab.org</label>
 			<description>Specify the API key to use on the community forum (for staff and curators - this allows for instance to
 				see content which is not yet reviewed or otherwise hidden from the general public). Leave blank if you don't have
