@@ -16,6 +16,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.apache.karaf.features</groupId>
+      <artifactId>org.apache.karaf.features.core</artifactId>
+      <version>4.2.7</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core</artifactId>
       <version>${project.version}</version>

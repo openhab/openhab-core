@@ -161,7 +161,7 @@ public abstract class MarketplaceBundleInstaller {
         }
     }
 
-    private File getAddonCacheDirectory(String addonId) {
+    protected File getAddonCacheDirectory(String addonId) {
         return new File(BUNDLE_CACHE_PATH + File.separator + addonId.replace("marketplace:", ""));
     }
 }
