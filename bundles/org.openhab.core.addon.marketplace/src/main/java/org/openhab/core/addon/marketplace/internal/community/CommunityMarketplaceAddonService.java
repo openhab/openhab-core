@@ -95,6 +95,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
     private HashMap<String, String> contentTypes = new HashMap<String, String>(3);
     private static final String BINDINGS_CONTENT_TYPE = "application/vnd.openhab.bundle";
+    private static final String KAR_CONTENT_TYPE = "application/vnd.openhab.feature;type=karfile";
     private static final String RULETEMPLATES_CONTENT_TYPE = "application/vnd.openhab.ruletemplate";
     private static final String UIWIDGETS_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=widget";
 
@@ -351,7 +352,6 @@ public class CommunityMarketplaceAddonService implements AddonService {
         String id = ADDON_ID_PREFIX + topic.id.toString();
         AddonType addonType = types.get(topic.category_id);
         String type = (addonType != null) ? addonType.getId() : "";
-        // TODO: adjust contentType to kar/jar
         String contentType = contentTypes.get(type);
         String version = "";
         String title = topic.title;
@@ -386,6 +386,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
                 }
                 if (postLink.url.endsWith(".kar")) {
                     properties.put("kar_download_url", postLink.url);
+                    contentType = KAR_CONTENT_TYPE;
                 }
                 if (postLink.url.endsWith(".json")) {
                     properties.put("json_download_url", postLink.url);
