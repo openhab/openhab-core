@@ -85,10 +85,10 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
             addWidgetAsYAML(addon.getId(), widget);
         } catch (IOException e) {
             logger.error("Widget from marketplace cannot be downloaded: {}", e.getMessage());
-            throw new MarketplaceHandlerException("Widget cannot be downloaded.");
+            throw new MarketplaceHandlerException("Widget cannot be downloaded.", e);
         } catch (Exception e) {
             logger.error("Widget from marketplace is invalid: {}", e.getMessage());
-            throw new MarketplaceHandlerException("Widget is not valid.");
+            throw new MarketplaceHandlerException("Widget is not valid.", e);
         }
     }
 

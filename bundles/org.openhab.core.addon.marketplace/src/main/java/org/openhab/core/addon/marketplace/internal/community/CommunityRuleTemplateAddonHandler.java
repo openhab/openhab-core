@@ -87,10 +87,10 @@ public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandle
             }
         } catch (IOException e) {
             logger.error("Rule template from marketplace cannot be downloaded: {}", e.getMessage());
-            throw new MarketplaceHandlerException("Template cannot be downloaded.");
+            throw new MarketplaceHandlerException("Template cannot be downloaded.", e);
         } catch (Exception e) {
             logger.error("Rule template from marketplace is invalid: {}", e.getMessage());
-            throw new MarketplaceHandlerException("Template is not valid.");
+            throw new MarketplaceHandlerException("Template is not valid.", e);
         }
     }
 

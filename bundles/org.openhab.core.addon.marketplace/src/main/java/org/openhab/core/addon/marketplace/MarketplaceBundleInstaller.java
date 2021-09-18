@@ -64,7 +64,7 @@ public abstract class MarketplaceBundleInstaller {
             Path outputPath = Path.of(addonFile.toURI());
             Files.copy(source, outputPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException | URISyntaxException e) {
-            throw new MarketplaceHandlerException("Cannot copy bundle to local cache: " + e.getMessage());
+            throw new MarketplaceHandlerException("Cannot copy bundle to local cache: " + e.getMessage(), e);
         }
     }
 
@@ -81,7 +81,7 @@ public abstract class MarketplaceBundleInstaller {
             File[] bundleFiles = addonPath.listFiles();
             if (bundleFiles == null || bundleFiles.length != 1) {
                 throw new MarketplaceHandlerException(
-                        "The local cache folder doesn't contain a single file: " + addonPath.toString());
+                        "The local cache folder doesn't contain a single file: " + addonPath, null);
             }
 
             try (FileInputStream fileInputStream = new FileInputStream(bundleFiles[0])) {
@@ -94,8 +94,8 @@ public abstract class MarketplaceBundleInstaller {
                 }
 
             } catch (IOException | BundleException e) {
-                throw new MarketplaceHandlerException(
-                        "Cannot install bundle from marketplace cache: " + e.getMessage());
+                throw new MarketplaceHandlerException("Cannot install bundle from marketplace cache: " + e.getMessage(),
+                        e);
             }
         }
     }
@@ -131,7 +131,7 @@ public abstract class MarketplaceBundleInstaller {
                 bundle.stop();
                 bundle.uninstall();
             } catch (BundleException e) {
-                throw new MarketplaceHandlerException("Failed uninstalling bundle: " + e.getMessage());
+                throw new MarketplaceHandlerException("Failed uninstalling bundle: " + e.getMessage(), e);
             }
         }
     }

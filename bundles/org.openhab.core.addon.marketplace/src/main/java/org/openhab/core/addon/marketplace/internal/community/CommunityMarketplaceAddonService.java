@@ -86,18 +86,24 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private static final String YAML_CODE_MARKUP_START = "<pre><code class=\"lang-yaml\">";
     private static final String CODE_MARKUP_END = "</code></pre>";
 
-    private HashMap<Integer, AddonType> types = new HashMap<Integer, AddonType>(3);
     private static final Integer BINDINGS_CATEGORY = 73;
     private static final Integer RULETEMPLATES_CATEGORY = 74;
     private static final Integer UIWIDGETS_CATEGORY = 75;
+    private static final Map<Integer, AddonType> CATEGORY_ADDON_TYPES = Map.of( //
+            BINDINGS_CATEGORY, new AddonType("binding", "Bindings"), //
+            RULETEMPLATES_CATEGORY, new AddonType("automation", "Automation"), //
+            UIWIDGETS_CATEGORY, new AddonType("ui", "User Interfaces"));
 
     private static final String PUBLISHED_TAG = "published";
 
-    private HashMap<String, String> contentTypes = new HashMap<String, String>(3);
     private static final String BINDINGS_CONTENT_TYPE = "application/vnd.openhab.bundle";
     private static final String KAR_CONTENT_TYPE = "application/vnd.openhab.feature;type=karfile";
     private static final String RULETEMPLATES_CONTENT_TYPE = "application/vnd.openhab.ruletemplate";
     private static final String UIWIDGETS_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=widget";
+    private static final Map<String, String> DEFAULT_CONTENT_TYPES = Map.of( //
+            "binding", BINDINGS_CONTENT_TYPE, //
+            "automation", RULETEMPLATES_CONTENT_TYPE, //
+            "ui", UIWIDGETS_CONTENT_TYPE);
 
     private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
@@ -108,12 +114,6 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
     @Activate
     protected void activate(Map<String, Object> config) {
-        types.put(BINDINGS_CATEGORY, new AddonType("binding", "Bindings"));
-        types.put(RULETEMPLATES_CATEGORY, new AddonType("automation", "Automation"));
-        types.put(UIWIDGETS_CATEGORY, new AddonType("ui", "User Interfaces"));
-        contentTypes.put("binding", BINDINGS_CONTENT_TYPE);
-        contentTypes.put("automation", RULETEMPLATES_CONTENT_TYPE);
-        contentTypes.put("ui", UIWIDGETS_CONTENT_TYPE);
         modified(config);
     }
 
@@ -162,7 +162,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     @Override
     public List<Addon> getAddons(Locale locale) {
         try {
-            List<DiscourseCategoryResponseDTO> pages = new ArrayList<DiscourseCategoryResponseDTO>();
+            List<DiscourseCategoryResponseDTO> pages = new ArrayList<>();
 
             URL url = new URL(COMMUNITY_MARKETPLACE_URL);
             int pageNb = 1;
@@ -192,7 +192,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
                     .map(t -> convertTopicItemToAddon(t, users)).collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("Unable to retrieve marketplace add-ons", e);
-            return new ArrayList<>();
+            return List.of();
         }
     }
 
@@ -218,7 +218,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
     @Override
     public List<AddonType> getTypes(Locale locale) {
-        return new ArrayList<AddonType>(types.values());
+        return new ArrayList<>(CATEGORY_ADDON_TYPES.values());
     }
 
     @Override
@@ -279,10 +279,10 @@ public class CommunityMarketplaceAddonService implements AddonService {
      */
     private Addon convertTopicItemToAddon(DiscourseTopicItem topic, List<DiscourseUser> users) {
         String id = ADDON_ID_PREFIX + topic.id.toString();
-        AddonType addonType = types.get(topic.category_id);
+        AddonType addonType = CATEGORY_ADDON_TYPES.get(topic.category_id);
         String type = (addonType != null) ? addonType.getId() : "";
         // TODO: content-type differentiation for kar and jar
-        String contentType = (contentTypes.get(type) != null) ? contentTypes.get(type) : "";
+        String contentType = (DEFAULT_CONTENT_TYPES.get(type) != null) ? DEFAULT_CONTENT_TYPES.get(type) : "";
         String version = "";
         String title = topic.title;
         String link = COMMUNITY_TOPIC_URL + topic.id.toString();
@@ -350,9 +350,9 @@ public class CommunityMarketplaceAddonService implements AddonService {
      */
     private Addon convertTopicToAddon(DiscourseTopicResponseDTO topic) {
         String id = ADDON_ID_PREFIX + topic.id.toString();
-        AddonType addonType = types.get(topic.category_id);
+        AddonType addonType = CATEGORY_ADDON_TYPES.get(topic.category_id);
         String type = (addonType != null) ? addonType.getId() : "";
-        String contentType = contentTypes.get(type);
+        String contentType = DEFAULT_CONTENT_TYPES.get(type);
         String version = "";
         String title = topic.title;
         String link = COMMUNITY_TOPIC_URL + topic.id.toString();

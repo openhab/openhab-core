@@ -63,13 +63,12 @@ public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller impl
 
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
-        URL sourceUrl;
         try {
-            sourceUrl = new URL((String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY));
+            URL sourceUrl = new URL((String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY));
             addBundleToCache(addon.getId(), sourceUrl);
             installFromCache(bundleContext, addon.getId());
         } catch (MalformedURLException e) {
-            throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage());
+            throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage(), e);
         }
     }
 
