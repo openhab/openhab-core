@@ -17,13 +17,14 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
 import org.openhab.core.addon.marketplace.internal.automation.MarketplaceRuleTemplateProvider;
 import org.openhab.core.automation.template.RuleTemplateProvider;
 import org.openhab.core.storage.Storage;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -38,7 +39,8 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - refactoring
  *
  */
-@Component
+@Component(immediate = true)
+@NonNullByDefault
 public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandler {
     private static final String JSON_DOWNLOAD_URL_PROPERTY = "json_download_url";
     private static final String YAML_DOWNLOAD_URL_PROPERTY = "yaml_download_url";
@@ -48,16 +50,12 @@ public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandle
 
     private final Logger logger = LoggerFactory.getLogger(CommunityRuleTemplateAddonHandler.class);
 
-    private MarketplaceRuleTemplateProvider marketplaceRuleTemplateProvider;
+    private final MarketplaceRuleTemplateProvider marketplaceRuleTemplateProvider;
 
-    @Reference
-    protected void setMarketplaceRuleTemplateProvider(MarketplaceRuleTemplateProvider marketplaceRuleTemplateProvider) {
+    @Activate
+    public CommunityRuleTemplateAddonHandler(
+            @Reference MarketplaceRuleTemplateProvider marketplaceRuleTemplateProvider) {
         this.marketplaceRuleTemplateProvider = marketplaceRuleTemplateProvider;
-    }
-
-    protected void unsetMarketplaceRuleTemplateProvider(
-            MarketplaceRuleTemplateProvider marketplaceRuleTemplateProvider) {
-        this.marketplaceRuleTemplateProvider = null;
     }
 
     @Override
@@ -81,10 +79,10 @@ public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandle
                 template = getTemplateFromURL((String) addon.getProperties().get(YAML_DOWNLOAD_URL_PROPERTY));
                 marketplaceRuleTemplateProvider.addTemplateAsYAML(addon.getId(), template);
             } else if (addon.getProperties().containsKey(JSON_CONTENT_PROPERTY)) {
-                template = (@NonNull String) addon.getProperties().get(JSON_CONTENT_PROPERTY);
+                template = (String) addon.getProperties().get(JSON_CONTENT_PROPERTY);
                 marketplaceRuleTemplateProvider.addTemplateAsJSON(addon.getId(), template);
             } else if (addon.getProperties().containsKey(YAML_CONTENT_PROPERTY)) {
-                template = (@NonNull String) addon.getProperties().get(YAML_CONTENT_PROPERTY);
+                template = (String) addon.getProperties().get(YAML_CONTENT_PROPERTY);
                 marketplaceRuleTemplateProvider.addTemplateAsYAML(addon.getId(), template);
             }
         } catch (IOException e) {

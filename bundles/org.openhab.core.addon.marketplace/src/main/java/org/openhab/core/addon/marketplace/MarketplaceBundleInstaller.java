@@ -79,7 +79,7 @@ public abstract class MarketplaceBundleInstaller {
         File addonPath = getAddonCacheDirectory(addonId);
         if (addonPath.exists() && addonPath.isDirectory()) {
             File[] bundleFiles = addonPath.listFiles();
-            if (bundleFiles.length != 1) {
+            if (bundleFiles == null || bundleFiles.length != 1) {
                 throw new MarketplaceHandlerException(
                         "The local cache folder doesn't contain a single file: " + addonPath.toString());
             }

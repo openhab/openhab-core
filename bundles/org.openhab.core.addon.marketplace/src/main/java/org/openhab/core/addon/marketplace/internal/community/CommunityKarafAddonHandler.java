@@ -13,24 +13,27 @@
 package org.openhab.core.addon.marketplace.internal.community;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
-import org.openhab.core.addon.marketplace.MarketplaceBundleInstaller;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -47,26 +50,22 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(immediate = true)
-public class CommunityKarafAddonHandler extends MarketplaceBundleInstaller implements MarketplaceAddonHandler {
-    private static final String KAR_CONTENT_TYPE = "application/vnd.openhab.kar";
-
-    // add-on types supported by this handler
-    private static final List<String> SUPPORTED_EXT_TYPES = List.of("automation", "binding", "persistence",
-            "transformation");
-
-    private static final String JAR_DOWNLOAD_URL_PROPERTY = "jar_download_url";
+@NonNullByDefault
+public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
+    private static final String KAR_CONTENT_TYPE = "application/vnd.openhab.feature;type=karfile";
+    private static final String BUNDLE_CACHE_PATH = OpenHAB.getUserDataFolder() + File.separator + "marketplace"
+            + File.separator + "kar";
+    private static final List<String> SUPPORTED_EXT_TYPES = List.of("binding");
+    private static final String KAR_DOWNLOAD_URL_PROPERTY = "kar_download_url";
 
     private final Logger logger = LoggerFactory.getLogger(CommunityKarafAddonHandler.class);
 
-    private final BundleContext bundleContext;
     private final FeaturesService featuresService;
 
     @Activate
-    public CommunityKarafAddonHandler(BundleContext bundleContext, @Reference FeaturesService featuresService,
-            Map<String, Object> config) {
-        this.bundleContext = bundleContext;
+    public CommunityKarafAddonHandler(@Reference FeaturesService featuresService) {
         this.featuresService = featuresService;
-        ensureCachedBundlesAreInstalled(bundleContext);
+        ensureCachedBundlesAreInstalled();
     }
 
     @Override
@@ -76,12 +75,8 @@ public class CommunityKarafAddonHandler extends MarketplaceBundleInstaller imple
     }
 
     @Override
-    public boolean isInstalled(String id) {
-        return isBundleInstalled(bundleContext, id);
-    }
-
-    @Override
-    protected boolean isBundleInstalled(BundleContext bundleContext, String addonId) {
+    @SuppressWarnings("null")
+    public boolean isInstalled(String addonId) {
         try {
             File addonDirectory = getAddonCacheDirectory(addonId);
             List<URI> repositories = Arrays.stream(featuresService.listRepositories()).map(Repository::getURI)
@@ -101,43 +96,22 @@ public class CommunityKarafAddonHandler extends MarketplaceBundleInstaller imple
     public void install(Addon addon) throws MarketplaceHandlerException {
         URL sourceUrl;
         try {
-            sourceUrl = new URL((String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY));
+            sourceUrl = new URL((String) addon.getProperties().get(KAR_DOWNLOAD_URL_PROPERTY));
             addBundleToCache(addon.getId(), sourceUrl);
-            installFromCache(bundleContext, addon.getId());
+            installFromCache(addon.getId());
         } catch (MalformedURLException e) {
             throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage());
         }
     }
 
     @Override
-    protected void installFromCache(BundleContext bundleContext, String addonId) throws MarketplaceHandlerException {
-        File addonPath = getAddonCacheDirectory(addonId);
-        if (addonPath.exists() && addonPath.isDirectory()) {
-            File[] bundleFiles = addonPath.listFiles();
-            if (bundleFiles != null && bundleFiles.length != 1) {
-                throw new MarketplaceHandlerException(
-                        "The local cache folder doesn't contain a single file: " + addonPath);
-            }
-            try {
-                featuresService.addRepository(bundleFiles[0].toURI(), true);
-            } catch (Exception e) {
-                throw new MarketplaceHandlerException(
-                        "Cannot install bundle from marketplace cache: " + e.getMessage());
-            }
-        }
-    }
-
-    @Override
+    @SuppressWarnings("null")
     public void uninstall(Addon addon) throws MarketplaceHandlerException {
-        uninstallBundle(bundleContext, addon.getId());
-    }
-
-    @Override
-    protected void uninstallBundle(BundleContext bundleContext, String addonId) throws MarketplaceHandlerException {
         try {
-            File addonPath = getAddonCacheDirectory(addonId);
-            List<URI> repositories = Arrays.stream(featuresService.listRepositories()).map(Repository::getURI)
-                    .collect(Collectors.toList());
+            File addonPath = getAddonCacheDirectory(addon.getId());
+            List<URI> repositories = Arrays
+                    .stream(Objects.requireNonNullElse(featuresService.listRepositories(), new Repository[] {}))
+                    .map(Repository::getURI).collect(Collectors.toList());
             if (addonPath.exists() && addonPath.isDirectory()) {
                 for (File file : Objects.requireNonNullElse(addonPath.listFiles(), new File[] {})) {
                     if (repositories.contains(file.toURI())) {
@@ -150,5 +124,66 @@ public class CommunityKarafAddonHandler extends MarketplaceBundleInstaller imple
         } catch (Exception e) {
             throw new MarketplaceHandlerException("Failed uninstalling bundle: " + e.getMessage());
         }
+    }
+
+    /**
+     * Downloads a bundle file from a remote source and puts it in the local cache with the add-on ID.
+     *
+     * @param addonId the add-on ID
+     * @param sourceUrl the (online) source where the .kar file can be found
+     * @throws MarketplaceHandlerException on error
+     */
+    private void addBundleToCache(String addonId, URL sourceUrl) throws MarketplaceHandlerException {
+        try {
+            String fileName = new File(sourceUrl.toURI().getPath()).getName();
+            File addonFile = new File(getAddonCacheDirectory(addonId), fileName);
+            addonFile.getParentFile().mkdirs();
+
+            InputStream source = sourceUrl.openStream();
+            Path outputPath = Path.of(addonFile.toURI());
+            Files.copy(source, outputPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException | URISyntaxException e) {
+            throw new MarketplaceHandlerException("Cannot copy bundle to local cache: " + e.getMessage());
+        }
+    }
+
+    private void installFromCache(String addonId) throws MarketplaceHandlerException {
+        File addonPath = getAddonCacheDirectory(addonId);
+        if (addonPath.exists() && addonPath.isDirectory()) {
+            File[] bundleFiles = addonPath.listFiles();
+            if (bundleFiles == null || bundleFiles.length != 1) {
+                throw new MarketplaceHandlerException(
+                        "The local cache folder doesn't contain a single file: " + addonPath);
+            }
+            try {
+                featuresService.addRepository(bundleFiles[0].toURI(), true);
+            } catch (Exception e) {
+                throw new MarketplaceHandlerException(
+                        "Cannot install bundle from marketplace cache: " + e.getMessage());
+            }
+        }
+    }
+
+    private void ensureCachedBundlesAreInstalled() {
+        File addonPath = new File(BUNDLE_CACHE_PATH);
+        if (addonPath.exists() && addonPath.isDirectory()) {
+            for (File bundleFile : addonPath.listFiles()) {
+                if (bundleFile.isDirectory()) {
+                    String addonId = "marketplace:" + bundleFile.getName();
+                    if (!isInstalled(addonId)) {
+                        logger.info("Reinstalling missing marketplace bundle: {}", addonId);
+                        try {
+                            installFromCache(addonId);
+                        } catch (MarketplaceHandlerException e) {
+                            logger.warn("Failed reinstalling add-on from cache", e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private File getAddonCacheDirectory(String addonId) {
+        return new File(BUNDLE_CACHE_PATH + File.separator + addonId.replace("marketplace:", ""));
     }
 }

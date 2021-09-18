@@ -36,12 +36,12 @@ import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
-import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponse;
-import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponse.DiscoursePosterInfo;
-import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponse.DiscourseTopicItem;
-import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponse.DiscourseUser;
-import org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponse;
-import org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponse.DiscoursePostLink;
+import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO;
+import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO.DiscoursePosterInfo;
+import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO.DiscourseTopicItem;
+import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO.DiscourseUser;
+import org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponseDTO;
+import org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponseDTO.DiscoursePostLink;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
@@ -161,7 +161,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     @Override
     public List<Addon> getAddons(Locale locale) {
         try {
-            List<DiscourseCategoryResponse> pages = new ArrayList<DiscourseCategoryResponse>();
+            List<DiscourseCategoryResponseDTO> pages = new ArrayList<DiscourseCategoryResponseDTO>();
 
             URL url = new URL(COMMUNITY_MARKETPLACE_URL);
             int pageNb = 1;
@@ -173,7 +173,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
                 }
 
                 try (Reader reader = new InputStreamReader(connection.getInputStream())) {
-                    DiscourseCategoryResponse parsed = gson.fromJson(reader, DiscourseCategoryResponse.class);
+                    DiscourseCategoryResponseDTO parsed = gson.fromJson(reader, DiscourseCategoryResponseDTO.class);
                     pages.add(parsed);
 
                     if (parsed.topic_list.more_topics_url != null) {
@@ -191,7 +191,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
                     .map(t -> convertTopicItemToAddon(t, users)).collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("Unable to retrieve marketplace add-ons", e);
-            return new ArrayList<Addon>();
+            return new ArrayList<>();
         }
     }
 
@@ -207,7 +207,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
             }
 
             try (Reader reader = new InputStreamReader(connection.getInputStream())) {
-                DiscourseTopicResponse parsed = gson.fromJson(reader, DiscourseTopicResponse.class);
+                DiscourseTopicResponseDTO parsed = gson.fromJson(reader, DiscourseTopicResponseDTO.class);
                 return convertTopicToAddon(parsed);
             }
         } catch (Exception e) {
@@ -280,6 +280,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
         String id = ADDON_ID_PREFIX + topic.id.toString();
         AddonType addonType = types.get(topic.category_id);
         String type = (addonType != null) ? addonType.getId() : "";
+        // TODO: content-type differentiation for kar and jar
         String contentType = (contentTypes.get(type) != null) ? contentTypes.get(type) : "";
         String version = "";
         String title = topic.title;
@@ -341,15 +342,16 @@ public class CommunityMarketplaceAddonService implements AddonService {
     }
 
     /**
-     * Transforms a {@link DiscourseTopicResponse} to a {@link Addon}
+     * Transforms a {@link DiscourseTopicResponseDTO} to a {@link Addon}
      *
      * @param topic the topic
      * @return the list item
      */
-    private Addon convertTopicToAddon(DiscourseTopicResponse topic) {
+    private Addon convertTopicToAddon(DiscourseTopicResponseDTO topic) {
         String id = ADDON_ID_PREFIX + topic.id.toString();
         AddonType addonType = types.get(topic.category_id);
         String type = (addonType != null) ? addonType.getId() : "";
+        // TODO: adjust contentType to kar/jar
         String contentType = contentTypes.get(type);
         String version = "";
         String title = topic.title;
@@ -381,6 +383,9 @@ public class CommunityMarketplaceAddonService implements AddonService {
             for (DiscoursePostLink postLink : topic.post_stream.posts[0].link_counts) {
                 if (postLink.url.endsWith(".jar")) {
                     properties.put("jar_download_url", postLink.url);
+                }
+                if (postLink.url.endsWith(".kar")) {
+                    properties.put("kar_download_url", postLink.url);
                 }
                 if (postLink.url.endsWith(".json")) {
                     properties.put("json_download_url", postLink.url);

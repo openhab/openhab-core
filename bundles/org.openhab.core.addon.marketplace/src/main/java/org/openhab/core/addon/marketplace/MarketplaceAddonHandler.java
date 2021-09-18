@@ -35,8 +35,9 @@ public interface MarketplaceAddonHandler {
     /**
      * Tells whether this handler supports a given add-on.
      *
-     * @param addon the add-on in question
-     * @return true, if the add-on is supported, false otherwise
+     * @param type the type of the add-on in question
+     * @param contentType the content type of the add-on on question
+     * @return true, if the addon type and contentType are supported, false otherwise
      */
     boolean supports(String type, String contentType);
 

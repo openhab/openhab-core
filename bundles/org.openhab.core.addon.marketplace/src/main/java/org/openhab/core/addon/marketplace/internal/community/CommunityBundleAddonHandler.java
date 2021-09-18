@@ -14,10 +14,9 @@ package org.openhab.core.addon.marketplace.internal.community;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceBundleInstaller;
@@ -25,9 +24,6 @@ import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A {@link MarketplaceAddonHandler} implementation, which handles add-ons as jar files (specifically, OSGi
@@ -40,28 +36,18 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(immediate = true)
+@NonNullByDefault
 public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller implements MarketplaceAddonHandler {
-
-    // add-on types supported by this handler
-    private static final List<String> SUPPORTED_EXT_TYPES = Arrays.asList("binding");
-
+    private static final List<String> SUPPORTED_EXT_TYPES = List.of("binding");
     private static final String BUNDLE_CONTENTTYPE = "application/vnd.openhab.bundle";
-
     private static final String JAR_DOWNLOAD_URL_PROPERTY = "jar_download_url";
 
-    private final Logger logger = LoggerFactory.getLogger(CommunityBundleAddonHandler.class);
-
-    private BundleContext bundleContext;
+    private final BundleContext bundleContext;
 
     @Activate
-    protected void activate(BundleContext bundleContext, Map<String, Object> config) {
+    public CommunityBundleAddonHandler(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
         ensureCachedBundlesAreInstalled(bundleContext);
-    }
-
-    @Deactivate
-    protected void deactivate() {
-        this.bundleContext = null;
     }
 
     @Override

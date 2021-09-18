@@ -18,7 +18,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
@@ -41,7 +41,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
  * @author Yannick Schaus - Initial contribution and API
  *
  */
-@Component
+@Component(immediate = true)
+@NonNullByDefault
 public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
     private static final String YAML_DOWNLOAD_URL_PROPERTY = "yaml_download_url";
     private static final String YAML_CONTENT_PROPERTY = "yaml_content";
@@ -77,7 +78,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
             if (addon.getProperties().containsKey(YAML_DOWNLOAD_URL_PROPERTY)) {
                 widget = getWidgetFromURL((String) addon.getProperties().get(YAML_DOWNLOAD_URL_PROPERTY));
             } else if (addon.getProperties().containsKey(YAML_CONTENT_PROPERTY)) {
-                widget = (@NonNull String) addon.getProperties().get(YAML_CONTENT_PROPERTY);
+                widget = (String) addon.getProperties().get(YAML_CONTENT_PROPERTY);
             } else {
                 throw new IllegalArgumentException("Couldn't find the widget in the add-on entry");
             }
