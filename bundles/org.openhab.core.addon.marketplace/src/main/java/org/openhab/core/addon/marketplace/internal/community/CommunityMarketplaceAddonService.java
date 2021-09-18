@@ -90,7 +90,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private static final String YAML_CODE_MARKUP_START = "<pre><code class=\"lang-yaml\">";
     private static final String CODE_MARKUP_END = "</code></pre>";
 
-    private static final Integer ADDONS_CATEGORY = 73;
+    private static final Integer BUNDLES_CATEGORY = 73;
     private static final Integer RULETEMPLATES_CATEGORY = 74;
     private static final Integer UIWIDGETS_CATEGORY = 75;
 
@@ -277,7 +277,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
             return TAG_ADDON_TYPE_MAP.get("automation");
         } else if (UIWIDGETS_CATEGORY.equals(category)) {
             return TAG_ADDON_TYPE_MAP.get("ui");
-        } else if (ADDONS_CATEGORY.equals(category)) {
+        } else if (BUNDLES_CATEGORY.equals(category)) {
             // try to get it from tags if we have tags
             if (tags == null) {
                 return null;
@@ -300,7 +300,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
             return RULETEMPLATES_CONTENT_TYPE;
         } else if (UIWIDGETS_CATEGORY.equals(category)) {
             return UIWIDGETS_CONTENT_TYPE;
-        } else if (ADDONS_CATEGORY.equals(category)) {
+        } else if (BUNDLES_CATEGORY.equals(category)) {
             if (tags != null && Arrays.asList(tags).contains("kar")) {
                 return KAR_CONTENT_TYPE;
             } else {
