@@ -177,7 +177,7 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
                         });
             }
         } catch (IOException e) {
-            logger.warn("Failed to re-install bundled: {}", e.getMessage());
+            logger.warn("Failed to re-install bundles: {}", e.getMessage());
         }
     }
 
