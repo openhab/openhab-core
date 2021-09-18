@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon.marketplace.internal.community;
+package org.openhab.core.addon.marketplace.karaf.internal.community;
 
 import java.io.File;
 import java.io.IOException;
