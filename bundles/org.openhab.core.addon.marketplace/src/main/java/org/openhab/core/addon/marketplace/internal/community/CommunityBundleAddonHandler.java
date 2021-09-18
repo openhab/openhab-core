@@ -12,6 +12,8 @@
  */
 package org.openhab.core.addon.marketplace.internal.community;
 
+import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.JAR_CONTENT_TYPE;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -38,8 +40,8 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true)
 @NonNullByDefault
 public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller implements MarketplaceAddonHandler {
-    private static final List<String> SUPPORTED_EXT_TYPES = List.of("binding");
-    private static final String BUNDLE_CONTENTTYPE = "application/vnd.openhab.bundle";
+    private static final List<String> SUPPORTED_EXT_TYPES = List.of("automation", "binding", "io", "persistence",
+            "transformation", "ui", "voice");
     private static final String JAR_DOWNLOAD_URL_PROPERTY = "jar_download_url";
 
     private final BundleContext bundleContext;
@@ -53,7 +55,7 @@ public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller impl
     @Override
     public boolean supports(String type, String contentType) {
         // we support only certain extension types, and only as pure OSGi bundles
-        return SUPPORTED_EXT_TYPES.contains(type) && contentType.equals(BUNDLE_CONTENTTYPE);
+        return SUPPORTED_EXT_TYPES.contains(type) && contentType.equals(JAR_CONTENT_TYPE);
     }
 
     @Override

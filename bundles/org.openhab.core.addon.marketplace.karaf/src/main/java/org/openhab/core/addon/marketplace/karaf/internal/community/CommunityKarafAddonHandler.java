@@ -12,6 +12,8 @@
  */
 package org.openhab.core.addon.marketplace.karaf.internal.community;
 
+import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.KAR_CONTENT_TYPE;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,9 +54,9 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 @NonNullByDefault
 public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
-    private static final String KAR_CONTENT_TYPE = "application/vnd.openhab.feature;type=karfile";
     private static final Path BUNDLE_CACHE_PATH = Path.of(OpenHAB.getUserDataFolder(), "marketplace", "kar");
-    private static final List<String> SUPPORTED_EXT_TYPES = List.of("binding");
+    private static final List<String> SUPPORTED_EXT_TYPES = List.of("automation", "binding", "io", "persistence",
+            "transformation", "ui", "voice");
     private static final String KAR_DOWNLOAD_URL_PROPERTY = "kar_download_url";
 
     private final Logger logger = LoggerFactory.getLogger(CommunityKarafAddonHandler.class);

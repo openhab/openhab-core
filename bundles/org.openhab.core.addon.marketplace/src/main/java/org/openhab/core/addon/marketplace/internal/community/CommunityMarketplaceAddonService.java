@@ -68,6 +68,10 @@ import com.google.gson.GsonBuilder;
         property = Constants.SERVICE_PID + "=org.openhab.marketplace")
 @ConfigurableService(category = "system", label = "Community Marketplace", description_uri = CommunityMarketplaceAddonService.CONFIG_URI)
 public class CommunityMarketplaceAddonService implements AddonService {
+    public static final String JAR_CONTENT_TYPE = "application/vnd.openhab.bundle";
+    public static final String KAR_CONTENT_TYPE = "application/vnd.openhab.feature;type=karfile";
+    public static final String RULETEMPLATES_CONTENT_TYPE = "application/vnd.openhab.ruletemplate";
+    public static final String UIWIDGETS_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=widget";
 
     // constants for the configuration properties
     static final String CONFIG_URI = "system:marketplace";
@@ -86,24 +90,20 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private static final String YAML_CODE_MARKUP_START = "<pre><code class=\"lang-yaml\">";
     private static final String CODE_MARKUP_END = "</code></pre>";
 
-    private static final Integer BINDINGS_CATEGORY = 73;
+    private static final Integer ADDONS_CATEGORY = 73;
     private static final Integer RULETEMPLATES_CATEGORY = 74;
     private static final Integer UIWIDGETS_CATEGORY = 75;
-    private static final Map<Integer, AddonType> CATEGORY_ADDON_TYPES = Map.of( //
-            BINDINGS_CATEGORY, new AddonType("binding", "Bindings"), //
-            RULETEMPLATES_CATEGORY, new AddonType("automation", "Automation"), //
-            UIWIDGETS_CATEGORY, new AddonType("ui", "User Interfaces"));
 
     private static final String PUBLISHED_TAG = "published";
 
-    private static final String BINDINGS_CONTENT_TYPE = "application/vnd.openhab.bundle";
-    private static final String KAR_CONTENT_TYPE = "application/vnd.openhab.feature;type=karfile";
-    private static final String RULETEMPLATES_CONTENT_TYPE = "application/vnd.openhab.ruletemplate";
-    private static final String UIWIDGETS_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=widget";
-    private static final Map<String, String> DEFAULT_CONTENT_TYPES = Map.of( //
-            "binding", BINDINGS_CONTENT_TYPE, //
-            "automation", RULETEMPLATES_CONTENT_TYPE, //
-            "ui", UIWIDGETS_CONTENT_TYPE);
+    private static final Map<String, AddonType> TAG_ADDON_TYPE_MAP = Map.of( //
+            "automation", new AddonType("automation", "Automation"), //
+            "binding", new AddonType("binding", "Bindings"), //
+            "io", new AddonType("io", "I/O Services"), //
+            "persistence", new AddonType("persistence", "Persistence Services"), //
+            "transformation", new AddonType("transformation", "Transformations"), //
+            "ui", new AddonType("ui", "User Interfaces"), //
+            "voice", new AddonType("voice", "Voices"));
 
     private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
@@ -218,7 +218,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
     @Override
     public List<AddonType> getTypes(Locale locale) {
-        return new ArrayList<>(CATEGORY_ADDON_TYPES.values());
+        return new ArrayList<>(TAG_ADDON_TYPE_MAP.values());
     }
 
     @Override
@@ -271,6 +271,48 @@ public class CommunityMarketplaceAddonService implements AddonService {
         return "";
     }
 
+    private @Nullable AddonType getAddonType(@Nullable Integer category, String @Nullable [] tags) {
+        // check if we can determine the addon type from the category
+        if (RULETEMPLATES_CATEGORY.equals(category)) {
+            return TAG_ADDON_TYPE_MAP.get("automation");
+        } else if (UIWIDGETS_CATEGORY.equals(category)) {
+            return TAG_ADDON_TYPE_MAP.get("ui");
+        } else if (ADDONS_CATEGORY.equals(category)) {
+            // try to get it from tags if we have tags
+            if (tags == null) {
+                return null;
+            }
+            for (String tag : tags) {
+                AddonType addonType = TAG_ADDON_TYPE_MAP.get(tag);
+                if (addonType != null) {
+                    return addonType;
+                }
+            }
+        }
+
+        // or return null
+        return null;
+    }
+
+    private String getContentType(@Nullable Integer category, String @Nullable [] tags) {
+        // check if we can determine the addon type from the category
+        if (RULETEMPLATES_CATEGORY.equals(category)) {
+            return RULETEMPLATES_CONTENT_TYPE;
+        } else if (UIWIDGETS_CATEGORY.equals(category)) {
+            return UIWIDGETS_CONTENT_TYPE;
+        } else if (ADDONS_CATEGORY.equals(category)) {
+            if (tags != null && Arrays.asList(tags).contains("kar")) {
+                return KAR_CONTENT_TYPE;
+            } else {
+                // default to plain jar bundle for addons
+                return JAR_CONTENT_TYPE;
+            }
+        }
+
+        // empty string if content type could not be defined
+        return "";
+    }
+
     /**
      * Transforms a {@link DiscourseTopicItem} to a {@link Addon}
      *
@@ -279,10 +321,11 @@ public class CommunityMarketplaceAddonService implements AddonService {
      */
     private Addon convertTopicItemToAddon(DiscourseTopicItem topic, List<DiscourseUser> users) {
         String id = ADDON_ID_PREFIX + topic.id.toString();
-        AddonType addonType = CATEGORY_ADDON_TYPES.get(topic.category_id);
+
+        AddonType addonType = getAddonType(topic.category_id, topic.tags);
         String type = (addonType != null) ? addonType.getId() : "";
-        // TODO: content-type differentiation for kar and jar
-        String contentType = (DEFAULT_CONTENT_TYPES.get(type) != null) ? DEFAULT_CONTENT_TYPES.get(type) : "";
+        String contentType = getContentType(topic.category_id, topic.tags);
+
         String version = "";
         String title = topic.title;
         String link = COMMUNITY_TOPIC_URL + topic.id.toString();
@@ -350,9 +393,11 @@ public class CommunityMarketplaceAddonService implements AddonService {
      */
     private Addon convertTopicToAddon(DiscourseTopicResponseDTO topic) {
         String id = ADDON_ID_PREFIX + topic.id.toString();
-        AddonType addonType = CATEGORY_ADDON_TYPES.get(topic.category_id);
+
+        AddonType addonType = getAddonType(topic.category_id, topic.tags);
         String type = (addonType != null) ? addonType.getId() : "";
-        String contentType = DEFAULT_CONTENT_TYPES.get(type);
+        String contentType = getContentType(topic.category_id, topic.tags);
+
         String version = "";
         String title = topic.title;
         String link = COMMUNITY_TOPIC_URL + topic.id.toString();
@@ -386,7 +431,6 @@ public class CommunityMarketplaceAddonService implements AddonService {
                 }
                 if (postLink.url.endsWith(".kar")) {
                     properties.put("kar_download_url", postLink.url);
-                    contentType = KAR_CONTENT_TYPE;
                 }
                 if (postLink.url.endsWith(".json")) {
                     properties.put("json_download_url", postLink.url);
@@ -412,7 +456,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
         // try to use an handler to determine if the add-on is installed
         boolean installed = false;
         for (MarketplaceAddonHandler handler : addonHandlers) {
-            if (handler.supports(type, (contentType != null) ? contentType : "")) {
+            if (handler.supports(type, contentType)) {
                 if (handler.isInstalled(id)) {
                     installed = true;
                 }
