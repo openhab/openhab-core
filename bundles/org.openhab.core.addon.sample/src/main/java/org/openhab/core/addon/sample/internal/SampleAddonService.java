@@ -80,8 +80,9 @@ public class SampleAddonService implements AddonService {
                 String description = createDescription();
                 String imageLink = null;
                 String backgroundColor = createRandomColor();
-                Addon extension = new Addon(id, typeId, label, version, "example/vnd.openhab.addon", link, "John Doe",
-                        false, installed, description, backgroundColor, imageLink, null, null, null, null, null, null);
+                Addon extension = new Addon(id, typeId, label, version, "stable", "example/vnd.openhab.addon", link,
+                        "John Doe", false, installed, description, backgroundColor, imageLink, null, null, null, null,
+                        null, null, null);
                 extensions.put(extension.getId(), extension);
             }
         }
