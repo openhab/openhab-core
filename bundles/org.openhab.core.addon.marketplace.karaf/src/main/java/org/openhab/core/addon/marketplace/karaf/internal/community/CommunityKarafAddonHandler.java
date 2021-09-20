@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.karaf.kar.KarService;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -54,6 +55,7 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     private static final List<String> SUPPORTED_EXT_TYPES = List.of("automation", "binding", "io", "persistence",
             "transformation", "ui", "voice");
     private static final String KAR_DOWNLOAD_URL_PROPERTY = "kar_download_url";
+    private static final String KAR_EXTENSION = ".kar";
 
     private final Logger logger = LoggerFactory.getLogger(CommunityKarafAddonHandler.class);
 
@@ -70,16 +72,24 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
         return SUPPORTED_EXT_TYPES.contains(type) && KAR_CONTENT_TYPE.equals(contentType);
     }
 
+    private Stream<Path> karFilesStream(Path addonDirectory) throws IOException {
+        return Files.isDirectory(addonDirectory) ? Files.list(addonDirectory).map(Path::getFileName)
+                .filter(path -> path.toString().endsWith(KAR_EXTENSION)) : Stream.empty();
+    }
+
+    private String pathToKarRepoName(Path path) {
+        String fileName = path.getFileName().toString();
+        return fileName.substring(0, fileName.length() - KAR_EXTENSION.length());
+    }
+
     @Override
     @SuppressWarnings("null")
     public boolean isInstalled(String addonId) {
         try {
             Path addonDirectory = getAddonCacheDirectory(addonId);
             List<String> repositories = karService.list();
-            if (Files.isDirectory(addonDirectory)) {
-                return Files.list(addonDirectory).filter(path -> path.endsWith(".kar")).findFirst()
-                        .map(Path::getFileName).map(Path::toString).map(repositories::contains).orElse(false);
-            }
+            return karFilesStream(addonDirectory).findFirst().map(this::pathToKarRepoName).map(repositories::contains)
+                    .orElse(false);
         } catch (Exception e) {
             logger.warn("Failed to determine installation status for {}: ", addonId, e);
         }
@@ -99,19 +109,16 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     }
 
     @Override
-    @SuppressWarnings("null")
     public void uninstall(Addon addon) throws MarketplaceHandlerException {
         try {
             Path addonPath = getAddonCacheDirectory(addon.getId());
             List<String> repositories = karService.list();
-            if (Files.isDirectory(addonPath)) {
-                List<Path> repositoryFiles = Files.list(addonPath)
-                        .filter(path -> repositories.contains(path.getFileName().toString()))
-                        .collect(Collectors.toList());
-                for (Path file : repositoryFiles) {
-                    karService.uninstall(file.getFileName().toString());
-                    Files.delete(file);
+            for (Path path : karFilesStream(addonPath).collect(Collectors.toList())) {
+                String karRepoName = pathToKarRepoName(path);
+                if (repositories.contains(karRepoName)) {
+                    karService.uninstall(karRepoName);
                 }
+                Files.delete(addonPath.resolve(path));
             }
             Files.delete(addonPath);
         } catch (Exception e) {
@@ -148,7 +155,7 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
                             "The local cache folder doesn't contain a single file: " + addonPath, null);
                 }
                 try {
-                    karService.install(bundleFiles.get(0).toUri(), true);
+                    karService.install(bundleFiles.get(0).toUri(), false);
                 } catch (Exception e) {
                     throw new MarketplaceHandlerException(
                             "Cannot install bundle from marketplace cache: " + e.getMessage(), e);
