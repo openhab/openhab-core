@@ -18,19 +18,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Repository;
+import org.apache.karaf.kar.KarService;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.Addon;
@@ -61,11 +57,11 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
 
     private final Logger logger = LoggerFactory.getLogger(CommunityKarafAddonHandler.class);
 
-    private final FeaturesService featuresService;
+    private final KarService karService;
 
     @Activate
-    public CommunityKarafAddonHandler(@Reference FeaturesService featuresService) {
-        this.featuresService = featuresService;
+    public CommunityKarafAddonHandler(@Reference KarService karService) {
+        this.karService = karService;
         ensureCachedBundlesAreInstalled();
     }
 
@@ -79,11 +75,10 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     public boolean isInstalled(String addonId) {
         try {
             Path addonDirectory = getAddonCacheDirectory(addonId);
-            List<URI> repositories = Arrays.stream(featuresService.listRepositories()).map(Repository::getURI)
-                    .collect(Collectors.toList());
+            List<String> repositories = karService.list();
             if (Files.isDirectory(addonDirectory)) {
-                return Files.list(addonDirectory).filter(path -> path.endsWith(".kar")).findFirst().map(Path::toUri)
-                        .map(repositories::contains).orElse(false);
+                return Files.list(addonDirectory).filter(path -> path.endsWith(".kar")).findFirst()
+                        .map(Path::getFileName).map(Path::toString).map(repositories::contains).orElse(false);
             }
         } catch (Exception e) {
             logger.warn("Failed to determine installation status for {}: ", addonId, e);
@@ -108,14 +103,13 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     public void uninstall(Addon addon) throws MarketplaceHandlerException {
         try {
             Path addonPath = getAddonCacheDirectory(addon.getId());
-            List<URI> repositories = Arrays
-                    .stream(Objects.requireNonNullElse(featuresService.listRepositories(), new Repository[] {}))
-                    .map(Repository::getURI).collect(Collectors.toList());
+            List<String> repositories = karService.list();
             if (Files.isDirectory(addonPath)) {
-                List<Path> repositoryFiles = Files.list(addonPath).filter(path -> repositories.contains(path.toUri()))
+                List<Path> repositoryFiles = Files.list(addonPath)
+                        .filter(path -> repositories.contains(path.getFileName().toString()))
                         .collect(Collectors.toList());
                 for (Path file : repositoryFiles) {
-                    featuresService.removeRepository(file.toUri(), true);
+                    karService.uninstall(file.getFileName().toString());
                     Files.delete(file);
                 }
             }
@@ -154,7 +148,7 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
                             "The local cache folder doesn't contain a single file: " + addonPath, null);
                 }
                 try {
-                    featuresService.addRepository(bundleFiles.get(0).toUri(), true);
+                    karService.install(bundleFiles.get(0).toUri(), true);
                 } catch (Exception e) {
                     throw new MarketplaceHandlerException(
                             "Cannot install bundle from marketplace cache: " + e.getMessage(), e);

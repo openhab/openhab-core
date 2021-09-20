@@ -16,8 +16,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.karaf.features</groupId>
-      <artifactId>org.apache.karaf.features.core</artifactId>
+      <groupId>org.apache.karaf.kar</groupId>
+      <artifactId>org.apache.karaf.kar.core</artifactId>
       <version>${karaf.tooling.version}</version>
       <scope>compile</scope>
     </dependency>
