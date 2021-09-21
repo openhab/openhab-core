@@ -207,7 +207,7 @@ public class Addon {
     }
 
     /**
-     * A
+     * A comma-separated list of ISO 3166 codes relevant to this add-on
      */
     public String getCountries() {
         return countries;
