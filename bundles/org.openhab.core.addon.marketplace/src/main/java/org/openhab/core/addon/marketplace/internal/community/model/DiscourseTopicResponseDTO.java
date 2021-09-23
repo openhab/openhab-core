@@ -20,7 +20,7 @@ import java.util.Date;
  * @author Yannick Schaus - Initial contribution
  *
  */
-public class DiscourseTopicResponse {
+public class DiscourseTopicResponseDTO {
     public Integer id;
 
     public DiscoursePostStream post_stream;

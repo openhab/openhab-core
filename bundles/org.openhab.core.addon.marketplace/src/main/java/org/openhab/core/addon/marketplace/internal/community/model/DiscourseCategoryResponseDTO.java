@@ -20,7 +20,7 @@ import java.util.Date;
  * @author Yannick Schaus - Initial contribution
  *
  */
-public class DiscourseCategoryResponse {
+public class DiscourseCategoryResponseDTO {
     public DiscourseUser[] users;
     public DiscourseTopicList topic_list;
 

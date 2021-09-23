@@ -13,6 +13,7 @@
 package org.openhab.core.addon.marketplace;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * This is an exception that can be thrown by {@link MarketplaceAddonHandler}s if some operation fails.
@@ -30,7 +31,7 @@ public class MarketplaceHandlerException extends Exception {
      *
      * @param message A message describing the issue
      */
-    public MarketplaceHandlerException(String message) {
-        super(message);
+    public MarketplaceHandlerException(String message, @Nullable Throwable cause) {
+        super(message, cause);
     }
 }

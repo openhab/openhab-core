@@ -21,6 +21,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
@@ -44,8 +46,7 @@ import org.slf4j.LoggerFactory;
 public abstract class MarketplaceBundleInstaller {
     private final Logger logger = LoggerFactory.getLogger(MarketplaceBundleInstaller.class);
 
-    private static final String BUNDLE_CACHE_PATH = OpenHAB.getUserDataFolder() + File.separator + "marketplace"
-            + File.separator + "bundles";
+    private static final Path BUNDLE_CACHE_PATH = Path.of(OpenHAB.getUserDataFolder(), "marketplace", "bundles");
 
     /**
      * Downloads a bundle file from a remote source and puts it in the local cache with the add-on ID.
@@ -57,14 +58,13 @@ public abstract class MarketplaceBundleInstaller {
     protected void addBundleToCache(String addonId, URL sourceUrl) throws MarketplaceHandlerException {
         try {
             String fileName = new File(sourceUrl.toURI().getPath()).getName();
-            File addonFile = new File(getAddonCacheDirectory(addonId), fileName);
-            addonFile.getParentFile().mkdirs();
+            Path addonFile = getAddonCacheDirectory(addonId).resolve(fileName);
+            Files.createDirectories(addonFile.getParent());
 
             InputStream source = sourceUrl.openStream();
-            Path outputPath = Path.of(addonFile.toURI());
-            Files.copy(source, outputPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(source, addonFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException | URISyntaxException e) {
-            throw new MarketplaceHandlerException("Cannot copy bundle to local cache: " + e.getMessage());
+            throw new MarketplaceHandlerException("Cannot copy bundle to local cache: " + e.getMessage(), e);
         }
     }
 
@@ -76,26 +76,27 @@ public abstract class MarketplaceBundleInstaller {
      * @throws MarketplaceHandlerException
      */
     protected void installFromCache(BundleContext bundleContext, String addonId) throws MarketplaceHandlerException {
-        File addonPath = getAddonCacheDirectory(addonId);
-        if (addonPath.exists() && addonPath.isDirectory()) {
-            File[] bundleFiles = addonPath.listFiles();
-            if (bundleFiles.length != 1) {
-                throw new MarketplaceHandlerException(
-                        "The local cache folder doesn't contain a single file: " + addonPath.toString());
-            }
-
-            try (FileInputStream fileInputStream = new FileInputStream(bundleFiles[0])) {
-                Bundle bundle = bundleContext.installBundle(addonId, fileInputStream);
-                try {
-                    bundle.start();
-                } catch (BundleException e) {
-                    logger.warn("The marketplace bundle was successfully installed but doesn't start: {}",
-                            e.getMessage());
+        Path addonPath = getAddonCacheDirectory(addonId);
+        if (Files.isDirectory(addonPath)) {
+            try {
+                List<Path> bundleFiles = Files.list(addonPath).collect(Collectors.toList());
+                if (bundleFiles.size() != 1) {
+                    throw new MarketplaceHandlerException(
+                            "The local cache folder doesn't contain a single file: " + addonPath, null);
                 }
 
+                try (FileInputStream fileInputStream = new FileInputStream(bundleFiles.get(0).toFile())) {
+                    Bundle bundle = bundleContext.installBundle(addonId, fileInputStream);
+                    try {
+                        bundle.start();
+                    } catch (BundleException e) {
+                        logger.warn("The marketplace bundle was successfully installed but doesn't start: {}",
+                                e.getMessage());
+                    }
+                }
             } catch (IOException | BundleException e) {
-                throw new MarketplaceHandlerException(
-                        "Cannot install bundle from marketplace cache: " + e.getMessage());
+                throw new MarketplaceHandlerException("Cannot install bundle from marketplace cache: " + e.getMessage(),
+                        e);
             }
         }
     }
@@ -117,21 +118,24 @@ public abstract class MarketplaceBundleInstaller {
      * @param addonId the add-on ID
      */
     protected void uninstallBundle(BundleContext bundleContext, String addonId) throws MarketplaceHandlerException {
-        File addonPath = getAddonCacheDirectory(addonId);
-        if (addonPath.exists() && addonPath.isDirectory()) {
-            for (File bundleFile : addonPath.listFiles()) {
-                bundleFile.delete();
+        try {
+            Path addonPath = getAddonCacheDirectory(addonId);
+            if (Files.isDirectory(addonPath)) {
+                for (Path bundleFile : Files.list(addonPath).collect(Collectors.toList())) {
+                    Files.delete(bundleFile);
+                }
             }
+            Files.delete(addonPath);
+        } catch (IOException e) {
+            throw new MarketplaceHandlerException("Failed to delete bundle-files: " + e.getMessage(), e);
         }
-        addonPath.delete();
-
         if (isBundleInstalled(bundleContext, addonId)) {
             Bundle bundle = bundleContext.getBundle(addonId);
             try {
                 bundle.stop();
                 bundle.uninstall();
             } catch (BundleException e) {
-                throw new MarketplaceHandlerException("Failed uninstalling bundle: " + e.getMessage());
+                throw new MarketplaceHandlerException("Failed uninstalling bundle: " + e.getMessage(), e);
             }
         }
     }
@@ -142,26 +146,24 @@ public abstract class MarketplaceBundleInstaller {
      * @param bundleContext the {@link BundleContext} to use to look up the bundles
      */
     protected void ensureCachedBundlesAreInstalled(BundleContext bundleContext) {
-        File addonPath = new File(BUNDLE_CACHE_PATH);
-        if (addonPath.exists() && addonPath.isDirectory()) {
-            for (File bundleFile : addonPath.listFiles()) {
-                if (bundleFile.isDirectory()) {
-                    String addonId = "marketplace:" + bundleFile.getName();
-                    if (!isBundleInstalled(bundleContext, addonId)) {
-                        logger.info("Reinstalling missing marketplace bundle: {}", addonId);
-                        try {
-                            installFromCache(bundleContext, addonId);
-                        } catch (MarketplaceHandlerException e) {
-                            logger.warn("Failed reinstalling add-on from cache", e);
-                        }
-                    }
-                }
-                bundleFile.delete();
+        try {
+            if (Files.isDirectory(BUNDLE_CACHE_PATH)) {
+                Files.list(BUNDLE_CACHE_PATH).filter(Files::isDirectory).map(p -> "marketplace:" + p.getFileName())
+                        .filter(addonId -> !isBundleInstalled(bundleContext, addonId)).forEach(addonId -> {
+                            logger.info("Reinstalling missing marketplace bundle: {}", addonId);
+                            try {
+                                installFromCache(bundleContext, addonId);
+                            } catch (MarketplaceHandlerException e) {
+                                logger.warn("Failed reinstalling add-on from cache", e);
+                            }
+                        });
             }
+        } catch (IOException e) {
+            logger.warn("Failed to re-install bundles: {}", e.getMessage());
         }
     }
 
-    private File getAddonCacheDirectory(String addonId) {
-        return new File(BUNDLE_CACHE_PATH + File.separator + addonId.replace("marketplace:", ""));
+    private Path getAddonCacheDirectory(String addonId) {
+        return BUNDLE_CACHE_PATH.resolve(addonId.replace("marketplace:", ""));
     }
 }

@@ -13,6 +13,7 @@
 package org.openhab.core.addon;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class defines an add-on.
@@ -21,10 +22,12 @@ import java.util.Map;
  * @author Yannick Schaus - Add fields
  */
 public class Addon {
+    public static final Set<String> CODE_MATURITY_LEVELS = Set.of("alpha", "beta", "mature", "stable");
 
     private final String id;
     private final String label;
     private final String version;
+    private final String maturity;
     private final String contentType;
     private final String link;
     private final String author;
@@ -36,6 +39,7 @@ public class Addon {
     private final String configDescriptionURI;
     private final String keywords;
     private final String countries;
+    private final String license;
     private final String connection;
     private final String backgroundColor;
     private final String imageLink;
@@ -56,8 +60,8 @@ public class Addon {
      */
     public Addon(String id, String type, String label, String version, String contentType, String link, String author,
             boolean verifiedAuthor, boolean installed) {
-        this(id, type, label, version, contentType, link, author, verifiedAuthor, installed, null, null, null, null,
-                null, null, null, null, null);
+        this(id, type, label, version, null, contentType, link, author, verifiedAuthor, installed, null, null, null,
+                null, null, null, null, null, null, null);
     }
 
     /**
@@ -67,28 +71,39 @@ public class Addon {
      * @param type the type id of the add-on
      * @param label the label of the add-on
      * @param version the version of the add-on
+     * @param maturity the maturity level of this version
      * @param contentType the content type of the add-on
-     * @param description the detailed description of the add-on (may be null)
-     * @param backgroundColor for displaying the add-on (may be null)
-     * @param link the link to find more information about the add-on (may be null)
+     * @param link the link to find more information about the add-on (may be null)*
      * @param author the author of the add-on
      * @param verifiedAuthor true, if the author is verified
-     * @param imageLink the link to an image (png/svg) (may be null)
      * @param installed true, if the add-on is installed, false otherwise
+     * @param description the description of the add-on (may be null)
+     * @param detailedDescription the detailed description of the add-on (may be null)
+     * @param configDescriptionURI the URI to the configuration description for this add-on
+     * @param keywords the keywords for this add-on
+     * @param countries a comma-separated list of ISO 3166 codes relevant to this add-on
+     * @param license the SPDX license identifier
+     * @param connection a string describing the type of connection (local or cloud, push or pull...) this add-on uses,
+     *            if applicable.
+     * @param backgroundColor for displaying the add-on (may be null)
+     * @param imageLink the link to an image (png/svg) (may be null)
+     * @param properties a {@link Map} containing addition information
      */
-    public Addon(String id, String type, String label, String version, String contentType, String link, String author,
-            boolean verifiedAuthor, boolean installed, String description, String detailedDescription,
-            String configDescriptionURI, String keywords, String countries, String connection, String backgroundColor,
-            String imageLink, Map<String, Object> properties) {
+    public Addon(String id, String type, String label, String version, String maturity, String contentType, String link,
+            String author, boolean verifiedAuthor, boolean installed, String description, String detailedDescription,
+            String configDescriptionURI, String keywords, String countries, String license, String connection,
+            String backgroundColor, String imageLink, Map<String, Object> properties) {
         this.id = id;
         this.label = label;
         this.version = version;
+        this.maturity = maturity;
         this.contentType = contentType;
         this.description = description;
         this.detailedDescription = detailedDescription;
         this.configDescriptionURI = configDescriptionURI;
         this.keywords = keywords;
         this.countries = countries;
+        this.license = license;
         this.connection = connection;
         this.backgroundColor = backgroundColor;
         this.link = link;
@@ -150,6 +165,13 @@ public class Addon {
     }
 
     /**
+     * The maturity level of this version
+     */
+    public String getMaturity() {
+        return maturity;
+    }
+
+    /**
      * The content type of the add-on
      */
     public String getContentType() {
@@ -189,6 +211,13 @@ public class Addon {
      */
     public String getCountries() {
         return countries;
+    }
+
+    /**
+     * The SPDX License identifier for this addon
+     */
+    public String getLicense() {
+        return license;
     }
 
     /**
