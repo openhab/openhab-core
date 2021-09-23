@@ -524,7 +524,7 @@ public class ModbusManagerImpl implements ModbusManager {
      * With some connection types, the connection is reseted (disconnected), and new connection is received from the
      * pool. This means that potentially other operations queuing for the connection can be executed in-between.
      *
-     * With some other connection types, the operation is retried without reseting the connection type.
+     * With some other connection types, the operation is retried without resetting the connection type.
      *
      * @param task
      * @param oneOffTask
@@ -620,11 +620,11 @@ public class ModbusManagerImpl implements ModbusManager {
                     // broken pipe on write)
                     if (willRetry) {
                         logger.warn(
-                                "Try {} out of {} failed when executing request ({}). Will try again soon. Error was I/O error, so reseting the connection. Error details: {} {} [operation ID {}]",
+                                "Try {} out of {} failed when executing request ({}). Will try again soon. Error was I/O error, so resetting the connection. Error details: {} {} [operation ID {}]",
                                 tryIndex, maxTries, request, e.getClass().getName(), e.getMessage(), operationId);
                     } else {
                         logger.error(
-                                "Last try {} failed when executing request ({}). Aborting. Error was I/O error, so reseting the connection. Error details: {} {} [operation ID {}]",
+                                "Last try {} failed when executing request ({}). Aborting. Error was I/O error, so resetting the connection. Error details: {} {} [operation ID {}]",
                                 tryIndex, request, e.getClass().getName(), e.getMessage(), operationId);
                     }
                     if (endpoint instanceof ModbusSerialSlaveEndpoint) {
@@ -643,11 +643,11 @@ public class ModbusManagerImpl implements ModbusManager {
                     // broken pipe on write)
                     if (willRetry) {
                         logger.warn(
-                                "Try {} out of {} failed when executing request ({}). Will try again soon. Error was I/O error, so reseting the connection. Error details: {} {} [operation ID {}]",
+                                "Try {} out of {} failed when executing request ({}). Will try again soon. Error was I/O error, so resetting the connection. Error details: {} {} [operation ID {}]",
                                 tryIndex, maxTries, request, e.getClass().getName(), e.getMessage(), operationId);
                     } else {
                         logger.error(
-                                "Last try {} failed when executing request ({}). Aborting. Error was I/O error, so reseting the connection. Error details: {} {} [operation ID {}]",
+                                "Last try {} failed when executing request ({}). Aborting. Error was I/O error, so resetting the connection. Error details: {} {} [operation ID {}]",
                                 tryIndex, request, e.getClass().getName(), e.getMessage(), operationId);
                     }
                     if (endpoint instanceof ModbusSerialSlaveEndpoint) {
@@ -679,11 +679,11 @@ public class ModbusManagerImpl implements ModbusManager {
                     // transaction error details already logged
                     if (willRetry) {
                         logger.warn(
-                                "Try {} out of {} failed when executing request ({}). Will try again soon. The response did not match the request. Reseting the connection. Error details: {} {} [operation ID {}]",
+                                "Try {} out of {} failed when executing request ({}). Will try again soon. The response did not match the request. Resetting the connection. Error details: {} {} [operation ID {}]",
                                 tryIndex, maxTries, request, e.getClass().getName(), e.getMessage(), operationId);
                     } else {
                         logger.error(
-                                "Last try {} failed when executing request ({}). Aborting. The response did not match the request. Reseting the connection. Error details: {} {} [operation ID {}]",
+                                "Last try {} failed when executing request ({}). Aborting. The response did not match the request. Resetting the connection. Error details: {} {} [operation ID {}]",
                                 tryIndex, request, e.getClass().getName(), e.getMessage(), operationId);
                     }
                     if (endpoint instanceof ModbusSerialSlaveEndpoint) {
@@ -701,11 +701,11 @@ public class ModbusManagerImpl implements ModbusManager {
                     // Some other (unexpected) exception occurred
                     if (willRetry) {
                         logger.warn(
-                                "Try {} out of {} failed when executing request ({}). Will try again soon. Error was unexpected error, so reseting the connection. Error details: {} {} [operation ID {}]",
+                                "Try {} out of {} failed when executing request ({}). Will try again soon. Error was unexpected error, so resetting the connection. Error details: {} {} [operation ID {}]",
                                 tryIndex, maxTries, request, e.getClass().getName(), e.getMessage(), operationId, e);
                     } else {
                         logger.error(
-                                "Last try {} failed when executing request ({}). Aborting. Error was unexpected error, so reseting the connection. Error details: {} {} [operation ID {}]",
+                                "Last try {} failed when executing request ({}). Aborting. Error was unexpected error, so resetting the connection. Error details: {} {} [operation ID {}]",
                                 tryIndex, request, e.getClass().getName(), e.getMessage(), operationId, e);
                     }
                     // Invalidate connection, and empty (so that new connection is acquired before new retry)

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.transport.modbus.internal;
 
+import java.util.Optional;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.modbus.exception.ModbusSlaveErrorResponseException;
@@ -29,10 +31,12 @@ import net.wimpi.modbus.ModbusSlaveException;
 public class ModbusSlaveErrorResponseExceptionImpl extends ModbusSlaveErrorResponseException {
 
     private static final long serialVersionUID = 6334580162425192133L;
-    private int type;
+    private int rawCode;
+    private Optional<KnownExceptionCode> exceptionCode;
 
     public ModbusSlaveErrorResponseExceptionImpl(ModbusSlaveException e) {
-        type = e.getType();
+        rawCode = e.getType();
+        exceptionCode = KnownExceptionCode.tryFromExceptionCode(rawCode);
     }
 
     /**
@@ -40,16 +44,17 @@ public class ModbusSlaveErrorResponseExceptionImpl extends ModbusSlaveErrorRespo
      */
     @Override
     public int getExceptionCode() {
-        return type;
+        return rawCode;
     }
 
     @Override
     public @Nullable String getMessage() {
-        return String.format("Slave responsed with error=%d", type);
+        return String.format("Slave responded with error=%d (%s)", rawCode,
+                exceptionCode.map(c -> c.name()).orElse("unknown error code"));
     }
 
     @Override
     public String toString() {
-        return String.format("ModbusSlaveErrorResponseException(error=%d)", type);
+        return String.format("ModbusSlaveErrorResponseException(error=%d)", rawCode);
     }
 }
