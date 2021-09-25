@@ -71,19 +71,19 @@ public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandle
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
         try {
-            String template;
-            if (addon.getProperties().containsKey(JSON_DOWNLOAD_URL_PROPERTY)) {
-                template = getTemplateFromURL((String) addon.getProperties().get(JSON_DOWNLOAD_URL_PROPERTY));
-                marketplaceRuleTemplateProvider.addTemplateAsJSON(addon.getId(), template);
-            } else if (addon.getProperties().containsKey(YAML_DOWNLOAD_URL_PROPERTY)) {
-                template = getTemplateFromURL((String) addon.getProperties().get(YAML_DOWNLOAD_URL_PROPERTY));
-                marketplaceRuleTemplateProvider.addTemplateAsYAML(addon.getId(), template);
-            } else if (addon.getProperties().containsKey(JSON_CONTENT_PROPERTY)) {
-                template = (String) addon.getProperties().get(JSON_CONTENT_PROPERTY);
-                marketplaceRuleTemplateProvider.addTemplateAsJSON(addon.getId(), template);
-            } else if (addon.getProperties().containsKey(YAML_CONTENT_PROPERTY)) {
-                template = (String) addon.getProperties().get(YAML_CONTENT_PROPERTY);
-                marketplaceRuleTemplateProvider.addTemplateAsYAML(addon.getId(), template);
+            String jsonDownloadUrl = (String) addon.getProperties().get(JSON_DOWNLOAD_URL_PROPERTY);
+            String yamlDownloadUrl = (String) addon.getProperties().get(YAML_DOWNLOAD_URL_PROPERTY);
+            String jsonContent = (String) addon.getProperties().get(JSON_CONTENT_PROPERTY);
+            String yamlContent = (String) addon.getProperties().get(YAML_CONTENT_PROPERTY);
+
+            if (jsonDownloadUrl != null) {
+                marketplaceRuleTemplateProvider.addTemplateAsJSON(addon.getId(), getTemplateFromURL(jsonDownloadUrl));
+            } else if (yamlDownloadUrl != null) {
+                marketplaceRuleTemplateProvider.addTemplateAsYAML(addon.getId(), getTemplateFromURL(yamlDownloadUrl));
+            } else if (jsonContent != null) {
+                marketplaceRuleTemplateProvider.addTemplateAsJSON(addon.getId(), jsonContent);
+            } else if (yamlContent != null) {
+                marketplaceRuleTemplateProvider.addTemplateAsYAML(addon.getId(), yamlContent);
             }
         } catch (IOException e) {
             logger.error("Rule template from marketplace cannot be downloaded: {}", e.getMessage());
