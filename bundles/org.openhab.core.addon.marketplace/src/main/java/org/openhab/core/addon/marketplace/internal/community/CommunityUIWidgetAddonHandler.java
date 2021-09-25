@@ -74,15 +74,16 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
         try {
-            String widget;
-            if (addon.getProperties().containsKey(YAML_DOWNLOAD_URL_PROPERTY)) {
-                widget = getWidgetFromURL((String) addon.getProperties().get(YAML_DOWNLOAD_URL_PROPERTY));
-            } else if (addon.getProperties().containsKey(YAML_CONTENT_PROPERTY)) {
-                widget = (String) addon.getProperties().get(YAML_CONTENT_PROPERTY);
+            String yamlDownloadUrl = (String) addon.getProperties().get(YAML_DOWNLOAD_URL_PROPERTY);
+            String yamlContent = (String) addon.getProperties().get(YAML_CONTENT_PROPERTY);
+
+            if (yamlDownloadUrl != null) {
+                addWidgetAsYAML(addon.getId(), getWidgetFromURL(yamlDownloadUrl));
+            } else if (yamlContent != null) {
+                addWidgetAsYAML(addon.getId(), yamlContent);
             } else {
                 throw new IllegalArgumentException("Couldn't find the widget in the add-on entry");
             }
-            addWidgetAsYAML(addon.getId(), widget);
         } catch (IOException e) {
             logger.error("Widget from marketplace cannot be downloaded: {}", e.getMessage());
             throw new MarketplaceHandlerException("Widget cannot be downloaded.", e);
