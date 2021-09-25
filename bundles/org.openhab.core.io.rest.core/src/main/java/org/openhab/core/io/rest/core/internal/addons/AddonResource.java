@@ -275,13 +275,9 @@ public class AddonResource implements RESTResource {
         eventPublisher.post(event);
     }
 
-    private AddonService getDefaultService() {
-        for (AddonService addonService : addonServices) {
-            if (addonService.getId().equals(DEFAULT_ADDON_SERVICE)) {
-                return addonService;
-            }
-        }
-        return addonServices.iterator().next();
+    private @Nullable AddonService getDefaultService() {
+        return addonServices.stream().filter(addonService -> DEFAULT_ADDON_SERVICE.equals(addonService.getId()))
+                .findFirst().orElse(addonServices.stream().findFirst().orElse(null));
     }
 
     private Stream<Addon> getAllAddons(Locale locale) {
