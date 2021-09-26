@@ -78,11 +78,11 @@ public class SampleAddonService implements AddonService {
                 String version = "1.0";
                 String link = (Math.random() < 0.5) ? null : "http://lmgtfy.com/?q=" + name;
                 String description = createDescription();
-                String imageLink = null;
                 String backgroundColor = createRandomColor();
-                Addon extension = new Addon(id, typeId, label, version, "stable", "example/vnd.openhab.addon", link,
-                        "John Doe", false, installed, description, backgroundColor, imageLink, null, null, null, null,
-                        null, null, null);
+                Addon extension = Addon.create(id).withType(typeId).withLabel(label).withVersion(version)
+                        .withMaturity("stable").withContentType("example/vnd.openhab.addon").withLink(link)
+                        .withAuthor("John Doe", false).withInstalled(installed).withDescription(description)
+                        .withBackgroundColor(backgroundColor).build();
                 extensions.put(extension.getId(), extension);
             }
         }

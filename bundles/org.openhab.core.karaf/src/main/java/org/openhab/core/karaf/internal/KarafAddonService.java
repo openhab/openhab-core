@@ -119,9 +119,6 @@ public class KarafAddonService implements AddonService {
     private Addon getAddon(Feature feature) {
         String name = getName(feature.getName());
         String type = getType(feature.getName());
-        String extId = type + "-" + name;
-        String label = feature.getDescription();
-        String version = feature.getVersion();
         String link = null;
         switch (type) {
             case FeatureInstaller.EXTENSION_TYPE_AUTOMATION:
@@ -148,8 +145,10 @@ public class KarafAddonService implements AddonService {
             default:
                 break;
         }
-        boolean installed = featuresService.isInstalled(feature);
-        return new Addon(extId, type, label, version, ADDONS_CONTENTTYPE, link, ADDONS_AUTHOR, true, installed);
+
+        return Addon.create(type + "-" + name).withType(type).withLabel(feature.getDescription())
+                .withVersion(feature.getVersion()).withContentType(ADDONS_CONTENTTYPE).withLink(link)
+                .withAuthor(ADDONS_AUTHOR, true).withInstalled(featuresService.isInstalled(feature)).build();
     }
 
     @Override

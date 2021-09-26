@@ -12,6 +12,7 @@
  */
 package org.openhab.core.addon;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,25 +53,6 @@ public class Addon {
      * @param type the type id of the add-on
      * @param label the label of the add-on
      * @param version the version of the add-on
-     * @param contentType the content type of the add-on
-     * @param link the link to find more information about the add-on (can be null)
-     * @param author the author of the add-on
-     * @param verifiedAuthor true, if the author is verified
-     * @param installed true, if the add-on is installed, false otherwise
-     */
-    public Addon(String id, String type, String label, String version, String contentType, String link, String author,
-            boolean verifiedAuthor, boolean installed) {
-        this(id, type, label, version, null, contentType, link, author, verifiedAuthor, installed, null, null, null,
-                null, null, null, null, null, null, null);
-    }
-
-    /**
-     * Creates a new Addon instance
-     *
-     * @param id the id of the add-on
-     * @param type the type id of the add-on
-     * @param label the label of the add-on
-     * @param version the version of the add-on
      * @param maturity the maturity level of this version
      * @param contentType the content type of the add-on
      * @param link the link to find more information about the add-on (may be null)*
@@ -89,10 +71,10 @@ public class Addon {
      * @param imageLink the link to an image (png/svg) (may be null)
      * @param properties a {@link Map} containing addition information
      */
-    public Addon(String id, String type, String label, String version, String maturity, String contentType, String link,
-            String author, boolean verifiedAuthor, boolean installed, String description, String detailedDescription,
-            String configDescriptionURI, String keywords, String countries, String license, String connection,
-            String backgroundColor, String imageLink, Map<String, Object> properties) {
+    private Addon(String id, String type, String label, String version, String maturity, String contentType,
+            String link, String author, boolean verifiedAuthor, boolean installed, String description,
+            String detailedDescription, String configDescriptionURI, String keywords, String countries, String license,
+            String connection, String backgroundColor, String imageLink, Map<String, Object> properties) {
         this.id = id;
         this.label = label;
         this.version = version;
@@ -260,5 +242,143 @@ public class Addon {
      */
     public String getImageLink() {
         return imageLink;
+    }
+
+    public static Builder create(String id) {
+        return new Builder(id);
+    }
+
+    public static class Builder {
+        private String id;
+        private String label;
+        private String version = "";
+        private String maturity = null;
+        private String contentType;
+        private String link;
+        private String author = "";
+        private boolean verifiedAuthor = false;
+        private boolean installed = false;
+        private String type;
+        private String description = "";
+        private String detailedDescription;
+        private String configDescriptionURI = "";
+        private String keywords = "";
+        private String countries = "";
+        private String license = null;
+        private String connection = "";
+        private String backgroundColor;
+        private String imageLink = null;
+        private Map<String, Object> properties = new HashMap<>();
+
+        private Builder(String id) {
+            this.id = id;
+        }
+
+        public Builder withLabel(String label) {
+            this.label = label;
+            return this;
+        }
+
+        public Builder withVersion(String version) {
+            this.version = version;
+            return this;
+        }
+
+        public Builder withMaturity(String maturity) {
+            this.maturity = maturity;
+            return this;
+        }
+
+        public Builder withContentType(String contentType) {
+            this.contentType = contentType;
+            return this;
+        }
+
+        public Builder withLink(String link) {
+            this.link = link;
+            return this;
+        }
+
+        public Builder withAuthor(String author) {
+            this.author = author;
+            return this;
+        }
+
+        public Builder withAuthor(String author, boolean verifiedAuthor) {
+            this.author = author;
+            this.verifiedAuthor = verifiedAuthor;
+            return this;
+        }
+
+        public Builder withInstalled(boolean installed) {
+            this.installed = installed;
+            return this;
+        }
+
+        public Builder withType(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder withDetailedDescription(String detailedDescription) {
+            this.detailedDescription = detailedDescription;
+            return this;
+        }
+
+        public Builder withConfigDescriptionURI(String configDescriptionURI) {
+            this.configDescriptionURI = configDescriptionURI;
+            return this;
+        }
+
+        public Builder withKeywords(String keywords) {
+            this.keywords = keywords;
+            return this;
+        }
+
+        public Builder withCountries(String countries) {
+            this.countries = countries;
+            return this;
+        }
+
+        public Builder withLicense(String license) {
+            this.license = license;
+            return this;
+        }
+
+        public Builder withConnection(String connection) {
+            this.connection = connection;
+            return this;
+        }
+
+        public Builder withBackgroundColor(String backgroundColor) {
+            this.backgroundColor = backgroundColor;
+            return this;
+        }
+
+        public Builder withImageLink(String imageLink) {
+            this.imageLink = imageLink;
+            return this;
+        }
+
+        public Builder withProperty(String key, Object value) {
+            this.properties.put(key, value);
+            return this;
+        }
+
+        public Builder withProperties(Map<String, Object> properties) {
+            this.properties.putAll(properties);
+            return this;
+        }
+
+        public Addon build() {
+            return new Addon(id, type, label, version, maturity, contentType, link, author, verifiedAuthor, installed,
+                    description, detailedDescription, configDescriptionURI, keywords, countries, license, connection,
+                    backgroundColor, imageLink, properties.isEmpty() ? null : properties);
+        }
     }
 }
