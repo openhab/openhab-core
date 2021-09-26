@@ -29,6 +29,7 @@ import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemFactory;
+import org.openhab.core.library.CoreItemFactory;
 
 /**
  *
@@ -51,10 +52,10 @@ public class ItemBuilderTest {
     public void testMinimal() {
         when(mockFactory.createItem(anyString(), anyString())).thenReturn(mockItem);
 
-        Item res = itemBuilderFactory.newItemBuilder("String", "test").build();
+        Item res = itemBuilderFactory.newItemBuilder(CoreItemFactory.STRING, "test").build();
 
         assertSame(mockItem, res);
-        verify(mockFactory).createItem(eq("String"), eq("test"));
+        verify(mockFactory).createItem(eq(CoreItemFactory.STRING), eq("test"));
         verify(mockItem).setLabel(isNull());
         verify(mockItem).setCategory(isNull());
         verify(mockItem).addGroupNames(eq(Collections.emptyList()));
@@ -78,14 +79,14 @@ public class ItemBuilderTest {
     public void testFull() {
         when(mockFactory.createItem(anyString(), anyString())).thenReturn(mockItem);
 
-        Item res = itemBuilderFactory.newItemBuilder("String", "test") //
+        Item res = itemBuilderFactory.newItemBuilder(CoreItemFactory.STRING, "test") //
                 .withCategory("category") //
                 .withGroups(List.of("a", "b")) //
                 .withLabel("label") //
                 .build();
 
         assertSame(mockItem, res);
-        verify(mockFactory).createItem(eq("String"), eq("test"));
+        verify(mockFactory).createItem(eq(CoreItemFactory.STRING), eq("test"));
         verify(mockItem).setCategory(eq("category"));
         verify(mockItem).addGroupNames(eq(List.of("a", "b")));
         verify(mockItem).setLabel(eq("label"));
@@ -157,20 +158,21 @@ public class ItemBuilderTest {
     @Test
     public void testNoFactory() {
         when(mockFactory.createItem(anyString(), anyString())).thenReturn(null);
-        assertThrows(IllegalStateException.class, () -> itemBuilderFactory.newItemBuilder("String", "test").build());
+        assertThrows(IllegalStateException.class,
+                () -> itemBuilderFactory.newItemBuilder(CoreItemFactory.STRING, "test").build());
     }
 
     @Test
     public void testFunctionOnNonGroupItem() {
         GroupFunction mockFunction = mock(GroupFunction.class);
-        assertThrows(IllegalArgumentException.class,
-                () -> itemBuilderFactory.newItemBuilder("String", "test").withGroupFunction(mockFunction));
+        assertThrows(IllegalArgumentException.class, () -> itemBuilderFactory
+                .newItemBuilder(CoreItemFactory.STRING, "test").withGroupFunction(mockFunction));
     }
 
     @Test
     public void testBaseItemOnNonGroupItem() {
         Item mockItem = mock(Item.class);
         assertThrows(IllegalArgumentException.class,
-                () -> itemBuilderFactory.newItemBuilder("String", "test").withBaseItem(mockItem));
+                () -> itemBuilderFactory.newItemBuilder(CoreItemFactory.STRING, "test").withBaseItem(mockItem));
     }
 }

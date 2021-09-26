@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.thing.internal.GenericItemChannelLinkProvider;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -150,7 +151,8 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
         }
 
         provider.startConfigurationUpdate(ITEMS_TESTMODEL_NAME);
-        provider.processBindingConfiguration(ITEMS_TESTMODEL_NAME, "Number", ITEM, CHANNEL, new Configuration());
+        provider.processBindingConfiguration(ITEMS_TESTMODEL_NAME, CoreItemFactory.NUMBER, ITEM, CHANNEL,
+                new Configuration());
         provider.stopConfigurationUpdate(ITEMS_TESTMODEL_NAME);
         assertThat(provider.getAll().size(), is(1));
         assertThat(provider.getAll().iterator().next().toString(), is(LINK));
@@ -158,7 +160,8 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
 
         reset(localListenerMock);
         provider.startConfigurationUpdate(ITEMS_TESTMODEL_NAME);
-        provider.processBindingConfiguration(ITEMS_TESTMODEL_NAME, "Number", ITEM, CHANNEL, new Configuration());
+        provider.processBindingConfiguration(ITEMS_TESTMODEL_NAME, CoreItemFactory.NUMBER, ITEM, CHANNEL,
+                new Configuration());
         provider.stopConfigurationUpdate(ITEMS_TESTMODEL_NAME);
         assertThat(provider.getAll().size(), is(1));
         assertThat(provider.getAll().iterator().next().toString(), is(LINK));

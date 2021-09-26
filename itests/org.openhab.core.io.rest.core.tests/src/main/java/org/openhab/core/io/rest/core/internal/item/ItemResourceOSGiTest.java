@@ -50,6 +50,7 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataProvider;
 import org.openhab.core.items.dto.GroupItemDTO;
 import org.openhab.core.items.dto.MetadataDTO;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
@@ -151,13 +152,14 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
     @Test
     public void shouldFilterItemsByType() throws Exception {
-        Response response = itemResource.getItems(uriInfo, httpHeaders, null, "Switch", null, null, false, null);
+        Response response = itemResource.getItems(uriInfo, httpHeaders, null, CoreItemFactory.SWITCH, null, null, false,
+                null);
         assertThat(readItemNamesFromResponse(response), hasItems(ITEM_NAME1, ITEM_NAME2));
 
-        response = itemResource.getItems(uriInfo, httpHeaders, null, "Dimmer", null, null, false, null);
+        response = itemResource.getItems(uriInfo, httpHeaders, null, CoreItemFactory.DIMMER, null, null, false, null);
         assertThat(readItemNamesFromResponse(response), hasItems(ITEM_NAME3));
 
-        response = itemResource.getItems(uriInfo, httpHeaders, null, "Color", null, null, false, null);
+        response = itemResource.getItems(uriInfo, httpHeaders, null, CoreItemFactory.COLOR, null, null, false, null);
         assertThat(readItemNamesFromResponse(response), hasSize(0));
     }
 
@@ -222,13 +224,13 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
         GroupItemDTO item1DTO = new GroupItemDTO();
         item1DTO.name = "item1";
-        item1DTO.type = "Switch";
+        item1DTO.type = CoreItemFactory.SWITCH;
         item1DTO.label = "item1Label";
         itemList.add(item1DTO);
 
         GroupItemDTO item2DTO = new GroupItemDTO();
         item2DTO.name = "item2";
-        item2DTO.type = "Rollershutter";
+        item2DTO.type = CoreItemFactory.ROLLERSHUTTER;
         item2DTO.label = "item2Label";
         itemList.add(item2DTO);
 

@@ -120,7 +120,7 @@ public class ItemRegistryImplTest extends JavaTest {
 
     @Test
     public void assertGetItemsOfTypeReturnsItemFromRegisteredItemProvider() {
-        List<Item> items = new ArrayList<>(itemRegistry.getItemsOfType("Switch"));
+        List<Item> items = new ArrayList<>(itemRegistry.getItemsOfType(CoreItemFactory.SWITCH));
         assertThat(items.size(), is(3));
         assertThat(items.get(0).getName(), is(equalTo(ITEM_NAME)));
     }

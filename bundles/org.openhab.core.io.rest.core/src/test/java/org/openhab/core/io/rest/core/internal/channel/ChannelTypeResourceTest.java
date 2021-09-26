@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.io.rest.LocaleServiceImpl;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
 import org.openhab.core.thing.profiles.TriggerProfileType;
 import org.openhab.core.thing.type.ChannelType;
@@ -74,7 +75,7 @@ public class ChannelTypeResourceTest {
 
         TriggerProfileType profileType = mock(TriggerProfileType.class);
         when(profileType.getSupportedChannelTypeUIDs()).thenReturn(List.of(channelTypeUID));
-        when(profileType.getSupportedItemTypes()).thenReturn(List.of("Switch", "Dimmer"));
+        when(profileType.getSupportedItemTypes()).thenReturn(List.of(CoreItemFactory.SWITCH, CoreItemFactory.DIMMER));
 
         when(profileTypeRegistry.getProfileTypes()).thenReturn(List.of(profileType));
 
@@ -83,6 +84,7 @@ public class ChannelTypeResourceTest {
         verify(channelTypeRegistry).getChannelType(channelTypeUID);
         verify(profileTypeRegistry).getProfileTypes();
         assertThat(response.getStatus(), is(200));
-        assertThat((Set<String>) response.getEntity(), IsIterableContaining.hasItems("Switch", "Dimmer"));
+        assertThat((Set<String>) response.getEntity(),
+                IsIterableContaining.hasItems(CoreItemFactory.SWITCH, CoreItemFactory.DIMMER));
     }
 }
