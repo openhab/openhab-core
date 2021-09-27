@@ -42,6 +42,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.storage.Storage;
@@ -137,8 +138,9 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         configDescriptionChannel = new URI("test:channel");
         configDescriptionThing = new URI("test:test");
         thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(List.of( //
-                ChannelBuilder.create(CHANNEL_UID, "Switch").withLabel("Test Label").withDescription("Test Description")
-                        .withType(CHANNEL_TYPE_UID).withDefaultTags(Set.of("Test Tag")).build() //
+                ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.SWITCH).withLabel("Test Label")
+                        .withDescription("Test Description").withType(CHANNEL_TYPE_UID)
+                        .withDefaultTags(Set.of("Test Tag")).build() //
         )).build();
         registerVolatileStorageService();
 
@@ -304,7 +306,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         assertNotNull(channel);
         assertEquals("Test Label", channel.getLabel());
         assertEquals("Test Description", channel.getDescription());
-        assertEquals("Switch", channel.getAcceptedItemType());
+        assertEquals(CoreItemFactory.SWITCH, channel.getAcceptedItemType());
         assertEquals(CHANNEL_TYPE_UID, channel.getChannelTypeUID());
         assertNotNull(channel.getDefaultTags());
         assertEquals(1, channel.getDefaultTags().size());
@@ -315,7 +317,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         assertNotNull(channel);
         assertEquals("Test Label Overridden", channel.getLabel());
         assertEquals("Test Description Overridden", channel.getDescription());
-        assertEquals("Switch", channel.getAcceptedItemType());
+        assertEquals(CoreItemFactory.SWITCH, channel.getAcceptedItemType());
         assertEquals(CHANNEL_TYPE_UID, channel.getChannelTypeUID());
         assertNotNull(channel.getDefaultTags());
         assertEquals(1, channel.getDefaultTags().size());
@@ -998,8 +1000,8 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         Configuration configChannel = new Configuration(propsChannel);
 
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(List.of( //
-                ChannelBuilder.create(CHANNEL_UID, "Switch").withType(CHANNEL_TYPE_UID).withConfiguration(configChannel)
-                        .build() //
+                ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.SWITCH).withType(CHANNEL_TYPE_UID)
+                        .withConfiguration(configChannel).build() //
         )).withConfiguration(configThing).build();
 
         managedThingProvider.add(thing);
@@ -1035,7 +1037,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     }
 
     private void registerChannelTypeProvider() throws Exception {
-        ChannelType channelType = ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "Test Label", "Switch")
+        ChannelType channelType = ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "Test Label", CoreItemFactory.SWITCH)
                 .withDescription("Test Description").withCategory("Test Category").withTag("Test Tag")
                 .withConfigDescriptionURI(new URI("test:channel")).build();
 

@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.type.BridgeType;
@@ -150,7 +151,7 @@ public class ThingTypesTest extends JavaOSGiTest {
             assertThat(alarmChannelType, is(notNullValue()));
 
             assertThat(alarmChannelType.toString(), is("hue:alarm"));
-            assertThat(alarmChannelType.getItemType(), is("Number"));
+            assertThat(alarmChannelType.getItemType(), is(CoreItemFactory.NUMBER));
             assertThat(alarmChannelType.getLabel(), is("Alarm System"));
             assertThat(alarmChannelType.getDescription(), is("The light blinks if alarm is set."));
 

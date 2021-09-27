@@ -40,6 +40,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
@@ -226,12 +227,12 @@ public class ThingFactoryTest extends JavaOSGiTest {
     @Test
     public void createThingWithChannels() {
         ChannelType channelType1 = ChannelTypeBuilder
-                .state(new ChannelTypeUID("bindingId:channelTypeId1"), "channelLabel", "Color")
+                .state(new ChannelTypeUID("bindingId:channelTypeId1"), "channelLabel", CoreItemFactory.COLOR)
                 .withTags(Stream.of("tag1", "tag2").collect(toSet())).build();
 
         ChannelType channelType2 = ChannelTypeBuilder
-                .state(new ChannelTypeUID("bindingId:channelTypeId2"), "channelLabel2", "Dimmer").withTag("tag3")
-                .build();
+                .state(new ChannelTypeUID("bindingId:channelTypeId2"), "channelLabel2", CoreItemFactory.DIMMER)
+                .withTag("tag3").build();
 
         registerChannelTypes(Set.of(channelType1, channelType2), emptyList());
 
@@ -247,7 +248,7 @@ public class ThingFactoryTest extends JavaOSGiTest {
 
         assertThat(thing.getChannels().size(), is(2));
         assertThat(thing.getChannels().get(0).getUID().toString(), is(equalTo("bindingId:thingType:thingId:ch1")));
-        assertThat(thing.getChannels().get(0).getAcceptedItemType(), is(equalTo("Color")));
+        assertThat(thing.getChannels().get(0).getAcceptedItemType(), is(equalTo(CoreItemFactory.COLOR)));
         assertThat(thing.getChannels().get(0).getDefaultTags().contains("tag1"), is(true));
         assertThat(thing.getChannels().get(0).getDefaultTags().contains("tag2"), is(true));
         assertThat(thing.getChannels().get(0).getDefaultTags().contains("tag3"), is(false));
@@ -259,12 +260,12 @@ public class ThingFactoryTest extends JavaOSGiTest {
     @Test
     public void createThingWithChannelsGroups() {
         ChannelType channelType1 = ChannelTypeBuilder
-                .state(new ChannelTypeUID("bindingId:channelTypeId1"), "channelLabel", "Color")
+                .state(new ChannelTypeUID("bindingId:channelTypeId1"), "channelLabel", CoreItemFactory.COLOR)
                 .withTags(Set.of("tag1", "tag2")).build();
 
         ChannelType channelType2 = ChannelTypeBuilder
-                .state(new ChannelTypeUID("bindingId:channelTypeId2"), "channelLabel2", "Dimmer").withTag("tag3")
-                .build();
+                .state(new ChannelTypeUID("bindingId:channelTypeId2"), "channelLabel2", CoreItemFactory.DIMMER)
+                .withTag("tag3").build();
 
         ChannelDefinition channelDef1 = new ChannelDefinitionBuilder("ch1", channelType1.getUID()).build();
         ChannelDefinition channelDef2 = new ChannelDefinitionBuilder("ch2", channelType2.getUID()).build();

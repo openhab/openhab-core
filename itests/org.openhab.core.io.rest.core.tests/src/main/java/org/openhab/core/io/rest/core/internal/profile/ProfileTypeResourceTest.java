@@ -30,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeBuilder;
@@ -55,8 +56,8 @@ public class ProfileTypeResourceTest extends JavaTest {
     // UIDs for state profile types
     private final ProfileTypeUID stateProfileTypeUID1 = new ProfileTypeUID("my:stateProfile1");
     private final ChannelTypeUID pt1ChannelType1UID = new ChannelTypeUID("my:channel1");
-    private final ChannelType pt1ChannelType1 = ChannelTypeBuilder.state(pt1ChannelType1UID, "channel1", "Switch")
-            .build();
+    private final ChannelType pt1ChannelType1 = ChannelTypeBuilder
+            .state(pt1ChannelType1UID, "channel1", CoreItemFactory.SWITCH).build();
 
     private final ProfileTypeUID stateProfileTypeUID2 = new ProfileTypeUID("my:stateProfile2");
 
@@ -70,7 +71,7 @@ public class ProfileTypeResourceTest extends JavaTest {
     // some other channel types for testing
     private final ChannelTypeUID otherStateChannelTypeUID = new ChannelTypeUID("other:stateChannel1");
     private final ChannelType otherStateChannelType = ChannelTypeBuilder
-            .state(otherStateChannelTypeUID, "channelState1", "Number").build();
+            .state(otherStateChannelTypeUID, "channelState1", CoreItemFactory.NUMBER).build();
     private final ChannelTypeUID otherTriggerChannelTypeUID = new ChannelTypeUID("other:triggerChannel1");
     private final ChannelType otherTriggerChannelType = ChannelTypeBuilder
             .trigger(otherTriggerChannelTypeUID, "channel1").build();
@@ -85,7 +86,8 @@ public class ProfileTypeResourceTest extends JavaTest {
 
         List<ProfileType> profileTypes = new ArrayList<>();
         ProfileType pt1 = ProfileTypeBuilder.newState(stateProfileTypeUID1, "profile1")
-                .withSupportedChannelTypeUIDs(pt1ChannelType1UID).withSupportedItemTypesOfChannel("Switch").build();
+                .withSupportedChannelTypeUIDs(pt1ChannelType1UID)
+                .withSupportedItemTypesOfChannel(CoreItemFactory.SWITCH).build();
         ProfileType pt2 = ProfileTypeBuilder.newState(stateProfileTypeUID2, "profile2").build();
         ProfileType pt3 = ProfileTypeBuilder.newTrigger(triggerProfileTypeUID1, "profile3")
                 .withSupportedChannelTypeUIDs(pt3ChannelType1UID).build();

@@ -33,6 +33,7 @@ import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.thing.testsupport.hue.DumbThingHandlerFactory;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -125,7 +126,8 @@ public class GenericThingProviderTest3 extends JavaOSGiTest {
         // now become smart again...
         dumbThingHandlerFactory.setDumb(false);
         ChannelType channelType1 = ChannelTypeBuilder
-                .state(new ChannelTypeUID(DumbThingHandlerFactory.BINDING_ID, "channel1"), "Channel 1", "String")
+                .state(new ChannelTypeUID(DumbThingHandlerFactory.BINDING_ID, "channel1"), "Channel 1",
+                        CoreItemFactory.STRING)
                 .build();
 
         ChannelTypeProvider channelTypeProvider = mock(ChannelTypeProvider.class);

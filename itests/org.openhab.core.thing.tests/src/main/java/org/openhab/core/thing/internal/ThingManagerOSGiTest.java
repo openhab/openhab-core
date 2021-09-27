@@ -141,7 +141,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         channelTypeProvider = mock(ChannelTypeProvider.class);
         when(channelTypeProvider.getChannelType(any(ChannelTypeUID.class), nullable(Locale.class)))
-                .thenReturn(ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "label", "Switch").build());
+                .thenReturn(ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "label", CoreItemFactory.SWITCH).build());
         registerService(channelTypeProvider);
 
         managedItemChannelLinkProvider = getService(ManagedItemChannelLinkProvider.class);

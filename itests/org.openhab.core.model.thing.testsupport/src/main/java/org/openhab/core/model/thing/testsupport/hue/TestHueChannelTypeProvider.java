@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.thing.type.ChannelDefinitionBuilder;
 import org.openhab.core.thing.type.ChannelGroupType;
 import org.openhab.core.thing.type.ChannelGroupTypeBuilder;
@@ -49,21 +50,21 @@ public class TestHueChannelTypeProvider implements ChannelTypeProvider, ChannelG
 
     public TestHueChannelTypeProvider() {
         try {
-            ChannelType ctColor = ChannelTypeBuilder.state(COLOR_CHANNEL_TYPE_UID, "colorLabel", "Color")
+            ChannelType ctColor = ChannelTypeBuilder.state(COLOR_CHANNEL_TYPE_UID, "colorLabel", CoreItemFactory.COLOR)
                     .withDescription("description").withConfigDescriptionURI(new URI("hue", "LCT001:color", null))
                     .build();
 
             ChannelType ctColorTemperature = ChannelTypeBuilder
-                    .state(COLOR_TEMP_CHANNEL_TYPE_UID, "colorTemperatureLabel", "Dimmer")
+                    .state(COLOR_TEMP_CHANNEL_TYPE_UID, "colorTemperatureLabel", CoreItemFactory.DIMMER)
                     .withDescription("description")
                     .withConfigDescriptionURI(new URI("hue", "LCT001:color_temperature", null)).build();
 
-            ChannelType ctColorX = ChannelTypeBuilder.state(COLORX_CHANNEL_TYPE_UID, "colorLabel", "Color")
-                    .withDescription("description").withConfigDescriptionURI(new URI("Xhue", "XLCT001:Xcolor", null))
-                    .build();
+            ChannelType ctColorX = ChannelTypeBuilder
+                    .state(COLORX_CHANNEL_TYPE_UID, "colorLabel", CoreItemFactory.COLOR).withDescription("description")
+                    .withConfigDescriptionURI(new URI("Xhue", "XLCT001:Xcolor", null)).build();
 
             ChannelType ctColorTemperatureX = ChannelTypeBuilder
-                    .state(COLORX_TEMP_CHANNEL_TYPE_UID, "colorTemperatureLabel", "Dimmer")
+                    .state(COLORX_TEMP_CHANNEL_TYPE_UID, "colorTemperatureLabel", CoreItemFactory.DIMMER)
                     .withDescription("description")
                     .withConfigDescriptionURI(new URI("Xhue", "XLCT001:Xcolor_temperature", null)).build();
 

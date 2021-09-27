@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Bridge;
@@ -125,7 +126,8 @@ public class GenericThingProviderTest extends JavaOSGiTest {
             assertThat(c.getUID().toString(),
                     anyOf(is("hue:LCT001:myBridge:bulb1:notification"), is("hue:LCT001:myBridge:bulb1:color"),
                             is("hue:LCT001:myBridge:bulb1:color_temperature"), is("hue:TEST:bulb4")));
-            assertThat(c.getAcceptedItemType(), anyOf(is("Switch"), is("Color"), is("Dimmer")));
+            assertThat(c.getAcceptedItemType(),
+                    anyOf(is(CoreItemFactory.SWITCH), is(CoreItemFactory.COLOR), is(CoreItemFactory.DIMMER)));
         });
         assertThat(bulb1.getBridgeUID(), is(bridge1.getUID()));
         assertThat(bulb1.getConfiguration().values().size(), is(1));
@@ -149,7 +151,7 @@ public class GenericThingProviderTest extends JavaOSGiTest {
         Channel firstChannel = bulb3.getChannels().stream()
                 .filter(c -> "hue:LCT001:bulb3:notification".equals(c.getUID().toString())).findFirst().get();
         assertThat(firstChannel.getUID().toString(), is("hue:LCT001:bulb3:notification"));
-        assertThat(firstChannel.getAcceptedItemType(), is("Switch"));
+        assertThat(firstChannel.getAcceptedItemType(), is(CoreItemFactory.SWITCH));
         assertThat(firstChannel.getConfiguration().values().size(), is(1));
         assertThat(firstChannel.getConfiguration().get("duration"), is("5"));
         assertThat(bulb3.getBridgeUID(), is(nullValue()));
@@ -222,7 +224,7 @@ public class GenericThingProviderTest extends JavaOSGiTest {
         assertThat(bulb2.getChannels().size(), is(2));
         Channel firstChannel = bulb2.getChannels().get(0);
         assertThat(firstChannel.getUID().toString(), is("hue:LCT001:bulb2:color"));
-        assertThat(firstChannel.getAcceptedItemType(), is("Color"));
+        assertThat(firstChannel.getAcceptedItemType(), is(CoreItemFactory.COLOR));
         assertThat(bulb2.getBridgeUID(), is(nullValue()));
         assertThat(bulb2.getConfiguration().values().size(), is(1));
         assertThat(bulb2.getConfiguration().get("lightId"), is("2"));
