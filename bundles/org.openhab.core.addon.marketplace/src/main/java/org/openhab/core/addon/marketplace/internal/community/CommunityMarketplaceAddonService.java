@@ -273,7 +273,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
         return "";
     }
 
-    private @Nullable AddonType getAddonType(@Nullable Integer category, String[] tags) {
+    private @Nullable AddonType getAddonType(@Nullable Integer category, List<String> tags) {
         // check if we can determine the addon type from the category
         if (RULETEMPLATES_CATEGORY.equals(category)) {
             return TAG_ADDON_TYPE_MAP.get("automation");
@@ -281,26 +281,21 @@ public class CommunityMarketplaceAddonService implements AddonService {
             return TAG_ADDON_TYPE_MAP.get("ui");
         } else if (BUNDLES_CATEGORY.equals(category)) {
             // try to get it from tags if we have tags
-            for (String tag : tags) {
-                AddonType addonType = TAG_ADDON_TYPE_MAP.get(tag);
-                if (addonType != null) {
-                    return addonType;
-                }
-            }
+            return tags.stream().map(TAG_ADDON_TYPE_MAP::get).filter(Objects::nonNull).findFirst().orElse(null);
         }
 
         // or return null
         return null;
     }
 
-    private String getContentType(@Nullable Integer category, String[] tags) {
+    private String getContentType(@Nullable Integer category, List<String> tags) {
         // check if we can determine the addon type from the category
         if (RULETEMPLATES_CATEGORY.equals(category)) {
             return RULETEMPLATES_CONTENT_TYPE;
         } else if (UIWIDGETS_CATEGORY.equals(category)) {
             return UIWIDGETS_CONTENT_TYPE;
         } else if (BUNDLES_CATEGORY.equals(category)) {
-            if (Arrays.asList(tags).contains("kar")) {
+            if (tags.contains("kar")) {
                 return KAR_CONTENT_TYPE;
             } else {
                 // default to plain jar bundle for addons
@@ -319,14 +314,13 @@ public class CommunityMarketplaceAddonService implements AddonService {
      * @return the list item
      */
     private Addon convertTopicItemToAddon(DiscourseTopicItem topic, List<DiscourseUser> users) {
-        String id = ADDON_ID_PREFIX + topic.id.toString();
-        String[] tags = Objects.requireNonNullElse(topic.tags, new String[0]);
+        List<String> tags = Arrays.asList(Objects.requireNonNullElse(topic.tags, new String[0]));
 
+        String id = ADDON_ID_PREFIX + topic.id.toString();
         AddonType addonType = getAddonType(topic.category_id, tags);
         String type = (addonType != null) ? addonType.getId() : "";
         String contentType = getContentType(topic.category_id, tags);
 
-        String version = "";
         String title = topic.title;
         String link = COMMUNITY_TOPIC_URL + topic.id.toString();
         int likeCount = topic.like_count;
@@ -334,51 +328,28 @@ public class CommunityMarketplaceAddonService implements AddonService {
         int postsCount = topic.posts_count;
         Date createdDate = topic.created_at;
         String author = "";
-        boolean verifiedAuthor = false;
         for (DiscoursePosterInfo posterInfo : topic.posters) {
             if (posterInfo.description.contains("Original Poster")) {
                 author = users.stream().filter(u -> u.id.equals(posterInfo.user_id)).findFirst().get().name;
             }
         }
 
-        String maturity = null;
-        for (String tag : tags) {
-            if (CODE_MATURITY_LEVELS.contains(tag)) {
-                maturity = tag;
-                break;
-            }
-        }
+        String maturity = tags.stream().filter(CODE_MATURITY_LEVELS::contains).findAny().orElse(null);
 
         HashMap<String, Object> properties = new HashMap<>(10);
         properties.put("created_at", createdDate);
         properties.put("like_count", likeCount);
         properties.put("views", views);
         properties.put("posts_count", postsCount);
-        properties.put("tags", tags);
-
-        String description = "";
-        String detailedDescription = "";
+        properties.put("tags", tags.toArray(String[]::new));
 
         // try to use an handler to determine if the add-on is installed
-        boolean installed = false;
-        for (MarketplaceAddonHandler handler : addonHandlers) {
-            if (handler.supports(type, contentType)) {
-                if (handler.isInstalled(id)) {
-                    installed = true;
-                }
-            }
-        }
+        boolean installed = addonHandlers.stream()
+                .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(id));
 
-        String configDescriptionURI = "";
-        String keywords = "";
-        String countries = "";
-        String connection = "";
-        String backgroundColor = "";
-        String imageLink = topic.image_url;
-        Addon addon = new Addon(id, type, title, version, maturity, contentType, link, author, verifiedAuthor,
-                installed, description, detailedDescription, configDescriptionURI, keywords, countries, null,
-                connection, backgroundColor, imageLink, properties);
-        return addon;
+        return Addon.create(id).withType(type).withContentType(contentType).withImageLink(topic.image_url)
+                .withAuthor(author).withProperties(properties).withLabel(title).withInstalled(installed)
+                .withMaturity(maturity).withLink(link).build();
     }
 
     /**
@@ -400,31 +371,20 @@ public class CommunityMarketplaceAddonService implements AddonService {
      */
     private Addon convertTopicToAddon(DiscourseTopicResponseDTO topic) {
         String id = ADDON_ID_PREFIX + topic.id.toString();
-        String[] tags = Objects.requireNonNullElse(topic.tags, new String[0]);
+        List<String> tags = Arrays.asList(Objects.requireNonNullElse(topic.tags, new String[0]));
 
         AddonType addonType = getAddonType(topic.category_id, tags);
         String type = (addonType != null) ? addonType.getId() : "";
         String contentType = getContentType(topic.category_id, tags);
 
-        String version = "";
-        String title = topic.title;
-        String link = COMMUNITY_TOPIC_URL + topic.id.toString();
         int likeCount = topic.like_count;
         int views = topic.views;
         int postsCount = topic.posts_count;
         Date createdDate = topic.post_stream.posts[0].created_at;
         Date updatedDate = topic.post_stream.posts[0].updated_at;
         Date lastPostedDate = topic.last_posted;
-        String author = topic.post_stream.posts[0].display_username;
-        boolean verifiedAuthor = false;
 
-        String maturity = null;
-        for (String tag : tags) {
-            if (CODE_MATURITY_LEVELS.contains(tag)) {
-                maturity = tag;
-                break;
-            }
-        }
+        String maturity = tags.stream().filter(CODE_MATURITY_LEVELS::contains).findAny().orElse(null);
 
         HashMap<String, Object> properties = new HashMap<>(10);
         properties.put("created_at", createdDate);
@@ -433,9 +393,8 @@ public class CommunityMarketplaceAddonService implements AddonService {
         properties.put("like_count", likeCount);
         properties.put("views", views);
         properties.put("posts_count", postsCount);
-        properties.put("tags", tags);
+        properties.put("tags", tags.toArray(String[]::new));
 
-        String description = "";
         String detailedDescription = topic.post_stream.posts[0].cooked;
 
         // try to extract contents or links
@@ -469,24 +428,14 @@ public class CommunityMarketplaceAddonService implements AddonService {
         }
 
         // try to use an handler to determine if the add-on is installed
-        boolean installed = false;
-        for (MarketplaceAddonHandler handler : addonHandlers) {
-            if (handler.supports(type, contentType)) {
-                if (handler.isInstalled(id)) {
-                    installed = true;
-                }
-            }
-        }
+        boolean installed = addonHandlers.stream()
+                .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(id));
 
-        String configDescriptionURI = "";
-        String keywords = "";
-        String countries = "";
-        String connection = "";
-        String backgroundColor = "";
-        Addon addon = new Addon(id, type, title, version, maturity, contentType, link, author, verifiedAuthor,
-                installed, description, detailedDescription, configDescriptionURI, keywords, countries, null,
-                connection, backgroundColor, null, properties);
-        return addon;
+        return Addon.create(id).withType(type).withContentType(contentType).withLabel(topic.title)
+                .withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
+                .withAuthor(topic.post_stream.posts[0].display_username).withMaturity(maturity)
+                .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties)
+                .build();
     }
 
     private void postInstalledEvent(String extensionId) {
