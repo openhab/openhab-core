@@ -15,11 +15,14 @@ package org.openhab.core.ui.internal.chart.defaultchartprovider;
 import java.awt.Color;
 import java.awt.Font;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Chart styling theme for the {@link DefaultChartProvider}.
  *
  * @author Holger Reichert - Initial contribution
  */
+@NonNullByDefault
 public interface ChartTheme {
 
     /**

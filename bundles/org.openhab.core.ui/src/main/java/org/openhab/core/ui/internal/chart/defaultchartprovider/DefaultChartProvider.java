@@ -16,23 +16,26 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.knowm.xchart.Chart;
-import org.knowm.xchart.ChartBuilder;
-import org.knowm.xchart.Series;
-import org.knowm.xchart.SeriesMarker;
-import org.knowm.xchart.StyleManager.LegendPosition;
-import org.openhab.core.i18n.TimeZoneProvider;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.knowm.xchart.XYChart;
+import org.knowm.xchart.XYChartBuilder;
+import org.knowm.xchart.XYSeries;
+import org.knowm.xchart.style.Styler.LegendPosition;
+import org.knowm.xchart.style.XYStyler;
+import org.knowm.xchart.style.markers.None;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -65,40 +68,58 @@ import org.slf4j.LoggerFactory;
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  * @author Christoph Weitkamp - Consider default persistence service
  */
+@NonNullByDefault
 @Component(immediate = true)
 public class DefaultChartProvider implements ChartProvider {
 
-    private final Logger logger = LoggerFactory.getLogger(DefaultChartProvider.class);
+    private static class LegendPositionDecider {
+        private int counter = 0;
 
-    private final TimeZoneProvider timeZoneProvider;
-    protected final ItemUIRegistry itemUIRegistry;
-    private final PersistenceServiceRegistry persistenceServiceRegistry;
+        private void addData(XYSeries series, List<Number> yData) {
+            // If the start value is below the median, then count legend position down
+            // Otherwise count up.
+            // We use this to decide whether to put the legend in the top or bottom corner.
+            if (yData.iterator().next().floatValue() > ((series.getYMax() - series.getYMin()) / 2 + series.getYMin())) {
+                counter++;
+            } else {
+                counter--;
+            }
+        }
 
-    private int legendPosition = 0;
-
-    private static final ChartTheme[] CHART_THEMES_AVAILABLE = { new ChartThemeWhite(), new ChartThemeBright(),
-            new ChartThemeDark(), new ChartThemeBlack() };
-    public static final String CHART_THEME_DEFAULT_NAME = "bright";
-    private Map<String, ChartTheme> chartThemes = null;
-
-    public static final int DPI_DEFAULT = 96;
-
-    @Activate
-    public DefaultChartProvider(final @Reference TimeZoneProvider timeZoneProvider,
-            final @Reference ItemUIRegistry itemUIRegistry,
-            final @Reference PersistenceServiceRegistry persistenceServiceRegistry) {
-        this.timeZoneProvider = timeZoneProvider;
-        this.itemUIRegistry = itemUIRegistry;
-        this.persistenceServiceRegistry = persistenceServiceRegistry;
+        private LegendPosition getLegendPosition() {
+            return counter < 0 ? LegendPosition.InsideNW : LegendPosition.InsideSW;
+        }
     }
 
+    private static final Duration TEN_MINUTES = Duration.ofMinutes(10);
+    private static final Duration ONE_DAY = Duration.ofDays(1);
+    private static final Duration ONE_WEEK = Duration.ofDays(7);
+
+    private static final ChartTheme CHART_THEME_DEFAULT = new ChartThemeBright();
+    private static final Map<String, ChartTheme> CHART_THEMES = Stream
+            .of(CHART_THEME_DEFAULT, new ChartThemeBrightTransparent(), //
+                    new ChartThemeWhite(), new ChartThemeWhiteTransparent(), //
+                    new ChartThemeDark(), new ChartThemeDarkTransparent(), //
+                    new ChartThemeBlack(), new ChartThemeBlackTransparent()) //
+            .collect(Collectors.toMap(ChartTheme::getThemeName, Function.identity()));
+
+    private static final int DPI_DEFAULT = 96;
+
+    private final Logger logger = LoggerFactory.getLogger(DefaultChartProvider.class);
+
+    private final ItemUIRegistry itemUIRegistry;
+    private final PersistenceServiceRegistry persistenceServiceRegistry;
+
     @Activate
-    protected void activate() {
-        logger.debug("Starting up default chart provider.");
-        String themeNames = Arrays.stream(CHART_THEMES_AVAILABLE) //
-                .map(t -> t.getThemeName()) //
-                .collect(Collectors.joining(", "));
-        logger.debug("Available themes for default chart provider: {}", themeNames);
+    public DefaultChartProvider(final @Reference ItemUIRegistry itemUIRegistry,
+            final @Reference PersistenceServiceRegistry persistenceServiceRegistry) {
+        this.itemUIRegistry = itemUIRegistry;
+        this.persistenceServiceRegistry = persistenceServiceRegistry;
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Available themes for default chart provider: {}",
+                    CHART_THEMES.keySet().stream().collect(Collectors.joining(", ")));
+        }
     }
 
     @Override
@@ -107,8 +128,9 @@ public class DefaultChartProvider implements ChartProvider {
     }
 
     @Override
-    public BufferedImage createChart(String serviceId, String theme, Date startTime, Date endTime, int height,
-            int width, String items, String groups, Integer dpiValue, Boolean legend)
+    public BufferedImage createChart(@Nullable String serviceId, @Nullable String theme, ZonedDateTime startTime,
+            ZonedDateTime endTime, int height, int width, @Nullable String items, @Nullable String groups,
+            @Nullable Integer dpiValue, @Nullable Boolean legend)
             throws ItemNotFoundException, IllegalArgumentException {
         logger.debug(
                 "Rendering chart: service: '{}', theme: '{}', startTime: '{}', endTime: '{}', width: '{}', height: '{}', items: '{}', groups: '{}', dpi: '{}', legend: '{}'",
@@ -130,61 +152,62 @@ public class DefaultChartProvider implements ChartProvider {
         int seriesCounter = 0;
 
         // get theme
-        ChartTheme chartTheme = getChartTheme(theme);
+        ChartTheme chartTheme = theme == null ? CHART_THEME_DEFAULT
+                : CHART_THEMES.getOrDefault(theme, CHART_THEME_DEFAULT);
 
         // get DPI
-        int dpi;
-        if (dpiValue != null && dpiValue > 0) {
-            dpi = dpiValue;
-        } else {
-            dpi = DPI_DEFAULT;
-        }
+        int dpi = dpiValue != null && dpiValue > 0 ? dpiValue : DPI_DEFAULT;
 
         // Create Chart
-        Chart chart = new ChartBuilder().width(width).height(height).build();
+        XYChart chart = new XYChartBuilder().width(width).height(height).build();
 
         // Define the time axis - the defaults are not very nice
-        long period = (endTime.getTime() - startTime.getTime()) / 1000;
+        Duration period = Duration.between(startTime, endTime);
         String pattern = "HH:mm";
-        if (period <= 600) { // 10 minutes
+
+        if (period.compareTo(TEN_MINUTES) <= 0) {
             pattern = "mm:ss";
-        } else if (period <= 86400) { // 1 day
+        } else if (period.compareTo(ONE_DAY) <= 0) {
             pattern = "HH:mm";
-        } else if (period <= 604800) { // 1 week
+        } else if (period.compareTo(ONE_WEEK) <= 0) {
             pattern = "EEE d";
         } else {
             pattern = "d MMM";
         }
 
-        chart.getStyleManager().setDatePattern(pattern);
+        XYStyler styler = chart.getStyler();
+        styler.setDatePattern(pattern);
         // axis
-        chart.getStyleManager().setAxisTickLabelsFont(chartTheme.getAxisTickLabelsFont(dpi));
-        chart.getStyleManager().setAxisTickLabelsColor(chartTheme.getAxisTickLabelsColor());
-        chart.getStyleManager().setXAxisMin(startTime.getTime());
-        chart.getStyleManager().setXAxisMax(endTime.getTime());
+        styler.setAxisTickLabelsFont(chartTheme.getAxisTickLabelsFont(dpi));
+        styler.setAxisTickLabelsColor(chartTheme.getAxisTickLabelsColor());
+        styler.setXAxisMin(Double.valueOf(startTime.toInstant().toEpochMilli()));
+        styler.setXAxisMax(Double.valueOf(endTime.toInstant().toEpochMilli()));
         int yAxisSpacing = Math.max(height / 10, chartTheme.getAxisTickLabelsFont(dpi).getSize());
-        chart.getStyleManager().setYAxisTickMarkSpacingHint(yAxisSpacing);
+        styler.setYAxisTickMarkSpacingHint(yAxisSpacing);
         // chart
-        chart.getStyleManager().setChartBackgroundColor(chartTheme.getChartBackgroundColor());
-        chart.getStyleManager().setChartFontColor(chartTheme.getChartFontColor());
-        chart.getStyleManager().setChartPadding(chartTheme.getChartPadding(dpi));
-        chart.getStyleManager().setPlotBackgroundColor(chartTheme.getPlotBackgroundColor());
+        styler.setChartBackgroundColor(chartTheme.getChartBackgroundColor());
+        styler.setChartFontColor(chartTheme.getChartFontColor());
+        styler.setChartPadding(chartTheme.getChartPadding(dpi));
+        styler.setPlotBackgroundColor(chartTheme.getPlotBackgroundColor());
         float plotGridLinesDash = (float) chartTheme.getPlotGridLinesDash(dpi);
         float[] plotGridLinesDashArray = { plotGridLinesDash, plotGridLinesDash };
-        chart.getStyleManager().setPlotGridLinesStroke(
-                new BasicStroke((float) chartTheme.getPlotGridLinesWidth(dpi), 0, 2, 10, plotGridLinesDashArray, 0));
-        chart.getStyleManager().setPlotGridLinesColor(chartTheme.getPlotGridLinesColor());
+        styler.setPlotGridLinesStroke(new BasicStroke((float) chartTheme.getPlotGridLinesWidth(dpi),
+                BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10, plotGridLinesDashArray, 0));
+        styler.setPlotGridLinesColor(chartTheme.getPlotGridLinesColor());
         // legend
-        chart.getStyleManager().setLegendBackgroundColor(chartTheme.getLegendBackgroundColor());
-        chart.getStyleManager().setLegendFont(chartTheme.getLegendFont(dpi));
-        chart.getStyleManager().setLegendSeriesLineLength(chartTheme.getLegendSeriesLineLength(dpi));
+        styler.setLegendBackgroundColor(chartTheme.getLegendBackgroundColor());
+        styler.setLegendFont(chartTheme.getLegendFont(dpi));
+        styler.setLegendSeriesLineLength(chartTheme.getLegendSeriesLineLength(dpi));
+
+        LegendPositionDecider legendPositionDecider = new LegendPositionDecider();
 
         // Loop through all the items
         if (items != null) {
             String[] itemNames = items.split(",");
             for (String itemName : itemNames) {
                 Item item = itemUIRegistry.getItem(itemName);
-                if (addItem(chart, persistenceService, startTime, endTime, item, seriesCounter, chartTheme, dpi)) {
+                if (addItem(chart, persistenceService, startTime, endTime, item, seriesCounter, chartTheme, dpi,
+                        legendPositionDecider)) {
                     seriesCounter++;
                 }
             }
@@ -199,7 +222,7 @@ public class DefaultChartProvider implements ChartProvider {
                     GroupItem groupItem = (GroupItem) item;
                     for (Item member : groupItem.getMembers()) {
                         if (addItem(chart, persistenceService, startTime, endTime, member, seriesCounter, chartTheme,
-                                dpi)) {
+                                dpi, legendPositionDecider)) {
                             seriesCounter++;
                         }
                     }
@@ -219,13 +242,13 @@ public class DefaultChartProvider implements ChartProvider {
             List<Date> xData = new ArrayList<>();
             List<Number> yData = new ArrayList<>();
 
-            xData.add(startTime);
+            xData.add(Date.from(startTime.toInstant()));
             yData.add(0);
-            xData.add(endTime);
+            xData.add(Date.from(endTime.toInstant()));
             yData.add(0);
 
-            Series series = chart.addSeries("NONE", xData, yData);
-            series.setMarker(SeriesMarker.NONE);
+            XYSeries series = chart.addSeries("NONE", xData, yData);
+            series.setMarker(new None());
             series.setLineStyle(new BasicStroke(0f));
         }
 
@@ -243,40 +266,37 @@ public class DefaultChartProvider implements ChartProvider {
         // Legend position (top-left or bottom-left) is dynamically selected based on the data
         // This won't be perfect, but it's a good compromise
         if (showLegend) {
-            if (legendPosition < 0) {
-                chart.getStyleManager().setLegendPosition(LegendPosition.InsideNW);
-            } else {
-                chart.getStyleManager().setLegendPosition(LegendPosition.InsideSW);
-            }
+            styler.setLegendPosition(legendPositionDecider.getLegendPosition());
         } else { // hide the whole legend
-            chart.getStyleManager().setLegendVisible(false);
+            styler.setLegendVisible(false);
         }
 
         // Write the chart as a PNG image
         BufferedImage lBufferedImage = new BufferedImage(chart.getWidth(), chart.getHeight(),
                 BufferedImage.TYPE_INT_ARGB);
         Graphics2D lGraphics2D = lBufferedImage.createGraphics();
-        chart.paint(lGraphics2D);
+        chart.paint(lGraphics2D, chart.getWidth(), chart.getHeight());
         return lBufferedImage;
     }
 
-    double convertData(State state) {
+    private double convertData(State state) {
         if (state instanceof DecimalType) {
             return ((DecimalType) state).doubleValue();
         } else if (state instanceof QuantityType) {
             return ((QuantityType<?>) state).doubleValue();
         } else if (state instanceof OnOffType) {
-            return (state == OnOffType.OFF) ? 0 : 1;
+            return state == OnOffType.OFF ? 0 : 1;
         } else if (state instanceof OpenClosedType) {
-            return (state == OpenClosedType.CLOSED) ? 0 : 1;
+            return state == OpenClosedType.CLOSED ? 0 : 1;
         } else {
             logger.debug("Unsupported item type in chart: {}", state.getClass().toString());
             return 0;
         }
     }
 
-    boolean addItem(Chart chart, QueryablePersistenceService service, Date timeBegin, Date timeEnd, Item item,
-            int seriesCounter, ChartTheme chartTheme, int dpi) {
+    private boolean addItem(XYChart chart, QueryablePersistenceService service, ZonedDateTime timeBegin,
+            ZonedDateTime timeEnd, Item item, int seriesCounter, ChartTheme chartTheme, int dpi,
+            LegendPositionDecider legendPositionDecider) {
         Color color = chartTheme.getLineColor(seriesCounter);
 
         // Get the item label
@@ -301,7 +321,7 @@ public class DefaultChartProvider implements ChartProvider {
         // This is necessary for values that don't change often otherwise data will start
         // after the start of the graph (or not at all if there's no change during the graph period)
         filter = new FilterCriteria();
-        filter.setEndDate(ZonedDateTime.ofInstant(timeBegin.toInstant(), timeZoneProvider.getTimeZone()));
+        filter.setEndDate(timeBegin);
         filter.setItemName(item.getName());
         filter.setPageSize(1);
         filter.setOrdering(Ordering.DESCENDING);
@@ -310,13 +330,13 @@ public class DefaultChartProvider implements ChartProvider {
             HistoricItem historicItem = result.iterator().next();
 
             state = historicItem.getState();
-            xData.add(timeBegin);
+            xData.add(Date.from(timeBegin.toInstant()));
             yData.add(convertData(state));
         }
 
         // Now, get all the data between the start and end time
-        filter.setBeginDate(ZonedDateTime.ofInstant(timeBegin.toInstant(), timeZoneProvider.getTimeZone()));
-        filter.setEndDate(ZonedDateTime.ofInstant(timeEnd.toInstant(), timeZoneProvider.getTimeZone()));
+        filter.setBeginDate(timeBegin);
+        filter.setEndDate(timeEnd);
         filter.setPageSize(Integer.MAX_VALUE);
         filter.setOrdering(Ordering.ASCENDING);
 
@@ -342,7 +362,7 @@ public class DefaultChartProvider implements ChartProvider {
 
         // Lastly, add the final state at the endtime
         if (state != null) {
-            xData.add(timeEnd);
+            xData.add(Date.from(timeEnd.toInstant()));
             yData.add(convertData(state));
         }
 
@@ -358,55 +378,18 @@ public class DefaultChartProvider implements ChartProvider {
             yData.add(yData.iterator().next());
         }
 
-        Series series = chart.addSeries(label, xData, yData);
+        XYSeries series = chart.addSeries(label, xData, yData);
         float lineWidth = (float) chartTheme.getLineWidth(dpi);
         series.setLineStyle(new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER));
-        series.setMarker(SeriesMarker.NONE);
+        series.setMarker(new None());
         series.setLineColor(color);
 
-        // If the start value is below the median, then count legend position down
-        // Otherwise count up.
-        // We use this to decide whether to put the legend in the top or bottom corner.
-        if (yData.iterator().next().floatValue() > ((series.getYMax() - series.getYMin()) / 2 + series.getYMin())) {
-            legendPosition++;
-        } else {
-            legendPosition--;
-        }
-
+        legendPositionDecider.addData(series, yData);
         return true;
     }
 
     @Override
     public ImageType getChartType() {
-        return (ImageType.png);
-    }
-
-    /**
-     * Retrieve a chart theme by it's name. If no name is given or no theme with the given name exists, the
-     * {@link DefaultChartProvider#CHART_THEME_DEFAULT_NAME default theme} gets returned.
-     *
-     * @param name the {@link ChartTheme#getThemeName() theme name}
-     * @return {@link ChartTheme}
-     */
-    private ChartTheme getChartTheme(String name) {
-        // if the static chartThemes hashmap is nul, we have to fill it first with all available themes,
-        // based on the theme name
-        if (chartThemes == null) {
-            chartThemes = new HashMap<>();
-            for (ChartTheme theme : CHART_THEMES_AVAILABLE) {
-                chartThemes.put(theme.getThemeName(), theme);
-            }
-        }
-        String chartThemeName = name;
-        // no theme name -> default theme
-        if (name == null || name.isBlank()) {
-            chartThemeName = CHART_THEME_DEFAULT_NAME;
-        }
-        ChartTheme chartTheme = chartThemes.get(chartThemeName);
-        if (chartTheme == null) {
-            // no theme with the given name found -> default theme
-            chartTheme = chartThemes.get(CHART_THEME_DEFAULT_NAME);
-        }
-        return chartTheme;
+        return ImageType.png;
     }
 }
