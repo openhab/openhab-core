@@ -94,7 +94,7 @@ public class ScriptBusEvent {
                 if (command != null) {
                     eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command));
                 } else {
-                    LoggerFactory.getLogger(ScriptBusEvent.class).warn("Command '{}' cannot be parsed.", commandString);
+                    LoggerFactory.getLogger(ScriptBusEvent.class).warn("Command '{}' cannot be parsed for item '{}'.", commandString, item);
                 }
             } catch (ItemNotFoundException e) {
                 LoggerFactory.getLogger(ScriptBusEvent.class).warn("Item '{}' does not exist.", itemName);
@@ -158,7 +158,7 @@ public class ScriptBusEvent {
                 if (state != null) {
                     eventPublisher.post(ItemEventFactory.createStateEvent(itemName, state));
                 } else {
-                    LoggerFactory.getLogger(ScriptBusEvent.class).warn("State '{}' cannot be parsed.", stateString);
+                    LoggerFactory.getLogger(ScriptBusEvent.class).warn("State '{}' cannot be parsed for item '{}'.", stateString, itemName);
                 }
             } catch (ItemNotFoundException e) {
                 LoggerFactory.getLogger(ScriptBusEvent.class).warn("Item '{}' does not exist.", itemName);
