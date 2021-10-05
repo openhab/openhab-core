@@ -463,9 +463,12 @@
 		<requirement>openhab.tp;filter:="(&amp;(feature=serial)(impl=rxtx))"</requirement>
 		<feature dependency="true">openhab.tp-serial-rxtx</feature>
 
+		<feature dependency="true">openhab-core-io-transport-mdns</feature>
+
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.serial/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.linuxsysfs/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.ser2net/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx.rfc2217/${project.version}</bundle>

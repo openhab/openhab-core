@@ -49,7 +49,6 @@ public class RFC2217PortProvider implements SerialPortProvider {
 
     @Override
     public Stream<SerialPortIdentifier> getSerialPortIdentifiers() {
-        // TODO implement discovery here. https://github.com/eclipse/smarthome/pull/5560
         return Stream.empty();
     }
 }
