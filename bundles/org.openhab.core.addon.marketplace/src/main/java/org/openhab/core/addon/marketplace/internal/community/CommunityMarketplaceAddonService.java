@@ -100,7 +100,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private static final Map<String, AddonType> TAG_ADDON_TYPE_MAP = Map.of( //
             "automation", new AddonType("automation", "Automation"), //
             "binding", new AddonType("binding", "Bindings"), //
-            "io", new AddonType("misc", "Misc"), //
+            "misc", new AddonType("misc", "Misc"), //
             "persistence", new AddonType("persistence", "Persistence"), //
             "transformation", new AddonType("transformation", "Transformations"), //
             "ui", new AddonType("ui", "User Interfaces"), //
