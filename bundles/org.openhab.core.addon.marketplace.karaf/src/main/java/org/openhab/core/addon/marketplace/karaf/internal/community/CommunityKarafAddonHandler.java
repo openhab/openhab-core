@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     private static final Path KAR_CACHE_PATH = Path.of(OpenHAB.getUserDataFolder(), "marketplace", "kar");
-    private static final List<String> SUPPORTED_EXT_TYPES = List.of("automation", "binding", "io", "persistence",
+    private static final List<String> SUPPORTED_EXT_TYPES = List.of("automation", "binding", "misc", "persistence",
             "transformation", "ui", "voice");
     private static final String KAR_DOWNLOAD_URL_PROPERTY = "kar_download_url";
     private static final String KAR_EXTENSION = ".kar";
