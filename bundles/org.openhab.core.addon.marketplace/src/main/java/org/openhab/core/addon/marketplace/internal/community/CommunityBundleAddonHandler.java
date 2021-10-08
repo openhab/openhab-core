@@ -40,7 +40,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true)
 @NonNullByDefault
 public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller implements MarketplaceAddonHandler {
-    private static final List<String> SUPPORTED_EXT_TYPES = List.of("automation", "binding", "io", "persistence",
+    private static final List<String> SUPPORTED_EXT_TYPES = List.of("automation", "binding", "misc", "persistence",
             "transformation", "ui", "voice");
     private static final String JAR_DOWNLOAD_URL_PROPERTY = "jar_download_url";
 

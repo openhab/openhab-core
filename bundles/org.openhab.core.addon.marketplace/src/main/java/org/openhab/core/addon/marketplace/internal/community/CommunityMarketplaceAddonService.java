@@ -100,11 +100,11 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private static final Map<String, AddonType> TAG_ADDON_TYPE_MAP = Map.of( //
             "automation", new AddonType("automation", "Automation"), //
             "binding", new AddonType("binding", "Bindings"), //
-            "io", new AddonType("io", "I/O Services"), //
-            "persistence", new AddonType("persistence", "Persistence Services"), //
+            "misc", new AddonType("misc", "Misc"), //
+            "persistence", new AddonType("persistence", "Persistence"), //
             "transformation", new AddonType("transformation", "Transformations"), //
             "ui", new AddonType("ui", "User Interfaces"), //
-            "voice", new AddonType("voice", "Voices"));
+            "voice", new AddonType("voice", "Voice"));
 
     private final Logger logger = LoggerFactory.getLogger(CommunityMarketplaceAddonService.class);
     private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
@@ -336,7 +336,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
         String maturity = tags.stream().filter(CODE_MATURITY_LEVELS::contains).findAny().orElse(null);
 
-        HashMap<String, Object> properties = new HashMap<>(10);
+        Map<String, Object> properties = new HashMap<>(10);
         properties.put("created_at", createdDate);
         properties.put("like_count", likeCount);
         properties.put("views", views);
@@ -386,7 +386,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
         String maturity = tags.stream().filter(CODE_MATURITY_LEVELS::contains).findAny().orElse(null);
 
-        HashMap<String, Object> properties = new HashMap<>(10);
+        Map<String, Object> properties = new HashMap<>(10);
         properties.put("created_at", createdDate);
         properties.put("updated_at", updatedDate);
         properties.put("last_posted", lastPostedDate);
