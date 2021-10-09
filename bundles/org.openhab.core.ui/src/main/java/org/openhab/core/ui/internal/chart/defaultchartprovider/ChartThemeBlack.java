@@ -15,11 +15,14 @@ package org.openhab.core.ui.internal.chart.defaultchartprovider;
 import java.awt.Color;
 import java.awt.Font;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Implementation of the black {@link ChartTheme chart theme}.
  *
  * @author Holger Reichert - Initial contribution
  */
+@NonNullByDefault
 public class ChartThemeBlack implements ChartTheme {
 
     private static final String THEME_NAME = "black";

@@ -13,8 +13,10 @@
 package org.openhab.core.ui.chart;
 
 import java.awt.image.BufferedImage;
-import java.util.Date;
+import java.time.ZonedDateTime;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.ItemNotFoundException;
 
 /**
@@ -25,6 +27,7 @@ import org.openhab.core.items.ItemNotFoundException;
  * @author Chris Jackson - Initial contribution
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  */
+@NonNullByDefault
 public interface ChartProvider {
     /**
      * Gets the name of this chart provider.
@@ -56,8 +59,9 @@ public interface ChartProvider {
      * @throws ItemNotFoundException if an item or group is not found
      * @throws IllegalArgumentException if an invalid argument is passed
      */
-    BufferedImage createChart(String service, String theme, Date startTime, Date endTime, int height, int width,
-            String items, String groups, Integer dpi, Boolean legend) throws ItemNotFoundException;
+    BufferedImage createChart(@Nullable String service, @Nullable String theme, ZonedDateTime startTime,
+            ZonedDateTime endTime, int height, int width, @Nullable String items, @Nullable String groups,
+            @Nullable Integer dpi, @Nullable Boolean legend) throws ItemNotFoundException;
 
     /**
      * Gets the type of data that will be written by the chart.

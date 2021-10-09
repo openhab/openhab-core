@@ -15,16 +15,16 @@ package org.openhab.core.ui.internal.chart;
 import static java.util.Map.entry;
 
 import java.awt.image.BufferedImage;
-import java.io.EOFException;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 import javax.servlet.ServletConfig;
@@ -32,7 +32,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.http.servlet.OpenHABServlet;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.ui.chart.ChartProvider;
@@ -65,6 +68,7 @@ import org.osgi.service.http.HttpService;
  * @author Chris Jackson - Initial contribution
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  */
+@NonNullByDefault
 @Component(immediate = true, service = ChartServlet.class, configurationPid = "org.openhab.chart", //
         property = Constants.SERVICE_PID + "=org.openhab.chart")
 @ConfigurableService(category = "system", label = "Charts", description_uri = ChartServlet.CONFIG_URI)
@@ -76,6 +80,9 @@ public class ChartServlet extends OpenHABServlet {
     private static final int CHART_HEIGHT = 240;
     private static final int CHART_WIDTH = 480;
     private static final String DATE_FORMAT = "yyyyMMddHHmm";
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
+
+    private final TimeZoneProvider timeZoneProvider;
 
     private String providerName = "default";
     private int defaultHeight = CHART_HEIGHT;
@@ -86,21 +93,25 @@ public class ChartServlet extends OpenHABServlet {
     // The URI of this servlet
     public static final String SERVLET_NAME = "/chart";
 
-    protected static final Map<String, Long> PERIODS = Map.ofEntries( //
-            entry("h", 3600000L), entry("4h", 14400000L), //
-            entry("8h", 28800000L), entry("12h", 43200000L), //
-            entry("D", 86400000L), entry("2D", 172800000L), //
-            entry("3D", 259200000L), entry("W", 604800000L), //
-            entry("2W", 1209600000L), entry("M", 2592000000L), //
-            entry("2M", 5184000000L), entry("4M", 10368000000L), //
-            entry("Y", 31536000000L)//
+    private static final Duration DEFAULT_PERIOD = Duration.ofDays(1);
+
+    private static final Map<String, Duration> PERIODS = Map.ofEntries( //
+            entry("h", Duration.ofHours(1)), entry("4h", Duration.ofHours(4)), //
+            entry("8h", Duration.ofHours(8)), entry("12h", Duration.ofHours(12)), //
+            entry("D", Duration.ofDays(1)), entry("2D", Duration.ofDays(2)), //
+            entry("3D", Duration.ofDays(3)), entry("W", Duration.ofDays(7)), //
+            entry("2W", Duration.ofDays(14)), entry("M", Duration.ofDays(30)), //
+            entry("2M", Duration.ofDays(60)), entry("4M", Duration.ofDays(120)), //
+            entry("Y", Duration.ofDays(365))//
     );
 
     protected static final Map<String, ChartProvider> CHART_PROVIDERS = new ConcurrentHashMap<>();
 
     @Activate
-    public ChartServlet(final @Reference HttpService httpService, final @Reference HttpContext httpContext) {
+    public ChartServlet(final @Reference HttpService httpService, final @Reference HttpContext httpContext,
+            final @Reference TimeZoneProvider timeZoneProvider) {
         super(httpService, httpContext);
+        this.timeZoneProvider = timeZoneProvider;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -128,7 +139,7 @@ public class ChartServlet extends OpenHABServlet {
     }
 
     @Modified
-    protected void modified(Map<String, Object> config) {
+    protected void modified(@Nullable Map<String, Object> config) {
         applyConfig(config);
     }
 
@@ -137,7 +148,7 @@ public class ChartServlet extends OpenHABServlet {
      *
      * @param config the configuration
      */
-    private void applyConfig(Map<String, Object> config) {
+    private void applyConfig(@Nullable Map<String, Object> config) {
         if (config == null) {
             return;
         }
@@ -224,22 +235,14 @@ public class ChartServlet extends OpenHABServlet {
         }
 
         // Read out the parameter period, begin and end and save them.
-        Long period = null;
-        Date timeBegin = null;
-        Date timeEnd = null;
-
-        if (periodParam != null) {
-            period = PERIODS.get(periodParam);
-        }
-        if (period == null) {
-            // use a day as the default period
-            period = PERIODS.get("D");
-        }
+        Duration period = periodParam == null ? DEFAULT_PERIOD : PERIODS.getOrDefault(periodParam, DEFAULT_PERIOD);
+        ZonedDateTime timeBegin = null;
+        ZonedDateTime timeEnd = null;
 
         if (timeBeginParam != null) {
             try {
-                timeBegin = new SimpleDateFormat(DATE_FORMAT).parse(timeBeginParam);
-            } catch (ParseException e) {
+                timeBegin = LocalDateTime.parse(timeBeginParam, FORMATTER).atZone(timeZoneProvider.getTimeZone());
+            } catch (DateTimeParseException e) {
                 res.sendError(HttpServletResponse.SC_BAD_REQUEST,
                         "Begin and end must have this format: " + DATE_FORMAT + ".");
                 return;
@@ -248,8 +251,8 @@ public class ChartServlet extends OpenHABServlet {
 
         if (timeEndParam != null) {
             try {
-                timeEnd = new SimpleDateFormat(DATE_FORMAT).parse(timeEndParam);
-            } catch (ParseException e) {
+                timeEnd = LocalDateTime.parse(timeEndParam, FORMATTER).atZone(timeZoneProvider.getTimeZone());
+            } catch (DateTimeParseException e) {
                 res.sendError(HttpServletResponse.SC_BAD_REQUEST,
                         "Begin and end must have this format: " + DATE_FORMAT + ".");
                 return;
@@ -258,17 +261,18 @@ public class ChartServlet extends OpenHABServlet {
 
         // Set begin and end time and check legality.
         if (timeBegin == null && timeEnd == null) {
-            timeEnd = new Date();
-            timeBegin = new Date(timeEnd.getTime() - period);
+            timeEnd = ZonedDateTime.now(timeZoneProvider.getTimeZone());
+            timeBegin = timeEnd.minus(period);
             logger.debug("No begin or end is specified, use now as end and now-period as begin.");
         } else if (timeEnd == null) {
-            timeEnd = new Date(timeBegin.getTime() + period);
+            timeEnd = timeBegin.plus(period);
             logger.debug("No end is specified, use begin + period as end.");
         } else if (timeBegin == null) {
-            timeBegin = new Date(timeEnd.getTime() - period);
+            timeBegin = timeEnd.minus(period);
             logger.debug("No begin is specified, use end-period as begin");
-        } else if (timeEnd.before(timeBegin)) {
-            throw new ServletException("The end is before the begin.");
+        } else if (timeEnd.isBefore(timeBegin)) {
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "The end is before the begin.");
+            return;
         }
 
         // If a persistence service is specified, find the provider
@@ -311,46 +315,43 @@ public class ChartServlet extends OpenHABServlet {
             width = maxWidth;
         }
 
-        // Set the content type to that provided by the chart provider
-        res.setContentType("image/" + provider.getChartType());
         logger.debug("chart building with width {} height {} dpi {}", width, height, dpi);
-        try (ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(res.getOutputStream())) {
+        try {
             BufferedImage chart = provider.createChart(serviceName, req.getParameter("theme"), timeBegin, timeEnd,
                     height, width, req.getParameter("items"), req.getParameter("groups"), dpi, legend);
-            ImageIO.write(chart, provider.getChartType().toString(), imageOutputStream);
-            logger.debug("Chart successfully generated and written to the response.");
+            // Set the content type to that provided by the chart provider
+            res.setContentType("image/" + provider.getChartType());
+            try (ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(res.getOutputStream())) {
+                ImageIO.write(chart, provider.getChartType().toString(), imageOutputStream);
+                logger.debug("Chart successfully generated and written to the response.");
+            }
         } catch (ItemNotFoundException e) {
             logger.debug("{}", e.getMessage());
             res.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } catch (IllegalArgumentException e) {
             logger.warn("Illegal argument in chart: {}", e.getMessage());
             res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Illegal argument in chart: " + e.getMessage());
-        } catch (IIOException | EOFException e) {
+        } catch (IOException e) {
             // this can happen if the request is terminated while the image is streamed, see
             // https://github.com/openhab/openhab-distro/issues/684
             logger.debug("Failed writing image to response stream", e);
         } catch (RuntimeException e) {
-            if (logger.isDebugEnabled()) {
-                // we also attach the stack trace
-                logger.warn("Chart generation failed: {}", e.getMessage(), e);
-            } else {
-                logger.warn("Chart generation failed: {}", e.getMessage());
-            }
+            logger.warn("Chart generation failed: {}", e.getMessage(), logger.isDebugEnabled() ? e : null);
             res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
     @Override
-    public void init(ServletConfig config) throws ServletException {
+    public void init(@Nullable ServletConfig config) throws ServletException {
     }
 
     @Override
-    public ServletConfig getServletConfig() {
+    public @Nullable ServletConfig getServletConfig() {
         return null;
     }
 
     @Override
-    public String getServletInfo() {
+    public @Nullable String getServletInfo() {
         return null;
     }
 
