@@ -177,7 +177,9 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
                 try (Reader reader = new InputStreamReader(connection.getInputStream())) {
                     DiscourseCategoryResponseDTO parsed = gson.fromJson(reader, DiscourseCategoryResponseDTO.class);
-                    pages.add(parsed);
+                    if (parsed.topic_list.topics.length != 0) {
+                        pages.add(parsed);
+                    }
 
                     if (parsed.topic_list.more_topics_url != null) {
                         // Discourse URL for next page is wrong
