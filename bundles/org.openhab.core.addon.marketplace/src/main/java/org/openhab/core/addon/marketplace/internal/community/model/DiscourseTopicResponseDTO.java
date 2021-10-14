@@ -27,6 +27,7 @@ public class DiscourseTopicResponseDTO {
 
     public String title;
     public Integer posts_count;
+    public String image_url;
 
     public Date created_at;
     public Date updated_at;
