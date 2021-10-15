@@ -434,7 +434,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
                 .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(id));
 
         return Addon.create(id).withType(type).withContentType(contentType).withLabel(topic.title)
-                .withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
+                .withImageLink(topic.image_url).withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
                 .withAuthor(topic.post_stream.posts[0].display_username).withMaturity(maturity)
                 .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties)
                 .build();
