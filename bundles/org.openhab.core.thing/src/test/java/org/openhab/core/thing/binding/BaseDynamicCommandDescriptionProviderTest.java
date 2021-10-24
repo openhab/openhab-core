@@ -12,7 +12,7 @@
  */
 package org.openhab.core.thing.binding;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.List;

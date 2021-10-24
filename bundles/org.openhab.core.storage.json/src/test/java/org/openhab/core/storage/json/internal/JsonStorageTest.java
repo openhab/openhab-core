@@ -12,7 +12,6 @@
  */
 package org.openhab.core.storage.json.internal;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
