@@ -42,6 +42,7 @@ import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkProvider;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 
 import com.google.gson.JsonElement;
@@ -73,6 +74,7 @@ public class ItemChannelLinkResourceOSGiTest extends JavaOSGiTest {
     private UriInfo uriInfo;
     private HttpHeaders httpHeaders;
 
+    private ItemChannelLinkRegistry itemChannelLinkRegistry;
     private ItemChannelLinkResource itemChannelLinkResource;
     private ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
 
@@ -83,6 +85,9 @@ public class ItemChannelLinkResourceOSGiTest extends JavaOSGiTest {
         itemChannelLinkResource = getService(RESTResource.class, ItemChannelLinkResource.class);
         assertNotNull(itemChannelLinkResource);
 
+        itemChannelLinkRegistry = getService(ItemChannelLinkRegistry.class);
+        assertNotNull(itemChannelLinkRegistry);
+
         managedItemChannelLinkProvider = getService(ManagedItemChannelLinkProvider.class);
         assertNotNull(managedItemChannelLinkProvider);
 
@@ -92,6 +97,10 @@ public class ItemChannelLinkResourceOSGiTest extends JavaOSGiTest {
 
         when(itemChannelLinkProvider.getAll()).thenReturn(List.of(link1, link2, link3));
         registerService(itemChannelLinkProvider);
+
+        waitForAssert(() -> {
+            assertThat(itemChannelLinkRegistry.getAll(), hasSize(3));
+        });
 
         UriBuilder uriBuilder = mock(UriBuilder.class);
         when(uriBuilder.build(any())).thenReturn(URI.create(""));
