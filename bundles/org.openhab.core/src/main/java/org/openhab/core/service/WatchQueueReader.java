@@ -202,8 +202,8 @@ public class WatchQueueReader implements Runnable {
 
     @Override
     public void run() {
-        try {
-            for (;;) {
+        for (;;) {
+            try {
                 WatchKey key;
                 try {
                     key = watchService.take();
@@ -272,11 +272,9 @@ public class WatchQueueReader implements Runnable {
                 }
 
                 key.reset();
+            } catch (Exception exc) {
+                logger.error("Exception caught in WatchQueueReader: ", exc);
             }
-        } catch (Exception exc) {
-            logger.debug("ClosedWatchServiceException caught! {}. \n{} Stopping ", exc.getLocalizedMessage(),
-                    Thread.currentThread().getName());
-            return;
         }
     }
 
