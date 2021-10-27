@@ -6,7 +6,7 @@ on:
       - 'main'
     paths-ignore:
       - '.github/**/*.md'
-  pull_request_target:
+  pull_request:
     branches:
       - 'main'
     paths-ignore:
@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}        
 
       - name: Set up Cache
         uses: actions/cache@v2
