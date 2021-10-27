@@ -70,3 +70,17 @@ jobs:
         with:
           name: sat-summary-report
           path: target/summary_report.html
+
+      - uses: jwgmeligmeyling/spotbugs-github-action@master
+        if: ${{ always() && (steps.build.outcome == 'failure') }}
+        with:
+          path: '**/spotbugsXml.xml'
+
+      - uses: jwgmeligmeyling/checkstyle-github-action@master
+        with:
+          path: '**/checkstyle-result.xml'
+
+      - uses: jwgmeligmeyling/spotbugs-github-action@master
+        if: ${{ always() && (steps.build.outcome == 'failure') }}
+        with:
+          path: '**/spotbugsXml.xml'
