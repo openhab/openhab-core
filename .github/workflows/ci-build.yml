@@ -6,7 +6,7 @@ on:
       - 'main'
     paths-ignore:
       - '.github/**/*.md'
-  pull_request:
+  pull_request_target:
     branches:
       - 'main'
     paths-ignore:
@@ -71,16 +71,14 @@ jobs:
           name: sat-summary-report
           path: target/summary_report.html
 
-      - uses: jwgmeligmeyling/spotbugs-github-action@master
+      - uses: jwgmeligmeyling/checkstyle-github-action@master
         if: ${{ always() && (steps.build.outcome == 'failure') }}
         with:
-          path: '**/spotbugsXml.xml'
-
-      - uses: jwgmeligmeyling/checkstyle-github-action@master
-        with:
+          title: CheckStyle Violations
           path: '**/checkstyle-result.xml'
 
       - uses: jwgmeligmeyling/spotbugs-github-action@master
         if: ${{ always() && (steps.build.outcome == 'failure') }}
         with:
+          title: SpotBugs Violations
           path: '**/spotbugsXml.xml'
