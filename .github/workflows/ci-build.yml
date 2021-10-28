@@ -73,7 +73,7 @@ jobs:
           name: sat-summary-report
           path: target/summary_report.html
 
-      - uses: nielsvanvelzen/checkstyle-github-action@master
+      - uses: nielsvanvelzen/checkstyle-github-action@inline-annotations
         if: ${{ always() && (steps.build.outcome == 'failure') }}
         with:
           title: CheckStyle Violations
