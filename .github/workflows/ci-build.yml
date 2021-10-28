@@ -78,7 +78,7 @@ jobs:
         with:
           title: CheckStyle Violations
           path: '**/checkstyle-result.xml'
-          mode: separate
+          mode: inline
 
       # - uses: jwgmeligmeyling/spotbugs-github-action@master
       #   if: ${{ always() && (steps.build.outcome == 'failure') }}
