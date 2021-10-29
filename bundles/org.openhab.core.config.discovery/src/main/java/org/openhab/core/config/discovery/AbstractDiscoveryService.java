@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.discovery;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -243,24 +244,8 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * @param discoveryResult Holds the information needed to identify the discovered device.
      */
     protected void thingDiscovered(final DiscoveryResult discoveryResult) {
-        final DiscoveryResult discoveryResultNew;
-        if (i18nProvider != null && localeProvider != null) {
-            Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-
-            String defaultLabel = discoveryResult.getLabel();
-
-            String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferKey(discoveryResult, "label"));
-
-            String label = i18nProvider.getText(bundle, key, defaultLabel, localeProvider.getLocale());
-
-            discoveryResultNew = DiscoveryResultBuilder.create(discoveryResult.getThingUID())
-                    .withThingType(discoveryResult.getThingTypeUID()).withBridge(discoveryResult.getBridgeUID())
-                    .withProperties(discoveryResult.getProperties())
-                    .withRepresentationProperty(discoveryResult.getRepresentationProperty()).withLabel(label)
-                    .withTTL(discoveryResult.getTimeToLive()).build();
-        } else {
-            discoveryResultNew = discoveryResult;
-        }
+        final DiscoveryResult discoveryResultNew = getLocalizedDiscoveryResult(discoveryResult,
+                FrameworkUtil.getBundle(this.getClass()));
         for (DiscoveryListener discoveryListener : discoveryListeners) {
             try {
                 discoveryListener.thingDiscovered(this, discoveryResultNew);
@@ -453,5 +438,50 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
 
     private String inferKey(DiscoveryResult discoveryResult, String lastSegment) {
         return "discovery." + discoveryResult.getThingUID().getAsString().replaceAll(":", ".") + "." + lastSegment;
+    }
+
+    protected DiscoveryResult getLocalizedDiscoveryResult(final DiscoveryResult discoveryResult,
+            @Nullable Bundle bundle) {
+        if (i18nProvider != null && localeProvider != null && bundle != null) {
+            String defaultLabel = discoveryResult.getLabel();
+
+            String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferKey(discoveryResult, "label"));
+
+            ParsedKey parsedKey = new ParsedKey(key);
+
+            String label = i18nProvider.getText(bundle, parsedKey.key, defaultLabel, localeProvider.getLocale(),
+                    parsedKey.args);
+
+            return DiscoveryResultBuilder.create(discoveryResult.getThingUID())
+                    .withThingType(discoveryResult.getThingTypeUID()).withBridge(discoveryResult.getBridgeUID())
+                    .withProperties(discoveryResult.getProperties())
+                    .withRepresentationProperty(discoveryResult.getRepresentationProperty()).withLabel(label)
+                    .withTTL(discoveryResult.getTimeToLive()).build();
+        } else {
+            return discoveryResult;
+        }
+    }
+
+    /**
+     * Utility class to parse the key with parameters into the key and optional arguments.
+     */
+    private final class ParsedKey {
+
+        private static final int LIMIT = 2;
+
+        private final String key;
+        private final Object @Nullable [] args;
+
+        private ParsedKey(String label) {
+            String[] parts = label.split("\\s+", LIMIT);
+            this.key = parts[0];
+
+            if (parts.length == 1) {
+                this.args = null;
+            } else {
+                this.args = Arrays.stream(parts[1].replaceAll("\\[|\\]|\"", "").split(","))
+                        .filter(s -> s != null && !s.trim().isEmpty()).map(s -> s.trim()).toArray(Object[]::new);
+            }
+        }
     }
 }

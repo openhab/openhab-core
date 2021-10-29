@@ -33,11 +33,14 @@ import org.openhab.core.config.discovery.AbstractDiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.config.discovery.upnp.UpnpDiscoveryParticipant;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.net.CidrAddress;
 import org.openhab.core.net.NetworkAddressChangeListener;
 import org.openhab.core.net.NetworkAddressService;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
@@ -104,6 +107,24 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
         networkAddressService.removeNetworkAddressChangeListener(this);
     }
 
+    @Reference
+    protected void setI18nProvider(TranslationProvider i18nProvider) {
+        this.i18nProvider = i18nProvider;
+    }
+
+    protected void unsetI18nProvider(TranslationProvider i18nProvider) {
+        this.i18nProvider = null;
+    }
+
+    @Reference
+    protected void setLocaleProvider(LocaleProvider localeProvider) {
+        this.localeProvider = localeProvider;
+    }
+
+    protected void unsetLocaleProvider(LocaleProvider localeProvider) {
+        this.localeProvider = null;
+    }
+
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addUpnpDiscoveryParticipant(UpnpDiscoveryParticipant participant) {
         this.participants.add(participant);
@@ -113,7 +134,9 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
             for (RemoteDevice device : devices) {
                 DiscoveryResult result = participant.createResult(device);
                 if (result != null) {
-                    thingDiscovered(result);
+                    final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
+                            FrameworkUtil.getBundle(participant.getClass()));
+                    thingDiscovered(resultNew);
                 }
             }
         }
@@ -169,7 +192,9 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
                     if (participant.getRemovalGracePeriodSeconds(device) > 0) {
                         cancelRemovalTask(device.getIdentity().getUdn());
                     }
-                    thingDiscovered(result);
+                    final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
+                            FrameworkUtil.getBundle(participant.getClass()));
+                    thingDiscovered(resultNew);
                 }
             } catch (Exception e) {
                 logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);

@@ -29,9 +29,12 @@ import org.openhab.core.config.discovery.AbstractDiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -63,10 +66,13 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Activate
     public MDNSDiscoveryService(final @Nullable Map<String, Object> configProperties,
-            final @Reference MDNSClient mdnsClient) {
+            final @Reference MDNSClient mdnsClient, final @Reference TranslationProvider i18nProvider,
+            final @Reference LocaleProvider localeProvider) {
         super(5);
 
         this.mdnsClient = mdnsClient;
+        this.i18nProvider = i18nProvider;
+        this.localeProvider = localeProvider;
 
         super.activate(configProperties);
 
@@ -152,7 +158,9 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
             for (ServiceInfo service : services) {
                 DiscoveryResult result = participant.createResult(service);
                 if (result != null) {
-                    thingDiscovered(result);
+                    final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
+                            FrameworkUtil.getBundle(participant.getClass()));
+                    thingDiscovered(resultNew);
                 }
             }
         }
@@ -213,7 +221,9 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                     try {
                         DiscoveryResult result = participant.createResult(serviceEvent.getInfo());
                         if (result != null) {
-                            thingDiscovered(result);
+                            final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
+                                    FrameworkUtil.getBundle(participant.getClass()));
+                            thingDiscovered(resultNew);
                         }
                     } catch (Exception e) {
                         logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
