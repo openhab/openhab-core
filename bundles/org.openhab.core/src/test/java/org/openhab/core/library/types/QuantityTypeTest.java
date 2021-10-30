@@ -71,9 +71,9 @@ public class QuantityTypeTest {
         new QuantityType<>("57%");
 
         QuantityType<Dimensionless> dt0 = new QuantityType<>("12");
-        assertTrue(dt0.getUnit().getDimension() == UnitDimension.NONE);
+        assertEquals(UnitDimension.NONE, dt0.getUnit().getDimension());
         dt0 = new QuantityType<>("2rad");
-        assertTrue(dt0.getUnit().getDimension() == UnitDimension.NONE);
+        assertEquals(UnitDimension.NONE, dt0.getUnit().getDimension());
     }
 
     @ParameterizedTest

@@ -447,7 +447,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
         if (autoDiscoveryEnabled instanceof String) {
             return Boolean.valueOf((String) autoDiscoveryEnabled);
         } else {
-            return autoDiscoveryEnabled == Boolean.TRUE;
+            return Boolean.TRUE.equals(autoDiscoveryEnabled);
         }
     }
 

@@ -115,7 +115,7 @@ public class SystemOffsetProfile implements StateProfile {
         if (state instanceof QuantityType) {
             QuantityType qtState = (QuantityType) state;
             try {
-                if (finalOffset.getUnit() == Units.ONE) {
+                if (Units.ONE.equals(finalOffset.getUnit())) {
                     // allow offsets without unit -> implicitly assume its the same as the one from the state, but warn
                     // the user
                     finalOffset = new QuantityType<>(finalOffset.toBigDecimal(), qtState.getUnit());
@@ -135,7 +135,7 @@ public class SystemOffsetProfile implements StateProfile {
             } catch (UnconvertibleException e) {
                 logger.warn("Cannot apply offset '{}' to state '{}' because types do not match.", finalOffset, qtState);
             }
-        } else if (state instanceof DecimalType && finalOffset.getUnit() == Units.ONE) {
+        } else if (state instanceof DecimalType && Units.ONE.equals(finalOffset.getUnit())) {
             DecimalType decState = (DecimalType) state;
             result = new DecimalType(decState.toBigDecimal().add(finalOffset.toBigDecimal()));
         } else {

@@ -463,7 +463,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             unregister(oldRule);
         }
 
-        if (isEnabled(rUID) == Boolean.TRUE) {
+        if (Boolean.TRUE.equals(isEnabled(rUID))) {
             setRule(rule);
         }
     }
@@ -1452,7 +1452,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
     private boolean mustTrigger(Rule r) {
         for (Trigger t : r.getTriggers()) {
-            if (t.getTypeUID() == SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID) {
+            if (SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID.equals(t.getTypeUID())) {
                 Object slObj = t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL);
                 try {
                     Integer sl = Integer.valueOf(slObj.toString());

@@ -165,6 +165,7 @@ public class WatchQueueReader implements Runnable {
         }
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public synchronized void stopWatchService(AbstractWatchService service) {
         if (watchService != null) {
             List<WatchKey> keys = new LinkedList<>();

@@ -386,6 +386,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      *
      * @param thing thing, that was updated and should be persisted
      */
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     protected void updateThing(Thing thing) {
         if (thing == this.thing) {
             throw new IllegalArgumentException(
