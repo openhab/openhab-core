@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.lsp.internal;
 
+import java.util.Objects;
+
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
@@ -99,7 +101,7 @@ public class RegistryProvider implements Provider<IResourceServiceProvider.Regis
         FileExtensionProvider extensionProvider = injector.getInstance(FileExtensionProvider.class);
         for (String ext : extensionProvider.getFileExtensions()) {
             if (registry.getExtensionToFactoryMap().containsKey(ext)) {
-                if (extensionProvider.getPrimaryFileExtension() == ext) {
+                if (Objects.equals(extensionProvider.getPrimaryFileExtension(), ext)) {
                     registry.getExtensionToFactoryMap().put(ext, resourceServiceProvider);
                 }
             } else {

@@ -56,6 +56,7 @@ public class ConsoleSupportKaraf {
         registerCommands();
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public void unsetSessionFactory(SessionFactory sessionFactory) {
         if (this.sessionFactory == sessionFactory) {
             unregisterCommands();

@@ -210,6 +210,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         allAvailableStorageCiphers.add(storageCipher);
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     protected synchronized void unsetStorageCipher(StorageCipher storageCipher) {
         allAvailableStorageCiphers.remove(storageCipher);
         if (this.storageCipher.isPresent() && this.storageCipher.get() == storageCipher) {

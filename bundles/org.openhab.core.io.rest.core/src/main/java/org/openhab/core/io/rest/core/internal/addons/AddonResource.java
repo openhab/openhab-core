@@ -133,7 +133,7 @@ public class AddonResource implements RESTResource {
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
-        if (serviceId == "all") {
+        if ("all".equals(serviceId)) {
             return Response.ok(new Stream2JSONInputStream(getAllAddons(locale))).build();
         } else {
             AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();

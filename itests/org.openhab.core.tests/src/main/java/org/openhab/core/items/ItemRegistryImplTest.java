@@ -342,6 +342,7 @@ public class ItemRegistryImplTest extends JavaTest {
     }
 
     @Test
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public void assertItemIsBeingDisposedOnRemove() {
         GenericItem item = spy(new SwitchItem("Item1"));
         itemProvider.add(item);

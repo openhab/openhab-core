@@ -232,7 +232,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
                 && (maximum != null ? maximum.equals(other.maximum) : other.maximum == null)
                 && (step != null ? step.equals(other.step) : other.step == null)
                 && (pattern != null ? pattern.equals(other.pattern) : other.pattern == null)
-                && readOnly == other.readOnly //
+                && (readOnly != null ? readOnly.equals(other.readOnly) : other.readOnly == null)
                 && (options != null ? options.equals(other.options) : other.options == null);
     }
 

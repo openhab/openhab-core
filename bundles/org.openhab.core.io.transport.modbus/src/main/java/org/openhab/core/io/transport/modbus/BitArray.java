@@ -53,6 +53,7 @@ public class BitArray implements Iterable<Boolean> {
         return bitSet;
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     private boolean sizeAndValuesEquals(@Nullable Object obj) {
         if (obj == null) {
             return false;

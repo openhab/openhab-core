@@ -134,7 +134,7 @@ public class SystemHysteresisStateProfile implements StateProfile {
             final QuantityType<?> qtState = (QuantityType<?>) value;
             final QuantityType<?> finalLower;
             final QuantityType<?> finalUpper;
-            if (lower.getUnit() == Units.ONE && upper.getUnit() == Units.ONE) {
+            if (Units.ONE.equals(lower.getUnit()) && Units.ONE.equals(upper.getUnit())) {
                 // allow bounds without unit -> implicitly assume its the same as the one from the state, but warn
                 // the user
                 finalLower = new QuantityType<>(lower.toBigDecimal(), qtState.getUnit());

@@ -93,11 +93,11 @@ public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
 
         // try to set the content-type, if possible
         final String mimeType;
-        if (stream.getFormat().getCodec() == AudioFormat.CODEC_MP3) {
+        if (AudioFormat.CODEC_MP3.equals(stream.getFormat().getCodec())) {
             mimeType = "audio/mpeg";
-        } else if (stream.getFormat().getContainer() == AudioFormat.CONTAINER_WAVE) {
+        } else if (AudioFormat.CONTAINER_WAVE.equals(stream.getFormat().getContainer())) {
             mimeType = "audio/wav";
-        } else if (stream.getFormat().getContainer() == AudioFormat.CONTAINER_OGG) {
+        } else if (AudioFormat.CONTAINER_OGG.equals(stream.getFormat().getContainer())) {
             mimeType = "audio/ogg";
         } else {
             mimeType = null;
