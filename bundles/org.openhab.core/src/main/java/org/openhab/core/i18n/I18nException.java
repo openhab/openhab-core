@@ -137,7 +137,7 @@ public class I18nException extends Exception {
     }
 
     /**
-     * Provides the untranslated message
+     * Provides the raw message
      *
      * If the message does not start with "@text/", it returns the same as the getMessage() method.
      * If the message starts with "@text/" and no optional arguments are set, it returns a string of this
@@ -145,9 +145,9 @@ public class I18nException extends Exception {
      * If the message starts with "@text/" and optional arguments are set, it returns a string of this kind: @text/key [
      * "param1", "param2" ]
      *
-     * @return the untranslated message or null if the message is undefined
+     * @return the raw message or null if the message is undefined
      */
-    public @Nullable String getUntranslatedMessage() {
+    public @Nullable String getRawMessage() {
         if (msgKey.isBlank()) {
             return super.getMessage();
         }
