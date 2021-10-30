@@ -13,6 +13,8 @@
 package org.openhab.core.i18n;
 
 import java.util.Locale;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -154,17 +156,8 @@ public class I18nException extends Exception {
         String result = "@text/" + msgKey;
         Object @Nullable [] params = msgParams;
         if (params != null && params.length > 0) {
-            result += " [";
-            boolean first = true;
-            for (Object param : params) {
-                if (first) {
-                    first = false;
-                } else {
-                    result += ",";
-                }
-                result += String.format(" \"%s\"", param == null ? "" : param.toString());
-            }
-            result += " ]";
+            result += Stream.of(params).map(param -> String.format(" \"%s\"", param == null ? "" : param.toString()))
+                    .collect(Collectors.joining(", ", " [", " ]"));
         }
         return result;
     }
