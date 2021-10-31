@@ -102,19 +102,27 @@ public class I18nExceptionTest {
     }
 
     @Test
-    public void testMessageWithKeyNoParam() {
+    public void testMessageWithKeyNoI18nSetup() {
         I18nException exception = new I18nException(MSG_KEY1);
 
         assertNull(exception.getMessage());
         assertNull(exception.getLocalizedMessage());
         assertThat(exception.getRawMessage(), is(RAW_MSG_KEY1));
+    }
 
+    @Test
+    public void testMessageWithKeyNoLocaleSetup() {
+        I18nException exception = new I18nException(MSG_KEY1);
         exception.setupI18n(bundle, i18nProvider);
 
         assertThat(exception.getMessage(), is(MSG_KEY1_EN));
         assertThat(exception.getLocalizedMessage(), is(MSG_KEY1_EN));
         assertThat(exception.getRawMessage(), is(RAW_MSG_KEY1));
+    }
 
+    @Test
+    public void testMessageWithKeyNoParam() {
+        I18nException exception = new I18nException(MSG_KEY1);
         exception.setupI18n(bundle, i18nProvider, Locale.FRENCH);
 
         assertThat(exception.getMessage(), is(MSG_KEY1_EN));
@@ -125,11 +133,6 @@ public class I18nExceptionTest {
     @Test
     public void testMessageWithKeyTwoParams() {
         I18nException exception = new I18nException(MSG_KEY2, PARAM1, PARAM2);
-
-        assertNull(exception.getMessage());
-        assertNull(exception.getLocalizedMessage());
-        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY2));
-
         exception.setupI18n(bundle, i18nProvider, Locale.FRENCH);
 
         assertThat(exception.getMessage(), is(MSG_KEY2_EN));
@@ -140,11 +143,6 @@ public class I18nExceptionTest {
     @Test
     public void testMessageWithKeyOneParam() {
         I18nException exception = new I18nException(MSG_KEY3, PARAM2);
-
-        assertNull(exception.getMessage());
-        assertNull(exception.getLocalizedMessage());
-        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY3));
-
         exception.setupI18n(bundle, i18nProvider, Locale.FRENCH);
 
         assertThat(exception.getMessage(), is(MSG_KEY3_EN));
