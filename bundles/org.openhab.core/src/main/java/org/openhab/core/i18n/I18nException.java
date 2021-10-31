@@ -156,8 +156,8 @@ public class I18nException extends Exception {
         String result = "@text/" + msgKey;
         Object @Nullable [] params = msgParams;
         if (params != null && params.length > 0) {
-            result += Stream.of(params).map(param -> String.format(" \"%s\"", param == null ? "" : param.toString()))
-                    .collect(Collectors.joining(", ", " [", " ]"));
+            result += Stream.of(params).map(param -> String.format("\"%s\"", param == null ? "" : param.toString()))
+                    .collect(Collectors.joining(", ", " [ ", " ]"));
         }
         return result;
     }
