@@ -109,26 +109,17 @@ public class I18nExceptionTest {
         assertNull(exception.getLocalizedMessage());
         assertThat(exception.getRawMessage(), is(RAW_MSG_KEY1));
 
+        exception.setupI18n(bundle, i18nProvider);
+
+        assertThat(exception.getMessage(), is(MSG_KEY1_EN));
+        assertThat(exception.getLocalizedMessage(), is(MSG_KEY1_EN));
+        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY1));
+
         exception.setupI18n(bundle, i18nProvider, Locale.FRENCH);
 
         assertThat(exception.getMessage(), is(MSG_KEY1_EN));
         assertThat(exception.getLocalizedMessage(), is(MSG_KEY1_FR));
         assertThat(exception.getRawMessage(), is(RAW_MSG_KEY1));
-    }
-
-    @Test
-    public void testMessageWithKeyOneParam() {
-        I18nException exception = new I18nException(MSG_KEY3, PARAM2);
-
-        assertNull(exception.getMessage());
-        assertNull(exception.getLocalizedMessage());
-        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY3));
-
-        exception.setupI18n(bundle, i18nProvider, Locale.FRENCH);
-
-        assertThat(exception.getMessage(), is(MSG_KEY3_EN));
-        assertThat(exception.getLocalizedMessage(), is(MSG_KEY3_FR));
-        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY3));
     }
 
     @Test
@@ -144,5 +135,20 @@ public class I18nExceptionTest {
         assertThat(exception.getMessage(), is(MSG_KEY2_EN));
         assertThat(exception.getLocalizedMessage(), is(MSG_KEY2_FR));
         assertThat(exception.getRawMessage(), is(RAW_MSG_KEY2));
+    }
+
+    @Test
+    public void testMessageWithKeyOneParam() {
+        I18nException exception = new I18nException(MSG_KEY3, PARAM2);
+
+        assertNull(exception.getMessage());
+        assertNull(exception.getLocalizedMessage());
+        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY3));
+
+        exception.setupI18n(bundle, i18nProvider, Locale.FRENCH);
+
+        assertThat(exception.getMessage(), is(MSG_KEY3_EN));
+        assertThat(exception.getLocalizedMessage(), is(MSG_KEY3_FR));
+        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY3));
     }
 }
