@@ -99,17 +99,29 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
 
         @Override
         protected void startScan() {
+            // Discovered thing 1 has a hard coded label and no key based on its thing UID defined in the properties
+            // file => the hard coded label should be considered
             DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(THING_UID1).withThingType(THING_TYPE_UID)
                     .withProperties(properties).withRepresentationProperty(KEY1).withBridge(BRIDGE_UID)
                     .withLabel(DISCOVERY_LABEL).build();
             thingDiscovered(discoveryResult);
+
+            // Discovered thing 2 has a hard coded label but with a key based on its thing UID defined in the properties
+            // file => the value from the properties file should be considered
             discoveryResult = DiscoveryResultBuilder.create(THING_UID2).withThingType(THING_TYPE_UID)
                     .withProperties(properties).withRepresentationProperty(KEY1).withLabel(DISCOVERY_LABEL).build();
             thingDiscovered(discoveryResult);
+
+            // Discovered thing 3 has a label referencing an entry in the properties file and no key based on its thing
+            // UID defined in the properties file => the value from the properties file should be considered
             discoveryResult = DiscoveryResultBuilder.create(THING_UID3).withThingType(THING_TYPE_UID)
                     .withProperties(properties).withRepresentationProperty(KEY1).withBridge(BRIDGE_UID)
                     .withLabel(DISCOVERY_LABEL_KEY).build();
             thingDiscovered(discoveryResult);
+
+            // Discovered thing 4 has a label referencing an entry in the properties file and a key based on its thing
+            // UID defined in the properties file => the value from the properties file (the one referenced by the
+            // label) should be considered
             discoveryResult = DiscoveryResultBuilder.create(THING_UID4).withThingType(THING_TYPE_UID)
                     .withProperties(properties).withRepresentationProperty(KEY1).withLabel(DISCOVERY_LABEL_KEY).build();
             thingDiscovered(discoveryResult);
