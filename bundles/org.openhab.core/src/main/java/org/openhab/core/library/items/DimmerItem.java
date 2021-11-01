@@ -12,9 +12,11 @@
  */
 package org.openhab.core.library.items;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.items.Item;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.IncreaseDecreaseType;
 import org.openhab.core.library.types.OnOffType;
@@ -38,6 +40,22 @@ public class DimmerItem extends SwitchItem {
             UnDefType.class);
     private static final List<Class<? extends Command>> ACCEPTED_COMMAND_TYPES = List.of(PercentType.class,
             OnOffType.class, IncreaseDecreaseType.class, RefreshType.class);
+    /**
+     * Numerical {@link Comparator}: Number values are sorted in ascending numerical order, if state is PercentType or
+     * OnOffType, UnDefType at the beginning
+     */
+    public static final Comparator<Item> DIMMER_COMPARATOR = new Comparator<Item>() {
+        @Override
+        public int compare(Item a, Item b) {
+            final State stateA = a.getState().as(PercentType.class);
+            final State stateB = b.getState().as(PercentType.class);
+            if (stateA != null && stateB != null) {
+                return ((PercentType) stateA).compareTo((PercentType) stateB);
+            } else {
+                return stateA == null ? -1 : 1;
+            }
+        }
+    };
 
     public DimmerItem(String name) {
         super(CoreItemFactory.DIMMER, name);
@@ -45,10 +63,6 @@ public class DimmerItem extends SwitchItem {
 
     /* package */ DimmerItem(String type, String name) {
         super(type, name);
-    }
-
-    public void send(PercentType command) {
-        internalSend(command);
     }
 
     @Override
@@ -59,6 +73,15 @@ public class DimmerItem extends SwitchItem {
     @Override
     public List<Class<? extends Command>> getAcceptedCommandTypes() {
         return ACCEPTED_COMMAND_TYPES;
+    }
+
+    public void send(PercentType command) {
+        internalSend(command);
+    }
+
+    @Override
+    public Comparator<Item> getDefaultStateComparator() {
+        return DIMMER_COMPARATOR;
     }
 
     @Override

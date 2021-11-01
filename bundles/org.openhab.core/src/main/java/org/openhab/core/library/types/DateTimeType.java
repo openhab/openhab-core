@@ -39,7 +39,7 @@ import org.openhab.core.types.State;
  * @author Gaël L'hopital - added ability to use second and milliseconds unix time
  */
 @NonNullByDefault
-public class DateTimeType implements PrimitiveType, State, Command {
+public class DateTimeType implements PrimitiveType, State, Command, Comparable<DateTimeType> {
 
     // external format patterns for output
     public static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
@@ -216,6 +216,11 @@ public class DateTimeType implements PrimitiveType, State, Command {
         }
         DateTimeType other = (DateTimeType) obj;
         return zonedDateTime.compareTo(other.zonedDateTime) == 0;
+    }
+
+    @Override
+    public int compareTo(DateTimeType o) {
+        return zonedDateTime.compareTo(o.zonedDateTime);
     }
 
     private ZonedDateTime parse(String value) throws DateTimeParseException {

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -40,6 +41,16 @@ import org.openhab.core.types.UnDefType;
  */
 @NonNullByDefault
 public interface Item extends Identifiable<String> {
+
+    /**
+     * Default state {@link Comparator}: values are sorted in ascending alphabetical order
+     */
+    public static final Comparator<Item> DEFAULT_STATE_COMPARATOR = new Comparator<Item>() {
+        @Override
+        public int compare(Item a, Item b) {
+            return a.getState().toFullString().compareTo(b.getState().toFullString());
+        }
+    };
 
     /**
      * returns the current state of the item
@@ -174,4 +185,13 @@ public interface Item extends Identifiable<String> {
      * @return command description (can be null)
      */
     public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale);
+
+    /**
+     * Returns a default {@link Comparator} for the item to compare its {@link State}.
+     *
+     * @return comparator to compare item states
+     */
+    public default Comparator<Item> getDefaultStateComparator() {
+        return DEFAULT_STATE_COMPARATOR;
+    }
 }

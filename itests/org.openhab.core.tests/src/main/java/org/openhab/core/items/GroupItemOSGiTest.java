@@ -89,6 +89,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     private final GroupFunctionHelper groupFunctionHelper = new GroupFunctionHelper();
     private ItemStateConverter itemStateConverter;
 
+    @SuppressWarnings("null")
     @BeforeEach
     public void beforeEach() {
         registerVolatileStorageService();
@@ -148,7 +149,6 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(change.getItem().label, is("secondLabel"));
     }
 
-    @SuppressWarnings("unchecked")
     @Test()
     public void assertAcceptedCommandTypesOnGroupItemsReturnsSubsetOfCommandTypesSupportedByAllMembers() {
         SwitchItem switchItem = new SwitchItem("switch");
@@ -293,6 +293,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(members.size(), is(2));
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testGetMembersFilteringGroups() {
         GroupItem rootGroupItem = new GroupItem("root");
@@ -314,6 +315,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(members.size(), is(1));
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testGetMembersFilteringGroupsTransient() {
         GroupItem rootGroupItem = new GroupItem("root");

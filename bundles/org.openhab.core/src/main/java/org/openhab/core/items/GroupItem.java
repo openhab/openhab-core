@@ -15,6 +15,7 @@ package org.openhab.core.items;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,13 +34,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public class GroupItem extends GenericItem implements StateChangeListener {
 
     public static final String TYPE = "Group";
+    public static final Comparator<Item> LABEL_COMPARATOR = new Comparator<Item>() {
+        @Override
+        public int compare(Item a, Item b) {
+            final String aLabel = a.getLabel();
+            final String bLabel = b.getLabel();
+            return aLabel != null && bLabel != null ? aLabel.compareTo(bLabel) : a.getName().compareTo(b.getName());
+        }
+    };
+    public static final Comparator<Item> NAME_COMPARATOR = new Comparator<Item>() {
+        @Override
+        public int compare(Item a, Item b) {
+            return a.getName().compareTo(b.getName());
+        }
+    };
 
     private final Logger logger = LoggerFactory.getLogger(GroupItem.class);
 
@@ -110,8 +124,7 @@ public class GroupItem extends GenericItem implements StateChangeListener {
     }
 
     /**
-     * Returns the direct members of this {@link GroupItem} regardless if these
-     * members are {@link GroupItem}s as well.
+     * Returns the direct members of this {@link GroupItem} regardless if these members are {@link GroupItem}s as well.
      *
      * @return the direct members of this {@link GroupItem}
      */
@@ -152,6 +165,52 @@ public class GroupItem extends GenericItem implements StateChangeListener {
         Set<Item> allMembers = new LinkedHashSet<>();
         collectMembers(allMembers, members);
         return allMembers.stream().filter(filterItem).collect(Collectors.toSet());
+    }
+
+    /**
+     * Returns a sorted list of the direct members of this {@link GroupItem} regardless if these members are
+     * {@link GroupItem}s as well.
+     *
+     * @return the sorted list of direct members of this {@link GroupItem}
+     */
+    public List<Item> getSortedMembers() {
+        List<Item> sortedMembers = new ArrayList<>(members);
+        MetadataRegistry localMetadataRegistry = metadataRegistry;
+        if (localMetadataRegistry != null) {
+            Metadata sortBy = localMetadataRegistry.get(new MetadataKey("sortBy", name));
+            if (sortBy != null) {
+                Comparator<Item> comparator = null;
+                switch (sortBy.getValue()) {
+                    case "LABEL":
+                        comparator = LABEL_COMPARATOR;
+                        break;
+                    case "NAME":
+                        comparator = NAME_COMPARATOR;
+                        break;
+                    case "STATE":
+                        comparator = baseItem != null ? baseItem.getDefaultStateComparator()
+                                : Item.DEFAULT_STATE_COMPARATOR;
+                        break;
+                }
+                if (comparator != null) {
+                    // sort members
+                    Collections.sort(sortedMembers, comparator);
+
+                    Object orderingConfig = sortBy.getConfiguration().get("ordering");
+                    if (orderingConfig != null) {
+                        if ("DESCENDING".equals(orderingConfig.toString())) {
+                            // reverse ordering
+                            Collections.reverse(sortedMembers);
+                        }
+                    }
+                } else {
+                    logger.warn(
+                            "Cannot sort members of group '{}' because criteria for sorting by '{}' are not yet implemented.",
+                            name, sortBy.getValue());
+                }
+            }
+        }
+        return Collections.unmodifiableList(sortedMembers);
     }
 
     /**

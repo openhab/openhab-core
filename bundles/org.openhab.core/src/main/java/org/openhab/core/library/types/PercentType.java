@@ -45,7 +45,6 @@ public class PercentType extends DecimalType {
      * Creates a new {@link PercentType} with the given value.
      *
      * @param value the value representing a percentage
-     *
      * @throws IllegalArgumentException when the value is not between 0 and 100
      */
     public PercentType(int value) {
@@ -58,7 +57,6 @@ public class PercentType extends DecimalType {
      * The English locale is used to determine (decimal/grouping) separator characters.
      *
      * @param value the non null value representing a percentage
-     *
      * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
      * @throws IllegalArgumentException when the value is not between 0 and 100
      */
@@ -71,7 +69,6 @@ public class PercentType extends DecimalType {
      *
      * @param value the non null value representing a percentage
      * @param locale the locale used to determine (decimal/grouping) separator characters
-     *
      * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
      * @throws IllegalArgumentException when the value is not between 0 and 100
      */
@@ -84,7 +81,6 @@ public class PercentType extends DecimalType {
      * Creates a new {@link PercentType} with the given value.
      *
      * @param value the value representing a percentage.
-     *
      * @throws IllegalArgumentException when the value is not between 0 and 100
      */
     public PercentType(BigDecimal value) {
@@ -103,7 +99,6 @@ public class PercentType extends DecimalType {
      *
      * @param value the non null value representing a percentage
      * @return new {@link PercentType}
-     *
      * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
      * @throws IllegalArgumentException when the value is not between 0 and 100
      */

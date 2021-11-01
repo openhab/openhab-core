@@ -12,10 +12,12 @@
  */
 package org.openhab.core.library.items;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.Item;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.types.Command;
@@ -36,6 +38,22 @@ public class DateTimeItem extends GenericItem {
             UnDefType.class);
     private static final List<Class<? extends Command>> ACCEPTED_COMMAND_TYPES = List.of(DateTimeType.class,
             RefreshType.class);
+    /**
+     * Chronological {@link Comparator}: DateTime values are sorted in ascending chronological order, if state is
+     * DateTimeType, UnDefType at the beginning
+     */
+    public static final Comparator<Item> DATE_TIME_COMPARATOR = new Comparator<Item>() {
+        @Override
+        public int compare(Item a, Item b) {
+            final State stateA = a.getState().as(DateTimeType.class);
+            final State stateB = b.getState().as(DateTimeType.class);
+            if (stateA != null && stateB != null) {
+                return ((DateTimeType) stateA).compareTo((DateTimeType) stateB);
+            } else {
+                return stateA == null ? -1 : 1;
+            }
+        }
+    };
 
     public DateTimeItem(String name) {
         super(CoreItemFactory.DATETIME, name);
@@ -53,6 +71,11 @@ public class DateTimeItem extends GenericItem {
 
     public void send(DateTimeType command) {
         internalSend(command);
+    }
+
+    @Override
+    public Comparator<Item> getDefaultStateComparator() {
+        return DATE_TIME_COMPARATOR;
     }
 
     @Override

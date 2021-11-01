@@ -61,7 +61,6 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
      * The English locale is used to determine (decimal/grouping) separator characters.
      *
      * @param value the non null value representing a number
-     *
      * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
      */
     public DecimalType(String value) {
@@ -73,7 +72,6 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
      *
      * @param value the non null value representing a number
      * @param locale the locale used to determine (decimal/grouping) separator characters
-     *
      * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
      */
     public DecimalType(String value, Locale locale) {
@@ -102,7 +100,6 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
      *
      * @param value the non null value representing a number
      * @return a new {@link DecimalType}
-     *
      * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
      */
     public static DecimalType valueOf(String value) {
@@ -192,7 +189,7 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         } else if (target == UpDownType.class) {
             if (equals(ZERO)) {
                 return target.cast(UpDownType.UP);
-            } else if (toBigDecimal().compareTo(BigDecimal.valueOf(1)) == 0) {
+            } else if (toBigDecimal().compareTo(BigDecimal.ONE) == 0) {
                 return target.cast(UpDownType.DOWN);
             } else {
                 return null;
@@ -200,7 +197,7 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         } else if (target == OpenClosedType.class) {
             if (equals(ZERO)) {
                 return target.cast(OpenClosedType.CLOSED);
-            } else if (toBigDecimal().compareTo(BigDecimal.valueOf(1)) == 0) {
+            } else if (toBigDecimal().compareTo(BigDecimal.ONE) == 0) {
                 return target.cast(OpenClosedType.OPEN);
             } else {
                 return null;

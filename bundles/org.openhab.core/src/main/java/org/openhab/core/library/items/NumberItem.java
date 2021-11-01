@@ -12,6 +12,7 @@
  */
 package org.openhab.core.library.items;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -22,6 +23,7 @@ import javax.measure.Unit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemUtil;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.DecimalType;
@@ -49,6 +51,22 @@ public class NumberItem extends GenericItem {
             QuantityType.class, UnDefType.class);
     private static final List<Class<? extends Command>> ACCEPTED_COMMAND_TYPES = List.of(DecimalType.class,
             QuantityType.class, RefreshType.class);
+    /**
+     * Numerical {@link Comparator}: Number values are sorted in ascending numerical order, if state is DecimalType or
+     * QuantityType, UnDefType at the beginning
+     */
+    public static final Comparator<Item> NUMBER_COMPARATOR = new Comparator<Item>() {
+        @Override
+        public int compare(Item a, Item b) {
+            final State stateA = a.getState().as(DecimalType.class);
+            final State stateB = b.getState().as(DecimalType.class);
+            if (stateA != null && stateB != null) {
+                return ((DecimalType) stateA).compareTo((DecimalType) stateB);
+            } else {
+                return stateA == null ? -1 : 1;
+            }
+        }
+    };
 
     @Nullable
     private Class<? extends Quantity<?>> dimension;
@@ -92,6 +110,11 @@ public class NumberItem extends GenericItem {
             }
         }
         return stateDescription;
+    }
+
+    @Override
+    public Comparator<Item> getDefaultStateComparator() {
+        return NUMBER_COMPARATOR;
     }
 
     /**

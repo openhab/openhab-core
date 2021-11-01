@@ -198,6 +198,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         if (item instanceof GenericItem) {
             GenericItem genericItem = (GenericItem) item;
             genericItem.setEventPublisher(getEventPublisher());
+            genericItem.setMetadataRegistry(metadataRegistry);
             genericItem.setStateDescriptionService(stateDescriptionService);
             genericItem.setCommandDescriptionService(commandDescriptionService);
             genericItem.setUnitProvider(unitProvider);

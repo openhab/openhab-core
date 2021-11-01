@@ -12,7 +12,6 @@
  */
 package org.openhab.core.library.items;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -63,9 +62,7 @@ public class StringItem extends GenericItem {
 
     @Override
     public <T extends State> @Nullable T getStateAs(Class<T> typeClass) {
-        List<Class<? extends State>> list = new ArrayList<>();
-        list.add(typeClass);
-        State convertedState = TypeParser.parseState(list, state.toString());
+        State convertedState = TypeParser.parseState(List.of(typeClass), state.toString());
         if (typeClass.isInstance(convertedState)) {
             return typeClass.cast(convertedState);
         } else {
