@@ -55,18 +55,22 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
     private static final String DISCOVERY_THING4_INFERED_KEY = "discovery."
             + THING_UID4.getAsString().replaceAll(":", ".") + ".label";
     private static final String DISCOVERY_LABEL = "Result Test";
-    private static final String PROPERTY_KEY = "test";
-    private static final String DISCOVERY_LABEL_KEY = "@text/" + PROPERTY_KEY;
+    private static final String DISCOVERY_LABEL_KEY1 = "@text/test";
+    private static final String DISCOVERY_LABEL_KEY2 = "@text/test2 [ \"50\", \"number\" ]";
     private static final String PROPERTY_LABEL1 = "Label from property (text key)";
     private static final String PROPERTY_LABEL2 = "Label from property (infered key)";
+    private static final String PROPERTY_LABEL3 = "Label from property (parameters 50 and number)";
 
     private TranslationProvider i18nProvider = new TranslationProvider() {
         @Override
         public @Nullable String getText(@Nullable Bundle bundle, @Nullable String key, @Nullable String defaultText,
                 @Nullable Locale locale, @Nullable Object... arguments) {
             if (Locale.ENGLISH.equals(locale)) {
-                if (PROPERTY_KEY.equals(key)) {
+                if ("test".equals(key)) {
                     return PROPERTY_LABEL1;
+                } else if ("test2".equals(key) && arguments != null && arguments.length == 2
+                        && "50".equals(arguments[0]) && "number".equals(arguments[1])) {
+                    return PROPERTY_LABEL3;
                 } else if (DISCOVERY_THING2_INFERED_KEY.equals(key) || DISCOVERY_THING4_INFERED_KEY.equals(key)) {
                     return PROPERTY_LABEL2;
                 }
@@ -116,14 +120,15 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
             // UID defined in the properties file => the value from the properties file should be considered
             discoveryResult = DiscoveryResultBuilder.create(THING_UID3).withThingType(THING_TYPE_UID)
                     .withProperties(properties).withRepresentationProperty(KEY1).withBridge(BRIDGE_UID)
-                    .withLabel(DISCOVERY_LABEL_KEY).build();
+                    .withLabel(DISCOVERY_LABEL_KEY1).build();
             thingDiscovered(discoveryResult);
 
             // Discovered thing 4 has a label referencing an entry in the properties file and a key based on its thing
             // UID defined in the properties file => the value from the properties file (the one referenced by the
             // label) should be considered
             discoveryResult = DiscoveryResultBuilder.create(THING_UID4).withThingType(THING_TYPE_UID)
-                    .withProperties(properties).withRepresentationProperty(KEY1).withLabel(DISCOVERY_LABEL_KEY).build();
+                    .withProperties(properties).withRepresentationProperty(KEY1).withLabel(DISCOVERY_LABEL_KEY2)
+                    .build();
             thingDiscovered(discoveryResult);
         }
     };
@@ -151,7 +156,7 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
             assertThat(result.getLabel(), is(PROPERTY_LABEL1));
         } else if (THING_UID4.equals(result.getThingUID())) {
             assertNull(result.getBridgeUID());
-            assertThat(result.getLabel(), is(PROPERTY_LABEL1));
+            assertThat(result.getLabel(), is(PROPERTY_LABEL3));
         }
     }
 
