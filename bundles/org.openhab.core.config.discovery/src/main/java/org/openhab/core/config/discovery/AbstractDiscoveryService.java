@@ -442,7 +442,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
 
     protected DiscoveryResult getLocalizedDiscoveryResult(final DiscoveryResult discoveryResult,
             @Nullable Bundle bundle) {
-        if (i18nProvider != null && localeProvider != null && bundle != null) {
+        if (i18nProvider != null && localeProvider != null) {
             String currentLabel = discoveryResult.getLabel();
 
             String key = I18nUtil.stripConstantOr(currentLabel, () -> inferKey(discoveryResult, "label"));
