@@ -443,20 +443,24 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     protected DiscoveryResult getLocalizedDiscoveryResult(final DiscoveryResult discoveryResult,
             @Nullable Bundle bundle) {
         if (i18nProvider != null && localeProvider != null && bundle != null) {
-            String defaultLabel = discoveryResult.getLabel();
+            String currentLabel = discoveryResult.getLabel();
 
-            String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferKey(discoveryResult, "label"));
+            String key = I18nUtil.stripConstantOr(currentLabel, () -> inferKey(discoveryResult, "label"));
 
             ParsedKey parsedKey = new ParsedKey(key);
 
-            String label = i18nProvider.getText(bundle, parsedKey.key, defaultLabel, localeProvider.getLocale(),
+            String label = i18nProvider.getText(bundle, parsedKey.key, currentLabel, localeProvider.getLocale(),
                     parsedKey.args);
 
-            return DiscoveryResultBuilder.create(discoveryResult.getThingUID())
-                    .withThingType(discoveryResult.getThingTypeUID()).withBridge(discoveryResult.getBridgeUID())
-                    .withProperties(discoveryResult.getProperties())
-                    .withRepresentationProperty(discoveryResult.getRepresentationProperty()).withLabel(label)
-                    .withTTL(discoveryResult.getTimeToLive()).build();
+            if (currentLabel.equals(label)) {
+                return discoveryResult;
+            } else {
+                return DiscoveryResultBuilder.create(discoveryResult.getThingUID())
+                        .withThingType(discoveryResult.getThingTypeUID()).withBridge(discoveryResult.getBridgeUID())
+                        .withProperties(discoveryResult.getProperties())
+                        .withRepresentationProperty(discoveryResult.getRepresentationProperty()).withLabel(label)
+                        .withTTL(discoveryResult.getTimeToLive()).build();
+            }
         } else {
             return discoveryResult;
         }
