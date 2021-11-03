@@ -110,30 +110,30 @@ public class I18nException extends Exception {
 
     @Override
     public @Nullable String getMessage() {
-        Bundle localeBundle = this.bundle;
+        Bundle localBundle = this.bundle;
         TranslationProvider localI18nProvider = this.i18nProvider;
         if (msgKey.isBlank()) {
             return super.getMessage();
-        } else if (localeBundle == null || localI18nProvider == null) {
+        } else if (localBundle == null || localI18nProvider == null) {
             logger.warn("Internationalization support is not setup for the exception");
             return super.getMessage();
         } else {
-            return localI18nProvider.getText(localeBundle, msgKey, null, Locale.ENGLISH, msgParams);
+            return localI18nProvider.getText(localBundle, msgKey, null, Locale.ENGLISH, msgParams);
         }
     }
 
     @Override
     public @Nullable String getLocalizedMessage() {
-        Bundle localeBundle = this.bundle;
+        Bundle localBundle = this.bundle;
         TranslationProvider localI18nProvider = this.i18nProvider;
         Locale localLocale = this.locale;
         if (msgKey.isBlank()) {
             return super.getMessage();
-        } else if (localeBundle == null || localI18nProvider == null) {
+        } else if (localBundle == null || localI18nProvider == null) {
             logger.warn("Internationalization support is not setup for the exception");
             return super.getMessage();
         } else {
-            return localI18nProvider.getText(localeBundle, msgKey, null,
+            return localI18nProvider.getText(localBundle, msgKey, null,
                     localLocale != null ? localLocale : Locale.ENGLISH, msgParams);
         }
     }
