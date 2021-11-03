@@ -83,7 +83,3 @@ jobs:
           title: CheckStyle Violations
           path: '**/checkstyle-result.xml'
           mode: inline
-
-      - name: Publish Test Report
-        if: ${{ always() && ((steps.build.outcome == 'success') || (steps.build.outcome == 'failure')) }}
-        uses: scacap/action-surefire-report@v1
