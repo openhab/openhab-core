@@ -277,14 +277,16 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
                 public WebSocketClient run() {
                     logger.debug("creating web socket client for consumer {}", consumerName);
 
-                    WebSocketClient webSocketClient = new WebSocketClient(createSslContextFactory());
+                    HttpClient httpClient = new HttpClient(createSslContextFactory());
                     if (threadPool != null) {
-                        webSocketClient.setExecutor(threadPool);
+                        httpClient.setExecutor(threadPool);
                     } else {
                         final QueuedThreadPool queuedThreadPool = createThreadPool(consumerName, minThreadsCustom,
                                 maxThreadsCustom, keepAliveTimeoutCustom);
-                        webSocketClient.setExecutor(queuedThreadPool);
+                        httpClient.setExecutor(queuedThreadPool);
                     }
+
+                    WebSocketClient webSocketClient = new WebSocketClient(httpClient);
 
                     if (startClient) {
                         try {
