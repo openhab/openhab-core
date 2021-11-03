@@ -24,7 +24,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
+        if: github.head_ref == ''
         uses: actions/checkout@v2
+
+      - name: Checkout merge
+        if: github.head_ref != ''
+        uses: actions/checkout@v2
+        with:
+          ref: refs/pull/${{github.event.pull_request.number}}/merge
 
       - name: Set up Cache
         uses: actions/cache@v2
