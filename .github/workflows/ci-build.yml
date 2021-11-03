@@ -25,8 +25,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}        
 
       - name: Set up Cache
         uses: actions/cache@v2
@@ -73,15 +71,9 @@ jobs:
           name: sat-summary-report
           path: target/summary_report.html
 
-      - uses: nielsvanvelzen/checkstyle-github-action@inline-annotations
-        if: ${{ always() && (steps.build.outcome == 'failure') }}
+      - uses: ghys/checkstyle-github-action@main
+        if: ${{ always() && ((steps.build.outcome == 'success') || (steps.build.outcome == 'failure')) }}
         with:
           title: CheckStyle Violations
           path: '**/checkstyle-result.xml'
           mode: inline
-
-      # - uses: jwgmeligmeyling/spotbugs-github-action@master
-      #   if: ${{ always() && (steps.build.outcome == 'failure') }}
-      #   with:
-      #     title: SpotBugs Violations
-      #     path: '**/spotbugsXml.xml'
