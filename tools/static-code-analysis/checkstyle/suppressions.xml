@@ -29,4 +29,14 @@
 	<suppress files=".+org.openhab.core.transform.AbstractFileTransformationService.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
 	<suppress files=".+org.openhab.core.automation.internal.commands.AbstractCommandProvider.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
 	<suppress files=".+org.openhab.core.automation.sample.rest.api.internal.Activator.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
+
+	<!-- Add suppressions for checks annotated as errors by the GitHub Checkstyle Action -->
+	<suppress files=".+org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO.java" checks="MemberNameCheck"/>
+	<suppress files=".+org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponseDTO.java" checks="MemberNameCheck"/>
+	<suppress files=".+org.openhab.core.io.rest.auth.internal.TokenResponseDTO.java" checks="MemberNameCheck"/>
+	<suppress files=".+org.openhab.core.io.rest.auth.internal.TokenResponseErrorDTO.java" checks="MemberNameCheck"/>
+	<suppress files=".+org.openhab.core.thing.dto.AbstractThingDTO.java" checks="MemberNameCheck"/>
+	<suppress files=".+org.openhab.core.thing.dto.ChannelTypeDTO.java" checks="MemberNameCheck"/>
+	<suppress files=".+org.openhab.core.thing.dto.StrippedThingTypeDTO.java" checks="MemberNameCheck"/>
+	<suppress files=".+org.openhab.core.thing.ThingStatusDetail.java" checks="MemberNameCheck"/>
 </suppressions>
