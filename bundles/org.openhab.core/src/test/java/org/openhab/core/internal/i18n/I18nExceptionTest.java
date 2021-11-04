@@ -67,12 +67,14 @@ public class I18nExceptionTest {
         @Override
         public @Nullable String getText(@Nullable Bundle bundle, @Nullable String key, @Nullable String defaultText,
                 @Nullable Locale locale, @Nullable Object... arguments) {
-            if (KEY1.equals(key)) {
-                return Locale.FRENCH.equals(locale) ? MSG_KEY1_FR : MSG_KEY1_EN;
-            } else if (KEY2.equals(key)) {
-                return Locale.FRENCH.equals(locale) ? MSG_KEY2_FR : MSG_KEY2_EN;
-            } else if (KEY3.equals(key)) {
-                return Locale.FRENCH.equals(locale) ? MSG_KEY3_FR : MSG_KEY3_EN;
+            if (bundle != null) {
+                if (KEY1.equals(key)) {
+                    return Locale.FRENCH.equals(locale) ? MSG_KEY1_FR : MSG_KEY1_EN;
+                } else if (KEY2.equals(key)) {
+                    return Locale.FRENCH.equals(locale) ? MSG_KEY2_FR : MSG_KEY2_EN;
+                } else if (KEY3.equals(key)) {
+                    return Locale.FRENCH.equals(locale) ? MSG_KEY3_FR : MSG_KEY3_EN;
+                }
             }
             return null;
         }
@@ -94,67 +96,10 @@ public class I18nExceptionTest {
 
         assertThat(exception.getMessage(), is(MSG));
         assertThat(exception.getLocalizedMessage(), is(MSG));
+        assertThat(exception.getMessage(bundle, i18nProvider), is(MSG));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, null), is(MSG));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, Locale.FRENCH), is(MSG));
         assertThat(exception.getRawMessage(), is(MSG));
-        assertNull(exception.getCause());
-
-        exception.setupI18n(bundle, i18nProvider, Locale.FRENCH);
-
-        assertThat(exception.getMessage(), is(MSG));
-        assertThat(exception.getLocalizedMessage(), is(MSG));
-        assertThat(exception.getRawMessage(), is(MSG));
-    }
-
-    @Test
-    public void testMessageWithKeyNoI18nSetup() {
-        I18nException exception = new I18nException(MSG_KEY1);
-
-        assertNull(exception.getMessage());
-        assertNull(exception.getLocalizedMessage());
-        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY1));
-        assertNull(exception.getCause());
-    }
-
-    @Test
-    public void testMessageWithKeyNoLocaleSetup() {
-        I18nException exception = new I18nException(MSG_KEY1);
-        exception.setupI18n(bundle, i18nProvider);
-
-        assertThat(exception.getMessage(), is(MSG_KEY1_EN));
-        assertThat(exception.getLocalizedMessage(), is(MSG_KEY1_EN));
-        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY1));
-        assertNull(exception.getCause());
-    }
-
-    @Test
-    public void testMessageWithKeyNoParam() {
-        I18nException exception = new I18nException(MSG_KEY1);
-        exception.setupI18n(bundle, i18nProvider, Locale.FRENCH);
-
-        assertThat(exception.getMessage(), is(MSG_KEY1_EN));
-        assertThat(exception.getLocalizedMessage(), is(MSG_KEY1_FR));
-        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY1));
-        assertNull(exception.getCause());
-    }
-
-    @Test
-    public void testMessageWithKeyTwoParams() {
-        I18nException exception = new I18nException(MSG_KEY2, PARAM1, PARAM2);
-        exception.setupI18n(bundle, i18nProvider, Locale.FRENCH);
-
-        assertThat(exception.getMessage(), is(MSG_KEY2_EN));
-        assertThat(exception.getLocalizedMessage(), is(MSG_KEY2_FR));
-        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY2));
-        assertNull(exception.getCause());
-    }
-
-    @Test
-    public void testMessageWithKeyOneParam() {
-        I18nException exception = new I18nException(MSG_KEY3, PARAM2);
-        exception.setupI18n(bundle, i18nProvider, Locale.FRENCH);
-
-        assertThat(exception.getMessage(), is(MSG_KEY3_EN));
-        assertThat(exception.getLocalizedMessage(), is(MSG_KEY3_FR));
-        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY3));
         assertNull(exception.getCause());
     }
 
@@ -165,19 +110,77 @@ public class I18nExceptionTest {
 
         assertThat(exception.getMessage(), is(MSG));
         assertThat(exception.getLocalizedMessage(), is(MSG));
+        assertThat(exception.getMessage(bundle, i18nProvider), is(MSG));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, null), is(MSG));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, Locale.FRENCH), is(MSG));
         assertThat(exception.getRawMessage(), is(MSG));
         assertNotNull(exception.getCause());
         assertThat(exception.getCause().getMessage(), is(CAUSE));
     }
 
     @Test
+    public void testMessageWithKeyButMissingParams() {
+        I18nException exception = new I18nException(MSG_KEY1);
+
+        assertNull(exception.getMessage());
+        assertNull(exception.getLocalizedMessage());
+        assertNull(exception.getMessage(bundle, null));
+        assertNull(exception.getMessage(null, i18nProvider));
+        assertNull(exception.getLocalizedMessage(bundle, null, Locale.FRENCH));
+        assertNull(exception.getLocalizedMessage(null, i18nProvider, Locale.FRENCH));
+        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY1));
+        assertNull(exception.getCause());
+    }
+
+    @Test
+    public void testMessageWithKeyNoParam() {
+        I18nException exception = new I18nException(MSG_KEY1);
+
+        assertNull(exception.getMessage());
+        assertNull(exception.getLocalizedMessage());
+        assertThat(exception.getMessage(bundle, i18nProvider), is(MSG_KEY1_EN));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, null), is(MSG_KEY1_EN));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, Locale.FRENCH), is(MSG_KEY1_FR));
+        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY1));
+        assertNull(exception.getCause());
+    }
+
+    @Test
+    public void testMessageWithKeyTwoParams() {
+        I18nException exception = new I18nException(MSG_KEY2, PARAM1, PARAM2);
+
+        assertNull(exception.getMessage());
+        assertNull(exception.getLocalizedMessage());
+        assertThat(exception.getMessage(bundle, i18nProvider), is(MSG_KEY2_EN));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, null), is(MSG_KEY2_EN));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, Locale.FRENCH), is(MSG_KEY2_FR));
+        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY2));
+        assertNull(exception.getCause());
+    }
+
+    @Test
+    public void testMessageWithKeyOneParam() {
+        I18nException exception = new I18nException(MSG_KEY3, PARAM2);
+
+        assertNull(exception.getMessage());
+        assertNull(exception.getLocalizedMessage());
+        assertThat(exception.getMessage(bundle, i18nProvider), is(MSG_KEY3_EN));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, null), is(MSG_KEY3_EN));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, Locale.FRENCH), is(MSG_KEY3_FR));
+        assertThat(exception.getRawMessage(), is(RAW_MSG_KEY3));
+        assertNull(exception.getCause());
+    }
+
+    @Test
     public void testMessageWithKeyAndWithCause() {
         Exception exception0 = new Exception(CAUSE);
         I18nException exception = new I18nException(MSG_KEY1, exception0);
-        exception.setupI18n(bundle, i18nProvider, Locale.FRENCH);
 
-        assertThat(exception.getMessage(), is(MSG_KEY1_EN));
-        assertThat(exception.getLocalizedMessage(), is(MSG_KEY1_FR));
+        assertNull(exception.getMessage());
+        assertNull(exception.getLocalizedMessage());
+        assertThat(exception.getMessage(bundle, i18nProvider), is(MSG_KEY1_EN));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, null), is(MSG_KEY1_EN));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, Locale.FRENCH), is(MSG_KEY1_FR));
         assertThat(exception.getRawMessage(), is(RAW_MSG_KEY1));
         assertNotNull(exception.getCause());
         assertThat(exception.getCause().getMessage(), is(CAUSE));
@@ -192,6 +195,9 @@ public class I18nExceptionTest {
 
         assertThat(exception.getMessage(), is(expectedMsg));
         assertThat(exception.getLocalizedMessage(), is(expectedMsg));
+        assertThat(exception.getMessage(bundle, i18nProvider), is(expectedMsg));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, null), is(expectedMsg));
+        assertThat(exception.getLocalizedMessage(bundle, i18nProvider, Locale.FRENCH), is(expectedMsg));
         assertThat(exception.getRawMessage(), is(expectedMsg));
         assertNotNull(exception.getCause());
         assertThat(exception.getCause().getMessage(), is(CAUSE));

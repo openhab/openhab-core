@@ -36,9 +36,6 @@ public class I18nException extends Exception {
 
     private String msgKey;
     private @Nullable Object @Nullable [] msgParams;
-    private @Nullable Bundle bundle;
-    private @Nullable TranslationProvider i18nProvider;
-    private @Nullable Locale locale;
 
     /**
      *
@@ -76,65 +73,38 @@ public class I18nException extends Exception {
     }
 
     /**
-     * Setup the internationalization support
+     * Returns the detail message string of this exception.
      *
-     * In case the message starts with "@text/", one of both setupI18n() methods needs to be called before using the
-     * getMessage() and getLocalizedMessage() methods.
-     *
-     * The getLocalizedMessage() method will then consider the English message.
+     * In case the message starts with "@text/" and the parameters bundle and i18nProvider are not null, the translation
+     * provider is used to look for the message key in the English properties file of the provided bundle.
      *
      * @param bundle the bundle containing the i18n properties
      * @param i18nProvider the translation provider
+     * @return the detail message string of this exception instance (which may be null)
      */
-    public void setupI18n(Bundle bundle, TranslationProvider i18nProvider) {
-        setupI18n(bundle, i18nProvider, Locale.ENGLISH);
+    public @Nullable String getMessage(@Nullable Bundle bundle, @Nullable TranslationProvider i18nProvider) {
+        return getLocalizedMessage(bundle, i18nProvider, Locale.ENGLISH);
     }
 
     /**
-     * Setup the internationalization support
+     * Returns a localized description of this exception.
      *
-     * In case the message starts with "@text/", one of both setupI18n() methods needs to be called before using the
-     * getMessage() and getLocalizedMessage() methods.
-     *
-     * The getLocalizedMessage() method will then consider the language provided by the locale parameter.
+     * In case the message starts with "@text/" and the parameters bundle and i18nProvider are not null, the translation
+     * provider is used to look for the message key in the properties file of the provided bundle containing strings for
+     * the requested language.
+     * English language is considered if no language is provided.
      *
      * @param bundle the bundle containing the i18n properties
      * @param i18nProvider the translation provider
      * @param locale the language to use for localizing the message
+     * @return the localized description of this exception instance (which may be null)
      */
-    public void setupI18n(Bundle bundle, TranslationProvider i18nProvider, Locale locale) {
-        this.bundle = bundle;
-        this.i18nProvider = i18nProvider;
-        this.locale = locale;
-    }
-
-    @Override
-    public @Nullable String getMessage() {
-        Bundle localBundle = this.bundle;
-        TranslationProvider localI18nProvider = this.i18nProvider;
-        if (msgKey.isBlank()) {
-            return super.getMessage();
-        } else if (localBundle == null || localI18nProvider == null) {
-            logger.warn("Internationalization support is not setup for the exception");
+    public @Nullable String getLocalizedMessage(@Nullable Bundle bundle, @Nullable TranslationProvider i18nProvider,
+            @Nullable Locale locale) {
+        if (msgKey.isBlank() || bundle == null || i18nProvider == null) {
             return super.getMessage();
         } else {
-            return localI18nProvider.getText(localBundle, msgKey, null, Locale.ENGLISH, msgParams);
-        }
-    }
-
-    @Override
-    public @Nullable String getLocalizedMessage() {
-        Bundle localBundle = this.bundle;
-        TranslationProvider localI18nProvider = this.i18nProvider;
-        Locale localLocale = this.locale;
-        if (msgKey.isBlank()) {
-            return super.getMessage();
-        } else if (localBundle == null || localI18nProvider == null) {
-            logger.warn("Internationalization support is not setup for the exception");
-            return super.getMessage();
-        } else {
-            return localI18nProvider.getText(localBundle, msgKey, null,
-                    localLocale != null ? localLocale : Locale.ENGLISH, msgParams);
+            return i18nProvider.getText(bundle, msgKey, null, locale != null ? locale : Locale.ENGLISH, msgParams);
         }
     }
 
