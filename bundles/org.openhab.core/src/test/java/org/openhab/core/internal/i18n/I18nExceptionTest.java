@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -85,10 +84,6 @@ public class I18nExceptionTest {
             return null;
         }
     };
-
-    @BeforeEach
-    public void setup() {
-    }
 
     @Test
     public void testMessageWithoutKey() {
