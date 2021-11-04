@@ -1,7 +1,11 @@
 #!/bin/bash
 
 BUILD_LOG=build.log
-DEFAULT_ARGUMENTS="clean verify -B -T 1.5C -U"
+
+ARGUMENTS="clean verify -B -T 1.5C -U"
+if [ $# -ge 1 ]; then
+    ARGUMENTS=$@
+fi
 
 function print_reactor_summary() {
     local start_end=$(grep -anE "\[INFO\] \\-{70,}" "$BUILD_LOG" | tail -n4 | cut -f1 -d: | sed -e 1b -e '$!d' | xargs)
@@ -22,22 +26,26 @@ function mvnp() {
         stdbuf -o0 sed -e :a -e "s/^.\{1,${padding}\}|/ &/;ta" # right align progress with padding
 }
 
+function build_all() {
+    echo
+    echo "Building all projects"
+    echo
+    echo "+ mvn $ARGUMENTS"
+    echo
+
+    mvnp $ARGUMENTS
+
+    status=$?
+    echo
+
+    if [ $status -eq 0 ]; then
+        print_reactor_summary
+    else
+        tail -n 2000 "$BUILD_LOG"
+    fi
+
+    exit $status
+}
+
 mvn -v
-echo
-
-if [ $# -ge 1 ]; then
-    mvnp $@
-else
-    mvnp $DEFAULT_ARGUMENTS
-fi
-
-status=$?
-echo
-
-if [ $status -eq 0 ]; then
-    print_reactor_summary
-else
-    tail -n 2000 "$BUILD_LOG"
-fi
-
-exit $status
+build_all
