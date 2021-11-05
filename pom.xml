@@ -142,8 +142,12 @@ Import-Package: \\
 -noimportjava: true
 -sources: false
 -contract: *
--includeresource: -${.}/NOTICE, -${.}/*.xsd]]></bnd>
+-includeresource: -${.}/NOTICE, -${.}/*.xsd
+-fixupmessages: \\
+  'Unused Import-Package instructions';is:=ignore,\\
+  'Unused Export-Package instructions';is:=ignore]]></bnd>
             <!-- Bundle-SymbolicName: ${project.groupId}.${project.artifactId} -->
+            <skipIfEmpty>true</skipIfEmpty>
           </configuration>
           <executions>
             <execution>
