@@ -36,20 +36,20 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * @author Wouter Born - Initial contribution
  */
 @NonNullByDefault
-public class AddonInfoReader {
+public class BundleInfoReader {
 
     private final Log log;
 
-    public AddonInfoReader(Log log) {
+    public BundleInfoReader(Log log) {
         this.log = log;
     }
 
-    public AddonInfo readAddonInfo(Path ohinfPath) throws IOException {
-        AddonInfo addonInfo = new AddonInfo();
-        readBindingInfo(ohinfPath, addonInfo);
-        readConfigInfo(ohinfPath, addonInfo);
-        readThingInfo(ohinfPath, addonInfo);
-        return addonInfo;
+    public BundleInfo readBundleInfo(Path ohinfPath) throws IOException {
+        BundleInfo bundleInfo = new BundleInfo();
+        readBindingInfo(ohinfPath, bundleInfo);
+        readConfigInfo(ohinfPath, bundleInfo);
+        readThingInfo(ohinfPath, bundleInfo);
+        return bundleInfo;
     }
 
     private Stream<Path> xmlPathStream(Path ohinfPath, String directory) throws IOException {
@@ -59,14 +59,14 @@ public class AddonInfoReader {
                 : Stream.of();
     }
 
-    private void readBindingInfo(Path ohinfPath, AddonInfo addonInfo) throws IOException {
+    private void readBindingInfo(Path ohinfPath, BundleInfo bundleInfo) throws IOException {
         BindingInfoReader reader = new BindingInfoReader();
         xmlPathStream(ohinfPath, "binding").forEach(path -> {
             log.info("Reading: " + path);
             try {
                 BindingInfoXmlResult bindingInfoXml = reader.readFromXML(path.toUri().toURL());
                 if (bindingInfoXml != null) {
-                    addonInfo.setBindingInfoXml(bindingInfoXml);
+                    bundleInfo.setBindingInfoXml(bindingInfoXml);
                 }
             } catch (ConversionException | MalformedURLException e) {
                 log.warn("Exception while reading binding info from: " + path, e);
@@ -74,14 +74,14 @@ public class AddonInfoReader {
         });
     }
 
-    private void readConfigInfo(Path ohinfPath, AddonInfo addonInfo) throws IOException {
+    private void readConfigInfo(Path ohinfPath, BundleInfo bundleInfo) throws IOException {
         ConfigDescriptionReader reader = new ConfigDescriptionReader();
         xmlPathStream(ohinfPath, "config").forEach(path -> {
             log.info("Reading: " + path);
             try {
                 List<ConfigDescription> configDescriptions = reader.readFromXML(path.toUri().toURL());
                 if (configDescriptions != null) {
-                    addonInfo.getConfigDescriptions().addAll(configDescriptions);
+                    bundleInfo.getConfigDescriptions().addAll(configDescriptions);
                 }
             } catch (ConversionException | MalformedURLException e) {
                 log.warn("Exception while reading config info from: " + path, e);
@@ -89,7 +89,7 @@ public class AddonInfoReader {
         });
     }
 
-    private void readThingInfo(Path ohinfPath, AddonInfo addonInfo) throws IOException {
+    private void readThingInfo(Path ohinfPath, BundleInfo bundleInfo) throws IOException {
         ThingDescriptionReader reader = new ThingDescriptionReader();
         xmlPathStream(ohinfPath, "thing").forEach(path -> {
             log.info("Reading: " + path);
@@ -100,11 +100,11 @@ public class AddonInfoReader {
                 }
                 for (Object type : types) {
                     if (type instanceof ThingTypeXmlResult) {
-                        addonInfo.getThingTypesXml().add((ThingTypeXmlResult) type);
+                        bundleInfo.getThingTypesXml().add((ThingTypeXmlResult) type);
                     } else if (type instanceof ChannelGroupTypeXmlResult) {
-                        addonInfo.getChannelGroupTypesXml().add((ChannelGroupTypeXmlResult) type);
+                        bundleInfo.getChannelGroupTypesXml().add((ChannelGroupTypeXmlResult) type);
                     } else if (type instanceof ChannelTypeXmlResult) {
-                        addonInfo.getChannelTypesXml().add((ChannelTypeXmlResult) type);
+                        bundleInfo.getChannelTypesXml().add((ChannelTypeXmlResult) type);
                     }
                 }
             } catch (ConversionException | MalformedURLException e) {

@@ -29,7 +29,7 @@ import org.openhab.core.thing.xml.internal.ThingTypeXmlResult;
  * @author Wouter Born - Initial contribution
  */
 @NonNullByDefault
-public class AddonInfo {
+public class BundleInfo {
 
     private @Nullable BindingInfoXmlResult bindingInfoXml;
     private List<ConfigDescription> configDescriptions = new ArrayList<>(5);

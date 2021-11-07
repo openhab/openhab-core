@@ -55,22 +55,22 @@ public class GenerateDefaultTranslationsMojo extends AbstractI18nMojo {
 
     protected String generateDefaultTranslations() {
         XmlToTranslationsConverter xmlConverter = new XmlToTranslationsConverter(getLog());
-        Translations generatedTranslations = xmlConverter.convert(addonInfo);
+        Translations generatedTranslations = xmlConverter.convert(bundleInfo);
 
         Path defaultTranslationsPath = ohinfDirectory.toPath()
-                .resolve(Path.of("i18n", addonInfo.getBindingId() + ".properties"));
+                .resolve(Path.of("i18n", bundleInfo.getBindingId() + ".properties"));
 
         PropertiesToTranslationsConverter propertiesConverter = new PropertiesToTranslationsConverter(getLog());
         Translations existingTranslations = propertiesConverter.convert(defaultTranslationsPath);
 
-        TranslationsMerger translationsMerger = new TranslationsMerger(getLog());
+        TranslationsMerger translationsMerger = new TranslationsMerger();
         translationsMerger.merge(generatedTranslations, existingTranslations);
 
         return generatedTranslations.linesStream().collect(Collectors.joining(System.lineSeparator()));
     }
 
     private void writeDefaultTranslations(String translationsString) throws MojoFailureException {
-        Path translationsPath = targetDirectory.toPath().resolve(addonInfo.getBindingId() + ".properties");
+        Path translationsPath = targetDirectory.toPath().resolve(bundleInfo.getBindingId() + ".properties");
 
         try {
             Files.createDirectories(translationsPath.getParent());

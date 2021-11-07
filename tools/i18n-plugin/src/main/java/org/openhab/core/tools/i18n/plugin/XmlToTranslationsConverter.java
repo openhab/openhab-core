@@ -43,7 +43,7 @@ import org.openhab.core.tools.i18n.plugin.Translations.TranslationsSection;
 import org.openhab.core.types.StateDescription;
 
 /**
- * Converts XML based {@link AddonInfo} to {@link Translations}.
+ * Converts XML based {@link BundleInfo} to {@link Translations}.
  *
  * @author Wouter Born - Initial contribution
  */
@@ -56,32 +56,32 @@ public class XmlToTranslationsConverter {
         this.log = log;
     }
 
-    public Translations convert(AddonInfo addonInfo) {
-        BindingInfoXmlResult bindingInfoXml = addonInfo.getBindingInfoXml();
+    public Translations convert(BundleInfo bundleInfo) {
+        BindingInfoXmlResult bindingInfoXml = bundleInfo.getBindingInfoXml();
         if (bindingInfoXml == null) {
             log.warn("Cannot generate translations because there is no XML binding info");
             return Translations.translations();
         }
 
         return Translations.translations( //
-                bindingSection(addonInfo), //
-                bindingConfigSection(addonInfo), //
-                thingTypesSection(addonInfo), //
-                thingTypesConfigSection(addonInfo), //
-                channelGroupTypesSection(addonInfo), //
-                channelTypesSection(addonInfo), //
-                channelTypesConfigSection(addonInfo));
+                bindingSection(bundleInfo), //
+                bindingConfigSection(bundleInfo), //
+                thingTypesSection(bundleInfo), //
+                thingTypesConfigSection(bundleInfo), //
+                channelGroupTypesSection(bundleInfo), //
+                channelTypesSection(bundleInfo), //
+                channelTypesConfigSection(bundleInfo));
     }
 
-    private TranslationsSection bindingSection(AddonInfo addonInfo) {
+    private TranslationsSection bindingSection(BundleInfo bundleInfo) {
         String header = "binding";
-        BindingInfoXmlResult bindingInfoXml = addonInfo.getBindingInfoXml();
+        BindingInfoXmlResult bindingInfoXml = bundleInfo.getBindingInfoXml();
         if (bindingInfoXml == null) {
             return section(header);
         }
 
         BindingInfo bindingInfo = bindingInfoXml.getBindingInfo();
-        String bindingId = addonInfo.getBindingId();
+        String bindingId = bundleInfo.getBindingId();
 
         String keyPrefix = String.format("binding.%s", bindingId);
 
@@ -91,9 +91,9 @@ public class XmlToTranslationsConverter {
         ));
     }
 
-    private TranslationsSection bindingConfigSection(AddonInfo addonInfo) {
+    private TranslationsSection bindingConfigSection(BundleInfo bundleInfo) {
         String header = "binding config";
-        BindingInfoXmlResult bindingInfoXml = addonInfo.getBindingInfoXml();
+        BindingInfoXmlResult bindingInfoXml = bundleInfo.getBindingInfoXml();
         if (bindingInfoXml == null) {
             return section(header);
         }
@@ -102,20 +102,20 @@ public class XmlToTranslationsConverter {
             return section(header);
         }
 
-        String keyPrefix = String.format("binding.config.%s", addonInfo.getBindingId());
+        String keyPrefix = String.format("binding.config.%s", bundleInfo.getBindingId());
         return section(header,
                 Stream.concat(configDescriptionGroupParameters(keyPrefix, bindingConfig.getParameterGroups()),
                         configDescriptionParameters(keyPrefix, bindingConfig.getParameters())));
     }
 
-    private TranslationsSection thingTypesSection(AddonInfo addonInfo) {
+    private TranslationsSection thingTypesSection(BundleInfo bundleInfo) {
         String header = "thing types";
-        List<ThingTypeXmlResult> thingTypesXml = addonInfo.getThingTypesXml();
+        List<ThingTypeXmlResult> thingTypesXml = bundleInfo.getThingTypesXml();
         if (thingTypesXml.isEmpty()) {
             return section(header);
         }
 
-        String bindingId = addonInfo.getBindingId();
+        String bindingId = bundleInfo.getBindingId();
         String keyPrefix = String.format("thing-type.%s", bindingId);
 
         return section(header, thingTypesXml.stream().map(thingTypeXml -> {
@@ -147,9 +147,9 @@ public class XmlToTranslationsConverter {
         }));
     }
 
-    private TranslationsSection thingTypesConfigSection(AddonInfo addonInfo) {
+    private TranslationsSection thingTypesConfigSection(BundleInfo bundleInfo) {
         String header = "thing types config";
-        List<ThingTypeXmlResult> thingTypesXml = addonInfo.getThingTypesXml();
+        List<ThingTypeXmlResult> thingTypesXml = bundleInfo.getThingTypesXml();
         if (thingTypesXml.isEmpty()) {
             return section(header);
         }
@@ -162,7 +162,7 @@ public class XmlToTranslationsConverter {
                         .map(ThingTypeXmlResult::toThingType) //
                         .map(ThingType::getConfigDescriptionURI) //
                         .distinct() //
-                        .map(addonInfo::getConfigDescription) //
+                        .map(bundleInfo::getConfigDescription) //
                         .filter(Optional::isPresent) //
                         .map(Optional::get));
 
@@ -181,14 +181,14 @@ public class XmlToTranslationsConverter {
         return section(header, groupsBuilder.build());
     }
 
-    private TranslationsSection channelGroupTypesSection(AddonInfo addonInfo) {
+    private TranslationsSection channelGroupTypesSection(BundleInfo bundleInfo) {
         String header = "channel group types";
-        List<ChannelGroupTypeXmlResult> channelGroupTypesXml = addonInfo.getChannelGroupTypesXml();
+        List<ChannelGroupTypeXmlResult> channelGroupTypesXml = bundleInfo.getChannelGroupTypesXml();
         if (channelGroupTypesXml.isEmpty()) {
             return section(header);
         }
 
-        String keyPrefix = String.format("channel-group-type.%s", addonInfo.getBindingId());
+        String keyPrefix = String.format("channel-group-type.%s", bundleInfo.getBindingId());
 
         return section(header, channelGroupTypesXml.stream().map(ChannelGroupTypeXmlResult::toChannelGroupType)
                 .map(channelGroupType -> {
@@ -223,14 +223,14 @@ public class XmlToTranslationsConverter {
                 }));
     }
 
-    private TranslationsSection channelTypesSection(AddonInfo addonInfo) {
+    private TranslationsSection channelTypesSection(BundleInfo bundleInfo) {
         String header = "channel types";
-        List<ChannelTypeXmlResult> channelTypesXml = addonInfo.getChannelTypesXml();
+        List<ChannelTypeXmlResult> channelTypesXml = bundleInfo.getChannelTypesXml();
         if (channelTypesXml.isEmpty()) {
             return section(header);
         }
 
-        String keyPrefix = String.format("channel-type.%s", addonInfo.getBindingId());
+        String keyPrefix = String.format("channel-type.%s", bundleInfo.getBindingId());
 
         return section(header, channelTypesXml.stream().map(channelTypeXml -> {
             ChannelType channelType = channelTypeXml.toChannelType();
@@ -262,9 +262,9 @@ public class XmlToTranslationsConverter {
         }));
     }
 
-    private TranslationsSection channelTypesConfigSection(AddonInfo addonInfo) {
+    private TranslationsSection channelTypesConfigSection(BundleInfo bundleInfo) {
         String header = "channel types config";
-        List<ChannelTypeXmlResult> channelTypesXml = addonInfo.getChannelTypesXml();
+        List<ChannelTypeXmlResult> channelTypesXml = bundleInfo.getChannelTypesXml();
         if (channelTypesXml.isEmpty()) {
             return section(header);
         }
@@ -275,7 +275,7 @@ public class XmlToTranslationsConverter {
                 channelTypesXml.stream().map(ChannelTypeXmlResult::toChannelType)
                         .map(ChannelType::getConfigDescriptionURI) //
                         .distinct() //
-                        .map(addonInfo::getConfigDescription) //
+                        .map(bundleInfo::getConfigDescription) //
                         .filter(Optional::isPresent) //
                         .map(Optional::get));
 

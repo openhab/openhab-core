@@ -15,7 +15,6 @@ package org.openhab.core.tools.i18n.plugin;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.maven.plugin.logging.Log;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.tools.i18n.plugin.Translations.TranslationsSection;
 
@@ -24,12 +23,6 @@ import org.openhab.core.tools.i18n.plugin.Translations.TranslationsSection;
  */
 @NonNullByDefault
 public class TranslationsMerger {
-
-    private final Log log;
-
-    public TranslationsMerger(Log log) {
-        this.log = log;
-    }
 
     /**
      * Adds any missing translations from <code>missingTranslations</code> to <code>mainTranslations</code>.

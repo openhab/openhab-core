@@ -31,14 +31,14 @@ public abstract class AbstractI18nMojo extends AbstractMojo {
     @Parameter(property = "i18n.ohinf.dir", defaultValue = "${project.basedir}/src/main/resources/OH-INF")
     protected @NonNullByDefault({}) File ohinfDirectory;
 
-    protected AddonInfo addonInfo = new AddonInfo();
+    protected BundleInfo bundleInfo = new BundleInfo();
 
     protected boolean ohinfExists() {
         return ohinfDirectory.exists();
     }
 
     protected void readAddonInfo() throws IOException {
-        AddonInfoReader addonInfoReader = new AddonInfoReader(getLog());
-        addonInfo = addonInfoReader.readAddonInfo(ohinfDirectory.toPath());
+        BundleInfoReader bundleInfoReader = new BundleInfoReader(getLog());
+        bundleInfo = bundleInfoReader.readBundleInfo(ohinfDirectory.toPath());
     }
 }
