@@ -127,6 +127,22 @@ public class XmlToTranslationsConverter {
             entriesBuilder
                     .add(entry(String.format("%s.%s.description", keyPrefix, thingId), thingType.getDescription()));
 
+            thingType.getChannelDefinitions().stream() //
+                    .sorted(Comparator.comparing(ChannelDefinition::getId)) //
+                    .forEach(channelDefinition -> {
+                        String label = channelDefinition.getLabel();
+                        if (label != null) {
+                            entriesBuilder.add(entry(String.format("%s.%s.channel.%s.label", keyPrefix, thingId,
+                                    channelDefinition.getId()), label));
+                        }
+
+                        String description = channelDefinition.getDescription();
+                        if (description != null) {
+                            entriesBuilder.add(entry(String.format("%s.%s.channel.%s.description", keyPrefix, thingId,
+                                    channelDefinition.getId()), description));
+                        }
+                    });
+
             thingType.getChannelGroupDefinitions().stream() //
                     .sorted(Comparator.comparing(ChannelGroupDefinition::getId)) //
                     .forEach(channelGroupDefinition -> {
