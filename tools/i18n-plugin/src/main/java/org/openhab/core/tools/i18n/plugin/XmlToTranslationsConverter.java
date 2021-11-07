@@ -58,11 +58,10 @@ public class XmlToTranslationsConverter {
 
     public Translations convert(BundleInfo bundleInfo) {
         BindingInfoXmlResult bindingInfoXml = bundleInfo.getBindingInfoXml();
-        if (bindingInfoXml == null) {
-            log.warn("Cannot generate translations because there is no XML binding info");
-            return Translations.translations();
-        }
+        return bindingInfoXml == null ? configTranslations(bundleInfo) : bindingTranslations(bundleInfo);
+    }
 
+    private Translations bindingTranslations(BundleInfo bundleInfo) {
         return Translations.translations( //
                 bindingSection(bundleInfo), //
                 bindingConfigSection(bundleInfo), //
@@ -71,6 +70,22 @@ public class XmlToTranslationsConverter {
                 channelGroupTypesSection(bundleInfo), //
                 channelTypesSection(bundleInfo), //
                 channelTypesConfigSection(bundleInfo));
+    }
+
+    private Translations configTranslations(BundleInfo bundleInfo) {
+        Builder<TranslationsGroup> groupsBuilder = Stream.builder();
+
+        bundleInfo.getConfigDescriptions().stream().map(configDescription -> {
+            String configKeyPrefix = String.format("%s.config.%s",
+                    (Object[]) configDescription.getUID().toString().split(":"));
+            Builder<TranslationsGroup> streamBuilder = Stream.builder();
+            configDescriptionGroupParameters(configKeyPrefix, configDescription.getParameterGroups())
+                    .forEach(streamBuilder::add);
+            configDescriptionParameters(configKeyPrefix, configDescription.getParameters()).forEach(streamBuilder::add);
+            return streamBuilder.build();
+        }).reduce(Stream::concat).orElseGet(Stream::empty).forEach(groupsBuilder::add);
+
+        return Translations.translations(section(groupsBuilder.build()));
     }
 
     private TranslationsSection bindingSection(BundleInfo bundleInfo) {

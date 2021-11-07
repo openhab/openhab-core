@@ -106,6 +106,10 @@ public class Translations {
         final String header;
         final List<TranslationsGroup> groups;
 
+        public TranslationsSection(List<TranslationsGroup> groups) {
+            this("", groups);
+        }
+
         public TranslationsSection(String header, List<TranslationsGroup> groups) {
             this.header = header;
             this.groups = groups;
@@ -123,10 +127,12 @@ public class Translations {
 
         public Stream<String> linesStream() {
             Builder<String> builder = Stream.builder();
-            Arrays.stream(header.split(System.lineSeparator())) //
-                    .map(line -> "# " + line) //
-                    .forEach(builder::add);
-            builder.add("");
+            if (!header.isBlank()) {
+                Arrays.stream(header.split(System.lineSeparator())) //
+                        .map(line -> "# " + line) //
+                        .forEach(builder::add);
+                builder.add("");
+            }
             groups.stream() //
                     .filter(TranslationsGroup::hasTranslations) //
                     .map(TranslationsGroup::linesStream) //
@@ -140,8 +146,16 @@ public class Translations {
             groups.forEach(group -> group.removeEntries(filter));
         }
 
+        public static TranslationsSection section(Stream<TranslationsGroup> groups) {
+            return section("", groups);
+        }
+
         public static TranslationsSection section(String header, Stream<TranslationsGroup> groups) {
             return new TranslationsSection(header, groups.sorted().collect(Collectors.toList()));
+        }
+
+        public static TranslationsSection section(TranslationsGroup... groups) {
+            return section("", groups);
         }
 
         public static TranslationsSection section(String header, TranslationsGroup... groups) {

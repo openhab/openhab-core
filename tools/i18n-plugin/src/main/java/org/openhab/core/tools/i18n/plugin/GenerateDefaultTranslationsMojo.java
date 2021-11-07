@@ -18,12 +18,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.config.core.ConfigDescription;
 
 /**
  * @author Wouter Born - Initial contribution
@@ -53,12 +55,28 @@ public class GenerateDefaultTranslationsMojo extends AbstractI18nMojo {
         }
     }
 
+    private String propertiesFileName(BundleInfo bundleInfo) {
+        String name = bundleInfo.getBindingId();
+        if (name.isEmpty()) {
+            Optional<ConfigDescription> optional = bundleInfo.getConfigDescriptions().stream().findFirst();
+            if (optional.isPresent()) {
+                ConfigDescription configDescription = optional.get();
+                name = configDescription.getUID().toString().split(":")[1];
+            }
+        }
+
+        if (name.isBlank()) {
+            name = "unknown";
+        }
+
+        return name + ".properties";
+    }
+
     protected String generateDefaultTranslations() {
         XmlToTranslationsConverter xmlConverter = new XmlToTranslationsConverter(getLog());
         Translations generatedTranslations = xmlConverter.convert(bundleInfo);
 
-        Path defaultTranslationsPath = ohinfDirectory.toPath()
-                .resolve(Path.of("i18n", bundleInfo.getBindingId() + ".properties"));
+        Path defaultTranslationsPath = ohinfDirectory.toPath().resolve(Path.of("i18n", propertiesFileName(bundleInfo)));
 
         PropertiesToTranslationsConverter propertiesConverter = new PropertiesToTranslationsConverter(getLog());
         Translations existingTranslations = propertiesConverter.convert(defaultTranslationsPath);
@@ -70,7 +88,7 @@ public class GenerateDefaultTranslationsMojo extends AbstractI18nMojo {
     }
 
     private void writeDefaultTranslations(String translationsString) throws MojoFailureException {
-        Path translationsPath = targetDirectory.toPath().resolve(bundleInfo.getBindingId() + ".properties");
+        Path translationsPath = targetDirectory.toPath().resolve(propertiesFileName(bundleInfo));
 
         try {
             Files.createDirectories(translationsPath.getParent());
