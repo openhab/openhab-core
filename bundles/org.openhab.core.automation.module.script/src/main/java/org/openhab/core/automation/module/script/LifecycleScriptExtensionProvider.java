@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.internal.defaultscope;
+package org.openhab.core.automation.module.script;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.module.script.ScriptExtensionProvider;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -98,7 +97,7 @@ public class LifecycleScriptExtensionProvider implements ScriptExtensionProvider
     }
 
     @FunctionalInterface
-    interface Disposable {
+    public interface Disposable {
         void dispose();
     }
 }
