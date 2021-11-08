@@ -185,6 +185,11 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     }
 
     private Path getAddonCacheDirectory(String addonId) {
-        return KAR_CACHE_PATH.resolve(addonId.replace("marketplace:", ""));
+        if (addonId.startsWith("marketplace:")) {
+            return KAR_CACHE_PATH.resolve(addonId.replace("marketplace:", ""));
+        } else if (addonId.contains(":")) {
+            return KAR_CACHE_PATH.resolve(addonId.replaceAll(":", File.separator));
+        }
+        return KAR_CACHE_PATH.resolve(addonId);
     }
 }

@@ -164,6 +164,11 @@ public abstract class MarketplaceBundleInstaller {
     }
 
     private Path getAddonCacheDirectory(String addonId) {
-        return BUNDLE_CACHE_PATH.resolve(addonId.replace("marketplace:", ""));
+        if (addonId.startsWith("marketplace:")) {
+            return BUNDLE_CACHE_PATH.resolve(addonId.replace("marketplace:", ""));
+        } else if (addonId.contains(":")) {
+            return BUNDLE_CACHE_PATH.resolve(addonId.replaceAll(":", File.separator));
+        }
+        return BUNDLE_CACHE_PATH.resolve(addonId);
     }
 }
