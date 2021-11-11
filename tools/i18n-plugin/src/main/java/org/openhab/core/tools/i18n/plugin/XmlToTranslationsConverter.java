@@ -40,6 +40,7 @@ import org.openhab.core.thing.xml.internal.ThingTypeXmlResult;
 import org.openhab.core.tools.i18n.plugin.Translations.TranslationsEntry;
 import org.openhab.core.tools.i18n.plugin.Translations.TranslationsGroup;
 import org.openhab.core.tools.i18n.plugin.Translations.TranslationsSection;
+import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.StateDescription;
 
 /**
@@ -287,6 +288,15 @@ public class XmlToTranslationsConverter {
                                 stateDescription.getPattern()));
                     }
                 }
+            }
+
+            CommandDescription commandDescription = channelType.getCommandDescription();
+            if (commandDescription != null) {
+                commandDescription.getCommandOptions().stream()
+                        .map(option -> entry(
+                                String.format("%s.%s.command.option.%s", keyPrefix, channelId, option.getCommand()),
+                                option.getLabel()))
+                        .forEach(entriesBuilder::add);
             }
 
             return group(entriesBuilder.build());
