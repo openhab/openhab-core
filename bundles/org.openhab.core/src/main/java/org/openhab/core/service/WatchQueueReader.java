@@ -337,8 +337,11 @@ public class WatchQueueReader implements Runnable {
         Path baseWatchedDir = null;
         Path registeredPath = null;
         synchronized (this) {
-            baseWatchedDir = keyToService.get(key).getSourcePath();
-            registeredPath = registeredKeys.get(key);
+            AbstractWatchService service = keyToService.get(key);
+            if (service != null) {
+                baseWatchedDir = service.getSourcePath();
+                registeredPath = registeredKeys.get(key);
+            }
         }
         if (registeredPath != null) {
             // If the path has been registered in the watch service it relative path can be resolved
