@@ -18,20 +18,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openhab.core.i18n.I18nException;
+import org.openhab.core.i18n.AbstractI18nException;
 import org.openhab.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
 
 /**
- * The {@link I18nExceptionTest} tests all the functionalities of the {@link I18nException} class.
+ * The {@link I18nExceptionTest} tests all the functionalities of the {@link AbstractI18nException} class.
  *
  * @author Laurent Garnier - Initial contribution
  */
+@NonNullByDefault
 @ExtendWith(MockitoExtension.class)
 public class I18nExceptionTest {
 
@@ -60,12 +62,12 @@ public class I18nExceptionTest {
 
     private static final String CAUSE = "Here is the root cause.";
 
-    private @Mock Bundle bundle;
+    private @Nullable @Mock Bundle bundle;
 
     TranslationProvider i18nProvider = new TranslationProvider() {
         @Override
         public @Nullable String getText(@Nullable Bundle bundle, @Nullable String key, @Nullable String defaultText,
-                @Nullable Locale locale, @Nullable Object... arguments) {
+                @Nullable Locale locale, @Nullable Object @Nullable... arguments) {
             if (bundle != null) {
                 if (KEY1.equals(key)) {
                     return Locale.FRENCH.equals(locale) ? MSG_KEY1_FR : MSG_KEY1_EN;
@@ -85,9 +87,25 @@ public class I18nExceptionTest {
         }
     };
 
+    private class TestException extends AbstractI18nException {
+        private static final long serialVersionUID = 1L;
+
+        public TestException(String message, @Nullable Object @Nullable... msgParams) {
+            super(message, msgParams);
+        }
+
+        public TestException(String message, @Nullable Throwable cause, @Nullable Object @Nullable... msgParams) {
+            super(message, cause, msgParams);
+        }
+
+        public TestException(Throwable cause) {
+            super(cause);
+        }
+    };
+
     @Test
     public void testMessageWithoutKey() {
-        I18nException exception = new I18nException(MSG);
+        AbstractI18nException exception = new TestException(MSG);
 
         assertThat(exception.getMessage(), is(MSG));
         assertThat(exception.getLocalizedMessage(), is(MSG));
@@ -101,7 +119,7 @@ public class I18nExceptionTest {
     @Test
     public void testMessageWithoutKeyAndWithCause() {
         Exception exception0 = new Exception(CAUSE);
-        I18nException exception = new I18nException(MSG, exception0);
+        AbstractI18nException exception = new TestException(MSG, exception0);
 
         assertThat(exception.getMessage(), is(MSG));
         assertThat(exception.getLocalizedMessage(), is(MSG));
@@ -115,7 +133,7 @@ public class I18nExceptionTest {
 
     @Test
     public void testMessageWithKeyButMissingParams() {
-        I18nException exception = new I18nException(MSG_KEY1);
+        AbstractI18nException exception = new TestException(MSG_KEY1);
 
         assertNull(exception.getMessage());
         assertNull(exception.getLocalizedMessage());
@@ -129,7 +147,7 @@ public class I18nExceptionTest {
 
     @Test
     public void testMessageWithKeyNoParam() {
-        I18nException exception = new I18nException(MSG_KEY1);
+        AbstractI18nException exception = new TestException(MSG_KEY1);
 
         assertNull(exception.getMessage());
         assertNull(exception.getLocalizedMessage());
@@ -142,7 +160,7 @@ public class I18nExceptionTest {
 
     @Test
     public void testMessageWithKeyTwoParams() {
-        I18nException exception = new I18nException(MSG_KEY2, PARAM1, PARAM2);
+        AbstractI18nException exception = new TestException(MSG_KEY2, PARAM1, PARAM2);
 
         assertNull(exception.getMessage());
         assertNull(exception.getLocalizedMessage());
@@ -155,7 +173,7 @@ public class I18nExceptionTest {
 
     @Test
     public void testMessageWithKeyOneParam() {
-        I18nException exception = new I18nException(MSG_KEY3, PARAM2);
+        AbstractI18nException exception = new TestException(MSG_KEY3, PARAM2);
 
         assertNull(exception.getMessage());
         assertNull(exception.getLocalizedMessage());
@@ -169,7 +187,7 @@ public class I18nExceptionTest {
     @Test
     public void testMessageWithKeyAndWithCause() {
         Exception exception0 = new Exception(CAUSE);
-        I18nException exception = new I18nException(MSG_KEY1, exception0);
+        AbstractI18nException exception = new TestException(MSG_KEY1, exception0);
 
         assertNull(exception.getMessage());
         assertNull(exception.getLocalizedMessage());
@@ -184,7 +202,7 @@ public class I18nExceptionTest {
     @Test
     public void testCauseOnly() {
         Exception exception0 = new Exception(CAUSE);
-        I18nException exception = new I18nException(exception0);
+        AbstractI18nException exception = new TestException(exception0);
 
         String expectedMsg = String.format("%s: %s", exception0.getClass().getName(), CAUSE);
 

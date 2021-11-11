@@ -26,7 +26,7 @@ import org.osgi.framework.Bundle;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public class I18nException extends RuntimeException {
+public abstract class AbstractI18nException extends RuntimeException {
 
     private String msgKey;
     private @Nullable Object @Nullable [] msgParams;
@@ -36,7 +36,7 @@ public class I18nException extends RuntimeException {
      * @param message the exception message; use "@text/key" to reference "key" entry in the properties file
      * @param msgParams the optional arguments of the message defined in the properties file
      */
-    public I18nException(String message, @Nullable Object @Nullable... msgParams) {
+    public AbstractI18nException(String message, @Nullable Object @Nullable... msgParams) {
         this(message, null, msgParams);
     }
 
@@ -47,7 +47,7 @@ public class I18nException extends RuntimeException {
      *            and indicates that the cause is nonexistent or unknown.
      * @param msgParams the optional arguments of the message defined in the properties file
      */
-    public I18nException(String message, @Nullable Throwable cause, @Nullable Object @Nullable... msgParams) {
+    public AbstractI18nException(String message, @Nullable Throwable cause, @Nullable Object @Nullable... msgParams) {
         super(I18nUtil.isConstant(message) ? null : message, cause);
         if (I18nUtil.isConstant(message)) {
             this.msgKey = I18nUtil.stripConstant(message);
@@ -61,7 +61,7 @@ public class I18nException extends RuntimeException {
      *
      * @param cause the cause (which is saved for later retrieval by the getCause() method).
      */
-    public I18nException(Throwable cause) {
+    public AbstractI18nException(Throwable cause) {
         super(cause);
         this.msgKey = "";
     }
