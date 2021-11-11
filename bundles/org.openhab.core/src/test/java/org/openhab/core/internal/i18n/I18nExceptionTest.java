@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.i18n.AbstractI18nException;
+import org.openhab.core.i18n.CommunicationException;
 import org.openhab.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
 
@@ -87,25 +88,9 @@ public class I18nExceptionTest {
         }
     };
 
-    private class TestException extends AbstractI18nException {
-        private static final long serialVersionUID = 1L;
-
-        public TestException(String message, @Nullable Object @Nullable... msgParams) {
-            super(message, msgParams);
-        }
-
-        public TestException(String message, @Nullable Throwable cause, @Nullable Object @Nullable... msgParams) {
-            super(message, cause, msgParams);
-        }
-
-        public TestException(Throwable cause) {
-            super(cause);
-        }
-    };
-
     @Test
     public void testMessageWithoutKey() {
-        AbstractI18nException exception = new TestException(MSG);
+        CommunicationException exception = new CommunicationException(MSG);
 
         assertThat(exception.getMessage(), is(MSG));
         assertThat(exception.getLocalizedMessage(), is(MSG));
@@ -119,7 +104,7 @@ public class I18nExceptionTest {
     @Test
     public void testMessageWithoutKeyAndWithCause() {
         Exception exception0 = new Exception(CAUSE);
-        AbstractI18nException exception = new TestException(MSG, exception0);
+        CommunicationException exception = new CommunicationException(MSG, exception0);
 
         assertThat(exception.getMessage(), is(MSG));
         assertThat(exception.getLocalizedMessage(), is(MSG));
@@ -133,7 +118,7 @@ public class I18nExceptionTest {
 
     @Test
     public void testMessageWithKeyButMissingParams() {
-        AbstractI18nException exception = new TestException(MSG_KEY1);
+        CommunicationException exception = new CommunicationException(MSG_KEY1);
 
         assertNull(exception.getMessage());
         assertNull(exception.getLocalizedMessage());
@@ -147,7 +132,7 @@ public class I18nExceptionTest {
 
     @Test
     public void testMessageWithKeyNoParam() {
-        AbstractI18nException exception = new TestException(MSG_KEY1);
+        CommunicationException exception = new CommunicationException(MSG_KEY1);
 
         assertNull(exception.getMessage());
         assertNull(exception.getLocalizedMessage());
@@ -160,7 +145,7 @@ public class I18nExceptionTest {
 
     @Test
     public void testMessageWithKeyTwoParams() {
-        AbstractI18nException exception = new TestException(MSG_KEY2, PARAM1, PARAM2);
+        CommunicationException exception = new CommunicationException(MSG_KEY2, PARAM1, PARAM2);
 
         assertNull(exception.getMessage());
         assertNull(exception.getLocalizedMessage());
@@ -173,7 +158,7 @@ public class I18nExceptionTest {
 
     @Test
     public void testMessageWithKeyOneParam() {
-        AbstractI18nException exception = new TestException(MSG_KEY3, PARAM2);
+        CommunicationException exception = new CommunicationException(MSG_KEY3, PARAM2);
 
         assertNull(exception.getMessage());
         assertNull(exception.getLocalizedMessage());
@@ -187,7 +172,7 @@ public class I18nExceptionTest {
     @Test
     public void testMessageWithKeyAndWithCause() {
         Exception exception0 = new Exception(CAUSE);
-        AbstractI18nException exception = new TestException(MSG_KEY1, exception0);
+        CommunicationException exception = new CommunicationException(MSG_KEY1, exception0);
 
         assertNull(exception.getMessage());
         assertNull(exception.getLocalizedMessage());
@@ -202,7 +187,7 @@ public class I18nExceptionTest {
     @Test
     public void testCauseOnly() {
         Exception exception0 = new Exception(CAUSE);
-        AbstractI18nException exception = new TestException(exception0);
+        CommunicationException exception = new CommunicationException(exception0);
 
         String expectedMsg = String.format("%s: %s", exception0.getClass().getName(), CAUSE);
 
