@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public class ConnectionException extends AbstractI18nException {
+public class ConnectionException extends CommunicationException {
 
     private static final long serialVersionUID = 1L;
 
