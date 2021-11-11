@@ -19,8 +19,6 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides an exception class for openHAB that incorporates support for internationalization
@@ -28,11 +26,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public class I18nException extends Exception {
-
-    private static final long serialVersionUID = 1L;
-
-    private final Logger logger = LoggerFactory.getLogger(I18nException.class);
+public class I18nException extends RuntimeException {
 
     private String msgKey;
     private @Nullable Object @Nullable [] msgParams;
