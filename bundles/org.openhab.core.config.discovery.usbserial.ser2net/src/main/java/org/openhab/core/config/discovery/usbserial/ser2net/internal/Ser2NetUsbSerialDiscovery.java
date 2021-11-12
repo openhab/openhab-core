@@ -73,7 +73,7 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
     private final Set<UsbSerialDiscoveryListener> discoveryListeners = new CopyOnWriteArraySet<>();
     private final MDNSClient mdnsClient;
 
-    private boolean backgroundDiscoveryEnabled = false;
+    private boolean notifyListeners = false;
 
     private Set<UsbSerialDeviceInformation> lastScanResult = new HashSet<>();
 
@@ -94,14 +94,14 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
 
     @Override
     public synchronized void startBackgroundScanning() {
-        backgroundDiscoveryEnabled = true;
+        notifyListeners = true;
         mdnsClient.addServiceListener(SERVICE_TYPE, this);
         logger.debug("Started ser2net USB-Serial mDNS background discovery");
     }
 
     @Override
     public synchronized void stopBackgroundScanning() {
-        backgroundDiscoveryEnabled = false;
+        notifyListeners = false;
         mdnsClient.removeServiceListener(SERVICE_TYPE, this);
         logger.debug("Stopped ser2net USB-Serial mDNS background discovery");
     }
@@ -149,7 +149,7 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
 
     @Override
     public void serviceAdded(@NonNullByDefault({}) ServiceEvent event) {
-        if (backgroundDiscoveryEnabled) {
+        if (notifyListeners) {
             Optional<UsbSerialDeviceInformation> deviceInfo = createUsbSerialDeviceInformation(event.getInfo());
             deviceInfo.ifPresent(this::announceAddedDevice);
         }
@@ -157,7 +157,7 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
 
     @Override
     public void serviceRemoved(@NonNullByDefault({}) ServiceEvent event) {
-        if (backgroundDiscoveryEnabled) {
+        if (notifyListeners) {
             Optional<UsbSerialDeviceInformation> deviceInfo = createUsbSerialDeviceInformation(event.getInfo());
             deviceInfo.ifPresent(this::announceRemovedDevice);
         }
