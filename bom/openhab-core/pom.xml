@@ -318,6 +318,12 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.config.discovery.usbserial.ser2net</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.config.discovery.upnp</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>

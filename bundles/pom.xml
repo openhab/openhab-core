@@ -31,6 +31,7 @@
     <module>org.openhab.core.config.discovery.mdns</module>
     <module>org.openhab.core.config.discovery.usbserial</module>
     <module>org.openhab.core.config.discovery.usbserial.linuxsysfs</module>
+    <module>org.openhab.core.config.discovery.usbserial.ser2net</module>
     <module>org.openhab.core.config.discovery.upnp</module>
     <module>org.openhab.core.config.dispatch</module>
     <module>org.openhab.core.config.serial</module>

@@ -47,14 +47,14 @@ import org.slf4j.LoggerFactory;
  * This discovery service is intended to be used by bindings that support USB devices, but do not directly talk to the
  * USB devices but rather use a serial port for the communication, where the serial port is provided by an operating
  * system driver outside the scope of openHAB. Examples for such USB devices are USB dongles that provide
- * access to wireless networks, like, e.g., Zigbeee or Zwave dongles.
+ * access to wireless networks, like, e.g., Zigbee or Zwave dongles.
  * <p/>
  * This discovery service provides functionality for discovering added and removed USB devices and the corresponding
  * serial ports. The actual {@link DiscoveryResult}s are then provided by {@link UsbSerialDiscoveryParticipant}s, which
  * are called by this discovery service whenever new devices are detected or devices are removed. Such
  * {@link UsbSerialDiscoveryParticipant}s should be provided by bindings accessing USB devices via a serial port.
  * <p/>
- * This discovery service requires a component implementing the interface {@link UsbSerialDiscovery}, which performs the
+ * This discovery service requires components implementing the interface {@link UsbSerialDiscovery}, which perform the
  * actual serial port and USB device discovery (as this discovery might differ depending on the operating system).
  *
  * @author Henning Sudbrock - Initial contribution
@@ -70,10 +70,8 @@ public class UsbSerialDiscoveryService extends AbstractDiscoveryService implemen
     private static final String THING_PROPERTY_USB_PRODUCT_ID = "usb_product_id";
 
     private final Set<UsbSerialDiscoveryParticipant> discoveryParticipants = new CopyOnWriteArraySet<>();
-
     private final Set<UsbSerialDeviceInformation> previouslyDiscovered = new CopyOnWriteArraySet<>();
-
-    private @NonNullByDefault({}) UsbSerialDiscovery usbSerialDiscovery;
+    private final Set<UsbSerialDiscovery> usbSerialDiscoveries = new CopyOnWriteArraySet<>();
 
     public UsbSerialDiscoveryService() {
         super(5);
@@ -83,7 +81,6 @@ public class UsbSerialDiscoveryService extends AbstractDiscoveryService implemen
     @Activate
     protected void activate(@Nullable Map<String, Object> configProperties) {
         super.activate(configProperties);
-        usbSerialDiscovery.registerDiscoveryListener(this);
     }
 
     @Modified
@@ -100,7 +97,7 @@ public class UsbSerialDiscoveryService extends AbstractDiscoveryService implemen
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addUsbSerialDiscoveryParticipant(UsbSerialDiscoveryParticipant participant) {
-        this.discoveryParticipants.add(participant);
+        discoveryParticipants.add(participant);
         for (UsbSerialDeviceInformation usbSerialDeviceInformation : previouslyDiscovered) {
             DiscoveryResult result = participant.createResult(usbSerialDeviceInformation);
             if (result != null) {
@@ -110,19 +107,23 @@ public class UsbSerialDiscoveryService extends AbstractDiscoveryService implemen
     }
 
     protected void removeUsbSerialDiscoveryParticipant(UsbSerialDiscoveryParticipant participant) {
-        this.discoveryParticipants.remove(participant);
+        discoveryParticipants.remove(participant);
     }
 
-    @Reference
-    protected void setUsbSerialDiscovery(UsbSerialDiscovery usbSerialDiscovery) {
-        this.usbSerialDiscovery = usbSerialDiscovery;
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    protected void addUsbSerialDiscovery(UsbSerialDiscovery usbSerialDiscovery) {
+        usbSerialDiscoveries.add(usbSerialDiscovery);
+        usbSerialDiscovery.registerDiscoveryListener(this);
+        if (isBackgroundDiscoveryEnabled()) {
+            usbSerialDiscovery.startBackgroundScanning();
+        }
     }
 
-    protected synchronized void unsetUsbSerialDiscovery(UsbSerialDiscovery usbSerialDiscovery) {
+    protected synchronized void removeUsbSerialDiscovery(UsbSerialDiscovery usbSerialDiscovery) {
         usbSerialDiscovery.stopBackgroundScanning();
         usbSerialDiscovery.unregisterDiscoveryListener(this);
-        this.usbSerialDiscovery = null;
-        this.previouslyDiscovered.clear();
+        usbSerialDiscoveries.remove(usbSerialDiscovery);
+        previouslyDiscovered.clear();
     }
 
     @Override
@@ -133,30 +134,17 @@ public class UsbSerialDiscoveryService extends AbstractDiscoveryService implemen
 
     @Override
     protected void startScan() {
-        if (usbSerialDiscovery != null) {
-            usbSerialDiscovery.doSingleScan();
-        } else {
-            logger.info("Could not scan, as there is no USB-Serial discovery service configured.");
-        }
+        usbSerialDiscoveries.forEach(UsbSerialDiscovery::doSingleScan);
     }
 
     @Override
     protected void startBackgroundDiscovery() {
-        if (usbSerialDiscovery != null) {
-            usbSerialDiscovery.startBackgroundScanning();
-        } else {
-            logger.info(
-                    "Could not start background discovery, as there is no USB-Serial discovery service configured.");
-        }
+        usbSerialDiscoveries.forEach(UsbSerialDiscovery::startBackgroundScanning);
     }
 
     @Override
     protected void stopBackgroundDiscovery() {
-        if (usbSerialDiscovery != null) {
-            usbSerialDiscovery.stopBackgroundScanning();
-        } else {
-            logger.info("Could not stop background discovery, as there is no USB-Serial discovery service configured.");
-        }
+        usbSerialDiscoveries.forEach(UsbSerialDiscovery::stopBackgroundScanning);
     }
 
     @Override
