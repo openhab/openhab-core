@@ -132,7 +132,7 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
     private <T> Set<T> setDifference(Set<T> set1, Set<T> set2) {
         Set<T> result = new HashSet<>(set1);
         result.removeAll(set2);
-        return Set.copyOf(result);
+        return result;
     }
 
     private void announceAddedDevice(UsbSerialDeviceInformation deviceInfo) {
