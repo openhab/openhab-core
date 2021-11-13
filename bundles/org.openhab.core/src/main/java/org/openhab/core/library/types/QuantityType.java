@@ -99,7 +99,6 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * The English locale is used to determine (decimal/grouping) separator characters.
      *
      * @param value the non null value representing a quantity with an optional unit.
-     *
      * @throws NumberFormatException when a quantity without a unit could not be parsed
      * @throws IllegalArgumentException when a quantity with a unit could not be parsed
      */
@@ -113,7 +112,6 @@ public class QuantityType<T extends Quantity<T>> extends Number
      *
      * @param value the non null value representing a quantity with an optional unit.
      * @param locale the locale used to determine (decimal/grouping) separator characters.
-     *
      * @throws NumberFormatException when a quantity without a unit could not be parsed
      * @throws IllegalArgumentException when a quantity with a unit could not be parsed
      */
@@ -201,7 +199,6 @@ public class QuantityType<T extends Quantity<T>> extends Number
      *
      * @param value the non null value representing a quantity with an optional unit
      * @return a new {@link QuantityType}
-     *
      * @throws NumberFormatException when a quantity without a unit could not be parsed
      * @throws IllegalArgumentException when a quantity with a unit could not be parsed
      */
