@@ -143,7 +143,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * {@link Map} holding all available {@link ModuleHandlerFactory}s linked with {@link ModuleType}s that they
      * supporting. The relation is {@link ModuleType}'s UID to {@link ModuleHandlerFactory} instance.
      */
-    private final Map<String, ModuleHandlerFactory> moduleHandlerFactories;
+    private final Map<String, ModuleHandlerFactory> moduleHandlerFactories = new HashMap<>(20);
 
     /**
      * {@link Set} holding all available {@link ModuleHandlerFactory}s.
@@ -176,7 +176,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * The context map of a {@link Rule} is cleaned when the execution is completed. The relation is
      * {@link Rule}'s UID to Rule context map.
      */
-    private final Map<String, Map<String, Object>> contextMap;
+    private final Map<String, Map<String, Object>> contextMap = new HashMap<>();
 
     /**
      * This field holds reference to {@link ModuleTypeRegistry}. The {@link RuleEngineImpl} needs it to auto-map
@@ -254,9 +254,6 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     public RuleEngineImpl(final @Reference ModuleTypeRegistry moduleTypeRegistry,
             final @Reference RuleRegistry ruleRegistry, final @Reference StorageService storageService,
             final @Reference ReadyService readyService) {
-        this.contextMap = new HashMap<>();
-        this.moduleHandlerFactories = new HashMap<>(20);
-
         this.disabledRulesStorage = storageService.<Boolean> getStorage(DISABLED_RULE_STORAGE,
                 this.getClass().getClassLoader());
 
