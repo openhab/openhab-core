@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
+import org.openhab.core.util.UIDUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -148,7 +149,7 @@ public abstract class MarketplaceBundleInstaller {
     protected void ensureCachedBundlesAreInstalled(BundleContext bundleContext) {
         try {
             if (Files.isDirectory(BUNDLE_CACHE_PATH)) {
-                Files.list(BUNDLE_CACHE_PATH).filter(Files::isDirectory).map(p -> "marketplace:" + p.getFileName())
+                Files.list(BUNDLE_CACHE_PATH).filter(Files::isDirectory).map(this::addonIdFromPath)
                         .filter(addonId -> !isBundleInstalled(bundleContext, addonId)).forEach(addonId -> {
                             logger.info("Reinstalling missing marketplace bundle: {}", addonId);
                             try {
@@ -163,12 +164,14 @@ public abstract class MarketplaceBundleInstaller {
         }
     }
 
+    private String addonIdFromPath(Path path) {
+        String pathName = UIDUtils.decode(path.getFileName().toString());
+        return pathName.contains(":") ? pathName : "marketplace:";
+    }
+
     private Path getAddonCacheDirectory(String addonId) {
-        if (addonId.startsWith("marketplace:")) {
-            return BUNDLE_CACHE_PATH.resolve(addonId.replace("marketplace:", ""));
-        } else if (addonId.contains(":")) {
-            return BUNDLE_CACHE_PATH.resolve(addonId.replaceAll(":", File.separator));
-        }
-        return BUNDLE_CACHE_PATH.resolve(addonId);
+        String dir = addonId.startsWith("marketplace:") ? addonId.replace("marketplace:", "")
+                : UIDUtils.encode(addonId);
+        return BUNDLE_CACHE_PATH.resolve(dir);
     }
 }
