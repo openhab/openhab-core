@@ -58,6 +58,9 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     /** Variable name for the received event in a "trigger event" rule */
     public static final String VAR_RECEIVED_EVENT = "receivedEvent";
 
+    /** Variable name for the triggering channel in a "trigger event" rule */
+    public static final String VAR_TRIGGERING_CHANNEL = "triggeringChannel";
+
     /**
      * conveninence API to build and initialize JvmTypes and their members.
      */
@@ -119,6 +122,8 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
                 parameters += script.toParameter(VAR_PREVIOUS_STATE, stateTypeRef)
                 val eventTypeRef = script.newTypeRef(String)
                 parameters += script.toParameter(VAR_RECEIVED_EVENT, eventTypeRef)
+                val channelRef = script.newTypeRef(String)
+                parameters += script.toParameter(VAR_TRIGGERING_CHANNEL, channelRef)
                 val stateTypeRef2 = script.newTypeRef(State)
                 parameters += script.toParameter(VAR_NEW_STATE, stateTypeRef2)
                 body = script
