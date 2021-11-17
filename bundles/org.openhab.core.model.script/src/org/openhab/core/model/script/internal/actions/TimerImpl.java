@@ -36,8 +36,6 @@ public class TimerImpl implements Timer {
     private final SchedulerRunnable runnable;
     private ScheduledCompletableFuture<Object> future;
 
-    private boolean cancelled;
-
     public TimerImpl(Scheduler scheduler, ZonedDateTime startTime, SchedulerRunnable runnable) {
         this.scheduler = scheduler;
         this.startTime = startTime;
@@ -48,26 +46,29 @@ public class TimerImpl implements Timer {
 
     @Override
     public boolean cancel() {
-        cancelled = true;
         return future.cancel(true);
     }
 
     @Override
     public boolean reschedule(ZonedDateTime newTime) {
         future.cancel(false);
-        cancelled = false;
         future = scheduler.schedule(runnable, newTime.toInstant());
         return true;
     }
 
     @Override
     public ZonedDateTime getExecutionTime() {
-        return cancelled ? null : ZonedDateTime.now().plusNanos(future.getDelay(TimeUnit.NANOSECONDS));
+        return future.isCancelled() ? null : ZonedDateTime.now().plusNanos(future.getDelay(TimeUnit.NANOSECONDS));
     }
 
     @Override
     public boolean isActive() {
-        return !future.isDone() && !cancelled;
+        return !future.isDone();
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return future.isCancelled();
     }
 
     @Override
