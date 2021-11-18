@@ -11,6 +11,17 @@
 		</config-description>
 	</thing-type>
 
+	<thing-type id="button">
+		<label>Magic Button</label>
+		<description>A button triggering different events.</description>
+
+		<channels>
+			<channel typeId="system.rawbutton" id="rawbutton"/>
+			<channel typeId="system.button" id="button"/>
+			<channel typeId="system.rawrocker" id="rawrocker"/>
+		</channels>
+	</thing-type>
+
 	<thing-type id="onoff-light" extensible="alert">
 		<label>Magic Light - On/Off</label>
 		<description>A on/off light</description>
@@ -88,11 +99,12 @@
 
 	<thing-type id="thermostat">
 		<label>Magic Thermostat</label>
-		<description>A thermostat for set point and current temperature.</description>
+		<description>A thermostat for set point temperature and current temperature.</description>
 
 		<channels>
-			<channel typeId="temperature" id="temperature"></channel>
-			<channel typeId="set-temperature" id="set-temperature"></channel>
+			<channel typeId="temperature" id="temperature"/>
+			<channel typeId="set-temperature" id="set-temperature"/>
+			<channel typeId="system.battery-level" id="battery-level"/>
 		</channels>
 	</thing-type>
 
@@ -156,7 +168,7 @@
 		<label>Magic Rollershutter Thing</label>
 		<description>A rollershutter</description>
 		<channels>
-			<channel typeId="rollershutter" id="rollershutter"></channel>
+			<channel typeId="rollershutter" id="rollershutter"/>
 		</channels>
 	</thing-type>
 
@@ -164,7 +176,7 @@
 		<label>Magic Player Thing</label>
 		<description>A media player</description>
 		<channels>
-			<channel typeId="player" id="player"></channel>
+			<channel typeId="player" id="player"/>
 		</channels>
 	</thing-type>
 
@@ -172,7 +184,7 @@
 		<label>Magic Image</label>
 		<description>A thing providing an image</description>
 		<channels>
-			<channel typeId="image" id="image"></channel>
+			<channel typeId="image" id="image"/>
 		</channels>
 		<config-description>
 			<parameter name="source" type="text" required="true">
@@ -187,7 +199,7 @@
 		<label>Magic ActionModule Thing</label>
 		<description>A Thing with an ActionModule</description>
 		<channels>
-			<channel typeId="switch" id="switch"></channel>
+			<channel typeId="switch" id="switch"/>
 		</channels>
 		<config-description>
 			<parameter name="textParam" type="text" required="true">
