@@ -13,6 +13,7 @@
 package org.openhab.core.tools.i18n.plugin;
 
 import static java.nio.file.StandardOpenOption.*;
+import static org.openhab.core.tools.i18n.plugin.DefaultTranslationsGenerationMode.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,12 +41,34 @@ public class GenerateDefaultTranslationsMojo extends AbstractI18nMojo {
     @Parameter(property = "i18n.target.dir", defaultValue = "${project.basedir}/src/main/resources/OH-INF/i18n")
     private @NonNullByDefault({}) File targetDirectory;
 
+    @Parameter(property = "i18n.generation.mode", defaultValue = "ADD_MISSING_TRANSLATIONS")
+    private DefaultTranslationsGenerationMode generationMode = ADD_MISSING_TRANSLATIONS;
+
     @Override
     public void execute() throws MojoFailureException {
         try {
             if (ohinfExists()) {
                 readAddonInfo();
-                String translationsString = generateDefaultTranslations();
+
+                Path defaultTranslationsPath = ohinfDirectory.toPath()
+                        .resolve(Path.of("i18n", propertiesFileName(bundleInfo)));
+
+                if (Files.exists(defaultTranslationsPath)) {
+                    if (generationMode == ADD_MISSING_FILES) {
+                        getLog().info("Skipped: " + defaultTranslationsPath);
+                        return;
+                    } else if (generationMode == REGENERATE_FILES) {
+                        try {
+                            getLog().info("Deleted: " + defaultTranslationsPath);
+                            Files.delete(defaultTranslationsPath);
+                        } catch (IOException e) {
+                            throw new MojoFailureException(
+                                    "Failed to delete existing default translations: " + defaultTranslationsPath, e);
+                        }
+                    }
+                }
+
+                String translationsString = generateDefaultTranslations(defaultTranslationsPath);
                 if (!translationsString.isBlank()) {
                     writeDefaultTranslations(translationsString);
                 }
@@ -72,11 +95,9 @@ public class GenerateDefaultTranslationsMojo extends AbstractI18nMojo {
         return name + ".properties";
     }
 
-    protected String generateDefaultTranslations() {
+    protected String generateDefaultTranslations(Path defaultTranslationsPath) {
         XmlToTranslationsConverter xmlConverter = new XmlToTranslationsConverter();
         Translations generatedTranslations = xmlConverter.convert(bundleInfo);
-
-        Path defaultTranslationsPath = ohinfDirectory.toPath().resolve(Path.of("i18n", propertiesFileName(bundleInfo)));
 
         PropertiesToTranslationsConverter propertiesConverter = new PropertiesToTranslationsConverter(getLog());
         Translations existingTranslations = propertiesConverter.convert(defaultTranslationsPath);
