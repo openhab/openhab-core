@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
-import org.apache.maven.plugin.logging.Log;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.binding.BindingInfo;
 import org.openhab.core.binding.xml.internal.BindingInfoXmlResult;
@@ -50,12 +49,6 @@ import org.openhab.core.types.StateDescription;
  */
 @NonNullByDefault
 public class XmlToTranslationsConverter {
-
-    private final Log log;
-
-    public XmlToTranslationsConverter(Log log) {
-        this.log = log;
-    }
 
     public Translations convert(BundleInfo bundleInfo) {
         BindingInfoXmlResult bindingInfoXml = bundleInfo.getBindingInfoXml();

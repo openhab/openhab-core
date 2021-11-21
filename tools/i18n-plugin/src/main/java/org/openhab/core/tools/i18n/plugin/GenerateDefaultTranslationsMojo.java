@@ -73,7 +73,7 @@ public class GenerateDefaultTranslationsMojo extends AbstractI18nMojo {
     }
 
     protected String generateDefaultTranslations() {
-        XmlToTranslationsConverter xmlConverter = new XmlToTranslationsConverter(getLog());
+        XmlToTranslationsConverter xmlConverter = new XmlToTranslationsConverter();
         Translations generatedTranslations = xmlConverter.convert(bundleInfo);
 
         Path defaultTranslationsPath = ohinfDirectory.toPath().resolve(Path.of("i18n", propertiesFileName(bundleInfo)));
