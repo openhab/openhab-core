@@ -20,13 +20,15 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
+ * Base class for internationalization mojos using openHAB XML information.
+ *
  * @author Wouter Born - Initial contribution
  */
 @NonNullByDefault
 public abstract class AbstractI18nMojo extends AbstractMojo {
 
     /**
-     * The directory where the OH-INF
+     * The directory containing the bundle openHAB information
      */
     @Parameter(property = "i18n.ohinf.dir", defaultValue = "${project.basedir}/src/main/resources/OH-INF")
     protected @NonNullByDefault({}) File ohinfDirectory;

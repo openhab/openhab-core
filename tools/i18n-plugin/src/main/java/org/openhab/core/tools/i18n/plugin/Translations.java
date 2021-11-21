@@ -24,6 +24,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
+ * The {@link Translations} of a bundle consisting of {@link TranslationsSection}s having {@link TranslationsGroup}s of
+ * {@link TranslationsEntry}s (key/value pairs).
+ *
  * @author Wouter Born - Initial contribution
  */
 @NonNullByDefault

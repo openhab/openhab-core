@@ -26,6 +26,8 @@ import org.openhab.core.thing.xml.internal.ChannelTypeXmlResult;
 import org.openhab.core.thing.xml.internal.ThingTypeXmlResult;
 
 /**
+ * The bundle information provided by the openHAB XML files in the <code>OH-INF</code> directory.
+ *
  * @author Wouter Born - Initial contribution
  */
 @NonNullByDefault

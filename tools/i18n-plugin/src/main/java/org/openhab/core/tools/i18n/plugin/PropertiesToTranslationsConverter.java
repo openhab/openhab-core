@@ -30,7 +30,7 @@ import org.openhab.core.tools.i18n.plugin.Translations.TranslationsGroup;
 import org.openhab.core.tools.i18n.plugin.Translations.TranslationsSection;
 
 /**
- * Converts properties files to {@link Translations}.
+ * Converts the translation key/value pairs of properties files to {@link Translations}.
  *
  * @author Wouter Born - Initial contribution
  */

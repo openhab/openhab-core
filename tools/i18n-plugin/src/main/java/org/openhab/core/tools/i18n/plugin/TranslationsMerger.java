@@ -19,6 +19,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.tools.i18n.plugin.Translations.TranslationsSection;
 
 /**
+ * Merges multiple {@link Translations} into one.
+ *
  * @author Wouter Born - Initial contribution
  */
 @NonNullByDefault

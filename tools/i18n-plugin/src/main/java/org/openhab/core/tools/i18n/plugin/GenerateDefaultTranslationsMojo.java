@@ -29,6 +29,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigDescription;
 
 /**
+ * Generates the default translations properties file for a bundle based on the XML files in the <code>OH-INF</code>
+ * directory.
+ *
  * @author Wouter Born - Initial contribution
  */
 @NonNullByDefault
@@ -59,8 +62,8 @@ public class GenerateDefaultTranslationsMojo extends AbstractI18nMojo {
                         return;
                     } else if (generationMode == REGENERATE_FILES) {
                         try {
-                            getLog().info("Deleted: " + defaultTranslationsPath);
                             Files.delete(defaultTranslationsPath);
+                            getLog().info("Deleted: " + defaultTranslationsPath);
                         } catch (IOException e) {
                             throw new MojoFailureException(
                                     "Failed to delete existing default translations: " + defaultTranslationsPath, e);

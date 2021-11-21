@@ -12,9 +12,14 @@
  */
 package org.openhab.core.tools.i18n.plugin;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
+ * Enumerates all the different modes for generating default translations.
+ *
  * @author Wouter Born - Initial contribution
  */
+@NonNullByDefault
 public enum DefaultTranslationsGenerationMode {
     /**
      * Creates XML based default translations files only when these do not yet exist.

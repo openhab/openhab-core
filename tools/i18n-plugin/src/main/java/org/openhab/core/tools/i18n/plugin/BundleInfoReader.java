@@ -33,6 +33,8 @@ import org.openhab.core.thing.xml.internal.ThingTypeXmlResult;
 import com.thoughtworks.xstream.converters.ConversionException;
 
 /**
+ * Reads all the bundle information provided by XML files in the <code>OH-INF</code> directory to {@link BundleInfo}.
+ *
  * @author Wouter Born - Initial contribution
  */
 @NonNullByDefault
