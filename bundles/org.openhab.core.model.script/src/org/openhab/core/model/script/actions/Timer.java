@@ -45,6 +45,13 @@ public interface Timer {
     public boolean isActive();
 
     /**
+     * Determines whether the timer has been cancelled
+     *
+     * @return true, if the timer has been cancelled, false otherwise
+     */
+    public boolean isCancelled();
+
+    /**
      * Determines whether the scheduled code is currently executed.
      *
      * @return true, if the code is being executed, false otherwise
