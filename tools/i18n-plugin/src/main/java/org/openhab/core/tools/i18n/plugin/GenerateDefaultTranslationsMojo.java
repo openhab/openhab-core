@@ -128,4 +128,12 @@ public class GenerateDefaultTranslationsMojo extends AbstractI18nMojo {
             throw new MojoFailureException("Failed to write generated translations to: " + translationsPath, e);
         }
     }
+
+    void setTargetDirectory(File targetDirectory) {
+        this.targetDirectory = targetDirectory;
+    }
+
+    void setGenerationMode(DefaultTranslationsGenerationMode generationMode) {
+        this.generationMode = generationMode;
+    }
 }

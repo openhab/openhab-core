@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="acmeweather"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Channel Group -->
+	<channel-group-type id="forecast">
+		<label>Weather information group</label>
+		<description>Weather information group description.</description>
+		<channels>
+			<channel id="temperature" typeId="temperature"/>
+			<channel id="minTemperature" typeId="temperature">
+				<label>Min. Temperature</label>
+				<description>Minimum forecasted temperature in degrees Celsius (metric) or Fahrenheit (imperial).</description>
+			</channel>
+			<channel id="maxTemperature" typeId="temperature">
+				<label>Max. Temperature</label>
+				<description>Maximum forecasted temperature in degrees Celsius (metric) or Fahrenheit (imperial).</description>
+			</channel>
+		</channels>
+	</channel-group-type>
+
+	<!-- Channel -->
+	<channel-type id="temperature">
+		<item-type>Number</item-type>
+		<label>Temperature</label>
+		<description>Temperature in degrees Celsius (metric) or Fahrenheit (imperial).</description>
+		<state pattern="%d degree Celsius">
+			<options>
+				<option value="VALUE">My label</option>
+			</options>
+		</state>
+	</channel-type>
+
+	<channel-type id="time-stamp">
+		<item-type>DateTime</item-type>
+		<label>Observation Time</label>
+		<description>Time of data observation.</description>
+		<category>Time</category>
+		<state readOnly="true" pattern="%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS"/>
+	</channel-type>
+
+</thing:thing-descriptions>

@@ -43,4 +43,8 @@ public abstract class AbstractI18nMojo extends AbstractMojo {
         BundleInfoReader bundleInfoReader = new BundleInfoReader(getLog());
         bundleInfo = bundleInfoReader.readBundleInfo(ohinfDirectory.toPath());
     }
+
+    void setOhinfDirectory(File ohinfDirectory) {
+        this.ohinfDirectory = ohinfDirectory;
+    }
 }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="thing-type:acmeweather:weather">
+		<parameter name="refreshInterval" type="integer" min="1" unit="min">
+			<label>Refresh Interval</label>
+			<description>Specifies the refresh interval (in minutes).</description>
+			<default>60</default>
+		</parameter>
+		<parameter name="language" type="text">
+			<label>Language</label>
+			<description>Language to be used by the ACME API.</description>
+			<options>
+				<option value="nl">Dutch</option>
+				<option value="de">German</option>
+				<option value="en">English</option>
+				<option value="fr">French</option>
+			</options>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>
