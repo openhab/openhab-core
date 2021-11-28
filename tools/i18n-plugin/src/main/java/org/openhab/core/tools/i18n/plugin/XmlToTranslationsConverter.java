@@ -70,8 +70,8 @@ public class XmlToTranslationsConverter {
         Builder<TranslationsGroup> groupsBuilder = Stream.builder();
 
         bundleInfo.getConfigDescriptions().stream().map(configDescription -> {
-            String configKeyPrefix = String.format("%s.config.%s",
-                    (Object[]) configDescription.getUID().toString().split(":"));
+            Object[] uid = configDescription.getUID().toString().split(":");
+            String configKeyPrefix = String.format("%s.config" + ".%s".repeat(uid.length - 1), uid);
             Builder<TranslationsGroup> streamBuilder = Stream.builder();
             configDescriptionGroupParameters(configKeyPrefix, configDescription.getParameterGroups())
                     .forEach(streamBuilder::add);

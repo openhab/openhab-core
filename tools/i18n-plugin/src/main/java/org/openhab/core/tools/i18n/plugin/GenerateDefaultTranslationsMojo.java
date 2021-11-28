@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.maven.plugin.MojoFailureException;
@@ -37,6 +38,9 @@ import org.openhab.core.config.core.ConfigDescription;
 @NonNullByDefault
 @Mojo(name = "generate-default-translations", threadSafe = true)
 public class GenerateDefaultTranslationsMojo extends AbstractI18nMojo {
+
+    private static final Set<String> ADDON_TYPES = Set.of("automation", "binding", "io", "persistence", "transform",
+            "voice");
 
     /**
      * The directory where the properties files will be generated
@@ -87,7 +91,12 @@ public class GenerateDefaultTranslationsMojo extends AbstractI18nMojo {
             Optional<ConfigDescription> optional = bundleInfo.getConfigDescriptions().stream().findFirst();
             if (optional.isPresent()) {
                 ConfigDescription configDescription = optional.get();
-                name = configDescription.getUID().toString().split(":")[1];
+                String[] uid = configDescription.getUID().toString().split(":");
+                if (uid.length > 2 && ADDON_TYPES.contains(uid[1])) {
+                    name = uid[2].toLowerCase();
+                } else {
+                    name = uid[1].toLowerCase();
+                }
             }
         }
 
