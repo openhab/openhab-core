@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="acmeweather"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- ACME Weather Binding -->
+	<thing-type id="weather">
+		<label>Weather Information *</label>
+		<description>@text/CUSTOM_KEY</description>
+
+		<channels>
+			<channel id="temperature" typeId="temperature"/>
+			<channel id="minTemperature" typeId="temperature">
+				<label>Min. Temperature</label>
+				<description>Minimum temperature in degrees Celsius (metric) or Fahrenheit (imperial).</description>
+			</channel>
+			<channel id="time-stamp" typeId="time-stamp"/>
+		</channels>
+
+		<config-description-ref uri="thing-type:acmeweather:weather"/>
+	</thing-type>
+
+	<!-- ACME Weather Binding with group -->
+	<thing-type id="weather-with-group">
+		<label>Weather Information with Group</label>
+
+		<channel-groups>
+			<channel-group id="forecastToday" typeId="forecast">
+				<label>Today</label>
+				<description>This is the weather forecast for today.</description>
+			</channel-group>
+			<channel-group id="forecastTomorrow" typeId="forecast">
+				<label>Weather Forecast Tomorrow</label>
+				<description>This is the weather forecast for tomorrow.</description>
+			</channel-group>
+		</channel-groups>
+	</thing-type>
+
+</thing:thing-descriptions>

@@ -18,6 +18,7 @@
 
   <modules>
     <module>archetype</module>
+    <module>i18n-plugin</module>
   </modules>
 
 </project>
