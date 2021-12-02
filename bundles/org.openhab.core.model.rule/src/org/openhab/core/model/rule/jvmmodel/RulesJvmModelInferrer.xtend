@@ -147,6 +147,8 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                     if (containsEventTrigger(rule)) {
                         val eventTypeRef = ruleModel.newTypeRef(String)
                         parameters += rule.toParameter(VAR_RECEIVED_EVENT, eventTypeRef)
+                        val channelRef = ruleModel.newTypeRef(String)
+                        parameters += rule.toParameter(VAR_TRIGGERING_CHANNEL, channelRef)
                     }
                     if (containsThingStateChangedEventTrigger(rule) && !containsParam(parameters, VAR_PREVIOUS_STATE)) {
                         val stateTypeRef = ruleModel.newTypeRef(State)
