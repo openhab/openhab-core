@@ -19,6 +19,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
@@ -51,12 +54,12 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     }
 
     @Override
-    public void triggered(Trigger trigger, Map<String, ?> outputs) {
+    public void triggered(Trigger trigger, @Nullable Map<@NonNull String, ?> context) {
         synchronized (this) {
             if (executor == null) {
                 return;
             }
-            future = executor.submit(new TriggerData(trigger, outputs));
+            future = executor.submit(new TriggerData(trigger, context));
         }
         re.logger.debug("The trigger '{}' of rule '{}' is triggered.", trigger.getId(), ruleUID);
     }
@@ -66,21 +69,21 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
         return future == null || !future.isDone();
     }
 
+    @NonNullByDefault
     class TriggerData implements Runnable {
 
         private final Trigger trigger;
+        private @Nullable final Map<String, ?> outputs;
 
         public Trigger getTrigger() {
             return trigger;
         }
 
-        public Map<String, ?> getOutputs() {
+        public @Nullable Map<String, ?> getOutputs() {
             return outputs;
         }
 
-        private final Map<String, ?> outputs;
-
-        public TriggerData(Trigger t, Map<String, ?> outputs) {
+        public TriggerData(Trigger t, @Nullable Map<String, ?> outputs) {
             this.trigger = t;
             this.outputs = outputs;
         }

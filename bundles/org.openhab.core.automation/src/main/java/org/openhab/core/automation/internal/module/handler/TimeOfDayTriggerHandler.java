@@ -44,7 +44,7 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
 
     private final CronScheduler scheduler;
     private final String expression;
-    private ScheduledCompletableFuture<Void> schedule;
+    private ScheduledCompletableFuture<?> schedule;
 
     public TimeOfDayTriggerHandler(Trigger module, CronScheduler scheduler) {
         super(module);
@@ -79,7 +79,11 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
 
     @Override
     public void run() {
-        ((TriggerHandlerCallback) callback).triggered(module, null);
+        if (callback != null) {
+            ((TriggerHandlerCallback) callback).triggered(module, null);
+        } else {
+            logger.debug("Tried to trigger, but callback isn't available!");
+        }
     }
 
     @Override
