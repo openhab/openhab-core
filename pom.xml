@@ -540,12 +540,6 @@ Import-Package: \\
         </plugin>
 
         <plugin>
-          <groupId>org.openhab.core.tools</groupId>
-          <artifactId>i18n-maven-plugin</artifactId>
-          <version>${project.version}</version>
-        </plugin>
-
-        <plugin>
           <groupId>org.openhab.tools.sat</groupId>
           <artifactId>sat-plugin</artifactId>
           <version>${sat.version}</version>
@@ -568,7 +562,6 @@ Import-Package: \\
             </execution>
           </executions>
         </plugin>
-
         <plugin>
           <groupId>com.github.ekryd.sortpom</groupId>
           <artifactId>sortpom-maven-plugin</artifactId>
@@ -591,7 +584,6 @@ Import-Package: \\
             </execution>
           </executions>
         </plugin>
-
         <plugin>
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
