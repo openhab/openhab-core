@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.rulesupport.internal.loader;
+package org.openhab.core.automation.module.script.rulesupport.loader;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -35,6 +35,7 @@ import org.mockito.InOrder;
 import org.openhab.core.automation.module.script.ScriptDependencyListener;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
+import org.openhab.core.automation.module.script.rulesupport.internal.loader.DelegatingScheduledExecutorService;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.StartLevelService;
@@ -60,7 +61,8 @@ class ScriptFileWatcherTest {
         scriptEngineManager = mock(ScriptEngineManager.class);
         dependencyTracker = mock(DependencyTracker.class);
         readyService = mock(ReadyService.class);
-        scriptFileWatcher = new ScriptFileWatcher(scriptEngineManager, dependencyTracker, readyService);
+        scriptFileWatcher = new ScriptFileWatcher(scriptEngineManager, dependencyTracker, readyService,
+                "automation" + File.separator + "jsr223");
         scriptFileWatcher.activate();
     }
 
