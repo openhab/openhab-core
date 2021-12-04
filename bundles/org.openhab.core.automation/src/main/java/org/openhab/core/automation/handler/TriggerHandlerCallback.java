@@ -54,5 +54,5 @@ public interface TriggerHandlerCallback extends ModuleHandlerCallback {
     /**
      * @return the scheduler of this rule
      */
-    public @Nullable ScheduledExecutorService getScheduler();
+    public ScheduledExecutorService getScheduler();
 }
