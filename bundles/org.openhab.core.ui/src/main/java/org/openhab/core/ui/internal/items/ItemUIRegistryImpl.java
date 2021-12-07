@@ -372,7 +372,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 }
             }
         } catch (ItemNotFoundException e) {
-            logger.error("Cannot retrieve item for widget {}", w.eClass().getInstanceTypeName());
+            logger.error("Cannot retrieve item '{}' for widget {}", itemName, w.eClass().getInstanceTypeName());
         }
 
         boolean considerTransform = false;
