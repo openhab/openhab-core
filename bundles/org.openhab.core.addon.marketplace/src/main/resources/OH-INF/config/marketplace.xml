@@ -27,7 +27,7 @@
 			<description>Comma-separated list of 3rd party marketplace URLs. Warning: Bundles distributed over 3rd party
 				marketplaces may lack proper review and can potentially contain malicious code and thus harm your system.</description>
 		</parameter>
-		<parameter name="stableOnly" type="boolean">
+		<parameter name="showUnstable" type="boolean">
 			<label>Show Non-Stable Bundles</label>
 			<default>false</default>
 			<description>Include entries which have not been tagged as "stable". These bundles should be used for testing
