@@ -13,7 +13,10 @@
 package org.openhab.core.library.types;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormatSymbols;
 import java.util.IllegalFormatConversionException;
 import java.util.Locale;
@@ -22,8 +25,10 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.openhab.core.library.unit.Units;
 
 /**
  * @author Thomas Eichstaedt-Engelen - Initial contribution
@@ -214,5 +219,30 @@ public class DecimalTypeTest {
     public void testConversionToPointType() {
         // should not be possible => null
         assertNull(new DecimalType("0.23").as(PointType.class));
+    }
+
+    @SuppressWarnings("unused")
+    static Stream<Arguments> testNumberConstructor() {
+        return Stream.of(arguments((byte) 42, "42", 42f, 42d), arguments((short) 42, "42", 42f, 42d),
+                arguments(42, "42", 42f, 42d), arguments(42L, "42", 42f, 42d),
+                arguments(new BigInteger("42"), "42", 42f, 42d), arguments(new PercentType(42), "42", 42f, 42d),
+                arguments(new HSBType(DecimalType.ZERO, PercentType.ZERO, new PercentType(42)), "42", 42f, 42d),
+                // 4.2 is an example of a float value, which cannot converted to a double value directly:
+                // (float) 4.2 ==> (double) 4.199999809265137
+                arguments(4.2f, "4.2", 4.2f, 4.2d), arguments(4.2d, "4.2", 4.2f, 4.2d),
+                arguments(new BigDecimal("4.2"), "4.2", 4.2f, 4.2d),
+                arguments(new DecimalType("4.2"), "4.2", 4.2f, 4.2d),
+                arguments(new QuantityType<>(4.2f, Units.WATT), "4.2", 4.2f, 4.2d),
+                arguments(new QuantityType<>(4.2d, Units.WATT), "4.2", 4.2f, 4.2d));
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void testNumberConstructor(Number val, String strVal, float floatVal, double doubleVal) {
+        assertEquals(new DecimalType(strVal), new DecimalType(val));
+        assertEquals(doubleVal, new DecimalType(val).doubleValue());
+        assertEquals(floatVal, new DecimalType(val).floatValue());
+        assertEquals(new BigDecimal(strVal), new DecimalType(val).toBigDecimal());
+        assertEquals(strVal, new DecimalType(val).toString());
     }
 }
