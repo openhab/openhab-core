@@ -75,6 +75,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     public static final String KAR_CONTENT_TYPE = "application/vnd.openhab.feature;type=karfile";
     public static final String RULETEMPLATES_CONTENT_TYPE = "application/vnd.openhab.ruletemplate";
     public static final String UIWIDGETS_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=widget";
+    public static final String BLOCKLIBRARIES_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=blocks";
 
     // constants for the configuration properties
     static final String CONFIG_URI = "system:marketplace";
@@ -94,6 +95,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private static final Integer BUNDLES_CATEGORY = 73;
     private static final Integer RULETEMPLATES_CATEGORY = 74;
     private static final Integer UIWIDGETS_CATEGORY = 75;
+    private static final Integer BLOCKLIBRARIES_CATEGORY = 76;
 
     private static final String PUBLISHED_TAG = "published";
 
@@ -281,6 +283,8 @@ public class CommunityMarketplaceAddonService implements AddonService {
             return TAG_ADDON_TYPE_MAP.get("automation");
         } else if (UIWIDGETS_CATEGORY.equals(category)) {
             return TAG_ADDON_TYPE_MAP.get("ui");
+        } else if (BLOCKLIBRARIES_CATEGORY.equals(category)) {
+            return TAG_ADDON_TYPE_MAP.get("automation");
         } else if (BUNDLES_CATEGORY.equals(category)) {
             // try to get it from tags if we have tags
             return tags.stream().map(TAG_ADDON_TYPE_MAP::get).filter(Objects::nonNull).findFirst().orElse(null);
@@ -296,6 +300,8 @@ public class CommunityMarketplaceAddonService implements AddonService {
             return RULETEMPLATES_CONTENT_TYPE;
         } else if (UIWIDGETS_CATEGORY.equals(category)) {
             return UIWIDGETS_CONTENT_TYPE;
+        } else if (BLOCKLIBRARIES_CATEGORY.equals(category)) {
+            return BLOCKLIBRARIES_CONTENT_TYPE;
         } else if (BUNDLES_CATEGORY.equals(category)) {
             if (tags.contains("kar")) {
                 return KAR_CONTENT_TYPE;
