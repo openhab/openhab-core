@@ -21,11 +21,11 @@
 		</parameter>
 	</config-description>
 
-	<config-description uri="system:jsonmarketplace">
+	<config-description uri="system:jsonaddonservice">
 		<parameter name="urls" type="text">
-			<label>Marketplace URLs</label>
-			<description>Comma-separated list of 3rd party marketplace URLs. Warning: Bundles distributed over 3rd party
-				marketplaces may lack proper review and can potentially contain malicious code and thus harm your system.</description>
+			<label>Addon Service URLs</label>
+			<description>Pipe (|) separated list of URLS that provide 3rd party addon services. Warning: Bundles distributed over 3rd party
+				addon services may lack proper review and can potentially contain malicious code and thus harm your system.</description>
 		</parameter>
 		<parameter name="showUnstable" type="boolean">
 			<label>Show Non-Stable Bundles</label>

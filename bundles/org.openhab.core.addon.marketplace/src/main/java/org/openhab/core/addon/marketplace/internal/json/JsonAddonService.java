@@ -36,6 +36,7 @@ import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
+import org.openhab.core.addon.marketplace.internal.json.model.AddonEntryDTO;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
@@ -59,10 +60,14 @@ import com.google.gson.reflect.TypeToken;
  */
 @Component(immediate = true, configurationPid = "org.openhab.core.marketplace.json", //
         property = Constants.SERVICE_PID + "=org.openhab.core.marketplace.json")
-@ConfigurableService(category = "system", label = "JSON 3rd Party Marketplace", description_uri = JsonMarketplaceAddonService.CONFIG_URI)
-public class JsonMarketplaceAddonService implements AddonService {
-    static final String CONFIG_URI = "system:jsonmarketplace";
-    private static final String ADDON_ID_PREFIX = "jsonmarketplace:";
+@ConfigurableService(category = "system", label = "JSON 3rd Party Addon Service", description_uri = JsonAddonService.CONFIG_URI)
+public class JsonAddonService implements AddonService {
+    static final String CONFIG_URI = "system:jsonaddonservice";
+    private static final String CONFIG_URLS = "urls";
+    private static final String CONFIG_SHOW_UNSTABLE = "showUnstable";
+
+    private static final String SERVICE_NAME = "json";
+    private static final String ADDON_ID_PREFIX = SERVICE_NAME + ":";
 
     private static final Map<String, AddonType> TAG_ADDON_TYPE_MAP = Map.of( //
             "automation", new AddonType("automation", "Automation"), //
@@ -76,23 +81,25 @@ public class JsonMarketplaceAddonService implements AddonService {
     private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
     private final Set<MarketplaceAddonHandler> addonHandlers = new HashSet<>();
 
-    private List<String> marketplaceUrls = List.of();
+    private List<String> addonserviceUrls = List.of();
     private List<AddonEntryDTO> cachedAddons = List.of();
 
     private boolean showUnstable = false;
 
-    private EventPublisher eventPublisher;
+    private final EventPublisher eventPublisher;
 
     @Activate
-    public void activate(Map<String, Object> config) {
+    public JsonAddonService(@Reference EventPublisher eventPublisher, Map<String,Object> config) {
+        this.eventPublisher = eventPublisher;
         modified(config);
     }
 
+
     @Modified
     public void modified(Map<String, Object> config) {
-        String urls = Objects.requireNonNullElse((String) config.get("urls"), "");
-        marketplaceUrls = Arrays.asList(urls.split(","));
-        showUnstable = (Boolean) config.getOrDefault("showUnstable", false);
+        String urls = Objects.requireNonNullElse((String) config.get(CONFIG_URLS), "");
+        addonserviceUrls = Arrays.asList(urls.split("\\|"));
+        showUnstable = (Boolean) config.getOrDefault(CONFIG_SHOW_UNSTABLE, false);
         refreshSource();
     }
 
@@ -105,29 +112,20 @@ public class JsonMarketplaceAddonService implements AddonService {
         this.addonHandlers.remove(handler);
     }
 
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
     @Override
     public String getId() {
-        return "jsonmarketplace";
+        return SERVICE_NAME;
     }
 
     @Override
     public String getName() {
-        return "JSON 3rd Party Marketplace";
+        return "JSON 3rd Party Addon Service";
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public void refreshSource() {
-        cachedAddons = (List<AddonEntryDTO>) marketplaceUrls.stream().map(urlString -> {
+        cachedAddons = (List<AddonEntryDTO>) addonserviceUrls.stream().map(urlString -> {
             try {
                 URL url = new URL(urlString);
                 URLConnection connection = url.openConnection();
@@ -145,7 +143,6 @@ public class JsonMarketplaceAddonService implements AddonService {
 
     @Override
     public List<Addon> getAddons(Locale locale) {
-        // TODO: fix that we need to refresh every time
         refreshSource();
         return cachedAddons.stream().map(this::fromAddonEntry).collect(Collectors.toList());
     }

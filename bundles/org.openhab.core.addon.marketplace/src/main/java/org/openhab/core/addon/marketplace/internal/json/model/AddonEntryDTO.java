@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon.marketplace.internal.json;
+package org.openhab.core.addon.marketplace.internal.json.model;
 
 import com.google.gson.annotations.SerializedName;
 
