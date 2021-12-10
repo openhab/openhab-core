@@ -12,7 +12,7 @@
 
   <artifactId>org.openhab.core.addon.marketplace</artifactId>
 
-  <name>openHAB Core :: Bundles :: Community Marketplace Add-on Service</name>
+  <name>openHAB Core :: Bundles :: Marketplace Add-on Services</name>
 
   <dependencies>
     <dependency>
