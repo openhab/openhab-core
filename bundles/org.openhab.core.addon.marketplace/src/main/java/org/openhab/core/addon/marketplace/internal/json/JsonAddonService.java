@@ -60,14 +60,15 @@ import com.google.gson.reflect.TypeToken;
  */
 @Component(immediate = true, configurationPid = "org.openhab.core.marketplace.json", //
         property = Constants.SERVICE_PID + "=org.openhab.core.marketplace.json")
-@ConfigurableService(category = "system", label = "JSON 3rd Party Addon Service", description_uri = JsonAddonService.CONFIG_URI)
+@ConfigurableService(category = "system", label = JsonAddonService.SERVICE_NAME, description_uri = JsonAddonService.CONFIG_URI)
 public class JsonAddonService implements AddonService {
+    static final String SERVICE_NAME = "JSON 3rd Party Add-on Service";
     static final String CONFIG_URI = "system:jsonaddonservice";
     private static final String CONFIG_URLS = "urls";
     private static final String CONFIG_SHOW_UNSTABLE = "showUnstable";
 
-    private static final String SERVICE_NAME = "json";
-    private static final String ADDON_ID_PREFIX = SERVICE_NAME + ":";
+    private static final String SERVICE_ID = "json";
+    private static final String ADDON_ID_PREFIX = SERVICE_ID + ":";
 
     private static final Map<String, AddonType> TAG_ADDON_TYPE_MAP = Map.of( //
             "automation", new AddonType("automation", "Automation"), //
@@ -113,12 +114,12 @@ public class JsonAddonService implements AddonService {
 
     @Override
     public String getId() {
-        return SERVICE_NAME;
+        return SERVICE_ID;
     }
 
     @Override
     public String getName() {
-        return "JSON 3rd Party Addon Service";
+        return SERVICE_NAME;
     }
 
     @Override
