@@ -89,11 +89,10 @@ public class JsonAddonService implements AddonService {
     private final EventPublisher eventPublisher;
 
     @Activate
-    public JsonAddonService(@Reference EventPublisher eventPublisher, Map<String,Object> config) {
+    public JsonAddonService(@Reference EventPublisher eventPublisher, Map<String, Object> config) {
         this.eventPublisher = eventPublisher;
         modified(config);
     }
-
 
     @Modified
     public void modified(Map<String, Object> config) {

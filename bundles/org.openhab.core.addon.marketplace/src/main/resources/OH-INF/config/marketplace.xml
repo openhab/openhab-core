@@ -24,8 +24,9 @@
 	<config-description uri="system:jsonaddonservice">
 		<parameter name="urls" type="text">
 			<label>Addon Service URLs</label>
-			<description>Pipe (|) separated list of URLS that provide 3rd party addon services. Warning: Bundles distributed over 3rd party
-				addon services may lack proper review and can potentially contain malicious code and thus harm your system.</description>
+			<description>Pipe (|) separated list of URLS that provide 3rd party addon services. Warning: Bundles distributed over
+				3rd party addon services may lack proper review and can potentially contain malicious code and thus harm your
+				system.</description>
 		</parameter>
 		<parameter name="showUnstable" type="boolean">
 			<label>Show Non-Stable Bundles</label>
