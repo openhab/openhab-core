@@ -18,7 +18,6 @@ import java.util.Date;
  * A DTO class mapped to the Discourse category topic list API.
  *
  * @author Yannick Schaus - Initial contribution
- *
  */
 public class DiscourseCategoryResponseDTO {
     public DiscourseUser[] users;

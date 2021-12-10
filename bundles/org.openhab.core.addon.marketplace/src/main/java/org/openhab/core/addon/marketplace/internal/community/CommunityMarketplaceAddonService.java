@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonEventFactory;
@@ -65,11 +66,11 @@ import com.google.gson.GsonBuilder;
  * This class is a {@link AddonService} retrieving posts on community.openhab.org (Discourse).
  *
  * @author Yannick Schaus - Initial contribution
- *
  */
 @Component(immediate = true, configurationPid = "org.openhab.marketplace", //
         property = Constants.SERVICE_PID + "=org.openhab.marketplace")
 @ConfigurableService(category = "system", label = "Community Marketplace", description_uri = CommunityMarketplaceAddonService.CONFIG_URI)
+@NonNullByDefault
 public class CommunityMarketplaceAddonService implements AddonService {
     public static final String JAR_CONTENT_TYPE = "application/vnd.openhab.bundle";
     public static final String KAR_CONTENT_TYPE = "application/vnd.openhab.feature;type=karfile";
@@ -112,9 +113,14 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
     private final Set<MarketplaceAddonHandler> addonHandlers = new HashSet<>();
 
-    private EventPublisher eventPublisher;
-    private String apiKey = null;
+    private final EventPublisher eventPublisher;
+    private @Nullable String apiKey = null;
     private boolean showUnpublished = false;
+
+    @Activate
+    public CommunityMarketplaceAddonService(final @Reference EventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -140,15 +146,6 @@ public class CommunityMarketplaceAddonService implements AddonService {
         this.addonHandlers.remove(handler);
     }
 
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
     @Override
     public String getId() {
         return "marketplace";
@@ -164,7 +161,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     }
 
     @Override
-    public List<Addon> getAddons(Locale locale) {
+    public List<Addon> getAddons(@Nullable Locale locale) {
         try {
             List<DiscourseCategoryResponseDTO> pages = new ArrayList<>();
 
@@ -203,7 +200,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     }
 
     @Override
-    public Addon getAddon(String id, Locale locale) {
+    public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
         URL url;
         try {
             url = new URL(String.format("%s%s", COMMUNITY_TOPIC_URL, id.replace(ADDON_ID_PREFIX, "")));
@@ -223,30 +220,28 @@ public class CommunityMarketplaceAddonService implements AddonService {
     }
 
     @Override
-    public List<AddonType> getTypes(Locale locale) {
+    public List<AddonType> getTypes(@Nullable Locale locale) {
         return new ArrayList<>(TAG_ADDON_TYPE_MAP.values());
     }
 
     @Override
     public void install(String id) {
         Addon addon = getAddon(id, null);
-        if (addon == null) {
-            postFailureEvent(id, "Could not find Add-on.");
-            return;
-        }
-        for (MarketplaceAddonHandler handler : addonHandlers) {
-            if (handler.supports(addon.getType(), addon.getContentType())) {
-                if (!handler.isInstalled(addon.getId())) {
-                    try {
-                        handler.install(addon);
-                        postInstalledEvent(id);
-                    } catch (MarketplaceHandlerException e) {
-                        postFailureEvent(id, e.getMessage());
+        if (addon != null) {
+            for (MarketplaceAddonHandler handler : addonHandlers) {
+                if (handler.supports(addon.getType(), addon.getContentType())) {
+                    if (!handler.isInstalled(addon.getId())) {
+                        try {
+                            handler.install(addon);
+                            postInstalledEvent(id);
+                        } catch (MarketplaceHandlerException e) {
+                            postFailureEvent(id, e.getMessage());
+                        }
+                    } else {
+                        postFailureEvent(id, "Add-on is already installed.");
                     }
-                } else {
-                    postFailureEvent(id, "Add-on is already installed.");
+                    return;
                 }
-                return;
             }
         }
         postFailureEvent(id, "Add-on not known.");
@@ -255,34 +250,32 @@ public class CommunityMarketplaceAddonService implements AddonService {
     @Override
     public void uninstall(String id) {
         Addon addon = getAddon(id, null);
-        if (addon == null) {
-            postFailureEvent(id, "Could not find Add-on.");
-            return;
-        }
-        for (MarketplaceAddonHandler handler : addonHandlers) {
-            if (handler.supports(addon.getType(), addon.getContentType())) {
-                if (handler.isInstalled(addon.getId())) {
-                    try {
-                        handler.uninstall(addon);
-                        postUninstalledEvent(id);
-                    } catch (MarketplaceHandlerException e) {
-                        postFailureEvent(id, e.getMessage());
+        if (addon != null) {
+            for (MarketplaceAddonHandler handler : addonHandlers) {
+                if (handler.supports(addon.getType(), addon.getContentType())) {
+                    if (handler.isInstalled(addon.getId())) {
+                        try {
+                            handler.uninstall(addon);
+                            postUninstalledEvent(id);
+                        } catch (MarketplaceHandlerException e) {
+                            postFailureEvent(id, e.getMessage());
+                        }
+                    } else {
+                        postFailureEvent(id, "Add-on is not installed.");
                     }
-                } else {
-                    postFailureEvent(id, "Add-on is not installed.");
+                    return;
                 }
-                return;
             }
         }
         postFailureEvent(id, "Add-on not known.");
     }
 
     @Override
-    public String getAddonId(URI addonURI) {
+    public @Nullable String getAddonId(URI addonURI) {
         if (addonURI.toString().startsWith(COMMUNITY_TOPIC_URL)) {
             return addonURI.toString().substring(0, addonURI.toString().indexOf("/", COMMUNITY_BASE_URL.length()));
         }
-        return "";
+        return null;
     }
 
     private @Nullable AddonType getAddonType(@Nullable Integer category, List<String> tags) {
@@ -352,12 +345,11 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
         String maturity = tags.stream().filter(CODE_MATURITY_LEVELS::contains).findAny().orElse(null);
 
-        Map<String, Object> properties = new HashMap<>(10);
-        properties.put("created_at", createdDate);
-        properties.put("like_count", likeCount);
-        properties.put("views", views);
-        properties.put("posts_count", postsCount);
-        properties.put("tags", tags.toArray(String[]::new));
+        Map<String, Object> properties = Map.of("created_at", createdDate, //
+                "like_count", likeCount, //
+                "views", views, //
+                "posts_count", postsCount, //
+                "tags", tags.toArray(String[]::new));
 
         // try to use an handler to determine if the add-on is installed
         boolean installed = addonHandlers.stream()
@@ -464,7 +456,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
         eventPublisher.post(event);
     }
 
-    private void postFailureEvent(String extensionId, String msg) {
+    private void postFailureEvent(String extensionId, @Nullable String msg) {
         Event event = AddonEventFactory.createAddonFailureEvent(extensionId, msg);
         eventPublisher.post(event);
     }

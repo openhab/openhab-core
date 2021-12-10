@@ -18,7 +18,6 @@ import java.util.Date;
  * A DTO class mapped to the Discourse topic API.
  *
  * @author Yannick Schaus - Initial contribution
- *
  */
 public class DiscourseTopicResponseDTO {
     public Integer id;

@@ -30,6 +30,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonEventFactory;
 import org.openhab.core.addon.AddonService;
@@ -61,6 +63,7 @@ import com.google.gson.reflect.TypeToken;
 @Component(immediate = true, configurationPid = "org.openhab.jsonaddonservice", //
         property = Constants.SERVICE_PID + "=org.openhab.jsonaddonservice")
 @ConfigurableService(category = "system", label = JsonAddonService.SERVICE_NAME, description_uri = JsonAddonService.CONFIG_URI)
+@NonNullByDefault
 public class JsonAddonService implements AddonService {
     static final String SERVICE_NAME = "Json 3rd Party Add-on Service";
     static final String CONFIG_URI = "system:jsonaddonservice";
@@ -143,41 +146,40 @@ public class JsonAddonService implements AddonService {
     }
 
     @Override
-    public List<Addon> getAddons(Locale locale) {
+    public List<Addon> getAddons(@Nullable Locale locale) {
         refreshSource();
         return cachedAddons.stream().map(this::fromAddonEntry).collect(Collectors.toList());
     }
 
     @Override
-    public Addon getAddon(String id, Locale locale) {
+    public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
         String remoteId = id.replace(ADDON_ID_PREFIX, "");
         return cachedAddons.stream().filter(e -> remoteId.equals(e.id)).map(this::fromAddonEntry).findAny()
                 .orElse(null);
     }
 
     @Override
-    public List<AddonType> getTypes(Locale locale) {
+    public List<AddonType> getTypes(@Nullable Locale locale) {
         return new ArrayList<>(TAG_ADDON_TYPE_MAP.values());
     }
 
     @Override
     public void install(String id) {
         Addon addon = getAddon(id, null);
-        if (addon == null) {
-            postFailureEvent(id, "Could not find Add-on.");
-            return;
-        }
-        for (MarketplaceAddonHandler handler : addonHandlers) {
-            if (handler.supports(addon.getType(), addon.getContentType())) {
-                if (!handler.isInstalled(addon.getId())) {
-                    try {
-                        handler.install(addon);
-                        postInstalledEvent(addon.getId());
-                    } catch (MarketplaceHandlerException e) {
-                        postFailureEvent(addon.getId(), e.getMessage());
+        if (addon != null) {
+            for (MarketplaceAddonHandler handler : addonHandlers) {
+                if (handler.supports(addon.getType(), addon.getContentType())) {
+                    if (!handler.isInstalled(addon.getId())) {
+                        try {
+                            handler.install(addon);
+                            postInstalledEvent(addon.getId());
+                        } catch (MarketplaceHandlerException e) {
+                            postFailureEvent(addon.getId(), e.getMessage());
+                        }
+                    } else {
+                        postFailureEvent(addon.getId(), "Add-on is already installed.");
                     }
-                } else {
-                    postFailureEvent(addon.getId(), "Add-on is already installed.");
+                    return;
                 }
                 return;
             }
@@ -188,21 +190,20 @@ public class JsonAddonService implements AddonService {
     @Override
     public void uninstall(String id) {
         Addon addon = getAddon(id, null);
-        if (addon == null) {
-            postFailureEvent(id, "Could not find Add-on.");
-            return;
-        }
-        for (MarketplaceAddonHandler handler : addonHandlers) {
-            if (handler.supports(addon.getType(), addon.getContentType())) {
-                if (handler.isInstalled(addon.getId())) {
-                    try {
-                        handler.uninstall(addon);
-                        postUninstalledEvent(addon.getId());
-                    } catch (MarketplaceHandlerException e) {
-                        postFailureEvent(addon.getId(), e.getMessage());
+        if (addon != null) {
+            for (MarketplaceAddonHandler handler : addonHandlers) {
+                if (handler.supports(addon.getType(), addon.getContentType())) {
+                    if (handler.isInstalled(addon.getId())) {
+                        try {
+                            handler.uninstall(addon);
+                            postUninstalledEvent(addon.getId());
+                        } catch (MarketplaceHandlerException e) {
+                            postFailureEvent(addon.getId(), e.getMessage());
+                        }
+                    } else {
+                        postFailureEvent(addon.getId(), "Add-on is not installed.");
                     }
-                } else {
-                    postFailureEvent(addon.getId(), "Add-on is not installed.");
+                    return;
                 }
                 return;
             }
@@ -211,7 +212,7 @@ public class JsonAddonService implements AddonService {
     }
 
     @Override
-    public String getAddonId(URI addonURI) {
+    public @Nullable String getAddonId(URI addonURI) {
         return null;
     }
 
@@ -248,7 +249,7 @@ public class JsonAddonService implements AddonService {
         eventPublisher.post(event);
     }
 
-    private void postFailureEvent(String extensionId, String msg) {
+    private void postFailureEvent(String extensionId, @Nullable String msg) {
         Event event = AddonEventFactory.createAddonFailureEvent(extensionId, msg);
         eventPublisher.post(event);
     }

@@ -27,7 +27,6 @@ import org.openhab.core.addon.Addon;
  *
  * @author Kai Kreuzer - Initial contribution and API
  * @author Yannick Schaus - refactoring
- *
  */
 @NonNullByDefault
 public interface MarketplaceAddonHandler {
