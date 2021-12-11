@@ -31,5 +31,7 @@ public class AddonEntryDTO {
     public String maturity = "unstable";
     @SerializedName("content_type")
     public String contentType = "";
+    @SerializedName("image_url")
+    public String imageUrl;
     public String url = "";
 }
