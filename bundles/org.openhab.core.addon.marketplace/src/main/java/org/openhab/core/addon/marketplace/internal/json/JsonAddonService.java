@@ -58,8 +58,8 @@ import com.google.gson.reflect.TypeToken;
  * @author Yannick Schaus - Initial contribution
  * @author Jan N. Klug - Refactored for JSON marketplaces
  */
-@Component(immediate = true, configurationPid = "org.openhab.core.marketplace.json", //
-        property = Constants.SERVICE_PID + "=org.openhab.core.marketplace.json")
+@Component(immediate = true, configurationPid = "org.openhab.jsonaddonservice", //
+        property = Constants.SERVICE_PID + "=org.openhab.jsonaddonservice")
 @ConfigurableService(category = "system", label = JsonAddonService.SERVICE_NAME, description_uri = JsonAddonService.CONFIG_URI)
 public class JsonAddonService implements AddonService {
     static final String SERVICE_NAME = "Json 3rd Party Add-on Service";
