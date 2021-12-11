@@ -39,7 +39,7 @@
 				"id": "ItemUpdateTrigger_1",
 				"type": "core.GenericEventTrigger",
 				"configuration": {
-					"eventSource": "${onItem}",
+					"eventSource": "{{onItem}}",
 					"eventTopic": "openhab/items/*",
 					"eventTypes": "ItemStateEvent"
 				}
@@ -50,8 +50,8 @@
 				"id": "ItemPostCommandActionID_1",
 				"type": "core.ItemCommandAction",
 				"configuration": {
-					"itemName": "${updateItem}",
-					"command": "${updateCommand}"
+					"itemName": "{{updateItem}}",
+					"command": "{{updateCommand}}"
 				}
 			}
 		]
