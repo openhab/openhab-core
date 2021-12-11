@@ -230,6 +230,10 @@ public class CommunityMarketplaceAddonService implements AddonService {
     @Override
     public void install(String id) {
         Addon addon = getAddon(id, null);
+        if (addon == null) {
+            postFailureEvent(id, "Could not find Add-on.");
+            return;
+        }
         for (MarketplaceAddonHandler handler : addonHandlers) {
             if (handler.supports(addon.getType(), addon.getContentType())) {
                 if (!handler.isInstalled(addon.getId())) {
@@ -251,6 +255,10 @@ public class CommunityMarketplaceAddonService implements AddonService {
     @Override
     public void uninstall(String id) {
         Addon addon = getAddon(id, null);
+        if (addon == null) {
+            postFailureEvent(id, "Could not find Add-on.");
+            return;
+        }
         for (MarketplaceAddonHandler handler : addonHandlers) {
             if (handler.supports(addon.getType(), addon.getContentType())) {
                 if (handler.isInstalled(addon.getId())) {
