@@ -10,16 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.rulesupport.internal.loader;
+package org.openhab.core.automation.module.script.rulesupport.loader;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.openhab.core.automation.module.script.rulesupport.internal.loader.ScriptLibraryWatcher;
 import org.openhab.core.automation.module.script.rulesupport.internal.loader.collection.BidiSetBag;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -31,38 +29,46 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jonathan Gilbert - Initial contribution
  */
-@Component(immediate = true, service = DependencyTracker.class)
 public class DependencyTracker {
+
+    public String libraryPath;
 
     private final Logger logger = LoggerFactory.getLogger(DependencyTracker.class);
 
     private final Set<DependencyChangeListener> dependencyChangeListeners = ConcurrentHashMap.newKeySet();
 
     private final BidiSetBag<String, String> scriptToLibs = new BidiSetBag<>();
-    private final ScriptLibraryWatcher scriptLibraryWatcher = new ScriptLibraryWatcher() {
-        @Override
-        void updateFile(String libraryPath) {
-            Set<String> scripts;
-            synchronized (scriptToLibs) {
-                scripts = new HashSet<>(scriptToLibs.getKeys(libraryPath)); // take a copy as it will change as we
-                                                                            // reimport
-            }
-            DependencyTracker.this.logger.debug("Library {} changed; reimporting {} scripts...", libraryPath,
-                    scripts.size());
-            for (String scriptUrl : scripts) {
-                reimportScript(scriptUrl);
-            }
-        }
-    };
+    private ScriptLibraryWatcher scriptLibraryWatcher;
 
-    @Activate
+    public DependencyTracker(final String libraryPath) {
+        this.libraryPath = libraryPath;
+    }
+
     public void activate() {
+        createScriptLibraryWatcher();
         scriptLibraryWatcher.activate();
     }
 
-    @Deactivate
     public void deactivate() {
         scriptLibraryWatcher.deactivate();
+    }
+
+    private void createScriptLibraryWatcher() {
+        scriptLibraryWatcher = new ScriptLibraryWatcher(libraryPath) {
+            @Override
+            protected void updateFile(String libraryPath) {
+                Set<String> scripts;
+                synchronized (scriptToLibs) {
+                    scripts = new HashSet<>(scriptToLibs.getKeys(libraryPath)); // take a copy as it will change as we
+                    // reimport
+                }
+                DependencyTracker.this.logger.debug("Library {} changed; reimporting {} scripts...", libraryPath,
+                        scripts.size());
+                for (String scriptUrl : scripts) {
+                    reimportScript(scriptUrl);
+                }
+            }
+        };
     }
 
     public void addLibForScript(String scriptPath, String libPath) {

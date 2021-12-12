@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.rulesupport.internal.loader;
+package org.openhab.core.automation.module.script.rulesupport.loader;
 
 import java.net.URISyntaxException;
 import java.net.URL;
