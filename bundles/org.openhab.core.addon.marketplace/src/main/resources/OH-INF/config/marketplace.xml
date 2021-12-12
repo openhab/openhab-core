@@ -25,8 +25,8 @@
 		<parameter name="urls" type="text">
 			<label>Add-on Service URLs</label>
 			<description>Pipe (|) separated list of URLS that provide 3rd party add-on services via Json files. Warning: Bundles
-				distributed over 3rd party addon services may lack proper review and can potentially contain malicious code and thus
-				harm your system.</description>
+				distributed over 3rd party add-on services may lack proper review and can potentially contain malicious code and
+				thus harm your system.</description>
 		</parameter>
 		<parameter name="showUnstable" type="boolean">
 			<label>Show Non-Stable Bundles</label>

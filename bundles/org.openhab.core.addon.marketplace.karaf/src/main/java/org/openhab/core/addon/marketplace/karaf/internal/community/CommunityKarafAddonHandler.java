@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution and API
  * @author Yannick Schaus - refactoring
  * @author Jan N. Klug - refactor to support kar files
- *
  */
 @Component(immediate = true)
 @NonNullByDefault
