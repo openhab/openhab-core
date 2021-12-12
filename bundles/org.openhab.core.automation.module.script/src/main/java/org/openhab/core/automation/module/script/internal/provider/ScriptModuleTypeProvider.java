@@ -149,8 +149,7 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
         if (!scriptTypes.isEmpty()) {
             ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
             if (scriptEngine != null) {
-                javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
-                parameterOptions.put(getPreferredMimeType(engineFactory), getLanguageName(factory));
+                parameterOptions.put(getPreferredMimeType(engineFactory), getLanguageName(scriptEngine.getFactory()));
                 logger.trace("ParameterOptions: {}", parameterOptions);
             } else {
                 logger.trace("setScriptEngineFactory: engine was null");
