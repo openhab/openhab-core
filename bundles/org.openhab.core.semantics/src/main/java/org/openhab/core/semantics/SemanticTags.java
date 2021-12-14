@@ -58,7 +58,7 @@ public class SemanticTags {
      *
      * @param tagId the id of the tag. The id can be fully qualified (e.g. "Location_Room_Bedroom") or a segment, if
      *            this uniquely identifies the tag
-     *            (e.g. "Bedroom").
+     *            (e.g. "BedRoom").
      * @return the class for the id or null, if non exists.
      */
     public static @Nullable Class<? extends Tag> getById(String tagId) {

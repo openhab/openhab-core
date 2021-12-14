@@ -16,11 +16,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.semantics.TagInfo;
 
 /**
- * This class defines a Bedroom.
+ * This class defines a BedRoom.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Location_Indoor_Room_Bedroom", label = "Bedroom", synonyms = "Bedrooms", description = "")
-public interface Bedroom extends Room {
+@TagInfo(id = "Location_Indoor_Room_Bedroom", label = "BedRoom", synonyms = "BedRooms", description = "")
+public interface BedRoom extends Room {
 }
