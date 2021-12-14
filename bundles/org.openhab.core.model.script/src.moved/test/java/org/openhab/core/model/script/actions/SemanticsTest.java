@@ -31,7 +31,7 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.script.internal.engine.action.SemanticsActionService;
 import org.openhab.core.semantics.model.equipment.CleaningRobot;
-import org.openhab.core.semantics.model.location.Bathroom;
+import org.openhab.core.semantics.model.location.BathRoom;
 import org.openhab.core.semantics.model.location.Indoor;
 
 /**
@@ -59,16 +59,16 @@ public class SemanticsTest {
         indoorLocationItem.addTag("Indoor");
 
         bathroomLocationItem = new GroupItem("TestBathRoom");
-        bathroomLocationItem.addTag("Bathroom");
+        bathroomLocationItem.addTag("BathRoom");
 
-        // Bathroom is placed in Indoor
+        // BathRoom is placed in Indoor
         indoorLocationItem.addMember(bathroomLocationItem);
         bathroomLocationItem.addGroupName(indoorLocationItem.getName());
 
         equipmentItem = new GroupItem("Test08");
         equipmentItem.addTag("CleaningRobot");
 
-        // Equipment (Cleaning Robot) is placed in Bathroom
+        // Equipment (Cleaning Robot) is placed in BathRoom
         bathroomLocationItem.addMember(equipmentItem);
         equipmentItem.addGroupName(bathroomLocationItem.getName());
 
@@ -108,7 +108,7 @@ public class SemanticsTest {
     @Test
     public void testGetLocationType() {
         assertThat(Semantics.getLocationType(indoorLocationItem), is(Indoor.class));
-        assertThat(Semantics.getLocationType(bathroomLocationItem), is(Bathroom.class));
+        assertThat(Semantics.getLocationType(bathroomLocationItem), is(BathRoom.class));
 
         assertNull(Semantics.getLocationType(humidityPointItem));
     }

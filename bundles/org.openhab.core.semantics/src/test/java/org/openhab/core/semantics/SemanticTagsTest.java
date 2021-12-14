@@ -22,7 +22,7 @@ import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.semantics.model.equipment.CleaningRobot;
-import org.openhab.core.semantics.model.location.Bathroom;
+import org.openhab.core.semantics.model.location.BathRoom;
 import org.openhab.core.semantics.model.location.Kitchen;
 import org.openhab.core.semantics.model.location.Room;
 import org.openhab.core.semantics.model.point.Measurement;
@@ -42,7 +42,7 @@ public class SemanticTagsTest {
         CoreItemFactory itemFactory = new CoreItemFactory();
 
         locationItem = new GroupItem("TestBathRoom");
-        locationItem.addTag("Bathroom");
+        locationItem.addTag("BathRoom");
 
         equipmentItem = new GroupItem("Test08");
         equipmentItem.addTag("CleaningRobot");
@@ -57,10 +57,10 @@ public class SemanticTagsTest {
         assertEquals(Location.class, SemanticTags.getById("Location"));
         assertEquals(Room.class, SemanticTags.getById("Room"));
         assertEquals(Room.class, SemanticTags.getById("Location_Indoor_Room"));
-        assertEquals(Bathroom.class, SemanticTags.getById("Bathroom"));
-        assertEquals(Bathroom.class, SemanticTags.getById("Room_Bathroom"));
-        assertEquals(Bathroom.class, SemanticTags.getById("Indoor_Room_Bathroom"));
-        assertEquals(Bathroom.class, SemanticTags.getById("Location_Indoor_Room_Bathroom"));
+        assertEquals(BathRoom.class, SemanticTags.getById("BathRoom"));
+        assertEquals(BathRoom.class, SemanticTags.getById("Room_Bathroom"));
+        assertEquals(BathRoom.class, SemanticTags.getById("Indoor_Room_Bathroom"));
+        assertEquals(BathRoom.class, SemanticTags.getById("Location_Indoor_Room_Bathroom"));
     }
 
     @Test
@@ -74,19 +74,19 @@ public class SemanticTagsTest {
     public void testByLabelOrSynonym() {
         assertEquals(Kitchen.class, SemanticTags.getByLabelOrSynonym("Kitchen", Locale.ENGLISH).iterator().next());
         assertEquals(Kitchen.class, SemanticTags.getByLabelOrSynonym("Küche", Locale.GERMAN).iterator().next());
-        assertEquals(Bathroom.class, SemanticTags.getByLabelOrSynonym("Badezimmer", Locale.GERMAN).iterator().next());
+        assertEquals(BathRoom.class, SemanticTags.getByLabelOrSynonym("Badezimmer", Locale.GERMAN).iterator().next());
     }
 
     @Test
     public void testGetSemanticType() {
-        assertEquals(Bathroom.class, SemanticTags.getSemanticType(locationItem));
+        assertEquals(BathRoom.class, SemanticTags.getSemanticType(locationItem));
         assertEquals(CleaningRobot.class, SemanticTags.getSemanticType(equipmentItem));
         assertEquals(Measurement.class, SemanticTags.getSemanticType(pointItem));
     }
 
     @Test
     public void testGetLocation() {
-        assertEquals(Bathroom.class, SemanticTags.getLocation(locationItem));
+        assertEquals(BathRoom.class, SemanticTags.getLocation(locationItem));
     }
 
     @Test

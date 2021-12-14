@@ -34,7 +34,7 @@ public class Locations {
         LOCATIONS.add(Apartment.class);
         LOCATIONS.add(Attic.class);
         LOCATIONS.add(Basement.class);
-        LOCATIONS.add(Bathroom.class);
+        LOCATIONS.add(BathRoom.class);
         LOCATIONS.add(Bedroom.class);
         LOCATIONS.add(BoilerRoom.class);
         LOCATIONS.add(Building.class);

@@ -30,7 +30,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.CoreItemFactory;
-import org.openhab.core.semantics.model.location.Bathroom;
+import org.openhab.core.semantics.model.location.BathRoom;
 import org.openhab.core.semantics.model.location.LivingRoom;
 
 /**
@@ -52,7 +52,7 @@ public class SemanticsServiceImplTest {
     public void setup() throws Exception {
         CoreItemFactory itemFactory = new CoreItemFactory();
         locationItem = new GroupItem("TestBathRoom");
-        locationItem.addTag("Bathroom");
+        locationItem.addTag("BathRoom");
         locationItem.setLabel("Joe's Room");
 
         equipmentItem = new GroupItem("Test08");
@@ -74,7 +74,7 @@ public class SemanticsServiceImplTest {
 
     @Test
     public void testGetItemsInLocation() throws Exception {
-        Set<Item> items = service.getItemsInLocation(Bathroom.class);
+        Set<Item> items = service.getItemsInLocation(BathRoom.class);
         assertTrue(items.contains(pointItem));
 
         items = service.getItemsInLocation("Room", Locale.ENGLISH);

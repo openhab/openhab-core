@@ -37,7 +37,7 @@ public interface SemanticsService {
 
     /**
      * Retrieves all items that are located in a given location and which are either classified as Points or
-     * Equipments. The location is identified by its label or synonym and can reference either a type (e.g. "Bathroom")
+     * Equipments. The location is identified by its label or synonym and can reference either a type (e.g. "BathRoom")
      * or a concrete instance (e.g. "Joe's Room").
      *
      * @param labelOrSynonym the label or synonym of the location

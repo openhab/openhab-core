@@ -38,7 +38,7 @@ public class SemanticsPredicatesTest {
         CoreItemFactory itemFactory = new CoreItemFactory();
 
         locationItem = new GroupItem("TestBathRoom");
-        locationItem.addTag("Bathroom");
+        locationItem.addTag("BathRoom");
 
         equipmentItem = new GroupItem("Test08");
         equipmentItem.addTag("CleaningRobot");
