@@ -31,7 +31,7 @@ import org.openhab.core.ui.components.RootUIComponent;
  */
 @NonNullByDefault
 public class UIComponentProvider extends AbstractProvider<RootUIComponent>
-        implements ManagedProvider<RootUIComponent, String> {
+        implements ManagedProvider<RootUIComponent, String>, UIProvider {
 
     private String namespace;
     private volatile Storage<RootUIComponent> storage;
@@ -106,5 +106,10 @@ public class UIComponentProvider extends AbstractProvider<RootUIComponent>
             throw new IllegalArgumentException("Invalid UID");
         }
         return storage.get(key);
+    }
+
+    @Override
+    public String getNamespace() {
+        return namespace;
     }
 }

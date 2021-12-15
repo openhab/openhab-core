@@ -12,34 +12,87 @@
  */
 package org.openhab.core.ui.internal.components;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.openhab.core.storage.StorageService;
+import org.eclipse.jdt.annotation.NonNull;
+import org.openhab.core.common.registry.ManagedProvider;
+import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
- * Implementation for a {@link UIComponentRegistryFactory} using a {@link StorageService} and a
- * {@link UIComponentProvider}.
+ * Implementation for a {@link UIComponentRegistryFactory} using a set of {@link UIComponentProvider}.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Łukasz Dywicki - Removed explicit dependency on storage providers.
+ * @author Jonathan Gilbert - Made providers' collections immutable.
  */
 @Component(service = UIComponentRegistryFactory.class, immediate = true)
 public class UIComponentRegistryFactoryImpl implements UIComponentRegistryFactory {
-    Map<String, UIComponentRegistryImpl> registries = new HashMap<>();
-
-    @Reference
-    StorageService storageService;
+    Map<String, UIComponentRegistryImpl> registries = new ConcurrentHashMap<>();
+    Map<String, Set<UIProvider>> providers = new ConcurrentHashMap<>();
 
     @Override
     public UIComponentRegistryImpl getRegistry(String namespace) {
         UIComponentRegistryImpl registry = registries.get(namespace);
         if (registry == null) {
-            registry = new UIComponentRegistryImpl(namespace, storageService);
+            Set<UIProvider> namespaceProviders = this.providers.get(namespace);
+            ManagedProvider<@NonNull RootUIComponent, @NonNull String> managedProvider = null;
+            if (namespaceProviders != null) {
+                for (UIProvider provider : namespaceProviders) {
+                    if (provider instanceof ManagedProvider) {
+                        managedProvider = (ManagedProvider<@NonNull RootUIComponent, @NonNull String>) provider;
+                        break;
+                    }
+                }
+            }
+            registry = new UIComponentRegistryImpl(namespace, managedProvider, namespaceProviders);
             registries.put(namespace, registry);
         }
         return registry;
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    void addProvider(UIProvider provider) {
+        if (registries.containsKey(provider.getNamespace())) {
+            registries.get(provider.getNamespace()).addProvider(provider);
+        }
+        registerProvider(provider);
+    }
+
+    void removeProvider(UIProvider provider) {
+        if (registries.containsKey(provider.getNamespace())) {
+            registries.get(provider.getNamespace()).removeProvider(provider);
+        }
+        deregisterProvider(provider);
+    }
+
+    private void registerProvider(UIProvider provider) {
+        Set<UIProvider> existing = providers.get(provider.getNamespace());
+
+        if (existing == null) {
+            existing = Collections.emptySet();
+        }
+
+        Set<UIProvider> updated = new HashSet<>(existing);
+        updated.add(provider);
+        providers.put(provider.getNamespace(), Set.copyOf(updated));
+    }
+
+    private void deregisterProvider(UIProvider provider) {
+        Set<UIProvider> existing = providers.get(provider.getNamespace());
+
+        if (existing != null && !existing.isEmpty()) {
+            Set<UIProvider> updated = new HashSet<>(existing);
+            updated.remove(provider);
+            providers.put(provider.getNamespace(), Set.copyOf(updated));
+        }
     }
 }
