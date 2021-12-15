@@ -186,7 +186,7 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
 
     private String addonIdFromPath(Path path) {
         String pathName = UIDUtils.decode(path.getFileName().toString());
-        return pathName.contains(":") ? pathName : "marketplace:";
+        return pathName.contains(":") ? pathName : "marketplace:" + pathName;
     }
 
     private Path getAddonCacheDirectory(String addonId) {
