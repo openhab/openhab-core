@@ -396,8 +396,8 @@ public class QuantityType<T extends Quantity<T>> extends Number
                 return null;
             }
         } else if (target == HSBType.class) {
-            return target.cast(
-                    new HSBType(DecimalType.ZERO, PercentType.ZERO, new PercentType(toBigDecimal().multiply(BIG_DECIMAL_HUNDRED))));
+            return target.cast(new HSBType(DecimalType.ZERO, PercentType.ZERO,
+                    new PercentType(toBigDecimal().multiply(BIG_DECIMAL_HUNDRED))));
         } else if (target == PercentType.class) {
             if (Units.PERCENT.equals(getUnit())) {
                 return target.cast(new PercentType(toBigDecimal()));
