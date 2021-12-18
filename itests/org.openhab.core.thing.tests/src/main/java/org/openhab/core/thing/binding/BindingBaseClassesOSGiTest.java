@@ -453,6 +453,22 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         public void updateProperty(String value) {
             updateProperty(Thing.PROPERTY_VENDOR, value);
         }
+
+        public void updateDeleteProperties() {
+            var properties = editProperties();
+            properties.remove(Thing.PROPERTY_MODEL_ID);
+            properties.put(Thing.PROPERTY_VENDOR, "vendor2");
+            properties.put(Thing.PROPERTY_HARDWARE_VERSION, "version2");
+            updateProperties(properties, true);
+        }
+
+        public void deleteProperty() {
+            deleteProperty(Thing.PROPERTY_VENDOR);
+        }
+
+        public void deleteProperties() {
+            deleteProperties(List.of(Thing.PROPERTY_SERIAL_NUMBER, Thing.PROPERTY_HARDWARE_VERSION));
+        }
     }
 
     class ThingRegistryChangeListener implements RegistryChangeListener<Thing> {
@@ -551,6 +567,53 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
             ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperty(null);
 
             assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is(nullValue()));
+        } finally {
+            thingRegistry.removeRegistryChangeListener(listener);
+        }
+    }
+
+    @Test
+    public void assertPropertiesCanBeDeletedFromThingHandler() {
+        registerThingTypeProvider();
+        YetAnotherThingHandlerFactory thingHandlerFactory = new YetAnotherThingHandlerFactory();
+        thingHandlerFactory.activate(componentContext);
+        registerService(thingHandlerFactory, ThingHandlerFactory.class.getName());
+
+        final ThingRegistryChangeListener listener = new ThingRegistryChangeListener();
+
+        try {
+            thingRegistry.addRegistryChangeListener(listener);
+            var testProperties = Map.of(Thing.PROPERTY_MODEL_ID, "model", Thing.PROPERTY_VENDOR, "vendor",
+                    Thing.PROPERTY_HARDWARE_VERSION, "version", Thing.PROPERTY_SERIAL_NUMBER, "number");
+            Thing thing = ThingBuilder
+                    .create(new ThingTypeUID("bindingId:type"), new ThingUID("bindingId:type:thingId"))
+                    .withProperties(testProperties).build();
+
+            managedThingProvider.add(thing);
+
+            waitForAssert(() -> assertThat(listener.isUpdated(), is(true)), 10000, 100);
+
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), not(nullValue()));
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), not(nullValue()));
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_HARDWARE_VERSION), not(nullValue()));
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_SERIAL_NUMBER), not(nullValue()));
+
+            // update/delete at once
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateDeleteProperties();
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is("vendor2"));
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_HARDWARE_VERSION), is("version2"));
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), is(nullValue()));
+
+            // delete property
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).deleteProperty();
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is(nullValue()));
+
+            // delete properties
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_SERIAL_NUMBER), not(nullValue()));
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_HARDWARE_VERSION), not(nullValue()));
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).deleteProperties();
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_SERIAL_NUMBER), is(nullValue()));
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_HARDWARE_VERSION), is(nullValue()));
         } finally {
             thingRegistry.removeRegistryChangeListener(listener);
         }

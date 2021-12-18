@@ -12,8 +12,10 @@
  */
 package org.openhab.core.thing.binding;
 
+import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -242,7 +244,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * Updates the state of the thing. Will use the thing UID to infer the
      * unique channel UID from the given ID.
      *
-     * @param channel ID id of the channel, which was updated
+     * @param channelID id of the channel, which was updated
      * @param state new state
      */
     protected void updateState(String channelID, State state) {
@@ -443,7 +445,7 @@ public abstract class BaseThingHandler implements ThingHandler {
 
     /**
      * Returns a copy of the properties map, that can be modified. The method {@link
-     * BaseThingHandler#updateProperties(Map<String, String> properties)} must be called to persist the properties.
+     * BaseThingHandler#updateProperties(Map<String, String>)} must be called to persist the properties.
      *
      * @return copy of the thing properties (not null)
      */
@@ -459,8 +461,35 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @param properties properties map, that was updated and should be persisted
      */
     protected void updateProperties(Map<String, String> properties) {
+        updateProperties(properties, false);
+    }
+
+    /**
+     * Informs the framework, that the given properties map of the thing was updated. This method performs a check, if
+     * the properties were updated. If the properties did not change, the framework is not informed about changes.
+     *
+     * @param properties properties map, that was updated and should be persisted
+     * @param updateAll if true the missing properties on the update will be removed from the thing
+     */
+    protected void updateProperties(Map<String, String> properties, boolean updateAll) {
+        updatePropertiesInternal((Map<String, @Nullable String>) properties, updateAll);
+    }
+
+    /**
+     * Informs the framework, that the given properties map of the thing was updated. This method performs a check, if
+     * the properties were updated. If the properties did not change, the framework is not informed about changes.
+     *
+     * @param properties properties map, that was updated and should be persisted
+     * @param updateAll if true the missing properties on the update will be removed from the thing
+     */
+    private void updatePropertiesInternal(Map<String, @Nullable String> properties, boolean updateAll) {
         boolean propertiesUpdated = false;
-        for (Entry<String, String> property : properties.entrySet()) {
+        var entries = properties.entrySet();
+        if (updateAll) {
+            thing.getProperties().keySet().stream().filter(key -> !entries.contains(key))
+                    .forEach(key -> entries.add(new AbstractMap.SimpleEntry<>(key, null)));
+        }
+        for (Entry<String, @Nullable String> property : entries) {
             String propertyName = property.getKey();
             String propertyValue = property.getValue();
             String existingPropertyValue = thing.getProperties().get(propertyName);
@@ -485,8 +514,7 @@ public abstract class BaseThingHandler implements ThingHandler {
     /**
      * <p>
      * Updates the given property value for the thing that is handled by this thing handler instance. The value is only
-     * set for the given property name if there has not been set any value yet or if the value has been changed. If the
-     * value of the property to be set is null then the property is removed.
+     * set for the given property name if there has not been set any value yet or if the value has been changed.
      *
      * This method also informs the framework about the updated thing, which in fact will persists the changes. So, if
      * multiple properties should be changed at the same time, the {@link BaseThingHandler#editProperties()} method
@@ -497,6 +525,35 @@ public abstract class BaseThingHandler implements ThingHandler {
      */
     protected void updateProperty(String name, String value) {
         updateProperties(Collections.singletonMap(name, value));
+    }
+
+    /**
+     * <p>
+     * Deletes the given property for the thing that is handled by this thing handler instance.
+     *
+     * This method also informs the framework about the updated thing, which in fact will persists the changes. So, if
+     * multiple properties should be changed at the same time, the {@link BaseThingHandler#editProperties()} method
+     * should be used.
+     *
+     * @param name the name of the property to be deleted
+     */
+    protected void deleteProperty(String name) {
+        updatePropertiesInternal(Collections.singletonMap(name, null), false);
+    }
+
+    /**
+     * <p>
+     * Deletes the given properties for the thing that is handled by this thing handler instance.
+     *
+     * This method also informs the framework about the updated thing, which in fact will persists the changes. So, if
+     * multiple properties should be changed at the same time, the {@link BaseThingHandler#editProperties()} method
+     * should be used.
+     *
+     * @param names the names of the properties to be removed
+     */
+    protected void deleteProperties(List<String> names) {
+        updatePropertiesInternal(names.stream().collect(HashMap::new, (m, v) -> m.put(v, null), HashMap::putAll),
+                false);
     }
 
     /**
