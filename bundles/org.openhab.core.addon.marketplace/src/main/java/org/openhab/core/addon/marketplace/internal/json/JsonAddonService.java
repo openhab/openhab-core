@@ -204,7 +204,6 @@ public class JsonAddonService implements AddonService {
                     }
                     return;
                 }
-                return;
             }
         }
         postFailureEvent(id, "Add-on not known.");
