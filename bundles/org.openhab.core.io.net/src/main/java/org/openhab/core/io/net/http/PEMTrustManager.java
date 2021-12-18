@@ -49,11 +49,10 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Initial contribution
  */
 @NonNullByDefault
-public class PEMTrustManager extends X509ExtendedTrustManager {
+public final class PEMTrustManager extends X509ExtendedTrustManager {
 
-    public static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----" + System.getProperty("line.separator");
-    public static final String END_CERT = System.getProperty("line.separator") + "-----END CERTIFICATE-----"
-            + System.getProperty("line.separator");
+    public static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
+    public static final String END_CERT = "-----END CERTIFICATE-----";
 
     private final X509Certificate trustedCert;
 
@@ -79,7 +78,8 @@ public class PEMTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Creates a {@link PEMTrustManager} instance by reading the PEM certificate from the given file.
-     * This is useful if you have a private CA certificate stored in a file.
+     * This is useful if you have a private CA certificate stored in a file. Be aware that the certificate is read once
+     * at the start of the system. There is no automatic refresh e.g. if the certificate will expire.
      *
      * @param path path to the PEM file
      * @return a {@link PEMTrustManager} instance
@@ -95,24 +95,38 @@ public class PEMTrustManager extends X509ExtendedTrustManager {
     }
 
     /**
-     * Creates a {@link PEMTrustManager} instance by downloading the PEM certificate from the given file.
+     * Creates a {@link PEMTrustManager} instance by downloading the PEM certificate from the given server.
      * This is useful if you have to deal with self-signed certificates which may differ on each server. This method
      * pins the certificate on first connection with the server ("trust on first use") by using a trust all connection
-     * and retrieves the servers certificate chain.
+     * and retrieves the servers certificate chain. Be aware that the certificate is downloaded once at the start of the
+     * system. There is no automatic refresh e.g. if the certificate will expire.
      *
-     * @param hostName host name of the server
+     * @param url url of the server
      * @return a {@link PEMTrustManager} instance
      * @throws MalformedURLException
      * @throws CertificateInstantiationException
      */
-    public static PEMTrustManager getInstanceFromServer(String hostName)
-            throws MalformedURLException, CertificateException {
-        String pemCert = getPEMCertificateFromServer(hostName);
+    public static PEMTrustManager getInstanceFromServer(String url) throws MalformedURLException, CertificateException {
+        return getInstanceFromServer(new URL(url));
+    }
+
+    /**
+     * Creates a {@link PEMTrustManager} instance by downloading the PEM certificate from the given server.
+     * This is useful if you have to deal with self-signed certificates which may differ on each server. This method
+     * pins the certificate on first connection with the server ("trust on first use") by using a trust all connection
+     * and retrieves the servers certificate chain. Be aware that the certificate is downloaded once at the start of the
+     * system. There is no automatic refresh e.g. if the certificate will expire.
+     *
+     * @param url url of the server
+     * @return a {@link PEMTrustManager} instance
+     * @throws CertificateInstantiationException
+     */
+    public static PEMTrustManager getInstanceFromServer(URL url) throws CertificateException {
+        String pemCert = getPEMCertificateFromServer(url);
         if (pemCert != null) {
             return new PEMTrustManager(pemCert);
         }
-        throw new CertificateInstantiationException(
-                String.format("Unable to load certificate from server: %s", hostName));
+        throw new CertificateInstantiationException(String.format("Unable to load certificate from server: %s", url));
     }
 
     @Override
@@ -157,8 +171,7 @@ public class PEMTrustManager extends X509ExtendedTrustManager {
         validatePEMCertificate(chain);
     }
 
-    private static @Nullable String getPEMCertificateFromServer(String host)
-            throws MalformedURLException, CertificateException {
+    private static @Nullable String getPEMCertificateFromServer(URL url) throws CertificateException {
         HttpsURLConnection connection = null;
         try {
             TrustManager[] trustManagers = { TrustAllTrustManager.getInstance() };
@@ -166,7 +179,6 @@ public class PEMTrustManager extends X509ExtendedTrustManager {
             SSLContext sslContext = SSLContext.getInstance("SSL");
             sslContext.init(null, trustManagers, new SecureRandom());
 
-            URL url = new URL(host);
             connection = (HttpsURLConnection) url.openConnection();
             connection.setSSLSocketFactory(sslContext.getSocketFactory());
             connection.connect();
@@ -191,18 +203,12 @@ public class PEMTrustManager extends X509ExtendedTrustManager {
         File certFile = new File(path);
         if (certFile.exists()) {
             try {
-                String cert = new String(Files.readAllBytes(certFile.toPath()), StandardCharsets.UTF_8);
-                if (cert.startsWith(BEGIN_CERT)) {
-                    return cert;
-                } else {
-                    LoggerFactory.getLogger(PEMTrustManager.class)
-                            .error("File is not a PEM certificate file. PEM-Certificates starts with: {}", BEGIN_CERT);
-                }
+                return new String(Files.readAllBytes(certFile.toPath()), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 LoggerFactory.getLogger(PEMTrustManager.class).error("An unexpected IOException occurred: ", e);
             }
         } else {
-            throw new FileNotFoundException();
+            throw new FileNotFoundException(String.format("File %s does not exist", path));
         }
         return null;
     }

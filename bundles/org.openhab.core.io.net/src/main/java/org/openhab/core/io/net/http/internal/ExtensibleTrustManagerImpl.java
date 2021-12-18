@@ -17,7 +17,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -185,7 +184,7 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
     private Collection<List<?>> getSubjectAlternatives(X509Certificate[] chain) throws CertificateParsingException {
         Collection<List<?>> subjectAlternativeNames = chain[0].getSubjectAlternativeNames();
 
-        return (subjectAlternativeNames != null) ? subjectAlternativeNames : Collections.emptyList();
+        return (subjectAlternativeNames != null) ? subjectAlternativeNames : List.of();
     }
 
     private String getCommonName(X509Certificate x509Certificate) {
