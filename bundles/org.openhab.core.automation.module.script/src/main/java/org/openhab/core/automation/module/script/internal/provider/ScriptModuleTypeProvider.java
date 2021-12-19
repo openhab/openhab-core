@@ -176,7 +176,7 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
 
     private String getPreferredMimeType(ScriptEngineFactory factory) {
         List<String> mimeTypes = new ArrayList<>(factory.getScriptTypes());
-        mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || mimeType.contains("x-"));
+        mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || "application/python".equals(mimeType));
         return mimeTypes.isEmpty() ? factory.getScriptTypes().get(0) : mimeTypes.get(0);
     }
 
