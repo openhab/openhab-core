@@ -43,12 +43,16 @@ import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.osgi.framework.Constants;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -60,11 +64,13 @@ import com.google.gson.reflect.TypeToken;
  * @author Yannick Schaus - Initial contribution
  * @author Jan N. Klug - Refactored for JSON marketplaces
  */
-@Component(immediate = true, configurationPid = "org.openhab.jsonaddonservice", //
+@Component(immediate = true, configurationPid = { "org.openhab.jsonaddonservice" }, //
         property = Constants.SERVICE_PID + "=org.openhab.jsonaddonservice")
 @ConfigurableService(category = "system", label = JsonAddonService.SERVICE_NAME, description_uri = JsonAddonService.CONFIG_URI)
 @NonNullByDefault
 public class JsonAddonService implements AddonService {
+    private final Logger logger = LoggerFactory.getLogger(JsonAddonService.class);
+
     static final String SERVICE_NAME = "Json 3rd Party Add-on Service";
     static final String CONFIG_URI = "system:jsonaddonservice";
 
@@ -92,10 +98,13 @@ public class JsonAddonService implements AddonService {
     private boolean showUnstable = false;
 
     private final EventPublisher eventPublisher;
+    private final ConfigurationAdmin configurationAdmin;
 
     @Activate
-    public JsonAddonService(@Reference EventPublisher eventPublisher, Map<String, Object> config) {
+    public JsonAddonService(@Reference EventPublisher eventPublisher, @Reference ConfigurationAdmin configurationAdmin,
+            Map<String, Object> config) {
         this.eventPublisher = eventPublisher;
+        this.configurationAdmin = configurationAdmin;
         modified(config);
     }
 
@@ -129,6 +138,11 @@ public class JsonAddonService implements AddonService {
     @Override
     @SuppressWarnings("unchecked")
     public void refreshSource() {
+        if (!remoteEnabled()) {
+            cachedAddons = List.of();
+            return;
+        }
+
         cachedAddons = (List<AddonEntryDTO>) addonserviceUrls.stream().map(urlString -> {
             try {
                 URL url = new URL(urlString);
@@ -250,5 +264,14 @@ public class JsonAddonService implements AddonService {
     private void postFailureEvent(String extensionId, @Nullable String msg) {
         Event event = AddonEventFactory.createAddonFailureEvent(extensionId, msg);
         eventPublisher.post(event);
+    }
+
+    private boolean remoteEnabled() {
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration("org.openhab.addons", null);
+            return (boolean) Objects.requireNonNullElse(configuration.getProperties().get("remote"), true);
+        } catch (IOException e) {
+            return true;
+        }
     }
 }
