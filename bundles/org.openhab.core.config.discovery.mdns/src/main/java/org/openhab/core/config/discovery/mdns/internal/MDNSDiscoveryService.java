@@ -16,7 +16,9 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.jmdns.ServiceEvent;
@@ -63,6 +65,11 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     private final Set<MDNSDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
 
     private final MDNSClient mdnsClient;
+
+    /*
+     * Map of scheduled tasks to remove devices from the Inbox
+     */
+    private Map<String, ScheduledFuture<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
 
     @Activate
     public MDNSDiscoveryService(final @Nullable Map<String, Object> configProperties,
@@ -200,7 +207,17 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                 try {
                     ThingUID thingUID = participant.getThingUID(serviceEvent.getInfo());
                     if (thingUID != null) {
-                        thingRemoved(thingUID);
+                        ServiceInfo service = serviceEvent.getInfo();
+                        long gracePeriod = participant.getRemovalGracePeriodSeconds(service);
+                        if (gracePeriod <= 0) {
+                            thingRemoved(thingUID);
+                        } else {
+                            cancelRemovalTask(service);
+                            deviceRemovalTasks.put(service.getQualifiedName(), scheduler.schedule(() -> {
+                                thingRemoved(thingUID);
+                                cancelRemovalTask(service);
+                            }, gracePeriod, TimeUnit.SECONDS));
+                        }
                     }
                 } catch (Exception e) {
                     logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
@@ -223,6 +240,10 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                         if (result != null) {
                             final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
                                     FrameworkUtil.getBundle(participant.getClass()));
+                            final ServiceInfo service = serviceEvent.getInfo();
+                            if (participant.getRemovalGracePeriodSeconds(service) > 0) {
+                                cancelRemovalTask(service);
+                            }
                             thingDiscovered(resultNew);
                         }
                     } catch (Exception e) {
@@ -230,6 +251,16 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                     }
                 }
             }
+        }
+    }
+
+    /*
+     * If the device has been scheduled to be removed, cancel its respective removal task
+     */
+    private void cancelRemovalTask(ServiceInfo service) {
+        ScheduledFuture<?> deviceRemovalTask = deviceRemovalTasks.remove(service.getQualifiedName());
+        if (deviceRemovalTask != null) {
+            deviceRemovalTask.cancel(false);
         }
     }
 }
