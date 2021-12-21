@@ -67,7 +67,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     private final MDNSClient mdnsClient;
 
     /*
-     * Map of scheduled tasks to remove devices from the Inbox
+     * Map of scheduled tasks to remove devices from the Inbox.
      */
     private Map<String, ScheduledFuture<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
 
@@ -255,7 +255,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     }
 
     /*
-     * If the device has been scheduled to be removed, cancel its respective removal task
+     * If the device has been scheduled to be removed, cancel its respective removal task.
      */
     private void cancelRemovalTask(ServiceInfo service) {
         ScheduledFuture<?> deviceRemovalTask = deviceRemovalTasks.remove(service.getQualifiedName());
