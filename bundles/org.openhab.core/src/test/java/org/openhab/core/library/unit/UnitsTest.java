@@ -309,7 +309,7 @@ public class UnitsTest {
 
     @Test
     public void testBar2Pascal() {
-        Quantity<Pressure> bar = Quantities.getQuantity(BigDecimal.valueOf(1), Units.BAR);
+        Quantity<Pressure> bar = Quantities.getQuantity(BigDecimal.ONE, Units.BAR);
         assertThat(bar.to(SIUnits.PASCAL), is(Quantities.getQuantity(100000, SIUnits.PASCAL)));
     }
 
