@@ -131,21 +131,21 @@
 	</feature>
 
 	<feature name="openhab.tp-netty" description="Netty bundles" version="${project.version}">
-		<capability>openhab.tp;feature=netty;version=4.1.68.Final</capability>
-		<bundle dependency="true">mvn:io.netty/netty-buffer/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-common/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-http/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-http2/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-mqtt/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-socks/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-handler/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-handler-proxy/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-resolver/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-native-epoll/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-native-kqueue/4.1.68.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-native-unix-common/4.1.68.Final</bundle>
+		<capability>openhab.tp;feature=netty;version=4.1.72.Final</capability>
+		<bundle dependency="true">mvn:io.netty/netty-buffer/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-common/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-http/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-http2/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-mqtt/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-socks/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-handler/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-handler-proxy/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-resolver/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-native-epoll/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-native-kqueue/4.1.72.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-native-unix-common/4.1.72.Final</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jaxb" description="JAXB bundles" version="${project.version}">
