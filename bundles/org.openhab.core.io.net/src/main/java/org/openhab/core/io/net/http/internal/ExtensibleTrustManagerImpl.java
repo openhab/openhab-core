@@ -29,6 +29,8 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.net.http.ExtensibleTrustManager;
 import org.openhab.core.io.net.http.TlsCertificateProvider;
 import org.openhab.core.io.net.http.TlsTrustManagerProvider;
@@ -50,6 +52,7 @@ import org.slf4j.LoggerFactory;
  * @author Martin van Wingerden - Initial contribution
  */
 @Component(service = ExtensibleTrustManager.class, immediate = true)
+@NonNullByDefault
 public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager implements ExtensibleTrustManager {
     private final Logger logger = LoggerFactory.getLogger(ExtensibleTrustManagerImpl.class);
 
@@ -60,12 +63,14 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
     private final Map<TlsCertificateProvider, X509ExtendedTrustManager> mappingFromTlsCertificateProvider = new ConcurrentHashMap<>();
 
     @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+    public void checkClientTrusted(X509Certificate @Nullable [] chain, @Nullable String authType)
+            throws CertificateException {
         checkClientTrusted(chain, authType, (Socket) null);
     }
 
     @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+    public void checkServerTrusted(X509Certificate @Nullable [] chain, @Nullable String authType)
+            throws CertificateException {
         checkServerTrusted(chain, authType, (Socket) null);
     }
 
@@ -75,8 +80,8 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
     }
 
     @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket)
-            throws CertificateException {
+    public void checkClientTrusted(X509Certificate @Nullable [] chain, @Nullable String authType,
+            @Nullable Socket socket) throws CertificateException {
         X509ExtendedTrustManager linkedTrustManager = getLinkedTrustMananger(chain);
         if (linkedTrustManager == null) {
             logger.trace("No specific trust manager found, falling back to default");
@@ -87,8 +92,8 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
     }
 
     @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine sslEngine)
-            throws CertificateException {
+    public void checkClientTrusted(X509Certificate @Nullable [] chain, @Nullable String authType,
+            @Nullable SSLEngine sslEngine) throws CertificateException {
         X509ExtendedTrustManager linkedTrustManager = getLinkedTrustMananger(chain, sslEngine);
         if (linkedTrustManager == null) {
             logger.trace("No specific trust manager found, falling back to default");
@@ -99,8 +104,8 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
     }
 
     @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket)
-            throws CertificateException {
+    public void checkServerTrusted(X509Certificate @Nullable [] chain, @Nullable String authType,
+            @Nullable Socket socket) throws CertificateException {
         X509ExtendedTrustManager linkedTrustManager = getLinkedTrustMananger(chain);
         if (linkedTrustManager == null) {
             logger.trace("No specific trust manager found, falling back to default");
@@ -111,8 +116,8 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
     }
 
     @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine sslEngine)
-            throws CertificateException {
+    public void checkServerTrusted(X509Certificate @Nullable [] chain, @Nullable String authType,
+            @Nullable SSLEngine sslEngine) throws CertificateException {
         X509ExtendedTrustManager linkedTrustManager = getLinkedTrustMananger(chain, sslEngine);
         if (linkedTrustManager == null) {
             logger.trace("No specific trust manager found, falling back to default");
@@ -122,7 +127,8 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
         }
     }
 
-    private X509ExtendedTrustManager getLinkedTrustMananger(X509Certificate[] chain, SSLEngine sslEngine) {
+    private @Nullable X509ExtendedTrustManager getLinkedTrustMananger(X509Certificate @Nullable [] chain,
+            @Nullable SSLEngine sslEngine) {
         if (sslEngine != null) {
             X509ExtendedTrustManager trustManager = null;
             String peer = null;
@@ -141,20 +147,21 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
         return getLinkedTrustMananger(chain);
     }
 
-    private X509ExtendedTrustManager getLinkedTrustMananger(X509Certificate[] chain) {
-        try {
-            String commonName = getCommonName(chain[0]);
+    private @Nullable X509ExtendedTrustManager getLinkedTrustMananger(X509Certificate @Nullable [] chain) {
+        if (chain != null) {
+            try {
+                String commonName = getCommonName(chain[0]);
 
-            X509ExtendedTrustManager trustManager = linkedTrustManager.getOrDefault(commonName, EMPTY_QUEUE).peek();
+                X509ExtendedTrustManager trustManager = linkedTrustManager.getOrDefault(commonName, EMPTY_QUEUE).peek();
 
-            if (trustManager != null) {
-                logger.trace("Found trustManager by common name: {}", commonName);
-                return trustManager;
-            }
+                if (trustManager != null) {
+                    logger.trace("Found trustManager by common name: {}", commonName);
+                    return trustManager;
+                }
 
-            Collection<List<?>> subjectAlternatives = getSubjectAlternatives(chain);
+                Collection<List<?>> subjectAlternatives = getSubjectAlternatives(chain);
 
-            logger.trace("Searching trustManager by Subject Alternative Names: {}", subjectAlternatives);
+                logger.trace("Searching trustManager by Subject Alternative Names: {}", subjectAlternatives);
 
             // @formatter:off
             return subjectAlternatives.stream()
@@ -166,13 +173,13 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
                     .findFirst()
                     .orElse(null);
             // @formatter:on
-        } catch (CommonNameNotFoundException e) {
-            logger.debug("CN not found", e);
-            return null;
-        } catch (CertificateParsingException e) {
-            logger.debug("Problem while parsing certificate", e);
-            return null;
+            } catch (CommonNameNotFoundException e) {
+                logger.debug("CN not found", e);
+            } catch (CertificateParsingException e) {
+                logger.debug("Problem while parsing certificate", e);
+            }
         }
+        return null;
     }
 
     private Collection<List<?>> getSubjectAlternatives(X509Certificate[] chain) throws CertificateParsingException {
@@ -202,8 +209,10 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
 
     @Override
     public void removeTlsCertificateProvider(TlsCertificateProvider tlsCertificateProvider) {
-        removeLinkedTrustManager(tlsCertificateProvider.getHostName(),
-                mappingFromTlsCertificateProvider.remove(tlsCertificateProvider));
+        X509ExtendedTrustManager trustManager = mappingFromTlsCertificateProvider.remove(tlsCertificateProvider);
+        if (trustManager != null) {
+            removeLinkedTrustManager(tlsCertificateProvider.getHostName(), trustManager);
+        }
     }
 
     @Override
@@ -217,10 +226,12 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
         removeLinkedTrustManager(tlsTrustManagerProvider.getHostName(), tlsTrustManagerProvider.getTrustManager());
     }
 
+    @SuppressWarnings("null")
     private void addLinkedTrustManager(String hostName, X509ExtendedTrustManager trustManager) {
         linkedTrustManager.computeIfAbsent(hostName, h -> new ConcurrentLinkedQueue<>()).add(trustManager);
     }
 
+    @SuppressWarnings("null")
     private void removeLinkedTrustManager(String hostName, X509ExtendedTrustManager trustManager) {
         linkedTrustManager.computeIfAbsent(hostName, h -> new ConcurrentLinkedQueue<>()).remove(trustManager);
     }

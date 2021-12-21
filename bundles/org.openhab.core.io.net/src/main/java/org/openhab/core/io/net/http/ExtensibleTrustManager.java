@@ -14,6 +14,8 @@ package org.openhab.core.io.net.http;
 
 import javax.net.ssl.TrustManager;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Provides an extensible composite TrustManager
  *
@@ -24,6 +26,7 @@ import javax.net.ssl.TrustManager;
  *
  * @author Martin van Wingerden - Initial contribution
  */
+@NonNullByDefault
 public interface ExtensibleTrustManager extends TrustManager {
 
     /**
