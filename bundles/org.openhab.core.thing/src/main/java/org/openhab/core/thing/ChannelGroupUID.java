@@ -44,7 +44,7 @@ public class ChannelGroupUID extends UID {
     }
 
     /**
-     * @param thingUID the unique identifier of the thing the channel belongs to
+     * @param thingUID the unique identifier of the thing the channel group belongs to
      * @param id the channel group's id
      */
     public ChannelGroupUID(ThingUID thingUID, String id) {
