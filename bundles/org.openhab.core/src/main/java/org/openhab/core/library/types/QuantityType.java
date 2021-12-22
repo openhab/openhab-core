@@ -65,7 +65,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
         implements PrimitiveType, State, Command, Comparable<QuantityType<T>> {
 
     private static final long serialVersionUID = 8828949721938234629L;
-    private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
+    private static final BigDecimal BIG_DECIMAL_HUNDRED = BigDecimal.valueOf(100);
 
     public static final QuantityType<Dimensionless> ZERO = new QuantityType<>(0, AbstractUnit.ONE);
     public static final QuantityType<Dimensionless> ONE = new QuantityType<>(1, AbstractUnit.ONE);
@@ -396,13 +396,13 @@ public class QuantityType<T extends Quantity<T>> extends Number
                 return null;
             }
         } else if (target == HSBType.class) {
-            return target.cast(
-                    new HSBType(DecimalType.ZERO, PercentType.ZERO, new PercentType(toBigDecimal().multiply(HUNDRED))));
+            return target.cast(new HSBType(DecimalType.ZERO, PercentType.ZERO,
+                    new PercentType(toBigDecimal().multiply(BIG_DECIMAL_HUNDRED))));
         } else if (target == PercentType.class) {
             if (Units.PERCENT.equals(getUnit())) {
                 return target.cast(new PercentType(toBigDecimal()));
             }
-            return target.cast(new PercentType(toBigDecimal().multiply(HUNDRED)));
+            return target.cast(new PercentType(toBigDecimal().multiply(BIG_DECIMAL_HUNDRED)));
         } else if (target == DecimalType.class) {
             return target.cast(new DecimalType(toBigDecimal()));
         } else {

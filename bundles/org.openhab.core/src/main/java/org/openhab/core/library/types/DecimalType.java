@@ -35,6 +35,7 @@ import org.openhab.core.types.State;
 public class DecimalType extends Number implements PrimitiveType, State, Command, Comparable<DecimalType> {
 
     private static final long serialVersionUID = 4226845847123464690L;
+    protected static final BigDecimal BIG_DECIMAL_HUNDRED = BigDecimal.valueOf(100);
 
     public static final DecimalType ZERO = new DecimalType(0);
 
@@ -185,11 +186,11 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         if (target == OnOffType.class) {
             return target.cast(equals(ZERO) ? OnOffType.OFF : OnOffType.ON);
         } else if (target == PercentType.class) {
-            return target.cast(new PercentType(toBigDecimal().multiply(BigDecimal.valueOf(100))));
+            return target.cast(new PercentType(toBigDecimal().multiply(BIG_DECIMAL_HUNDRED)));
         } else if (target == UpDownType.class) {
             if (equals(ZERO)) {
                 return target.cast(UpDownType.UP);
-            } else if (toBigDecimal().compareTo(BigDecimal.valueOf(1)) == 0) {
+            } else if (toBigDecimal().compareTo(BigDecimal.ONE) == 0) {
                 return target.cast(UpDownType.DOWN);
             } else {
                 return null;
@@ -197,14 +198,14 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         } else if (target == OpenClosedType.class) {
             if (equals(ZERO)) {
                 return target.cast(OpenClosedType.CLOSED);
-            } else if (toBigDecimal().compareTo(BigDecimal.valueOf(1)) == 0) {
+            } else if (toBigDecimal().compareTo(BigDecimal.ONE) == 0) {
                 return target.cast(OpenClosedType.OPEN);
             } else {
                 return null;
             }
         } else if (target == HSBType.class) {
             return target.cast(new HSBType(DecimalType.ZERO, PercentType.ZERO,
-                    new PercentType(this.toBigDecimal().multiply(BigDecimal.valueOf(100)))));
+                    new PercentType(this.toBigDecimal().multiply(BIG_DECIMAL_HUNDRED))));
         } else if (target == DateTimeType.class) {
             return target.cast(new DateTimeType(value.toString()));
         } else {
