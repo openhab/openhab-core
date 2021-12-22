@@ -27,6 +27,7 @@ import javax.net.ssl.TrustManager;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.HttpProxy;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -236,6 +237,39 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
                     logger.debug("creating http client for consumer {}", consumerName);
 
                     HttpClient httpClient = new HttpClient(createSslContextFactory());
+
+                    // If proxy is set as property (standard Java property), provide the proxy information to Jetty HTTP
+                    // Client
+                    String httpProxyHost = System.getProperty("http.proxyHost");
+                    String httpsProxyHost = System.getProperty("https.proxyHost");
+
+                    if (httpProxyHost != null) {
+                        String sProxyPort = System.getProperty("http.proxyPort");
+                        if (sProxyPort != null) {
+                            try {
+                                int port = Integer.parseInt(sProxyPort);
+                                httpClient.getProxyConfiguration().getProxies().add(new HttpProxy(httpProxyHost, port));
+                            } catch (NumberFormatException ex) {
+                                // this was not a correct port. Ignoring.
+                                logger.debug(
+                                        "HTTP Proxy detected (http.proxyHost), but invalid proxyport. Ignoring proxy.");
+                            }
+                        }
+                    } else if (httpsProxyHost != null) {
+                        String sProxyPort = System.getProperty("https.proxyPort");
+                        if (sProxyPort != null) {
+                            try {
+                                int port = Integer.parseInt(sProxyPort);
+                                httpClient.getProxyConfiguration().getProxies()
+                                        .add(new HttpProxy(httpsProxyHost, port));
+                            } catch (NumberFormatException ex) {
+                                // this was not a correct port. Ignoring.
+                                logger.debug(
+                                        "HTTP Proxy detected (https.proxyHost), but invalid proxyport. Ignoring proxy.");
+                            }
+                        }
+                    }
+
                     httpClient.setMaxConnectionsPerDestination(2);
 
                     if (threadPool != null) {
