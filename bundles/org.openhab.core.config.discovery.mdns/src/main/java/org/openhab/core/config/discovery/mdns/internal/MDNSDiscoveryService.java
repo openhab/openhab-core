@@ -207,16 +207,13 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                 try {
                     ThingUID thingUID = participant.getThingUID(serviceEvent.getInfo());
                     if (thingUID != null) {
-                        ServiceInfo service = serviceEvent.getInfo();
-                        long gracePeriod = participant.getRemovalGracePeriodSeconds(service);
+                        ServiceInfo serviceInfo = serviceEvent.getInfo();
+                        long gracePeriod = participant.getRemovalGracePeriodSeconds(serviceInfo);
                         if (gracePeriod <= 0) {
                             thingRemoved(thingUID);
                         } else {
-                            cancelRemovalTask(service);
-                            deviceRemovalTasks.put(service.getQualifiedName(), scheduler.schedule(() -> {
-                                thingRemoved(thingUID);
-                                cancelRemovalTask(service);
-                            }, gracePeriod, TimeUnit.SECONDS));
+                            cancelRemovalTask(serviceInfo);
+                            scheduleRemovalTask(thingUID, serviceInfo, gracePeriod);
                         }
                     }
                 } catch (Exception e) {
@@ -253,11 +250,27 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     /**
      * If the device has been scheduled to be removed, cancel its respective removal task.
+     *
+     * @param serviceInfo the mDNS ServiceInfo describing the device on the network.
      */
     private void cancelRemovalTask(ServiceInfo serviceInfo) {
         ScheduledFuture<?> deviceRemovalTask = deviceRemovalTasks.remove(serviceInfo.getQualifiedName());
         if (deviceRemovalTask != null) {
             deviceRemovalTask.cancel(false);
         }
+    }
+
+    /**
+     * Schedule a task that will remove the device from the Inbox after the given grace period has expired.
+     *
+     * @param thingUID the UID of the Thing to be removed.
+     * @param serviceInfo the mDNS ServiceInfo describing the device on the network.
+     * @param gracePeriod the scheduled delay in seconds.
+     */
+    private void scheduleRemovalTask(ThingUID thingUID, ServiceInfo serviceInfo, long gracePeriod) {
+        deviceRemovalTasks.put(serviceInfo.getQualifiedName(), scheduler.schedule(() -> {
+            thingRemoved(thingUID);
+            cancelRemovalTask(serviceInfo);
+        }, gracePeriod, TimeUnit.SECONDS));
     }
 }

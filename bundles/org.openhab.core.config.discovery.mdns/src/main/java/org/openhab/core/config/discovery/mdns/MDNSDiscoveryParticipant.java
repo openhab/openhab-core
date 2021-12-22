@@ -74,10 +74,10 @@ public interface MDNSDiscoveryParticipant {
      * To prevent this, a binding that implements an MDNSDiscoveryParticipant may OPTIONALLY implement this method to
      * specify an additional delay period (grace period) to wait before the device is removed from the Inbox.
      *
-     * @param service the mDNS ServiceInfo describing the device on the network.
+     * @param serviceInfo the mDNS ServiceInfo describing the device on the network.
      * @return the additional grace period delay in seconds before the device will be removed from the Inbox.
      */
-    default long getRemovalGracePeriodSeconds(ServiceInfo service) {
+    default long getRemovalGracePeriodSeconds(ServiceInfo serviceInfo) {
         return 0;
     }
 }
