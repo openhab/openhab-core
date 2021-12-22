@@ -66,7 +66,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     private final MDNSClient mdnsClient;
 
-    /*
+    /**
      * Map of scheduled tasks to remove devices from the Inbox.
      */
     private Map<String, ScheduledFuture<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
@@ -238,12 +238,9 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                     try {
                         DiscoveryResult result = participant.createResult(serviceEvent.getInfo());
                         if (result != null) {
+                            cancelRemovalTask(serviceEvent.getInfo());
                             final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
                                     FrameworkUtil.getBundle(participant.getClass()));
-                            final ServiceInfo service = serviceEvent.getInfo();
-                            if (participant.getRemovalGracePeriodSeconds(service) > 0) {
-                                cancelRemovalTask(service);
-                            }
                             thingDiscovered(resultNew);
                         }
                     } catch (Exception e) {
@@ -254,11 +251,11 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         }
     }
 
-    /*
+    /**
      * If the device has been scheduled to be removed, cancel its respective removal task.
      */
-    private void cancelRemovalTask(ServiceInfo service) {
-        ScheduledFuture<?> deviceRemovalTask = deviceRemovalTasks.remove(service.getQualifiedName());
+    private void cancelRemovalTask(ServiceInfo serviceInfo) {
+        ScheduledFuture<?> deviceRemovalTask = deviceRemovalTasks.remove(serviceInfo.getQualifiedName());
         if (deviceRemovalTask != null) {
             deviceRemovalTask.cancel(false);
         }
