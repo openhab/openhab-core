@@ -72,8 +72,9 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     private Map<String, ScheduledFuture<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
 
     @Activate
-    public MDNSDiscoveryService(final @Nullable Map<String, Object> configProperties,
-            final @Reference MDNSClient mdnsClient, final @Reference TranslationProvider i18nProvider,
+    public MDNSDiscoveryService(final @Nullable Map<String, Object> configProperties, //
+            final @Reference MDNSClient mdnsClient, //
+            final @Reference TranslationProvider i18nProvider, //
             final @Reference LocaleProvider localeProvider) {
         super(5);
 
@@ -133,16 +134,13 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     }
 
     private void startScan(boolean isBackground) {
-        scheduler.schedule(new Runnable() {
-            @Override
-            public void run() {
-                scan(isBackground);
-            }
+        scheduler.schedule(() -> {
+            scan(isBackground);
         }, 0, TimeUnit.SECONDS);
     }
 
     /**
-     * Scan has 2 different behaviours. background/ foreground. Background scans can
+     * Scan has 2 different behaviors. background/ foreground. Background scans can
      * have much higher timeout. Foreground scans have only a short timeout as human
      * users may become impatient. The underlying reason is that the jmDNS
      * implementation {@code MDNSClient#list(String)} has a default timeout of 6
@@ -175,14 +173,14 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addMDNSDiscoveryParticipant(MDNSDiscoveryParticipant participant) {
-        this.participants.add(participant);
+        participants.add(participant);
         if (isBackgroundDiscoveryEnabled()) {
             mdnsClient.addServiceListener(participant.getServiceType(), this);
         }
     }
 
     protected void removeMDNSDiscoveryParticipant(MDNSDiscoveryParticipant participant) {
-        this.participants.remove(participant);
+        participants.remove(participant);
         mdnsClient.removeServiceListener(participant.getServiceType(), this);
     }
 
