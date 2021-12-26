@@ -160,13 +160,8 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
             }
             logger.debug("{} services found for {}; duration: {}ms", services.length, participant.getServiceType(),
                     System.currentTimeMillis() - start);
-            for (ServiceInfo service : services) {
-                DiscoveryResult result = participant.createResult(service);
-                if (result != null) {
-                    final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
-                            FrameworkUtil.getBundle(participant.getClass()));
-                    thingDiscovered(resultNew);
-                }
+            for (ServiceInfo serviceInfo : services) {
+                createDicoveryResult(participant, serviceInfo);
             }
         }
     }
@@ -202,21 +197,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     public void serviceRemoved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         for (MDNSDiscoveryParticipant participant : participants) {
             if (participant.getServiceType().equals(serviceEvent.getType())) {
-                try {
-                    ThingUID thingUID = participant.getThingUID(serviceEvent.getInfo());
-                    if (thingUID != null) {
-                        ServiceInfo serviceInfo = serviceEvent.getInfo();
-                        long gracePeriod = participant.getRemovalGracePeriodSeconds(serviceInfo);
-                        if (gracePeriod <= 0) {
-                            thingRemoved(thingUID);
-                        } else {
-                            cancelRemovalTask(serviceInfo);
-                            scheduleRemovalTask(thingUID, serviceInfo, gracePeriod);
-                        }
-                    }
-                } catch (Exception e) {
-                    logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
-                }
+                removeDicoveryResult(participant, serviceEvent.getInfo());
             }
         }
     }
@@ -230,19 +211,40 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         if (isBackgroundDiscoveryEnabled()) {
             for (MDNSDiscoveryParticipant participant : participants) {
                 if (participant.getServiceType().equals(serviceEvent.getType())) {
-                    try {
-                        DiscoveryResult result = participant.createResult(serviceEvent.getInfo());
-                        if (result != null) {
-                            cancelRemovalTask(serviceEvent.getInfo());
-                            final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
-                                    FrameworkUtil.getBundle(participant.getClass()));
-                            thingDiscovered(resultNew);
-                        }
-                    } catch (Exception e) {
-                        logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
-                    }
+                    createDicoveryResult(participant, serviceEvent.getInfo());
                 }
             }
+        }
+    }
+
+    private void createDicoveryResult(MDNSDiscoveryParticipant participant, ServiceInfo serviceInfo) {
+        try {
+            DiscoveryResult result = participant.createResult(serviceInfo);
+            if (result != null) {
+                cancelRemovalTask(serviceInfo);
+                final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
+                        FrameworkUtil.getBundle(participant.getClass()));
+                thingDiscovered(resultNew);
+            }
+        } catch (Exception e) {
+            logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
+        }
+    }
+
+    private void removeDicoveryResult(MDNSDiscoveryParticipant participant, ServiceInfo serviceInfo) {
+        try {
+            ThingUID thingUID = participant.getThingUID(serviceInfo);
+            if (thingUID != null) {
+                long gracePeriod = participant.getRemovalGracePeriodSeconds(serviceInfo);
+                if (gracePeriod <= 0) {
+                    thingRemoved(thingUID);
+                } else {
+                    cancelRemovalTask(serviceInfo);
+                    scheduleRemovalTask(thingUID, serviceInfo, gracePeriod);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
         }
     }
 
