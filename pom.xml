@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -540,6 +540,12 @@ Import-Package: \\
         </plugin>
 
         <plugin>
+          <groupId>org.openhab.core.tools</groupId>
+          <artifactId>i18n-maven-plugin</artifactId>
+          <version>3.2.0</version>
+        </plugin>
+
+        <plugin>
           <groupId>org.openhab.tools.sat</groupId>
           <artifactId>sat-plugin</artifactId>
           <version>${sat.version}</version>
@@ -562,6 +568,7 @@ Import-Package: \\
             </execution>
           </executions>
         </plugin>
+
         <plugin>
           <groupId>com.github.ekryd.sortpom</groupId>
           <artifactId>sortpom-maven-plugin</artifactId>
@@ -584,6 +591,7 @@ Import-Package: \\
             </execution>
           </executions>
         </plugin>
+
         <plugin>
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>

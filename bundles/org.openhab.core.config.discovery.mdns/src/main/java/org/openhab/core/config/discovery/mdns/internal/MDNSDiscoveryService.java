@@ -16,7 +16,9 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.jmdns.ServiceEvent;
@@ -64,9 +66,15 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     private final MDNSClient mdnsClient;
 
+    /**
+     * Map of scheduled tasks to remove devices from the Inbox.
+     */
+    private Map<String, ScheduledFuture<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
+
     @Activate
-    public MDNSDiscoveryService(final @Nullable Map<String, Object> configProperties,
-            final @Reference MDNSClient mdnsClient, final @Reference TranslationProvider i18nProvider,
+    public MDNSDiscoveryService(final @Nullable Map<String, Object> configProperties, //
+            final @Reference MDNSClient mdnsClient, //
+            final @Reference TranslationProvider i18nProvider, //
             final @Reference LocaleProvider localeProvider) {
         super(5);
 
@@ -126,16 +134,13 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     }
 
     private void startScan(boolean isBackground) {
-        scheduler.schedule(new Runnable() {
-            @Override
-            public void run() {
-                scan(isBackground);
-            }
+        scheduler.schedule(() -> {
+            scan(isBackground);
         }, 0, TimeUnit.SECONDS);
     }
 
     /**
-     * Scan has 2 different behaviours. background/ foreground. Background scans can
+     * Scan has 2 different behaviors. background/ foreground. Background scans can
      * have much higher timeout. Foreground scans have only a short timeout as human
      * users may become impatient. The underlying reason is that the jmDNS
      * implementation {@code MDNSClient#list(String)} has a default timeout of 6
@@ -168,14 +173,14 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addMDNSDiscoveryParticipant(MDNSDiscoveryParticipant participant) {
-        this.participants.add(participant);
+        participants.add(participant);
         if (isBackgroundDiscoveryEnabled()) {
             mdnsClient.addServiceListener(participant.getServiceType(), this);
         }
     }
 
     protected void removeMDNSDiscoveryParticipant(MDNSDiscoveryParticipant participant) {
-        this.participants.remove(participant);
+        participants.remove(participant);
         mdnsClient.removeServiceListener(participant.getServiceType(), this);
     }
 
@@ -200,7 +205,14 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                 try {
                     ThingUID thingUID = participant.getThingUID(serviceEvent.getInfo());
                     if (thingUID != null) {
-                        thingRemoved(thingUID);
+                        ServiceInfo serviceInfo = serviceEvent.getInfo();
+                        long gracePeriod = participant.getRemovalGracePeriodSeconds(serviceInfo);
+                        if (gracePeriod <= 0) {
+                            thingRemoved(thingUID);
+                        } else {
+                            cancelRemovalTask(serviceInfo);
+                            scheduleRemovalTask(thingUID, serviceInfo, gracePeriod);
+                        }
                     }
                 } catch (Exception e) {
                     logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
@@ -221,6 +233,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                     try {
                         DiscoveryResult result = participant.createResult(serviceEvent.getInfo());
                         if (result != null) {
+                            cancelRemovalTask(serviceEvent.getInfo());
                             final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
                                     FrameworkUtil.getBundle(participant.getClass()));
                             thingDiscovered(resultNew);
@@ -231,5 +244,31 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                 }
             }
         }
+    }
+
+    /**
+     * If the device has been scheduled to be removed, cancel its respective removal task.
+     *
+     * @param serviceInfo the mDNS ServiceInfo describing the device on the network.
+     */
+    private void cancelRemovalTask(ServiceInfo serviceInfo) {
+        ScheduledFuture<?> deviceRemovalTask = deviceRemovalTasks.remove(serviceInfo.getQualifiedName());
+        if (deviceRemovalTask != null) {
+            deviceRemovalTask.cancel(false);
+        }
+    }
+
+    /**
+     * Schedule a task that will remove the device from the Inbox after the given grace period has expired.
+     *
+     * @param thingUID the UID of the Thing to be removed.
+     * @param serviceInfo the mDNS ServiceInfo describing the device on the network.
+     * @param gracePeriod the scheduled delay in seconds.
+     */
+    private void scheduleRemovalTask(ThingUID thingUID, ServiceInfo serviceInfo, long gracePeriod) {
+        deviceRemovalTasks.put(serviceInfo.getQualifiedName(), scheduler.schedule(() -> {
+            thingRemoved(thingUID);
+            cancelRemovalTask(serviceInfo);
+        }, gracePeriod, TimeUnit.SECONDS));
     }
 }

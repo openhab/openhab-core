@@ -22,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.jupnp.UpnpService;
 import org.jupnp.model.meta.LocalDevice;
 import org.jupnp.model.meta.RemoteDevice;
@@ -41,6 +42,7 @@ import org.openhab.core.net.NetworkAddressService;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
@@ -64,22 +66,28 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
 
     private final Logger logger = LoggerFactory.getLogger(UpnpDiscoveryService.class);
 
-    private final Set<UpnpDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
-
-    public UpnpDiscoveryService() {
-        super(5);
-    }
-
-    private UpnpService upnpService;
-
     /*
      * Map of scheduled tasks to remove devices from the Inbox
      */
-    private Map<UDN, Future<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
+    private final Map<UDN, Future<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
 
-    @Override
-    protected void activate(Map<String, Object> configProperties) {
+    private final Set<UpnpDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
+
+    private final UpnpService upnpService;
+
+    @Activate
+    public UpnpDiscoveryService(final @Nullable Map<String, Object> configProperties, //
+            final @Reference UpnpService upnpService, //
+            final @Reference TranslationProvider i18nProvider, //
+            final @Reference LocaleProvider localeProvider) {
+        super(5);
+
+        this.upnpService = upnpService;
+        this.i18nProvider = i18nProvider;
+        this.localeProvider = localeProvider;
+
         super.activate(configProperties);
+
         startScan();
     }
 
@@ -87,15 +95,6 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     @Modified
     protected void modified(Map<String, Object> configProperties) {
         super.modified(configProperties);
-    }
-
-    @Reference
-    protected void setUpnpService(UpnpService upnpService) {
-        this.upnpService = upnpService;
-    }
-
-    protected void unsetUpnpService(UpnpService upnpService) {
-        this.upnpService = null;
     }
 
     @Reference
@@ -107,43 +106,23 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
         networkAddressService.removeNetworkAddressChangeListener(this);
     }
 
-    @Reference
-    protected void setI18nProvider(TranslationProvider i18nProvider) {
-        this.i18nProvider = i18nProvider;
-    }
-
-    protected void unsetI18nProvider(TranslationProvider i18nProvider) {
-        this.i18nProvider = null;
-    }
-
-    @Reference
-    protected void setLocaleProvider(LocaleProvider localeProvider) {
-        this.localeProvider = localeProvider;
-    }
-
-    protected void unsetLocaleProvider(LocaleProvider localeProvider) {
-        this.localeProvider = null;
-    }
-
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addUpnpDiscoveryParticipant(UpnpDiscoveryParticipant participant) {
-        this.participants.add(participant);
+        participants.add(participant);
 
-        if (upnpService != null) {
-            Collection<RemoteDevice> devices = upnpService.getRegistry().getRemoteDevices();
-            for (RemoteDevice device : devices) {
-                DiscoveryResult result = participant.createResult(device);
-                if (result != null) {
-                    final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
-                            FrameworkUtil.getBundle(participant.getClass()));
-                    thingDiscovered(resultNew);
-                }
+        Collection<RemoteDevice> devices = upnpService.getRegistry().getRemoteDevices();
+        for (RemoteDevice device : devices) {
+            DiscoveryResult result = participant.createResult(device);
+            if (result != null) {
+                final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
+                        FrameworkUtil.getBundle(participant.getClass()));
+                thingDiscovered(resultNew);
             }
         }
     }
 
     protected void removeUpnpDiscoveryParticipant(UpnpDiscoveryParticipant participant) {
-        this.participants.remove(participant);
+        participants.remove(participant);
     }
 
     @Override

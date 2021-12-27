@@ -14,11 +14,11 @@ package org.openhab.core.config.discovery.mdns.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.openhab.core.config.discovery.DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY;
 
 import java.io.IOException;
 import java.util.Hashtable;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.discovery.DiscoveryService;
@@ -31,9 +31,10 @@ import org.osgi.service.cm.ConfigurationAdmin;
  *
  * @author Henning Sudbrock - Initial contribution
  */
+@NonNullByDefault
 public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
 
-    private MDNSDiscoveryService mdnsDiscoveryService;
+    private @NonNullByDefault({}) MDNSDiscoveryService mdnsDiscoveryService;
 
     @BeforeEach
     public void setup() {
@@ -59,10 +60,10 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
         ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
         assertThat(configAdmin, is(notNullValue()));
 
+        @SuppressWarnings("null")
         Configuration configuration = configAdmin.getConfiguration("discovery.mdns");
         Hashtable<String, Object> properties = new Hashtable<>();
-        properties.put(CONFIG_PROPERTY_BACKGROUND_DISCOVERY, Boolean.valueOf(status));
-
+        properties.put(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY, Boolean.valueOf(status));
         configuration.update(properties);
     }
 }
