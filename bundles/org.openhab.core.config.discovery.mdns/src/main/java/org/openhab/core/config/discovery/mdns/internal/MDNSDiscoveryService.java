@@ -161,7 +161,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
             logger.debug("{} services found for {}; duration: {}ms", services.length, participant.getServiceType(),
                     System.currentTimeMillis() - start);
             for (ServiceInfo serviceInfo : services) {
-                createDicoveryResult(participant, serviceInfo);
+                createDiscoveryResult(participant, serviceInfo);
             }
         }
     }
@@ -197,7 +197,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     public void serviceRemoved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         for (MDNSDiscoveryParticipant participant : participants) {
             if (participant.getServiceType().equals(serviceEvent.getType())) {
-                removeDicoveryResult(participant, serviceEvent.getInfo());
+                removeDiscoveryResult(participant, serviceEvent.getInfo());
             }
         }
     }
@@ -211,13 +211,13 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         if (isBackgroundDiscoveryEnabled()) {
             for (MDNSDiscoveryParticipant participant : participants) {
                 if (participant.getServiceType().equals(serviceEvent.getType())) {
-                    createDicoveryResult(participant, serviceEvent.getInfo());
+                    createDiscoveryResult(participant, serviceEvent.getInfo());
                 }
             }
         }
     }
 
-    private void createDicoveryResult(MDNSDiscoveryParticipant participant, ServiceInfo serviceInfo) {
+    private void createDiscoveryResult(MDNSDiscoveryParticipant participant, ServiceInfo serviceInfo) {
         try {
             DiscoveryResult result = participant.createResult(serviceInfo);
             if (result != null) {
@@ -231,7 +231,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         }
     }
 
-    private void removeDicoveryResult(MDNSDiscoveryParticipant participant, ServiceInfo serviceInfo) {
+    private void removeDiscoveryResult(MDNSDiscoveryParticipant participant, ServiceInfo serviceInfo) {
         try {
             ThingUID thingUID = participant.getThingUID(serviceInfo);
             if (thingUID != null) {
