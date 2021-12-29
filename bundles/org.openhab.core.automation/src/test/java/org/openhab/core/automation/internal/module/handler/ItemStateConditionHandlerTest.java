@@ -65,9 +65,9 @@ public class ItemStateConditionHandlerTest {
                 { new ParameterSet("5", new DecimalType(23), false) }, //
                 { new ParameterSet("5", new DecimalType(5), true) }, //
                 { new ParameterSet("5 °C", new DecimalType(23), false) }, //
-                { new ParameterSet("5 °C", new DecimalType(5), false) }, //
+                { new ParameterSet("5 °C", new DecimalType(5), true) }, //
                 { new ParameterSet("5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("5", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("5", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) } });
     }
