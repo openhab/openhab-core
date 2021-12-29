@@ -170,7 +170,6 @@ public class CommunityMarketplaceAddonService implements AddonService {
     @Override
     public List<Addon> getAddons(@Nullable Locale locale) {
         if (!remoteEnabled()) {
-
             return List.of();
         }
 
