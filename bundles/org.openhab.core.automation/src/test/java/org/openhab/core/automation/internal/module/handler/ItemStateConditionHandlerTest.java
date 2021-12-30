@@ -35,6 +35,7 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.types.State;
 
@@ -65,11 +66,13 @@ public class ItemStateConditionHandlerTest {
                 { new ParameterSet("5", new DecimalType(23), false) }, //
                 { new ParameterSet("5", new DecimalType(5), true) }, //
                 { new ParameterSet("5 °C", new DecimalType(23), false) }, //
-                { new ParameterSet("5 °C", new DecimalType(5), true) }, //
+                { new ParameterSet("5 °C", new DecimalType(5), false) }, //
                 { new ParameterSet("5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("5", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("5", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) } });
+                { new ParameterSet("5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT), true) }, //
+                { new ParameterSet("32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) } });
     }
 
     public static Collection<Object[]> greaterThanParameters() {
@@ -97,7 +100,9 @@ public class ItemStateConditionHandlerTest {
                 { new ParameterSet("5", new QuantityType<>(4, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("5 °C", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("5 °C", new QuantityType<>(4, SIUnits.CELSIUS), false) } });
+                { new ParameterSet("5 °C", new QuantityType<>(4, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT), true) }, //
+                { new ParameterSet("32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) } });
     }
 
     public static Collection<Object[]> lessThanParameters() {
@@ -125,7 +130,9 @@ public class ItemStateConditionHandlerTest {
                 { new ParameterSet("5", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("5 °C", new QuantityType<>(4, SIUnits.CELSIUS), true) } });
+                { new ParameterSet("5 °C", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT), true) }, //
+                { new ParameterSet("32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) } });
     }
 
     private static final String ITEM_NAME = "myItem";
