@@ -149,7 +149,7 @@ public class AudioFormat {
     /**
      * Channels number
      */
-    private final @Nullable Integer channels;
+    private @Nullable Integer channels;
 
     /**
      * Constructs an instance with the specified properties.
@@ -204,12 +204,7 @@ public class AudioFormat {
     public AudioFormat(@Nullable String container, @Nullable String codec, @Nullable Boolean bigEndian,
             @Nullable Integer bitDepth, @Nullable Integer bitRate, @Nullable Long frequency,
             @Nullable Integer channels) {
-        this.container = container;
-        this.codec = codec;
-        this.bigEndian = bigEndian;
-        this.bitDepth = bitDepth;
-        this.bitRate = bitRate;
-        this.frequency = frequency;
+        this(container, codec, bigEndian, bitDepth, bitRate, frequency);
         this.channels = channels;
     }
 
@@ -272,7 +267,7 @@ public class AudioFormat {
     /**
      * Gets channel number
      *
-     * @return The frequency
+     * @return The number of channels
      */
     public @Nullable Integer getChannels() {
         return channels;

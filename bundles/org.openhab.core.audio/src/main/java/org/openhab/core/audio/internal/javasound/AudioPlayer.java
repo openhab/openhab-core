@@ -137,7 +137,6 @@ public class AudioPlayer extends Thread {
         final int sampleSizeInBits = bitDepth.intValue();
 
         final int channels = audioFormat.getChannels() == null ? Integer.valueOf(1) : audioFormat.getChannels();
-        ;
 
         final int frameSize = channels * sampleSizeInBits / 8;
 
