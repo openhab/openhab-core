@@ -58,7 +58,8 @@ Video:
 
 Chart:
     'Chart' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? & ('icon=' icon=Icon)? &
-    ('service=' service=(STRING))? & ('refresh=' refresh=INT)? & ('period=' period=ID) & ('legend=' legend=BOOLEAN_OBJECT)? &
+    ('service=' service=(STRING))? & ('refresh=' refresh=INT)? & ('period=' period=ID) &
+    ('legend=' legend=BOOLEAN_OBJECT)? & ('forceasitem=' forceAsItem=BOOLEAN_OBJECT)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)* ']'))? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
     ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)* ']'))?);
