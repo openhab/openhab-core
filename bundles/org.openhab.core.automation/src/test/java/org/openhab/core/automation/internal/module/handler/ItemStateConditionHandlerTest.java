@@ -46,9 +46,9 @@ import org.openhab.core.types.State;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class ItemStateConditionHandlerTest {
 
-    @NonNullByDefault
     public static class ParameterSet {
         public final String comparisonState;
         public final State itemState;
@@ -67,6 +67,7 @@ public class ItemStateConditionHandlerTest {
                 { new ParameterSet("5", new DecimalType(5), true) }, //
                 { new ParameterSet("5 °C", new DecimalType(23), false) }, //
                 { new ParameterSet("5 °C", new DecimalType(5), false) }, //
+                { new ParameterSet("0", new QuantityType<>(), true) }, //
                 { new ParameterSet("5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("5", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
@@ -81,6 +82,7 @@ public class ItemStateConditionHandlerTest {
                 { new ParameterSet("5", new DecimalType(5), false) }, //
                 { new ParameterSet("5 °C", new DecimalType(23), true) }, //
                 { new ParameterSet("5 °C", new DecimalType(5), false) }, //
+                { new ParameterSet("0", new QuantityType<>(), false) }, //
                 { new ParameterSet("5", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("5", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("5 °C", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
@@ -95,6 +97,7 @@ public class ItemStateConditionHandlerTest {
                 { new ParameterSet("5 °C", new DecimalType(23), true) }, //
                 { new ParameterSet("5 °C", new DecimalType(5), true) }, //
                 { new ParameterSet("5 °C", new DecimalType(4), false) }, //
+                { new ParameterSet("0", new QuantityType<>(), true) }, //
                 { new ParameterSet("5", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("5", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("5", new QuantityType<>(4, SIUnits.CELSIUS), false) }, //
@@ -111,6 +114,7 @@ public class ItemStateConditionHandlerTest {
                 { new ParameterSet("5", new DecimalType(4), true) }, //
                 { new ParameterSet("5 °C", new DecimalType(23), false) }, //
                 { new ParameterSet("5 °C", new DecimalType(4), true) }, //
+                { new ParameterSet("0", new QuantityType<>(), false) }, //
                 { new ParameterSet("5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("5", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
@@ -125,6 +129,7 @@ public class ItemStateConditionHandlerTest {
                 { new ParameterSet("5 °C", new DecimalType(23), false) }, //
                 { new ParameterSet("5 °C", new DecimalType(5), true) }, //
                 { new ParameterSet("5 °C", new DecimalType(4), true) }, //
+                { new ParameterSet("0", new QuantityType<>(), true) }, //
                 { new ParameterSet("5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("5", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("5", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
@@ -139,7 +144,7 @@ public class ItemStateConditionHandlerTest {
 
     private final NumberItem item = new NumberItem(ITEM_NAME);
 
-    private @Mock ItemRegistry mockItemRegistry;
+    private @NonNullByDefault({}) @Mock ItemRegistry mockItemRegistry;
 
     @BeforeEach
     public void setup() throws ItemNotFoundException {
