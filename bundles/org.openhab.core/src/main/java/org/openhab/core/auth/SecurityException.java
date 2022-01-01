@@ -12,11 +12,15 @@
  */
 package org.openhab.core.auth;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Base type for exceptions reporting security concerns.
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@SuppressWarnings("serial")
+@NonNullByDefault
 public class SecurityException extends Exception {
 
     /**

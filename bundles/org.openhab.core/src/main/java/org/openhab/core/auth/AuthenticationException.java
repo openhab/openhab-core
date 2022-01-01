@@ -12,12 +12,15 @@
  */
 package org.openhab.core.auth;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Base type for exceptions thrown by authentication layer.
  *
  * @author Łukasz Dywicki - Initial contribution
  * @author Kai Kreuzer - Added JavaDoc and serial id
  */
+@NonNullByDefault
 public class AuthenticationException extends SecurityException {
 
     private static final long serialVersionUID = 8063538216812770858L;
