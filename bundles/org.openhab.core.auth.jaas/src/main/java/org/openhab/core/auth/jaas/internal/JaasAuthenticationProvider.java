@@ -96,7 +96,7 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
             return getAuthentication(name, loginContext.getSubject());
         } catch (LoginException e) {
             String message = e.getMessage();
-            throw new AuthenticationException(message != null ? message : "An unexpected LoginException occured");
+            throw new AuthenticationException(message != null ? message : "An unexpected LoginException occurred");
         } finally {
             Thread.currentThread().setContextClassLoader(contextClassLoader);
         }
