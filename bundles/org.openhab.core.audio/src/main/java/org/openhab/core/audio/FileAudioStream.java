@@ -21,6 +21,7 @@ import java.io.InputStream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.audio.utils.AudioStreamUtils;
+import org.openhab.core.audio.utils.AudioWaveUtils;
 
 /**
  * This is an AudioStream from an audio file

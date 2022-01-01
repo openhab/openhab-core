@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.audio;
+package org.openhab.core.audio.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,12 +19,16 @@ import javax.sound.sampled.AudioFormat.Encoding;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.audio.AudioFormat;
+
 /**
  * Some utility methods for parsing and cleaning wav files
  *
  * @author Gwendal Roulleau - Initial contribution
  *
  */
+@NonNullByDefault
 public class AudioWaveUtils {
 
     private static final AudioFormat DEFAULT_WAVE_AUDIO_FORMAT = new AudioFormat(AudioFormat.CONTAINER_WAVE,
@@ -41,15 +45,15 @@ public class AudioWaveUtils {
         try {
             inputStream.mark(200); // arbitrary amount, also used by the underlying parsing package from Sun
             javax.sound.sampled.AudioFormat format = AudioSystem.getAudioInputStream(inputStream).getFormat();
-            String javaSoundencoding = format.getEncoding().toString();
+            Encoding javaSoundencoding = format.getEncoding();
             String codecPCMSignedOrUnsigned;
-            if (javaSoundencoding.equals(Encoding.PCM_SIGNED.toString())) {
+            if (Encoding.PCM_SIGNED.equals(javaSoundencoding)) {
                 codecPCMSignedOrUnsigned = AudioFormat.CODEC_PCM_SIGNED;
-            } else if (javaSoundencoding.equals(Encoding.PCM_UNSIGNED.toString())) {
+            } else if (Encoding.PCM_UNSIGNED.equals(javaSoundencoding)) {
                 codecPCMSignedOrUnsigned = AudioFormat.CODEC_PCM_UNSIGNED;
-            } else if (javaSoundencoding.equals(Encoding.ULAW.toString())) {
+            } else if (Encoding.ULAW.equals(javaSoundencoding)) {
                 codecPCMSignedOrUnsigned = AudioFormat.CODEC_PCM_ULAW;
-            } else if (javaSoundencoding.equals(Encoding.ALAW.toString())) {
+            } else if (Encoding.ALAW.equals(javaSoundencoding)) {
                 codecPCMSignedOrUnsigned = AudioFormat.CODEC_PCM_ALAW;
             } else {
                 codecPCMSignedOrUnsigned = null;
@@ -58,7 +62,6 @@ public class AudioWaveUtils {
             Long frequency = Float.valueOf(format.getSampleRate()).longValue();
             return new AudioFormat(AudioFormat.CONTAINER_WAVE, codecPCMSignedOrUnsigned, format.isBigEndian(),
                     format.getSampleSizeInBits(), bitRate, frequency, format.getChannels());
-
         } catch (UnsupportedAudioFileException e) {
             // do not throw exception and assume default format to let a chance for the sink to play the stream.
             return DEFAULT_WAVE_AUDIO_FORMAT;
