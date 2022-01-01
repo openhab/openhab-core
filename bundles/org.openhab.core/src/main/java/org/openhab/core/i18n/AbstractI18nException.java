@@ -25,6 +25,7 @@ import org.osgi.framework.Bundle;
  *
  * @author Laurent Garnier - Initial contribution
  */
+@SuppressWarnings("serial")
 @NonNullByDefault
 public abstract class AbstractI18nException extends RuntimeException {
 
