@@ -14,6 +14,7 @@ package org.openhab.core.addon.marketplace.internal.community;
 
 import static org.openhab.core.addon.Addon.CODE_MATURITY_LEVELS;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
@@ -50,6 +51,8 @@ import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.osgi.framework.Constants;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -114,12 +117,16 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private final Set<MarketplaceAddonHandler> addonHandlers = new HashSet<>();
 
     private final EventPublisher eventPublisher;
+    private final ConfigurationAdmin configurationAdmin;
+
     private @Nullable String apiKey = null;
     private boolean showUnpublished = false;
 
     @Activate
-    public CommunityMarketplaceAddonService(final @Reference EventPublisher eventPublisher) {
+    public CommunityMarketplaceAddonService(final @Reference EventPublisher eventPublisher,
+            @Reference ConfigurationAdmin configurationAdmin) {
         this.eventPublisher = eventPublisher;
+        this.configurationAdmin = configurationAdmin;
     }
 
     @Activate
@@ -162,6 +169,10 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
     @Override
     public List<Addon> getAddons(@Nullable Locale locale) {
+        if (!remoteEnabled()) {
+            return List.of();
+        }
+
         try {
             List<DiscourseCategoryResponseDTO> pages = new ArrayList<>();
 
@@ -201,6 +212,10 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
     @Override
     public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
+        if (!remoteEnabled()) {
+            return null;
+        }
+
         URL url;
         try {
             url = new URL(String.format("%s%s", COMMUNITY_TOPIC_URL, id.replace(ADDON_ID_PREFIX, "")));
@@ -459,5 +474,14 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private void postFailureEvent(String extensionId, @Nullable String msg) {
         Event event = AddonEventFactory.createAddonFailureEvent(extensionId, msg);
         eventPublisher.post(event);
+    }
+
+    private boolean remoteEnabled() {
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration("org.openhab.addons", null);
+            return (boolean) Objects.requireNonNullElse(configuration.getProperties().get("remote"), true);
+        } catch (IOException e) {
+            return true;
+        }
     }
 }
