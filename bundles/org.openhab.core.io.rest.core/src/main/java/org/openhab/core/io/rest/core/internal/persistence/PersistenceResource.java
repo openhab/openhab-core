@@ -15,7 +15,6 @@ package org.openhab.core.io.rest.core.internal.persistence;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -507,7 +506,7 @@ public class PersistenceResource implements RESTResource {
 
         ModifiablePersistenceService mService = (ModifiablePersistenceService) service;
 
-        mService.store(item, Date.from(dateTime.toInstant()), state);
+        mService.store(item, dateTime, state);
         return Response.status(Status.OK).build();
     }
 }
