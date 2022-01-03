@@ -106,6 +106,8 @@ public class SystemRangeStateProfileTest {
                         BigDecimal.TEN, BIGDECIMAL_FOURTY, false) }, //
                 { new ParameterSet(List.of(QuantityType.valueOf("0 %")), List.of(OnOffType.OFF), BigDecimal.TEN,
                         BIGDECIMAL_FOURTY, false) }, //
+                { new ParameterSet(List.of(new QuantityType<>()), List.of(OnOffType.OFF), BigDecimal.TEN,
+                        BIGDECIMAL_FOURTY, false) }, //
                 // lower bound = 10, upper bound = 40 (as QuantityType), one state update / command (QuantityType), not
                 // inverted
                 { new ParameterSet(List.of(QuantityType.valueOf("100 %")), List.of(OnOffType.OFF), QUANTITY_STRING_TEN,

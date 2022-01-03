@@ -115,13 +115,13 @@ public class SystemOffsetProfile implements StateProfile {
         if (state instanceof QuantityType) {
             QuantityType qtState = (QuantityType) state;
             try {
-                if (Units.ONE.equals(finalOffset.getUnit())) {
+                if (Units.ONE.equals(finalOffset.getUnit()) && !Units.ONE.equals(qtState.getUnit())) {
                     // allow offsets without unit -> implicitly assume its the same as the one from the state, but warn
                     // the user
-                    finalOffset = new QuantityType<>(finalOffset.toBigDecimal(), qtState.getUnit());
                     logger.warn(
                             "Received a QuantityType state '{}' with unit, but the offset is defined as a plain number without unit ({}), please consider adding a unit to the profile offset.",
                             state, offset);
+                    finalOffset = new QuantityType<>(finalOffset.toBigDecimal(), qtState.getUnit());
                 }
                 // take care of temperatures because they start at offset -273°C = 0K
                 if (Units.KELVIN.equals(qtState.getUnit().getSystemUnit())) {
@@ -147,6 +147,7 @@ public class SystemOffsetProfile implements StateProfile {
         return result;
     }
 
+    @SuppressWarnings("null")
     private @Nullable QuantityType<Temperature> handleTemperature(QuantityType<Temperature> qtState,
             QuantityType<Temperature> offset) {
         // do the math in Kelvin and afterwards convert it back to the unit of the state

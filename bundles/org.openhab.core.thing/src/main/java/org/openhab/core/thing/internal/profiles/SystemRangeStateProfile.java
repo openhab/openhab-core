@@ -145,11 +145,13 @@ public class SystemRangeStateProfile implements StateProfile {
             if (Units.ONE.equals(lower.getUnit()) && Units.ONE.equals(upper.getUnit())) {
                 // allow bounds without unit -> implicitly assume its the same as the one from the state, but warn
                 // the user
+                if (!Units.ONE.equals(qtState.getUnit())) {
+                    logger.warn(
+                            "Received a QuantityType '{}' with unit, but the boundaries are defined as a plain number without units (lower={}, upper={}), please consider adding units to them.",
+                            value, lower, upper);
+                }
                 finalLower = new QuantityType<>(lower.toBigDecimal(), qtState.getUnit());
                 finalUpper = new QuantityType<>(upper.toBigDecimal(), qtState.getUnit());
-                logger.warn(
-                        "Received a QuantityType '{}' with unit, but the boundaries are defined as a plain number without units (lower={}, upper={}), please consider adding units to them.",
-                        value, lower, upper);
             } else {
                 finalLower = lower.toUnit(qtState.getUnit());
                 finalUpper = upper.toUnit(qtState.getUnit());
