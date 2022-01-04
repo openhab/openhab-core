@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.internal;
 
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1450,14 +1451,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     private boolean mustTrigger(Rule r) {
         for (Trigger t : r.getTriggers()) {
             if (SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID.equals(t.getTypeUID())) {
-                Object slObj = t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL);
-                try {
-                    Integer sl = Integer.valueOf(slObj.toString());
-                    if (sl <= StartLevelService.STARTLEVEL_RULEENGINE) {
-                        return true;
-                    }
-                } catch (NumberFormatException e) {
-                    logger.warn("Configuration '{}' is not a valid start level!", slObj);
+                int sl = ((BigDecimal) t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL)).intValue();
+                if (sl <= StartLevelService.STARTLEVEL_RULEENGINE) {
+                    return true;
                 }
             }
         }
