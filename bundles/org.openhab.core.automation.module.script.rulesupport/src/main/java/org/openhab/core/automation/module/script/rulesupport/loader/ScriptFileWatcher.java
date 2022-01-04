@@ -137,9 +137,11 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyServ
         if (file.exists()) {
             File[] files = file.listFiles();
             if (files != null) {
-                for (File f : files) {
-                    if (!f.isHidden()) {
-                        importResources(f);
+                if (watchSubDirectories()) {
+                    for (File f : files) {
+                        if (!f.isHidden()) {
+                            importResources(f);
+                        }
                     }
                 }
             } else {
