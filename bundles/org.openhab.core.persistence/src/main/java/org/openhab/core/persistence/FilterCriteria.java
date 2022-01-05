@@ -159,4 +159,11 @@ public class FilterCriteria {
         this.state = state;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "FilterCriteria [itemName=" + itemName + ", beginDate=" + beginDate + ", endDate=" + endDate
+                + ", pageNumber=" + pageNumber + ", pageSize=" + pageSize + ", operator=" + operator + ", ordering="
+                + ordering + ", state=" + state + "]";
+    }
 }
