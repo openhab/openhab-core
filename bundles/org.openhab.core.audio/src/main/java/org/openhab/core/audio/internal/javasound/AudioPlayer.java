@@ -136,11 +136,11 @@ public class AudioPlayer extends Thread {
         }
         final int sampleSizeInBits = bitDepth.intValue();
 
-        final int channels = 1;
+        final int channels = audioFormat.getChannels() == null ? Integer.valueOf(1) : audioFormat.getChannels();
 
-        final int frameSize = sampleSizeInBits / 8;
+        final int frameSize = channels * sampleSizeInBits / 8;
 
-        final float frameRate = sampleRate / frameSize;
+        final float frameRate = channels * sampleRate / frameSize;
 
         final Boolean bigEndian = audioFormat.isBigEndian();
         if (bigEndian == null) {
