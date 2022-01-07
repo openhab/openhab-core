@@ -66,9 +66,10 @@ public class ${bindingIdCamelCase}Handler extends BaseThingHandler {
         config = getConfigAs(${bindingIdCamelCase}Configuration.class);
 
         // TODO: Initialize the handler.
-        // The framework requires you to return from this method quickly. Also, before leaving this method a thing
-        // status from one of ONLINE, OFFLINE or UNKNOWN must be set. This might already be the real thing status in
-        // case you can decide it directly.
+        // The framework requires you to return from this method quickly, i.e. any network access must be done in
+        // the background initialization below.
+        // Also, before leaving this method a thing status from one of ONLINE, OFFLINE or UNKNOWN must be set. This
+        // might already be the real thing status in case you can decide it directly.
         // In case you can not decide the thing status directly (e.g. for long running connection handshake using WAN
         // access or similar) you should set status UNKNOWN here and then decide the real status asynchronously in the
         // background.
@@ -93,6 +94,9 @@ public class ${bindingIdCamelCase}Handler extends BaseThingHandler {
         // logger.trace("Example trace message");
         // logger.debug("Example debug message");
         // logger.warn("Example warn message");
+        //
+        // Logging to INFO should be avoided normally.
+        // See https://www.openhab.org/docs/developer/guidelines.html#f-logging
 
         // Note: When initialization can NOT be done set the status with more details for further
         // analysis. See also class ThingStatusDetail for all available status details.
