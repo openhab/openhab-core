@@ -13,6 +13,7 @@
 @Grab('com.xlson.groovycsv:groovycsv:1.1')
 import static com.xlson.groovycsv.CsvParser.parseCsv
 import java.nio.file.Paths
+import java.time.Year
 
 baseDir = Paths.get(getClass().protectionDomain.codeSource.location.toURI()).getParent().getParent().toAbsolutePath()
 
@@ -246,8 +247,10 @@ public class Properties {
     file.close()
 }
 
-def header() { """/**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+def header() {
+    int year = Year.now().getValue()
+"""/**
+ * Copyright (c) 2010-${year} Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
