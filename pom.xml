@@ -442,6 +442,7 @@ Import-Package: \\
               <headerDefinition>licenses/epl-2.0/xml-header-style.xml</headerDefinition>
             </headerDefinitions>
             <includes>
+              <include>**/archetype/**/*.groovy</include>
               <include>**/org/openhab/core/**/*.java</include>
               <include>**/org/openhab/core/**/*.mwe2</include>
               <include>**/org/openhab/core/**/*.xtend</include>
