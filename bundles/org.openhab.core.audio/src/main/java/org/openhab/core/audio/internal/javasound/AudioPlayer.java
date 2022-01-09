@@ -62,7 +62,7 @@ public class AudioPlayer extends Thread {
     public void run() {
         SourceDataLine line;
 
-        org.openhab.core.audio.AudioFormat openhabAudioFormat = this.audioStream.getFormat();
+        org.openhab.core.audio.AudioFormat openhabAudioFormat = audioStream.getFormat();
 
         AudioFormat audioFormat = convertAudioFormat(openhabAudioFormat);
         if (audioFormat == null) {
@@ -94,7 +94,7 @@ public class AudioPlayer extends Thread {
             // If this is a wav container, we should remove the header from the stream
             // to avoid a "clack" noise at the beginning
             if (org.openhab.core.audio.AudioFormat.CONTAINER_WAVE.equals(openhabAudioFormat.getContainer())) {
-                AudioWaveUtils.removeFMT(this.audioStream);
+                AudioWaveUtils.removeFMT(audioStream);
             }
             while (-1 != nRead) {
                 nRead = audioStream.read(abData, 0, abData.length);
