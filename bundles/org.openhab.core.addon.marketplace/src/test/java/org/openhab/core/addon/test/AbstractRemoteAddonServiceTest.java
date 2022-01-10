@@ -12,10 +12,16 @@
  */
 package org.openhab.core.addon.test;
 
+import static org.openhab.core.addon.test.TestAddonService.INSTALL_EXCEPTION_ADDON;
+import static org.openhab.core.addon.test.TestAddonService.SERVICE_PID;
+import static org.openhab.core.addon.test.TestAddonService.TEST_ADDON;
+import static org.openhab.core.addon.test.TestAddonService.UNINSTALL_EXCEPTION_ADDON;
+
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Assertions;
@@ -38,7 +44,8 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * The {@link AbstractRemoteAddonServiceTest} is a
+ * The {@link AbstractRemoteAddonServiceTest} contains tests for the
+ * {@link org.openhab.core.addon.marketplace.AbstractRemoteAddonService}
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -46,7 +53,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
 @MockitoSettings(strictness = Strictness.WARN)
 @NonNullByDefault
 public class AbstractRemoteAddonServiceTest {
-
     private @Mock @NonNullByDefault({}) StorageService storageService;
     private @Mock @NonNullByDefault({}) ConfigurationAdmin configurationAdmin;
     private @Mock @NonNullByDefault({}) EventPublisher eventPublisher;
@@ -54,19 +60,23 @@ public class AbstractRemoteAddonServiceTest {
 
     private @NonNullByDefault({}) Storage<String> storage;
     private @NonNullByDefault({}) TestAddonService addonService;
-
+    private @NonNullByDefault({}) TestAddonHandler addonHandler;
     private final Dictionary<String, Object> properties = new Hashtable<>();
 
     @BeforeEach
     public void initialize() throws IOException {
         storage = new VolatileStorage<>();
-        Mockito.doReturn(storage).when(storageService).getStorage(TestAddonService.SERVICE_PID);
+        Mockito.doReturn(storage).when(storageService).getStorage(SERVICE_PID);
         Mockito.doReturn(configuration).when(configurationAdmin).getConfiguration("org.openhab.addons", null);
         Mockito.doReturn(properties).when(configuration).getProperties();
 
+        addonHandler = new TestAddonHandler();
+
         addonService = new TestAddonService(eventPublisher, configurationAdmin, storageService);
-        addonService.addAddonHandler(new VirtualAddonHandler());
+        addonService.addAddonHandler(addonHandler);
     }
+
+    // general tests
 
     @Test
     public void testRemoteDisabledBlocksRemoteCalls() {
@@ -86,18 +96,142 @@ public class AbstractRemoteAddonServiceTest {
     }
 
     @Test
-    public void testAddonInstallation() {
-        addonService.install(TestAddonService.TEST_ADDON);
+    public void testAddonIsReportedAsInstalledIfStorageEntryMissing() {
+        addonService.setInstalled(TEST_ADDON);
+        List<Addon> addons = addonService.getAddons(null);
+        Addon addon = addons.stream().filter(a -> getFullAddonId(TEST_ADDON).equals(a.getId())).findAny().orElse(null);
 
+        Objects.requireNonNull(addon);
+        Assertions.assertTrue(addon.isInstalled());
+    }
+
+    // installation tests
+
+    @Test
+    public void testAddonInstall() {
+        addonService.getAddons(null);
+
+        addonService.install(TEST_ADDON);
+
+        checkResult(TEST_ADDON, getFullAddonId(TEST_ADDON) + "/installed", true, true);
+    }
+
+    @Test
+    public void testAddonInstallFailsWithHandlerException() {
+        addonService.getAddons(null);
+
+        addonService.install(INSTALL_EXCEPTION_ADDON);
+
+        checkResult(INSTALL_EXCEPTION_ADDON, getFullAddonId(INSTALL_EXCEPTION_ADDON) + "/failed", false, true);
+    }
+
+    @Test
+    public void testAddonInstallFailsOnInstalledAddon() {
+        addonService.setInstalled(TEST_ADDON);
+        addonService.addToStorage(TEST_ADDON);
+        addonService.getAddons(null);
+
+        addonService.install(TEST_ADDON);
+
+        checkResult(TEST_ADDON, getFullAddonId(TEST_ADDON) + "/failed", true, true);
+    }
+
+    @Test
+    public void testAddonInstallFailsOnUnknownAddon() {
+        addonService.getAddons(null);
+
+        addonService.install("unknown");
+
+        checkResult("unknown", "unknown/failed", false, false);
+    }
+
+    // uninstallation tests
+
+    @Test
+    public void testAddonUninstall() {
+        addonService.setInstalled(TEST_ADDON);
+        addonService.addToStorage(TEST_ADDON);
+        addonService.getAddons(null);
+
+        addonService.uninstall(TEST_ADDON);
+
+        checkResult(TEST_ADDON, getFullAddonId(TEST_ADDON) + "/uninstalled", false, true);
+    }
+
+    @Test
+    public void testAddonUninstallFailsWithHandlerException() {
+        addonService.setInstalled(UNINSTALL_EXCEPTION_ADDON);
+        addonService.addToStorage(UNINSTALL_EXCEPTION_ADDON);
+        addonService.getAddons(null);
+
+        addonService.uninstall(UNINSTALL_EXCEPTION_ADDON);
+
+        checkResult(UNINSTALL_EXCEPTION_ADDON, getFullAddonId(UNINSTALL_EXCEPTION_ADDON) + "/failed", true, true);
+    }
+
+    @Test
+    public void testAddonUninstallFailsOnUninstalledAddon() {
+        addonService.getAddons(null);
+
+        addonService.uninstall(TEST_ADDON);
+
+        checkResult(TEST_ADDON, getFullAddonId(TEST_ADDON) + "/failed", false, true);
+    }
+
+    @Test
+    public void testAddonUninstallFailsOnUnknownAddon() {
+        addonService.getAddons(null);
+
+        addonService.uninstall("unknown");
+
+        checkResult("unknown", "unknown/failed", false, false);
+    }
+
+    @Test
+    public void testAddonUninstallRemovesStorageEntryOnUninstalledAddon() {
+        addonService.addToStorage(TEST_ADDON);
+        addonService.getAddons(null);
+
+        addonService.uninstall(TEST_ADDON);
+
+        checkResult(TEST_ADDON, getFullAddonId(TEST_ADDON) + "/failed", false, true);
+    }
+
+    /**
+     * checks that a proper event is posted, the presence in storage and installation status in handler
+     *
+     * @param id add-on id (without service-prefix)
+     * @param expectedEventTopic the expected event (e.g. installed)
+     * @param installStatus the expected installation status of the add-on
+     * @param present if the addon is expected to be present after the test
+     */
+    private void checkResult(String id, String expectedEventTopic, boolean installStatus, boolean present) {
+        // assert expected event is posted
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         Mockito.verify(eventPublisher).post(eventCaptor.capture());
+        Event event = eventCaptor.getValue();
+        String topic = "openhab/addons/" + expectedEventTopic;
 
-        Event postInstallationEvent = eventCaptor.getValue();
-        Assertions.assertEquals("openhab/addons/" + getFullAddonId(TestAddonService.TEST_ADDON) + "/installed",
-                postInstallationEvent.getTopic());
+        Assertions.assertEquals(topic, event.getTopic());
+
+        // assert addon handler was called (by checking it's installed status)
+        Assertions.assertEquals(installStatus, addonHandler.isInstalled(getFullAddonId(id)));
+
+        // assert is present in storage if installed or missing if uninstalled
+        Assertions.assertEquals(installStatus, storage.containsKey(id));
+
+        // assert correct installation status is reported for addon
+        Addon addon = addonService.getAddon(id, null);
+        if (present) {
+            Assertions.assertNotNull(addon);
+            Objects.requireNonNull(addon);
+            Assertions.assertEquals(installStatus, addon.isInstalled());
+        } else {
+            Assertions.assertNull(addon);
+        }
     }
 
     private String getFullAddonId(String id) {
-        return TestAddonService.SERVICE_PID + ":" + id;
+        return SERVICE_PID + ":" + id;
     }
 }

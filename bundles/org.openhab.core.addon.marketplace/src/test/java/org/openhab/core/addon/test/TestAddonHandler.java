@@ -24,12 +24,12 @@ import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
 
 /**
- * The {@link VirtualAddonHandler} is a
+ * The {@link TestAddonHandler} is a
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class VirtualAddonHandler implements MarketplaceAddonHandler {
+public class TestAddonHandler implements MarketplaceAddonHandler {
     private static final Set<String> SUPPORTED_ADDON_TYPES = Set.of("binding", "automation");
     public static final String TEST_ADDON_CONTENT_TYPE = "testAddonContentType";
 
@@ -47,7 +47,7 @@ public class VirtualAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
-        if (INSTALL_EXCEPTION_ADDON.equals(addon.getId())) {
+        if (addon.getId().endsWith(":" + INSTALL_EXCEPTION_ADDON)) {
             throw new MarketplaceHandlerException("Installation failed", null);
         }
         installedAddons.add(addon.getId());
@@ -55,8 +55,8 @@ public class VirtualAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public void uninstall(Addon addon) throws MarketplaceHandlerException {
-        if (UNINSTALL_EXCEPTION_ADDON.equals(addon.getId())) {
-            throw new MarketplaceHandlerException("Installation failed", null);
+        if (addon.getId().endsWith(":" + UNINSTALL_EXCEPTION_ADDON)) {
+            throw new MarketplaceHandlerException("Uninstallation failed", null);
         }
         installedAddons.remove(addon.getId());
     }

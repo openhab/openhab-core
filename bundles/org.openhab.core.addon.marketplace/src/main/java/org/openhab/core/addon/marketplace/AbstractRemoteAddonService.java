@@ -38,6 +38,8 @@ import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -49,6 +51,7 @@ import com.google.gson.GsonBuilder;
  */
 @NonNullByDefault
 public abstract class AbstractRemoteAddonService implements AddonService {
+    private final Logger logger = LoggerFactory.getLogger(AbstractRemoteAddonService.class);
     protected static final Map<String, AddonType> TAG_ADDON_TYPE_MAP = Map.of( //
             "automation", new AddonType("automation", "Automation"), //
             "binding", new AddonType("binding", "Bindings"), //
@@ -80,7 +83,6 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         List<Addon> addons = new ArrayList<>();
         installedAddonStorage.stream().map(e -> Objects.requireNonNull(gson.fromJson(e.getValue(), Addon.class)))
                 .forEach(addons::add);
-        addons.forEach(a -> a.setInstalled(true));
 
         // create lookup list to make sure installed addons take precedence
         List<String> installedAddons = addons.stream().map(Addon::getId).collect(Collectors.toList());
@@ -89,6 +91,9 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             List<Addon> remoteAddons = Objects.requireNonNullElse(cachedRemoteAddons.getValue(), List.of());
             remoteAddons.stream().filter(a -> !installedAddons.contains(a.getId())).forEach(addons::add);
         }
+
+        // check real installation status based on handlers
+        addons.forEach(addon -> addon.setInstalled(addonHandlers.stream().anyMatch(h -> h.isInstalled(addon.getId()))));
 
         cachedAddons = addons;
         this.installedAddons = installedAddons;
@@ -125,7 +130,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                         try {
                             handler.install(addon);
                             installedAddonStorage.put(id, gson.toJson(addon));
-                            cachedRemoteAddons.invalidateValue();
+                            refreshSource();
                             postInstalledEvent(addon.getId());
                         } catch (MarketplaceHandlerException e) {
                             postFailureEvent(addon.getId(), e.getMessage());
@@ -150,7 +155,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                         try {
                             handler.uninstall(addon);
                             installedAddonStorage.remove(id);
-                            cachedRemoteAddons.invalidateValue();
+                            refreshSource();
                             postUninstalledEvent(addon.getId());
                         } catch (MarketplaceHandlerException e) {
                             postFailureEvent(addon.getId(), e.getMessage());

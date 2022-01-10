@@ -381,7 +381,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
             properties.put("yaml_content", unescapeEntities(yamlContent));
         }
 
-        // try to use an handler to determine if the add-on is installed
+        // try to use a handler to determine if the add-on is installed
         boolean installed = addonHandlers.stream()
                 .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(id));
 

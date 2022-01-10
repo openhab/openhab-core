@@ -13,18 +13,17 @@
 package org.openhab.core.addon.test;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
+import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.StorageService;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -41,12 +40,8 @@ public class TestAddonService extends AbstractRemoteAddonService {
     public static final String UNINSTALL_EXCEPTION_ADDON = "uninstallException";
 
     public static final String SERVICE_PID = "testAddonService";
-
-    public static final Map<String, Addon> REMOTE_ADDONS = Stream
-            .of(TEST_ADDON, INSTALL_EXCEPTION_ADDON, UNINSTALL_EXCEPTION_ADDON)
-            .map(id -> Addon.create(SERVICE_PID + ":" + id).withType("binding")
-                    .withContentType(VirtualAddonHandler.TEST_ADDON_CONTENT_TYPE).build())
-            .collect(Collectors.toMap(Addon::getId, a -> a));
+    public static final Set<String> REMOTE_ADDONS = Set.of(TEST_ADDON, INSTALL_EXCEPTION_ADDON,
+            UNINSTALL_EXCEPTION_ADDON);
 
     private int remoteCalls = 0;
 
@@ -66,7 +61,10 @@ public class TestAddonService extends AbstractRemoteAddonService {
     @Override
     protected List<Addon> getRemoteAddons() {
         remoteCalls++;
-        return new ArrayList<>(REMOTE_ADDONS.values());
+        return REMOTE_ADDONS.stream()
+                .map(id -> Addon.create(SERVICE_PID + ":" + id).withType("binding")
+                        .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE).build())
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -82,7 +80,7 @@ public class TestAddonService extends AbstractRemoteAddonService {
     @Override
     public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
         String remoteId = SERVICE_PID + ":" + id;
-        return REMOTE_ADDONS.get(remoteId);
+        return cachedAddons.stream().filter(a -> remoteId.equals(a.getId())).findAny().orElse(null);
     }
 
     @Override
@@ -90,7 +88,43 @@ public class TestAddonService extends AbstractRemoteAddonService {
         return null;
     }
 
+    /**
+     * get the number of remote calls issued by the addon service
+     *
+     * @return number of calls
+     */
     public int getRemoteCalls() {
         return remoteCalls;
+    }
+
+    /**
+     * this installs an addon to the service without calling the install method
+     *
+     * @param id id of the addon to install
+     */
+    public void setInstalled(String id) {
+        Addon addon = Addon.create(SERVICE_PID + ":" + id).withType("binding")
+                .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE).build();
+
+        addonHandlers.forEach(addonHandler -> {
+            try {
+                addonHandler.install(addon);
+            } catch (MarketplaceHandlerException e) {
+                // ignore
+            }
+        });
+    }
+
+    /**
+     * add to installedStorage
+     *
+     * @param id id of the addon to add
+     */
+    public void addToStorage(String id) {
+        Addon addon = Addon.create(SERVICE_PID + ":" + id).withType("binding")
+                .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE).build();
+
+        addon.setInstalled(true);
+        installedAddonStorage.put(id, gson.toJson(addon));
     }
 }
