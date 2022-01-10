@@ -105,6 +105,24 @@ public class AbstractRemoteAddonServiceTest {
         Assertions.assertTrue(addon.isInstalled());
     }
 
+    @Test
+    public void testInstalledAddonIsStillPresentAfterRemoteIsDisabledOrMissing() {
+        addonService.setInstalled(TEST_ADDON);
+        addonService.addToStorage(TEST_ADDON);
+
+        // check all addons are present
+        List<Addon> addons = addonService.getAddons(null);
+        Assertions.assertEquals(TestAddonService.REMOTE_ADDONS.size(), addons.size());
+
+        // disable remote repo
+        properties.put("remote", false);
+
+        // check only the installed addon is present
+        addons = addonService.getAddons(null);
+        Assertions.assertEquals(1, addons.size());
+        Assertions.assertEquals(getFullAddonId(TEST_ADDON), addons.get(0).getId());
+    }
+
     // installation tests
 
     @Test

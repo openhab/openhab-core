@@ -126,11 +126,13 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         }
     }
 
+    @Override
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
     protected void addAddonHandler(MarketplaceAddonHandler handler) {
         this.addonHandlers.add(handler);
     }
 
+    @Override
     protected void removeAddonHandler(MarketplaceAddonHandler handler) {
         this.addonHandlers.remove(handler);
     }
