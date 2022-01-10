@@ -269,7 +269,11 @@ public class JsonAddonService implements AddonService {
     private boolean remoteEnabled() {
         try {
             Configuration configuration = configurationAdmin.getConfiguration("org.openhab.addons", null);
-            return (boolean) Objects.requireNonNullElse(configuration.getProperties().get("remote"), true);
+            if (configuration.getProperties() != null) {
+                return (boolean) Objects.requireNonNullElse(configuration.getProperties().get("remote"), true);
+            } else {
+                return true;
+            }
         } catch (IOException e) {
             return true;
         }
