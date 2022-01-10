@@ -12,6 +12,7 @@
  */
 package org.openhab.core.audio.utils;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -30,6 +31,11 @@ import org.openhab.core.audio.AudioFormat;
  */
 @NonNullByDefault
 public class AudioWaveUtils {
+
+    /**
+     * This "magic" packet marks the beginning of the read data
+     */
+    private final static int DATA_MAGIC = 0x64617461;
 
     private static final AudioFormat DEFAULT_WAVE_AUDIO_FORMAT = new AudioFormat(AudioFormat.CONTAINER_WAVE,
             AudioFormat.CODEC_PCM_SIGNED, false, 16, 705600, 44100L, 1);
@@ -68,5 +74,27 @@ public class AudioWaveUtils {
         } finally {
             inputStream.reset();
         }
+    }
+
+    /**
+     * Remove FMT block (WAV header) from a stream by consuming it until
+     * the magic packet signaling data. Limit to 200 readInt() (arbitrary value
+     * used in sun audio package).
+     * If you don't remove/consume the FMT and pass the data to a player
+     * as if it is a pure PCM stream, it could try to play it and will
+     * do a "click" noise at the beginning.
+     *
+     * @param audio A wav container in an InputStream
+     * @throws IOException
+     */
+    public static void removeFMT(InputStream data) throws IOException {
+        DataInputStream dataInputStream = new DataInputStream(data);
+        Integer nextInt = dataInputStream.readInt();
+        int i = 0;
+        while (nextInt != DATA_MAGIC && i < 200) {
+            nextInt = dataInputStream.readInt();
+            i++;
+        }
+        dataInputStream.readInt();
     }
 }
