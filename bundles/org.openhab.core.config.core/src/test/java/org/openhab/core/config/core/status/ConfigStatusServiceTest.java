@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
@@ -37,9 +39,10 @@ import org.openhab.core.util.BundleResolver;
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 public class ConfigStatusServiceTest extends JavaTest {
 
-    private ConfigStatusService configStatusService;
+    private @NonNullByDefault({}) ConfigStatusService configStatusService;
 
     private static final String ENTITY_ID1 = "entity1";
     private static final String ENTITY_ID2 = "entity2";
@@ -104,21 +107,17 @@ public class ConfigStatusServiceTest extends JavaTest {
         messagesEntity2En.add(buildConfigStatusMessage(PARAM3_MSG3.parameterName, PARAM3_MSG3.type,
                 MessageFormat.format(MSG3_EN, ARGS), PARAM3_MSG3.statusCode));
 
-        configStatusService = new ConfigStatusService();
-
         LocaleProvider localeProvider = mock(LocaleProvider.class);
         when(localeProvider.getLocale()).thenReturn(new Locale("en", "US"));
-        configStatusService.setLocaleProvider(localeProvider);
 
-        configStatusService.setEventPublisher(mock(EventPublisher.class));
-        configStatusService.setBundleResolver(mock(BundleResolver.class));
-        configStatusService.setTranslationProvider(getTranslationProvider());
+        configStatusService = new ConfigStatusService(mock(EventPublisher.class), localeProvider,
+                getTranslationProvider(), mock(BundleResolver.class));
         configStatusService.addConfigStatusProvider(getConfigStatusProviderMock(ENTITY_ID1));
         configStatusService.addConfigStatusProvider(getConfigStatusProviderMock(ENTITY_ID2));
     }
 
     private ConfigStatusMessage buildConfigStatusMessage(String parameterName, Type type, String msg,
-            Integer statusCode) {
+            @Nullable Integer statusCode) {
         return new ConfigStatusMessage(parameterName, type, msg, statusCode);
     }
 
@@ -142,7 +141,7 @@ public class ConfigStatusServiceTest extends JavaTest {
         assertConfigStatusInfo(info, new ConfigStatusInfo(expectedMessages));
     }
 
-    private void assertConfigStatusInfo(ConfigStatusInfo actual, ConfigStatusInfo expected) {
+    private void assertConfigStatusInfo(@Nullable ConfigStatusInfo actual, ConfigStatusInfo expected) {
         assertThat(actual, equalTo(expected));
     }
 

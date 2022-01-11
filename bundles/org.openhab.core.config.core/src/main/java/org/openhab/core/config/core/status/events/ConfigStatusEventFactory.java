@@ -14,6 +14,8 @@ package org.openhab.core.config.core.status.events;
 
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.status.ConfigStatusInfo;
 import org.openhab.core.events.AbstractEventFactory;
 import org.openhab.core.events.Event;
@@ -26,7 +28,8 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Thomas Höfer - Initial contribution
  */
-@Component(immediate = true, service = { EventFactory.class })
+@Component(immediate = true, service = EventFactory.class)
+@NonNullByDefault
 public final class ConfigStatusEventFactory extends AbstractEventFactory {
 
     private static final Set<String> SUPPORTED_EVENT_TYPES = Set.of(ConfigStatusInfoEvent.TYPE);
@@ -48,7 +51,8 @@ public final class ConfigStatusEventFactory extends AbstractEventFactory {
     }
 
     @Override
-    protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
+    protected Event createEventByType(String eventType, String topic, String payload, @Nullable String source)
+            throws Exception {
         if (ConfigStatusInfoEvent.TYPE.equals(eventType)) {
             return createStatusInfoEvent(topic, payload);
         }

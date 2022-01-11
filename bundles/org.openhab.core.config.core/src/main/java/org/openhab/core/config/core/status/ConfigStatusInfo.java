@@ -20,6 +20,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
 
 /**
@@ -28,6 +30,7 @@ import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 public final class ConfigStatusInfo {
 
     private final Collection<ConfigStatusMessage> configStatusMessages = new ArrayList<>();
@@ -146,7 +149,7 @@ public final class ConfigStatusInfo {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

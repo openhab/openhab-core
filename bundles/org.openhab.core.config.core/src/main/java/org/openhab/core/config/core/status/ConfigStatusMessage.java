@@ -15,6 +15,8 @@ package org.openhab.core.config.core.status;
 import java.util.Arrays;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The {@link ConfigStatusMessage} is a domain object for a configuration status message. It contains the name
  * of the configuration parameter, the {@link ConfigStatusMessage.Type} information, the internationalized message and
@@ -74,19 +76,19 @@ public final class ConfigStatusMessage {
     public final Type type;
 
     /** The key for the message to be internalized. */
-    final transient String messageKey;
+    final transient @Nullable String messageKey;
 
     /** The arguments to be injected into the internationalized message. */
-    final transient Object[] arguments;
+    final transient Object @Nullable [] arguments;
 
     /** The corresponding internationalized status message. */
-    public final String message;
+    public final @Nullable String message;
 
     /**
      * The optional status code of the configuration status message; to be used if there are additional information to
      * be provided.
      */
-    public final Integer statusCode;
+    public final @Nullable Integer statusCode;
 
     /**
      * Package protected default constructor to allow reflective instantiation.
@@ -103,12 +105,7 @@ public final class ConfigStatusMessage {
      * @param builder the configuration status message builder
      */
     private ConfigStatusMessage(Builder builder) {
-        this.parameterName = builder.parameterName;
-        this.type = builder.type;
-        this.messageKey = builder.messageKey;
-        this.arguments = builder.arguments;
-        this.message = null;
-        this.statusCode = builder.statusCode;
+        this(builder.parameterName, builder.type, builder.messageKey, builder.arguments, null, builder.statusCode);
     }
 
     /**
@@ -119,12 +116,12 @@ public final class ConfigStatusMessage {
      * @param message the corresponding internationalized status message
      * @param statusCode the optional status code
      */
-    ConfigStatusMessage(String parameterName, Type type, String message, Integer statusCode) {
+    ConfigStatusMessage(String parameterName, Type type, String message, @Nullable Integer statusCode) {
         this(parameterName, type, null, null, message, statusCode);
     }
 
-    private ConfigStatusMessage(String parameterName, Type type, String messageKey, Object[] arguments, String message,
-            Integer statusCode) {
+    private ConfigStatusMessage(String parameterName, Type type, @Nullable String messageKey,
+            Object @Nullable [] arguments, @Nullable String message, @Nullable Integer statusCode) {
         this.parameterName = parameterName;
         this.type = type;
         this.messageKey = messageKey;
@@ -144,11 +141,11 @@ public final class ConfigStatusMessage {
 
         private final Type type;
 
-        private String messageKey;
+        private @Nullable String messageKey;
 
-        private Object[] arguments;
+        private Object @Nullable [] arguments;
 
-        private Integer statusCode;
+        private @Nullable Integer statusCode;
 
         private Builder(String parameterName, Type type) {
             Objects.requireNonNull(parameterName, "Parameter name must not be null.");
@@ -199,6 +196,17 @@ public final class ConfigStatusMessage {
         }
 
         /**
+         * Adds the given message key suffix for the creation of {@link ConfigStatusMessage#messageKey}.
+         *
+         * @param messageKeySuffix the message key suffix to be added
+         * @return the updated builder
+         */
+        public Builder withMessageKeySuffix(String messageKeySuffix) {
+            this.messageKey = CONFIG_STATUS_MSG_KEY_PREFIX + type.name().toLowerCase() + "." + messageKeySuffix;
+            return this;
+        }
+
+        /**
          * Adds the given arguments (to be injected into the internationalized message) to the builder.
          *
          * @param arguments the arguments to be added
@@ -217,17 +225,6 @@ public final class ConfigStatusMessage {
          */
         public Builder withStatusCode(Integer statusCode) {
             this.statusCode = statusCode;
-            return this;
-        }
-
-        /**
-         * Adds the given message key suffix for the creation of {@link ConfigStatusMessage#messageKey}.
-         *
-         * @param messageKeySuffix the message key suffix to be added
-         * @return the updated builder
-         */
-        public Builder withMessageKeySuffix(String messageKeySuffix) {
-            this.messageKey = CONFIG_STATUS_MSG_KEY_PREFIX + type.name().toLowerCase() + "." + messageKeySuffix;
             return this;
         }
 
@@ -253,7 +250,7 @@ public final class ConfigStatusMessage {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

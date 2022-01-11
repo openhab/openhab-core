@@ -12,12 +12,15 @@
  */
 package org.openhab.core.config.core.status;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link ConfigStatusCallback} interface is a callback interface to propagate a new configuration status for an
  * entity.
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 public interface ConfigStatusCallback {
 
     /**

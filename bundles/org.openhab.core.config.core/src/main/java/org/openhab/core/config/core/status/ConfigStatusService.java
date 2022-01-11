@@ -18,6 +18,8 @@ import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.status.events.ConfigStatusInfoEvent;
 import org.openhab.core.events.EventPublisher;
@@ -25,6 +27,7 @@ import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -41,19 +44,31 @@ import org.slf4j.LoggerFactory;
  * @author Chris Jackson - Allow null messages
  * @author Markus Rathgeb - Add locale provider support
  */
-@Component(immediate = true, service = { ConfigStatusService.class })
+@Component(immediate = true, service = ConfigStatusService.class)
+@NonNullByDefault
 public final class ConfigStatusService implements ConfigStatusCallback {
 
     private final Logger logger = LoggerFactory.getLogger(ConfigStatusService.class);
 
-    private final List<ConfigStatusProvider> configStatusProviders = new CopyOnWriteArrayList<>();
-    private EventPublisher eventPublisher;
-    private LocaleProvider localeProvider;
-    private TranslationProvider translationProvider;
-    private BundleResolver bundleResolver;
+    private final EventPublisher eventPublisher;
+    private final LocaleProvider localeProvider;
+    private final TranslationProvider translationProvider;
+    private final BundleResolver bundleResolver;
 
+    private final List<ConfigStatusProvider> configStatusProviders = new CopyOnWriteArrayList<>();
     private final ExecutorService executorService = ThreadPoolManager
             .getPool(ConfigStatusService.class.getSimpleName());
+
+    @Activate
+    public ConfigStatusService(final @Reference EventPublisher eventPublisher, //
+            final @Reference LocaleProvider localeProvider, //
+            final @Reference TranslationProvider i18nProvider, //
+            final @Reference BundleResolver bundleResolver) {
+        this.eventPublisher = eventPublisher;
+        this.localeProvider = localeProvider;
+        this.translationProvider = i18nProvider;
+        this.bundleResolver = bundleResolver;
+    }
 
     /**
      * Retrieves the {@link ConfigStatusInfo} of the entity by using the registered
@@ -67,7 +82,7 @@ public final class ConfigStatusService implements ConfigStatusCallback {
      *         supports the given entity
      * @throws IllegalArgumentException if given entityId is null or empty
      */
-    public ConfigStatusInfo getConfigStatus(String entityId, final Locale locale) {
+    public @Nullable ConfigStatusInfo getConfigStatus(String entityId, final @Nullable Locale locale) {
         if (entityId == null || entityId.isEmpty()) {
             throw new IllegalArgumentException("EntityId must not be null or empty");
         }
@@ -76,7 +91,7 @@ public final class ConfigStatusService implements ConfigStatusCallback {
 
         for (ConfigStatusProvider configStatusProvider : configStatusProviders) {
             if (configStatusProvider.supportsEntity(entityId)) {
-                return getConfigStatus(configStatusProvider, entityId, loc);
+                return getConfigStatusInfo(configStatusProvider, entityId, loc);
             }
         }
 
@@ -87,54 +102,44 @@ public final class ConfigStatusService implements ConfigStatusCallback {
 
     @Override
     public void configUpdated(final ConfigStatusSource configStatusSource) {
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                final ConfigStatusInfo info = getConfigStatus(configStatusSource.entityId, null);
-
-                if (info != null) {
-                    if (eventPublisher != null) {
-                        eventPublisher.post(new ConfigStatusInfoEvent(configStatusSource.getTopic(), info));
-                    } else {
-                        logger.warn("EventPublisher not available. Cannot post new config status for entity {}",
-                                configStatusSource.entityId);
-                    }
-                }
+        executorService.submit(() -> {
+            final ConfigStatusInfo info = getConfigStatus(configStatusSource.entityId, null);
+            if (info != null) {
+                eventPublisher.post(new ConfigStatusInfoEvent(configStatusSource.getTopic(), info));
             }
         });
     }
 
-    private ConfigStatusInfo getConfigStatus(ConfigStatusProvider configStatusProvider, String entityId,
-            Locale locale) {
-        Collection<ConfigStatusMessage> configStatus = configStatusProvider.getConfigStatus();
-        if (configStatus == null) {
+    private @Nullable ConfigStatusInfo getConfigStatusInfo(ConfigStatusProvider configStatusProvider, String entityId,
+            @Nullable Locale locale) {
+        Collection<ConfigStatusMessage> configStatusMessages = configStatusProvider.getConfigStatus();
+        if (configStatusMessages == null) {
             logger.debug("Cannot provide config status for entity {} because its config status provider returned null.",
                     entityId);
             return null;
         }
 
         Bundle bundle = bundleResolver.resolveBundle(configStatusProvider.getClass());
-
-        ConfigStatusInfo info = new ConfigStatusInfo();
-
-        for (ConfigStatusMessage configStatusMessage : configStatus) {
-            String message = null;
-            if (configStatusMessage.messageKey != null) {
-                message = translationProvider.getText(bundle, configStatusMessage.messageKey, null, locale,
-                        configStatusMessage.arguments);
-                if (message == null) {
-                    logger.warn(
-                            "No translation found for key {} and config status provider {}. Will ignore the config status message.",
-                            configStatusMessage.messageKey, configStatusProvider.getClass().getSimpleName());
-                    continue;
+        if (!configStatusMessages.isEmpty()) {
+            ConfigStatusInfo info = new ConfigStatusInfo();
+            for (ConfigStatusMessage configStatusMessage : configStatusMessages) {
+                String message = null;
+                if (configStatusMessage.messageKey != null) {
+                    message = translationProvider.getText(bundle, configStatusMessage.messageKey, null, locale,
+                            configStatusMessage.arguments);
+                    if (message == null) {
+                        logger.warn(
+                                "No translation found for key {} and config status provider {}. Will ignore the config status message.",
+                                configStatusMessage.messageKey, configStatusProvider.getClass().getSimpleName());
+                        continue;
+                    }
                 }
+                info.add(new ConfigStatusMessage(configStatusMessage.parameterName, configStatusMessage.type, message,
+                        configStatusMessage.statusCode));
             }
-            info.add(new ConfigStatusMessage(configStatusMessage.parameterName, configStatusMessage.type, message,
-                    configStatusMessage.statusCode));
-
+            return info;
         }
-
-        return info;
+        return null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -146,41 +151,5 @@ public final class ConfigStatusService implements ConfigStatusCallback {
     protected void removeConfigStatusProvider(ConfigStatusProvider configStatusProvider) {
         configStatusProvider.setConfigStatusCallback(null);
         configStatusProviders.remove(configStatusProvider);
-    }
-
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
-    @Reference
-    protected void setLocaleProvider(LocaleProvider localeProvider) {
-        this.localeProvider = localeProvider;
-    }
-
-    protected void unsetLocaleProvider(LocaleProvider localeProvider) {
-        this.localeProvider = null;
-    }
-
-    @Reference
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
-        this.translationProvider = i18nProvider;
-    }
-
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        this.translationProvider = null;
-    }
-
-    @Reference
-    protected void setBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
-    }
-
-    protected void unsetBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
     }
 }
