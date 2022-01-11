@@ -122,6 +122,11 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     public @Nullable ScriptEngineContainer createScriptEngine(String scriptType, String engineIdentifier) {
         ScriptEngineContainer result = null;
         ScriptEngineFactory engineFactory = findEngineFactory(scriptType);
+
+        if (loadedScriptEngineInstances.containsKey(engineIdentifier)) {
+            removeEngine(engineIdentifier);
+        }
+
         if (engineFactory == null) {
             logger.error("ScriptEngine for language '{}' could not be found for identifier: {}", scriptType,
                     engineIdentifier);
@@ -195,8 +200,9 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     public void removeEngine(String engineIdentifier) {
         ScriptEngineContainer container = loadedScriptEngineInstances.get(engineIdentifier);
         if (container != null) {
-            if (container.getScriptEngine() instanceof Invocable) {
-                Invocable inv = (Invocable) container.getScriptEngine();
+            ScriptEngine scriptEngine = container.getScriptEngine();
+            if (scriptEngine instanceof Invocable) {
+                Invocable inv = (Invocable) scriptEngine;
                 try {
                     inv.invokeFunction("scriptUnloaded");
                 } catch (NoSuchMethodException e) {
@@ -207,6 +213,18 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             } else {
                 logger.trace("ScriptEngine does not support Invocable interface");
             }
+
+            if (scriptEngine instanceof AutoCloseable) {
+                AutoCloseable closeable = (AutoCloseable) scriptEngine;
+                try {
+                    closeable.close();
+                } catch (Exception e) {
+                    logger.error("Error while closing script engine", e);
+                }
+            } else {
+                logger.trace("ScriptEngine does not support AutoCloseable interface");
+            }
+
             removeScriptExtensions(engineIdentifier);
         }
     }
