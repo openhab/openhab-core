@@ -221,11 +221,11 @@ public class ConfigDescriptionValidatorTest {
     public void assertValidationThrowsExceptionContainingMessagesForAllRequiredConfigParameters() {
         List<ConfigValidationMessage> expected = Stream.of(
                 new ConfigValidationMessage(BOOL_REQUIRED_PARAM_NAME, MessageKey.PARAMETER_REQUIRED.defaultMessage,
-                    MessageKey.PARAMETER_REQUIRED.key),
+                        MessageKey.PARAMETER_REQUIRED.key),
                 new ConfigValidationMessage(DECIMAL_REQUIRED_PARAM_NAME, MessageKey.PARAMETER_REQUIRED.defaultMessage,
-                    MessageKey.PARAMETER_REQUIRED.key),
+                        MessageKey.PARAMETER_REQUIRED.key),
                 new ConfigValidationMessage(TXT_REQUIRED_PARAM_NAME, MessageKey.PARAMETER_REQUIRED.defaultMessage,
-                    MessageKey.PARAMETER_REQUIRED.key),
+                        MessageKey.PARAMETER_REQUIRED.key),
                 new ConfigValidationMessage(INT_REQUIRED_PARAM_NAME, MessageKey.PARAMETER_REQUIRED.defaultMessage,
                         MessageKey.PARAMETER_REQUIRED.key))
                 .collect(toList());
@@ -260,7 +260,7 @@ public class ConfigDescriptionValidatorTest {
 
     void assertNonNullRequired(String parameterName) {
         List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(parameterName,
-            MessageKey.PARAMETER_REQUIRED.defaultMessage, MessageKey.PARAMETER_REQUIRED.key));
+                MessageKey.PARAMETER_REQUIRED.defaultMessage, MessageKey.PARAMETER_REQUIRED.key));
 
         try {
             params.put(parameterName, null);
@@ -439,7 +439,7 @@ public class ConfigDescriptionValidatorTest {
     public void assertValidationThrowsExceptionContainingMultipleVariousViolations() {
         List<ConfigValidationMessage> expected = Stream.of(
                 new ConfigValidationMessage(BOOL_REQUIRED_PARAM_NAME, MessageKey.PARAMETER_REQUIRED.defaultMessage,
-                    MessageKey.PARAMETER_REQUIRED.key),
+                        MessageKey.PARAMETER_REQUIRED.key),
                 new ConfigValidationMessage(TXT_MAX_PARAM_NAME, MessageKey.MAX_VALUE_TXT_VIOLATED.defaultMessage,
                         MessageKey.MAX_VALUE_TXT_VIOLATED.key, MAX.toString()),
                 new ConfigValidationMessage(INT_MIN_PARAM_NAME, MessageKey.MIN_VALUE_NUMERIC_VIOLATED.defaultMessage,
