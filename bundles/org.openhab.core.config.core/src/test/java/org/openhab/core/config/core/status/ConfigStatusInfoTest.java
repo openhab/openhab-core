@@ -87,18 +87,6 @@ public class ConfigStatusInfoTest {
         assertConfigStatusInfo(info);
     }
 
-    // @Test
-    // public void assertNPEisThrownIfTypesAreNull() {
-    // ConfigStatusInfo info = new ConfigStatusInfo();
-    // assertThrows(NullPointerException.class, () -> info.getConfigStatusMessages(null, Set.of()));
-    // }
-    //
-    // @Test
-    // public void assertNPEisThrownIfParameterNamesAreNull() {
-    // ConfigStatusInfo info = new ConfigStatusInfo();
-    // assertThrows(NullPointerException.class, () -> info.getConfigStatusMessages(Set.of(), null));
-    // }
-
     private void assertConfigStatusInfo(ConfigStatusInfo info) {
         assertThat(info.getConfigStatusMessages().size(), is(ALL.size()));
         assertThat(info.getConfigStatusMessages(), hasItems(MSG1, MSG2, MSG3, MSG4, MSG5, MSG6));
