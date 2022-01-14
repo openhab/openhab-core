@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.core.status.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.status.ConfigStatusInfo;
 import org.openhab.core.events.AbstractEvent;
 
@@ -22,6 +23,7 @@ import com.google.gson.Gson;
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 public final class ConfigStatusInfoEvent extends AbstractEvent {
 
     static final String TYPE = "ConfigStatusInfoEvent";

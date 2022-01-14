@@ -12,16 +12,13 @@
  */
 package org.openhab.core.config.core.status;
 
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
 
@@ -31,6 +28,7 @@ import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
  * @author Thomas Höfer - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class ConfigStatusInfoTest {
 
     private static final String PARAM1 = "param1";
@@ -60,8 +58,7 @@ public class ConfigStatusInfoTest {
     private static final ConfigStatusMessage MSG6 = ConfigStatusMessage.Builder.pending(PARAM6)
             .withMessageKeySuffix(ERROR2).withStatusCode(1).build();
 
-    private static final List<ConfigStatusMessage> ALL = Stream.of(MSG1, MSG2, MSG3, MSG4, MSG5, MSG6)
-            .collect(toList());
+    private static final List<ConfigStatusMessage> ALL = List.of(MSG1, MSG2, MSG3, MSG4, MSG5, MSG6);
 
     @Test
     public void assertCorrectConfigErrorHandlingForEmptyResultObject() {
@@ -88,18 +85,6 @@ public class ConfigStatusInfoTest {
             info.add(configStatusMessage);
         }
         assertConfigStatusInfo(info);
-    }
-
-    @Test
-    public void assertNPEisThrownIfTypesAreNull() {
-        ConfigStatusInfo info = new ConfigStatusInfo();
-        assertThrows(NullPointerException.class, () -> info.getConfigStatusMessages(null, emptySet()));
-    }
-
-    @Test
-    public void assertNPEisThrownIfParameterNamesAreNull() {
-        ConfigStatusInfo info = new ConfigStatusInfo();
-        assertThrows(NullPointerException.class, () -> info.getConfigStatusMessages(emptySet(), null));
     }
 
     private void assertConfigStatusInfo(ConfigStatusInfo info) {
