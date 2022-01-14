@@ -103,7 +103,7 @@ public final class ConfigDescriptionValidatorImpl implements ConfigDescriptionVa
 
         Collection<ConfigValidationMessage> configDescriptionValidationMessages = new ArrayList<>();
 
-        for (String key : configurationParameters.keySet()) {
+        for (String key : map.keySet()) {
             ConfigDescriptionParameter configDescriptionParameter = map.get(key);
             if (configDescriptionParameter != null) {
                 // If the parameter supports multiple selection, then it may be provided as an array
