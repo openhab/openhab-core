@@ -281,7 +281,6 @@ public class PersistenceResource implements RESTResource {
                     timeZoneProvider.getTimeZone());
         }
 
-        FilterCriteria filter;
         Iterable<HistoricItem> result;
         State state = null;
 
@@ -290,24 +289,25 @@ public class PersistenceResource implements RESTResource {
         ItemHistoryDTO dto = new ItemHistoryDTO();
         dto.name = itemName;
 
-        filter = new FilterCriteria();
-        filter.setItemName(itemName);
-
         // If "boundary" is true then we want to get one value before and after the requested period
         // This is necessary for values that don't change often otherwise data will start after the start of the graph
         // (or not at all if there's no change during the graph period)
         if (boundary) {
             // Get the value before the start time.
-            filter.setEndDate(dateTimeBegin);
-            filter.setPageSize(1);
-            filter.setOrdering(Ordering.DESCENDING);
-            result = qService.query(filter);
+            FilterCriteria filterBeforeStart = new FilterCriteria();
+            filterBeforeStart.setItemName(itemName);
+            filterBeforeStart.setEndDate(dateTimeBegin);
+            filterBeforeStart.setPageSize(1);
+            filterBeforeStart.setOrdering(Ordering.DESCENDING);
+            result = qService.query(filterBeforeStart);
             if (result.iterator().hasNext()) {
                 dto.addData(dateTimeBegin.toInstant().toEpochMilli(), result.iterator().next().getState());
                 quantity++;
             }
         }
 
+        FilterCriteria filter = new FilterCriteria();
+        filter.setItemName(itemName);
         if (pageLength == 0) {
             filter.setPageNumber(0);
             filter.setPageSize(Integer.MAX_VALUE);
@@ -315,11 +315,9 @@ public class PersistenceResource implements RESTResource {
             filter.setPageNumber(pageNumber);
             filter.setPageSize(pageLength);
         }
-
         filter.setBeginDate(dateTimeBegin);
         filter.setEndDate(dateTimeEnd);
         filter.setOrdering(Ordering.ASCENDING);
-
         result = qService.query(filter);
         Iterator<HistoricItem> it = result.iterator();
 
@@ -345,10 +343,12 @@ public class PersistenceResource implements RESTResource {
 
         if (boundary) {
             // Get the value after the end time.
-            filter.setBeginDate(dateTimeEnd);
-            filter.setPageSize(1);
-            filter.setOrdering(Ordering.ASCENDING);
-            result = qService.query(filter);
+            FilterCriteria filterAfterEnd = new FilterCriteria();
+            filterAfterEnd.setItemName(itemName);
+            filterAfterEnd.setBeginDate(dateTimeEnd);
+            filterAfterEnd.setPageSize(1);
+            filterAfterEnd.setOrdering(Ordering.ASCENDING);
+            result = qService.query(filterAfterEnd);
             if (result.iterator().hasNext()) {
                 dto.addData(dateTimeEnd.toInstant().toEpochMilli(), result.iterator().next().getState());
                 quantity++;
@@ -432,8 +432,6 @@ public class PersistenceResource implements RESTResource {
                     "Persistence service not modifiable: " + serviceId);
         }
 
-        ModifiablePersistenceService mService = (ModifiablePersistenceService) service;
-
         if (timeBegin == null || timeEnd == null) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "The start and end time must be set");
         }
@@ -444,15 +442,15 @@ public class PersistenceResource implements RESTResource {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Start time must be earlier than end time");
         }
 
-        FilterCriteria filter;
-
         // First, get the value at the start time.
         // This is necessary for values that don't change often otherwise data will start after the start of the graph
         // (or not at all if there's no change during the graph period)
-        filter = new FilterCriteria();
+        FilterCriteria filter = new FilterCriteria();
+        filter.setItemName(itemName);
         filter.setBeginDate(dateTimeBegin);
         filter.setEndDate(dateTimeEnd);
-        filter.setItemName(itemName);
+
+        ModifiablePersistenceService mService = (ModifiablePersistenceService) service;
         try {
             mService.remove(filter);
         } catch (IllegalArgumentException e) {
@@ -465,12 +463,18 @@ public class PersistenceResource implements RESTResource {
     private Response putItemState(@Nullable String serviceId, String itemName, String value, @Nullable String time) {
         // If serviceId is null, then use the default service
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
-        PersistenceService service = persistenceServiceRegistry.get(effectiveServiceId);
 
+        PersistenceService service = persistenceServiceRegistry.get(effectiveServiceId);
         if (service == null) {
             logger.warn("Persistence service not found '{}'.", effectiveServiceId);
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
                     "Persistence service not found: " + effectiveServiceId);
+        }
+
+        if (!(service instanceof ModifiablePersistenceService)) {
+            logger.warn("Persistence service not modifiable '{}'.", effectiveServiceId);
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "Persistence service not modifiable: " + effectiveServiceId);
         }
 
         Item item;
@@ -498,14 +502,7 @@ public class PersistenceResource implements RESTResource {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Time badly formatted.");
         }
 
-        if (!(service instanceof ModifiablePersistenceService)) {
-            logger.warn("Persistence service not modifiable '{}'.", effectiveServiceId);
-            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
-                    "Persistence service not modifiable: " + effectiveServiceId);
-        }
-
         ModifiablePersistenceService mService = (ModifiablePersistenceService) service;
-
         mService.store(item, dateTime, state);
         return Response.status(Status.OK).build();
     }

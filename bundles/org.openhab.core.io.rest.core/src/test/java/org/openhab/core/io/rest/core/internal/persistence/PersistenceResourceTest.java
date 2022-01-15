@@ -12,6 +12,9 @@
  */
 package org.openhab.core.io.rest.core.internal.persistence;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -95,9 +98,10 @@ public class PersistenceResourceTest {
 
     @Test
     public void testGetPersistenceItemData() {
-        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 5, false);
+        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, false);
 
-        assertEquals(5, Integer.parseInt(dto.datapoints));
+        assertThat(Integer.parseInt(dto.datapoints), is(5));
+        assertThat(dto.data, hasSize(5));
 
         // since we added binary state type elements, all except the first have to be repeated but with the timestamp of
         // the following item
@@ -121,5 +125,13 @@ public class PersistenceResourceTest {
 
         assertEquals(item3.time, item4.time);
         assertNotEquals(item3.state, item4.state);
+    }
+
+    @Test
+    public void testGetPersistenceItemDataWithBoundery() {
+        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, true);
+
+        assertThat(Integer.parseInt(dto.datapoints), is(7));
+        assertThat(dto.data, hasSize(7));
     }
 }
