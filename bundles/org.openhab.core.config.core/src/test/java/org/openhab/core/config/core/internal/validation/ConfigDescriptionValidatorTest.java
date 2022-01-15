@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -229,46 +230,35 @@ public class ConfigDescriptionValidatorTest {
                 new ConfigValidationMessage(INT_REQUIRED_PARAM_NAME, MessageKey.PARAMETER_REQUIRED.defaultMessage,
                         MessageKey.PARAMETER_REQUIRED.key))
                 .collect(toList());
-        try {
-            params.put(BOOL_PARAM_NAME, null);
-            params.put(TXT_PARAM_NAME, null);
-            params.put(INT_PARAM_NAME, null);
-            params.put(DECIMAL_PARAM_NAME, null);
-            params.put(BOOL_REQUIRED_PARAM_NAME, null);
-            params.put(TXT_REQUIRED_PARAM_NAME, null);
-            params.put(INT_REQUIRED_PARAM_NAME, null);
-            params.put(DECIMAL_REQUIRED_PARAM_NAME, null);
-            configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
-            failBecauseOfMissingConfigValidationException();
-        } catch (ConfigValidationException e) {
-            assertThat(getConfigValidationMessages(e), is(expected));
-        }
+        params.put(BOOL_PARAM_NAME, null);
+        params.put(TXT_PARAM_NAME, null);
+        params.put(INT_PARAM_NAME, null);
+        params.put(DECIMAL_PARAM_NAME, null);
+        params.put(BOOL_REQUIRED_PARAM_NAME, null);
+        params.put(TXT_REQUIRED_PARAM_NAME, null);
+        params.put(INT_REQUIRED_PARAM_NAME, null);
+        params.put(DECIMAL_REQUIRED_PARAM_NAME, null);
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
     }
 
     void assertMissingRequired(String parameterName) {
         List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(parameterName,
                 MessageKey.PARAMETER_REQUIRED.defaultMessage, MessageKey.PARAMETER_REQUIRED.key));
-
-        try {
-            params.remove(parameterName);
-            configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
-            failBecauseOfMissingConfigValidationException();
-        } catch (ConfigValidationException e) {
-            assertThat(getConfigValidationMessages(e), is(expected));
-        }
+        params.remove(parameterName);
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
     }
 
     void assertNonNullRequired(String parameterName) {
         List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(parameterName,
                 MessageKey.PARAMETER_REQUIRED.defaultMessage, MessageKey.PARAMETER_REQUIRED.key));
-
-        try {
-            params.put(parameterName, null);
-            configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
-            failBecauseOfMissingConfigValidationException();
-        } catch (ConfigValidationException e) {
-            assertThat(getConfigValidationMessages(e), is(expected));
-        }
+        params.put(parameterName, null);
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
     }
 
     // ===========================================================================
@@ -327,30 +317,24 @@ public class ConfigDescriptionValidatorTest {
                         MessageKey.MAX_VALUE_NUMERIC_VIOLATED.defaultMessage, MessageKey.MAX_VALUE_NUMERIC_VIOLATED.key,
                         DECIMAL_MAX.toString()))
                 .collect(toList());
-        try {
-            params.put(TXT_MIN_PARAM_NAME, String.valueOf(MIN_VIOLATED));
-            params.put(TXT_MAX_PARAM_NAME, String.valueOf(MAX_VIOLATED));
-            params.put(INT_MIN_PARAM_NAME, MIN_VIOLATED);
-            params.put(INT_MAX_PARAM_NAME, MAX_VIOLATED);
-            params.put(DECIMAL_MIN_PARAM_NAME, DECIMAL_MIN_VIOLATED);
-            params.put(DECIMAL_MAX_PARAM_NAME, DECIMAL_MAX_VIOLATED);
-            configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
-            failBecauseOfMissingConfigValidationException();
-        } catch (ConfigValidationException e) {
-            assertThat(getConfigValidationMessages(e), is(expected));
-        }
+        params.put(TXT_MIN_PARAM_NAME, String.valueOf(MIN_VIOLATED));
+        params.put(TXT_MAX_PARAM_NAME, String.valueOf(MAX_VIOLATED));
+        params.put(INT_MIN_PARAM_NAME, MIN_VIOLATED);
+        params.put(INT_MAX_PARAM_NAME, MAX_VIOLATED);
+        params.put(DECIMAL_MIN_PARAM_NAME, DECIMAL_MIN_VIOLATED);
+        params.put(DECIMAL_MAX_PARAM_NAME, DECIMAL_MAX_VIOLATED);
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
     }
 
     void assertMinMax(String parameterName, Object value, MessageKey msgKey, String minMax) {
         List<ConfigValidationMessage> expected = List
                 .of(new ConfigValidationMessage(parameterName, msgKey.defaultMessage, msgKey.key, minMax));
-        try {
-            params.put(parameterName, value);
-            configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
-            failBecauseOfMissingConfigValidationException();
-        } catch (ConfigValidationException e) {
-            assertThat(getConfigValidationMessages(e), is(expected));
-        }
+        params.put(parameterName, value);
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
     }
 
     // ===========================================================================
@@ -389,28 +373,22 @@ public class ConfigDescriptionValidatorTest {
                 new ConfigValidationMessage(DECIMAL_PARAM_NAME, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
                         MessageKey.DATA_TYPE_VIOLATED.key, Type.DECIMAL))
                 .collect(toList());
-        try {
-            params.put(BOOL_PARAM_NAME, INVALID);
-            params.put(TXT_PARAM_NAME, INVALID);
-            params.put(INT_PARAM_NAME, INVALID);
-            params.put(DECIMAL_PARAM_NAME, INVALID);
-            configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
-            failBecauseOfMissingConfigValidationException();
-        } catch (ConfigValidationException e) {
-            assertThat(getConfigValidationMessages(e), is(expected));
-        }
+        params.put(BOOL_PARAM_NAME, INVALID);
+        params.put(TXT_PARAM_NAME, INVALID);
+        params.put(INT_PARAM_NAME, INVALID);
+        params.put(DECIMAL_PARAM_NAME, INVALID);
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
     }
 
     void assertType(String parameterName, Type type) {
         List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(parameterName,
                 MessageKey.DATA_TYPE_VIOLATED.defaultMessage, MessageKey.DATA_TYPE_VIOLATED.key, type));
-        try {
-            params.put(parameterName, INVALID);
-            configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
-            failBecauseOfMissingConfigValidationException();
-        } catch (ConfigValidationException e) {
-            assertThat(getConfigValidationMessages(e), is(expected));
-        }
+        params.put(parameterName, INVALID);
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
     }
 
     // ===========================================================================
@@ -422,13 +400,10 @@ public class ConfigDescriptionValidatorTest {
         List<ConfigValidationMessage> expected = List
                 .of(new ConfigValidationMessage(TXT_PATTERN_PARAM_NAME, MessageKey.PATTERN_VIOLATED.defaultMessage,
                         MessageKey.PATTERN_VIOLATED.key, String.valueOf(MAX_VIOLATED), PATTERN));
-        try {
-            params.put(TXT_PATTERN_PARAM_NAME, String.valueOf(MAX_VIOLATED));
-            configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
-            failBecauseOfMissingConfigValidationException();
-        } catch (ConfigValidationException e) {
-            assertThat(getConfigValidationMessages(e), is(expected));
-        }
+        params.put(TXT_PATTERN_PARAM_NAME, String.valueOf(MAX_VIOLATED));
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
     }
 
     // ===========================================================================
@@ -454,19 +429,16 @@ public class ConfigDescriptionValidatorTest {
                         MessageKey.MAX_VALUE_NUMERIC_VIOLATED.defaultMessage, MessageKey.MAX_VALUE_NUMERIC_VIOLATED.key,
                         DECIMAL_MAX.toString()))
                 .collect(toList());
-        try {
-            params.put(BOOL_REQUIRED_PARAM_NAME, null);
-            params.put(TXT_REQUIRED_PARAM_NAME, null);
-            params.put(TXT_MAX_PARAM_NAME, String.valueOf(MAX_VIOLATED));
-            params.put(TXT_PATTERN_PARAM_NAME, String.valueOf(MAX_VIOLATED));
-            params.put(INT_MIN_PARAM_NAME, MIN_VIOLATED);
-            params.put(DECIMAL_PARAM_NAME, INVALID);
-            params.put(DECIMAL_MAX_PARAM_NAME, DECIMAL_MAX_VIOLATED);
-            configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
-            failBecauseOfMissingConfigValidationException();
-        } catch (ConfigValidationException e) {
-            assertThat(getConfigValidationMessages(e), is(expected));
-        }
+        params.put(BOOL_REQUIRED_PARAM_NAME, null);
+        params.put(TXT_REQUIRED_PARAM_NAME, null);
+        params.put(TXT_MAX_PARAM_NAME, String.valueOf(MAX_VIOLATED));
+        params.put(TXT_PATTERN_PARAM_NAME, String.valueOf(MAX_VIOLATED));
+        params.put(INT_MIN_PARAM_NAME, MIN_VIOLATED);
+        params.put(DECIMAL_PARAM_NAME, INVALID);
+        params.put(DECIMAL_MAX_PARAM_NAME, DECIMAL_MAX_VIOLATED);
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
     }
 
     @Test
@@ -474,13 +446,10 @@ public class ConfigDescriptionValidatorTest {
         List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(TXT_MAX_PATTERN_PARAM_NAME,
                 MessageKey.MAX_VALUE_TXT_VIOLATED.defaultMessage, MessageKey.MAX_VALUE_TXT_VIOLATED.key,
                 MAX.toString()));
-        try {
-            params.put(TXT_MAX_PATTERN_PARAM_NAME, String.valueOf(MAX_VIOLATED));
-            configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
-            failBecauseOfMissingConfigValidationException();
-        } catch (ConfigValidationException e) {
-            assertThat(getConfigValidationMessages(e), is(expected));
-        }
+        params.put(TXT_MAX_PATTERN_PARAM_NAME, String.valueOf(MAX_VIOLATED));
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
     }
 
     @Test
