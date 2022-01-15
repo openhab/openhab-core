@@ -98,7 +98,7 @@ public class PersistenceResourceTest {
 
     @Test
     public void testGetPersistenceItemData() {
-        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 5, false);
+        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, false);
 
         assertThat(Integer.parseInt(dto.datapoints), is(5));
         assertThat(dto.data, hasSize(5));
@@ -125,5 +125,13 @@ public class PersistenceResourceTest {
 
         assertEquals(item3.time, item4.time);
         assertNotEquals(item3.state, item4.state);
+    }
+
+    @Test
+    public void testGetPersistenceItemDataWithBoundery() {
+        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, true);
+
+        assertThat(Integer.parseInt(dto.datapoints), is(7));
+        assertThat(dto.data, hasSize(7));
     }
 }

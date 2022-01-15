@@ -432,13 +432,6 @@ public class PersistenceResource implements RESTResource {
                     "Persistence service not modifiable: " + serviceId);
         }
 
-        try {
-            Item item = itemRegistry.getItem(itemName);
-        } catch (ItemNotFoundException e) {
-            logger.warn("Item not found '{}'.", itemName);
-            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Item not found: " + itemName);
-        }
-
         if (timeBegin == null || timeEnd == null) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "The start and end time must be set");
         }
