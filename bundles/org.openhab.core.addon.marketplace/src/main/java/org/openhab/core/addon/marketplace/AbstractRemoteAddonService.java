@@ -209,7 +209,9 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                 // if we can't determine a set property, we use true (default is remote enabled)
                 return true;
             }
-            return (boolean) Objects.requireNonNullElse(properties.get("remote"), true);
+            Object remoteEnabled = properties.get("remote");
+            return (remoteEnabled == null || "true".equals(remoteEnabled.toString()));
+
         } catch (IOException e) {
             return true;
         }
