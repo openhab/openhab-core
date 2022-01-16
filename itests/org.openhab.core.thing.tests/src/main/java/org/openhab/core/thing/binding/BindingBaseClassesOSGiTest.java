@@ -351,7 +351,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         // ThingHandler.initialize() has not been called; thing with status UNINITIALIZED.HANDLER_CONFIGURATION_PENDING
         ThingStatusInfo uninitialized = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_CONFIGURATION_PENDING)
-                .withDescription("Missing or invalid configuration.").build();
+                .withDescription("@text/missing-or-invalid-configuration").build();
         assertThat(thing.getStatusInfo(), is(uninitialized));
 
         thingRegistry.updateConfiguration(thingUID, Map.of("parameter", "value"));

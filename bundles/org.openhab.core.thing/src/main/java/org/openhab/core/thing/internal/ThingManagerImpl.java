@@ -584,7 +584,7 @@ public class ThingManagerImpl
                                 setThingStatus(thing,
                                         buildStatusInfo(ThingStatus.UNINITIALIZED,
                                                 ThingStatusDetail.HANDLER_CONFIGURATION_PENDING,
-                                                "Missing or invalid configuration."));
+                                                "@text/missing-or-invalid-configuration"));
                             }
                         }
                     } else {
@@ -763,7 +763,7 @@ public class ThingManagerImpl
                         "Thing '{}' not initializable, check if required configuration parameters are present and set values are valid.",
                         thing.getUID());
                 setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED,
-                        ThingStatusDetail.HANDLER_CONFIGURATION_PENDING, "Missing or invalid configuration."));
+                        ThingStatusDetail.HANDLER_CONFIGURATION_PENDING, "@text/missing-or-invalid-configuration"));
             }
         } finally {
             lock.unlock();
