@@ -15,6 +15,7 @@ package org.openhab.core.config.core.validation;
 import java.net.URI;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.Configuration;
 
@@ -27,6 +28,7 @@ import org.openhab.core.config.core.Configuration;
  * @author Thomas Höfer - Initial contribution
  * @author Chris Jackson - Handle checks on multiple selection parameters
  */
+@NonNullByDefault
 public interface ConfigDescriptionValidator {
 
     /**

@@ -12,12 +12,15 @@
  */
 package org.openhab.core.config.core.internal.validation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link ConfigDescriptionParameterValidatorFactory} creates the corresponding
  * {@link ConfigDescriptionParameterValidator}s used by ConfigDescriptionValidator.
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 public final class ConfigDescriptionParameterValidatorFactory {
 
     private ConfigDescriptionParameterValidatorFactory() {

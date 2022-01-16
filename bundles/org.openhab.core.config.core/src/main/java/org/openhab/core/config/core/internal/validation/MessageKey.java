@@ -12,15 +12,18 @@
  */
 package org.openhab.core.config.core.internal.validation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Utility class providing the {@link MessageKey}s for config description validation. The {@link MessageKey}
  * consists of a key to be used for internationalization and a general default text.
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 final class MessageKey {
 
-    static final MessageKey PARAMETER_REQUIRED = new MessageKey("parameter_required", "The parameter is required");
+    static final MessageKey PARAMETER_REQUIRED = new MessageKey("parameter_required", "The parameter is required.");
 
     static final MessageKey DATA_TYPE_VIOLATED = new MessageKey("data_type_violated",
             "The data type of the value ({0}) does not match with the type declaration ({1}) in the configuration description.");

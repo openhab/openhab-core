@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.core.internal.validation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
 
@@ -20,15 +22,15 @@ import org.openhab.core.config.core.validation.ConfigValidationMessage;
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 final class RequiredValidator implements ConfigDescriptionParameterValidator {
 
     @Override
-    public ConfigValidationMessage validate(ConfigDescriptionParameter param, Object value) {
+    public @Nullable ConfigValidationMessage validate(ConfigDescriptionParameter param, @Nullable Object value) {
         if (param.isRequired() && value == null) {
             MessageKey messageKey = MessageKey.PARAMETER_REQUIRED;
             return new ConfigValidationMessage(param.getName(), messageKey.defaultMessage, messageKey.key);
         }
-
         return null;
     }
 }

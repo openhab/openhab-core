@@ -139,8 +139,7 @@ public class ConfigValidationExceptionTest {
     }
 
     @Test
-    @SuppressWarnings("unused")
-    public void assertThatNPEisThrownForNullConfigValidationMessages() {
+    public void assertThatNPEIsThrownForNullConfigValidationMessages() {
         assertThrows(NullPointerException.class,
                 () -> new ConfigValidationException(BUNDLE, TRANSLATION_PROVIDER, null));
     }

@@ -12,10 +12,8 @@
  */
 package org.openhab.core.config.core.internal.validation;
 
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -26,7 +24,6 @@ import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,10 +38,9 @@ import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
 import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
+import org.openhab.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Testing the {@link ConfigDescriptionValidator}.
@@ -53,8 +49,6 @@ import org.slf4j.LoggerFactory;
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 public class ConfigDescriptionValidatorTest {
-
-    private final Logger logger = LoggerFactory.getLogger(ConfigDescriptionValidatorTest.class);
 
     private static final int MIN_VIOLATED = 1;
     private static final int MAX_VIOLATED = 1234;
@@ -144,10 +138,10 @@ public class ConfigDescriptionValidatorTest {
     }
 
     private static final ConfigDescription CONFIG_DESCRIPTION = ConfigDescriptionBuilder.create(CONFIG_DESCRIPTION_URI)
-            .withParameters(Stream.of(BOOL_PARAM, BOOL_REQUIRED_PARAM, TXT_PARAM, TXT_REQUIRED_PARAM, TXT_MIN_PARAM,
+            .withParameters(List.of(BOOL_PARAM, BOOL_REQUIRED_PARAM, TXT_PARAM, TXT_REQUIRED_PARAM, TXT_MIN_PARAM,
                     TXT_MAX_PARAM, TXT_PATTERN_PARAM, TXT_MAX_PATTERN_PARAM, TXT_MULTIPLE_LIMIT_PARAM, INT_PARAM,
                     INT_REQUIRED_PARAM, INT_MIN_PARAM, INT_MAX_PARAM, DECIMAL_PARAM, DECIMAL_REQUIRED_PARAM,
-                    DECIMAL_MIN_PARAM, DECIMAL_MAX_PARAM).collect(toList()))
+                    DECIMAL_MIN_PARAM, DECIMAL_MAX_PARAM))
             .build();
 
     private Map<String, Object> params;
@@ -165,9 +159,8 @@ public class ConfigDescriptionValidatorTest {
         BundleContext bundleContext = mock(BundleContext.class);
         when(bundleContext.getBundle()).thenReturn(mock(Bundle.class));
 
-        configDescriptionValidator = new ConfigDescriptionValidatorImpl();
-        configDescriptionValidator.setConfigDescriptionRegistry(configDescriptionRegistry);
-        configDescriptionValidator.activate(bundleContext);
+        configDescriptionValidator = new ConfigDescriptionValidatorImpl(bundleContext, configDescriptionRegistry,
+                mock(TranslationProvider.class));
 
         params = new LinkedHashMap<>();
         params.put(BOOL_PARAM_NAME, null);
@@ -232,7 +225,7 @@ public class ConfigDescriptionValidatorTest {
 
     @Test
     public void assertValidationThrowsExceptionContainingMessagesForAllRequiredConfigParameters() {
-        List<ConfigValidationMessage> expected = Stream.of(
+        List<ConfigValidationMessage> expected = List.of(
                 new ConfigValidationMessage(BOOL_REQUIRED_PARAM_NAME, MessageKey.PARAMETER_REQUIRED.defaultMessage,
                         MessageKey.PARAMETER_REQUIRED.key),
                 new ConfigValidationMessage(DECIMAL_REQUIRED_PARAM_NAME, MessageKey.PARAMETER_REQUIRED.defaultMessage,
@@ -240,8 +233,7 @@ public class ConfigDescriptionValidatorTest {
                 new ConfigValidationMessage(TXT_REQUIRED_PARAM_NAME, MessageKey.PARAMETER_REQUIRED.defaultMessage,
                         MessageKey.PARAMETER_REQUIRED.key),
                 new ConfigValidationMessage(INT_REQUIRED_PARAM_NAME, MessageKey.PARAMETER_REQUIRED.defaultMessage,
-                        MessageKey.PARAMETER_REQUIRED.key))
-                .collect(toList());
+                        MessageKey.PARAMETER_REQUIRED.key));
         params.put(BOOL_PARAM_NAME, null);
         params.put(TXT_PARAM_NAME, null);
         params.put(INT_PARAM_NAME, null);
@@ -313,7 +305,7 @@ public class ConfigDescriptionValidatorTest {
 
     @Test
     public void assertValidationThrowsExceptionContainingMessagesForAllMinMaxConfigParameters() {
-        List<ConfigValidationMessage> expected = Stream.of(
+        List<ConfigValidationMessage> expected = List.of(
                 new ConfigValidationMessage(TXT_MAX_PARAM_NAME, MessageKey.MAX_VALUE_TXT_VIOLATED.defaultMessage,
                         MessageKey.MAX_VALUE_TXT_VIOLATED.key, MAX.toString()),
                 new ConfigValidationMessage(INT_MIN_PARAM_NAME, MessageKey.MIN_VALUE_NUMERIC_VIOLATED.defaultMessage,
@@ -327,8 +319,7 @@ public class ConfigDescriptionValidatorTest {
                         MessageKey.MAX_VALUE_NUMERIC_VIOLATED.key, MAX.toString()),
                 new ConfigValidationMessage(DECIMAL_MAX_PARAM_NAME,
                         MessageKey.MAX_VALUE_NUMERIC_VIOLATED.defaultMessage, MessageKey.MAX_VALUE_NUMERIC_VIOLATED.key,
-                        DECIMAL_MAX.toString()))
-                .collect(toList());
+                        DECIMAL_MAX.toString()));
         params.put(TXT_MIN_PARAM_NAME, String.valueOf(MIN_VIOLATED));
         params.put(TXT_MAX_PARAM_NAME, String.valueOf(MAX_VIOLATED));
         params.put(INT_MIN_PARAM_NAME, MIN_VIOLATED);
@@ -375,7 +366,7 @@ public class ConfigDescriptionValidatorTest {
 
     @Test
     public void assertValidationThrowsExceptionContainingMessagesForMultipleInvalidTypedConfigParameters() {
-        List<ConfigValidationMessage> expected = Stream.of(
+        List<ConfigValidationMessage> expected = List.of(
                 new ConfigValidationMessage(BOOL_PARAM_NAME, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
                         MessageKey.DATA_TYPE_VIOLATED.key, Long.class, Type.BOOLEAN),
                 new ConfigValidationMessage(INT_PARAM_NAME, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
@@ -383,8 +374,7 @@ public class ConfigDescriptionValidatorTest {
                 new ConfigValidationMessage(TXT_PARAM_NAME, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
                         MessageKey.DATA_TYPE_VIOLATED.key, Long.class, Type.TEXT),
                 new ConfigValidationMessage(DECIMAL_PARAM_NAME, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
-                        MessageKey.DATA_TYPE_VIOLATED.key, Long.class, Type.DECIMAL))
-                .collect(toList());
+                        MessageKey.DATA_TYPE_VIOLATED.key, Long.class, Type.DECIMAL));
         params.put(BOOL_PARAM_NAME, INVALID);
         params.put(TXT_PARAM_NAME, INVALID);
         params.put(INT_PARAM_NAME, INVALID);
@@ -434,7 +424,7 @@ public class ConfigDescriptionValidatorTest {
 
     @Test
     public void assertValidationThrowsExceptionContainingMultipleVariousViolations() {
-        List<ConfigValidationMessage> expected = Stream.of(
+        List<ConfigValidationMessage> expected = List.of(
                 new ConfigValidationMessage(BOOL_REQUIRED_PARAM_NAME, MessageKey.PARAMETER_REQUIRED.defaultMessage,
                         MessageKey.PARAMETER_REQUIRED.key),
                 new ConfigValidationMessage(TXT_MAX_PARAM_NAME, MessageKey.MAX_VALUE_TXT_VIOLATED.defaultMessage,
@@ -449,8 +439,7 @@ public class ConfigDescriptionValidatorTest {
                         MessageKey.DATA_TYPE_VIOLATED.key, Long.class, Type.DECIMAL),
                 new ConfigValidationMessage(DECIMAL_MAX_PARAM_NAME,
                         MessageKey.MAX_VALUE_NUMERIC_VIOLATED.defaultMessage, MessageKey.MAX_VALUE_NUMERIC_VIOLATED.key,
-                        DECIMAL_MAX.toString()))
-                .collect(toList());
+                        DECIMAL_MAX.toString()));
         params.put(BOOL_REQUIRED_PARAM_NAME, null);
         params.put(TXT_REQUIRED_PARAM_NAME, null);
         params.put(TXT_MAX_PARAM_NAME, String.valueOf(MAX_VIOLATED));
@@ -490,25 +479,8 @@ public class ConfigDescriptionValidatorTest {
     }
 
     @Test
-    public void assertValidateThrowsNPEforNullParamerters() {
-        assertThrows(NullPointerException.class,
-                () -> configDescriptionValidator.validate(null, CONFIG_DESCRIPTION_URI));
-    }
-
-    @Test
-    public void assertValidateThrowsNPEforNullConfigDescriptionUri() {
-        assertThrows(NullPointerException.class, () -> configDescriptionValidator.validate(params, null));
-    }
-
-    @Test
     public void assertValidateCanHandleUnknownURIs() throws Exception {
         configDescriptionValidator.validate(params, new URI(UNKNOWN));
-    }
-
-    @Test
-    public void assertValidateCanHandleSituationsWithoutConfigDescriptionRegistry() {
-        configDescriptionValidator.setConfigDescriptionRegistry(null);
-        configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
     }
 
     @SuppressWarnings("unchecked")
@@ -520,9 +492,5 @@ public class ConfigDescriptionValidatorTest {
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
             throw new IllegalStateException("Failed to get configValidationMessages: " + e.getMessage(), e);
         }
-    }
-
-    private void failBecauseOfMissingConfigValidationException() {
-        fail("A config validation exception was expected but it was not thrown");
     }
 }

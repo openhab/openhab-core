@@ -12,8 +12,9 @@
  */
 package org.openhab.core.config.core.internal.validation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
-import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.internal.validation.TypeIntrospections.TypeIntrospection;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
 
@@ -23,25 +24,21 @@ import org.openhab.core.config.core.validation.ConfigValidationMessage;
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 final class TypeValidator implements ConfigDescriptionParameterValidator {
 
     @Override
-    public ConfigValidationMessage validate(ConfigDescriptionParameter parameter, Object value) {
+    public @Nullable ConfigValidationMessage validate(ConfigDescriptionParameter parameter, @Nullable Object value) {
         if (value == null) {
             return null;
         }
 
         TypeIntrospection typeIntrospection = TypeIntrospections.get(parameter.getType());
         if (!typeIntrospection.isAssignable(value)) {
-            return createDataTypeViolationMessage(parameter.getName(), parameter.getType(), value.getClass());
+            return new ConfigValidationMessage(parameter.getName(), MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
+                    MessageKey.DATA_TYPE_VIOLATED.key, value.getClass(), parameter.getType());
         }
 
         return null;
-    }
-
-    private static ConfigValidationMessage createDataTypeViolationMessage(String parameterName, Type type,
-            Class<?> clazz) {
-        return new ConfigValidationMessage(parameterName, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
-                MessageKey.DATA_TYPE_VIOLATED.key, clazz, type);
     }
 }

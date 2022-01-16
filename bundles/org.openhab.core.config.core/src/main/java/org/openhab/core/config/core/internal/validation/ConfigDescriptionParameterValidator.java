@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.core.internal.validation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
 
@@ -21,6 +23,7 @@ import org.openhab.core.config.core.validation.ConfigValidationMessage;
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 public interface ConfigDescriptionParameterValidator {
 
     /**
@@ -32,5 +35,6 @@ public interface ConfigDescriptionParameterValidator {
      * @return a {@link ConfigValidationMessage} if value does not meet the declaration of the parameter,
      *         otherwise null
      */
-    ConfigValidationMessage validate(ConfigDescriptionParameter parameter, Object value);
+    @Nullable
+    ConfigValidationMessage validate(ConfigDescriptionParameter parameter, @Nullable Object value);
 }
