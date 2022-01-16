@@ -62,4 +62,13 @@ public final class ConfigDescriptionParameterValidatorFactory {
     public static ConfigDescriptionParameterValidator createPatternValidator() {
         return new PatternValidator();
     }
+
+    /**
+     * Returns a new validator for the parameter options of a config description parameter.
+     *
+     * @return a new validator for the parameter options of a config description parameter
+     */
+    public static ConfigDescriptionParameterValidator createOptionsValidator() {
+        return new OptionsValidator();
+    }
 }

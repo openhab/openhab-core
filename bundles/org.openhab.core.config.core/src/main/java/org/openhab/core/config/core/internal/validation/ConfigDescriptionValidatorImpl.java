@@ -53,7 +53,8 @@ public final class ConfigDescriptionValidatorImpl implements ConfigDescriptionVa
             ConfigDescriptionParameterValidatorFactory.createRequiredValidator(), //
             ConfigDescriptionParameterValidatorFactory.createTypeValidator(), //
             ConfigDescriptionParameterValidatorFactory.createMinMaxValidator(), //
-            ConfigDescriptionParameterValidatorFactory.createPatternValidator() //
+            ConfigDescriptionParameterValidatorFactory.createPatternValidator(), //
+            ConfigDescriptionParameterValidatorFactory.createOptionsValidator() //
     );
 
     private final Logger logger = LoggerFactory.getLogger(ConfigDescriptionValidatorImpl.class);

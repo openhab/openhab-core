@@ -35,6 +35,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
 import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
@@ -76,6 +77,8 @@ public class ConfigDescriptionValidatorTest {
     private static final String TXT_MAX_PARAM_NAME = "txt-max-name";
     private static final String TXT_PATTERN_PARAM_NAME = "txt-pattern-name";
     private static final String TXT_MAX_PATTERN_PARAM_NAME = "txt-max-pattern-name";
+    private static final String TXT_PARAM_WITH_LIMITED_OPTIONS_NAME = "txt-param-with-limited-options-name";
+    private static final String TXT_PARAM_WITH_UNLIMITED_OPTIONS_NAME = "txt-param-with-unlimited-options-name";
     private static final String TXT_MULTIPLE_LIMIT_PARAM_NAME = "txt-multiple-limit-name";
 
     private static final String INT_PARAM_NAME = "int-param";
@@ -87,6 +90,11 @@ public class ConfigDescriptionValidatorTest {
     private static final String DECIMAL_REQUIRED_PARAM_NAME = "decimal-required-param";
     private static final String DECIMAL_MIN_PARAM_NAME = "decimal-min-name";
     private static final String DECIMAL_MAX_PARAM_NAME = "decimal-max-name";
+
+    private static final List<ParameterOption> parameterOptions = List.of( //
+            new ParameterOption("http", "HTTP"), //
+            new ParameterOption("https", "HTTPS") //
+    );
 
     private static final ConfigDescriptionParameter BOOL_PARAM = ConfigDescriptionParameterBuilder
             .create(BOOL_PARAM_NAME, ConfigDescriptionParameter.Type.BOOLEAN).build();
@@ -106,6 +114,12 @@ public class ConfigDescriptionValidatorTest {
     private static final ConfigDescriptionParameter TXT_MAX_PATTERN_PARAM = ConfigDescriptionParameterBuilder
             .create(TXT_MAX_PATTERN_PARAM_NAME, ConfigDescriptionParameter.Type.TEXT).withMaximum(MAX)
             .withPattern(PATTERN).build();
+    private static final ConfigDescriptionParameter TXT_PARAM_WITH_LIMITED_OPTIONS = ConfigDescriptionParameterBuilder
+            .create(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, ConfigDescriptionParameter.Type.TEXT)
+            .withOptions(parameterOptions).build();
+    private static final ConfigDescriptionParameter TXT_PARAM_WITH_UNLIMITED_OPTIONS = ConfigDescriptionParameterBuilder
+            .create(TXT_PARAM_WITH_UNLIMITED_OPTIONS_NAME, ConfigDescriptionParameter.Type.TEXT)
+            .withOptions(parameterOptions).withLimitToOptions(false).build();
     private static final ConfigDescriptionParameter TXT_MULTIPLE_LIMIT_PARAM = ConfigDescriptionParameterBuilder
             .create(TXT_MULTIPLE_LIMIT_PARAM_NAME, Type.TEXT).withMultiple(true).withMultipleLimit(2).build();
 
@@ -139,9 +153,10 @@ public class ConfigDescriptionValidatorTest {
 
     private static final ConfigDescription CONFIG_DESCRIPTION = ConfigDescriptionBuilder.create(CONFIG_DESCRIPTION_URI)
             .withParameters(List.of(BOOL_PARAM, BOOL_REQUIRED_PARAM, TXT_PARAM, TXT_REQUIRED_PARAM, TXT_MIN_PARAM,
-                    TXT_MAX_PARAM, TXT_PATTERN_PARAM, TXT_MAX_PATTERN_PARAM, TXT_MULTIPLE_LIMIT_PARAM, INT_PARAM,
-                    INT_REQUIRED_PARAM, INT_MIN_PARAM, INT_MAX_PARAM, DECIMAL_PARAM, DECIMAL_REQUIRED_PARAM,
-                    DECIMAL_MIN_PARAM, DECIMAL_MAX_PARAM))
+                    TXT_MAX_PARAM, TXT_PATTERN_PARAM, TXT_MAX_PATTERN_PARAM, TXT_PARAM_WITH_LIMITED_OPTIONS,
+                    TXT_PARAM_WITH_UNLIMITED_OPTIONS, TXT_MULTIPLE_LIMIT_PARAM, INT_PARAM, INT_REQUIRED_PARAM,
+                    INT_MIN_PARAM, INT_MAX_PARAM, DECIMAL_PARAM, DECIMAL_REQUIRED_PARAM, DECIMAL_MIN_PARAM,
+                    DECIMAL_MAX_PARAM))
             .build();
 
     private Map<String, Object> params;
@@ -406,6 +421,33 @@ public class ConfigDescriptionValidatorTest {
         ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
                 () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
         assertThat(getConfigValidationMessages(exception), is(expected));
+    }
+
+    // ===========================================================================
+    // PARAMETER OPTION VALIDATIONS
+    // ===========================================================================
+
+    @Test
+    public void assertValidationThrowsNoExceptionForAllowedLimitedParameterOption() {
+        params.put(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, "http");
+        Assertions.assertDoesNotThrow(() -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+    }
+
+    @Test
+    public void assertValidationThrowsExceptionForNotAllowedLimitedParameterOption() {
+        List<ConfigValidationMessage> expected = List
+                .of(new ConfigValidationMessage(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME,
+                        MessageKey.OPTIONS_VIOLATED.defaultMessage, MessageKey.OPTIONS_VIOLATED.key));
+        params.put(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, "ftp");
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
+    }
+
+    @Test
+    public void assertValidationThrowsNoExceptionForAllowedUnlimitedParameterOption() {
+        params.put(TXT_PARAM_WITH_UNLIMITED_OPTIONS_NAME, "ftp");
+        Assertions.assertDoesNotThrow(() -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
     }
 
     // ===========================================================================

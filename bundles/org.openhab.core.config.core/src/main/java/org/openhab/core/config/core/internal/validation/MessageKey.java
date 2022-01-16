@@ -41,6 +41,9 @@ final class MessageKey {
     static final MessageKey PATTERN_VIOLATED = new MessageKey("pattern_violated",
             "The value {0} does not match the pattern {1}.");
 
+    static final MessageKey OPTIONS_VIOLATED = new MessageKey("options_violated",
+            "The value {0} does not match allowed parameter options.");
+
     static final MessageKey MULTIPLE_LIMIT_VIOLATED = new MessageKey("multiple_limit_violated",
             "Only {0} elements are allowed but {1} are provided.");
     /** The key to be used for internationalization. */

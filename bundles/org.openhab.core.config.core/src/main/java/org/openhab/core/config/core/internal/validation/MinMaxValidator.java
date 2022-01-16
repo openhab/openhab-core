@@ -18,7 +18,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
-import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.config.core.internal.validation.TypeIntrospections.TypeIntrospection;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
 
@@ -39,15 +38,12 @@ final class MinMaxValidator implements ConfigDescriptionParameterValidator {
         }
 
         // Allow specified options to be outside of the min/max value
-        for (ParameterOption option : parameter.getOptions()) {
-            // Option values are a string, so we can do a simple compare
-            if (option.getValue().equals(value.toString())) {
-                return null;
-            }
+        // Option values are a string, so we can do a simple compare
+        if (parameter.getOptions().stream().map(o -> o.getValue()).anyMatch(v -> v.equals(value.toString()))) {
+            return null;
         }
 
         TypeIntrospection typeIntrospection = TypeIntrospections.get(parameter.getType());
-
         if (parameter.getMinimum() != null) {
             BigDecimal min = parameter.getMinimum();
             if (typeIntrospection.isMinViolated(value, min)) {
@@ -55,7 +51,6 @@ final class MinMaxValidator implements ConfigDescriptionParameterValidator {
                         min);
             }
         }
-
         if (parameter.getMaximum() != null) {
             BigDecimal max = parameter.getMaximum();
             if (typeIntrospection.isMaxViolated(value, max)) {
