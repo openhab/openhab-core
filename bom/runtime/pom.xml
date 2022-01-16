@@ -19,7 +19,7 @@
     <cxf.version>3.4.5</cxf.version>
     <jackson.version>2.12.5</jackson.version>
     <jetty.version>9.4.43.v20210629</jetty.version>
-    <pax.logging.version>2.0.12</pax.logging.version>
+    <pax.logging.version>2.0.14</pax.logging.version>
     <pax.web.version>7.3.23</pax.web.version>
     <swagger.version>2.1.9</swagger.version>
   </properties>
@@ -730,13 +730,13 @@
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.19</version>
+      <version>4.20</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.19</version>
+      <version>4.20</version>
       <scope>compile</scope>
     </dependency>
 
