@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -40,6 +40,7 @@ import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.events.Event;
 import org.openhab.core.io.rest.RESTConstants;
@@ -207,17 +208,21 @@ public class SseResource implements RESTResource, SsePublisher {
     @Operation(operationId = "updateItemListForStateUpdates", summary = "Changes the list of items a SSE connection will receive state updates to.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Unknown connectionId") })
-    public Object updateTrackedItems(@PathParam("connectionId") String connectionId,
-            @Parameter(description = "items") Set<String> itemNames) {
+    public Object updateTrackedItems(@PathParam("connectionId") @Nullable String connectionId,
+            @Parameter(description = "items") @Nullable Set<String> itemNames) {
+        if (connectionId == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
         Optional<SseSinkItemInfo> itemStateInfo = itemStatesBroadcaster.getInfoIf(hasConnectionId(connectionId))
                 .findFirst();
         if (!itemStateInfo.isPresent()) {
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        itemStateInfo.get().updateTrackedItems(itemNames);
+        Set<String> trackedItemNames = (itemNames == null) ? Set.of() : itemNames;
+        itemStateInfo.get().updateTrackedItems(trackedItemNames);
 
-        OutboundSseEvent itemStateEvent = itemStatesEventBuilder.buildEvent(sse.newEventBuilder(), itemNames);
+        OutboundSseEvent itemStateEvent = itemStatesEventBuilder.buildEvent(sse.newEventBuilder(), trackedItemNames);
         if (itemStateEvent != null) {
             itemStatesBroadcaster.sendIf(itemStateEvent, hasConnectionId(connectionId));
         }

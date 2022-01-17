@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -309,7 +309,7 @@ public class UnitsTest {
 
     @Test
     public void testBar2Pascal() {
-        Quantity<Pressure> bar = Quantities.getQuantity(BigDecimal.valueOf(1), Units.BAR);
+        Quantity<Pressure> bar = Quantities.getQuantity(BigDecimal.ONE, Units.BAR);
         assertThat(bar.to(SIUnits.PASCAL), is(Quantities.getQuantity(100000, SIUnits.PASCAL)));
     }
 

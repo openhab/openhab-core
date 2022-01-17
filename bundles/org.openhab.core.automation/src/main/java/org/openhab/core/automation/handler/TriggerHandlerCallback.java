@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,6 +15,8 @@ package org.openhab.core.automation.handler;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.Trigger;
@@ -30,6 +32,7 @@ import org.openhab.core.automation.type.Output;
  * @author Kai Kreuzer - made it a sub-interface of ModuleHandlerCallback
  * @author Fabian Wolter - Add method for retrieving the handler's scheduler
  */
+@NonNullByDefault
 public interface TriggerHandlerCallback extends ModuleHandlerCallback {
 
     /**
@@ -46,7 +49,7 @@ public interface TriggerHandlerCallback extends ModuleHandlerCallback {
      *            <li><code>value</code> - represents output value of the {@link Trigger}'s {@link Output}
      *            </ul>
      */
-    public void triggered(Trigger trigger, Map<String, ?> context);
+    public void triggered(Trigger trigger, @Nullable Map<String, ?> context);
 
     /**
      * @return the scheduler of this rule

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -52,24 +52,29 @@ public class TimerImplTest {
     public void testTimerIsActiveAndCancel() {
         assertThat(subject.isActive(), is(true));
         assertThat(subject.hasTerminated(), is(false));
+        assertThat(subject.isCancelled(), is(false));
 
         subject.cancel();
         assertThat(subject.isActive(), is(false));
         assertThat(subject.hasTerminated(), is(true));
+        assertThat(subject.isCancelled(), is(true));
 
         subject.reschedule(ZonedDateTime.now().plusSeconds(DEFAULT_TIMEOUT_SECONDS));
         assertThat(subject.isActive(), is(true));
         assertThat(subject.hasTerminated(), is(false));
+        assertThat(subject.isCancelled(), is(false));
     }
 
     @Test
     public void testTimerIsActiveAndTerminate() throws InterruptedException {
         assertThat(subject.isActive(), is(true));
         assertThat(subject.hasTerminated(), is(false));
+        assertThat(subject.isCancelled(), is(false));
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 1));
         assertThat(subject.isActive(), is(false));
         assertThat(subject.hasTerminated(), is(true));
+        assertThat(subject.isCancelled(), is(false));
     }
 
     @Test
@@ -77,28 +82,34 @@ public class TimerImplTest {
         Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 1));
         assertThat(subject.isActive(), is(false));
         assertThat(subject.hasTerminated(), is(true));
+        assertThat(subject.isCancelled(), is(false));
      
         subject.reschedule(ZonedDateTime.now().plusSeconds(DEFAULT_TIMEOUT_SECONDS));
         assertThat(subject.isActive(), is(true));
         assertThat(subject.hasTerminated(), is(false));
+        assertThat(subject.isCancelled(), is(false));
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 1));
         assertThat(subject.isActive(), is(false));
         assertThat(subject.hasTerminated(), is(true));
+        assertThat(subject.isCancelled(), is(false));
     }
 
     @Test
     public void testTimerIsRunning() throws InterruptedException {
         assertThat(subject.isRunning(), is(false));
         assertThat(subject.hasTerminated(), is(false));
+        assertThat(subject.isCancelled(), is(false));
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS) + 500);
         assertThat(subject.isRunning(), is(true));
         assertThat(subject.hasTerminated(), is(false));
+        assertThat(subject.isCancelled(), is(false));
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_RUNTIME_SECONDS + 1));
         assertThat(subject.isRunning(), is(false));
         assertThat(subject.hasTerminated(), is(true));
+        assertThat(subject.isCancelled(), is(false));
     }
 
     private Timer createTimer(ZonedDateTime instant, SchedulerRunnable runnable) {

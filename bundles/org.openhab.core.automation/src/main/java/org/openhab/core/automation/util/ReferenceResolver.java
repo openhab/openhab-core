@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -43,19 +43,19 @@ import org.slf4j.Logger;
  * <ul>
  * <li>Single reference configuration value where whole configuration property value is replaced(if found) with the
  * referenced value <br/>
- * 'configurationProperty': '${singleReference}'</li>
+ * 'configurationProperty': '{{singleReference}}'</li>
  * <li>Complex reference configuration value where only reference parts are replaced in the whole configuration property
  * value. <br/>
- * 'configurationProperty': '{key1: ${complexReference1}, key2: ${complexReference2}'</li>
+ * 'configurationProperty': '{key1: {{complexReference1}}, key2: {{complexReference2}}}'</li>
  * </ul>
  *
  * Given Module 'A' is child of CompositeModule then its inputs can have '${singleReferences}' to CompositeModule.
  * <ul>
  * <li>Single reference to CompositeModule inputs where whole input value is replaced with the referenced value <br/>
- * 'childInput' : '${compositeModuleInput}'</li>
+ * 'childInput' : '{{compositeModuleInput}}'</li>
  * <li>Single reference to CompositeModule configuration where whole input value is replaced with the referenced value
  * <br/>
- * 'childInput' : '${compositeModuleConfiguration}'</li>
+ * 'childInput' : '{{compositeModuleConfiguration}}'</li>
  * </ul>
  *
  * @author Vasil Ilchev - Initial contribution
@@ -66,12 +66,13 @@ public class ReferenceResolver {
     /**
      * Updates (changes) configuration properties of module base on given context (it can be CompositeModule
      * Configuration or Rule Configuration).
-     * For example: 1) If a module configuration property has a value '${name}' the method looks for such key in context
+     * For example: 1) If a module configuration property has a value '{{name}}' the method looks for such key in
+     * context
      * and if found - replace the module's configuration value as it is.
      *
-     * 2) If a module configuration property has complex value 'Hello ${firstName} ${lastName}' the method tries to
+     * 2) If a module configuration property has complex value 'Hello {{firstName}} {{lastName}}' the method tries to
      * parse it and replace (if values are found) referenced parts in module's configuration value. Will
-     * try to find values for ${firstName} and ${lastName} in the given context and replace them. References that are
+     * try to find values for {{firstName}} and {{lastName}} in the given context and replace them. References that are
      * not found in the context - are not replaced.
      *
      * @param module module that is directly part of Rule or part of CompositeModule
@@ -143,7 +144,7 @@ public class ReferenceResolver {
     }
 
     /**
-     * Resolves single reference '${singleReference}' from given context.
+     * Resolves single reference '{{singleReference}}' from given context.
      *
      * @param reference single reference expression for resolving
      * @param context contains the values that will be used for reference resolving
@@ -153,29 +154,29 @@ public class ReferenceResolver {
         Object result = reference;
         if (isReference(reference)) {
             final String trimmedVal = reference.trim();
-            String key = trimmedVal.substring(2, trimmedVal.length() - 1);
-            result = context.get(key);// ${substring}
+            String key = trimmedVal.substring(2, trimmedVal.length() - 2);
+            result = context.get(key);// {{substring}}
         }
         return result;
     }
 
     /**
-     * Tries to resolve complex references e.g. 'Hello ${firstName} ${lastName}'..'{key1: ${reference1}, key2:
-     * ${reference2}}'..etc.
+     * Tries to resolve complex references e.g. 'Hello {{firstName}} {{lastName}}'..'{key1: {{reference1}}, key2:
+     * {{reference2}}}'..etc.
      *
-     * References are keys in the context map (without the '${' prefix and '}' suffix).
+     * References are keys in the context map (without the '{{' prefix and '}}' suffix).
      *
      * If value is found in the given context it overrides the reference part in the configuration value. For example:
      *
      * <pre>
      * configuration {
      * ..
-     *   configProperty: 'Hello ${firstName} ${lastName}'
+     *   configProperty: 'Hello {{firstName}} {{lastName}}'
      * ..
      * }
      * </pre>
      *
-     * And context that has value for '${lastName}':
+     * And context that has value for '{{lastName}}':
      *
      * <pre>
      * ..
@@ -205,13 +206,13 @@ public class ReferenceResolver {
     private static String resolvePattern(String reference, Map<String, ?> context, Logger logger) {
         final StringBuilder sb = new StringBuilder();
         int previous = 0;
-        for (int start, end; (start = reference.indexOf("${", previous)) != -1; previous = end + 1) {
+        for (int start, end; (start = reference.indexOf("{{", previous)) != -1; previous = end + 2) {
             sb.append(reference.substring(previous, start));
-            end = reference.indexOf('}', start + 2);
+            end = reference.indexOf("}}", start + 2);
             if (end == -1) {
                 previous = start;
                 String msg = "Couldn't parse referenced key: " + reference.substring(start)
-                        + ": expected reference syntax-> ${referencedKey}";
+                        + ": expected reference syntax-> {{referencedKey}}";
                 logger.warn(msg);
                 throw new IllegalArgumentException(msg);
             }
@@ -221,9 +222,9 @@ public class ReferenceResolver {
             if (referencedValue != null) {
                 sb.append(referencedValue);
             } else {
-                String msg = "Cannot find reference for ${ " + referencedKey + " } , it will remain the same.";
+                String msg = "Cannot find reference for {{" + referencedKey + "}} , it will remain the same.";
                 logger.warn(msg);
-                sb.append("${" + referencedKey + "}");
+                sb.append("{{" + referencedKey + "}}");
             }
         }
         sb.append(reference.substring(previous));
@@ -231,26 +232,26 @@ public class ReferenceResolver {
     }
 
     /**
-     * Determines whether given Text is '${reference}'.
+     * Determines whether given Text is '{{reference}}'.
      *
      * @param value the value for evaluation
-     * @return True if this value is a '${reference}', false otherwise.
+     * @return True if this value is a '{{reference}}', false otherwise.
      */
     private static boolean isReference(String value) {
         String trimmedVal = value == null ? null : value.trim();
-        // starts with '${' and contains it only once contains '}' only once - last char reference is not empty '${}'
-        return trimmedVal != null && trimmedVal.lastIndexOf("${") == 0
-                && trimmedVal.indexOf('}') == trimmedVal.length() - 1 && trimmedVal.length() > 3;
+        // starts with '{{' and contains it only once contains '}}' only once - last char reference is not empty '{{}}'
+        return trimmedVal != null && trimmedVal.lastIndexOf("{{") == 0
+                && trimmedVal.indexOf("}}") == trimmedVal.length() - 2 && trimmedVal.length() > 4;
     }
 
     /**
-     * Determines whether given Text is '...${reference}...'.
+     * Determines whether given Text is '...{{reference}}...'.
      *
      * @param value the value for evaluation
-     * @return True if this value is a '...${reference}...', false otherwise.
+     * @return True if this value is a '...{{reference}}...', false otherwise.
      */
     private static boolean containsPattern(String value) {
-        return value != null && value.trim().contains("${") && value.trim().indexOf("${") < value.trim().indexOf("}");
+        return value != null && value.trim().contains("{{") && value.trim().indexOf("{{") < value.trim().indexOf("}}");
     }
 
     /**

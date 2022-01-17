@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.auth.internal;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,8 +29,8 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class ExpiringUserSecurityContextCache {
-    private static final int MAX_SIZE = 10;
-    private static final int CLEANUP_FREQUENCY = 10;
+    static final int MAX_SIZE = 10;
+    static final int CLEANUP_FREQUENCY = 10;
 
     private final long keepPeriod;
     private final Map<String, Entry> entryMap;
@@ -50,7 +51,7 @@ public class ExpiringUserSecurityContextCache {
     synchronized @Nullable UserSecurityContext get(String key) {
         calls++;
         if (calls >= CLEANUP_FREQUENCY) {
-            entryMap.keySet().forEach(k -> getEntry(k));
+            new HashSet<>(entryMap.keySet()).forEach(k -> getEntry(k));
             calls = 0;
         }
         Entry entry = getEntry(key);

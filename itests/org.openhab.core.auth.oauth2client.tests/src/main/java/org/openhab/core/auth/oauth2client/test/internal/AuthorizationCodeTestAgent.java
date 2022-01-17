@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -53,6 +53,7 @@ public class AuthorizationCodeTestAgent extends AbstractTestAgent implements Tes
         super.oauthFactory = oauthFactory;
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public void unsetOauthFactory(OAuthFactory oauthFactory) {
         if (super.oauthFactory == oauthFactory) {
             if (handle != null) {

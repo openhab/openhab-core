@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,6 +25,7 @@ import javax.sound.sampled.SourceDataLine;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.utils.AudioWaveUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +61,10 @@ public class AudioPlayer extends Thread {
     @Override
     public void run() {
         SourceDataLine line;
-        AudioFormat audioFormat = convertAudioFormat(this.audioStream.getFormat());
+
+        org.openhab.core.audio.AudioFormat openhabAudioFormat = audioStream.getFormat();
+
+        AudioFormat audioFormat = convertAudioFormat(openhabAudioFormat);
         if (audioFormat == null) {
             logger.warn("Audio format is unsupported or does not have enough details in order to be played");
             return;
@@ -87,6 +91,11 @@ public class AudioPlayer extends Thread {
         int nRead = 0;
         byte[] abData = new byte[65532]; // needs to be a multiple of 4 and 6, to support both 16 and 24 bit stereo
         try {
+            // If this is a wav container, we should remove the header from the stream
+            // to avoid a "clack" noise at the beginning
+            if (org.openhab.core.audio.AudioFormat.CONTAINER_WAVE.equals(openhabAudioFormat.getContainer())) {
+                AudioWaveUtils.removeFMT(audioStream);
+            }
             while (-1 != nRead) {
                 nRead = audioStream.read(abData, 0, abData.length);
                 if (nRead >= 0) {
@@ -136,11 +145,11 @@ public class AudioPlayer extends Thread {
         }
         final int sampleSizeInBits = bitDepth.intValue();
 
-        final int channels = 1;
+        final int channels = audioFormat.getChannels() == null ? Integer.valueOf(1) : audioFormat.getChannels();
 
-        final int frameSize = sampleSizeInBits / 8;
+        final int frameSize = channels * sampleSizeInBits / 8;
 
-        final float frameRate = sampleRate / frameSize;
+        final float frameRate = channels * sampleRate / frameSize;
 
         final Boolean bigEndian = audioFormat.isBigEndian();
         if (bigEndian == null) {

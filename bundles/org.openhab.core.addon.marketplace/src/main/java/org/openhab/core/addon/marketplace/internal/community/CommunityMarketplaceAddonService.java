@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,7 @@ package org.openhab.core.addon.marketplace.internal.community;
 
 import static org.openhab.core.addon.Addon.CODE_MATURITY_LEVELS;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
@@ -32,6 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonEventFactory;
@@ -49,6 +51,8 @@ import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.osgi.framework.Constants;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -65,16 +69,17 @@ import com.google.gson.GsonBuilder;
  * This class is a {@link AddonService} retrieving posts on community.openhab.org (Discourse).
  *
  * @author Yannick Schaus - Initial contribution
- *
  */
 @Component(immediate = true, configurationPid = "org.openhab.marketplace", //
         property = Constants.SERVICE_PID + "=org.openhab.marketplace")
 @ConfigurableService(category = "system", label = "Community Marketplace", description_uri = CommunityMarketplaceAddonService.CONFIG_URI)
+@NonNullByDefault
 public class CommunityMarketplaceAddonService implements AddonService {
     public static final String JAR_CONTENT_TYPE = "application/vnd.openhab.bundle";
     public static final String KAR_CONTENT_TYPE = "application/vnd.openhab.feature;type=karfile";
     public static final String RULETEMPLATES_CONTENT_TYPE = "application/vnd.openhab.ruletemplate";
     public static final String UIWIDGETS_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=widget";
+    public static final String BLOCKLIBRARIES_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=blocks";
 
     // constants for the configuration properties
     static final String CONFIG_URI = "system:marketplace";
@@ -94,6 +99,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private static final Integer BUNDLES_CATEGORY = 73;
     private static final Integer RULETEMPLATES_CATEGORY = 74;
     private static final Integer UIWIDGETS_CATEGORY = 75;
+    private static final Integer BLOCKLIBRARIES_CATEGORY = 76;
 
     private static final String PUBLISHED_TAG = "published";
 
@@ -110,9 +116,18 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
     private final Set<MarketplaceAddonHandler> addonHandlers = new HashSet<>();
 
-    private EventPublisher eventPublisher;
-    private String apiKey = null;
+    private final EventPublisher eventPublisher;
+    private final ConfigurationAdmin configurationAdmin;
+
+    private @Nullable String apiKey = null;
     private boolean showUnpublished = false;
+
+    @Activate
+    public CommunityMarketplaceAddonService(final @Reference EventPublisher eventPublisher,
+            @Reference ConfigurationAdmin configurationAdmin) {
+        this.eventPublisher = eventPublisher;
+        this.configurationAdmin = configurationAdmin;
+    }
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -138,15 +153,6 @@ public class CommunityMarketplaceAddonService implements AddonService {
         this.addonHandlers.remove(handler);
     }
 
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
     @Override
     public String getId() {
         return "marketplace";
@@ -162,7 +168,11 @@ public class CommunityMarketplaceAddonService implements AddonService {
     }
 
     @Override
-    public List<Addon> getAddons(Locale locale) {
+    public List<Addon> getAddons(@Nullable Locale locale) {
+        if (!remoteEnabled()) {
+            return List.of();
+        }
+
         try {
             List<DiscourseCategoryResponseDTO> pages = new ArrayList<>();
 
@@ -201,7 +211,11 @@ public class CommunityMarketplaceAddonService implements AddonService {
     }
 
     @Override
-    public Addon getAddon(String id, Locale locale) {
+    public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
+        if (!remoteEnabled()) {
+            return null;
+        }
+
         URL url;
         try {
             url = new URL(String.format("%s%s", COMMUNITY_TOPIC_URL, id.replace(ADDON_ID_PREFIX, "")));
@@ -221,26 +235,28 @@ public class CommunityMarketplaceAddonService implements AddonService {
     }
 
     @Override
-    public List<AddonType> getTypes(Locale locale) {
+    public List<AddonType> getTypes(@Nullable Locale locale) {
         return new ArrayList<>(TAG_ADDON_TYPE_MAP.values());
     }
 
     @Override
     public void install(String id) {
         Addon addon = getAddon(id, null);
-        for (MarketplaceAddonHandler handler : addonHandlers) {
-            if (handler.supports(addon.getType(), addon.getContentType())) {
-                if (!handler.isInstalled(addon.getId())) {
-                    try {
-                        handler.install(addon);
-                        postInstalledEvent(id);
-                    } catch (MarketplaceHandlerException e) {
-                        postFailureEvent(id, e.getMessage());
+        if (addon != null) {
+            for (MarketplaceAddonHandler handler : addonHandlers) {
+                if (handler.supports(addon.getType(), addon.getContentType())) {
+                    if (!handler.isInstalled(addon.getId())) {
+                        try {
+                            handler.install(addon);
+                            postInstalledEvent(id);
+                        } catch (MarketplaceHandlerException e) {
+                            postFailureEvent(id, e.getMessage());
+                        }
+                    } else {
+                        postFailureEvent(id, "Add-on is already installed.");
                     }
-                } else {
-                    postFailureEvent(id, "Add-on is already installed.");
+                    return;
                 }
-                return;
             }
         }
         postFailureEvent(id, "Add-on not known.");
@@ -249,30 +265,32 @@ public class CommunityMarketplaceAddonService implements AddonService {
     @Override
     public void uninstall(String id) {
         Addon addon = getAddon(id, null);
-        for (MarketplaceAddonHandler handler : addonHandlers) {
-            if (handler.supports(addon.getType(), addon.getContentType())) {
-                if (handler.isInstalled(addon.getId())) {
-                    try {
-                        handler.uninstall(addon);
-                        postUninstalledEvent(id);
-                    } catch (MarketplaceHandlerException e) {
-                        postFailureEvent(id, e.getMessage());
+        if (addon != null) {
+            for (MarketplaceAddonHandler handler : addonHandlers) {
+                if (handler.supports(addon.getType(), addon.getContentType())) {
+                    if (handler.isInstalled(addon.getId())) {
+                        try {
+                            handler.uninstall(addon);
+                            postUninstalledEvent(id);
+                        } catch (MarketplaceHandlerException e) {
+                            postFailureEvent(id, e.getMessage());
+                        }
+                    } else {
+                        postFailureEvent(id, "Add-on is not installed.");
                     }
-                } else {
-                    postFailureEvent(id, "Add-on is not installed.");
+                    return;
                 }
-                return;
             }
         }
         postFailureEvent(id, "Add-on not known.");
     }
 
     @Override
-    public String getAddonId(URI addonURI) {
+    public @Nullable String getAddonId(URI addonURI) {
         if (addonURI.toString().startsWith(COMMUNITY_TOPIC_URL)) {
             return addonURI.toString().substring(0, addonURI.toString().indexOf("/", COMMUNITY_BASE_URL.length()));
         }
-        return "";
+        return null;
     }
 
     private @Nullable AddonType getAddonType(@Nullable Integer category, List<String> tags) {
@@ -281,6 +299,8 @@ public class CommunityMarketplaceAddonService implements AddonService {
             return TAG_ADDON_TYPE_MAP.get("automation");
         } else if (UIWIDGETS_CATEGORY.equals(category)) {
             return TAG_ADDON_TYPE_MAP.get("ui");
+        } else if (BLOCKLIBRARIES_CATEGORY.equals(category)) {
+            return TAG_ADDON_TYPE_MAP.get("automation");
         } else if (BUNDLES_CATEGORY.equals(category)) {
             // try to get it from tags if we have tags
             return tags.stream().map(TAG_ADDON_TYPE_MAP::get).filter(Objects::nonNull).findFirst().orElse(null);
@@ -296,6 +316,8 @@ public class CommunityMarketplaceAddonService implements AddonService {
             return RULETEMPLATES_CONTENT_TYPE;
         } else if (UIWIDGETS_CATEGORY.equals(category)) {
             return UIWIDGETS_CONTENT_TYPE;
+        } else if (BLOCKLIBRARIES_CATEGORY.equals(category)) {
+            return BLOCKLIBRARIES_CONTENT_TYPE;
         } else if (BUNDLES_CATEGORY.equals(category)) {
             if (tags.contains("kar")) {
                 return KAR_CONTENT_TYPE;
@@ -338,12 +360,11 @@ public class CommunityMarketplaceAddonService implements AddonService {
 
         String maturity = tags.stream().filter(CODE_MATURITY_LEVELS::contains).findAny().orElse(null);
 
-        Map<String, Object> properties = new HashMap<>(10);
-        properties.put("created_at", createdDate);
-        properties.put("like_count", likeCount);
-        properties.put("views", views);
-        properties.put("posts_count", postsCount);
-        properties.put("tags", tags.toArray(String[]::new));
+        Map<String, Object> properties = Map.of("created_at", createdDate, //
+                "like_count", likeCount, //
+                "views", views, //
+                "posts_count", postsCount, //
+                "tags", tags.toArray(String[]::new));
 
         // try to use an handler to determine if the add-on is installed
         boolean installed = addonHandlers.stream()
@@ -450,8 +471,21 @@ public class CommunityMarketplaceAddonService implements AddonService {
         eventPublisher.post(event);
     }
 
-    private void postFailureEvent(String extensionId, String msg) {
+    private void postFailureEvent(String extensionId, @Nullable String msg) {
         Event event = AddonEventFactory.createAddonFailureEvent(extensionId, msg);
         eventPublisher.post(event);
+    }
+
+    private boolean remoteEnabled() {
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration("org.openhab.addons", null);
+            if (configuration.getProperties() != null) {
+                return (boolean) Objects.requireNonNullElse(configuration.getProperties().get("remote"), true);
+            } else {
+                return true;
+            }
+        } catch (IOException e) {
+            return true;
+        }
     }
 }

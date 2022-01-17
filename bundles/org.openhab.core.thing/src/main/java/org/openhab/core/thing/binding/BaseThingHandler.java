@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -386,6 +386,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      *
      * @param thing thing, that was updated and should be persisted
      */
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     protected void updateThing(Thing thing) {
         if (thing == this.thing) {
             throw new IllegalArgumentException(

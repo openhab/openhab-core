@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -232,7 +232,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
                 && (maximum != null ? maximum.equals(other.maximum) : other.maximum == null)
                 && (step != null ? step.equals(other.step) : other.step == null)
                 && (pattern != null ? pattern.equals(other.pattern) : other.pattern == null)
-                && readOnly == other.readOnly //
+                && (readOnly != null ? readOnly.equals(other.readOnly) : other.readOnly == null)
                 && (options != null ? options.equals(other.options) : other.options == null);
     }
 

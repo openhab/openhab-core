@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -77,7 +77,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertGetConfigurableServicesWorks() {
-        int num = configurableServiceResource.getAll().size();
+        int num = configurableServiceResource.getAll("en").size();
 
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put("service.pid", "pid");
@@ -87,7 +87,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
 
         registerService(mock(SomeServiceInterface.class), properties);
 
-        List<ConfigurableServiceDTO> configurableServices = configurableServiceResource.getAll();
+        List<ConfigurableServiceDTO> configurableServices = configurableServiceResource.getAll("en");
         assertThat(configurableServices.size(), is(num + 1));
 
         Optional<ConfigurableServiceDTO> optionalService = configurableServices.stream()
@@ -105,7 +105,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertComponentNameFallbackWorks() {
-        int num = configurableServiceResource.getAll().size();
+        int num = configurableServiceResource.getAll("en").size();
 
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put("component.name", "component.name");
@@ -113,7 +113,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
 
         registerService(mock(SomeServiceInterface.class), properties);
 
-        List<ConfigurableServiceDTO> configurableServices = configurableServiceResource.getAll();
+        List<ConfigurableServiceDTO> configurableServices = configurableServiceResource.getAll("en");
         assertThat(configurableServices.size(), is(num + 1));
 
         Optional<ConfigurableServiceDTO> optionalService = configurableServices.stream()
@@ -135,7 +135,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
 
         Map<String, Object> newConfiguration = new HashMap<>();
         newConfiguration.put("a", "b");
-        response = configurableServiceResource.updateConfiguration("id", newConfiguration);
+        response = configurableServiceResource.updateConfiguration("en", "id", newConfiguration);
         assertThat(response.getStatus(), is(204));
 
         response = configurableServiceResource.getConfiguration("id");
@@ -143,7 +143,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
         assertThat(((Map) response.getEntity()).get("a"), is(equalTo("b")));
 
         newConfiguration.put("a", "c");
-        response = configurableServiceResource.updateConfiguration("id", newConfiguration);
+        response = configurableServiceResource.updateConfiguration("en", "id", newConfiguration);
         assertThat(response.getStatus(), is(200));
         assertThat(((Map) response.getEntity()).get("a"), is(equalTo("b")));
 

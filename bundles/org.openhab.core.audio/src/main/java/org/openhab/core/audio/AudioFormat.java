@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -147,6 +147,11 @@ public class AudioFormat {
     private final @Nullable Long frequency;
 
     /**
+     * Channels number
+     */
+    private final @Nullable Integer channels;
+
+    /**
      * Constructs an instance with the specified properties.
      *
      * Note that any properties that are null indicate that
@@ -167,12 +172,39 @@ public class AudioFormat {
      */
     public AudioFormat(@Nullable String container, @Nullable String codec, @Nullable Boolean bigEndian,
             @Nullable Integer bitDepth, @Nullable Integer bitRate, @Nullable Long frequency) {
+        this(container, codec, bigEndian, bitDepth, bitRate, frequency, 1);
+    }
+
+    /**
+     * Constructs an instance with the specified properties.
+     *
+     * Note that any properties that are null indicate that
+     * the corresponding AudioFormat allows any value for
+     * the property.
+     *
+     * Concretely this implies that if, for example, one
+     * passed null for the value of frequency, this would
+     * mean the created AudioFormat allowed for any valid
+     * frequency.
+     *
+     * @param container The container for the audio
+     * @param codec The audio codec
+     * @param bigEndian If the audo data is big endian
+     * @param bitDepth The bit depth of the audo data
+     * @param bitRate The bit rate of the audio
+     * @param frequency The frequency at which the audio was sampled
+     * @param channels The number of channels
+     */
+    public AudioFormat(@Nullable String container, @Nullable String codec, @Nullable Boolean bigEndian,
+            @Nullable Integer bitDepth, @Nullable Integer bitRate, @Nullable Long frequency,
+            @Nullable Integer channels) {
         this.container = container;
         this.codec = codec;
         this.bigEndian = bigEndian;
         this.bitDepth = bitDepth;
         this.bitRate = bitRate;
         this.frequency = frequency;
+        this.channels = channels;
     }
 
     /**
@@ -229,6 +261,15 @@ public class AudioFormat {
      */
     public @Nullable Long getFrequency() {
         return frequency;
+    }
+
+    /**
+     * Gets channel number
+     *
+     * @return The number of channels
+     */
+    public @Nullable Integer getChannels() {
+        return channels;
     }
 
     /**
@@ -345,10 +386,12 @@ public class AudioFormat {
                 continue;
             }
 
+            Integer channel = format.getChannels() == null ? Integer.valueOf(1) : format.getChannels();
+
             // If required set BigEndian, BitDepth, BitRate, and Frequency to default values
             if (null == format.isBigEndian()) {
                 format = new AudioFormat(format.getContainer(), format.getCodec(), Boolean.TRUE, format.getBitDepth(),
-                        format.getBitRate(), format.getFrequency());
+                        format.getBitRate(), format.getFrequency(), channel);
             }
             if (null == format.getBitDepth() || null == format.getBitRate() || null == format.getFrequency()) {
                 // Define default values
@@ -379,7 +422,7 @@ public class AudioFormat {
                 }
 
                 format = new AudioFormat(format.getContainer(), format.getCodec(), format.isBigEndian(), bitDepth,
-                        bitRate, frequency);
+                        bitRate, frequency, channel);
             }
 
             // Return preferred AudioFormat
@@ -414,7 +457,9 @@ public class AudioFormat {
                     : getFrequency().equals(format.getFrequency()))) {
                 return false;
             }
-            return true;
+            if (!(null == getChannels() ? null == format.getChannels() : getChannels().equals(format.getChannels()))) {
+                return false;
+            }
         }
         return super.equals(obj);
     }
@@ -429,6 +474,7 @@ public class AudioFormat {
         result = prime * result + ((codec == null) ? 0 : codec.hashCode());
         result = prime * result + ((container == null) ? 0 : container.hashCode());
         result = prime * result + ((frequency == null) ? 0 : frequency.hashCode());
+        result = prime * result + ((channels == null) ? 0 : channels.hashCode());
         return result;
     }
 
@@ -439,6 +485,7 @@ public class AudioFormat {
                 + (bigEndian != null ? "bigEndian=" + bigEndian + ", " : "")
                 + (bitDepth != null ? "bitDepth=" + bitDepth + ", " : "")
                 + (bitRate != null ? "bitRate=" + bitRate + ", " : "")
-                + (frequency != null ? "frequency=" + frequency : "") + "]";
+                + (frequency != null ? "frequency=" + frequency : "") + (channels != null ? "channels=" + channels : "")
+                + "]";
     }
 }

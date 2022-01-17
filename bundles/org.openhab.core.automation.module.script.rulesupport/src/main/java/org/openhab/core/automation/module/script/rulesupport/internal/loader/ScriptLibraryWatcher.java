@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 
-import org.openhab.core.OpenHAB;
 import org.openhab.core.service.AbstractWatchService;
 
 /**
@@ -26,12 +25,10 @@ import org.openhab.core.service.AbstractWatchService;
  *
  * @author Jonathan Gilbert - Initial contribution
  */
-abstract class ScriptLibraryWatcher extends AbstractWatchService {
+public abstract class ScriptLibraryWatcher extends AbstractWatchService {
 
-    public static final String LIB_PATH = String.join(File.separator, OpenHAB.getConfigFolder(), "automation", "lib");
-
-    ScriptLibraryWatcher() {
-        super(LIB_PATH);
+    public ScriptLibraryWatcher(final String libraryPath) {
+        super(libraryPath);
     }
 
     @Override
@@ -58,5 +55,5 @@ abstract class ScriptLibraryWatcher extends AbstractWatchService {
         }
     }
 
-    abstract void updateFile(String filePath);
+    protected abstract void updateFile(String filePath);
 }

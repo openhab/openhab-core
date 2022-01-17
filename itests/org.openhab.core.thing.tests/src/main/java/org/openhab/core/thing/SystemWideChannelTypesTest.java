@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,11 +19,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeProvider;
+import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateOption;
 
 /**
@@ -31,11 +33,12 @@ import org.openhab.core.types.StateOption;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class SystemWideChannelTypesTest extends JavaOSGiTest {
 
     private static final int NUMBER_OF_SYSTEM_WIDE_CHANNEL_TYPES = 24;
 
-    private ChannelTypeProvider systemChannelTypeProvider;
+    private @NonNullByDefault({}) ChannelTypeProvider systemChannelTypeProvider;
 
     @BeforeEach
     public void setUp() {
@@ -86,29 +89,32 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
         assertEquals("Signalstärke", signalStrengthChannelType.getLabel());
         assertNull(signalStrengthChannelType.getDescription());
 
-        List<StateOption> signalStrengthChannelTypeOptions = signalStrengthChannelType.getState().getOptions();
-        assertEquals(5, signalStrengthChannelTypeOptions.size());
+        StateDescription stateDescription = signalStrengthChannelType.getState();
+        if (stateDescription != null) {
+            List<StateOption> signalStrengthChannelTypeOptions = stateDescription.getOptions();
+            assertEquals(5, signalStrengthChannelTypeOptions.size());
 
-        StateOption noSignalOption = signalStrengthChannelTypeOptions.stream().filter(it -> "0".equals(it.getValue()))
-                .findFirst().get();
-        assertNotNull(noSignalOption);
-        assertEquals("Kein Signal", noSignalOption.getLabel());
-        StateOption weakOption = signalStrengthChannelTypeOptions.stream().filter(it -> "1".equals(it.getValue()))
-                .findFirst().get();
-        assertNotNull(weakOption);
-        assertEquals("Schwach", weakOption.getLabel());
-        StateOption averageOption = signalStrengthChannelTypeOptions.stream().filter(it -> "2".equals(it.getValue()))
-                .findFirst().get();
-        assertNotNull(averageOption);
-        assertEquals("Durchschnittlich", averageOption.getLabel());
-        StateOption goodOption = signalStrengthChannelTypeOptions.stream().filter(it -> "3".equals(it.getValue()))
-                .findFirst().get();
-        assertNotNull(goodOption);
-        assertEquals("Gut", goodOption.getLabel());
-        StateOption excellentOption = signalStrengthChannelTypeOptions.stream().filter(it -> "4".equals(it.getValue()))
-                .findFirst().get();
-        assertNotNull(excellentOption);
-        assertEquals("Ausgezeichnet", excellentOption.getLabel());
+            StateOption noSignalOption = signalStrengthChannelTypeOptions.stream()
+                    .filter(it -> "0".equals(it.getValue())).findFirst().get();
+            assertNotNull(noSignalOption);
+            assertEquals("Kein Signal", noSignalOption.getLabel());
+            StateOption weakOption = signalStrengthChannelTypeOptions.stream().filter(it -> "1".equals(it.getValue()))
+                    .findFirst().get();
+            assertNotNull(weakOption);
+            assertEquals("Schwach", weakOption.getLabel());
+            StateOption averageOption = signalStrengthChannelTypeOptions.stream()
+                    .filter(it -> "2".equals(it.getValue())).findFirst().get();
+            assertNotNull(averageOption);
+            assertEquals("Durchschnittlich", averageOption.getLabel());
+            StateOption goodOption = signalStrengthChannelTypeOptions.stream().filter(it -> "3".equals(it.getValue()))
+                    .findFirst().get();
+            assertNotNull(goodOption);
+            assertEquals("Gut", goodOption.getLabel());
+            StateOption excellentOption = signalStrengthChannelTypeOptions.stream()
+                    .filter(it -> "4".equals(it.getValue())).findFirst().get();
+            assertNotNull(excellentOption);
+            assertEquals("Ausgezeichnet", excellentOption.getLabel());
+        }
 
         ChannelType lowBatteryChannelType = systemChannelTypeProvider
                 .getChannelType(SYSTEM_CHANNEL_TYPE_UID_LOW_BATTERY, Locale.GERMAN);
@@ -126,15 +132,14 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
                 Locale.GERMAN);
         assertNotNull(powerChannelType);
         assertEquals("Betrieb", powerChannelType.getLabel());
-        assertEquals(
-                "Ermöglicht die Steuerung der Betriebsbereitschaft. Das Gerät ist betriebsbereit, wenn \"Betrieb\" den Status ON hat.",
+        assertEquals("Steuert die Betriebsbereitschaft. Bei ON ist das Gerät betriebsbereit, bei OFF nicht.",
                 powerChannelType.getDescription());
 
         ChannelType locationChannelType = systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_LOCATION,
                 Locale.GERMAN);
         assertNotNull(locationChannelType);
         assertEquals("Ort", locationChannelType.getLabel());
-        assertEquals("Ort in geographischen Koordinaten (Breitengrad/Längengrad/Höhe).",
+        assertEquals("Zeigt einen Ort in geographischen Koordinaten (Breitengrad/Längengrad/Höhe) an.",
                 locationChannelType.getDescription());
 
         ChannelType motionChannelType = systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_MOTION,
@@ -154,7 +159,8 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
                 Locale.GERMAN);
         assertNotNull(colorChannelType);
         assertEquals("Farbe", colorChannelType.getLabel());
-        assertEquals("Steuert die Lichtfarbe.", colorChannelType.getDescription());
+        assertEquals("Steuert die Farbe, die Helligkeit und schaltet das Licht ein und aus.",
+                colorChannelType.getDescription());
 
         ChannelType colorTemperatureChannelType = systemChannelTypeProvider
                 .getChannelType(SYSTEM_CHANNEL_TYPE_UID_COLOR_TEMPERATURE, Locale.GERMAN);
@@ -167,20 +173,20 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
                 .getChannelType(SYSTEM_CHANNEL_TYPE_UID_COLOR_TEMPERATURE_ABS, Locale.GERMAN);
         assertNotNull(colorTemperatureAbsChannelType);
         assertEquals("Farbtemperatur", colorTemperatureAbsChannelType.getLabel());
-        assertEquals("Steuert die Farbtemperatur des Lichts in Kelvin.",
+        assertEquals("Steuert die Farbtemperatur des Lichts (in Kelvin).",
                 colorTemperatureAbsChannelType.getDescription());
 
         ChannelType volumeChannelType = systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_VOLUME,
                 Locale.GERMAN);
         assertNotNull(volumeChannelType);
         assertEquals("Lautstärke", volumeChannelType.getLabel());
-        assertEquals("Ermöglicht die Steuerung der Lautstärke.", volumeChannelType.getDescription());
+        assertEquals("Steuert die Lautstärke eines Gerätes.", volumeChannelType.getDescription());
 
         ChannelType muteChannelType = systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_MUTE,
                 Locale.GERMAN);
         assertNotNull(muteChannelType);
         assertEquals("Stumm schalten", muteChannelType.getLabel());
-        assertEquals("Ermöglicht die Lautstärke auf stumm zu schalten.", muteChannelType.getDescription());
+        assertEquals("Schaltet ein Gerät stumm.", muteChannelType.getDescription());
 
         ChannelType mediaControlChannelType = systemChannelTypeProvider
                 .getChannelType(SYSTEM_CHANNEL_TYPE_UID_MEDIA_CONTROL, Locale.GERMAN);
@@ -206,31 +212,31 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
                 .getChannelType(SYSTEM_CHANNEL_TYPE_UID_WIND_DIRECTION, Locale.GERMAN);
         assertNotNull(windDirectionChannelType);
         assertEquals("Windrichtung", windDirectionChannelType.getLabel());
-        assertEquals("Aktuelle Windrichtung ausgedrückt als Winkel.", windDirectionChannelType.getDescription());
+        assertEquals("Zeigt die aktuelle Windrichtung an (als Winkel).", windDirectionChannelType.getDescription());
 
         ChannelType windSpeedChannelType = systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_WIND_SPEED,
                 Locale.GERMAN);
         assertNotNull(windSpeedChannelType);
         assertEquals("Windgeschwindigkeit", windSpeedChannelType.getLabel());
-        assertEquals("Aktuelle Windgeschwindigkeit.", windSpeedChannelType.getDescription());
+        assertEquals("Zeigt die aktuelle Windgeschwindigkeit an.", windSpeedChannelType.getDescription());
 
         ChannelType outdoorTemperatureChannelType = systemChannelTypeProvider
                 .getChannelType(SYSTEM_CHANNEL_TYPE_UID_OUTDOOR_TEMPERATURE, Locale.GERMAN);
         assertNotNull(outdoorTemperatureChannelType);
         assertEquals("Außentemperatur", outdoorTemperatureChannelType.getLabel());
-        assertEquals("Aktuelle Außentemperatur.", outdoorTemperatureChannelType.getDescription());
+        assertEquals("Zeigt die aktuelle Außentemperatur an.", outdoorTemperatureChannelType.getDescription());
 
         ChannelType atmosphericHumidityChannelType = systemChannelTypeProvider
                 .getChannelType(SYSTEM_CHANNEL_TYPE_UID_ATMOSPHERIC_HUMIDITY, Locale.GERMAN);
         assertNotNull(atmosphericHumidityChannelType);
         assertEquals("Luftfeuchtigkeit", atmosphericHumidityChannelType.getLabel());
-        assertEquals("Aktuelle atmosphärische relative Luftfeuchtigkeit.",
+        assertEquals("Zeigt die aktuelle atmosphärische relative Luftfeuchtigkeit an.",
                 atmosphericHumidityChannelType.getDescription());
 
         ChannelType barometricPressureChannelType = systemChannelTypeProvider
                 .getChannelType(SYSTEM_CHANNEL_TYPE_UID_BAROMETRIC_PRESSURE, Locale.GERMAN);
         assertNotNull(barometricPressureChannelType);
         assertEquals("Luftdruck", barometricPressureChannelType.getLabel());
-        assertEquals("Aktueller Luftdruck.", barometricPressureChannelType.getDescription());
+        assertEquals("Zeigt den aktuellen Luftdruck an.", barometricPressureChannelType.getDescription());
     }
 }

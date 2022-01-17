@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -105,6 +105,8 @@ public class SystemRangeStateProfileTest {
                 { new ParameterSet(List.of(QuantityType.valueOf(QUANTITY_STRING_TEN)), List.of(OnOffType.ON),
                         BigDecimal.TEN, BIGDECIMAL_FOURTY, false) }, //
                 { new ParameterSet(List.of(QuantityType.valueOf("0 %")), List.of(OnOffType.OFF), BigDecimal.TEN,
+                        BIGDECIMAL_FOURTY, false) }, //
+                { new ParameterSet(List.of(new QuantityType<>()), List.of(OnOffType.OFF), BigDecimal.TEN,
                         BIGDECIMAL_FOURTY, false) }, //
                 // lower bound = 10, upper bound = 40 (as QuantityType), one state update / command (QuantityType), not
                 // inverted

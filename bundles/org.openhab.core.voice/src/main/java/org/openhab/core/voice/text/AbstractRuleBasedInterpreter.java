@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -112,7 +112,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             if ((result = rule.execute(language, tokens)).isSuccess()) {
                 return result.getResponse();
             } else {
-                if (result != InterpretationResult.SYNTAX_ERROR) {
+                if (!InterpretationResult.SYNTAX_ERROR.equals(result)) {
                     lastResult = result;
                 }
             }
@@ -855,6 +855,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         }
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public void unsetItemRegistry(ItemRegistry itemRegistry) {
         if (itemRegistry == this.itemRegistry) {
             this.itemRegistry.removeRegistryChangeListener(registryChangeListener);
@@ -868,6 +869,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         }
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public void unsetEventPublisher(EventPublisher eventPublisher) {
         if (eventPublisher == this.eventPublisher) {
             this.eventPublisher = null;

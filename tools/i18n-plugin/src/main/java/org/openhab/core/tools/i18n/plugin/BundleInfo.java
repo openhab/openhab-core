@@ -1,0 +1,95 @@
+/**
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.core.tools.i18n.plugin;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.binding.xml.internal.BindingInfoXmlResult;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.thing.xml.internal.ChannelGroupTypeXmlResult;
+import org.openhab.core.thing.xml.internal.ChannelTypeXmlResult;
+import org.openhab.core.thing.xml.internal.ThingTypeXmlResult;
+
+/**
+ * The bundle information provided by the openHAB XML files in the <code>OH-INF</code> directory.
+ *
+ * @author Wouter Born - Initial contribution
+ */
+@NonNullByDefault
+public class BundleInfo {
+
+    private @Nullable BindingInfoXmlResult bindingInfoXml;
+    private List<ConfigDescription> configDescriptions = new ArrayList<>(5);
+    private List<ChannelGroupTypeXmlResult> channelGroupTypesXml = new ArrayList<>(5);
+    private List<ChannelTypeXmlResult> channelTypesXml = new ArrayList<>(5);
+    private List<ThingTypeXmlResult> thingTypesXml = new ArrayList<>(5);
+
+    public @Nullable BindingInfoXmlResult getBindingInfoXml() {
+        return bindingInfoXml;
+    }
+
+    public void setBindingInfoXml(BindingInfoXmlResult bindingInfo) {
+        this.bindingInfoXml = bindingInfo;
+    }
+
+    public List<ConfigDescription> getConfigDescriptions() {
+        return configDescriptions;
+    }
+
+    public void setConfigDescriptions(List<ConfigDescription> configDescriptions) {
+        this.configDescriptions = configDescriptions;
+    }
+
+    public List<ChannelGroupTypeXmlResult> getChannelGroupTypesXml() {
+        return channelGroupTypesXml;
+    }
+
+    public void setChannelGroupTypesXml(List<ChannelGroupTypeXmlResult> channelGroupTypesXml) {
+        this.channelGroupTypesXml = channelGroupTypesXml;
+    }
+
+    public List<ChannelTypeXmlResult> getChannelTypesXml() {
+        return channelTypesXml;
+    }
+
+    public void setChannelTypesXml(List<ChannelTypeXmlResult> channelTypesXml) {
+        this.channelTypesXml = channelTypesXml;
+    }
+
+    public List<ThingTypeXmlResult> getThingTypesXml() {
+        return thingTypesXml;
+    }
+
+    public void setThingTypesXml(List<ThingTypeXmlResult> thingTypesXml) {
+        this.thingTypesXml = thingTypesXml;
+    }
+
+    public String getBindingId() {
+        BindingInfoXmlResult localBindingInfoXml = bindingInfoXml;
+        return localBindingInfoXml == null ? "" : localBindingInfoXml.getBindingInfo().getUID();
+    }
+
+    public Optional<ConfigDescription> getConfigDescription(@Nullable URI uri) {
+        if (uri == null) {
+            return Optional.empty();
+        }
+
+        return configDescriptions.stream().filter(configDescription -> configDescription.getUID().equals(uri))
+                .findFirst();
+    }
+}

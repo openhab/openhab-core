@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -142,14 +142,16 @@ public class SystemRangeStateProfile implements StateProfile {
             final QuantityType<?> qtState = (QuantityType<?>) value;
             final QuantityType<?> finalLower;
             final QuantityType<?> finalUpper;
-            if (lower.getUnit() == Units.ONE && upper.getUnit() == Units.ONE) {
+            if (Units.ONE.equals(lower.getUnit()) && Units.ONE.equals(upper.getUnit())) {
                 // allow bounds without unit -> implicitly assume its the same as the one from the state, but warn
                 // the user
+                if (!Units.ONE.equals(qtState.getUnit())) {
+                    logger.warn(
+                            "Received a QuantityType '{}' with unit, but the boundaries are defined as a plain number without units (lower={}, upper={}), please consider adding units to them.",
+                            value, lower, upper);
+                }
                 finalLower = new QuantityType<>(lower.toBigDecimal(), qtState.getUnit());
                 finalUpper = new QuantityType<>(upper.toBigDecimal(), qtState.getUnit());
-                logger.warn(
-                        "Received a QuantityType '{}' with unit, but the boundaries are defined as a plain number without units (lower={}, upper={}), please consider adding units to them.",
-                        value, lower, upper);
             } else {
                 finalLower = lower.toUnit(qtState.getUnit());
                 finalUpper = upper.toUnit(qtState.getUnit());

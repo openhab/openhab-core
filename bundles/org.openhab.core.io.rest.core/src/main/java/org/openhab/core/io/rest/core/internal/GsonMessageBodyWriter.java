@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,7 +25,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.MessageBodyWriter;
 
-import org.eclipse.jetty.io.EofException;
 import org.openhab.core.io.rest.JSONInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +89,7 @@ public class GsonMessageBodyWriter<T> implements MessageBodyWriter<T> {
             // Keep this code as it has been present before,
             // but I don't think this needs to be done in the message body writer itself.
             entityStream.flush();
-        } catch (EofException e) {
+        } catch (IOException e) {
             // we catch this exception to avoid confusion errors in the log file, since this is not any error situation
             // see https://github.com/openhab/openhab-distro/issues/1188
             logger.debug("Failed writing HTTP response, since other side closed the connection");

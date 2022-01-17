@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,7 +16,9 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.jmdns.ServiceEvent;
@@ -29,9 +31,12 @@ import org.openhab.core.config.discovery.AbstractDiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -61,12 +66,21 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     private final MDNSClient mdnsClient;
 
+    /**
+     * Map of scheduled tasks to remove devices from the Inbox.
+     */
+    private Map<String, ScheduledFuture<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
+
     @Activate
-    public MDNSDiscoveryService(final @Nullable Map<String, Object> configProperties,
-            final @Reference MDNSClient mdnsClient) {
+    public MDNSDiscoveryService(final @Nullable Map<String, Object> configProperties, //
+            final @Reference MDNSClient mdnsClient, //
+            final @Reference TranslationProvider i18nProvider, //
+            final @Reference LocaleProvider localeProvider) {
         super(5);
 
         this.mdnsClient = mdnsClient;
+        this.i18nProvider = i18nProvider;
+        this.localeProvider = localeProvider;
 
         super.activate(configProperties);
 
@@ -120,16 +134,13 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     }
 
     private void startScan(boolean isBackground) {
-        scheduler.schedule(new Runnable() {
-            @Override
-            public void run() {
-                scan(isBackground);
-            }
+        scheduler.schedule(() -> {
+            scan(isBackground);
         }, 0, TimeUnit.SECONDS);
     }
 
     /**
-     * Scan has 2 different behaviours. background/ foreground. Background scans can
+     * Scan has 2 different behaviors. background/ foreground. Background scans can
      * have much higher timeout. Foreground scans have only a short timeout as human
      * users may become impatient. The underlying reason is that the jmDNS
      * implementation {@code MDNSClient#list(String)} has a default timeout of 6
@@ -149,25 +160,22 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
             }
             logger.debug("{} services found for {}; duration: {}ms", services.length, participant.getServiceType(),
                     System.currentTimeMillis() - start);
-            for (ServiceInfo service : services) {
-                DiscoveryResult result = participant.createResult(service);
-                if (result != null) {
-                    thingDiscovered(result);
-                }
+            for (ServiceInfo serviceInfo : services) {
+                createDiscoveryResult(participant, serviceInfo);
             }
         }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addMDNSDiscoveryParticipant(MDNSDiscoveryParticipant participant) {
-        this.participants.add(participant);
+        participants.add(participant);
         if (isBackgroundDiscoveryEnabled()) {
             mdnsClient.addServiceListener(participant.getServiceType(), this);
         }
     }
 
     protected void removeMDNSDiscoveryParticipant(MDNSDiscoveryParticipant participant) {
-        this.participants.remove(participant);
+        participants.remove(participant);
         mdnsClient.removeServiceListener(participant.getServiceType(), this);
     }
 
@@ -189,14 +197,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     public void serviceRemoved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         for (MDNSDiscoveryParticipant participant : participants) {
             if (participant.getServiceType().equals(serviceEvent.getType())) {
-                try {
-                    ThingUID thingUID = participant.getThingUID(serviceEvent.getInfo());
-                    if (thingUID != null) {
-                        thingRemoved(thingUID);
-                    }
-                } catch (Exception e) {
-                    logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
-                }
+                removeDiscoveryResult(participant, serviceEvent.getInfo());
             }
         }
     }
@@ -210,16 +211,66 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         if (isBackgroundDiscoveryEnabled()) {
             for (MDNSDiscoveryParticipant participant : participants) {
                 if (participant.getServiceType().equals(serviceEvent.getType())) {
-                    try {
-                        DiscoveryResult result = participant.createResult(serviceEvent.getInfo());
-                        if (result != null) {
-                            thingDiscovered(result);
-                        }
-                    } catch (Exception e) {
-                        logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
-                    }
+                    createDiscoveryResult(participant, serviceEvent.getInfo());
                 }
             }
         }
+    }
+
+    private void createDiscoveryResult(MDNSDiscoveryParticipant participant, ServiceInfo serviceInfo) {
+        try {
+            DiscoveryResult result = participant.createResult(serviceInfo);
+            if (result != null) {
+                cancelRemovalTask(serviceInfo);
+                final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
+                        FrameworkUtil.getBundle(participant.getClass()));
+                thingDiscovered(resultNew);
+            }
+        } catch (Exception e) {
+            logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
+        }
+    }
+
+    private void removeDiscoveryResult(MDNSDiscoveryParticipant participant, ServiceInfo serviceInfo) {
+        try {
+            ThingUID thingUID = participant.getThingUID(serviceInfo);
+            if (thingUID != null) {
+                long gracePeriod = participant.getRemovalGracePeriodSeconds(serviceInfo);
+                if (gracePeriod <= 0) {
+                    thingRemoved(thingUID);
+                } else {
+                    cancelRemovalTask(serviceInfo);
+                    scheduleRemovalTask(thingUID, serviceInfo, gracePeriod);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
+        }
+    }
+
+    /**
+     * If the device has been scheduled to be removed, cancel its respective removal task.
+     *
+     * @param serviceInfo the mDNS ServiceInfo describing the device on the network.
+     */
+    private void cancelRemovalTask(ServiceInfo serviceInfo) {
+        ScheduledFuture<?> deviceRemovalTask = deviceRemovalTasks.remove(serviceInfo.getQualifiedName());
+        if (deviceRemovalTask != null) {
+            deviceRemovalTask.cancel(false);
+        }
+    }
+
+    /**
+     * Schedule a task that will remove the device from the Inbox after the given grace period has expired.
+     *
+     * @param thingUID the UID of the Thing to be removed.
+     * @param serviceInfo the mDNS ServiceInfo describing the device on the network.
+     * @param gracePeriod the scheduled delay in seconds.
+     */
+    private void scheduleRemovalTask(ThingUID thingUID, ServiceInfo serviceInfo, long gracePeriod) {
+        deviceRemovalTasks.put(serviceInfo.getQualifiedName(), scheduler.schedule(() -> {
+            thingRemoved(thingUID);
+            cancelRemovalTask(serviceInfo);
+        }, gracePeriod, TimeUnit.SECONDS));
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -46,8 +48,8 @@ import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ConfigurableServiceUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.i18n.I18nUtil;
-import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.core.config.ConfigurationService;
@@ -109,7 +111,7 @@ public class ConfigurableServiceResource implements RESTResource {
     private final ConfigDescriptionRegistry configDescRegistry;
     private final ConfigurationService configurationService;
     private final TranslationProvider i18nProvider;
-    private final LocaleProvider localeProvider;
+    private final LocaleService localeService;
 
     @Activate
     public ConfigurableServiceResource( //
@@ -117,20 +119,22 @@ public class ConfigurableServiceResource implements RESTResource {
             final @Reference ConfigurationService configurationService, //
             final @Reference ConfigDescriptionRegistry configDescRegistry, //
             final @Reference TranslationProvider translationProvider, //
-            final @Reference LocaleProvider localeProvider) {
+            final @Reference LocaleService localeService) {
         this.bundleContext = bundleContext;
         this.configDescRegistry = configDescRegistry;
         this.configurationService = configurationService;
         this.i18nProvider = translationProvider;
-        this.localeProvider = localeProvider;
+        this.localeService = localeService;
     }
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getServices", summary = "Get all configurable services.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigurableServiceDTO.class)))) })
-    public List<ConfigurableServiceDTO> getAll() {
-        return getConfigurableServices();
+    public List<ConfigurableServiceDTO> getAll(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
+        Locale locale = localeService.getLocale(language);
+        return getConfigurableServices(locale);
     }
 
     @GET
@@ -139,8 +143,11 @@ public class ConfigurableServiceResource implements RESTResource {
     @Operation(operationId = "getServicesById", summary = "Get configurable service for given service ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigurableServiceDTO.class))),
             @ApiResponse(responseCode = "404", description = "Not found") })
-    public Response getById(@PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
-        ConfigurableServiceDTO configurableService = getServiceById(serviceId);
+    public Response getById(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
+            @PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
+        Locale locale = localeService.getLocale(language);
+        ConfigurableServiceDTO configurableService = getServiceById(serviceId, locale);
         if (configurableService != null) {
             return Response.ok(configurableService).build();
         } else {
@@ -148,13 +155,13 @@ public class ConfigurableServiceResource implements RESTResource {
         }
     }
 
-    private @Nullable ConfigurableServiceDTO getServiceById(String serviceId) {
-        ConfigurableServiceDTO multiService = getMultiConfigServiceById(serviceId);
+    private @Nullable ConfigurableServiceDTO getServiceById(String serviceId, Locale locale) {
+        ConfigurableServiceDTO multiService = getMultiConfigServiceById(serviceId, locale);
         if (multiService != null) {
             return multiService;
         }
 
-        List<ConfigurableServiceDTO> configurableServices = getConfigurableServices();
+        List<ConfigurableServiceDTO> configurableServices = getConfigurableServices(locale);
         for (ConfigurableServiceDTO configurableService : configurableServices) {
             if (configurableService.id.equals(serviceId)) {
                 return configurableService;
@@ -163,10 +170,10 @@ public class ConfigurableServiceResource implements RESTResource {
         return null;
     }
 
-    private @Nullable ConfigurableServiceDTO getMultiConfigServiceById(String serviceId) {
+    private @Nullable ConfigurableServiceDTO getMultiConfigServiceById(String serviceId, Locale locale) {
         String filter = "(&(" + Constants.SERVICE_PID + "=" + serviceId + ")(" + ConfigurationAdmin.SERVICE_FACTORYPID
                 + "=*))";
-        List<ConfigurableServiceDTO> services = getServicesByFilter(filter);
+        List<ConfigurableServiceDTO> services = getServicesByFilter(filter, locale);
         if (services.size() == 1) {
             return services.get(0);
         }
@@ -179,13 +186,15 @@ public class ConfigurableServiceResource implements RESTResource {
     @Operation(operationId = "getServiceContext", summary = "Get existing multiple context service configurations for the given factory PID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigurableServiceDTO.class)))) })
     public List<ConfigurableServiceDTO> getMultiConfigServicesByFactoryPid(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
-        return collectServicesById(serviceId);
+        Locale locale = localeService.getLocale(language);
+        return collectServicesById(serviceId, locale);
     }
 
-    private List<ConfigurableServiceDTO> collectServicesById(String serviceId) {
+    private List<ConfigurableServiceDTO> collectServicesById(String serviceId, Locale locale) {
         String filter = "(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + serviceId + ")";
-        return getServicesByFilter(filter);
+        return getServicesByFilter(filter, locale);
     }
 
     @GET
@@ -213,11 +222,15 @@ public class ConfigurableServiceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "204", description = "No old configuration"),
             @ApiResponse(responseCode = "500", description = "Configuration can not be updated due to internal error") })
-    public Response updateConfiguration(@PathParam("serviceId") @Parameter(description = "service ID") String serviceId,
+    public Response updateConfiguration(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
+            @PathParam("serviceId") @Parameter(description = "service ID") String serviceId,
             @Nullable Map<String, Object> configuration) {
+        Locale locale = localeService.getLocale(language);
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);
-            configurationService.update(serviceId, new Configuration(normalizeConfiguration(configuration, serviceId)));
+            configurationService.update(serviceId,
+                    new Configuration(normalizeConfiguration(configuration, serviceId, locale)));
             return oldConfiguration != null ? Response.ok(oldConfiguration.getProperties()).build()
                     : Response.noContent().build();
         } catch (IOException ex) {
@@ -227,12 +240,12 @@ public class ConfigurableServiceResource implements RESTResource {
     }
 
     private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
-            String serviceId) {
+            String serviceId, Locale locale) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }
 
-        ConfigurableServiceDTO service = getServiceById(serviceId);
+        ConfigurableServiceDTO service = getServiceById(serviceId, locale);
         if (service == null) {
             return properties;
         }
@@ -272,7 +285,7 @@ public class ConfigurableServiceResource implements RESTResource {
         }
     }
 
-    private List<ConfigurableServiceDTO> getServicesByFilter(String filter) {
+    private List<ConfigurableServiceDTO> getServicesByFilter(String filter, Locale locale) {
         List<ConfigurableServiceDTO> services = new ArrayList<>();
         ServiceReference<?>[] serviceReferences = null;
         try {
@@ -296,8 +309,7 @@ public class ConfigurableServiceResource implements RESTResource {
                 String key = I18nUtil.stripConstantOr(defaultLabel,
                         () -> inferKey(configurableService.description_uri(), "label"));
 
-                String label = i18nProvider.getText(serviceReference.getBundle(), key, defaultLabel,
-                        localeProvider.getLocale());
+                String label = i18nProvider.getText(serviceReference.getBundle(), key, defaultLabel, locale);
 
                 String category = configurableService.category();
 
@@ -335,11 +347,11 @@ public class ConfigurableServiceResource implements RESTResource {
         return configDescriptionURI;
     }
 
-    private List<ConfigurableServiceDTO> getConfigurableServices() {
+    private List<ConfigurableServiceDTO> getConfigurableServices(Locale locale) {
         List<ConfigurableServiceDTO> services = new ArrayList<>();
 
-        services.addAll(getServicesByFilter(ConfigurableServiceUtil.CONFIGURABLE_SERVICE_FILTER));
-        services.addAll(getServicesByFilter(ConfigurableServiceUtil.CONFIGURABLE_MULTI_CONFIG_SERVICE_FILTER));
+        services.addAll(getServicesByFilter(ConfigurableServiceUtil.CONFIGURABLE_SERVICE_FILTER, locale));
+        services.addAll(getServicesByFilter(ConfigurableServiceUtil.CONFIGURABLE_MULTI_CONFIG_SERVICE_FILTER, locale));
 
         return services;
     }

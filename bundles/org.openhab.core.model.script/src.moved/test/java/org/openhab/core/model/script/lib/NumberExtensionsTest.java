@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -74,12 +74,12 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorMinusNumberNumber() {
-        assertThat(NumberExtensions.operator_minus(DECIMAL2, DECIMAL1), is(BigDecimal.valueOf(1)));
+        assertThat(NumberExtensions.operator_minus(DECIMAL2, DECIMAL1), is(BigDecimal.ONE));
     }
 
     @Test
     public void operatorMinusNumberQuantityOne() {
-        assertThat(NumberExtensions.operator_minus(Q_ONE_2, DECIMAL1), is(BigDecimal.valueOf(1)));
+        assertThat(NumberExtensions.operator_minus(Q_ONE_2, DECIMAL1), is(BigDecimal.ONE));
     }
 
     @Test
@@ -194,7 +194,7 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorGreaterEqualsThanNumberQuantity() {
-        assertFalse(NumberExtensions.operator_greaterEqualsThan(BigDecimal.valueOf(1), new QuantityType<>("1 km")));
+        assertFalse(NumberExtensions.operator_greaterEqualsThan(BigDecimal.ONE, new QuantityType<>("1 km")));
     }
 
     @Test

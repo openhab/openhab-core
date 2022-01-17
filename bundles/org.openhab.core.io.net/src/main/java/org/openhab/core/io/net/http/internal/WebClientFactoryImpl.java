@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,6 +27,7 @@ import javax.net.ssl.TrustManager;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.HttpProxy;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -236,6 +237,39 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
                     logger.debug("creating http client for consumer {}", consumerName);
 
                     HttpClient httpClient = new HttpClient(createSslContextFactory());
+
+                    // If proxy is set as property (standard Java property), provide the proxy information to Jetty HTTP
+                    // Client
+                    String httpProxyHost = System.getProperty("http.proxyHost");
+                    String httpsProxyHost = System.getProperty("https.proxyHost");
+
+                    if (httpProxyHost != null) {
+                        String sProxyPort = System.getProperty("http.proxyPort");
+                        if (sProxyPort != null) {
+                            try {
+                                int port = Integer.parseInt(sProxyPort);
+                                httpClient.getProxyConfiguration().getProxies().add(new HttpProxy(httpProxyHost, port));
+                            } catch (NumberFormatException ex) {
+                                // this was not a correct port. Ignoring.
+                                logger.debug(
+                                        "HTTP Proxy detected (http.proxyHost), but invalid proxyport. Ignoring proxy.");
+                            }
+                        }
+                    } else if (httpsProxyHost != null) {
+                        String sProxyPort = System.getProperty("https.proxyPort");
+                        if (sProxyPort != null) {
+                            try {
+                                int port = Integer.parseInt(sProxyPort);
+                                httpClient.getProxyConfiguration().getProxies()
+                                        .add(new HttpProxy(httpsProxyHost, port));
+                            } catch (NumberFormatException ex) {
+                                // this was not a correct port. Ignoring.
+                                logger.debug(
+                                        "HTTP Proxy detected (https.proxyHost), but invalid proxyport. Ignoring proxy.");
+                            }
+                        }
+                    }
+
                     httpClient.setMaxConnectionsPerDestination(2);
 
                     if (threadPool != null) {
@@ -277,14 +311,16 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
                 public WebSocketClient run() {
                     logger.debug("creating web socket client for consumer {}", consumerName);
 
-                    WebSocketClient webSocketClient = new WebSocketClient(createSslContextFactory());
+                    HttpClient httpClient = new HttpClient(createSslContextFactory());
                     if (threadPool != null) {
-                        webSocketClient.setExecutor(threadPool);
+                        httpClient.setExecutor(threadPool);
                     } else {
                         final QueuedThreadPool queuedThreadPool = createThreadPool(consumerName, minThreadsCustom,
                                 maxThreadsCustom, keepAliveTimeoutCustom);
-                        webSocketClient.setExecutor(queuedThreadPool);
+                        httpClient.setExecutor(queuedThreadPool);
                     }
+
+                    WebSocketClient webSocketClient = new WebSocketClient(httpClient);
 
                     if (startClient) {
                         try {

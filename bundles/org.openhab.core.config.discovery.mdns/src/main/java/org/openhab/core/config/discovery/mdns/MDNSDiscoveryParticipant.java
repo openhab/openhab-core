@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -50,7 +50,7 @@ public interface MDNSDiscoveryParticipant {
     /**
      * Creates a discovery result for a mDNS service
      *
-     * @param device the mDNS service found on the network
+     * @param service the mDNS service found on the network
      * @return the according discovery result or <code>null</code>, if device is not
      *         supported by this participant
      */
@@ -60,10 +60,24 @@ public interface MDNSDiscoveryParticipant {
     /**
      * Returns the thing UID for a mDNS service
      *
-     * @param device the mDNS service on the network
+     * @param service the mDNS service on the network
      * @return a thing UID or <code>null</code>, if device is not supported
      *         by this participant
      */
     @Nullable
     ThingUID getThingUID(ServiceInfo service);
+
+    /**
+     * Some openHAB bindings handle devices that can sometimes be a bit late in updating their mDNS announcements, which
+     * means that such devices are repeatedly removed from, and (re)added to, the Inbox.
+     *
+     * To prevent this, a binding that implements an MDNSDiscoveryParticipant may OPTIONALLY implement this method to
+     * specify an additional delay period (grace period) to wait before the device is removed from the Inbox.
+     *
+     * @param serviceInfo the mDNS ServiceInfo describing the device on the network.
+     * @return the additional grace period delay in seconds before the device will be removed from the Inbox.
+     */
+    default long getRemovalGracePeriodSeconds(ServiceInfo serviceInfo) {
+        return 0;
+    }
 }

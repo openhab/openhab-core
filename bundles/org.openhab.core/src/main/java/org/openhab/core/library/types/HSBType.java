@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -104,10 +104,10 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
         if (BigDecimal.ZERO.compareTo(hue) > 0 || BigDecimal.valueOf(360).compareTo(hue) <= 0) {
             throw new IllegalArgumentException("Hue must be between 0 and 360");
         }
-        if (BigDecimal.ZERO.compareTo(saturation) > 0 || BigDecimal.valueOf(100).compareTo(saturation) < 0) {
+        if (BigDecimal.ZERO.compareTo(saturation) > 0 || BIG_DECIMAL_HUNDRED.compareTo(saturation) < 0) {
             throw new IllegalArgumentException("Saturation must be between 0 and 100");
         }
-        if (BigDecimal.ZERO.compareTo(value) > 0 || BigDecimal.valueOf(100).compareTo(value) < 0) {
+        if (BigDecimal.ZERO.compareTo(value) > 0 || BIG_DECIMAL_HUNDRED.compareTo(value) < 0) {
             throw new IllegalArgumentException("Brightness must be between 0 and 100");
         }
     }
@@ -275,8 +275,8 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
         PercentType green = null;
         PercentType blue = null;
 
-        BigDecimal h = hue.divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP);
-        BigDecimal s = saturation.divide(BigDecimal.valueOf(100));
+        BigDecimal h = hue.divide(BIG_DECIMAL_HUNDRED, 10, RoundingMode.HALF_UP);
+        BigDecimal s = saturation.divide(BIG_DECIMAL_HUNDRED);
 
         int hInt = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP).intValue();
         BigDecimal f = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP)
@@ -376,7 +376,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     }
 
     private int convertPercentToByte(PercentType percent) {
-        return percent.value.multiply(BigDecimal.valueOf(255)).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+        return percent.value.multiply(BigDecimal.valueOf(255)).divide(BIG_DECIMAL_HUNDRED, 2, RoundingMode.HALF_UP)
                 .intValue();
     }
 
@@ -386,8 +386,8 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
             // if brightness is not completely off, we consider the state to be on
             return target.cast(PercentType.ZERO.equals(getBrightness()) ? OnOffType.OFF : OnOffType.ON);
         } else if (target == DecimalType.class) {
-            return target.cast(new DecimalType(
-                    getBrightness().toBigDecimal().divide(BigDecimal.valueOf(100), 8, RoundingMode.UP)));
+            return target.cast(
+                    new DecimalType(getBrightness().toBigDecimal().divide(BIG_DECIMAL_HUNDRED, 8, RoundingMode.UP)));
         } else if (target == PercentType.class) {
             return target.cast(new PercentType(getBrightness().toBigDecimal()));
         } else {

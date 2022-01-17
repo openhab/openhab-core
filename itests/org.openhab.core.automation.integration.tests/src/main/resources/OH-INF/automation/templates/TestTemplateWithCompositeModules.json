@@ -39,7 +39,7 @@
 				"id": "ItemUpdateTrigger_2",
 				"type": "core.ItemStateChangeTrigger",
 				"configuration": {
-					"itemName": "${onItem}"
+					"itemName": "{{onItem}}"
 				}
 			}
 		],
@@ -48,8 +48,8 @@
 				"id": "ItemPostCommandActionID_1",
 				"type": "core.ItemCommandAction",
 				"configuration": {
-					"itemName": "${updateItem}",
-					"command": "${updateCommand}"
+					"itemName": "{{updateItem}}",
+					"command": "{{updateCommand}}"
 				}
 			}
 		]

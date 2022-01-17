@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,13 +14,12 @@ package org.openhab.core.ui.icon.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -143,20 +142,16 @@ public class IconServlet extends OpenHABServlet {
             return;
         }
 
-        if (Format.SVG.equals(format)) {
-            resp.setContentType("image/svg+xml");
-        } else {
-            resp.setContentType("image/png");
-        }
-        resp.setDateHeader("Last-Modified", new Date().getTime());
-        ServletOutputStream os = resp.getOutputStream();
         try (InputStream is = provider.getIcon(category, iconSetId, state, format)) {
             if (is == null) {
                 logger.debug("Requested icon category {} provided by no icon provider", category);
                 resp.sendError(404);
                 return;
             }
-            is.transferTo(os);
+
+            resp.setContentType(Format.SVG.equals(format) ? "image/svg+xml" : "image/png");
+            resp.setDateHeader("Last-Modified", Instant.now().toEpochMilli());
+            is.transferTo(resp.getOutputStream());
             resp.flushBuffer();
         } catch (IOException e) {
             logger.error("Failed sending the icon byte stream as a response: {}", e.getMessage());

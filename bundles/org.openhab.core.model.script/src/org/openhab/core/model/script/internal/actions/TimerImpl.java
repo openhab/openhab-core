@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,28 +15,25 @@ package org.openhab.core.model.script.internal.actions;
 import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.script.actions.Timer;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.openhab.core.scheduler.Scheduler;
 import org.openhab.core.scheduler.SchedulerRunnable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is an implementation of the {@link Timer} interface.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class TimerImpl implements Timer {
-
-    private final Logger logger = LoggerFactory.getLogger(TimerImpl.class);
 
     private final Scheduler scheduler;
     private final ZonedDateTime startTime;
     private final SchedulerRunnable runnable;
-    private ScheduledCompletableFuture<Object> future;
-
-    private boolean cancelled;
+    private ScheduledCompletableFuture<?> future;
 
     public TimerImpl(Scheduler scheduler, ZonedDateTime startTime, SchedulerRunnable runnable) {
         this.scheduler = scheduler;
@@ -48,26 +45,29 @@ public class TimerImpl implements Timer {
 
     @Override
     public boolean cancel() {
-        cancelled = true;
         return future.cancel(true);
     }
 
     @Override
-    public boolean reschedule(ZonedDateTime newTime) {
+    public synchronized boolean reschedule(ZonedDateTime newTime) {
         future.cancel(false);
-        cancelled = false;
         future = scheduler.schedule(runnable, newTime.toInstant());
         return true;
     }
 
     @Override
-    public ZonedDateTime getExecutionTime() {
-        return cancelled ? null : ZonedDateTime.now().plusNanos(future.getDelay(TimeUnit.NANOSECONDS));
+    public @Nullable ZonedDateTime getExecutionTime() {
+        return future.isCancelled() ? null : ZonedDateTime.now().plusNanos(future.getDelay(TimeUnit.NANOSECONDS));
     }
 
     @Override
     public boolean isActive() {
-        return !future.isDone() && !cancelled;
+        return !future.isDone();
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return future.isCancelled();
     }
 
     @Override

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -51,6 +51,7 @@ import org.openhab.core.model.rule.rules.GroupMemberUpdateEventTrigger;
 import org.openhab.core.model.rule.rules.RuleModel;
 import org.openhab.core.model.rule.rules.SystemOnShutdownTrigger;
 import org.openhab.core.model.rule.rules.SystemOnStartupTrigger;
+import org.openhab.core.model.rule.rules.SystemStartlevelTrigger;
 import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger;
 import org.openhab.core.model.rule.rules.ThingStateUpdateEventTrigger;
 import org.openhab.core.model.rule.rules.TimerTrigger;
@@ -292,6 +293,12 @@ public class DSLRuleProvider
         if (t instanceof SystemOnStartupTrigger) {
             Configuration cfg = new Configuration();
             cfg.put("startlevel", 20);
+            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                    .withTypeUID("core.SystemStartlevelTrigger").withConfiguration(cfg).build();
+        } else if (t instanceof SystemStartlevelTrigger) {
+            SystemStartlevelTrigger slTrigger = (SystemStartlevelTrigger) t;
+            Configuration cfg = new Configuration();
+            cfg.put("startlevel", slTrigger.getLevel());
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
                     .withTypeUID("core.SystemStartlevelTrigger").withConfiguration(cfg).build();
         } else if (t instanceof SystemOnShutdownTrigger) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,12 +13,13 @@
 package org.openhab.core.automation.internal.module.handler;
 
 import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
     public static final String MODULE_TYPE_ID = "core.ChannelEventTrigger";
@@ -47,21 +49,19 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
 
     private final Logger logger = LoggerFactory.getLogger(ChannelEventTriggerHandler.class);
 
-    private final String eventOnChannel;
+    private @Nullable final String eventOnChannel;
     private final ChannelUID channelUID;
-    private final Set<String> types = new HashSet<>();
+    private final Set<String> types;
     private final BundleContext bundleContext;
-
-    @SuppressWarnings("rawtypes")
-    private ServiceRegistration eventSubscriberRegistration;
+    private final ServiceRegistration<?> eventSubscriberRegistration;
 
     public ChannelEventTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
 
         this.eventOnChannel = (String) module.getConfiguration().get(CFG_CHANNEL_EVENT);
         this.channelUID = new ChannelUID((String) module.getConfiguration().get(CFG_CHANNEL));
+        this.types = Set.of("ChannelTriggeredEvent");
         this.bundleContext = bundleContext;
-        this.types.add("ChannelTriggeredEvent");
 
         Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("event.topics", TOPIC);
@@ -71,37 +71,31 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
 
     @Override
     public void receive(Event event) {
-        if (callback != null) {
+        ModuleHandlerCallback localCallback = callback;
+        if (localCallback != null) {
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
-
-            Map<String, Object> values = new HashMap<>();
-            values.put("event", event);
-
-            ((TriggerHandlerCallback) callback).triggered(this.module, values);
+            ((TriggerHandlerCallback) localCallback).triggered(module, Map.of("event", event));
         }
     }
 
     @Override
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}:{}", event.getTopic(), TOPIC);
-
         boolean eventMatches = false;
         if (event instanceof ChannelTriggeredEvent) {
             ChannelTriggeredEvent cte = (ChannelTriggeredEvent) event;
-            if (cte.getChannel().equals(channelUID)) {
+            if (channelUID.equals(cte.getChannel())) {
                 logger.trace("->FILTER: {}:{}", cte.getEvent(), eventOnChannel);
-                eventMatches = true;
-                if (eventOnChannel != null && !eventOnChannel.isEmpty() && !eventOnChannel.equals(cte.getEvent())) {
-                    eventMatches = false;
-                }
+                eventMatches = eventOnChannel == null || eventOnChannel.isBlank()
+                        || eventOnChannel.equals(cte.getEvent());
             }
         }
         return eventMatches;
     }
 
     @Override
-    public EventFilter getEventFilter() {
+    public @Nullable EventFilter getEventFilter() {
         return this;
     }
 
@@ -110,15 +104,9 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
         return types;
     }
 
-    /**
-     * do the cleanup: unregistering eventSubscriber...
-     */
     @Override
     public void dispose() {
         super.dispose();
-        if (eventSubscriberRegistration != null) {
-            eventSubscriberRegistration.unregister();
-            eventSubscriberRegistration = null;
-        }
+        eventSubscriberRegistration.unregister();
     }
 }

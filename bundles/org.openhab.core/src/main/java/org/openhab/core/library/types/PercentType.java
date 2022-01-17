@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -45,7 +45,6 @@ public class PercentType extends DecimalType {
      * Creates a new {@link PercentType} with the given value.
      *
      * @param value the value representing a percentage
-     *
      * @throws IllegalArgumentException when the value is not between 0 and 100
      */
     public PercentType(int value) {
@@ -58,7 +57,6 @@ public class PercentType extends DecimalType {
      * The English locale is used to determine (decimal/grouping) separator characters.
      *
      * @param value the non null value representing a percentage
-     *
      * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
      * @throws IllegalArgumentException when the value is not between 0 and 100
      */
@@ -71,7 +69,6 @@ public class PercentType extends DecimalType {
      *
      * @param value the non null value representing a percentage
      * @param locale the locale used to determine (decimal/grouping) separator characters
-     *
      * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
      * @throws IllegalArgumentException when the value is not between 0 and 100
      */
@@ -84,7 +81,6 @@ public class PercentType extends DecimalType {
      * Creates a new {@link PercentType} with the given value.
      *
      * @param value the value representing a percentage.
-     *
      * @throws IllegalArgumentException when the value is not between 0 and 100
      */
     public PercentType(BigDecimal value) {
@@ -93,7 +89,7 @@ public class PercentType extends DecimalType {
     }
 
     private void validateValue(BigDecimal value) {
-        if (BigDecimal.ZERO.compareTo(value) > 0 || BigDecimal.valueOf(100).compareTo(value) < 0) {
+        if (BigDecimal.ZERO.compareTo(value) > 0 || BIG_DECIMAL_HUNDRED.compareTo(value) < 0) {
             throw new IllegalArgumentException("Value must be between 0 and 100");
         }
     }
@@ -103,7 +99,6 @@ public class PercentType extends DecimalType {
      *
      * @param value the non null value representing a percentage
      * @return new {@link PercentType}
-     *
      * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
      * @throws IllegalArgumentException when the value is not between 0 and 100
      */
@@ -116,7 +111,7 @@ public class PercentType extends DecimalType {
         if (target == OnOffType.class) {
             return target.cast(equals(ZERO) ? OnOffType.OFF : OnOffType.ON);
         } else if (target == DecimalType.class) {
-            return target.cast(new DecimalType(toBigDecimal().divide(BigDecimal.valueOf(100), 8, RoundingMode.UP)));
+            return target.cast(new DecimalType(toBigDecimal().divide(BIG_DECIMAL_HUNDRED, 8, RoundingMode.UP)));
         } else if (target == UpDownType.class) {
             if (equals(ZERO)) {
                 return target.cast(UpDownType.UP);

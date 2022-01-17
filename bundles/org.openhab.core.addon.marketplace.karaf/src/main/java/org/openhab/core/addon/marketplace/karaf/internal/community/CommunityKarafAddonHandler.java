@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,6 +33,7 @@ import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
+import org.openhab.core.util.UIDUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -46,7 +47,6 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution and API
  * @author Yannick Schaus - refactoring
  * @author Jan N. Klug - refactor to support kar files
- *
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -169,7 +169,7 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     private void ensureCachedKarsAreInstalled() {
         try {
             if (Files.isDirectory(KAR_CACHE_PATH)) {
-                Files.list(KAR_CACHE_PATH).filter(Files::isDirectory).map(p -> "marketplace:" + p.getFileName())
+                Files.list(KAR_CACHE_PATH).filter(Files::isDirectory).map(this::addonIdFromPath)
                         .filter(addonId -> !isInstalled(addonId)).forEach(addonId -> {
                             logger.info("Reinstalling missing marketplace KAR: {}", addonId);
                             try {
@@ -184,7 +184,14 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
         }
     }
 
+    private String addonIdFromPath(Path path) {
+        String pathName = UIDUtils.decode(path.getFileName().toString());
+        return pathName.contains(":") ? pathName : "marketplace:" + pathName;
+    }
+
     private Path getAddonCacheDirectory(String addonId) {
-        return KAR_CACHE_PATH.resolve(addonId.replace("marketplace:", ""));
+        String dir = addonId.startsWith("marketplace:") ? addonId.replace("marketplace:", "")
+                : UIDUtils.encode(addonId);
+        return KAR_CACHE_PATH.resolve(dir);
     }
 }

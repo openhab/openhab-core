@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -81,7 +81,7 @@ public class JavaSoundAudioSink implements AudioSink {
     @Override
     public synchronized void process(final @Nullable AudioStream audioStream)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
-        if (audioStream != null && audioStream.getFormat().getCodec() != AudioFormat.CODEC_MP3) {
+        if (audioStream != null && !AudioFormat.CODEC_MP3.equals(audioStream.getFormat().getCodec())) {
             AudioPlayer audioPlayer = new AudioPlayer(audioStream);
             audioPlayer.start();
             try {

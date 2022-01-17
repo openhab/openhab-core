@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -71,9 +71,9 @@ public class AutomationCommandRemove extends AutomationCommand {
             case AutomationCommands.TEMPLATE_PROVIDER:
                 return autoCommands.remove(AutomationCommands.TEMPLATE_PROVIDER, url);
             case AutomationCommands.RULE_PROVIDER:
-                if (command == AutomationCommands.REMOVE_RULE) {
+                if (AutomationCommands.REMOVE_RULE.equals(command)) {
                     return autoCommands.removeRule(id);
-                } else if (command == AutomationCommands.REMOVE_RULES) {
+                } else if (AutomationCommands.REMOVE_RULES.equals(command)) {
                     return autoCommands.removeRules(id);
                 }
         }

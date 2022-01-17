@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,8 @@
  */
 package org.openhab.core.auth;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A dedicated exception thrown when extracted credentials can not be matched with any authentication provider.
  *
@@ -20,6 +22,8 @@ package org.openhab.core.auth;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@SuppressWarnings("serial")
+@NonNullByDefault
 public class UnsupportedCredentialsException extends AuthenticationException {
 
     /**

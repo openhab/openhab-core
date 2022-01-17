@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This class defines an add-on.
  *
@@ -28,22 +30,22 @@ public class Addon {
     private final String id;
     private final String label;
     private final String version;
-    private final String maturity;
+    private final @Nullable String maturity;
     private final String contentType;
-    private final String link;
+    private final @Nullable String link;
     private final String author;
     private boolean verifiedAuthor;
     private boolean installed;
     private final String type;
-    private final String description;
-    private final String detailedDescription;
+    private final @Nullable String description;
+    private final @Nullable String detailedDescription;
     private final String configDescriptionURI;
     private final String keywords;
     private final String countries;
-    private final String license;
+    private final @Nullable String license;
     private final String connection;
-    private final String backgroundColor;
-    private final String imageLink;
+    private final @Nullable String backgroundColor;
+    private final @Nullable String imageLink;
     private final Map<String, Object> properties;
 
     /**
@@ -55,7 +57,7 @@ public class Addon {
      * @param version the version of the add-on
      * @param maturity the maturity level of this version
      * @param contentType the content type of the add-on
-     * @param link the link to find more information about the add-on (may be null)*
+     * @param link the link to find more information about the add-on (may be null)
      * @param author the author of the add-on
      * @param verifiedAuthor true, if the author is verified
      * @param installed true, if the add-on is installed, false otherwise
@@ -71,10 +73,11 @@ public class Addon {
      * @param imageLink the link to an image (png/svg) (may be null)
      * @param properties a {@link Map} containing addition information
      */
-    private Addon(String id, String type, String label, String version, String maturity, String contentType,
-            String link, String author, boolean verifiedAuthor, boolean installed, String description,
-            String detailedDescription, String configDescriptionURI, String keywords, String countries, String license,
-            String connection, String backgroundColor, String imageLink, Map<String, Object> properties) {
+    private Addon(String id, String type, String label, String version, @Nullable String maturity, String contentType,
+            @Nullable String link, String author, boolean verifiedAuthor, boolean installed,
+            @Nullable String description, @Nullable String detailedDescription, String configDescriptionURI,
+            String keywords, String countries, @Nullable String license, String connection,
+            @Nullable String backgroundColor, @Nullable String imageLink, @Nullable Map<String, Object> properties) {
         this.id = id;
         this.label = label;
         this.version = version;
@@ -94,7 +97,7 @@ public class Addon {
         this.verifiedAuthor = verifiedAuthor;
         this.installed = installed;
         this.type = type;
-        this.properties = properties;
+        this.properties = properties == null ? Map.of() : properties;
     }
 
     /**
@@ -121,7 +124,7 @@ public class Addon {
     /**
      * The (optional) link to find more information about the add-on
      */
-    public String getLink() {
+    public @Nullable String getLink() {
         return link;
     }
 
@@ -149,7 +152,7 @@ public class Addon {
     /**
      * The maturity level of this version
      */
-    public String getMaturity() {
+    public @Nullable String getMaturity() {
         return maturity;
     }
 
@@ -163,14 +166,14 @@ public class Addon {
     /**
      * The description of the add-on
      */
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 
     /**
      * The detailed description of the add-on
      */
-    public String getDetailedDescription() {
+    public @Nullable String getDetailedDescription() {
         return detailedDescription;
     }
 
@@ -198,7 +201,7 @@ public class Addon {
     /**
      * The SPDX License identifier for this addon
      */
-    public String getLicense() {
+    public @Nullable String getLicense() {
         return license;
     }
 
@@ -233,14 +236,14 @@ public class Addon {
     /**
      * The background color for rendering the add-on
      */
-    public String getBackgroundColor() {
+    public @Nullable String getBackgroundColor() {
         return backgroundColor;
     }
 
     /**
      * A link to an image (png/svg) for the add-on
      */
-    public String getImageLink() {
+    public @Nullable String getImageLink() {
         return imageLink;
     }
 
@@ -252,22 +255,22 @@ public class Addon {
         private String id;
         private String label;
         private String version = "";
-        private String maturity = null;
+        private @Nullable String maturity;
         private String contentType;
-        private String link;
+        private @Nullable String link;
         private String author = "";
         private boolean verifiedAuthor = false;
         private boolean installed = false;
         private String type;
-        private String description = "";
-        private String detailedDescription;
+        private @Nullable String description;
+        private @Nullable String detailedDescription;
         private String configDescriptionURI = "";
         private String keywords = "";
         private String countries = "";
-        private String license = null;
+        private @Nullable String license;
         private String connection = "";
-        private String backgroundColor;
-        private String imageLink = null;
+        private @Nullable String backgroundColor;
+        private @Nullable String imageLink;
         private Map<String, Object> properties = new HashMap<>();
 
         private Builder(String id) {
@@ -284,7 +287,7 @@ public class Addon {
             return this;
         }
 
-        public Builder withMaturity(String maturity) {
+        public Builder withMaturity(@Nullable String maturity) {
             this.maturity = maturity;
             return this;
         }
@@ -345,7 +348,7 @@ public class Addon {
             return this;
         }
 
-        public Builder withLicense(String license) {
+        public Builder withLicense(@Nullable String license) {
             this.license = license;
             return this;
         }
@@ -360,7 +363,7 @@ public class Addon {
             return this;
         }
 
-        public Builder withImageLink(String imageLink) {
+        public Builder withImageLink(@Nullable String imageLink) {
             this.imageLink = imageLink;
             return this;
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,14 @@
  */
 @Grab('com.xlson.groovycsv:groovycsv:1.1')
 import static com.xlson.groovycsv.CsvParser.parseCsv
+import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.Year
+import java.util.stream.Collectors
+
 
 baseDir = Paths.get(getClass().protectionDomain.codeSource.location.toURI()).getParent().getParent().toAbsolutePath()
+header = header()
 
 def tagSets = new TreeMap<String, String>()
 def locations = new TreeSet<String>()
@@ -65,7 +70,7 @@ def createTagSetClass(def line, String tagSet) {
     def parentClass = parent ? parent : type
     def pkg = type.toLowerCase()
     def file = new FileWriter("${baseDir}/src/main/java/org/openhab/core/semantics/model/${pkg}/${tag}.java")
-    file.write(header())
+    file.write(header)
     file.write("package org.openhab.core.semantics.model." + pkg + ";\n\n")
     file.write("import org.eclipse.jdt.annotation.NonNullByDefault;\n")
     if (!parent) {
@@ -96,7 +101,7 @@ def appendLabelsFile(FileWriter file, def line, String tagSet) {
 
 def createLocationsFile(Set<String> locations) {
     def file = new FileWriter("${baseDir}/src/main/java/org/openhab/core/semantics/model/location/Locations.java")
-    file.write(header())
+    file.write(header)
     file.write("""package org.openhab.core.semantics.model.location;
 
 import java.util.HashSet;
@@ -134,7 +139,7 @@ public class Locations {
 
 def createEquipmentsFile(Set<String> equipments) {
     def file = new FileWriter("${baseDir}/src/main/java/org/openhab/core/semantics/model/equipment/Equipments.java")
-    file.write(header())
+    file.write(header)
     file.write("""package org.openhab.core.semantics.model.equipment;
 
 import java.util.HashSet;
@@ -172,7 +177,7 @@ public class Equipments {
 
 def createPointsFile(Set<String> points) {
     def file = new FileWriter("${baseDir}/src/main/java/org/openhab/core/semantics/model/point/Points.java")
-    file.write(header())
+    file.write(header)
     file.write("""package org.openhab.core.semantics.model.point;
 
 import java.util.HashSet;
@@ -210,7 +215,7 @@ public class Points {
 
 def createPropertiesFile(Set<String> properties) {
     def file = new FileWriter("${baseDir}/src/main/java/org/openhab/core/semantics/model/property/Properties.java")
-    file.write(header())
+    file.write(header)
     file.write("""package org.openhab.core.semantics.model.property;
 
 import java.util.HashSet;
@@ -246,17 +251,19 @@ public class Properties {
     file.close()
 }
 
-def header() { """/**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
- *
- * See the NOTICE file(s) distributed with this work for additional
- * information.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License 2.0 which is available at
- * http://www.eclipse.org/legal/epl-2.0
- *
- * SPDX-License-Identifier: EPL-2.0
- */
-"""
+def header() {
+    def headerPath = baseDir.resolve("../../licenses/epl-2.0/header.txt")
+    def year = String.valueOf(Year.now().getValue())
+
+    def headerLines = Files.readAllLines(headerPath)
+
+    headerLines = headerLines.stream().map(line -> {
+        line.isBlank() ? " *" : " * " + line.replace("\${year}", year)
+    }).collect(Collectors.toList())
+
+    headerLines.add(0, "/**")
+    headerLines.add(" */")
+    headerLines.add("")
+
+    headerLines.stream().collect(Collectors.joining(System.lineSeparator()))
 }

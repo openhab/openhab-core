@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Location_Outdoor_Porch", label = "Porch", synonyms = "Proches", description = "")
+@TagInfo(id = "Location_Outdoor_Porch", label = "Porch", synonyms = "Porches", description = "")
 public interface Porch extends Outdoor {
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.discovery;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -243,24 +244,8 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * @param discoveryResult Holds the information needed to identify the discovered device.
      */
     protected void thingDiscovered(final DiscoveryResult discoveryResult) {
-        final DiscoveryResult discoveryResultNew;
-        if (i18nProvider != null && localeProvider != null) {
-            Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-
-            String defaultLabel = discoveryResult.getLabel();
-
-            String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferKey(discoveryResult, "label"));
-
-            String label = i18nProvider.getText(bundle, key, defaultLabel, localeProvider.getLocale());
-
-            discoveryResultNew = DiscoveryResultBuilder.create(discoveryResult.getThingUID())
-                    .withThingType(discoveryResult.getThingTypeUID()).withBridge(discoveryResult.getBridgeUID())
-                    .withProperties(discoveryResult.getProperties())
-                    .withRepresentationProperty(discoveryResult.getRepresentationProperty()).withLabel(label)
-                    .withTTL(discoveryResult.getTimeToLive()).build();
-        } else {
-            discoveryResultNew = discoveryResult;
-        }
+        final DiscoveryResult discoveryResultNew = getLocalizedDiscoveryResult(discoveryResult,
+                FrameworkUtil.getBundle(this.getClass()));
         for (DiscoveryListener discoveryListener : discoveryListeners) {
             try {
                 discoveryListener.thingDiscovered(this, discoveryResultNew);
@@ -447,11 +432,60 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
         if (autoDiscoveryEnabled instanceof String) {
             return Boolean.valueOf((String) autoDiscoveryEnabled);
         } else {
-            return autoDiscoveryEnabled == Boolean.TRUE;
+            return Boolean.TRUE.equals(autoDiscoveryEnabled);
         }
     }
 
     private String inferKey(DiscoveryResult discoveryResult, String lastSegment) {
         return "discovery." + discoveryResult.getThingUID().getAsString().replaceAll(":", ".") + "." + lastSegment;
+    }
+
+    protected DiscoveryResult getLocalizedDiscoveryResult(final DiscoveryResult discoveryResult,
+            @Nullable Bundle bundle) {
+        if (i18nProvider != null && localeProvider != null) {
+            String currentLabel = discoveryResult.getLabel();
+
+            String key = I18nUtil.stripConstantOr(currentLabel, () -> inferKey(discoveryResult, "label"));
+
+            ParsedKey parsedKey = new ParsedKey(key);
+
+            String label = i18nProvider.getText(bundle, parsedKey.key, currentLabel, localeProvider.getLocale(),
+                    parsedKey.args);
+
+            if (currentLabel.equals(label)) {
+                return discoveryResult;
+            } else {
+                return DiscoveryResultBuilder.create(discoveryResult.getThingUID())
+                        .withThingType(discoveryResult.getThingTypeUID()).withBridge(discoveryResult.getBridgeUID())
+                        .withProperties(discoveryResult.getProperties())
+                        .withRepresentationProperty(discoveryResult.getRepresentationProperty()).withLabel(label)
+                        .withTTL(discoveryResult.getTimeToLive()).build();
+            }
+        } else {
+            return discoveryResult;
+        }
+    }
+
+    /**
+     * Utility class to parse the key with parameters into the key and optional arguments.
+     */
+    private final class ParsedKey {
+
+        private static final int LIMIT = 2;
+
+        private final String key;
+        private final Object @Nullable [] args;
+
+        private ParsedKey(String label) {
+            String[] parts = label.split("\\s+", LIMIT);
+            this.key = parts[0];
+
+            if (parts.length == 1) {
+                this.args = null;
+            } else {
+                this.args = Arrays.stream(parts[1].replaceAll("\\[|\\]|\"", "").split(","))
+                        .filter(s -> s != null && !s.isBlank()).map(s -> s.trim()).toArray(Object[]::new);
+            }
+        }
     }
 }

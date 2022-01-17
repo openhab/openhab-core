@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,10 +28,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public abstract class ModbusSlaveErrorResponseException extends ModbusTransportException {
 
-    private static final Map<Integer, KnownExceptionCode> exceptionCodesIndex = new HashMap<>(10);
+    private static final Map<Integer, KnownExceptionCode> EXCEPTION_CODES_INDEX = new HashMap<>(10);
     static {
         for (KnownExceptionCode code : KnownExceptionCode.values()) {
-            exceptionCodesIndex.put(code.exceptionCode, code);
+            EXCEPTION_CODES_INDEX.put(code.exceptionCode, code);
         }
     }
 
@@ -64,7 +64,7 @@ public abstract class ModbusSlaveErrorResponseException extends ModbusTransportE
         }
 
         public static Optional<KnownExceptionCode> tryFromExceptionCode(int exceptionCode) {
-            return Optional.ofNullable(exceptionCodesIndex.get(exceptionCode));
+            return Optional.ofNullable(EXCEPTION_CODES_INDEX.get(exceptionCode));
         }
     }
 

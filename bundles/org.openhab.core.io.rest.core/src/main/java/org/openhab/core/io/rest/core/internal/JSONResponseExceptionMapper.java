@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,13 @@
  */
 package org.openhab.core.io.rest.core.internal;
 
+import java.io.EOFException;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
@@ -35,14 +37,22 @@ import org.slf4j.LoggerFactory;
 @JaxrsExtension
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @NonNullByDefault
-public class JSONResponseExceptionMapper implements ExceptionMapper<@NonNull Exception> {
+public class JSONResponseExceptionMapper implements ExceptionMapper<Exception> {
 
     private final Logger logger = LoggerFactory.getLogger(JSONResponseExceptionMapper.class);
     private final ExceptionMapper<Exception> delegate = new JSONResponse.ExceptionMapper();
 
     @Override
-    public Response toResponse(Exception e) {
-        logger.error("Unexpected exception occurred while processing REST request.", e);
-        return delegate.toResponse(e);
+    public @Nullable Response toResponse(Exception e) {
+        if (e instanceof EOFException) {
+            // we catch this exception to avoid confusion errors in the log file, since this is not any error situation
+            // see https://github.com/openhab/openhab-distro/issues/1188
+            logger.debug("Failed writing HTTP response, since other side closed the connection");
+            // Returning null results in a Response.Status.NO_CONTENT response.
+            return null;
+        } else {
+            logger.error("Unexpected exception occurred while processing REST request.", e);
+            return delegate.toResponse(e);
+        }
     }
 }

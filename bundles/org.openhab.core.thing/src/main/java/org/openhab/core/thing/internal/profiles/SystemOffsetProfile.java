@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -115,13 +115,13 @@ public class SystemOffsetProfile implements StateProfile {
         if (state instanceof QuantityType) {
             QuantityType qtState = (QuantityType) state;
             try {
-                if (finalOffset.getUnit() == Units.ONE) {
+                if (Units.ONE.equals(finalOffset.getUnit()) && !Units.ONE.equals(qtState.getUnit())) {
                     // allow offsets without unit -> implicitly assume its the same as the one from the state, but warn
                     // the user
-                    finalOffset = new QuantityType<>(finalOffset.toBigDecimal(), qtState.getUnit());
                     logger.warn(
                             "Received a QuantityType state '{}' with unit, but the offset is defined as a plain number without unit ({}), please consider adding a unit to the profile offset.",
                             state, offset);
+                    finalOffset = new QuantityType<>(finalOffset.toBigDecimal(), qtState.getUnit());
                 }
                 // take care of temperatures because they start at offset -273°C = 0K
                 if (Units.KELVIN.equals(qtState.getUnit().getSystemUnit())) {
@@ -135,7 +135,7 @@ public class SystemOffsetProfile implements StateProfile {
             } catch (UnconvertibleException e) {
                 logger.warn("Cannot apply offset '{}' to state '{}' because types do not match.", finalOffset, qtState);
             }
-        } else if (state instanceof DecimalType && finalOffset.getUnit() == Units.ONE) {
+        } else if (state instanceof DecimalType && Units.ONE.equals(finalOffset.getUnit())) {
             DecimalType decState = (DecimalType) state;
             result = new DecimalType(decState.toBigDecimal().add(finalOffset.toBigDecimal()));
         } else {
@@ -147,6 +147,7 @@ public class SystemOffsetProfile implements StateProfile {
         return result;
     }
 
+    @SuppressWarnings("null")
     private @Nullable QuantityType<Temperature> handleTemperature(QuantityType<Temperature> qtState,
             QuantityType<Temperature> offset) {
         // do the math in Kelvin and afterwards convert it back to the unit of the state

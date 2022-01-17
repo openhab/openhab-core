@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,10 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -147,11 +151,17 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
         elements.put("PointType", PointType.class);
         elements.put("StringType", StringType.class);
 
-        elements.put("SIUnits", SIUnits.class);
         elements.put("ImperialUnits", ImperialUnits.class);
         elements.put("MetricPrefix", MetricPrefix.class);
+        elements.put("SIUnits", SIUnits.class);
         elements.put("Units", Units.class);
         elements.put("BinaryPrefix", BinaryPrefix.class);
+
+        // date time static functions
+        elements.put("ChronoUnit", ChronoUnit.class);
+        elements.put("Duration", Duration.class);
+        elements.put("ZoneId", ZoneId.class);
+        elements.put("ZonedDateTime", ZonedDateTime.class);
 
         // services
         elements.put("items", new ItemRegistryDelegate(itemRegistry));

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -149,8 +149,7 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
         if (!scriptTypes.isEmpty()) {
             ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
             if (scriptEngine != null) {
-                javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
-                parameterOptions.put(getPreferredMimeType(factory), getLanguageName(factory));
+                parameterOptions.put(getPreferredMimeType(engineFactory), getLanguageName(scriptEngine.getFactory()));
                 logger.trace("ParameterOptions: {}", parameterOptions);
             } else {
                 logger.trace("setScriptEngineFactory: engine was null");
@@ -165,8 +164,7 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
         if (!scriptTypes.isEmpty()) {
             ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
             if (scriptEngine != null) {
-                javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
-                parameterOptions.remove(getPreferredMimeType(factory));
+                parameterOptions.remove(getPreferredMimeType(engineFactory));
                 logger.trace("ParameterOptions: {}", parameterOptions);
             } else {
                 logger.trace("unsetScriptEngineFactory: engine was null");
@@ -176,10 +174,10 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
         }
     }
 
-    private String getPreferredMimeType(javax.script.ScriptEngineFactory factory) {
-        List<String> mimeTypes = new ArrayList<>(factory.getMimeTypes());
-        mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || mimeType.contains("x-"));
-        return mimeTypes.isEmpty() ? factory.getMimeTypes().get(0) : mimeTypes.get(0);
+    private String getPreferredMimeType(ScriptEngineFactory factory) {
+        List<String> mimeTypes = new ArrayList<>(factory.getScriptTypes());
+        mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || "application/python".equals(mimeType));
+        return mimeTypes.isEmpty() ? factory.getScriptTypes().get(0) : mimeTypes.get(0);
     }
 
     private String getLanguageName(javax.script.ScriptEngineFactory factory) {

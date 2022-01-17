@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -99,6 +99,7 @@ public class SystemHysteresisStateProfileTest {
                         BigDecimal.TEN, null) }, //
                 { new ParameterSet(List.of(QuantityType.valueOf("0 %")), List.of(OnOffType.OFF), BigDecimal.TEN,
                         null) }, //
+                { new ParameterSet(List.of(new QuantityType<>()), List.of(OnOffType.OFF), BigDecimal.TEN, null) }, //
                 // lower bound = upper bound = 10 (as QuantityType), one state update / command (QuantityType)
                 { new ParameterSet(List.of(QuantityType.valueOf("100 %")), List.of(OnOffType.ON), QUANTITY_STRING_TEN,
                         null) }, //

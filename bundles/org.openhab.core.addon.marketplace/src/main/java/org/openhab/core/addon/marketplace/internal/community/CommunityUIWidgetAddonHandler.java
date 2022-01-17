@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.Addon;
@@ -58,7 +59,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
         this.widgetRegistry = uiComponentRegistryFactory.getRegistry("ui:widget");
         this.yamlMapper = new ObjectMapper(new YAMLFactory());
         yamlMapper.findAndRegisterModules();
-        this.yamlMapper.setDateFormat(new SimpleDateFormat("MMM d, yyyy, hh:mm:ss aa"));
+        this.yamlMapper.setDateFormat(new SimpleDateFormat("MMM d, yyyy, hh:mm:ss aa", Locale.ENGLISH));
     }
 
     @Override

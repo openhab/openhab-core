@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Classes implementing this interface can be registered as an OSGi service in order to provide functionality for
  * managing add-ons, such as listing, installing and uninstalling them.
@@ -24,6 +27,7 @@ import java.util.Locale;
  * @author Kai Kreuzer - Initial contribution
  * @author Yannick Schaus - Add id, name and refreshSource
  */
+@NonNullByDefault
 public interface AddonService {
 
     /**
@@ -57,16 +61,17 @@ public interface AddonService {
      * @param locale the locale to use for the result
      * @return the localized add-ons
      */
-    List<Addon> getAddons(Locale locale);
+    List<Addon> getAddons(@Nullable Locale locale);
 
     /**
      * Retrieves the add-on for the given id.
      *
      * @param id the id of the add-on
      * @param locale the locale to use for the result
-     * @return the localized add-on or null, if no add-on exists with this id
+     * @return the localized add-on or <code>null</code>, if no add-on exists with this id
      */
-    Addon getAddon(String id, Locale locale);
+    @Nullable
+    Addon getAddon(String id, @Nullable Locale locale);
 
     /**
      * Retrieves all possible types of add-ons.
@@ -74,7 +79,7 @@ public interface AddonService {
      * @param locale the locale to use for the result
      * @return the localized types
      */
-    List<AddonType> getTypes(Locale locale);
+    List<AddonType> getTypes(@Nullable Locale locale);
 
     /**
      * Installs the given add-on.
@@ -102,7 +107,8 @@ public interface AddonService {
      * This must not be a long running process but return immediately.
      *
      * @param addonURI the URI from which to parse the add-on Id.
-     * @return the add-on Id if the URI can be parsed, otherwise <code>null</code>.
+     * @return the add-on Id if the URI can be parsed, otherwise <code>null</code>
      */
+    @Nullable
     String getAddonId(URI addonURI);
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -44,7 +44,7 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
 
     private final CronScheduler scheduler;
     private final String expression;
-    private ScheduledCompletableFuture<Void> schedule;
+    private ScheduledCompletableFuture<?> schedule;
 
     public TimeOfDayTriggerHandler(Trigger module, CronScheduler scheduler) {
         super(module);
@@ -79,7 +79,11 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
 
     @Override
     public void run() {
-        ((TriggerHandlerCallback) callback).triggered(module, null);
+        if (callback != null) {
+            ((TriggerHandlerCallback) callback).triggered(module, null);
+        } else {
+            logger.debug("Tried to trigger, but callback isn't available!");
+        }
     }
 
     @Override

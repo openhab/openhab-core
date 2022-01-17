@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.audio;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -20,6 +21,7 @@ import java.io.InputStream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.audio.utils.AudioStreamUtils;
+import org.openhab.core.audio.utils.AudioWaveUtils;
 
 /**
  * This is an AudioStream from an audio file
@@ -57,8 +59,7 @@ public class FileAudioStream extends FixedLengthAudioStream {
         final String extension = AudioStreamUtils.getExtension(filename);
         switch (extension) {
             case WAV_EXTENSION:
-                return new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED, false, 16, 705600,
-                        44100L);
+                return parseWavFormat(file);
             case MP3_EXTENSION:
                 return AudioFormat.MP3;
             case OGG_EXTENSION:
@@ -67,6 +68,14 @@ public class FileAudioStream extends FixedLengthAudioStream {
                 return AudioFormat.AAC;
             default:
                 throw new AudioException("Unsupported file extension!");
+        }
+    }
+
+    private static AudioFormat parseWavFormat(File file) throws AudioException {
+        try (BufferedInputStream inputStream = new BufferedInputStream(getInputStream(file))) {
+            return AudioWaveUtils.parseWavFormat(inputStream);
+        } catch (IOException e) {
+            throw new AudioException("Cannot parse wav stream", e);
         }
     }
 

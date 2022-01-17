@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,6 +19,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
@@ -34,15 +36,16 @@ import org.openhab.core.common.NamedThreadFactory;
  * @author Kai Kreuzer - improved stability
  * @author Fabian Wolter - Change executor to ScheduledExecutorService and expose it
  */
+@NonNullByDefault
 public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
+
+    private final RuleEngineImpl re;
 
     private final String ruleUID;
 
     private ScheduledExecutorService executor;
 
-    private Future<?> future;
-
-    private final RuleEngineImpl re;
+    private @Nullable Future<?> future;
 
     protected TriggerHandlerCallbackImpl(RuleEngineImpl re, String ruleUID) {
         this.re = re;
@@ -51,12 +54,9 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     }
 
     @Override
-    public void triggered(Trigger trigger, Map<String, ?> outputs) {
+    public void triggered(Trigger trigger, @Nullable Map<String, ?> context) {
         synchronized (this) {
-            if (executor == null) {
-                return;
-            }
-            future = executor.submit(new TriggerData(trigger, outputs));
+            future = executor.submit(new TriggerData(trigger, context));
         }
         re.logger.debug("The trigger '{}' of rule '{}' is triggered.", trigger.getId(), ruleUID);
     }
@@ -69,18 +69,17 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     class TriggerData implements Runnable {
 
         private final Trigger trigger;
+        private @Nullable final Map<String, ?> outputs;
 
         public Trigger getTrigger() {
             return trigger;
         }
 
-        public Map<String, ?> getOutputs() {
+        public @Nullable Map<String, ?> getOutputs() {
             return outputs;
         }
 
-        private final Map<String, ?> outputs;
-
-        public TriggerData(Trigger t, Map<String, ?> outputs) {
+        public TriggerData(Trigger t, @Nullable Map<String, ?> outputs) {
             this.trigger = t;
             this.outputs = outputs;
         }
@@ -93,16 +92,15 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
 
     public void dispose() {
         synchronized (this) {
-            AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            AccessController.doPrivileged((PrivilegedAction<@Nullable Void>) () -> {
                 executor.shutdownNow();
                 return null;
             });
-            executor = null;
         }
     }
 
     @Override
-    public Boolean isEnabled(String ruleUID) {
+    public @Nullable Boolean isEnabled(String ruleUID) {
         return re.isEnabled(ruleUID);
     }
 
@@ -112,12 +110,12 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     }
 
     @Override
-    public RuleStatusInfo getStatusInfo(String ruleUID) {
+    public @Nullable RuleStatusInfo getStatusInfo(String ruleUID) {
         return re.getStatusInfo(ruleUID);
     }
 
     @Override
-    public RuleStatus getStatus(String ruleUID) {
+    public @Nullable RuleStatus getStatus(String ruleUID) {
         return re.getStatus(ruleUID);
     }
 
@@ -127,7 +125,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     }
 
     @Override
-    public void runNow(String uid, boolean considerConditions, Map<String, Object> context) {
+    public void runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context) {
         re.runNow(uid, considerConditions, context);
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,6 +30,7 @@ import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.types.Command;
@@ -78,8 +79,7 @@ public class SystemOffsetProfileTest {
         verify(callback, times(1)).handleCommand(capture.capture());
 
         Command result = capture.getValue();
-        @SuppressWarnings("unchecked")
-        QuantityType<Temperature> decResult = (QuantityType<Temperature>) result;
+        QuantityType<?> decResult = (QuantityType<?>) result;
         assertEquals(20, decResult.intValue());
         assertEquals(SIUnits.CELSIUS, decResult.getUnit());
     }
@@ -128,8 +128,7 @@ public class SystemOffsetProfileTest {
         verify(callback, times(1)).sendCommand(capture.capture());
 
         Command result = capture.getValue();
-        @SuppressWarnings("unchecked")
-        QuantityType<Temperature> decResult = (QuantityType<Temperature>) result;
+        QuantityType<?> decResult = (QuantityType<?>) result;
         assertEquals(26, decResult.intValue());
         assertEquals(SIUnits.CELSIUS, decResult.getUnit());
     }
@@ -146,8 +145,7 @@ public class SystemOffsetProfileTest {
         verify(callback, times(1)).sendUpdate(capture.capture());
 
         State result = capture.getValue();
-        @SuppressWarnings("unchecked")
-        QuantityType<Temperature> decResult = (QuantityType<Temperature>) result;
+        QuantityType<?> decResult = (QuantityType<?>) result;
         assertEquals(26, decResult.intValue());
         assertEquals(SIUnits.CELSIUS, decResult.getUnit());
     }
@@ -164,14 +162,13 @@ public class SystemOffsetProfileTest {
         verify(callback, times(1)).sendUpdate(capture.capture());
 
         State result = capture.getValue();
-        @SuppressWarnings("unchecked")
-        QuantityType<Temperature> decResult = (QuantityType<Temperature>) result;
+        QuantityType<?> decResult = (QuantityType<?>) result;
         assertThat(decResult.doubleValue(), is(closeTo(24.6666666666666666666666666666667d, 0.0000000000000001d)));
         assertEquals(SIUnits.CELSIUS, decResult.getUnit());
     }
 
     @Test
-    public void testQuantityTypeOnStateUpdateFromHandlerDecimalOffset() {
+    public void testQuantityTypeWithUnitCelsiusOnStateUpdateFromHandlerDecimalOffset() {
         ProfileCallback callback = mock(ProfileCallback.class);
         SystemOffsetProfile offsetProfile = createProfile(callback, "3");
 
@@ -182,16 +179,32 @@ public class SystemOffsetProfileTest {
         verify(callback, times(1)).sendUpdate(capture.capture());
 
         State result = capture.getValue();
-        @SuppressWarnings("unchecked")
-        QuantityType<Temperature> decResult = (QuantityType<Temperature>) result;
+        QuantityType<?> decResult = (QuantityType<?>) result;
         assertEquals(26, decResult.intValue());
         assertEquals(SIUnits.CELSIUS, decResult.getUnit());
+    }
+
+    @Test
+    public void testQuantityTypeWithUnitOneOnStateUpdateFromHandlerDecimalOffset() {
+        ProfileCallback callback = mock(ProfileCallback.class);
+        SystemOffsetProfile offsetProfile = createProfile(callback, "3");
+
+        State state = new QuantityType<>();
+        offsetProfile.onStateUpdateFromHandler(state);
+
+        ArgumentCaptor<State> capture = ArgumentCaptor.forClass(State.class);
+        verify(callback, times(1)).sendUpdate(capture.capture());
+
+        State result = capture.getValue();
+        QuantityType<?> decResult = (QuantityType<?>) result;
+        assertEquals(3, decResult.intValue());
+        assertEquals(Units.ONE, decResult.getUnit());
     }
 
     private SystemOffsetProfile createProfile(ProfileCallback callback, String offset) {
         ProfileContext context = mock(ProfileContext.class);
         Configuration config = new Configuration();
-        config.put("offset", offset);
+        config.put(SystemOffsetProfile.OFFSET_PARAM, offset);
         when(context.getConfiguration()).thenReturn(config);
 
         return new SystemOffsetProfile(callback, context);

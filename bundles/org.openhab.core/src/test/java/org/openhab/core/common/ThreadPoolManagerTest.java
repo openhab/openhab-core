@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -34,7 +35,7 @@ public class ThreadPoolManagerTest {
 
     @Test
     public void testGetScheduledPool() {
-        ThreadPoolExecutor result = (ThreadPoolExecutor) ThreadPoolManager.getScheduledPool("test1");
+        ThreadPoolExecutor result = ThreadPoolManager.getScheduledPoolUnwrapped("test1");
 
         assertThat(result, instanceOf(ScheduledExecutorService.class));
 
@@ -45,7 +46,7 @@ public class ThreadPoolManagerTest {
 
     @Test
     public void testGetCachedPool() {
-        ExecutorService result = ThreadPoolManager.getPool("test2");
+        ExecutorService result = ThreadPoolManager.getPoolUnwrapped("test2");
 
         assertThat(result, instanceOf(ExecutorService.class));
 
@@ -60,7 +61,7 @@ public class ThreadPoolManagerTest {
     public void testGetConfiguredScheduledPool() {
         ThreadPoolManager tpm = new ThreadPoolManager();
         tpm.modified(Map.of("test3", "5"));
-        ThreadPoolExecutor result = (ThreadPoolExecutor) ThreadPoolManager.getScheduledPool("test3");
+        ThreadPoolExecutor result = ThreadPoolManager.getScheduledPoolUnwrapped("test3");
 
         assertThat(result, instanceOf(ScheduledExecutorService.class));
         assertEquals(5, result.getCorePoolSize());
@@ -70,14 +71,14 @@ public class ThreadPoolManagerTest {
     public void testGetConfiguredCachedPool() {
         ThreadPoolManager tpm = new ThreadPoolManager();
         tpm.modified(Map.of("test4", "4"));
-        ThreadPoolExecutor result = (ThreadPoolExecutor) ThreadPoolManager.getPool("test4");
+        ThreadPoolExecutor result = ThreadPoolManager.getPoolUnwrapped("test4");
 
         assertEquals(4, result.getMaximumPoolSize());
     }
 
     @Test
     public void testReconfiguringScheduledPool() {
-        ThreadPoolExecutor result = (ThreadPoolExecutor) ThreadPoolManager.getScheduledPool("test5");
+        ThreadPoolExecutor result = ThreadPoolManager.getScheduledPoolUnwrapped("test5");
         assertEquals(ThreadPoolManager.DEFAULT_THREAD_POOL_SIZE, result.getCorePoolSize());
 
         ThreadPoolManager tpm = new ThreadPoolManager();
@@ -88,7 +89,7 @@ public class ThreadPoolManagerTest {
 
     @Test
     public void testReconfiguringCachedPool() {
-        ThreadPoolExecutor result = (ThreadPoolExecutor) ThreadPoolManager.getPool("test6");
+        ThreadPoolExecutor result = ThreadPoolManager.getPoolUnwrapped("test6");
         assertEquals(ThreadPoolManager.DEFAULT_THREAD_POOL_SIZE, result.getMaximumPoolSize());
 
         ThreadPoolManager tpm = new ThreadPoolManager();
@@ -98,5 +99,39 @@ public class ThreadPoolManagerTest {
 
         tpm.modified(Map.of("test6", "3"));
         assertEquals(3, result.getMaximumPoolSize());
+    }
+
+    @Test
+    public void testGetPoolShutdown() throws InterruptedException {
+        checkThreadPoolWorks("Test");
+        ThreadPoolManager.getPool("Test").shutdown();
+        checkThreadPoolWorks("Test");
+        ThreadPoolManager.getPool("Test2").shutdownNow();
+        checkThreadPoolWorks("Test2");
+    }
+
+    @Test
+    public void testGetScheduledPoolShutdown() throws InterruptedException {
+        checkScheduledPoolWorks("Test2");
+        ThreadPoolManager.getScheduledPool("Test2").shutdown();
+        checkScheduledPoolWorks("Test2");
+        ThreadPoolManager.getScheduledPool("Test3").shutdownNow();
+        checkScheduledPoolWorks("Test3");
+    }
+
+    private void checkThreadPoolWorks(String poolName) throws InterruptedException {
+        ExecutorService threadPool = ThreadPoolManager.getPool(poolName);
+        CountDownLatch cdl = new CountDownLatch(1);
+        threadPool.execute(cdl::countDown);
+        assertTrue(cdl.await(1, TimeUnit.SECONDS), "Checking if thread pool " + poolName + " works");
+        assertFalse(threadPool.isShutdown(), "Checking if thread pool is not shut down");
+    }
+
+    private void checkScheduledPoolWorks(String poolName) throws InterruptedException {
+        ScheduledExecutorService threadPool = ThreadPoolManager.getScheduledPool(poolName);
+        CountDownLatch cdl = new CountDownLatch(1);
+        threadPool.schedule(cdl::countDown, 100, TimeUnit.MILLISECONDS);
+        assertTrue(cdl.await(1, TimeUnit.SECONDS), "Checking if thread pool " + poolName + " works");
+        assertFalse(threadPool.isShutdown(), "Checking if thread pool is not shut down");
     }
 }

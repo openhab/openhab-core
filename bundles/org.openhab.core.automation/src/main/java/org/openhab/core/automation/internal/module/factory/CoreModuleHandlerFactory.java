@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,8 @@
  */
 package org.openhab.core.automation.internal.module.factory;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
@@ -59,7 +59,7 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
 
     private final Logger logger = LoggerFactory.getLogger(CoreModuleHandlerFactory.class);
 
-    private static final Collection<String> TYPES = Arrays.asList(ItemCommandTriggerHandler.MODULE_TYPE_ID,
+    private static final Collection<String> TYPES = List.of(ItemCommandTriggerHandler.MODULE_TYPE_ID,
             GroupCommandTriggerHandler.MODULE_TYPE_ID, ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID,
             ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID, GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID,
             GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID, ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID,
@@ -219,7 +219,7 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
             }
         }
 
-        logger.error("The ModuleHandler is not supported:{}", moduleTypeUID);
+        logger.error("The ModuleHandler is not supported: {}", moduleTypeUID);
         return null;
     }
 }

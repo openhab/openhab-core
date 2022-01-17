@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,8 +15,6 @@ package org.openhab.core.thing.internal.profiles;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,13 +46,10 @@ public class TimestampOffsetProfileTest {
     public static class ParameterSet {
         public final long seconds;
         public final @Nullable String timeZone;
-        public final ZoneOffset expectedZoneOffset;
 
         public ParameterSet(long seconds, @Nullable String timeZone) {
             this.seconds = seconds;
             this.timeZone = timeZone;
-            this.expectedZoneOffset = timeZone == null ? ZoneOffset.UTC
-                    : ZoneId.of(timeZone).getRules().getOffset(LocalDateTime.now());
         }
     }
 
@@ -121,7 +116,6 @@ public class TimestampOffsetProfileTest {
         DateTimeType updateResult = (DateTimeType) result;
         DateTimeType expectedResult = new DateTimeType(
                 ((DateTimeType) cmd).getZonedDateTime().plusSeconds(parameterSet.seconds));
-        assertEquals(parameterSet.expectedZoneOffset, updateResult.getZonedDateTime().getOffset());
         String timeZone = parameterSet.timeZone;
         if (timeZone != null) {
             expectedResult = expectedResult.toZone(timeZone);
@@ -146,7 +140,6 @@ public class TimestampOffsetProfileTest {
         DateTimeType updateResult = (DateTimeType) result;
         DateTimeType expectedResult = new DateTimeType(
                 ((DateTimeType) state).getZonedDateTime().plusSeconds(parameterSet.seconds));
-        assertEquals(parameterSet.expectedZoneOffset, updateResult.getZonedDateTime().getOffset());
         String timeZone = parameterSet.timeZone;
         if (timeZone != null) {
             expectedResult = expectedResult.toZone(timeZone);

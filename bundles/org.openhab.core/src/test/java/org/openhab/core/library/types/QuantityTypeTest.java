@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -71,9 +71,9 @@ public class QuantityTypeTest {
         new QuantityType<>("57%");
 
         QuantityType<Dimensionless> dt0 = new QuantityType<>("12");
-        assertTrue(dt0.getUnit().getDimension() == UnitDimension.NONE);
+        assertEquals(UnitDimension.NONE, dt0.getUnit().getDimension());
         dt0 = new QuantityType<>("2rad");
-        assertTrue(dt0.getUnit().getDimension() == UnitDimension.NONE);
+        assertEquals(UnitDimension.NONE, dt0.getUnit().getDimension());
     }
 
     @ParameterizedTest

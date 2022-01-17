@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -65,8 +65,9 @@ public class ByteArrayFileCache {
      *            disable this functionality.
      */
     public ByteArrayFileCache(String servicePID, Duration expiry) {
-        // TODO track and limit folder size
-        // TODO support user specific folder
+        // possible to-dos:
+        // - track and limit folder size
+        // - support user specific folder
         cacheFolder = new File(new File(OpenHAB.getUserDataFolder(), CACHE_FOLDER_NAME), servicePID);
         if (!cacheFolder.exists()) {
             logger.debug("Creating cache folder '{}'", cacheFolder.getAbsolutePath());

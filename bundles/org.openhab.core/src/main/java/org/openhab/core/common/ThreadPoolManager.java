@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,17 +12,25 @@
  */
 package org.openhab.core.common;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.openhab.core.internal.common.WrappedScheduledExecutorService;
 import org.osgi.framework.Constants;
@@ -133,7 +141,7 @@ public class ThreadPoolManager {
             }
         }
         if (pool instanceof ScheduledExecutorService) {
-            return (ScheduledExecutorService) pool;
+            return new UnstoppableScheduledExecutorService(poolName, (ScheduledExecutorService) pool);
         } else {
             throw new IllegalArgumentException("Pool " + poolName + " is not a scheduled pool!");
         }
@@ -162,7 +170,17 @@ public class ThreadPoolManager {
                 }
             }
         }
-        return pool;
+        return new UnstoppableExecutorService<>(poolName, pool);
+    }
+
+    static ThreadPoolExecutor getPoolUnwrapped(String poolName) {
+        UnstoppableExecutorService<?> ret = (UnstoppableExecutorService<?>) getPool(poolName);
+        return (ThreadPoolExecutor) ret.getDelegate();
+    }
+
+    static ThreadPoolExecutor getScheduledPoolUnwrapped(String poolName) {
+        UnstoppableExecutorService<?> ret = (UnstoppableScheduledExecutorService) getScheduledPool(poolName);
+        return (ThreadPoolExecutor) ret.getDelegate();
     }
 
     protected static int getConfig(String poolName) {
@@ -172,5 +190,121 @@ public class ThreadPoolManager {
 
     public static Set<String> getPoolNames() {
         return new HashSet<>(pools.keySet());
+    }
+
+    static class UnstoppableExecutorService<T extends ExecutorService> implements ExecutorService {
+
+        protected final Logger logger = LoggerFactory.getLogger(getClass());
+        protected final T delegate;
+        protected final String threadPoolName;
+
+        private UnstoppableExecutorService(String threadPoolName, T delegate) {
+            this.threadPoolName = threadPoolName;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void shutdown() {
+            logger.warn("shutdown() invoked on a shared thread pool '{}'. This is a bug, please submit a bug report",
+                    threadPoolName, new IllegalStateException());
+        }
+
+        @Override
+        public List<Runnable> shutdownNow() {
+            logger.warn("shutdownNow() invoked on a shared thread pool '{}'. This is a bug, please submit a bug report",
+                    threadPoolName, new IllegalStateException());
+            return Collections.emptyList();
+        }
+
+        @Override
+        public boolean isShutdown() {
+            return delegate.isShutdown();
+        }
+
+        @Override
+        public boolean isTerminated() {
+            return delegate.isTerminated();
+        }
+
+        @Override
+        public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+            return delegate.awaitTermination(timeout, unit);
+        }
+
+        @Override
+        public <T> Future<T> submit(Callable<T> task) {
+            return delegate.submit(task);
+        }
+
+        @Override
+        public <T> Future<T> submit(Runnable task, T result) {
+            return delegate.submit(task, result);
+        }
+
+        @Override
+        public Future<?> submit(Runnable task) {
+            return delegate.submit(task);
+        }
+
+        @Override
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+            return delegate.invokeAll(tasks);
+        }
+
+        @Override
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+                throws InterruptedException {
+            return delegate.invokeAll(tasks, timeout, unit);
+        }
+
+        @Override
+        public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
+                throws InterruptedException, ExecutionException {
+            return delegate.invokeAny(tasks);
+        }
+
+        @Override
+        public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+                throws InterruptedException, ExecutionException, TimeoutException {
+            return delegate.invokeAny(tasks, timeout, unit);
+        }
+
+        @Override
+        public void execute(Runnable command) {
+            delegate.execute(command);
+        }
+
+        T getDelegate() {
+            return delegate;
+        }
+    }
+
+    static class UnstoppableScheduledExecutorService extends UnstoppableExecutorService<ScheduledExecutorService>
+            implements ScheduledExecutorService {
+
+        private UnstoppableScheduledExecutorService(String threadPoolName, ScheduledExecutorService delegate) {
+            super(threadPoolName, delegate);
+        }
+
+        @Override
+        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+            return delegate.schedule(command, delay, unit);
+        }
+
+        @Override
+        public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+            return delegate.schedule(callable, delay, unit);
+        }
+
+        @Override
+        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+            return delegate.scheduleAtFixedRate(command, initialDelay, period, unit);
+        }
+
+        @Override
+        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay,
+                TimeUnit unit) {
+            return delegate.scheduleWithFixedDelay(command, initialDelay, delay, unit);
+        }
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -50,39 +50,39 @@ public class ReferenceResolverUtilTest {
         CONTEXT.put(CONTEXT_PROPERTY4, new BigDecimal(12345));
 
         // module configuration with references
-        MODULE_CONFIGURATION.put("simpleReference", String.format("${%s}", CONTEXT_PROPERTY4));
+        MODULE_CONFIGURATION.put("simpleReference", String.format("{{%s}}", CONTEXT_PROPERTY4));
         MODULE_CONFIGURATION.put("complexReference",
-                String.format("Hello ${%s} ${%s}", CONTEXT_PROPERTY1, CONTEXT_PROPERTY4));
+                String.format("Hello {{%s}} {{%s}}", CONTEXT_PROPERTY1, CONTEXT_PROPERTY4));
         MODULE_CONFIGURATION.put("complexReferenceWithMissing",
-                String.format("Testing ${UNKNOWN}, ${%s}", CONTEXT_PROPERTY4));
+                String.format("Testing {{UNKNOWN}}, {{%s}}", CONTEXT_PROPERTY4));
         MODULE_CONFIGURATION.put("complexReferenceArray",
-                String.format("[${%s}, ${%s}, staticText]", CONTEXT_PROPERTY2, CONTEXT_PROPERTY3));
+                String.format("[{{%s}}, {{%s}}, staticText]", CONTEXT_PROPERTY2, CONTEXT_PROPERTY3));
         MODULE_CONFIGURATION.put("complexReferenceArrayWithMissing",
-                String.format("[${UNKNOWN}, ${%s}, staticText]", CONTEXT_PROPERTY3));
+                String.format("[{{UNKNOWN}}, {{%s}}, staticText]", CONTEXT_PROPERTY3));
         MODULE_CONFIGURATION.put("complexReferenceObj",
-                String.format("{key1: ${%s}, key2: staticText, key3: ${%s}}", CONTEXT_PROPERTY1, CONTEXT_PROPERTY4));
+                String.format("{key1: {{%s}}, key2: staticText, key3: {{%s}}}", CONTEXT_PROPERTY1, CONTEXT_PROPERTY4));
         MODULE_CONFIGURATION.put("complexReferenceObjWithMissing",
-                String.format("{key1: ${UNKNOWN}, key2: ${%s}, key3: ${UNKNOWN2}}", CONTEXT_PROPERTY2));
+                String.format("{key1: {{UNKNOWN}}, key2: {{%s}}, key3: {{UNKNOWN2}}}", CONTEXT_PROPERTY2));
 
         // expected resolved module configuration
         EXPECTED_MODULE_CONFIGURATION.put("simpleReference", CONTEXT.get(CONTEXT_PROPERTY4));
         EXPECTED_MODULE_CONFIGURATION.put("complexReference",
                 String.format("Hello %s %s", CONTEXT.get(CONTEXT_PROPERTY1), CONTEXT.get(CONTEXT_PROPERTY4)));
         EXPECTED_MODULE_CONFIGURATION.put("complexReferenceWithMissing",
-                String.format("Testing ${UNKNOWN}, %s", CONTEXT.get(CONTEXT_PROPERTY4)));
+                String.format("Testing {{UNKNOWN}}, %s", CONTEXT.get(CONTEXT_PROPERTY4)));
         EXPECTED_MODULE_CONFIGURATION.put("complexReferenceArray",
                 String.format("[%s, %s, staticText]", CONTEXT.get(CONTEXT_PROPERTY2), CONTEXT.get(CONTEXT_PROPERTY3)));
         EXPECTED_MODULE_CONFIGURATION.put("complexReferenceArrayWithMissing",
-                String.format("[${UNKNOWN}, %s, staticText]", CONTEXT.get(CONTEXT_PROPERTY3)));
+                String.format("[{{UNKNOWN}}, %s, staticText]", CONTEXT.get(CONTEXT_PROPERTY3)));
         EXPECTED_MODULE_CONFIGURATION.put("complexReferenceObj", String.format("{key1: %s, key2: staticText, key3: %s}",
                 CONTEXT.get(CONTEXT_PROPERTY1), CONTEXT.get(CONTEXT_PROPERTY4)));
         EXPECTED_MODULE_CONFIGURATION.put("complexReferenceObjWithMissing",
-                String.format("{key1: ${UNKNOWN}, key2: %s, key3: ${UNKNOWN2}}", CONTEXT.get(CONTEXT_PROPERTY2)));
+                String.format("{key1: {{UNKNOWN}}, key2: %s, key3: {{UNKNOWN2}}}", CONTEXT.get(CONTEXT_PROPERTY2)));
 
         // composite child module input with references
-        COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES.put("moduleInput", String.format("${%s}", CONTEXT_PROPERTY1));
-        COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES.put("moduleInputMissing", "${UNKNOWN}");
-        COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES.put("moduleInput2", String.format("${%s}", CONTEXT_PROPERTY2));
+        COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES.put("moduleInput", String.format("{{%s}}", CONTEXT_PROPERTY1));
+        COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES.put("moduleInputMissing", "{{UNKNOWN}}");
+        COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES.put("moduleInput2", String.format("{{%s}}", CONTEXT_PROPERTY2));
         // expected resolved child module context
         EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT.put("moduleInput", CONTEXT.get(CONTEXT_PROPERTY1));
         EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT.put("moduleInputMissing", CONTEXT.get("UNKNOWN"));

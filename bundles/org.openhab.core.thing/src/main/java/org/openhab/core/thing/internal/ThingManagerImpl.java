@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -551,6 +551,7 @@ public class ThingManagerImpl
     }
 
     @Override
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public void thingUpdated(final Thing thing, ThingTrackerEvent thingTrackerEvent) {
         ThingUID thingUID = thing.getUID();
         if (thingUpdatedLock.contains(thingUID)) {
@@ -703,6 +704,7 @@ public class ThingManagerImpl
         }
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     private void initializeHandler(Thing thing) {
         if (isDisabledByStorage(thing.getUID())) {
             setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.DISABLED));
@@ -834,6 +836,7 @@ public class ThingManagerImpl
         return thing.getStatus() == ThingStatus.INITIALIZING;
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     private boolean isHandlerRegistered(Thing thing) {
         ThingHandler handler = thingHandlers.get(thing.getUID());
         return handler != null && handler == thing.getHandler();

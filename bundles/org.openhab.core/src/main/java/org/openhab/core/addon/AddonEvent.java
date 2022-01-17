@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,8 @@
  */
 package org.openhab.core.addon;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEvent;
 
 /**
@@ -19,6 +21,7 @@ import org.openhab.core.events.AbstractEvent;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class AddonEvent extends AbstractEvent {
 
     /**
@@ -26,7 +29,7 @@ public class AddonEvent extends AbstractEvent {
      */
     public static final String TYPE = AddonEvent.class.getSimpleName();
 
-    private String msg;
+    private @Nullable String msg;
     private String id;
 
     /**
@@ -37,7 +40,7 @@ public class AddonEvent extends AbstractEvent {
      * @param id the id of the add-on
      * @param msg the message text
      */
-    public AddonEvent(String topic, String payload, String id, String msg) {
+    public AddonEvent(String topic, String payload, String id, @Nullable String msg) {
         super(topic, payload, null);
         this.id = id;
         this.msg = msg;

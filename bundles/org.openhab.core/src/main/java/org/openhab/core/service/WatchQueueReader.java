@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -165,6 +165,7 @@ public class WatchQueueReader implements Runnable {
         }
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public synchronized void stopWatchService(AbstractWatchService service) {
         if (watchService != null) {
             List<WatchKey> keys = new LinkedList<>();
@@ -334,8 +335,11 @@ public class WatchQueueReader implements Runnable {
         Path baseWatchedDir = null;
         Path registeredPath = null;
         synchronized (this) {
-            baseWatchedDir = keyToService.get(key).getSourcePath();
-            registeredPath = registeredKeys.get(key);
+            AbstractWatchService service = keyToService.get(key);
+            if (service != null) {
+                baseWatchedDir = service.getSourcePath();
+                registeredPath = registeredKeys.get(key);
+            }
         }
         if (registeredPath != null) {
             // If the path has been registered in the watch service it relative path can be resolved

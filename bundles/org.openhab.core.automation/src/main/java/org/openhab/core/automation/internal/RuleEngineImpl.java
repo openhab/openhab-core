@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.internal;
 
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -143,7 +144,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * {@link Map} holding all available {@link ModuleHandlerFactory}s linked with {@link ModuleType}s that they
      * supporting. The relation is {@link ModuleType}'s UID to {@link ModuleHandlerFactory} instance.
      */
-    private final Map<String, ModuleHandlerFactory> moduleHandlerFactories;
+    private final Map<String, ModuleHandlerFactory> moduleHandlerFactories = new HashMap<>(20);
 
     /**
      * {@link Set} holding all available {@link ModuleHandlerFactory}s.
@@ -176,7 +177,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * The context map of a {@link Rule} is cleaned when the execution is completed. The relation is
      * {@link Rule}'s UID to Rule context map.
      */
-    private final Map<String, Map<String, Object>> contextMap;
+    private final Map<String, Map<String, Object>> contextMap = new HashMap<>();
 
     /**
      * This field holds reference to {@link ModuleTypeRegistry}. The {@link RuleEngineImpl} needs it to auto-map
@@ -254,9 +255,6 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     public RuleEngineImpl(final @Reference ModuleTypeRegistry moduleTypeRegistry,
             final @Reference RuleRegistry ruleRegistry, final @Reference StorageService storageService,
             final @Reference ReadyService readyService) {
-        this.contextMap = new HashMap<>();
-        this.moduleHandlerFactories = new HashMap<>(20);
-
         this.disabledRulesStorage = storageService.<Boolean> getStorage(DISABLED_RULE_STORAGE,
                 this.getClass().getClassLoader());
 
@@ -463,7 +461,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             unregister(oldRule);
         }
 
-        if (isEnabled(rUID) == Boolean.TRUE) {
+        if (Boolean.TRUE.equals(isEnabled(rUID))) {
             setRule(rule);
         }
     }
@@ -1452,15 +1450,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
     private boolean mustTrigger(Rule r) {
         for (Trigger t : r.getTriggers()) {
-            if (t.getTypeUID() == SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID) {
-                Object slObj = t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL);
-                try {
-                    Integer sl = Integer.valueOf(slObj.toString());
-                    if (sl <= StartLevelService.STARTLEVEL_RULEENGINE) {
-                        return true;
-                    }
-                } catch (NumberFormatException e) {
-                    logger.warn("Configuration '{}' is not a valid start level!", slObj);
+            if (SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID.equals(t.getTypeUID())) {
+                int sl = ((BigDecimal) t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL)).intValue();
+                if (sl <= StartLevelService.STARTLEVEL_RULEENGINE) {
+                    return true;
                 }
             }
         }

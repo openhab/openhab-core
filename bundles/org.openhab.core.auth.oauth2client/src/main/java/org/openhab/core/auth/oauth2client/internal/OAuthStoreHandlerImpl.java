@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -210,6 +210,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         allAvailableStorageCiphers.add(storageCipher);
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     protected synchronized void unsetStorageCipher(StorageCipher storageCipher) {
         allAvailableStorageCiphers.remove(storageCipher);
         if (this.storageCipher.isPresent() && this.storageCipher.get() == storageCipher) {

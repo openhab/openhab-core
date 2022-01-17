@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,15 +14,28 @@ package org.openhab.core.config.discovery.mdns.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.openhab.core.config.discovery.DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Random;
+import java.util.Set;
 
+import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.config.discovery.DiscoveryListener;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
 import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -31,14 +44,53 @@ import org.osgi.service.cm.ConfigurationAdmin;
  *
  * @author Henning Sudbrock - Initial contribution
  */
+@NonNullByDefault
 public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
 
-    private MDNSDiscoveryService mdnsDiscoveryService;
+    private @NonNullByDefault({}) MDNSDiscoveryService mdnsDiscoveryService;
 
     @BeforeEach
     public void setup() {
         mdnsDiscoveryService = getService(DiscoveryService.class, MDNSDiscoveryService.class);
         assertThat(mdnsDiscoveryService, is(notNullValue()));
+    }
+
+    @Test
+    public void testThingDiscoveredAndRemoved() {
+        String serviceType = "_http._tcp.local.";
+        ThingTypeUID thingTypeUID = new ThingTypeUID("myBinding", "myThingType");
+        ThingUID thingUID = new ThingUID(thingTypeUID, "test" + new Random().nextInt(999999999));
+        Set<ThingTypeUID> thingTypeUIDs = Set.of(thingTypeUID);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).build();
+
+        MDNSDiscoveryParticipant mockMDNSDiscoveryParticipant = mock(MDNSDiscoveryParticipant.class);
+        when(mockMDNSDiscoveryParticipant.getSupportedThingTypeUIDs()).thenReturn(thingTypeUIDs);
+        when(mockMDNSDiscoveryParticipant.getServiceType()).thenReturn(serviceType);
+        when(mockMDNSDiscoveryParticipant.createResult(any())).thenReturn(discoveryResult);
+        when(mockMDNSDiscoveryParticipant.getThingUID(any())).thenReturn(thingUID);
+
+        mdnsDiscoveryService.addMDNSDiscoveryParticipant(mockMDNSDiscoveryParticipant);
+
+        assertThat(mdnsDiscoveryService.getSupportedThingTypes(), is(thingTypeUIDs));
+
+        ServiceEvent mockServiceEvent = mock(ServiceEvent.class);
+        when(mockServiceEvent.getType()).thenReturn(serviceType);
+        when(mockServiceEvent.getInfo()).thenReturn(ServiceInfo.create(serviceType, "name", 80, "text"));
+
+        DiscoveryListener mockDiscoveryListener = mock(DiscoveryListener.class);
+        mdnsDiscoveryService.addDiscoveryListener(mockDiscoveryListener);
+
+        mdnsDiscoveryService.serviceAdded(mockServiceEvent);
+        verify(mockDiscoveryListener, times(1)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
+        verifyNoMoreInteractions(mockDiscoveryListener);
+
+        mdnsDiscoveryService.serviceResolved(mockServiceEvent);
+        verify(mockDiscoveryListener, times(2)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
+        verifyNoMoreInteractions(mockDiscoveryListener);
+
+        mdnsDiscoveryService.serviceRemoved(mockServiceEvent);
+        verify(mockDiscoveryListener, times(1)).thingRemoved(mdnsDiscoveryService, thingUID);
+        verifyNoMoreInteractions(mockDiscoveryListener);
     }
 
     /**
@@ -59,10 +111,10 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
         ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
         assertThat(configAdmin, is(notNullValue()));
 
+        @SuppressWarnings("null")
         Configuration configuration = configAdmin.getConfiguration("discovery.mdns");
         Hashtable<String, Object> properties = new Hashtable<>();
-        properties.put(CONFIG_PROPERTY_BACKGROUND_DISCOVERY, Boolean.valueOf(status));
-
+        properties.put(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY, Boolean.valueOf(status));
         configuration.update(properties);
     }
 }

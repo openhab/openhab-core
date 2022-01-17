@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -147,6 +147,8 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                     if (containsEventTrigger(rule)) {
                         val eventTypeRef = ruleModel.newTypeRef(String)
                         parameters += rule.toParameter(VAR_RECEIVED_EVENT, eventTypeRef)
+                        val channelRef = ruleModel.newTypeRef(String)
+                        parameters += rule.toParameter(VAR_TRIGGERING_CHANNEL, channelRef)
                     }
                     if (containsThingStateChangedEventTrigger(rule) && !containsParam(parameters, VAR_PREVIOUS_STATE)) {
                         val stateTypeRef = ruleModel.newTypeRef(State)

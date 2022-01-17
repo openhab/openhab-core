@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -65,8 +65,13 @@ public class WebClientFactoryImplTest {
     }
 
     @AfterEach
-    public void tearDown() {
-        webClientFactory.deactivate();
+    public void tearDown() throws InterruptedException {
+        // Sometimes a java.nio.channels.ClosedSelectorException occurs when the commonWebSocketClient
+        // is stopped while its threads are still starting. This would cause webClientFactory.deactivate()
+        // to block forever so continue if it has not completed after 2 seconds.
+        Thread deactivateThread = new Thread(() -> webClientFactory.deactivate());
+        deactivateThread.start();
+        deactivateThread.join(2000);
     }
 
     @Test

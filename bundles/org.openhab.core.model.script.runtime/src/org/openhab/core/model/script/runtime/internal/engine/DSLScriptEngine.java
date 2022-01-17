@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -165,6 +165,8 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
         if (value instanceof ChannelTriggeredEvent) {
             ChannelTriggeredEvent event = (ChannelTriggeredEvent) value;
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_RECEIVED_EVENT), event.getEvent());
+            evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_CHANNEL),
+                    event.getChannel().getAsString());
         }
         if (value instanceof ItemEvent) {
             ItemEvent event = (ItemEvent) value;

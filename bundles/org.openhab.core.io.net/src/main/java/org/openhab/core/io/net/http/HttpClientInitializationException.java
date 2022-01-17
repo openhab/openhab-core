@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,16 +12,20 @@
  */
 package org.openhab.core.io.net.http;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This exception is thrown, if an unexpected error occurs during initialization of the Jetty client
  *
  * @author Michael Bock - Initial contribution
  */
+@NonNullByDefault
 public class HttpClientInitializationException extends RuntimeException {
 
     private static final long serialVersionUID = -3187938868560212413L;
 
-    public HttpClientInitializationException(String message, Throwable cause) {
+    public HttpClientInitializationException(String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 }
