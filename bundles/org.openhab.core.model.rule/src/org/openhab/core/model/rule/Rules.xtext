@@ -76,12 +76,18 @@ TimerTrigger:
 
 SystemTrigger:
 	SystemOnStartupTrigger |
+        SystemStartlevelTrigger |
 	SystemOnShutdownTrigger
 ;
 
 SystemOnStartupTrigger:
 	{SystemOnStartupTrigger}
 	'System' 'started'
+;
+
+SystemStartlevelTrigger:
+        {SystemStartlevelTrigger}
+        'System' 'reached start level' level=INT
 ;
 
 SystemOnShutdownTrigger:
