@@ -203,15 +203,10 @@ public class WatchQueueReader implements Runnable {
 
     @Override
     public void run() {
-        try {
-            for (;;) {
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
                 WatchKey key;
-                try {
-                    key = watchService.take();
-                } catch (InterruptedException exc) {
-                    logger.info("Caught InterruptedException: {}", exc.getLocalizedMessage());
-                    return;
-                }
+                key = watchService.take();
 
                 for (WatchEvent<?> event : key.pollEvents()) {
                     WatchEvent.Kind<?> kind = event.kind();
@@ -273,11 +268,12 @@ public class WatchQueueReader implements Runnable {
                 }
 
                 key.reset();
+            } catch (InterruptedException exc) {
+                logger.debug("WatchQueueReader interrupted; thread exiting: {}", exc.getLocalizedMessage());
+                return;
+            } catch (Exception exc) {
+                logger.debug("Exception caught in WatchQueueReader", exc);
             }
-        } catch (Exception exc) {
-            logger.debug("ClosedWatchServiceException caught! {}. \n{} Stopping ", exc.getLocalizedMessage(),
-                    Thread.currentThread().getName());
-            return;
         }
     }
 
