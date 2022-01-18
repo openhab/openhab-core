@@ -97,11 +97,12 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     @Modified
     void modified(@Nullable Map<String, Object> config) {
         if (config != null) {
-            this.defaultSource = config.containsKey(CONFIG_DEFAULT_SOURCE)
-                    ? config.get(CONFIG_DEFAULT_SOURCE).toString()
-                    : null;
-            this.defaultSink = config.containsKey(CONFIG_DEFAULT_SINK) ? config.get(CONFIG_DEFAULT_SINK).toString()
-                    : null;
+            if (config.containsKey(CONFIG_DEFAULT_SOURCE)) {
+                this.defaultSource = config.get(CONFIG_DEFAULT_SOURCE).toString();
+            }
+            if (config.containsKey(CONFIG_DEFAULT_SINK)) {
+                this.defaultSink = config.get(CONFIG_DEFAULT_SINK).toString();
+            }
         }
     }
 
