@@ -272,7 +272,7 @@ public class WatchQueueReader implements Runnable {
                 logger.debug("WatchQueueReader interrupted; thread exiting: {}", exc.getLocalizedMessage());
                 return;
             } catch (Exception exc) {
-                logger.error("Exception caught in WatchQueueReader: ", exc);
+                logger.debug("Exception caught in WatchQueueReader", exc);
             }
         }
     }
