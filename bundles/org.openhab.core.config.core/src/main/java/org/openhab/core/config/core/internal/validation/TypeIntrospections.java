@@ -123,7 +123,18 @@ final class TypeIntrospections {
          * @return true, if the given value can be assigned to the type of this introspection, otherwise false
          */
         boolean isAssignable(Object value) {
-            return clazz.isAssignableFrom(value.getClass());
+            return clazz.isAssignableFrom(value.getClass()) || isStringInstance(value);
+        }
+
+        /**
+         * Returns true, if the given value is a string, otherwise false.
+         *
+         * @param value the value to be analyzed
+         *
+         * @return true, if the given value is a string, otherwise false
+         */
+        final boolean isStringInstance(Object value) {
+            return value instanceof String;
         }
 
         /**
