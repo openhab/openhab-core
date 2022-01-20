@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -42,11 +41,10 @@ import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.Provider;
-import org.openhab.core.config.core.ConfigDescription;
-import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
+import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
@@ -558,6 +556,7 @@ public class ThingManagerImpl
             // called from the thing handler itself, therefore
             // it exists, is initializing/initialized and
             // must not be informed (in order to prevent infinite loops)
+            // we assume the handler knows what he's doing and don't check config validity
             replaceThing(getThing(thingUID), thing);
         } else {
             Lock lock1 = getLockForThing(thing.getUID());
@@ -571,7 +570,23 @@ public class ThingManagerImpl
                             oldThing.setHandler(null);
                         }
                         thing.setHandler(thingHandler);
-                        safeCaller.create(thingHandler, ThingHandler.class).build().thingUpdated(thing);
+
+                        if (isInitializable(thing, getThingType(thing))) {
+                            safeCaller.create(thingHandler, ThingHandler.class).build().thingUpdated(thing);
+                        } else {
+                            final ThingHandlerFactory thingHandlerFactory = findThingHandlerFactory(
+                                    thing.getThingTypeUID());
+                            if (thingHandlerFactory != null) {
+                                if (isBridge(thing)) {
+                                    unregisterAndDisposeChildHandlers((Bridge) thing, thingHandlerFactory);
+                                }
+                                disposeHandler(thing, thingHandler);
+                                setThingStatus(thing,
+                                        buildStatusInfo(ThingStatus.UNINITIALIZED,
+                                                ThingStatusDetail.HANDLER_CONFIGURATION_PENDING,
+                                                "@text/missing-or-invalid-configuration"));
+                            }
+                        }
                     } else {
                         logger.debug(
                                 "Cannot notify handler about updated thing '{}', because handler is not initialized (thing must be in status UNKNOWN, ONLINE or OFFLINE).",
@@ -744,9 +759,11 @@ public class ThingManagerImpl
                 setThingStatus(thing, buildStatusInfo(ThingStatus.INITIALIZING, ThingStatusDetail.NONE));
                 doInitializeHandler(handler);
             } else {
-                logger.debug("Thing '{}' not initializable, check required configuration parameters.", thing.getUID());
-                setThingStatus(thing,
-                        buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_CONFIGURATION_PENDING));
+                logger.debug(
+                        "Thing '{}' not initializable, check if required configuration parameters are present and set values are valid.",
+                        thing.getUID());
+                setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED,
+                        ThingStatusDetail.HANDLER_CONFIGURATION_PENDING, "@text/missing-or-invalid-configuration"));
             }
         } finally {
             lock.unlock();
@@ -754,13 +771,13 @@ public class ThingManagerImpl
     }
 
     private boolean isInitializable(Thing thing, @Nullable ThingType thingType) {
-        if (!isComplete(thingType, thing.getUID(), tt -> tt.getConfigDescriptionURI(), thing.getConfiguration())) {
+        if (!isComplete(thingType, thing.getUID(), ThingType::getConfigDescriptionURI, thing.getConfiguration())) {
             return false;
         }
 
         for (Channel channel : thing.getChannels()) {
             ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
-            if (!isComplete(channelType, channel.getUID(), ct -> ct.getConfigDescriptionURI(),
+            if (!isComplete(channelType, channel.getUID(), ChannelType::getConfigDescriptionURI,
                     channel.getConfiguration())) {
                 return false;
             }
@@ -786,35 +803,20 @@ public class ThingManagerImpl
             return true;
         }
 
-        ConfigDescription description = resolve(configDescriptionURIFunction.apply(prototype), null);
-        if (description == null) {
-            logger.debug("Config description for '{}' is not resolvable, assuming '{}' is initializable",
+        URI configDescriptionURI = configDescriptionURIFunction.apply(prototype);
+        if (configDescriptionURI == null) {
+            logger.debug("Config description URI for '{}' not found, assuming '{}' is initializable",
                     prototype.getUID(), targetUID);
             return true;
         }
 
-        List<String> requiredParameters = getRequiredParameters(description);
-        Set<String> propertyKeys = configuration.getProperties().keySet();
-        if (logger.isDebugEnabled()) {
-            logger.debug("Configuration of '{}' needs {}, has {}.", targetUID, requiredParameters, propertyKeys);
+        try {
+            configDescriptionValidator.validate(configuration.getProperties(), configDescriptionURI);
+        } catch (ConfigValidationException e) {
+            return false;
         }
-        return propertyKeys.containsAll(requiredParameters);
-    }
 
-    private @Nullable ConfigDescription resolve(@Nullable URI configDescriptionURI, @Nullable Locale locale) {
-        return configDescriptionURI != null
-                ? configDescriptionRegistry.getConfigDescription(configDescriptionURI, locale)
-                : null;
-    }
-
-    private List<String> getRequiredParameters(ConfigDescription description) {
-        List<String> requiredParameters = new ArrayList<>();
-        for (ConfigDescriptionParameter param : description.getParameters()) {
-            if (param.isRequired()) {
-                requiredParameters.add(param.getName());
-            }
-        }
-        return requiredParameters;
+        return true;
     }
 
     private void doInitializeHandler(final ThingHandler thingHandler) {
