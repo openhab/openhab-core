@@ -173,21 +173,32 @@ public final class ConfigParser {
             } else if (Integer.class.equals(typeClass)) {
                 result = bdValue.intValue();
             }
+        } else if (value instanceof Number) {
+            Number number = (Number) value;
+            if (Long.class.equals(typeClass)) {
+                result = number.longValue();
+            } else if (Integer.class.equals(typeClass)) {
+                result = number.intValue();
+            } else if (Double.class.equals(typeClass)) {
+                result = number.doubleValue();
+            } else if (Float.class.equals(typeClass)) {
+                result = number.floatValue();
+            }
         } else if (value instanceof String && !String.class.equals(typeClass)) {
             // Handle the conversion case of String to Float,Double,Long,Integer,BigDecimal,Boolean
-            String bdValue = (String) value;
+            String strValue = (String) value;
             if (Float.class.equals(typeClass)) {
-                result = Float.valueOf(bdValue);
+                result = Float.valueOf(strValue);
             } else if (Double.class.equals(typeClass)) {
-                result = Double.valueOf(bdValue);
+                result = Double.valueOf(strValue);
             } else if (Long.class.equals(typeClass)) {
-                result = Long.valueOf(bdValue);
+                result = Long.valueOf(strValue);
             } else if (BigDecimal.class.equals(typeClass)) {
-                result = new BigDecimal(bdValue);
+                result = new BigDecimal(strValue);
             } else if (Integer.class.equals(typeClass)) {
-                result = Integer.valueOf(bdValue);
+                result = Integer.valueOf(strValue);
             } else if (Boolean.class.equals(typeClass)) {
-                result = Boolean.valueOf(bdValue);
+                result = Boolean.valueOf(strValue);
             } else if (type.isEnum()) {
                 final Class<? extends Enum> enumType = (Class<? extends Enum>) typeClass;
                 result = Enum.valueOf(enumType, value.toString());
