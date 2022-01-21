@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.config.core.internal;
+package org.openhab.core.config.core;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -22,18 +22,34 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Map an OSGi configuration map {@code Map<String, Object>} to an individual configuration bean.
+ * Map an OSGi configuration map {@code Map<String, Object>} or type-less value to an individual configuration bean or
+ * typed value.
  *
  * @author David Graeff - Initial contribution
+ * @author Jan N. Klug - Extended and refactored to an exposed utility class
+ *
  */
-public class ConfigMapper {
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigMapper.class);
+@NonNullByDefault
+public final class ConfigParser {
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigParser.class);
+    private static final Map<String, Class<?>> WRAPPER_CLASSES_MAP = Map.of(//
+            "float", Float.class, //
+            "double", Double.class, //
+            "long", Long.class, //
+            "int", Integer.class, //
+            "boolean", Boolean.class);
+
+    private ConfigParser() {
+        // prevent instantiation
+    }
 
     /**
      * Use this method to automatically map a configuration collection to a Configuration holder object. A common
@@ -54,8 +70,8 @@ public class ConfigMapper {
      * @return The configuration holder object. All fields that matched a configuration option are set. If a required
      *         field is not set, null is returned.
      */
-    public static <T> @Nullable T as(Map<String, Object> properties, Class<T> configurationClass) {
-        T configuration = null;
+    public static <T> @Nullable T configurationAs(Map<String, Object> properties, Class<T> configurationClass) {
+        T configuration;
         try {
             configuration = configurationClass.getConstructor().newInstance();
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
@@ -70,13 +86,12 @@ public class ConfigMapper {
                 continue;
             }
             String fieldName = field.getName();
-            String configKey = fieldName;
             Class<?> type = field.getType();
 
-            Object value = properties.get(configKey);
+            Object value = properties.get(fieldName);
             // Consider RequiredField annotations
             if (value == null) {
-                LOGGER.trace("Skipping field '{}', because config has no entry for {}", fieldName, configKey);
+                LOGGER.trace("Skipping field '{}', because config has no entry for {}", fieldName, fieldName);
                 continue;
             }
 
@@ -87,14 +102,15 @@ public class ConfigMapper {
                         .getActualTypeArguments()[0];
                 final List<Object> lst = new ArrayList<>(c.size());
                 for (final Object it : c) {
-                    final Object normalized = objectConvert(it, innerClass);
+                    // the null check is done above
+                    final Object normalized = Objects.requireNonNull(valueAs(it, innerClass));
                     lst.add(normalized);
                 }
                 value = lst;
             }
 
             try {
-                value = objectConvert(value, type);
+                value = valueAs(value, type);
                 LOGGER.trace("Setting value ({}) {} to field '{}' in configuration class {}", type.getSimpleName(),
                         value, fieldName, configurationClass.getName());
                 field.setAccessible(true);
@@ -120,49 +136,70 @@ public class ConfigMapper {
         return fields;
     }
 
-    private static Object objectConvert(Object value, Class<?> type) {
+    /**
+     * Convert a value to a given type
+     *
+     * @param value input value or String representation of that value
+     * @param type desired target class
+     * @param defaultValue default value to be used if conversion fails or input value is null
+     * @return the converted value
+     */
+    public static <T> T valueAs(@Nullable Object value, Class<T> type, T defaultValue) {
+        return Objects.requireNonNullElse(valueAs(value, type), defaultValue);
+    }
+
+    /**
+     * Convert a value to a given type
+     *
+     * @param value input value or String representation of that value
+     * @param type desired target class
+     * @return the converted value or null if conversion fails or input value is null
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> @Nullable T valueAs(@Nullable Object value, Class<T> type) {
+        // make sure primitives are converted to their respective wrapper class
+        Class<?> typeClass = WRAPPER_CLASSES_MAP.getOrDefault(type.getSimpleName(), type);
+
         Object result = value;
-        // Handle the conversion case of BigDecimal to Float,Double,Long,Integer and the respective
-        // primitive types
-        String typeName = type.getSimpleName();
-        if (value instanceof BigDecimal && !BigDecimal.class.equals(type)) {
+        // Handle the conversion case of BigDecimal to Float,Double,Long,Integer
+        if (value instanceof BigDecimal && !BigDecimal.class.equals(typeClass)) {
             BigDecimal bdValue = (BigDecimal) value;
-            if (Float.class.equals(type) || "float".equals(typeName)) {
+            if (Float.class.equals(typeClass)) {
                 result = bdValue.floatValue();
-            } else if (Double.class.equals(type) || "double".equals(typeName)) {
+            } else if (Double.class.equals(typeClass)) {
                 result = bdValue.doubleValue();
-            } else if (Long.class.equals(type) || "long".equals(typeName)) {
+            } else if (Long.class.equals(typeClass)) {
                 result = bdValue.longValue();
-            } else if (Integer.class.equals(type) || "int".equals(typeName)) {
+            } else if (Integer.class.equals(typeClass)) {
                 result = bdValue.intValue();
             }
-        } else
-        // Handle the conversion case of String to Float,Double,Long,Integer,BigDecimal,Boolean and the respective
-        // primitive types
-        if (value instanceof String && !String.class.equals(type)) {
+        } else if (value instanceof String && !String.class.equals(typeClass)) {
+            // Handle the conversion case of String to Float,Double,Long,Integer,BigDecimal,Boolean
             String bdValue = (String) value;
-            if (Float.class.equals(type) || "float".equals(typeName)) {
+            if (Float.class.equals(typeClass)) {
                 result = Float.valueOf(bdValue);
-            } else if (Double.class.equals(type) || "double".equals(typeName)) {
+            } else if (Double.class.equals(typeClass)) {
                 result = Double.valueOf(bdValue);
-            } else if (Long.class.equals(type) || "long".equals(typeName)) {
+            } else if (Long.class.equals(typeClass)) {
                 result = Long.valueOf(bdValue);
-            } else if (BigDecimal.class.equals(type)) {
+            } else if (BigDecimal.class.equals(typeClass)) {
                 result = new BigDecimal(bdValue);
-            } else if (Integer.class.equals(type) || "int".equals(typeName)) {
+            } else if (Integer.class.equals(typeClass)) {
                 result = Integer.valueOf(bdValue);
-            } else if (Boolean.class.equals(type) || "boolean".equals(typeName)) {
+            } else if (Boolean.class.equals(typeClass)) {
                 result = Boolean.valueOf(bdValue);
             } else if (type.isEnum()) {
-                @SuppressWarnings({ "rawtypes", "unchecked" })
-                final Class<? extends Enum> enumType = (Class<? extends Enum>) type;
-                @SuppressWarnings({ "unchecked" })
-                final Enum<?> enumvalue = Enum.valueOf(enumType, value.toString());
-                result = enumvalue;
-            } else if (Collection.class.isAssignableFrom(type)) {
+                final Class<? extends Enum> enumType = (Class<? extends Enum>) typeClass;
+                result = Enum.valueOf(enumType, value.toString());
+            } else if (Collection.class.isAssignableFrom(typeClass)) {
                 result = List.of(value);
             }
         }
-        return result;
+
+        if (result != null && typeClass.isAssignableFrom(result.getClass())) {
+            return (T) result;
+        }
+
+        return null;
     }
 }
