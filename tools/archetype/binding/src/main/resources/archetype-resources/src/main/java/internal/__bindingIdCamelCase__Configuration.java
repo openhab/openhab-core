@@ -15,17 +15,20 @@
  */
 package ${package}.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link ${bindingIdCamelCase}Configuration} class contains fields mapping thing configuration parameters.
  *
  * @author ${author} - Initial contribution
  */
+@NonNullByDefault
 public class ${bindingIdCamelCase}Configuration {
 
     /**
      * Sample configuration parameters. Replace with your own.
      */
-    public String hostname;
-    public String password;
-    public int refreshInterval;
+    public String hostname = "";
+    public String password = "";
+    public int refreshInterval = 600;
 }
