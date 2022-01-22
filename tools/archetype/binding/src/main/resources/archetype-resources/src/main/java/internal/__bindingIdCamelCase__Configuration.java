@@ -30,5 +30,5 @@ public class ${bindingIdCamelCase}Configuration {
      */
     public String hostname = "";
     public String password = "";
-    public int refreshInterval;
+    public int refreshInterval = 600;
 }
