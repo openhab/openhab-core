@@ -102,8 +102,10 @@ public final class ConfigParser {
                         .getActualTypeArguments()[0];
                 final List<Object> lst = new ArrayList<>(c.size());
                 for (final Object it : c) {
-                    // the null check is done above
-                    final Object normalized = Objects.requireNonNull(valueAs(it, innerClass));
+                    final Object normalized = valueAs(it, innerClass);
+                    if (normalized == null) {
+                        continue;
+                    }
                     lst.add(normalized);
                 }
                 value = lst;
@@ -111,6 +113,9 @@ public final class ConfigParser {
 
             try {
                 value = valueAs(value, type);
+                if (value == null) {
+                    continue;
+                }
                 LOGGER.trace("Setting value ({}) {} to field '{}' in configuration class {}", type.getSimpleName(),
                         value, fieldName, configurationClass.getName());
                 field.setAccessible(true);
