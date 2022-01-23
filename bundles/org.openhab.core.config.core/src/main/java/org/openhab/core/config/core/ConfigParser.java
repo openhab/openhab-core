@@ -175,6 +175,11 @@ public final class ConfigParser {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> @Nullable T valueAs(@Nullable Object value, Class<T> type) {
+        if (value == null || type.isAssignableFrom(value.getClass())) {
+            // exit early if value is null or type is already compatible
+            return (T) value;
+        }
+
         // make sure primitives are converted to their respective wrapper class
         Class<?> typeClass = WRAPPER_CLASSES_MAP.getOrDefault(type.getSimpleName(), type);
 
@@ -243,10 +248,10 @@ public final class ConfigParser {
 
         if (result != null && typeClass.isAssignableFrom(result.getClass())) {
             return (T) result;
-        } else if (value != null) {
-            LOGGER.warn("Conversion of value '{}' with type '{}' to '{}' failed. Returning null", value,
-                    value.getClass(), type);
         }
+
+        LOGGER.warn("Conversion of value '{}' with type '{}' to '{}' failed. Returning null", value, value.getClass(),
+                type);
 
         return null;
     }
