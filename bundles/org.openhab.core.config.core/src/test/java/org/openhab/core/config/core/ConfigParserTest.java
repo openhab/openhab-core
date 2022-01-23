@@ -14,6 +14,7 @@ package org.openhab.core.config.core;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -76,8 +77,11 @@ public class ConfigParserTest {
             // Enum
             new TestParameter<>("ENUM1", TestEnum.class, TestEnum.ENUM1), //
             // List
-            new TestParameter<>(List.of(1, 2, 3), List.class, List.of(1, 2, 3)), //
-            new TestParameter<>(List.of("1", "2", "3"), List.class, List.of("1", "2", "3")),
+            new TestParameter<>("1", List.class, List.of("1")), //
+            new TestParameter<>(List.of(1, 2, 3), List.class, List.of(1, 2, 3)),
+            // Set
+            new TestParameter<>("1", Set.class, Set.of("1")), //
+            new TestParameter<>(Set.of(1, 2, 3), Set.class, Set.of(1, 2, 3)), //
             // illegal conversion
             new TestParameter<>(1, Boolean.class, null), //
             // null input

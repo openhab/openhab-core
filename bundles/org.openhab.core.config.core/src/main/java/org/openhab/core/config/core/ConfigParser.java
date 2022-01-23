@@ -20,9 +20,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -72,6 +74,7 @@ public final class ConfigParser {
      * @return The configuration holder object. All fields that matched a configuration option are set. If a required
      *         field is not set, null is returned.
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> @Nullable T configurationAs(Map<String, @Nullable Object> properties,
             Class<T> configurationClass) {
         T configuration;
@@ -98,20 +101,27 @@ public final class ConfigParser {
                 continue;
             }
 
-            // Allows to have List<int>, List<Double>, List<String> etc
+            // Allows to have List<int>, List<Double>, List<String> etc (and the corresponding Set<?>
             if (value instanceof Collection) {
-                Collection<?> c = (Collection<?>) value;
                 Class<?> innerClass = (Class<?>) ((ParameterizedType) field.getGenericType())
                         .getActualTypeArguments()[0];
-                final List<Object> lst = new ArrayList<>(c.size());
-                for (final Object it : c) {
+                Collection collection;
+                if (List.class.isAssignableFrom(type)) {
+                    collection = new ArrayList<>();
+                } else if (Set.class.isAssignableFrom(type)) {
+                    collection = new HashSet<>();
+                } else {
+                    LOGGER.warn("Skipping field '{}', only List and Set is supported as target Collection", fieldName);
+                    continue;
+                }
+                for (final Object it : (Collection<?>) value) {
                     final Object normalized = valueAs(it, innerClass);
                     if (normalized == null) {
                         continue;
                     }
-                    lst.add(normalized);
+                    collection.add(normalized);
                 }
-                value = lst;
+                value = collection;
             }
 
             try {
@@ -224,6 +234,8 @@ public final class ConfigParser {
             } else if (type.isEnum()) {
                 final Class<? extends Enum> enumType = (Class<? extends Enum>) typeClass;
                 result = Enum.valueOf(enumType, value.toString());
+            } else if (Set.class.isAssignableFrom(typeClass)) {
+                result = Set.of(value);
             } else if (Collection.class.isAssignableFrom(typeClass)) {
                 result = List.of(value);
             }

@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.Test;
  * @author Dennis Nobel - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class ConfigurationTest {
 
     public static class ConfigClass {
@@ -44,14 +47,15 @@ public class ConfigurationTest {
         public int intField;
         public boolean booleanField;
         public String stringField = "somedefault";
-        public List<String> listField;
+        public @NonNullByDefault({}) List<String> listField;
+        public @NonNullByDefault({}) Set<String> setField;
         @SuppressWarnings("unused")
         private static final String CONSTANT = "SOME_CONSTANT";
     }
 
     public static class ExtendedConfigClass extends ConfigClass {
         public int additionalIntField;
-        public String listField;
+        public @NonNullByDefault({}) String listField;
     }
 
     @Test
@@ -62,6 +66,7 @@ public class ConfigurationTest {
         configuration.put("stringField", "test");
         configuration.put("enumField", "ON");
         configuration.put("listField", List.of("one", "two", "three"));
+        configuration.put("setField", List.of("one", "two", "three"));
         configuration.put("notExisitingProperty", true);
 
         ConfigClass configClass = configuration.as(ConfigClass.class);
@@ -71,6 +76,7 @@ public class ConfigurationTest {
         assertThat(configClass.stringField, is("test"));
         assertThat(configClass.enumField, is(ConfigClass.MyEnum.ON));
         assertThat(configClass.listField, is(hasItems("one", "two", "three")));
+        assertThat(configClass.setField, is(hasItems("one", "two", "three")));
     }
 
     @Test
@@ -143,7 +149,7 @@ public class ConfigurationTest {
 
     @Test
     public void assertToStringHandlesNullValuesGracefully() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, @Nullable Object> properties = new HashMap<>();
         properties.put("stringField", null);
 
         Configuration configuration = new Configuration(properties);
