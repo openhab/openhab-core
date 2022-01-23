@@ -45,6 +45,8 @@ public final class ConfigParser {
             "double", Double.class, //
             "long", Long.class, //
             "int", Integer.class, //
+            "short", Short.class, //
+            "byte", Byte.class, //
             "boolean", Boolean.class);
 
     private ConfigParser() {
@@ -70,7 +72,8 @@ public final class ConfigParser {
      * @return The configuration holder object. All fields that matched a configuration option are set. If a required
      *         field is not set, null is returned.
      */
-    public static <T> @Nullable T configurationAs(Map<String, Object> properties, Class<T> configurationClass) {
+    public static <T> @Nullable T configurationAs(Map<String, @Nullable Object> properties,
+            Class<T> configurationClass) {
         T configuration;
         try {
             configuration = configurationClass.getConstructor().newInstance();
@@ -142,14 +145,14 @@ public final class ConfigParser {
     }
 
     /**
-     * Convert a value to a given type
+     * Convert a value to a given type or return default value
      *
      * @param value input value or String representation of that value
      * @param type desired target class
      * @param defaultValue default value to be used if conversion fails or input value is null
      * @return the converted value
      */
-    public static <T> T valueAs(@Nullable Object value, Class<T> type, T defaultValue) {
+    public static <T> T valueAsOrElse(@Nullable Object value, Class<T> type, T defaultValue) {
         return Objects.requireNonNullElse(valueAs(value, type), defaultValue);
     }
 
@@ -177,17 +180,27 @@ public final class ConfigParser {
                 result = bdValue.longValue();
             } else if (Integer.class.equals(typeClass)) {
                 result = bdValue.intValue();
+            } else if (Short.class.equals(typeClass)) {
+                result = bdValue.shortValue();
+            } else if (Byte.class.equals(typeClass)) {
+                result = bdValue.byteValue();
             }
         } else if (value instanceof Number) {
             Number number = (Number) value;
-            if (Long.class.equals(typeClass)) {
+            if (Float.class.equals(typeClass)) {
+                result = number.floatValue();
+            } else if (Double.class.equals(typeClass)) {
+                result = number.doubleValue();
+            } else if (Long.class.equals(typeClass)) {
                 result = number.longValue();
             } else if (Integer.class.equals(typeClass)) {
                 result = number.intValue();
-            } else if (Double.class.equals(typeClass)) {
-                result = number.doubleValue();
-            } else if (Float.class.equals(typeClass)) {
-                result = number.floatValue();
+            } else if (Short.class.equals(typeClass)) {
+                result = number.shortValue();
+            } else if (Byte.class.equals(typeClass)) {
+                result = number.byteValue();
+            } else if (BigDecimal.class.equals(typeClass)) {
+                result = new BigDecimal(number.toString());
             }
         } else if (value instanceof String && !String.class.equals(typeClass)) {
             // Handle the conversion case of String to Float,Double,Long,Integer,BigDecimal,Boolean
@@ -198,10 +211,14 @@ public final class ConfigParser {
                 result = Double.valueOf(strValue);
             } else if (Long.class.equals(typeClass)) {
                 result = Long.valueOf(strValue);
-            } else if (BigDecimal.class.equals(typeClass)) {
-                result = new BigDecimal(strValue);
             } else if (Integer.class.equals(typeClass)) {
                 result = Integer.valueOf(strValue);
+            } else if (Short.class.equals(typeClass)) {
+                result = Short.valueOf(strValue);
+            } else if (Byte.class.equals(typeClass)) {
+                result = Byte.valueOf(strValue);
+            } else if (BigDecimal.class.equals(typeClass)) {
+                result = new BigDecimal(strValue);
             } else if (Boolean.class.equals(typeClass)) {
                 result = Boolean.valueOf(strValue);
             } else if (type.isEnum()) {
@@ -214,6 +231,9 @@ public final class ConfigParser {
 
         if (result != null && typeClass.isAssignableFrom(result.getClass())) {
             return (T) result;
+        } else if (value != null) {
+            LOGGER.warn("Conversion of value '{}' with type '{}' to '{}' failed. Returning null", value,
+                    value.getClass(), type);
         }
 
         return null;

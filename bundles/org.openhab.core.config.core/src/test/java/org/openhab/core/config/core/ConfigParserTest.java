@@ -32,26 +32,36 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class ConfigParserTest {
 
     private static final List<TestParameter<?>> TEST_PARAMETERS = List.of( //
-            // int/Integer
-            new TestParameter<>("1", int.class, 1), //
-            new TestParameter<>("-1", Integer.class, -1), //
-            new TestParameter<>(-1, int.class, -1), //
-            new TestParameter<>(1, Integer.class, 1), //
-            // long/Long
-            new TestParameter<>("1", long.class, 1L), //
-            new TestParameter<>("-1", Long.class, -1L), //
-            new TestParameter<>(-1, long.class, -1L), //
-            new TestParameter<>(1, Long.class, 1L), //
-            // double/Double
-            new TestParameter<>("7.5", double.class, 7.5), //
-            new TestParameter<>("-7.5", Double.class, -7.5), //
-            new TestParameter<>(-7.5, double.class, -7.5), //
-            new TestParameter<>(7.5, Double.class, 7.5), //
             // float/Float
             new TestParameter<>("7.5", float.class, 7.5f), //
             new TestParameter<>("-7.5", Float.class, -7.5f), //
             new TestParameter<>(-7.5, float.class, -7.5f), //
             new TestParameter<>(7.5, Float.class, 7.5f), //
+            // double/Double
+            new TestParameter<>("7.5", double.class, 7.5), //
+            new TestParameter<>("-7.5", Double.class, -7.5), //
+            new TestParameter<>(-7.5, double.class, -7.5), //
+            new TestParameter<>(7.5, Double.class, 7.5), //
+            // long/Long
+            new TestParameter<>("1", long.class, 1L), //
+            new TestParameter<>("-1", Long.class, -1L), //
+            new TestParameter<>(-1, long.class, -1L), //
+            new TestParameter<>(1, Long.class, 1L), //
+            // int/Integer
+            new TestParameter<>("1", int.class, 1), //
+            new TestParameter<>("-1", Integer.class, -1), //
+            new TestParameter<>(-1, int.class, -1), //
+            new TestParameter<>(1, Integer.class, 1), //
+            // short/Short
+            new TestParameter<>("1", short.class, (short) 1), //
+            new TestParameter<>("-1", Short.class, (short) -1), //
+            new TestParameter<>(-1, short.class, (short) -1), //
+            new TestParameter<>(1, Short.class, (short) 1), //
+            // byte/Byte
+            new TestParameter<>("1", byte.class, (byte) 1), //
+            new TestParameter<>("-1", Byte.class, (byte) -1), //
+            new TestParameter<>(-1, byte.class, (byte) -1), //
+            new TestParameter<>(1, Byte.class, (byte) 1), //
             // boolean/Boolean
             new TestParameter<>("true", boolean.class, true), //
             new TestParameter<>("true", Boolean.class, true), //
@@ -60,6 +70,7 @@ public class ConfigParserTest {
             // BigDecimal
             new TestParameter<>("7.5", BigDecimal.class, BigDecimal.valueOf(7.5)), //
             new TestParameter<>(BigDecimal.valueOf(-7.5), BigDecimal.class, BigDecimal.valueOf(-7.5)), //
+            new TestParameter<>(1, BigDecimal.class, BigDecimal.valueOf(1)), //
             // String
             new TestParameter<>("foo", String.class, "foo"), //
             // Enum
@@ -87,7 +98,7 @@ public class ConfigParserTest {
 
     @Test
     public void valueAsDefaultTest() {
-        Object result = ConfigParser.valueAs(null, String.class, "foo");
+        Object result = ConfigParser.valueAsOrElse(null, String.class, "foo");
         Assertions.assertEquals("foo", result);
     }
 
