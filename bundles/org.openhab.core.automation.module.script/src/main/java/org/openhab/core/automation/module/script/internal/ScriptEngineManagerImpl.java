@@ -226,6 +226,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             }
 
             removeScriptExtensions(engineIdentifier);
+            loadedScriptEngineInstances.remove(engineIdentifier);
         }
     }
 
