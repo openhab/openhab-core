@@ -71,7 +71,7 @@ public class ConfigParserTest {
             // BigDecimal
             new TestParameter<>("7.5", BigDecimal.class, BigDecimal.valueOf(7.5)), //
             new TestParameter<>(BigDecimal.valueOf(-7.5), BigDecimal.class, BigDecimal.valueOf(-7.5)), //
-            new TestParameter<>(1, BigDecimal.class, BigDecimal.valueOf(1)), //
+            new TestParameter<>(1, BigDecimal.class, BigDecimal.ONE), //
             // String
             new TestParameter<>("foo", String.class, "foo"), //
             // Enum

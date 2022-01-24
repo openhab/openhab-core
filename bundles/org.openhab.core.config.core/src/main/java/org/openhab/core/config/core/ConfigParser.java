@@ -62,7 +62,7 @@ public final class ConfigParser {
      * <pre>
      * {@code
      *   public void modified(Map<String, Object> properties) {
-     *     YourConfig config = ConfigMapper.as(properties, YourConfig.class);
+     *     YourConfig config = ConfigParser.configurationAs(properties, YourConfig.class);
      *   }
      * }
      * </pre>
@@ -160,7 +160,7 @@ public final class ConfigParser {
      * @param value input value or String representation of that value
      * @param type desired target class
      * @param defaultValue default value to be used if conversion fails or input value is null
-     * @return the converted value
+     * @return the converted value or the default value if value is null or conversion fails
      */
     public static <T> T valueAsOrElse(@Nullable Object value, Class<T> type, T defaultValue) {
         return Objects.requireNonNullElse(valueAs(value, type), defaultValue);
@@ -184,23 +184,8 @@ public final class ConfigParser {
         Class<?> typeClass = WRAPPER_CLASSES_MAP.getOrDefault(type.getSimpleName(), type);
 
         Object result = value;
-        // Handle the conversion case of BigDecimal to Float,Double,Long,Integer
-        if (value instanceof BigDecimal && !BigDecimal.class.equals(typeClass)) {
-            BigDecimal bdValue = (BigDecimal) value;
-            if (Float.class.equals(typeClass)) {
-                result = bdValue.floatValue();
-            } else if (Double.class.equals(typeClass)) {
-                result = bdValue.doubleValue();
-            } else if (Long.class.equals(typeClass)) {
-                result = bdValue.longValue();
-            } else if (Integer.class.equals(typeClass)) {
-                result = bdValue.intValue();
-            } else if (Short.class.equals(typeClass)) {
-                result = bdValue.shortValue();
-            } else if (Byte.class.equals(typeClass)) {
-                result = bdValue.byteValue();
-            }
-        } else if (value instanceof Number) {
+        // Handle the conversion case of Number to Float,Double,Long,Integer,Short,Byte,BigDecimal
+        if (value instanceof Number) {
             Number number = (Number) value;
             if (Float.class.equals(typeClass)) {
                 result = number.floatValue();
