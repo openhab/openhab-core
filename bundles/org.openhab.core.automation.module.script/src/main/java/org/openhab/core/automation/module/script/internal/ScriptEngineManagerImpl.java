@@ -198,7 +198,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
     @Override
     public void removeEngine(String engineIdentifier) {
-        ScriptEngineContainer container = loadedScriptEngineInstances.get(engineIdentifier);
+        ScriptEngineContainer container = loadedScriptEngineInstances.remove(engineIdentifier);
         if (container != null) {
             ScriptEngine scriptEngine = container.getScriptEngine();
             if (scriptEngine instanceof Invocable) {
