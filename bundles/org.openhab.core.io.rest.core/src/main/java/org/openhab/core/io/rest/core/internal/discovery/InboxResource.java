@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -151,7 +152,7 @@ public class InboxResource implements RESTResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getDiscoveredInboxItems", summary = "Get all discovered things.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DiscoveryResultDTO.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DiscoveryResultDTO.class)))) })
     public Response getAll() {
         Stream<DiscoveryResultDTO> discoveryStream = inbox.getAll().stream().map(DiscoveryResultDTOMapper::map);
         return Response.ok(new Stream2JSONInputStream(discoveryStream)).build();
