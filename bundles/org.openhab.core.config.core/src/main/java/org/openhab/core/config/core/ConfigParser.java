@@ -101,7 +101,7 @@ public final class ConfigParser {
                 continue;
             }
 
-            // Allows to have List<int>, List<Double>, List<String> etc (and the corresponding Set<?>
+            // Allows to have List<int>, List<Double>, List<String> etc (and the corresponding Set<?>)
             if (value instanceof Collection) {
                 Class<?> innerClass = (Class<?>) ((ParameterizedType) field.getGenericType())
                         .getActualTypeArguments()[0];
