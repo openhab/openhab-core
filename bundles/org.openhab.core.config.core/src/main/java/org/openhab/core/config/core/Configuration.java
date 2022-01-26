@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.internal.ConfigMapper;
 
 /**
  * This class is a wrapper for configuration settings of {@link Thing}s.
@@ -41,7 +40,7 @@ public class Configuration {
     private final Map<String, Object> properties;
 
     public Configuration() {
-        this(emptyMap(), true);
+        this(Map.of(), true);
     }
 
     /**
@@ -53,7 +52,7 @@ public class Configuration {
      * @param configuration the configuration that should be cloned (may be null)
      */
     public Configuration(final @Nullable Configuration configuration) {
-        this(configuration == null ? emptyMap() : configuration.properties, true);
+        this(configuration == null ? Map.of() : configuration.properties, true);
     }
 
     /**
@@ -62,7 +61,7 @@ public class Configuration {
      * @param properties the properties the configuration should be filled. If null, an empty configuration is created.
      */
     public Configuration(@Nullable Map<String, Object> properties) {
-        this(properties == null ? emptyMap() : properties, false);
+        this(properties == null ? Map.of() : properties, false);
     }
 
     /**
@@ -77,7 +76,7 @@ public class Configuration {
 
     public <T> T as(Class<T> configurationClass) {
         synchronized (properties) {
-            return ConfigMapper.as(properties, configurationClass);
+            return ConfigParser.configurationAs(properties, configurationClass);
         }
     }
 
