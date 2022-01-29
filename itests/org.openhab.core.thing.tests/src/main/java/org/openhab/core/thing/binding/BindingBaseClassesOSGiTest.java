@@ -155,6 +155,11 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         public void initialize() {
             updateStatus(ThingStatus.ONLINE);
         }
+
+        @Override
+        public void updateConfiguration(Configuration configuration) {
+            super.updateConfiguration(configuration);
+        }
     }
 
     class SimpleBridgeHandler extends BaseBridgeHandler {
@@ -604,6 +609,36 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
         assertThrows(ConfigValidationException.class,
                 () -> thingRegistry.updateConfiguration(thingUID, Map.of("parameter", configuration)));
+    }
+
+    @Test
+    public void assertIllegalConfigurationParametersPreventUpdate() {
+        SimpleThingHandlerFactory thingHandlerFactory = new SimpleThingHandlerFactory();
+        thingHandlerFactory.activate(componentContext);
+        registerService(thingHandlerFactory, ThingHandlerFactory.class.getName());
+
+        registerThingTypeProvider();
+        registerConfigDescriptionProvider(true);
+
+        ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId:type");
+        ThingUID thingUID = new ThingUID("bindingId:type:thingId");
+        Thing thing = ThingBuilder.create(thingTypeUID, thingUID)
+                .withConfiguration(new Configuration(Map.of("parameter", "someValue"))).build();
+
+        managedThingProvider.add(thing);
+
+        SimpleThingHandler handler = (SimpleThingHandler) thing.getHandler();
+        assertNotNull(handler);
+
+        handler.updateConfiguration(new Configuration(Map.of("parameter", "otherValue")));
+        Object parameter = handler.getThing().getConfiguration().get("parameter");
+        assertNotNull(parameter);
+        assertEquals("otherValue", parameter);
+
+        handler.updateConfiguration(new Configuration(Map.of()));
+        // configuration should not change
+        assertNotNull(parameter);
+        assertEquals("otherValue", parameter);
     }
 
     @Test

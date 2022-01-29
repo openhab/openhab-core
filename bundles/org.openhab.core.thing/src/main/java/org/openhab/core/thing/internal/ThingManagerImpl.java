@@ -556,8 +556,13 @@ public class ThingManagerImpl
             // called from the thing handler itself, therefore
             // it exists, is initializing/initialized and
             // must not be informed (in order to prevent infinite loops)
-            // we assume the handler knows what he's doing and don't check config validity
-            replaceThing(getThing(thingUID), thing);
+            if (isInitializable(thing, getThingType(thing))) {
+                replaceThing(getThing(thingUID), thing);
+            } else {
+                logger.warn(
+                        "Updating thing/configuration for thing '{}' denied, thing can't be initialized with the provided configuration.",
+                        thingUID);
+            }
         } else {
             Lock lock1 = getLockForThing(thing.getUID());
             try {
