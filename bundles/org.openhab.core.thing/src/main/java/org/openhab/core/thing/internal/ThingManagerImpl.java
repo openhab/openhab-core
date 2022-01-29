@@ -813,6 +813,8 @@ public class ThingManagerImpl
         try {
             configDescriptionValidator.validate(configuration.getProperties(), configDescriptionURI);
         } catch (ConfigValidationException e) {
+            logger.trace("Failed to validate config for '{}' with URI '{}': {}", targetUID, configDescriptionURI,
+                    e.getValidationMessages());
             return false;
         }
 
