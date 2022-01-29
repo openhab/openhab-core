@@ -44,6 +44,8 @@ import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Testing the {@link ConfigDescriptionValidator}.
@@ -52,6 +54,8 @@ import org.osgi.framework.BundleContext;
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 public class ConfigDescriptionValidatorTest {
+
+    private final Logger logger = LoggerFactory.getLogger(ConfigDescriptionValidatorTest.class);
 
     private static final int MIN_VIOLATED = 1;
     private static final int MAX_VIOLATED = 1234;
@@ -187,6 +191,14 @@ public class ConfigDescriptionValidatorTest {
 
     @Test
     public void assertValidationThrowsNoExceptionForValidConfigParameters() {
+        configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
+    }
+
+    @Test
+    public void assertValidationThrowsNoExceptionForValidStringConfigParameters() {
+        params.put(BOOL_PARAM_NAME, "true");
+        params.put(INT_PARAM_NAME, "1");
+        params.put(DECIMAL_PARAM_NAME, "1.0");
         configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
     }
 
