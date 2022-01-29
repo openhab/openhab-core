@@ -365,13 +365,13 @@ public class ConfigDescriptionValidatorTest {
     public void assertValidationThrowsExceptionContainingMessagesForMultipleInvalidTypedConfigParameters() {
         List<ConfigValidationMessage> expected = Stream.of(
                 new ConfigValidationMessage(BOOL_PARAM_NAME, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
-                        MessageKey.DATA_TYPE_VIOLATED.key, Type.BOOLEAN),
+                        MessageKey.DATA_TYPE_VIOLATED.key, Long.class, Type.BOOLEAN),
                 new ConfigValidationMessage(INT_PARAM_NAME, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
-                        MessageKey.DATA_TYPE_VIOLATED.key, Type.INTEGER),
+                        MessageKey.DATA_TYPE_VIOLATED.key, Long.class, Type.INTEGER),
                 new ConfigValidationMessage(TXT_PARAM_NAME, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
-                        MessageKey.DATA_TYPE_VIOLATED.key, Type.TEXT),
+                        MessageKey.DATA_TYPE_VIOLATED.key, Long.class, Type.TEXT),
                 new ConfigValidationMessage(DECIMAL_PARAM_NAME, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
-                        MessageKey.DATA_TYPE_VIOLATED.key, Type.DECIMAL))
+                        MessageKey.DATA_TYPE_VIOLATED.key, Long.class, Type.DECIMAL))
                 .collect(toList());
         params.put(BOOL_PARAM_NAME, INVALID);
         params.put(TXT_PARAM_NAME, INVALID);
@@ -384,7 +384,7 @@ public class ConfigDescriptionValidatorTest {
 
     void assertType(String parameterName, Type type) {
         List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(parameterName,
-                MessageKey.DATA_TYPE_VIOLATED.defaultMessage, MessageKey.DATA_TYPE_VIOLATED.key, type));
+                MessageKey.DATA_TYPE_VIOLATED.defaultMessage, MessageKey.DATA_TYPE_VIOLATED.key, Long.class, type));
         params.put(parameterName, INVALID);
         ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
                 () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
@@ -424,7 +424,7 @@ public class ConfigDescriptionValidatorTest {
                 new ConfigValidationMessage(TXT_REQUIRED_PARAM_NAME, MessageKey.PARAMETER_REQUIRED.defaultMessage,
                         MessageKey.PARAMETER_REQUIRED.key),
                 new ConfigValidationMessage(DECIMAL_PARAM_NAME, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
-                        MessageKey.DATA_TYPE_VIOLATED.key, Type.DECIMAL),
+                        MessageKey.DATA_TYPE_VIOLATED.key, Long.class, Type.DECIMAL),
                 new ConfigValidationMessage(DECIMAL_MAX_PARAM_NAME,
                         MessageKey.MAX_VALUE_NUMERIC_VIOLATED.defaultMessage, MessageKey.MAX_VALUE_NUMERIC_VIOLATED.key,
                         DECIMAL_MAX.toString()))
