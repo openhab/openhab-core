@@ -559,7 +559,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     @Override
     public @Nullable STTService getSTT() {
         STTService stt = null;
-        if (defaultTTS != null) {
+        if (defaultSTT != null) {
             stt = sttServices.get(defaultSTT);
             if (stt == null) {
                 logger.warn("Default STT service '{}' not available!", defaultSTT);
