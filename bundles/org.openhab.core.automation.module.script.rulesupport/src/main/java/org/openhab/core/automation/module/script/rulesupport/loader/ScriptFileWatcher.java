@@ -129,6 +129,24 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyServ
     }
 
     /**
+     * Processes initial import of resources.
+     *
+     * @param rootDirectory the root directory to import initial resources from
+     */
+    private void importInitialResources(File rootDirectory) {
+        if (rootDirectory.exists()) {
+            File[] files = rootDirectory.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    if (!f.isHidden()) {
+                        importResources(f);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Imports resources from the specified file or directory.
      *
      * @param file the file or directory to import resources from
@@ -285,7 +303,7 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyServ
             if (newLevel >= StartLevelService.STARTLEVEL_MODEL) { // start
                 ScheduledExecutorService localScheduler = executorFactory.get();
                 scheduler = localScheduler;
-                localScheduler.submit(() -> importResources(new File(pathToWatch)));
+                localScheduler.submit(() -> importInitialResources(new File(pathToWatch)));
                 localScheduler.scheduleWithFixedDelay(() -> checkFiles(currentStartLevel), 0, RECHECK_INTERVAL,
                         TimeUnit.SECONDS);
             }
