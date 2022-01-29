@@ -629,13 +629,17 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
         SimpleThingHandler handler = (SimpleThingHandler) thing.getHandler();
         assertNotNull(handler);
+        Object parameter = handler.getThing().getConfiguration().get("parameter");
+        assertNotNull(parameter);
+        assertEquals("someValue", parameter);
 
         handler.updateConfiguration(new Configuration(Map.of("parameter", "otherValue")));
-        Object parameter = handler.getThing().getConfiguration().get("parameter");
+        parameter = handler.getThing().getConfiguration().get("parameter");
         assertNotNull(parameter);
         assertEquals("otherValue", parameter);
 
         handler.updateConfiguration(new Configuration(Map.of()));
+        parameter = handler.getThing().getConfiguration().get("parameter");
         // configuration should not change
         assertNotNull(parameter);
         assertEquals("otherValue", parameter);

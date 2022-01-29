@@ -242,7 +242,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * Updates the state of the thing. Will use the thing UID to infer the
      * unique channel UID from the given ID.
      *
-     * @param channel ID id of the channel, which was updated
+     * @param channelID id of the channel, which was updated
      * @param state new state
      */
     protected void updateState(String channelID, State state) {
@@ -392,13 +392,25 @@ public abstract class BaseThingHandler implements ThingHandler {
             throw new IllegalArgumentException(
                     "Changes must not be done on the current thing - create a copy, e.g. via editThing()");
         }
+        ThingHandlerCallback callback = this.callback;
+        if (callback == null) {
+            logger.warn("Handler {} tried updating thing {} although the handler was already disposed.",
+                    this.getClass().getSimpleName(), thing.getUID());
+            return;
+        }
+        try {
+            callback.validateConfigurationParameters(thing, thing.getConfiguration().getProperties());
+        } catch (ConfigValidationException e) {
+            logger.warn(
+                    "Attempt to update thing '{}' with a thing containing invalid configuration '{}', blocked. This is most likely a bug.",
+                    thing.getUID(), thing.getConfiguration());
+            return;
+        }
         synchronized (this) {
             if (this.callback != null) {
                 this.thing = thing;
                 this.callback.thingUpdated(thing);
             } else {
-                logger.warn("Handler {} tried updating thing {} although the handler was already disposed.",
-                        this.getClass().getSimpleName(), thing.getUID());
             }
         }
     }
@@ -421,16 +433,23 @@ public abstract class BaseThingHandler implements ThingHandler {
      */
     protected void updateConfiguration(Configuration configuration) {
         Map<String, Object> old = this.thing.getConfiguration().getProperties();
+        ThingHandlerCallback callback = this.callback;
+        if (callback == null) {
+            logger.warn("Handler {} tried updating its configuration although the handler was already disposed.",
+                    this.getClass().getSimpleName());
+            return;
+        }
+        try {
+            callback.validateConfigurationParameters(this.thing, configuration.getProperties());
+        } catch (ConfigValidationException e) {
+            logger.warn("Attempt to apply invalid configuration '{}' on thing '{}' blocked. This is most likely a bug.",
+                    configuration, thing.getUID());
+            return;
+        }
         try {
             this.thing.getConfiguration().setProperties(configuration.getProperties());
             synchronized (this) {
-                if (this.callback != null) {
-                    this.callback.thingUpdated(thing);
-                } else {
-                    logger.warn(
-                            "Handler {} tried updating its configuration although the handler was already disposed.",
-                            this.getClass().getSimpleName());
-                }
+                callback.thingUpdated(thing);
             }
         } catch (RuntimeException e) {
             logger.warn(
