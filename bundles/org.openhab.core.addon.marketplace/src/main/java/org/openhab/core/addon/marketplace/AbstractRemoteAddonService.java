@@ -39,8 +39,6 @@ import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -52,7 +50,6 @@ import com.google.gson.GsonBuilder;
  */
 @NonNullByDefault
 public abstract class AbstractRemoteAddonService implements AddonService {
-    private final Logger logger = LoggerFactory.getLogger(AbstractRemoteAddonService.class);
     protected static final Map<String, AddonType> TAG_ADDON_TYPE_MAP = Map.of( //
             "automation", new AddonType("automation", "Automation"), //
             "binding", new AddonType("binding", "Bindings"), //
