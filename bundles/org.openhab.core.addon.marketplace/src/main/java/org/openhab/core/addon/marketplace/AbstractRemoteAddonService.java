@@ -32,6 +32,7 @@ import org.openhab.core.addon.AddonEventFactory;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
 import org.openhab.core.cache.ExpiringCache;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.Storage;
@@ -209,9 +210,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                 // if we can't determine a set property, we use true (default is remote enabled)
                 return true;
             }
-            Object remoteEnabled = properties.get("remote");
-            return (remoteEnabled == null || "true".equals(remoteEnabled.toString()));
-
+            return ConfigParser.valueAsOrElse(properties.get("remote"), Boolean.class, true);
         } catch (IOException e) {
             return true;
         }
