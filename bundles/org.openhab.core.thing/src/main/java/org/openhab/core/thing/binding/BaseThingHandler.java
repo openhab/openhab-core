@@ -384,6 +384,10 @@ public abstract class BaseThingHandler implements ThingHandler {
      * Informs the framework, that a thing was updated. This method must be called after the configuration or channels
      * was changed.
      *
+     * Any method overriding this method has to make sure that only things with valid configurations are passed to the
+     * callback. This can be achieved by calling
+     * {@link ThingHandlerCallback#validateConfigurationParameters(Thing, Map)}.
+     * 
      * @param thing thing, that was updated and should be persisted
      */
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
@@ -426,6 +430,9 @@ public abstract class BaseThingHandler implements ThingHandler {
     /**
      * Updates the configuration of the thing and informs the framework about it.
      *
+     * Any method overriding this method has to make sure that only valid configurations are passed to the callback.
+     * This can be achieved by calling {@link ThingHandlerCallback#validateConfigurationParameters(Thing, Map)}.
+     *
      * @param configuration configuration, that was updated and should be persisted
      */
     protected void updateConfiguration(Configuration configuration) {
@@ -459,7 +466,7 @@ public abstract class BaseThingHandler implements ThingHandler {
 
     /**
      * Returns a copy of the properties map, that can be modified. The method {@link
-     * BaseThingHandler#updateProperties(Map<String, String> properties)} must be called to persist the properties.
+     * BaseThingHandler#updateProperties(Map)} must be called to persist the properties.
      *
      * @return copy of the thing properties (not null)
      */
