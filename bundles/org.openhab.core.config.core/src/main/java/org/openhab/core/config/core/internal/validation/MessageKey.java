@@ -23,7 +23,7 @@ final class MessageKey {
     static final MessageKey PARAMETER_REQUIRED = new MessageKey("parameter_required", "The parameter is required");
 
     static final MessageKey DATA_TYPE_VIOLATED = new MessageKey("data_type_violated",
-            "The data type of the value does not match with the type declaration ({0}) in the configuration description.");
+            "The data type of the value ({0}) does not match with the type declaration ({1}) in the configuration description.");
 
     static final MessageKey MAX_VALUE_TXT_VIOLATED = new MessageKey("max_value_txt_violated",
             "The value must not consist of more than {0} characters.");

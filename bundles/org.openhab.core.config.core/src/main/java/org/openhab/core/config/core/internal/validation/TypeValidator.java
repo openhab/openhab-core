@@ -33,14 +33,15 @@ final class TypeValidator implements ConfigDescriptionParameterValidator {
 
         TypeIntrospection typeIntrospection = TypeIntrospections.get(parameter.getType());
         if (!typeIntrospection.isAssignable(value)) {
-            return createDataTypeViolationMessage(parameter.getName(), parameter.getType());
+            return createDataTypeViolationMessage(parameter.getName(), parameter.getType(), value.getClass());
         }
 
         return null;
     }
 
-    private static ConfigValidationMessage createDataTypeViolationMessage(String parameterName, Type type) {
+    private static ConfigValidationMessage createDataTypeViolationMessage(String parameterName, Type type,
+            Class<?> clazz) {
         return new ConfigValidationMessage(parameterName, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
-                MessageKey.DATA_TYPE_VIOLATED.key, type);
+                MessageKey.DATA_TYPE_VIOLATED.key, clazz, type);
     }
 }
