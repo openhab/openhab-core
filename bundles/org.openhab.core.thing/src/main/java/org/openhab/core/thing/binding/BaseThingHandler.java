@@ -407,11 +407,8 @@ public abstract class BaseThingHandler implements ThingHandler {
             return;
         }
         synchronized (this) {
-            if (this.callback != null) {
-                this.thing = thing;
-                this.callback.thingUpdated(thing);
-            } else {
-            }
+            this.thing = thing;
+            callback.thingUpdated(thing);
         }
     }
 
