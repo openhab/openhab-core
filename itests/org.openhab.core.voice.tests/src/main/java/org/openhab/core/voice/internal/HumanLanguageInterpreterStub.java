@@ -30,20 +30,18 @@ import org.openhab.core.voice.text.InterpretationException;
 public class HumanLanguageInterpreterStub implements HumanLanguageInterpreter {
 
     private static final String INTERPRETED_TEXT = "Interpreted text";
-    private static final String EXCEPTION_MESSAGE = "Exception message";
+    private static final String EXCEPTION_MESSAGE = "interpretation exception";
 
     private static final String HLI_STUB_ID = "HLIStubID";
     private static final String HLI_STUB_LABEL = "HLIStubLabel";
 
-    private boolean isInterpretationExceptionExpected;
+    private boolean exceptionExpected;
+    private String question = "";
+    private String answer = "";
 
     @Override
     public String getId() {
         return HLI_STUB_ID;
-    }
-
-    public void setIsInterpretationExceptionExpected(boolean value) {
-        isInterpretationExceptionExpected = value;
     }
 
     @Override
@@ -53,10 +51,12 @@ public class HumanLanguageInterpreterStub implements HumanLanguageInterpreter {
 
     @Override
     public String interpret(Locale locale, String text) throws InterpretationException {
-        if (isInterpretationExceptionExpected) {
+        question = text;
+        if (exceptionExpected) {
             throw new InterpretationException(EXCEPTION_MESSAGE);
         } else {
-            return INTERPRETED_TEXT;
+            answer = INTERPRETED_TEXT;
+            return answer;
         }
     }
 
@@ -76,6 +76,18 @@ public class HumanLanguageInterpreterStub implements HumanLanguageInterpreter {
     public Set<String> getSupportedGrammarFormats() {
         // This method will not be used in the tests
         return null;
+    }
+
+    public void setExceptionExpected(boolean exceptionExpected) {
+        this.exceptionExpected = exceptionExpected;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public String getAnswer() {
+        return answer;
     }
 
     @Override

@@ -17,10 +17,12 @@ import java.util.Set;
 
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.voice.KSErrorEvent;
 import org.openhab.core.voice.KSException;
 import org.openhab.core.voice.KSListener;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.KSServiceHandle;
+import org.openhab.core.voice.KSpottedEvent;
 
 /**
  * A {@link KSService} stub used for the tests.
@@ -35,16 +37,17 @@ public class KSServiceStub implements KSService {
     private static final String KSSERVICE_STUB_ID = "ksServiceStubID";
     private static final String KSSERVICE_STUB_LABEL = "ksServiceStubLabel";
 
+    private static final String EXCEPTION_MESSAGE = "keyword spotting exception";
+    private static final String ERROR_MESSAGE = "keyword spotting error";
+
+    private boolean exceptionExpected;
+    private boolean errorExpected;
     private boolean isWordSpotted;
-    private boolean isKSExceptionExpected;
+    private boolean aborted;
 
     @Override
     public String getId() {
         return KSSERVICE_STUB_ID;
-    }
-
-    public void setIsKsExceptionExpected(boolean value) {
-        this.isKSExceptionExpected = value;
     }
 
     @Override
@@ -65,20 +68,38 @@ public class KSServiceStub implements KSService {
     @Override
     public KSServiceHandle spot(KSListener ksListener, AudioStream audioStream, Locale locale, String keyword)
             throws KSException {
-        if (isKSExceptionExpected) {
-            throw new KSException("Expected KSException");
+        if (exceptionExpected) {
+            throw new KSException(EXCEPTION_MESSAGE);
         } else {
-            isWordSpotted = true;
+            if (errorExpected) {
+                ksListener.ksEventReceived(new KSErrorEvent(ERROR_MESSAGE));
+            } else {
+                isWordSpotted = true;
+                ksListener.ksEventReceived(new KSpottedEvent());
+            }
             return new KSServiceHandle() {
                 @Override
                 public void abort() {
+                    aborted = true;
                 }
             };
         }
     }
 
+    public void setExceptionExpected(boolean exceptionExpected) {
+        this.exceptionExpected = exceptionExpected;
+    }
+
+    public void setErrorExpected(boolean errorExpected) {
+        this.errorExpected = errorExpected;
+    }
+
     public boolean isWordSpotted() {
         return isWordSpotted;
+    }
+
+    public boolean isAborted() {
+        return aborted;
     }
 
     @Override

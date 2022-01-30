@@ -14,15 +14,22 @@ package org.openhab.core.voice.voiceconsolecommandextension;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.voice.internal.SinkStub;
 import org.openhab.core.voice.internal.TTSServiceStub;
 import org.openhab.core.voice.internal.VoiceStub;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * A {@link VoiceConsoleCommandExtensionTest} which tests the execution of the command "voices".
@@ -31,13 +38,25 @@ import org.osgi.framework.BundleContext;
  * @author Velin Yordanov - migrated tests from groovy to java
  */
 public class VoicesCommandTest extends VoiceConsoleCommandExtensionTest {
+    private static final String CONFIG_LANGUAGE = "language";
     private static final String SUBCMD_VOICES = "voices";
+    private LocaleProvider localeProvider;
     private TTSServiceStub ttsService;
     private SinkStub sink;
     private VoiceStub voice;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws IOException {
+        localeProvider = getService(LocaleProvider.class);
+        assertNotNull(localeProvider);
+
+        Dictionary<String, Object> localeConfig = new Hashtable<>();
+        localeConfig.put(CONFIG_LANGUAGE, Locale.ENGLISH.getLanguage());
+        ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
+        Configuration configuration = configAdmin.getFactoryConfiguration("org.openhab.i18n", null);
+        configuration.update(localeConfig);
+        configuration.update();
+
         BundleContext context = bundleContext;
 
         ttsService = new TTSServiceStub(context);
@@ -52,7 +71,7 @@ public class VoicesCommandTest extends VoiceConsoleCommandExtensionTest {
     @Test
     public void testVoicesCommand() {
         String[] command = new String[] { SUBCMD_VOICES };
-        Locale locale = Locale.getDefault();
+        Locale locale = localeProvider.getLocale();
         String expectedText = String.format("* %s - %s - %s (%s)", ttsService.getLabel(locale),
                 voice.getLocale().getDisplayName(locale), voice.getLabel(), voice.getUID());
         extensionService.execute(command, console);

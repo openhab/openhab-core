@@ -29,6 +29,7 @@ import org.openhab.core.voice.text.InterpretationException;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Christoph Weitkamp - Added parameter to adjust the volume
+ * @author Laurent Garnier - Updated methods startDialog and added method stopDialog
  */
 @NonNullByDefault
 public interface VoiceManager {
@@ -121,20 +122,48 @@ public interface VoiceManager {
     Voice getPreferredVoice(Set<Voice> voices);
 
     /**
-     * Starts listening for the keyword that starts a dialog
+     * Starts an infinite dialog sequence using all default services: keyword spotting on the default audio source,
+     * audio source listening to retrieve the question, speech to text conversion, interpretation, text to speech
+     * conversion and playback of the answer on the default audio sink
      *
-     * @throws IllegalStateException if required services are not available
+     * Only one dialog can be started for the default audio source.
+     *
+     * @throws IllegalStateException if required services are not available or the dialog is already started for the
+     *             default audio source
      */
-    void startDialog();
+    void startDialog() throws IllegalStateException;
 
     /**
-     * Starts listening for the keyword that starts a dialog
+     * Starts an infinite dialog sequence: keyword spotting on the audio source, audio source listening to retrieve
+     * the question, speech to text conversion, interpretation, text to speech conversion and playback of the answer
+     * on the audio sink
      *
-     * @throws IllegalStateException if required services are not available
+     * Only one dialog can be started for an audio source.
+     *
+     * @param ks the keyword spotting service to use or null to use the default service
+     * @param stt the speech-to-text service to use or null to use the default service
+     * @param tts the text-to-speech service to use or null to use the default service
+     * @param hli the human language text interpreter to use or null to use the default service
+     * @param source the audio source to use or null to use the default source
+     * @param sink the audio sink to use or null to use the default sink
+     * @param Locale the locale to use or null to use the default locale
+     * @param keyword the keyword to use during keyword spotting or null to use the default keyword
+     * @param listeningItem the item to switch ON while listening to a question
+     * @throws IllegalStateException if required services are not available or the dialog is already started for this
+     *             audio source
      */
     void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
             @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
-            @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem);
+            @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
+            throws IllegalStateException;
+
+    /**
+     * Stop the dialog associated to an audio source
+     *
+     * @param source the audio source or null to consider the default audio source
+     * @throws IllegalStateException if no dialog is started for the audio source
+     */
+    void stopDialog(@Nullable AudioSource source) throws IllegalStateException;
 
     /**
      * Retrieves a TTS service.

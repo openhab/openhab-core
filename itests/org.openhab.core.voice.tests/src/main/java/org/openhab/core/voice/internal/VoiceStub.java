@@ -43,7 +43,6 @@ public class VoiceStub implements Voice {
 
     @Override
     public Locale getLocale() {
-        // we need to return something different from null here (the real value is not important)
-        return Locale.getDefault();
+        return Locale.ENGLISH;
     }
 }

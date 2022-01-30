@@ -42,6 +42,7 @@ import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.STTService;
@@ -51,9 +52,12 @@ import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -69,6 +73,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort TTS options
+ * @author Laurent Garnier - Updated methods startDialog and added method stopDialog
  */
 @Component(immediate = true, configurationPid = VoiceManagerImpl.CONFIGURATION_PID, //
         property = Constants.SERVICE_PID + "=org.openhab.voice")
@@ -103,6 +108,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     private final LocaleProvider localeProvider;
     private final AudioManager audioManager;
     private final EventPublisher eventPublisher;
+    private final TranslationProvider i18nProvider;
+
+    private @Nullable Bundle bundle;
 
     /**
      * default settings filled through the service configuration
@@ -116,17 +124,26 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     private @Nullable String defaultVoice;
     private final Map<String, String> defaultVoices = new HashMap<>();
 
+    private Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
+
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
-            final @Reference EventPublisher eventPublisher) {
+            final @Reference EventPublisher eventPublisher, final @Reference TranslationProvider i18nProvider) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
         this.eventPublisher = eventPublisher;
+        this.i18nProvider = i18nProvider;
     }
 
     @Activate
-    protected void activate(Map<String, Object> config) {
+    protected void activate(BundleContext bundleContext, Map<String, Object> config) {
+        this.bundle = bundleContext.getBundle();
         modified(config);
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        stopAllDialogs();
     }
 
     @SuppressWarnings("null")
@@ -257,7 +274,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 }
             }
         } catch (TTSException | UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
-            logger.warn("Error saying '{}': {}", text, e.getMessage(), e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Error saying '{}': {}", text, e.getMessage(), e);
+            } else {
+                logger.warn("Error saying '{}': {}", text, e.getMessage());
+            }
         }
     }
 
@@ -458,36 +479,70 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     }
 
     @Override
-    public void startDialog() {
+    public void startDialog() throws IllegalStateException {
         startDialog(null, null, null, null, null, null, null, this.keyword, this.listeningItem);
     }
 
     @Override
-    public void startDialog(@Nullable KSService ksService, @Nullable STTService sttService,
-            @Nullable TTSService ttsService, @Nullable HumanLanguageInterpreter interpreter,
-            @Nullable AudioSource audioSource, @Nullable AudioSink audioSink, @Nullable Locale locale,
-            @Nullable String keyword, @Nullable String listeningItem) {
+    public void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
+            @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
+            throws IllegalStateException {
         // use defaults, if null
-        KSService ks = (ksService == null) ? getKS() : ksService;
-        STTService stt = (sttService == null) ? getSTT() : sttService;
-        TTSService tts = (ttsService == null) ? getTTS() : ttsService;
-        HumanLanguageInterpreter hli = (interpreter == null) ? getHLI() : interpreter;
-        AudioSource source = (audioSource == null) ? audioManager.getSource() : audioSource;
-        AudioSink sink = (audioSink == null) ? audioManager.getSink() : audioSink;
+        KSService ksService = (ks == null) ? getKS() : ks;
+        STTService sttService = (stt == null) ? getSTT() : stt;
+        TTSService ttsService = (tts == null) ? getTTS() : tts;
+        HumanLanguageInterpreter interpreter = (hli == null) ? getHLI() : hli;
+        AudioSource audioSource = (source == null) ? audioManager.getSource() : source;
+        AudioSink audioSink = (sink == null) ? audioManager.getSink() : sink;
         Locale loc = (locale == null) ? localeProvider.getLocale() : locale;
         String kw = (keyword == null) ? this.keyword : keyword;
         String item = (listeningItem == null) ? this.listeningItem : listeningItem;
+        Bundle b = bundle;
 
-        if (ks != null && stt != null && tts != null && hli != null && source != null && sink != null && loc != null
-                && kw != null) {
-            DialogProcessor processor = new DialogProcessor(ks, stt, tts, hli, source, sink, loc, kw, item,
-                    this.eventPublisher);
-            processor.start();
+        if (ksService != null && sttService != null && ttsService != null && interpreter != null && audioSource != null
+                && audioSink != null && b != null) {
+            DialogProcessor processor = dialogProcessors.get(audioSource.getId());
+            if (processor == null) {
+                logger.debug("Starting a new dialog for source {} ({})", audioSource.getLabel(null),
+                        audioSource.getId());
+                processor = new DialogProcessor(ksService, sttService, ttsService, interpreter, audioSource, audioSink,
+                        loc, kw, item, this.eventPublisher, this.i18nProvider, b);
+                dialogProcessors.put(audioSource.getId(), processor);
+                processor.start();
+            } else {
+                throw new IllegalStateException(
+                        String.format("Cannot start dialog as a dialog is already started for audio source '%s'.",
+                                audioSource.getLabel(null)));
+            }
         } else {
-            String msg = "Cannot start dialog as services are missing.";
-            logger.error(msg);
-            throw new IllegalStateException(msg);
+            throw new IllegalStateException("Cannot start dialog as services are missing.");
         }
+    }
+
+    @Override
+    public void stopDialog(@Nullable AudioSource source) throws IllegalStateException {
+        AudioSource audioSource = (source == null) ? audioManager.getSource() : source;
+        if (audioSource != null) {
+            DialogProcessor processor = dialogProcessors.remove(audioSource.getId());
+            if (processor != null) {
+                processor.stop();
+                logger.debug("Dialog stopped for source {} ({})", audioSource.getLabel(null), audioSource.getId());
+            } else {
+                throw new IllegalStateException(
+                        String.format("Cannot stop dialog as no dialog is started for audio source '%s'.",
+                                audioSource.getLabel(null)));
+            }
+        } else {
+            throw new IllegalStateException("Cannot stop dialog as audio source is missing.");
+        }
+    }
+
+    private void stopAllDialogs() {
+        dialogProcessors.values().forEach(processor -> {
+            processor.stop();
+        });
+        dialogProcessors.clear();
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
