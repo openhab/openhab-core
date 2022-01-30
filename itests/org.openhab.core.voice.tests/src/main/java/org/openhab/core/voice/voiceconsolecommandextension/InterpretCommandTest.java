@@ -41,7 +41,7 @@ public class InterpretCommandTest extends VoiceConsoleCommandExtensionTest {
     private static final String CONFIG_DEFAULT_VOICE = "defaultVoice";
     private static final String SUBCMD_INTERPRET = "interpret";
     private static final String INTERPRETED_TEXT = "Interpreted text";
-    private static final String EXCEPTION_MESSAGE = "Exception message";
+    private static final String EXCEPTION_MESSAGE = "interpretation exception";
 
     private HumanLanguageInterpreterStub hliStub;
     private VoiceStub voice;
@@ -79,7 +79,7 @@ public class InterpretCommandTest extends VoiceConsoleCommandExtensionTest {
     @Test
     public void verifyThatAnInterpretationExceptionIsHandledProperly() {
         waitForAssert(() -> {
-            hliStub.setIsInterpretationExceptionExpected(true);
+            hliStub.setExceptionExpected(true);
             String[] params = new String[] { SUBCMD_INTERPRET, "text", "to", "be", "interpreted" };
             extensionService.execute(params, console);
             assertThat(console.getPrintedText(), is(EXCEPTION_MESSAGE));
