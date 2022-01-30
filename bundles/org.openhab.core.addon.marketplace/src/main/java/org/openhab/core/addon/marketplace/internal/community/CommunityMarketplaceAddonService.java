@@ -23,6 +23,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +48,7 @@ import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCate
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO.DiscourseUser;
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponseDTO;
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponseDTO.DiscoursePostLink;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
@@ -85,6 +87,7 @@ public class CommunityMarketplaceAddonService implements AddonService {
     static final String CONFIG_URI = "system:marketplace";
     static final String CONFIG_API_KEY = "apiKey";
     static final String CONFIG_SHOW_UNPUBLISHED_ENTRIES_KEY = "showUnpublished";
+    private static final String CFG_REMOTE = "remote";
 
     private static final String COMMUNITY_BASE_URL = "https://community.openhab.org";
     private static final String COMMUNITY_MARKETPLACE_URL = COMMUNITY_BASE_URL + "/c/marketplace/69/l/latest";
@@ -479,11 +482,12 @@ public class CommunityMarketplaceAddonService implements AddonService {
     private boolean remoteEnabled() {
         try {
             Configuration configuration = configurationAdmin.getConfiguration("org.openhab.addons", null);
-            if (configuration.getProperties() != null) {
-                return (boolean) Objects.requireNonNullElse(configuration.getProperties().get("remote"), true);
-            } else {
+            Dictionary<String, Object> properties = configuration.getProperties();
+            if (properties == null) {
+                // if we can't determine a set property, we use true (default is remote enabled)
                 return true;
             }
+            return ConfigParser.valueAsOrElse(properties.get(CFG_REMOTE), Boolean.class, true);
         } catch (IOException e) {
             return true;
         }

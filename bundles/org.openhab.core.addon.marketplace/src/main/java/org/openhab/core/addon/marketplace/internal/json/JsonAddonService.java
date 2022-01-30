@@ -21,6 +21,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +40,7 @@ import org.openhab.core.addon.AddonType;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
 import org.openhab.core.addon.marketplace.internal.json.model.AddonEntryDTO;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
@@ -79,6 +81,7 @@ public class JsonAddonService implements AddonService {
 
     private static final String CONFIG_URLS = "urls";
     private static final String CONFIG_SHOW_UNSTABLE = "showUnstable";
+    private static final String CFG_REMOTE = "remote";
 
     private static final Map<String, AddonType> TAG_ADDON_TYPE_MAP = Map.of( //
             "automation", new AddonType("automation", "Automation"), //
@@ -269,11 +272,12 @@ public class JsonAddonService implements AddonService {
     private boolean remoteEnabled() {
         try {
             Configuration configuration = configurationAdmin.getConfiguration("org.openhab.addons", null);
-            if (configuration.getProperties() != null) {
-                return (boolean) Objects.requireNonNullElse(configuration.getProperties().get("remote"), true);
-            } else {
+            Dictionary<String, Object> properties = configuration.getProperties();
+            if (properties == null) {
+                // if we can't determine a set property, we use true (default is remote enabled)
                 return true;
             }
+            return ConfigParser.valueAsOrElse(properties.get(CFG_REMOTE), Boolean.class, true);
         } catch (IOException e) {
             return true;
         }
