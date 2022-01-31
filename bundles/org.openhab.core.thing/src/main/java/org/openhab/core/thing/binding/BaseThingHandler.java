@@ -404,6 +404,8 @@ public abstract class BaseThingHandler implements ThingHandler {
         }
         try {
             callback.validateConfigurationParameters(thing, thing.getConfiguration().getProperties());
+            thing.getChannels().forEach(channel -> callback.validateConfigurationParameters(channel,
+                    channel.getConfiguration().getProperties()));
         } catch (ConfigValidationException e) {
             logger.warn(
                     "Attempt to update thing '{}' with a thing containing invalid configuration '{}', blocked. This is most likely a bug.",

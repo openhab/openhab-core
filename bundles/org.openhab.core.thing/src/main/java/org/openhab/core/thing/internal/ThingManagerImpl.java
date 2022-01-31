@@ -292,6 +292,14 @@ public class ThingManagerImpl
         }
 
         @Override
+        public void validateConfigurationParameters(Channel channel, Map<String, Object> configurationParameters) {
+            ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
+            if (channelType != null && channelType.getConfigDescriptionURI() != null) {
+                configDescriptionValidator.validate(configurationParameters, channelType.getConfigDescriptionURI());
+            }
+        }
+
+        @Override
         public void configurationUpdated(Thing thing) {
             if (!ThingHandlerHelper.isHandlerInitialized(thing)) {
                 initializeHandler(thing);
