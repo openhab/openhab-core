@@ -31,7 +31,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
@@ -83,6 +82,7 @@ public class ConfigDescriptionValidatorTest {
     private static final String TXT_MAX_PARAM_NAME = "txt-max-name";
     private static final String TXT_PATTERN_PARAM_NAME = "txt-pattern-name";
     private static final String TXT_MAX_PATTERN_PARAM_NAME = "txt-max-pattern-name";
+    private static final String TXT_MULTIPLE_LIMIT_PARAM_NAME = "txt-multiple-limit-name";
 
     private static final String INT_PARAM_NAME = "int-param";
     private static final String INT_REQUIRED_PARAM_NAME = "int-required-param";
@@ -112,6 +112,8 @@ public class ConfigDescriptionValidatorTest {
     private static final ConfigDescriptionParameter TXT_MAX_PATTERN_PARAM = ConfigDescriptionParameterBuilder
             .create(TXT_MAX_PATTERN_PARAM_NAME, ConfigDescriptionParameter.Type.TEXT).withMaximum(MAX)
             .withPattern(PATTERN).build();
+    private static final ConfigDescriptionParameter TXT_MULTIPLE_LIMIT_PARAM = ConfigDescriptionParameterBuilder
+            .create(TXT_MULTIPLE_LIMIT_PARAM_NAME, Type.TEXT).withMultiple(true).withMultipleLimit(2).build();
 
     private static final ConfigDescriptionParameter INT_PARAM = ConfigDescriptionParameterBuilder
             .create(INT_PARAM_NAME, ConfigDescriptionParameter.Type.INTEGER).build();
@@ -142,11 +144,10 @@ public class ConfigDescriptionValidatorTest {
     }
 
     private static final ConfigDescription CONFIG_DESCRIPTION = ConfigDescriptionBuilder.create(CONFIG_DESCRIPTION_URI)
-            .withParameters(Stream
-                    .of(BOOL_PARAM, BOOL_REQUIRED_PARAM, TXT_PARAM, TXT_REQUIRED_PARAM, TXT_MIN_PARAM, TXT_MAX_PARAM,
-                            TXT_PATTERN_PARAM, TXT_MAX_PATTERN_PARAM, INT_PARAM, INT_REQUIRED_PARAM, INT_MIN_PARAM,
-                            INT_MAX_PARAM, DECIMAL_PARAM, DECIMAL_REQUIRED_PARAM, DECIMAL_MIN_PARAM, DECIMAL_MAX_PARAM)
-                    .collect(toList()))
+            .withParameters(Stream.of(BOOL_PARAM, BOOL_REQUIRED_PARAM, TXT_PARAM, TXT_REQUIRED_PARAM, TXT_MIN_PARAM,
+                    TXT_MAX_PARAM, TXT_PATTERN_PARAM, TXT_MAX_PATTERN_PARAM, TXT_MULTIPLE_LIMIT_PARAM, INT_PARAM,
+                    INT_REQUIRED_PARAM, INT_MIN_PARAM, INT_MAX_PARAM, DECIMAL_PARAM, DECIMAL_REQUIRED_PARAM,
+                    DECIMAL_MIN_PARAM, DECIMAL_MAX_PARAM).collect(toList()))
             .build();
 
     private Map<String, Object> params;
@@ -155,13 +156,11 @@ public class ConfigDescriptionValidatorTest {
     @BeforeEach
     public void setUp() {
         ConfigDescriptionRegistry configDescriptionRegistry = mock(ConfigDescriptionRegistry.class);
-        when(configDescriptionRegistry.getConfigDescription(any())).thenAnswer(new Answer<ConfigDescription>() {
-            @Override
-            public ConfigDescription answer(InvocationOnMock invocation) throws Throwable {
-                URI uri = (URI) invocation.getArgument(0);
-                return !CONFIG_DESCRIPTION_URI.equals(uri) ? null : CONFIG_DESCRIPTION;
-            }
-        });
+        when(configDescriptionRegistry.getConfigDescription(any()))
+                .thenAnswer((Answer<ConfigDescription>) invocation -> {
+                    URI uri = invocation.getArgument(0);
+                    return !CONFIG_DESCRIPTION_URI.equals(uri) ? null : CONFIG_DESCRIPTION;
+                });
 
         BundleContext bundleContext = mock(BundleContext.class);
         when(bundleContext.getBundle()).thenReturn(mock(Bundle.class));
@@ -179,6 +178,7 @@ public class ConfigDescriptionValidatorTest {
         params.put(TXT_MAX_PARAM_NAME, String.valueOf(MIN_VIOLATED));
         params.put(TXT_PATTERN_PARAM_NAME, "abbbc");
         params.put(TXT_MAX_PATTERN_PARAM_NAME, "abc");
+        params.put(TXT_MULTIPLE_LIMIT_PARAM_NAME, List.of("1", "2"));
         params.put(INT_PARAM_NAME, null);
         params.put(INT_REQUIRED_PARAM_NAME, 0);
         params.put(INT_MIN_PARAM_NAME, MIN);
@@ -421,6 +421,16 @@ public class ConfigDescriptionValidatorTest {
     // ===========================================================================
     // MISC VALIDATIONS
     // ===========================================================================
+
+    @Test
+    public void assertValidationThrowsExceptionForMultipleLimitViolated() {
+        List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(TXT_MULTIPLE_LIMIT_PARAM_NAME,
+                MessageKey.MULTIPLE_LIMIT_VIOLATED.defaultMessage, MessageKey.MULTIPLE_LIMIT_VIOLATED.key, 2, 3));
+        params.put(TXT_MULTIPLE_LIMIT_PARAM_NAME, List.of("1", "2", "3"));
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
+    }
 
     @Test
     public void assertValidationThrowsExceptionContainingMultipleVariousViolations() {
