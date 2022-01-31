@@ -207,7 +207,8 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
 
             byte[] bytes = ((X509Certificate) certs[0]).getEncoded();
             if (bytes.length != 0) {
-                return BEGIN_CERT + "\r\n" + Base64.getEncoder().encodeToString(bytes) + "\r\n" + END_CERT;
+                return BEGIN_CERT + System.lineSeparator() + Base64.getEncoder().encodeToString(bytes)
+                        + System.lineSeparator() + END_CERT;
             }
         } catch (NoSuchAlgorithmException | KeyManagementException | IOException e) {
             LoggerFactory.getLogger(PEMTrustManager.class).error("An unexpected exception occurred: ", e);
