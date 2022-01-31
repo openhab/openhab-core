@@ -25,6 +25,7 @@ import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
@@ -386,7 +387,9 @@ public abstract class BaseThingHandler implements ThingHandler {
      *
      * Any method overriding this method has to make sure that only things with valid configurations are passed to the
      * callback. This can be achieved by calling
-     * {@link ThingHandlerCallback#validateConfigurationParameters(Thing, Map)}.
+     * {@link ThingHandlerCallback#validateConfigurationParameters(Thing, Map)}. It is also necessary to ensure that all
+     * channel configurations are valid by calling
+     * {@link ThingHandlerCallback#validateConfigurationParameters(Channel, Map)}.
      * 
      * @param thing thing, that was updated and should be persisted
      */
