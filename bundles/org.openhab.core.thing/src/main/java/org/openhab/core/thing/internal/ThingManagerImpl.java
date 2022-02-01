@@ -292,6 +292,14 @@ public class ThingManagerImpl
         }
 
         @Override
+        public void validateConfigurationParameters(Channel channel, Map<String, Object> configurationParameters) {
+            ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
+            if (channelType != null && channelType.getConfigDescriptionURI() != null) {
+                configDescriptionValidator.validate(configurationParameters, channelType.getConfigDescriptionURI());
+            }
+        }
+
+        @Override
         public void configurationUpdated(Thing thing) {
             if (!ThingHandlerHelper.isHandlerInitialized(thing)) {
                 initializeHandler(thing);
@@ -556,7 +564,6 @@ public class ThingManagerImpl
             // called from the thing handler itself, therefore
             // it exists, is initializing/initialized and
             // must not be informed (in order to prevent infinite loops)
-            // we assume the handler knows what he's doing and don't check config validity
             replaceThing(getThing(thingUID), thing);
         } else {
             Lock lock1 = getLockForThing(thing.getUID());

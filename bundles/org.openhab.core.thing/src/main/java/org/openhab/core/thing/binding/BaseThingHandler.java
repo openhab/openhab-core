@@ -25,6 +25,7 @@ import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
@@ -242,7 +243,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * Updates the state of the thing. Will use the thing UID to infer the
      * unique channel UID from the given ID.
      *
-     * @param channel ID id of the channel, which was updated
+     * @param channelID id of the channel, which was updated
      * @param state new state
      */
     protected void updateState(String channelID, State state) {
@@ -384,6 +385,12 @@ public abstract class BaseThingHandler implements ThingHandler {
      * Informs the framework, that a thing was updated. This method must be called after the configuration or channels
      * was changed.
      *
+     * Any method overriding this method has to make sure that only things with valid configurations are passed to the
+     * callback. This can be achieved by calling
+     * {@link ThingHandlerCallback#validateConfigurationParameters(Thing, Map)}. It is also necessary to ensure that all
+     * channel configurations are valid by calling
+     * {@link ThingHandlerCallback#validateConfigurationParameters(Channel, Map)}.
+     * 
      * @param thing thing, that was updated and should be persisted
      */
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
@@ -392,14 +399,25 @@ public abstract class BaseThingHandler implements ThingHandler {
             throw new IllegalArgumentException(
                     "Changes must not be done on the current thing - create a copy, e.g. via editThing()");
         }
+        ThingHandlerCallback callback = this.callback;
+        if (callback == null) {
+            logger.warn("Handler {} tried updating thing {} although the handler was already disposed.",
+                    this.getClass().getSimpleName(), thing.getUID());
+            return;
+        }
+        try {
+            callback.validateConfigurationParameters(thing, thing.getConfiguration().getProperties());
+            thing.getChannels().forEach(channel -> callback.validateConfigurationParameters(channel,
+                    channel.getConfiguration().getProperties()));
+        } catch (ConfigValidationException e) {
+            logger.warn(
+                    "Attempt to update thing '{}' with a thing containing invalid configuration '{}', blocked. This is most likely a bug.",
+                    thing.getUID(), thing.getConfiguration());
+            return;
+        }
         synchronized (this) {
-            if (this.callback != null) {
-                this.thing = thing;
-                this.callback.thingUpdated(thing);
-            } else {
-                logger.warn("Handler {} tried updating thing {} although the handler was already disposed.",
-                        this.getClass().getSimpleName(), thing.getUID());
-            }
+            this.thing = thing;
+            callback.thingUpdated(thing);
         }
     }
 
@@ -417,20 +435,30 @@ public abstract class BaseThingHandler implements ThingHandler {
     /**
      * Updates the configuration of the thing and informs the framework about it.
      *
+     * Any method overriding this method has to make sure that only valid configurations are passed to the callback.
+     * This can be achieved by calling {@link ThingHandlerCallback#validateConfigurationParameters(Thing, Map)}.
+     *
      * @param configuration configuration, that was updated and should be persisted
      */
     protected void updateConfiguration(Configuration configuration) {
         Map<String, Object> old = this.thing.getConfiguration().getProperties();
+        ThingHandlerCallback callback = this.callback;
+        if (callback == null) {
+            logger.warn("Handler {} tried updating its configuration although the handler was already disposed.",
+                    this.getClass().getSimpleName());
+            return;
+        }
+        try {
+            callback.validateConfigurationParameters(this.thing, configuration.getProperties());
+        } catch (ConfigValidationException e) {
+            logger.warn("Attempt to apply invalid configuration '{}' on thing '{}' blocked. This is most likely a bug.",
+                    configuration, thing.getUID());
+            return;
+        }
         try {
             this.thing.getConfiguration().setProperties(configuration.getProperties());
             synchronized (this) {
-                if (this.callback != null) {
-                    this.callback.thingUpdated(thing);
-                } else {
-                    logger.warn(
-                            "Handler {} tried updating its configuration although the handler was already disposed.",
-                            this.getClass().getSimpleName());
-                }
+                callback.thingUpdated(thing);
             }
         } catch (RuntimeException e) {
             logger.warn(
@@ -443,7 +471,7 @@ public abstract class BaseThingHandler implements ThingHandler {
 
     /**
      * Returns a copy of the properties map, that can be modified. The method {@link
-     * BaseThingHandler#updateProperties(Map<String, String> properties)} must be called to persist the properties.
+     * BaseThingHandler#updateProperties(Map)} must be called to persist the properties.
      *
      * @return copy of the thing properties (not null)
      */
