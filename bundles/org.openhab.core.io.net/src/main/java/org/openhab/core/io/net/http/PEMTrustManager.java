@@ -72,8 +72,9 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
             } catch (IOException e) {
                 throw new CertificateException(e);
             }
+        } else {
+            throw new CertificateParsingException("Certificate is either empty or cannot be parsed correctly");
         }
-        throw new CertificateParsingException("Certificate is either empty or cannot be parsed correctly");
     }
 
     /**
@@ -171,6 +172,25 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
         validatePEMCertificate(chain);
     }
 
+    @Override
+    public int hashCode() {
+        return trustedCert.hashCode();
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof PEMTrustManager)) {
+            return false;
+        }
+        return trustedCert.equals(((PEMTrustManager) obj).trustedCert);
+    }
+
     private static @Nullable String getPEMCertificateFromServer(URL url) throws CertificateException {
         HttpsURLConnection connection = null;
         try {
@@ -187,7 +207,8 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
 
             byte[] bytes = ((X509Certificate) certs[0]).getEncoded();
             if (bytes.length != 0) {
-                return BEGIN_CERT + Base64.getEncoder().encodeToString(bytes) + END_CERT;
+                return BEGIN_CERT + System.lineSeparator() + Base64.getEncoder().encodeToString(bytes)
+                        + System.lineSeparator() + END_CERT;
             }
         } catch (NoSuchAlgorithmException | KeyManagementException | IOException e) {
             LoggerFactory.getLogger(PEMTrustManager.class).error("An unexpected exception occurred: ", e);
