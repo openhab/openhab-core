@@ -19,28 +19,23 @@ import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Base class for OSGI services that access to file system by Java WatchService. <br />
- * See the WatchService <a href=
- * "http://docs.oracle.com/javase/7/docs/api/java/nio/file/WatchService.html"
- * >java docs</a> for more details
+ * Base class for OSGI services that access to file system by Java WatchService.
+ *
+ * See the WatchService <a href="http://docs.oracle.com/javase/7/docs/api/java/nio/file/WatchService.html">java docs</a>
+ * for more details
  *
  * @author Fabio Marini - Initial contribution
  * @author Dimitar Ivanov - added javadoc; introduced WatchKey to directory mapping for the queue reader
  * @author Ana Dimova - reduce to a single watch thread for all class instances of {@link AbstractWatchService}
+ * @author Jan N. Klug - add null annotations
  */
+@NonNullByDefault
 public abstract class AbstractWatchService {
-
-    /**
-     * Default logger for Watch Services
-     */
-    protected final Logger logger = LoggerFactory.getLogger(AbstractWatchService.class);
-
-    protected String pathToWatch;
+    protected @Nullable String pathToWatch;
 
     protected AbstractWatchService(String pathToWatch) {
         this.pathToWatch = pathToWatch;
@@ -49,7 +44,7 @@ public abstract class AbstractWatchService {
     /**
      * The queue reader
      */
-    protected WatchQueueReader watchQueueReader;
+    protected WatchQueueReader watchQueueReader = WatchQueueReader.getInstance();
 
     /**
      * Method to call on service activation
@@ -57,7 +52,6 @@ public abstract class AbstractWatchService {
     public void activate() {
         Path pathToWatch = getSourcePath();
         if (pathToWatch != null) {
-            watchQueueReader = WatchQueueReader.getInstance();
             watchQueueReader.customizeWatchQueueReader(this, pathToWatch, watchSubDirectories());
         }
     }
@@ -65,12 +59,10 @@ public abstract class AbstractWatchService {
     /**
      * Method to call on service deactivation
      */
+    @SuppressWarnings("unused")
     public void deactivate() {
         WatchQueueReader watchQueueReader = this.watchQueueReader;
-        if (watchQueueReader != null) {
-            watchQueueReader.stopWatchService(this);
-        }
-        this.watchQueueReader = null;
+        watchQueueReader.stopWatchService(this);
     }
 
     /**
@@ -78,6 +70,7 @@ public abstract class AbstractWatchService {
      *         {@link Path} with the {@link Paths#get(String, String...)} method.
      */
     public @Nullable Path getSourcePath() {
+        String pathToWatch = this.pathToWatch;
         return pathToWatch == null || pathToWatch.isBlank() ? null : Paths.get(pathToWatch);
     }
 
@@ -98,7 +91,7 @@ public abstract class AbstractWatchService {
      * @return The array of {@link WatchKey}s for the registration or <code>null</code> if no registration has been
      *         done.
      */
-    protected abstract Kind<?>[] getWatchEventKinds(Path directory);
+    protected abstract Kind<?> @Nullable [] getWatchEventKinds(Path directory);
 
     /**
      * Processes the given watch event. Note that the kind and the number of the events for the watched directory is a
@@ -106,7 +99,7 @@ public abstract class AbstractWatchService {
      *
      * @param event the watch event to be handled
      * @param kind the event's kind
-     * @param path the path of the event (resolved to the {@link #baseWatchedDir})
+     * @param path the path of the event (resolved to the {@link #pathToWatch})
      */
     protected abstract void processWatchEvent(WatchEvent<?> event, Kind<?> kind, Path path);
 }

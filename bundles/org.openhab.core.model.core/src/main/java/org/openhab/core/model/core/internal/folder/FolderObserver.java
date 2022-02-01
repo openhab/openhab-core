@@ -48,6 +48,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is able to observe multiple folders for changes and notifies the
@@ -59,6 +61,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  */
 @Component(name = "org.openhab.core.folder", immediate = true, configurationPid = "org.openhab.folder", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class FolderObserver extends AbstractWatchService {
+    private Logger logger = LoggerFactory.getLogger(FolderObserver.class);
 
     /* the model repository is provided as a service */
     private final ModelRepository modelRepository;
