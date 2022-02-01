@@ -108,8 +108,18 @@ public final class ConfigDescriptionValidatorImpl implements ConfigDescriptionVa
             if (configDescriptionParameter != null) {
                 // If the parameter supports multiple selection, then it may be provided as an array
                 if (configDescriptionParameter.isMultiple() && configurationParameters.get(key) instanceof List) {
+                    List<Object> values = (List<Object>) configurationParameters.get(key);
+                    // check if multipleLimit is obeyed
+                    Integer multipleLimit = configDescriptionParameter.getMultipleLimit();
+                    if (multipleLimit != null && values.size() > multipleLimit) {
+                        MessageKey messageKey = MessageKey.MULTIPLE_LIMIT_VIOLATED;
+                        ConfigValidationMessage message = new ConfigValidationMessage(
+                                configDescriptionParameter.getName(), messageKey.defaultMessage, messageKey.key,
+                                multipleLimit, values.size());
+                        configDescriptionValidationMessages.add(message);
+                    }
                     // Perform validation on each value in the list separately
-                    for (Object value : (List<Object>) configurationParameters.get(key)) {
+                    for (Object value : values) {
                         ConfigValidationMessage message = validateParameter(configDescriptionParameter, value);
                         if (message != null) {
                             configDescriptionValidationMessages.add(message);
