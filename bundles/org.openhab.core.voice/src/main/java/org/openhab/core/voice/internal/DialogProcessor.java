@@ -160,12 +160,8 @@ public class DialogProcessor implements KSListener, STTListener {
     private void closeStreamKS() {
         AudioStream stream = streamKS;
         if (stream != null) {
-            // Due to the current implementation of JavaSoundAudioSource, the stream is not closed as it would
-            // lead to problem
-            // try {
-            // stream.close();
-            // } catch (IOException e1) {
-            // }
+            // Due to an issue in JavaSoundAudioSource ( https://github.com/openhab/openhab-core/issues/2702 )
+            // we do not try closing the stream
             streamKS = null;
         }
     }
@@ -182,12 +178,8 @@ public class DialogProcessor implements KSListener, STTListener {
     private void closeStreamSTT() {
         AudioStream stream = streamSTT;
         if (stream != null) {
-            // Due to the current implementation of JavaSoundAudioSource, the stream is not closed as it would
-            // lead to problem
-            // try {
-            // stream.close();
-            // } catch (IOException e1) {
-            // }
+            // Due to an issue in JavaSoundAudioSource ( https://github.com/openhab/openhab-core/issues/2702 )
+            // we do not try closing the stream
             streamSTT = null;
         }
     }
