@@ -77,7 +77,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         return List.of(buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"),
                 buildCommandUsage(SUBCMD_INTERPRET + " <command>", "interprets a human language command"),
                 buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services"),
-                buildCommandUsage(SUBCMD_START_DIALOG + " [<source> <interpreter> <sink> <keyword>]",
+                buildCommandUsage(SUBCMD_START_DIALOG + " [<source> [<interpreter> [<sink> [<keyword>]]]]",
                         "start a new dialog processing using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_STOP_DIALOG + " [<source>]",
                         "stop the dialog processing for the default audio source or the audio source identified with provided argument"));
