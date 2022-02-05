@@ -12,7 +12,6 @@
  */
 package org.openhab.core.thing.binding;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -492,7 +491,7 @@ public abstract class BaseThingHandler implements ThingHandler {
             this.thing.setProperties(Map.of());
             propertiesUpdated = true;
         } else if (properties != null) {
-            for (Entry<String, String> property : properties.entrySet()) {
+            for (Entry<String, @Nullable String> property : properties.entrySet()) {
                 String propertyName = property.getKey();
                 String propertyValue = property.getValue();
                 String existingPropertyValue = thing.getProperties().get(propertyName);

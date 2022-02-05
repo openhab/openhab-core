@@ -531,7 +531,8 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
             // set properties
             String modelId = "1234";
             String firmwareVersion = "1.2.3";
-            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperties(Map.of(Thing.PROPERTY_MODEL_ID, modelId, Thing.PROPERTY_FIRMWARE_VERSION, firmwareVersion ));
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperties(
+                    Map.of(Thing.PROPERTY_MODEL_ID, modelId, Thing.PROPERTY_FIRMWARE_VERSION, firmwareVersion));
 
             assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), is(modelId));
             assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION), is(firmwareVersion));
