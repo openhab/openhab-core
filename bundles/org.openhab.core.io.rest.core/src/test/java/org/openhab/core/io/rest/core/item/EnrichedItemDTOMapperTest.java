@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.core.item;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,5 +77,29 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
                 null, null);
         assertThat(dto.members.length, is(2));
         assertThat(((EnrichedGroupItemDTO) dto.members[0]).members.length, is(1));
+    }
+
+    @Test
+    public void testDirectRecursiveMembershipDoesNotThrowStackOverflowException() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+
+        groupItem1.addMember(groupItem2);
+        groupItem2.addMember(groupItem1);
+
+        assertDoesNotThrow(() -> EnrichedItemDTOMapper.map(groupItem1, true, null, null, null));
+    }
+
+    @Test
+    public void testIndirectRecursiveMembershipDoesNotThrowStackOverflowException() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+        GroupItem groupItem3 = new GroupItem("group3");
+
+        groupItem1.addMember(groupItem2);
+        groupItem2.addMember(groupItem3);
+        groupItem3.addMember(groupItem1);
+
+        assertDoesNotThrow(() -> EnrichedItemDTOMapper.map(groupItem1, true, null, null, null));
     }
 }
