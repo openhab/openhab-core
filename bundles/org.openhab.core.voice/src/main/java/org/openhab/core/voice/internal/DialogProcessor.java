@@ -14,6 +14,7 @@ package org.openhab.core.voice.internal;
 
 import static org.openhab.core.voice.internal.VoiceManagerImpl.getBestMatch;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -39,6 +40,7 @@ import org.openhab.core.voice.KSListener;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.KSServiceHandle;
 import org.openhab.core.voice.KSpottedEvent;
+import org.openhab.core.voice.RecognitionStartEvent;
 import org.openhab.core.voice.RecognitionStopEvent;
 import org.openhab.core.voice.STTEvent;
 import org.openhab.core.voice.STTException;
@@ -65,6 +67,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Laurent Garnier - Added stop() + null annotations + resources releasing
+ * @author Miguel Álvarez - Close audio streams + use RecognitionStartEvent
  */
 @NonNullByDefault
 public class DialogProcessor implements KSListener, STTListener {
@@ -160,8 +163,11 @@ public class DialogProcessor implements KSListener, STTListener {
     private void closeStreamKS() {
         AudioStream stream = streamKS;
         if (stream != null) {
-            // Due to an issue in JavaSoundAudioSource ( https://github.com/openhab/openhab-core/issues/2702 )
-            // we do not try closing the stream
+            try {
+                stream.close();
+            } catch (IOException e) {
+                logger.warn("IOException closing ks audio stream: {}", e.getMessage(), e);
+            }
             streamKS = null;
         }
     }
@@ -178,8 +184,11 @@ public class DialogProcessor implements KSListener, STTListener {
     private void closeStreamSTT() {
         AudioStream stream = streamSTT;
         if (stream != null) {
-            // Due to an issue in JavaSoundAudioSource ( https://github.com/openhab/openhab-core/issues/2702 )
-            // we do not try closing the stream
+            try {
+                stream.close();
+            } catch (IOException e) {
+                logger.warn("IOException closing stt audio stream: {}", e.getMessage(), e);
+            }
             streamSTT = null;
         }
     }
@@ -201,7 +210,6 @@ public class DialogProcessor implements KSListener, STTListener {
         if (!processing) {
             isSTTServerAborting = false;
             if (ksEvent instanceof KSpottedEvent) {
-                toggleProcessing(true);
                 abortSTT();
                 closeStreamSTT();
                 isSTTServerAborting = false;
@@ -254,6 +262,8 @@ public class DialogProcessor implements KSListener, STTListener {
                     }
                 }
             }
+        } else if (sttEvent instanceof RecognitionStartEvent) {
+            toggleProcessing(true);
         } else if (sttEvent instanceof RecognitionStopEvent) {
             toggleProcessing(false);
         } else if (sttEvent instanceof SpeechRecognitionErrorEvent) {
