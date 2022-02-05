@@ -16,7 +16,6 @@ import java.util.Locale;
 import java.util.Set;
 
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
 import javax.sound.sampled.TargetDataLine;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -32,6 +31,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Kelly Davis - Initial contribution and API
  * @author Kai Kreuzer - Refactored and stabilized
+ * @author Miguel Álvarez - Don't share TargetDataLine
  *
  */
 @NonNullByDefault
@@ -50,11 +50,6 @@ public class JavaSoundAudioSource implements AudioSource {
     private final AudioFormat audioFormat = convertAudioFormat(format);
 
     /**
-     * TargetDataLine for the mic
-     */
-    private @Nullable TargetDataLine microphone;
-
-    /**
      * Constructs a JavaSoundAudioSource
      */
     public JavaSoundAudioSource() {
@@ -63,13 +58,7 @@ public class JavaSoundAudioSource implements AudioSource {
     private TargetDataLine initMicrophone(javax.sound.sampled.AudioFormat format) throws AudioException {
         try {
             TargetDataLine microphone = AudioSystem.getTargetDataLine(format);
-
-            DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-            microphone = (TargetDataLine) AudioSystem.getLine(info);
-
             microphone.open(format);
-
-            this.microphone = microphone;
             return microphone;
         } catch (Exception e) {
             throw new AudioException("Error creating the audio input stream.", e);
@@ -81,10 +70,7 @@ public class JavaSoundAudioSource implements AudioSource {
         if (!expectedFormat.isCompatible(audioFormat)) {
             throw new AudioException("Cannot produce streams in format " + expectedFormat);
         }
-        TargetDataLine mic = this.microphone;
-        if (mic == null) {
-            mic = initMicrophone(format);
-        }
+        TargetDataLine mic = initMicrophone(format);
         return new JavaSoundInputStream(mic, audioFormat);
     }
 
