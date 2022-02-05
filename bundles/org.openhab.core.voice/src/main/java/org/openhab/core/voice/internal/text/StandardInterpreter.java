@@ -275,9 +275,10 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
                 /* PlayPauseType */
 
-                itemRule(seq(cmd(alt("continuar", "continua", "play"), PlayPauseType.PLAY), articulo) /*
-                                                                                                       * item
-                                                                                                       */),
+                itemRule(seq(cmd(alt("continuar", "continua", "reanudar", "reanuda", "play"), PlayPauseType.PLAY),
+                        articulo) /*
+                                   * item
+                                   */),
 
                 itemRule(seq(cmd(alt("pausa", "pausar"), PlayPauseType.PAUSE), articulo) /* item */),
 
