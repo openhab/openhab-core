@@ -139,7 +139,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class SimpleThingHandler extends BaseThingHandler {
+    static class SimpleThingHandler extends BaseThingHandler {
 
         SimpleThingHandler(Thing thing) {
             super(thing);
@@ -245,7 +245,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         thingHandlerFactory.deactivate(componentContext);
     }
 
-    class ConfigStatusInfoEventSubscriber implements EventSubscriber {
+    static class ConfigStatusInfoEventSubscriber implements EventSubscriber {
         private final ThingUID thingUID;
         private Event receivedEvent;
 
@@ -368,7 +368,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         }, 4000, DFL_SLEEP_TIME);
     }
 
-    class ConfigStatusProviderThingHandlerFactory extends BaseThingHandlerFactory {
+    static class ConfigStatusProviderThingHandlerFactory extends BaseThingHandlerFactory {
 
         @Override
         public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -425,7 +425,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class YetAnotherThingHandler extends BaseThingHandler {
+    static class YetAnotherThingHandler extends BaseThingHandler {
 
         YetAnotherThingHandler(Thing thing) {
             super(thing);
@@ -449,19 +449,9 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
             configuration.put("key", "value");
             updateConfiguration(configuration);
         }
-
-        public void updateProperties(String value) {
-            Map<String, String> properties = editProperties();
-            properties.put(Thing.PROPERTY_MODEL_ID, value);
-            updateProperties(properties);
-        }
-
-        public void updateProperty(String value) {
-            updateProperty(Thing.PROPERTY_VENDOR, value);
-        }
     }
 
-    class ThingRegistryChangeListener implements RegistryChangeListener<Thing> {
+    static class ThingRegistryChangeListener implements RegistryChangeListener<Thing> {
         private boolean updated;
         private Thing thing;
 
@@ -540,23 +530,26 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
             // set properties
             String modelId = "1234";
-            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperties(modelId);
+            String firmwareVersion = "1.2.3";
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperties(Map.of(Thing.PROPERTY_MODEL_ID, modelId, Thing.PROPERTY_FIRMWARE_VERSION, firmwareVersion ));
 
             assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), is(modelId));
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION), is(firmwareVersion));
 
             String vendor = "vendor";
-            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperty(vendor);
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperty(Thing.PROPERTY_VENDOR, vendor);
 
             assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is(vendor));
 
-            // unset properties
-            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperties((String) null);
+            // unset single property
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperty(Thing.PROPERTY_MODEL_ID, null);
 
             assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), is(nullValue()));
 
-            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperty(null);
+            // unset all properties
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperties(null);
 
-            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is(nullValue()));
+            assertTrue(listener.getThing().getProperties().isEmpty());
         } finally {
             thingRegistry.removeRegistryChangeListener(listener);
         }
