@@ -14,6 +14,8 @@ package org.openhab.core.addon.marketplace.internal.community.model;
 
 import java.util.Date;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * A DTO class mapped to the Discourse category topic list API.
  *
@@ -21,38 +23,48 @@ import java.util.Date;
  */
 public class DiscourseCategoryResponseDTO {
     public DiscourseUser[] users;
-    public DiscourseTopicList topic_list;
+    @SerializedName("topic_list")
+    public DiscourseTopicList topicList;
 
-    public class DiscourseUser {
+    public static class DiscourseUser {
         public Integer id;
         public String username;
         public String name;
-        public String avatar_template;
+        @SerializedName("avatar_template")
+        public String avatarTemplate;
     }
 
-    public class DiscourseTopicList {
-        public String more_topics_url;
-        public Integer per_page;
+    public static class DiscourseTopicList {
+        @SerializedName("more_topics_url")
+        public String moreTopicsUrl;
+        @SerializedName("per_page")
+        public Integer perPage;
         public DiscourseTopicItem[] topics;
     }
 
-    public class DiscoursePosterInfo {
+    public static class DiscoursePosterInfo {
         public String extras;
         public String description;
-        public Integer user_id;
+        @SerializedName("user_id")
+        public Integer userId;
     }
 
-    public class DiscourseTopicItem {
+    public static class DiscourseTopicItem {
         public Integer id;
         public String title;
         public String slug;
         public String[] tags;
-        public Integer posts_count;
-        public String image_url;
-        public Date created_at;
-        public Integer like_count;
+        @SerializedName("posts_count")
+        public Integer postsCount;
+        @SerializedName("image_url")
+        public String imageUrl;
+        @SerializedName("created_at")
+        public Date createdAt;
+        @SerializedName("like_count")
+        public Integer likeCount;
         public Integer views;
-        public Integer category_id;
+        @SerializedName("category_id")
+        public Integer categoryId;
         public DiscoursePosterInfo[] posters;
     }
 }

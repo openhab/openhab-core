@@ -14,6 +14,8 @@ package org.openhab.core.addon.marketplace.internal.community.model;
 
 import java.util.Date;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * A DTO class mapped to the Discourse topic API.
  *
@@ -22,57 +24,72 @@ import java.util.Date;
 public class DiscourseTopicResponseDTO {
     public Integer id;
 
-    public DiscoursePostStream post_stream;
+    @SerializedName("post_stream")
+    public DiscoursePostStream postStream;
 
     public String title;
-    public Integer posts_count;
-    public String image_url;
+    @SerializedName("posts_count")
+    public Integer postsCount;
+    @SerializedName("image_url")
+    public String imageUrl;
 
-    public Date created_at;
-    public Date updated_at;
-    public Date last_posted;
+    @SerializedName("created_at")
+    public Date createdAt;
+    @SerializedName("updated_at")
+    public Date updatedAt;
+    @SerializedName("last_posted")
+    public Date lastPosted;
 
-    public Integer like_count;
+    @SerializedName("like_count")
+    public Integer likeCount;
     public Integer views;
 
     public String[] tags;
-    public Integer category_id;
+    @SerializedName("category_id")
+    public Integer categoryId;
 
     public DiscourseTopicDetails details;
 
-    public class DiscoursePostAuthor {
+    public static class DiscoursePostAuthor {
         public Integer id;
         public String username;
-        public String avatar_template;
+        @SerializedName("avatar_template")
+        public String avatarTemplate;
     }
 
-    public class DiscoursePostLink {
+    public static class DiscoursePostLink {
         public String url;
         public Boolean internal;
         public Integer clicks;
     }
 
-    public class DiscoursePostStream {
+    public static class DiscoursePostStream {
         public DiscoursePost[] posts;
     }
 
-    public class DiscoursePost {
+    public static class DiscoursePost {
         public Integer id;
 
         public String username;
-        public String display_username;
+        @SerializedName("display_username")
+        public String displayUsername;
 
-        public Date created_at;
-        public Date updated_at;
+        @SerializedName("created_at")
+        public Date createdAt;
+        @SerializedName("updated_at")
+        public Date updatedAt;
 
         public String cooked;
 
-        public DiscoursePostLink[] link_counts;
+        @SerializedName("link_counts")
+        public DiscoursePostLink[] linkCounts;
     }
 
-    public class DiscourseTopicDetails {
-        public DiscoursePostAuthor created_by;
-        public DiscoursePostAuthor last_poster;
+    public static class DiscourseTopicDetails {
+        @SerializedName("created_by")
+        public DiscoursePostAuthor createdBy;
+        @SerializedName("last_poster")
+        public DiscoursePostAuthor lastPoster;
 
         public DiscoursePostLink[] links;
     }
