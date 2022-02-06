@@ -226,6 +226,80 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
                 itemRule(seq(cmd("rafraîchir", RefreshType.REFRESH), lela) /* item */)
 
         );
+
+        /****************************** SPANISH ******************************/
+
+        Expression encenderApagar = alt(cmd(alt("enciende", "encender"), OnOffType.ON),
+                cmd(alt("apaga", "apagar"), OnOffType.OFF));
+        Expression cambia = alt("cambia", "cambiar");
+        Expression poner = alt("pon", "poner");
+        Expression de = opt("de");
+        Expression articulo = opt(alt("el", "la"));
+        Expression nombreColor = alt(cmd("blanco", HSBType.WHITE), cmd("rosa", HSBType.fromRGB(255, 96, 208)),
+                cmd("amarillo", HSBType.fromRGB(255, 224, 32)), cmd("naranja", HSBType.fromRGB(255, 160, 16)),
+                cmd("púrpura", HSBType.fromRGB(128, 0, 128)), cmd("rojo", HSBType.RED), cmd("verde", HSBType.GREEN),
+                cmd("azul", HSBType.BLUE));
+
+        addRules(new Locale("es"),
+
+                /* OnOffType */
+
+                itemRule(seq(encenderApagar, articulo), /* item */ onOff),
+
+                /* IncreaseDecreaseType */
+
+                itemRule(seq(cmd(alt("baja", "suaviza", "bajar", "suavizar"), IncreaseDecreaseType.DECREASE),
+                        articulo) /*
+                                   * item
+                                   */),
+
+                itemRule(seq(cmd(alt("sube", "aumenta", "subir", "aumentar"), IncreaseDecreaseType.INCREASE),
+                        articulo) /* item */),
+
+                /* ColorType */
+
+                itemRule(seq(cambia, articulo, opt("color"), de, articulo), /* item */ seq(opt("a"), nombreColor)),
+
+                /* UpDownType */
+
+                itemRule(seq(poner, articulo), /* item */ cmd("arriba", UpDownType.UP)),
+
+                itemRule(seq(poner, articulo), /* item */ cmd("abajo", UpDownType.DOWN)),
+
+                /* NextPreviousType */
+
+                itemRule(alt("cambiar", "cambia"),
+                        /* item */ seq(opt("a"),
+                                alt(cmd("siguiente", NextPreviousType.NEXT),
+                                        cmd("anterior", NextPreviousType.PREVIOUS)))),
+
+                /* PlayPauseType */
+
+                itemRule(seq(cmd(alt("continuar", "continua", "reanudar", "reanuda", "play"), PlayPauseType.PLAY),
+                        articulo) /*
+                                   * item
+                                   */),
+
+                itemRule(seq(cmd(alt("pausa", "pausar"), PlayPauseType.PAUSE), articulo) /* item */),
+
+                /* RewindFastForwardType */
+
+                itemRule(seq(cmd(alt("rebobina", "rebobinar"), RewindFastforwardType.REWIND), articulo) /* item */),
+
+                itemRule(seq(cmd(alt("avanza", "avanzar"), RewindFastforwardType.FASTFORWARD), articulo) /* item */),
+
+                /* StopMoveType */
+
+                itemRule(seq(cmd(alt("para", "parar", "stop"), StopMoveType.STOP), articulo) /* item */),
+
+                itemRule(seq(cmd(alt("mueve", "mover"), StopMoveType.MOVE), articulo) /* item */),
+
+                /* RefreshType */
+
+                itemRule(seq(cmd(alt("recarga", "refresca", "recargar", "refrescar"), RefreshType.REFRESH),
+                        articulo) /* item */)
+
+        );
     }
 
     @Override
