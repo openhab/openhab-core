@@ -63,7 +63,7 @@ public final class ConfigDescriptionValidatorImpl implements ConfigDescriptionVa
     private final BundleContext bundleContext;
 
     @Activate
-    public ConfigDescriptionValidatorImpl(final @Reference BundleContext bundleContext,
+    public ConfigDescriptionValidatorImpl(final BundleContext bundleContext,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
             final @Reference TranslationProvider translationProvider) {
         this.bundleContext = bundleContext;
