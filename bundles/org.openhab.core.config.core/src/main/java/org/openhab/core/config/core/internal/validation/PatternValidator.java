@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.core.internal.validation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
@@ -22,10 +24,11 @@ import org.openhab.core.config.core.validation.ConfigValidationMessage;
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 final class PatternValidator implements ConfigDescriptionParameterValidator {
 
     @Override
-    public ConfigValidationMessage validate(ConfigDescriptionParameter parameter, Object value) {
+    public @Nullable ConfigValidationMessage validate(ConfigDescriptionParameter parameter, @Nullable Object value) {
         if (value == null || parameter.getType() != Type.TEXT || parameter.getPattern() == null) {
             return null;
         }
@@ -35,7 +38,6 @@ final class PatternValidator implements ConfigDescriptionParameterValidator {
             return new ConfigValidationMessage(parameter.getName(), messageKey.defaultMessage, messageKey.key,
                     String.valueOf(value), parameter.getPattern());
         }
-
         return null;
     }
 }

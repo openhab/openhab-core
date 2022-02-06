@@ -14,6 +14,8 @@ package org.openhab.core.config.core.internal.validation;
 
 import java.math.BigDecimal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ParameterOption;
@@ -26,12 +28,12 @@ import org.openhab.core.config.core.validation.ConfigValidationMessage;
  *
  * @author Thomas Höfer - Initial contribution
  * @authod Chris Jackson - Allow options to be outside of min/max value
- * @param <T>
  */
+@NonNullByDefault
 final class MinMaxValidator implements ConfigDescriptionParameterValidator {
 
     @Override
-    public ConfigValidationMessage validate(ConfigDescriptionParameter parameter, Object value) {
+    public @Nullable ConfigValidationMessage validate(ConfigDescriptionParameter parameter, @Nullable Object value) {
         if (value == null || parameter.getType() == Type.BOOLEAN) {
             return null;
         }
@@ -61,7 +63,6 @@ final class MinMaxValidator implements ConfigDescriptionParameterValidator {
                         max);
             }
         }
-
         return null;
     }
 

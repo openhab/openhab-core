@@ -14,13 +14,13 @@ package org.openhab.core.config.core.internal.validation;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -32,10 +32,7 @@ import org.openhab.core.i18n.TranslationProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,29 +46,29 @@ import org.slf4j.LoggerFactory;
  * @author Chris Jackson - Handle checks on multiple selection parameters
  */
 @Component
+@NonNullByDefault
 public final class ConfigDescriptionValidatorImpl implements ConfigDescriptionValidator {
+
+    private static final List<ConfigDescriptionParameterValidator> VALIDATORS = List.of( //
+            ConfigDescriptionParameterValidatorFactory.createRequiredValidator(), //
+            ConfigDescriptionParameterValidatorFactory.createTypeValidator(), //
+            ConfigDescriptionParameterValidatorFactory.createMinMaxValidator(), //
+            ConfigDescriptionParameterValidatorFactory.createPatternValidator() //
+    );
 
     private final Logger logger = LoggerFactory.getLogger(ConfigDescriptionValidatorImpl.class);
 
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-    private TranslationProvider translationProvider;
-
-    private static final List<ConfigDescriptionParameterValidator> VALIDATORS = Collections
-            .unmodifiableList(Arrays.asList(ConfigDescriptionParameterValidatorFactory.createRequiredValidator(),
-                    ConfigDescriptionParameterValidatorFactory.createTypeValidator(),
-                    ConfigDescriptionParameterValidatorFactory.createMinMaxValidator(),
-                    ConfigDescriptionParameterValidatorFactory.createPatternValidator()));
-
-    private BundleContext bundleContext;
+    private final ConfigDescriptionRegistry configDescriptionRegistry;
+    private final TranslationProvider translationProvider;
+    private final BundleContext bundleContext;
 
     @Activate
-    protected void activate(BundleContext bundleContext) {
+    public ConfigDescriptionValidatorImpl(final BundleContext bundleContext,
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
+            final @Reference TranslationProvider translationProvider) {
         this.bundleContext = bundleContext;
-    }
-
-    @Deactivate
-    protected void deactivate() {
-        this.bundleContext = null;
+        this.configDescriptionRegistry = configDescriptionRegistry;
+        this.translationProvider = translationProvider;
     }
 
     /**
@@ -86,7 +83,7 @@ public final class ConfigDescriptionValidatorImpl implements ConfigDescriptionVa
      * @throws NullPointerException if given config description URI or configuration parameters are null
      */
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     public void validate(Map<String, Object> configurationParameters, URI configDescriptionURI) {
         Objects.requireNonNull(configurationParameters, "Configuration parameters must not be null");
         Objects.requireNonNull(configDescriptionURI, "Config description URI must not be null");
@@ -150,8 +147,8 @@ public final class ConfigDescriptionValidatorImpl implements ConfigDescriptionVa
      * @return the {@link ConfigValidationMessage} if the given value is not valid for the config description parameter,
      *         otherwise null
      */
-    private ConfigValidationMessage validateParameter(ConfigDescriptionParameter configDescriptionParameter,
-            Object value) {
+    private @Nullable ConfigValidationMessage validateParameter(ConfigDescriptionParameter configDescriptionParameter,
+            @Nullable Object value) {
         for (ConfigDescriptionParameterValidator validator : VALIDATORS) {
             ConfigValidationMessage message = validator.validate(configDescriptionParameter, value);
             if (message != null) {
@@ -170,33 +167,11 @@ public final class ConfigDescriptionValidatorImpl implements ConfigDescriptionVa
      *         config description registry is not available or because of config description could not be found for
      *         given URI)
      */
-    private ConfigDescription getConfigDescription(URI configDescriptionURI) {
-        if (configDescriptionRegistry == null) {
-            logger.warn("No config description registry available.");
-            return null;
-        }
+    private @Nullable ConfigDescription getConfigDescription(URI configDescriptionURI) {
         ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
         if (configDescription == null) {
             logger.warn("No config description found for URI '{}'", configDescriptionURI);
         }
         return configDescription;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = configDescriptionRegistry;
-    }
-
-    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setTranslationProvider(TranslationProvider translationProvider) {
-        this.translationProvider = translationProvider;
-    }
-
-    protected void unsetTranslationProvider(TranslationProvider translationProvider) {
-        this.translationProvider = null;
     }
 }

@@ -286,16 +286,22 @@ public class ThingManagerImpl
         @Override
         public void validateConfigurationParameters(Thing thing, Map<String, Object> configurationParameters) {
             ThingType thingType = thingTypeRegistry.getThingType(thing.getThingTypeUID());
-            if (thingType != null && thingType.getConfigDescriptionURI() != null) {
-                configDescriptionValidator.validate(configurationParameters, thingType.getConfigDescriptionURI());
+            if (thingType != null) {
+                URI configDescriptionURI = thingType.getConfigDescriptionURI();
+                if (configDescriptionURI != null) {
+                    configDescriptionValidator.validate(configurationParameters, configDescriptionURI);
+                }
             }
         }
 
         @Override
         public void validateConfigurationParameters(Channel channel, Map<String, Object> configurationParameters) {
             ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
-            if (channelType != null && channelType.getConfigDescriptionURI() != null) {
-                configDescriptionValidator.validate(configurationParameters, channelType.getConfigDescriptionURI());
+            if (channelType != null) {
+                URI configDescriptionURI = channelType.getConfigDescriptionURI();
+                if (configDescriptionURI != null) {
+                    configDescriptionValidator.validate(configurationParameters, configDescriptionURI);
+                }
             }
         }
 

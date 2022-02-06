@@ -12,8 +12,6 @@
  */
 package org.openhab.core.config.core.internal.validation;
 
-import static java.util.Map.entry;
-
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -27,9 +25,12 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
  */
 final class TypeIntrospections {
 
-    private static final Map<Type, TypeIntrospection> INTROSPECTIONS = Map.ofEntries(
-            entry(Type.BOOLEAN, new BooleanIntrospection()), entry(Type.TEXT, new StringIntrospection()),
-            entry(Type.INTEGER, new IntegerIntrospection()), entry(Type.DECIMAL, new FloatIntrospection()));
+    private static final Map<Type, TypeIntrospection> INTROSPECTIONS = Map.of( //
+            Type.BOOLEAN, new BooleanIntrospection(), //
+            Type.TEXT, new StringIntrospection(), //
+            Type.INTEGER, new IntegerIntrospection(), //
+            Type.DECIMAL, new FloatIntrospection() //
+    );
 
     private TypeIntrospections() {
         super();
