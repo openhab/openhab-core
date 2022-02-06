@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.binding;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -485,7 +486,22 @@ public abstract class BaseThingHandler implements ThingHandler {
      *
      * @param properties properties map, that was updated and should be persisted (all properties cleared if null)
      */
-    protected void updateProperties(@Nullable Map<String, @Nullable String> properties) {
+    protected void updateProperties(@Nullable Map<String, String> properties) {
+        if (properties == null) {
+            updatePropertiesInternal(null);
+        } else {
+            Map<String, @Nullable String> updatedPropertiesMap = new HashMap<>(properties);
+            updatePropertiesInternal(updatedPropertiesMap);
+        }
+    }
+
+    /**
+     * Informs the framework, that the given properties map of the thing was updated. This method performs a check, if
+     * the properties were updated. If the properties did not change, the framework is not informed about changes.
+     *
+     * @param properties properties map, that was updated and should be persisted (all properties cleared if null)
+     */
+    private void updatePropertiesInternal(@Nullable Map<String, @Nullable String> properties) {
         boolean propertiesUpdated = false;
         if (properties == null && !this.thing.getProperties().isEmpty()) {
             this.thing.setProperties(Map.of());
@@ -528,9 +544,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @param value the value of the property
      */
     protected void updateProperty(String name, @Nullable String value) {
-        Map<String, @Nullable String> properties = new HashMap<>();
-        properties.put(name, value);
-        updateProperties(properties);
+        updatePropertiesInternal(Collections.singletonMap(name, value));
     }
 
     /**
