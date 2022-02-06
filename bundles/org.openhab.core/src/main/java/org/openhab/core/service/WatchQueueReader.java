@@ -315,7 +315,7 @@ public class WatchQueueReader implements Runnable {
 
                 key.reset();
             } catch (InterruptedException exc) {
-                logger.info("Caught InterruptedException. Shutting down.");
+                logger.debug("Caught InterruptedException. Shutting down.");
                 return;
             } catch (Exception exc) {
                 logger.debug("Exception caught in WatchQueueReader. Restarting.", exc);
@@ -337,10 +337,10 @@ public class WatchQueueReader implements Runnable {
      * "https://stackoverflow.com/questions/16777869/java-7-watchservice-ignoring-multiple-occurrences-of-the-same-event">thisdiscussion</a>
      * on Stack Overflow.
      *
-     * @param key the `WatchKey`
-     * @param event the `WatchEvent` itself
-     * @param resolvedPath the resolved `Path` for this event
-     * @param services a `Set` of `AbstractWatchServices` that subscribe to this event
+     * @param key the {@link WatchKey}
+     * @param event the {@link }WatchEvent} itself
+     * @param resolvedPath the resolved {@link Path} for this event
+     * @param services a {@link Set<AbstractWatchService>} that subscribe to this event
      */
     private void processModificationEvent(WatchKey key, WatchEvent<?> event, Path resolvedPath,
             Set<AbstractWatchService> services) {
