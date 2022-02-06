@@ -12,8 +12,10 @@
  */
 package org.openhab.core.io.rest.core.item;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
 
@@ -59,11 +61,19 @@ public class EnrichedItemDTOMapper {
     public static EnrichedItemDTO map(Item item, boolean drillDown, @Nullable Predicate<Item> itemFilter,
             @Nullable UriBuilder uriBuilder, @Nullable Locale locale) {
         ItemDTO itemDTO = ItemDTOMapper.map(item);
-        return map(item, itemDTO, uriBuilder, drillDown, itemFilter, locale);
+        return map(item, itemDTO, drillDown, itemFilter, uriBuilder, locale, new ArrayList<>());
     }
 
-    private static EnrichedItemDTO map(Item item, ItemDTO itemDTO, @Nullable UriBuilder uriBuilder, boolean drillDown,
-            @Nullable Predicate<Item> itemFilter, @Nullable Locale locale) {
+    private static EnrichedItemDTO map(Item item, boolean drillDown, @Nullable Predicate<Item> itemFilter,
+            @Nullable UriBuilder uriBuilder, @Nullable Locale locale, List<Item> parents) {
+        ItemDTO itemDTO = ItemDTOMapper.map(item);
+        return map(item, itemDTO, drillDown, itemFilter, uriBuilder, locale, parents);
+    }
+
+    private static EnrichedItemDTO map(Item item, ItemDTO itemDTO, boolean drillDown,
+            @Nullable Predicate<Item> itemFilter, @Nullable UriBuilder uriBuilder, @Nullable Locale locale,
+            List<Item> parents) {
+        parents.add(item);
         String state = item.getState().toFullString();
         String transformedState = considerTransformation(state, item, locale);
         if (transformedState != null && transformedState.equals(state)) {
@@ -86,8 +96,12 @@ public class EnrichedItemDTOMapper {
             if (drillDown) {
                 Collection<EnrichedItemDTO> members = new LinkedHashSet<>();
                 for (Item member : groupItem.getMembers()) {
-                    if (itemFilter == null || itemFilter.test(member)) {
-                        members.add(map(member, drillDown, itemFilter, uriBuilder, locale));
+                    if (parents.contains(member)) {
+                        LOGGER.error(
+                                "Recursive group membership found: {} is both, a direct or indirect parent and a child of {}.",
+                                member.getName(), groupItem.getName());
+                    } else if (itemFilter == null || itemFilter.test(member)) {
+                        members.add(map(member, drillDown, itemFilter, uriBuilder, locale, parents));
                     }
                 }
                 memberDTOs = members.toArray(new EnrichedItemDTO[members.size()]);
