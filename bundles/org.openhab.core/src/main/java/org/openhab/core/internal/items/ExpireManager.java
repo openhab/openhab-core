@@ -41,6 +41,7 @@ import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.GroupItemStateChangedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.items.events.ItemStateEvent;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.Command;
@@ -77,10 +78,10 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
 
     private final Logger logger = LoggerFactory.getLogger(ExpireManager.class);
 
-    private Map<String, @Nullable Optional<ExpireConfig>> itemExpireConfig = new ConcurrentHashMap<>();
-    private Map<String, Instant> itemExpireMap = new ConcurrentHashMap<>();
+    private final Map<String, @Nullable Optional<ExpireConfig>> itemExpireConfig = new ConcurrentHashMap<>();
+    private final Map<String, Instant> itemExpireMap = new ConcurrentHashMap<>();
 
-    private ScheduledExecutorService threadPool = ThreadPoolManager
+    private final ScheduledExecutorService threadPool = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
     private final EventPublisher eventPublisher;
@@ -140,10 +141,13 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         itemExpireMap.clear();
     }
 
-    private void processEvent(String itemName, Type type) {
-        logger.trace("Received '{}' for item {}", type, itemName);
+    private void processEvent(String itemName, Type type, boolean isStateUpdate) {
+        logger.trace("Received '{}' for item {}, state update = {}", type, itemName, isStateUpdate);
         ExpireConfig expireConfig = getExpireConfig(itemName);
         if (expireConfig != null) {
+            if (isStateUpdate && expireConfig.ignoreStateUpdates) {
+                return;
+            }
             Command expireCommand = expireConfig.expireCommand;
             State expireState = expireConfig.expireState;
 
@@ -166,7 +170,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
     private @Nullable ExpireConfig getExpireConfig(String itemName) {
         Optional<ExpireConfig> itemConfig = itemExpireConfig.get(itemName);
         if (itemConfig != null) {
-            return itemConfig.isPresent() ? itemConfig.get() : null;
+            return itemConfig.orElse(null);
         } else {
             Metadata metadata = metadataRegistry.get(new MetadataKey(METADATA_NAMESPACE, itemName));
             if (metadata != null) {
@@ -240,13 +244,13 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         }
         if (event instanceof ItemStateEvent) {
             ItemStateEvent isEvent = (ItemStateEvent) event;
-            processEvent(isEvent.getItemName(), isEvent.getItemState());
+            processEvent(isEvent.getItemName(), isEvent.getItemState(), true);
         } else if (event instanceof ItemCommandEvent) {
             ItemCommandEvent icEvent = (ItemCommandEvent) event;
-            processEvent(icEvent.getItemName(), icEvent.getItemCommand());
-        } else if (event instanceof GroupItemStateChangedEvent) {
-            GroupItemStateChangedEvent gcEvent = (GroupItemStateChangedEvent) event;
-            processEvent(gcEvent.getItemName(), gcEvent.getItemState());
+            processEvent(icEvent.getItemName(), icEvent.getItemCommand(), false);
+        } else if (event instanceof ItemStateChangedEvent) {
+            ItemStateChangedEvent icEvent = (ItemStateChangedEvent) event;
+            processEvent(icEvent.getItemName(), icEvent.getItemState(), false);
         }
     }
 
@@ -296,19 +300,18 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         protected static final Pattern DURATION_PATTERN = Pattern
                 .compile("(?:([0-9]+)H)?\\s*(?:([0-9]+)M)?\\s*(?:([0-9]+)S)?", Pattern.CASE_INSENSITIVE);
 
-        @Nullable
-        final Command expireCommand;
-        @Nullable
-        final State expireState;
+        final @Nullable Command expireCommand;
+        final @Nullable State expireState;
         final String durationString;
         final Duration duration;
+        final boolean ignoreStateUpdates;
 
         /**
          * Construct an ExpireConfig from the config string.
          *
          * Valid syntax:
          *
-         * {@code &lt;duration&gt;[,[state=|command=|]&lt;stateOrCommand&gt;]}<br>
+         * {@code &lt;duration&gt;[,(state=|command=|)&lt;stateOrCommand&gt;][,ignoreStateUpdates]}<br>
          * if neither state= or command= is present, assume state
          *
          * @param item the item to which we are bound
@@ -324,6 +327,16 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             String stateOrCommand = ((commaPos >= 0) && (configString.length() - 1) > commaPos)
                     ? configString.substring(commaPos + 1).trim()
                     : null;
+
+            if (stateOrCommand != null && stateOrCommand.endsWith(",ignoreStateUpdates")) {
+                stateOrCommand = stateOrCommand.substring(0, stateOrCommand.lastIndexOf(","));
+                ignoreStateUpdates = true;
+            } else if ("ignoreStateUpdates".equals(stateOrCommand)) {
+                stateOrCommand = null;
+                ignoreStateUpdates = true;
+            } else {
+                ignoreStateUpdates = false;
+            }
 
             if ((stateOrCommand != null) && (stateOrCommand.length() > 0)) {
                 if (stateOrCommand.startsWith(COMMAND_PREFIX)) {
@@ -384,7 +397,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         @Override
         public String toString() {
             return "duration='" + durationString + "', s=" + duration.toSeconds() + ", state='" + expireState
-                    + "', command='" + expireCommand + "'";
+                    + "', command='" + expireCommand + "', ignoreStateUpdates=" + ignoreStateUpdates;
         }
     }
 }
