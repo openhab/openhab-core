@@ -142,7 +142,7 @@ class ExpireManagerTest {
         expireManager.receive(event);
         Thread.sleep(1000L);
         verify(eventPublisher, never()).post(any());
-        Thread.sleep(500L);
+        Thread.sleep(1000L);
         verify(eventPublisher, times(1)).post(any());
     }
 
@@ -159,7 +159,7 @@ class ExpireManagerTest {
         expireManager.receive(event);
         Thread.sleep(1000L);
         verify(eventPublisher, never()).post(any());
-        Thread.sleep(500L);
+        Thread.sleep(1000L);
         verify(eventPublisher, times(1)).post(any());
     }
 
@@ -174,7 +174,7 @@ class ExpireManagerTest {
         Thread.sleep(800L);
         event = ItemEventFactory.createStateEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
-        Thread.sleep(700L);
+        Thread.sleep(1000L);
         verify(eventPublisher, times(1)).post(any());
     }
 
