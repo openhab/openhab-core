@@ -338,9 +338,9 @@ public class WatchQueueReader implements Runnable {
      * on Stack Overflow.
      *
      * @param key the {@link WatchKey}
-     * @param event the {@link }WatchEvent} itself
+     * @param event the {@link WatchEvent} itself
      * @param resolvedPath the resolved {@link Path} for this event
-     * @param services a {@link Set<AbstractWatchService>} that subscribe to this event
+     * @param services the {@link AbstractWatchService}s that subscribe to this event
      */
     private void processModificationEvent(WatchKey key, WatchEvent<?> event, Path resolvedPath,
             Set<AbstractWatchService> services) {
