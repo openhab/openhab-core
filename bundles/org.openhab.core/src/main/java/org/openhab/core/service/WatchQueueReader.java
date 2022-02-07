@@ -12,7 +12,10 @@
  */
 package org.openhab.core.service;
 
-import static java.nio.file.StandardWatchEventKinds.*;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,14 +38,20 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,23 +62,24 @@ import org.slf4j.LoggerFactory;
  * @author Fabio Marini - Initial contribution
  * @author Dimitar Ivanov - use relative path in watch events. Added option to watch directory events or not
  * @author Ana Dimova - reduce to a single watch thread for all class instances of {@link AbstractWatchService}
+ * @author Jan N. Klug - allow multiple listeners for the same directory and add null annotations
  */
+@NonNullByDefault
 public class WatchQueueReader implements Runnable {
-
     private static final String THREAD_POOL_NAME = "file-processing";
     private static final int PROCESSING_DELAY = 1000; // ms
 
     protected final Logger logger = LoggerFactory.getLogger(WatchQueueReader.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(THREAD_POOL_NAME);
 
-    protected WatchService watchService;
+    protected @Nullable WatchService watchService;
 
     private final Map<WatchKey, Path> registeredKeys = new HashMap<>();
-    private final Map<WatchKey, AbstractWatchService> keyToService = new HashMap<>();
+    private final Map<WatchKey, Set<AbstractWatchService>> keyToService = new HashMap<>();
     private final Map<AbstractWatchService, Map<Path, byte[]>> hashes = new HashMap<>();
-    private final Map<WatchKey, Map<Path, ScheduledFuture<?>>> futures = new ConcurrentHashMap<>();
+    private final List<Notification> notifications = new CopyOnWriteArrayList<>();
 
-    private Thread qr;
+    private @Nullable Thread qr;
 
     private static final WatchQueueReader INSTANCE = new WatchQueueReader();
 
@@ -90,6 +100,12 @@ public class WatchQueueReader implements Runnable {
 
     private WatchQueueReader() {
         // prevent instantiation
+    }
+
+    // used for testing to check if properly terminated
+    @Nullable
+    WatchService getWatchService() {
+        return watchService;
     }
 
     /**
@@ -118,33 +134,37 @@ public class WatchQueueReader implements Runnable {
 
     private void registerWithSubDirectories(AbstractWatchService watchService, Path toWatch) throws IOException {
         Files.walkFileTree(toWatch, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE,
-                new SimpleFileVisitor<Path>() {
+                new SimpleFileVisitor<>() {
                     @Override
-                    public FileVisitResult preVisitDirectory(Path subDir, BasicFileAttributes attrs)
-                            throws IOException {
-                        Kind<?>[] kinds = watchService.getWatchEventKinds(subDir);
-                        if (kinds != null) {
+                    public FileVisitResult preVisitDirectory(@Nullable Path subDir,
+                            @Nullable BasicFileAttributes attrs) {
+                        if (subDir != null) {
+                            Kind<?>[] kinds = watchService.getWatchEventKinds(subDir);
                             registerDirectoryInternal(watchService, kinds, subDir);
                         }
                         return FileVisitResult.CONTINUE;
                     }
 
                     @Override
-                    public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                    public FileVisitResult visitFileFailed(@Nullable Path file, @Nullable IOException exc) {
                         if (exc instanceof AccessDeniedException) {
                             logger.warn("Access to folder '{}' was denied, therefore skipping it.",
-                                    file.toAbsolutePath().toString());
+                                    file != null ? file.toAbsolutePath() : null);
                         }
                         return FileVisitResult.SKIP_SUBTREE;
                     }
                 });
     }
 
-    private synchronized void registerDirectoryInternal(AbstractWatchService service, Kind<?>[] kinds, Path directory) {
+    private synchronized void registerDirectoryInternal(AbstractWatchService service, Kind<?> @Nullable [] kinds,
+            Path directory) {
+        WatchService watchService = this.watchService;
         if (watchService == null) {
             try {
                 watchService = FileSystems.getDefault().newWatchService();
-                qr = new Thread(this, "Dir Watcher");
+                this.watchService = watchService;
+                Thread qr = new Thread(this, "openHAB Dir Watcher");
+                this.qr = qr;
                 qr.start();
             } catch (IOException e) {
                 logger.debug("The directory '{}' was not registered in the watch service", directory, e);
@@ -152,51 +172,67 @@ public class WatchQueueReader implements Runnable {
             }
         }
         WatchKey registrationKey = null;
+        if (kinds == null) {
+            return;
+        }
         try {
-            registrationKey = directory.register(this.watchService, kinds);
+            registrationKey = directory.register(watchService, kinds);
         } catch (IOException e) {
             logger.debug("The directory '{}' was not registered in the watch service: {}", directory, e.getMessage());
         }
         if (registrationKey != null) {
             registeredKeys.put(registrationKey, directory);
-            keyToService.put(registrationKey, service);
+            Set<AbstractWatchService> services = Objects
+                    .requireNonNull(keyToService.computeIfAbsent(registrationKey, k -> new HashSet<>()));
+            services.add(service);
         } else {
             logger.debug("The directory '{}' was not registered in the watch service", directory);
         }
     }
 
-    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public synchronized void stopWatchService(AbstractWatchService service) {
-        if (watchService != null) {
-            List<WatchKey> keys = new LinkedList<>();
-            for (WatchKey key : keyToService.keySet()) {
-                if (keyToService.get(key) == service) {
-                    keys.add(key);
-                }
+        List<WatchKey> keysToRemove = new LinkedList<>();
+        for (Map.Entry<WatchKey, Set<AbstractWatchService>> entry : keyToService.entrySet()) {
+            Set<AbstractWatchService> services = entry.getValue();
+            services.remove(service);
+            if (services.isEmpty()) {
+                keysToRemove.add(entry.getKey());
             }
-            if (keys.size() == keyToService.size()) {
-                try {
+        }
+        for (Notification notification : notifications) {
+            if (notification.service.equals(service)) {
+                notification.future.cancel(true);
+                notifications.remove(notification);
+            }
+        }
+        if (keysToRemove.size() == keyToService.size()) {
+            try {
+                WatchService watchService = this.watchService;
+                if (watchService != null) {
                     watchService.close();
-                } catch (IOException e) {
-                    logger.warn("Cannot deactivate folder watcher", e);
-                }
-                watchService = null;
-                keyToService.clear();
-                registeredKeys.clear();
-                hashes.clear();
-                futures.values().forEach(keyFutures -> keyFutures.values().forEach(future -> future.cancel(true)));
-                futures.clear();
-            } else {
-                for (WatchKey key : keys) {
-                    key.cancel();
-                    keyToService.remove(key);
-                    registeredKeys.remove(key);
-                    hashes.remove(service);
-                    Map<Path, ScheduledFuture<?>> keyFutures = futures.remove(key);
-                    if (keyFutures != null) {
-                        keyFutures.values().forEach(future -> future.cancel(true));
+
+                    Thread qr = this.qr;
+                    if (qr != null) {
+                        qr.interrupt();
+                        this.qr = null;
                     }
+
+                    this.watchService = null;
                 }
+            } catch (IOException e) {
+                logger.warn("Cannot deactivate folder watcher", e);
+            }
+            keyToService.clear();
+            registeredKeys.clear();
+            hashes.clear();
+            notifications.forEach(notification -> notification.future.cancel(true));
+            notifications.clear();
+        } else {
+            for (WatchKey key : keysToRemove) {
+                key.cancel();
+                keyToService.remove(key);
+                registeredKeys.remove(key);
+                hashes.remove(service);
             }
         }
     }
@@ -205,46 +241,56 @@ public class WatchQueueReader implements Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                WatchKey key;
-                key = watchService.take();
+                WatchKey key = null;
+                WatchService watchService = this.watchService;
+                if (watchService != null) {
+                    key = watchService.take();
+                }
 
+                if (key == null) {
+                    continue;
+                }
                 for (WatchEvent<?> event : key.pollEvents()) {
-                    WatchEvent.Kind<?> kind = event.kind();
+                    Kind<?> kind = event.kind();
                     if (kind == OVERFLOW) {
                         logger.warn(
                                 "Found an event of kind 'OVERFLOW': {}. File system changes might have been missed.",
                                 event);
                         continue;
                     }
-
                     Path resolvedPath = resolvePath(key, event);
+
                     if (resolvedPath != null) {
                         // Process the event only when a relative path to it is resolved
-                        AbstractWatchService service;
+                        Set<AbstractWatchService> services;
                         synchronized (this) {
-                            service = keyToService.get(key);
+                            services = keyToService.get(key);
                         }
-                        if (service != null) {
+                        if (services != null) {
                             File f = resolvedPath.toFile();
                             if (kind == ENTRY_MODIFY && f.isDirectory()) {
                                 logger.trace("Skipping modification event for directory: {}", f);
                             } else {
                                 if (kind == ENTRY_MODIFY) {
-                                    processModificationEvent(key, event, resolvedPath, service);
+                                    processModificationEvent(key, event, resolvedPath, services);
                                 } else {
-                                    service.processWatchEvent(event, kind, resolvedPath);
+                                    services.forEach(s -> s.processWatchEvent(event, kind, resolvedPath));
                                 }
                             }
-                            if (kind == ENTRY_CREATE && f.isDirectory() && service.watchSubDirectories()
-                                    && service.getWatchEventKinds(resolvedPath) != null) {
-                                registerDirectoryInternal(service, service.getWatchEventKinds(resolvedPath),
-                                        resolvedPath);
+                            if (kind == ENTRY_CREATE && f.isDirectory()) {
+                                for (AbstractWatchService service : services) {
+                                    if (service.watchSubDirectories()
+                                            && service.getWatchEventKinds(resolvedPath) != null) {
+                                        registerDirectoryInternal(service, service.getWatchEventKinds(resolvedPath),
+                                                resolvedPath);
+                                    }
+                                }
                             } else if (kind == ENTRY_DELETE) {
                                 synchronized (this) {
                                     WatchKey toCancel = null;
-                                    for (WatchKey k : registeredKeys.keySet()) {
-                                        if (registeredKeys.get(k).equals(resolvedPath)) {
-                                            toCancel = k;
+                                    for (Map.Entry<WatchKey, Path> entry : registeredKeys.entrySet()) {
+                                        if (entry.getValue().equals(resolvedPath)) {
+                                            toCancel = entry.getKey();
                                             break;
                                         }
                                     }
@@ -253,14 +299,14 @@ public class WatchQueueReader implements Runnable {
                                         keyToService.remove(toCancel);
                                         toCancel.cancel();
                                     }
-                                    forgetChecksum(service, resolvedPath);
-                                    Map<Path, ScheduledFuture<?>> keyFutures = futures.get(key);
-                                    if (keyFutures != null) {
-                                        ScheduledFuture<?> future = keyFutures.remove(resolvedPath);
-                                        if (future != null) {
-                                            future.cancel(true);
+
+                                    services.forEach(service -> forgetChecksum(service, resolvedPath));
+                                    notifications.forEach(notification -> {
+                                        if (notification.path.equals(resolvedPath)) {
+                                            notification.future.cancel(true);
+                                            notifications.remove(notification);
                                         }
-                                    }
+                                    });
                                 }
                             }
                         }
@@ -269,75 +315,79 @@ public class WatchQueueReader implements Runnable {
 
                 key.reset();
             } catch (InterruptedException exc) {
-                logger.debug("WatchQueueReader interrupted; thread exiting: {}", exc.getLocalizedMessage());
+                logger.debug("Caught InterruptedException. Shutting down.");
                 return;
             } catch (Exception exc) {
-                logger.debug("Exception caught in WatchQueueReader", exc);
+                logger.debug("Exception caught in WatchQueueReader. Restarting.", exc);
             }
         }
     }
 
     /**
-     * Schedules forwarding of the event to the listeners (if appliccable).
-     * <p>
+     * Schedules forwarding of the event to the listeners (if applicable).
+     *
      * By delaying the forwarding, duplicate modification events and those where the actual file-content is not
      * consistent or empty in between will get skipped and the file system gets a chance to "settle" before the
      * framework is going to act on it.
-     * <p>
+     *
      * Also, modification events are received for meta-data changes (e.g. last modification timestamp or file
      * permissions). They are filtered out by comparing the checksums of the file's content.
-     * <p>
-     * See also
-     * <a href=
-     * "https://stackoverflow.com/questions/16777869/java-7-watchservice-ignoring-multiple-occurrences-of-the-same-event">this
-     * discussion</a> on Stack Overflow.
      *
+     * See also <a href=
+     * "https://stackoverflow.com/questions/16777869/java-7-watchservice-ignoring-multiple-occurrences-of-the-same-event">thisdiscussion</a>
+     * on Stack Overflow.
      *
-     * @param key
-     * @param event
-     * @param resolvedPath
-     * @param service
+     * @param key the {@link WatchKey}
+     * @param event the {@link WatchEvent} itself
+     * @param resolvedPath the resolved {@link Path} for this event
+     * @param services the {@link AbstractWatchService}s that subscribe to this event
      */
     private void processModificationEvent(WatchKey key, WatchEvent<?> event, Path resolvedPath,
-            AbstractWatchService service) {
-        synchronized (futures) {
-            logger.trace("Modification event for {} ", resolvedPath);
-            ScheduledFuture<?> previousFuture = removeScheduledJob(key, resolvedPath);
-            if (previousFuture != null) {
-                previousFuture.cancel(true);
-                logger.trace("Cancelled previous for {} ", resolvedPath);
+            Set<AbstractWatchService> services) {
+        synchronized (notifications) {
+            for (AbstractWatchService service : services) {
+                logger.trace("Modification event for {} ", resolvedPath);
+                removeScheduledNotifications(key, service, resolvedPath);
+                ScheduledFuture<?> future = scheduler.schedule(() -> {
+                    logger.trace("Executing job for {}", resolvedPath);
+                    if (removeScheduledNotifications(key, service, resolvedPath)) {
+                        logger.trace("Job removed itself for {}", resolvedPath);
+                    } else {
+                        logger.trace("Job couldn't find itself for {}", resolvedPath);
+                    }
+                    if (checkAndTrackContent(service, resolvedPath)) {
+                        service.processWatchEvent(event, event.kind(), resolvedPath);
+                    } else {
+                        logger.trace("File content '{}' has not changed, skipping modification event", resolvedPath);
+                    }
+                }, PROCESSING_DELAY, TimeUnit.MILLISECONDS);
+                logger.trace("Scheduled processing of {}", resolvedPath);
+                notifications.add(new Notification(key, service, resolvedPath, future));
             }
-            ScheduledFuture<?> future = scheduler.schedule(() -> {
-                logger.trace("Executing job for {}", resolvedPath);
-                ScheduledFuture<?> res = removeScheduledJob(key, resolvedPath);
-                if (res != null) {
-                    logger.trace("Job removed itself for {}", resolvedPath);
-                } else {
-                    logger.trace("Job couldn't find itself for {}", resolvedPath);
-                }
-                if (checkAndTrackContent(service, resolvedPath)) {
-                    service.processWatchEvent(event, event.kind(), resolvedPath);
-                } else {
-                    logger.trace("File content '{}' has not changed, skipping modification event", resolvedPath);
-                }
-            }, PROCESSING_DELAY, TimeUnit.MILLISECONDS);
-            logger.trace("Scheduled processing of {}", resolvedPath);
-            rememberScheduledJob(key, resolvedPath, future);
         }
     }
 
-    private Path resolvePath(WatchKey key, WatchEvent<?> event) {
+    private boolean removeScheduledNotifications(WatchKey key, AbstractWatchService service, Path path) {
+        Set<Notification> notifications = this.notifications.stream().filter(f -> f.matches(key, service, path))
+                .collect(Collectors.toSet());
+        if (notifications.size() > 1) {
+            logger.warn("Found more than one notification for {} / {} / {}. This is a bug.", key, service, path);
+        }
+        notifications.forEach(notification -> notification.future.cancel(true));
+        this.notifications.removeAll(notifications);
+        return !notifications.isEmpty();
+    }
+
+    private @Nullable Path resolvePath(WatchKey key, WatchEvent<?> event) {
         WatchEvent<Path> ev = cast(event);
         // Context for directory entry event is the file name of entry.
         Path contextPath = ev.context();
-        Path baseWatchedDir = null;
-        Path registeredPath = null;
+        List<Path> baseWatchedDir;
+        Path registeredPath;
         synchronized (this) {
-            AbstractWatchService service = keyToService.get(key);
-            if (service != null) {
-                baseWatchedDir = service.getSourcePath();
-                registeredPath = registeredKeys.get(key);
-            }
+            baseWatchedDir = keyToService.getOrDefault(key, Set.of()).stream().map(AbstractWatchService::getSourcePath)
+                    .filter(Objects::nonNull).map(Objects::requireNonNull).collect(Collectors.toList());
+            registeredPath = registeredKeys.get(key);
         }
         if (registeredPath != null) {
             // If the path has been registered in the watch service it relative path can be resolved
@@ -351,7 +401,7 @@ public class WatchQueueReader implements Runnable {
         return null;
     }
 
-    private byte[] hash(Path path) {
+    private byte @Nullable [] hash(Path path) {
         try {
             MessageDigest digester = MessageDigest.getInstance("SHA-256");
             if (!Files.exists(path)) {
@@ -386,11 +436,7 @@ public class WatchQueueReader implements Runnable {
         if (newHash == null) {
             return true;
         }
-        Map<Path, byte[]> keyHashes = hashes.get(service);
-        if (keyHashes == null) {
-            keyHashes = new HashMap<>();
-            hashes.put(service, keyHashes);
-        }
+        Map<Path, byte[]> keyHashes = Objects.requireNonNull(hashes.computeIfAbsent(service, s -> new HashMap<>()));
         byte[] oldHash = keyHashes.put(resolvedPath, newHash);
         return oldHash == null || !Arrays.equals(oldHash, newHash);
     }
@@ -402,22 +448,40 @@ public class WatchQueueReader implements Runnable {
         }
     }
 
-    private Map<Path, ScheduledFuture<?>> getKeyFutures(WatchKey key) {
-        Map<Path, ScheduledFuture<?>> keyFutures = futures.get(key);
-        if (keyFutures == null) {
-            keyFutures = new ConcurrentHashMap<>();
-            futures.put(key, keyFutures);
+    /**
+     * The {@link Notification} stores the information of a single notification
+     */
+    private static class Notification {
+        public final WatchKey key;
+        public final AbstractWatchService service;
+        public final Path path;
+        public final ScheduledFuture<?> future;
+
+        private Notification(WatchKey key, AbstractWatchService service, Path path, ScheduledFuture<?> future) {
+            this.key = key;
+            this.service = service;
+            this.path = path;
+            this.future = future;
         }
-        return keyFutures;
-    }
 
-    private ScheduledFuture<?> removeScheduledJob(WatchKey key, Path resolvedPath) {
-        Map<Path, ScheduledFuture<?>> keyFutures = getKeyFutures(key);
-        return keyFutures.remove(resolvedPath);
-    }
+        public boolean matches(WatchKey key, AbstractWatchService service, Path path) {
+            return this.key.equals(key) && this.service.equals(service) && this.path.equals(path);
+        }
 
-    private void rememberScheduledJob(WatchKey key, Path resolvedPath, ScheduledFuture<?> future) {
-        Map<Path, ScheduledFuture<?>> keyFutures = getKeyFutures(key);
-        keyFutures.put(resolvedPath, future);
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            Notification notification = (Notification) o;
+            return key.equals(notification.key) && service.equals(notification.service)
+                    && path.equals(notification.path) && future.equals(notification.future);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(key, service, path, future);
+        }
     }
 }

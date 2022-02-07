@@ -20,6 +20,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +45,7 @@ public class ConfigDispatcherFileWatcherTest {
     @Test
     public void configurationFileCreated() {
         String path = "myPath.cfg";
-        configDispatcherFileWatcher.processWatchEvent(null, StandardWatchEventKinds.ENTRY_CREATE,
+        configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_CREATE,
                 new File(path).toPath());
 
         verify(configDispatcher).processConfigFile(new File(path));
@@ -53,7 +54,7 @@ public class ConfigDispatcherFileWatcherTest {
     @Test
     public void configurationFileModified() {
         String path = "myPath.cfg";
-        configDispatcherFileWatcher.processWatchEvent(null, StandardWatchEventKinds.ENTRY_MODIFY,
+        configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_MODIFY,
                 new File(path).toPath());
 
         verify(configDispatcher).processConfigFile(new File(path));
@@ -62,7 +63,7 @@ public class ConfigDispatcherFileWatcherTest {
     @Test
     public void nonConfigurationFileCreated() {
         String path = "myPath";
-        configDispatcherFileWatcher.processWatchEvent(null, StandardWatchEventKinds.ENTRY_CREATE,
+        configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_CREATE,
                 new File(path).toPath());
 
         verifyNoInteractions(configDispatcher);
@@ -71,7 +72,7 @@ public class ConfigDispatcherFileWatcherTest {
     @Test
     public void nonConfigurationFileModified() {
         String path = "myPath";
-        configDispatcherFileWatcher.processWatchEvent(null, StandardWatchEventKinds.ENTRY_MODIFY,
+        configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_MODIFY,
                 new File(path).toPath());
 
         verifyNoInteractions(configDispatcher);
@@ -80,7 +81,7 @@ public class ConfigDispatcherFileWatcherTest {
     @Test
     public void configurationFileRemoved() {
         String path = "myPath.cfg";
-        configDispatcherFileWatcher.processWatchEvent(null, StandardWatchEventKinds.ENTRY_DELETE,
+        configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_DELETE,
                 new File(path).toPath());
 
         verify(configDispatcher).fileRemoved(new File(path).getAbsolutePath());
@@ -89,13 +90,13 @@ public class ConfigDispatcherFileWatcherTest {
     @Test
     public void nonConfigurationFileRemoved() {
         String path = "myPath";
-        configDispatcherFileWatcher.processWatchEvent(null, StandardWatchEventKinds.ENTRY_DELETE,
+        configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_DELETE,
                 new File(path).toPath());
 
         verifyNoInteractions(configDispatcher);
     }
 
-    public class TestConfigDispatcherFileWatcher extends ConfigDispatcherFileWatcher {
+    public static class TestConfigDispatcherFileWatcher extends ConfigDispatcherFileWatcher {
         public TestConfigDispatcherFileWatcher(ConfigDispatcher configDispatcher) {
             super(configDispatcher);
         }
@@ -103,6 +104,24 @@ public class ConfigDispatcherFileWatcherTest {
         @Override
         protected void processWatchEvent(WatchEvent<?> event, Kind<?> kind, Path path) {
             super.processWatchEvent(event, kind, path);
+        }
+    }
+
+    private static class TestWatchEvent implements WatchEvent<Path> {
+
+        @Override
+        public Kind<Path> kind() {
+            return StandardWatchEventKinds.ENTRY_CREATE;
+        }
+
+        @Override
+        public int count() {
+            return 0;
+        }
+
+        @Override
+        public @Nullable Path context() {
+            return null;
         }
     }
 }

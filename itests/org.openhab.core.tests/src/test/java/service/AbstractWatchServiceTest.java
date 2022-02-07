@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.service;
+package service;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 import static org.hamcrest.CoreMatchers.is;
@@ -32,6 +32,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.service.AbstractWatchService;
 import org.openhab.core.test.java.JavaTest;
 
 /**

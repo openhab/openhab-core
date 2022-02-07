@@ -180,7 +180,7 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyServ
     }
 
     @Override
-    protected Kind<?>[] getWatchEventKinds(@Nullable Path subDir) {
+    protected Kind<?> @Nullable [] getWatchEventKinds(@Nullable Path subDir) {
         return new Kind<?>[] { ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY };
     }
 
