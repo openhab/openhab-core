@@ -133,14 +133,14 @@ class ExpireManagerTest {
     void testIgnoreStateUpdateExtendsExpiryOnStateChange() throws InterruptedException, ItemNotFoundException {
         Item testItem = new NumberItem(ITEMNAME);
         when(itemRegistry.getItem(ITEMNAME)).thenReturn(testItem);
-        when(metadataRegistry.get(METADATA_KEY)).thenReturn(config("1s,ignoreStateUpdates"));
+        when(metadataRegistry.get(METADATA_KEY)).thenReturn(config("2s,ignoreStateUpdates"));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
-        Thread.sleep(800L);
+        Thread.sleep(1500L);
         event = ItemEventFactory.createStateChangedEvent(ITEMNAME, new DecimalType(2), new DecimalType(1));
         expireManager.receive(event);
-        Thread.sleep(1000L);
+        Thread.sleep(1500L);
         verify(eventPublisher, never()).post(any());
         Thread.sleep(1000L);
         verify(eventPublisher, times(1)).post(any());
@@ -150,14 +150,14 @@ class ExpireManagerTest {
     void testIgnoreStateUpdateExtendsExpiryOnCommand() throws InterruptedException, ItemNotFoundException {
         Item testItem = new NumberItem(ITEMNAME);
         when(itemRegistry.getItem(ITEMNAME)).thenReturn(testItem);
-        when(metadataRegistry.get(METADATA_KEY)).thenReturn(config("1s,ignoreStateUpdates"));
+        when(metadataRegistry.get(METADATA_KEY)).thenReturn(config("2s,ignoreStateUpdates"));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
-        Thread.sleep(800L);
+        Thread.sleep(1500L);
         event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
-        Thread.sleep(1000L);
+        Thread.sleep(1500L);
         verify(eventPublisher, never()).post(any());
         Thread.sleep(1000L);
         verify(eventPublisher, times(1)).post(any());
@@ -167,14 +167,14 @@ class ExpireManagerTest {
     void testIgnoreStateUpdateDoesNotExtendExpiryOnStateUpdate() throws InterruptedException, ItemNotFoundException {
         Item testItem = new NumberItem(ITEMNAME);
         when(itemRegistry.getItem(ITEMNAME)).thenReturn(testItem);
-        when(metadataRegistry.get(METADATA_KEY)).thenReturn(config("1s,ignoreStateUpdates"));
+        when(metadataRegistry.get(METADATA_KEY)).thenReturn(config("2s,ignoreStateUpdates"));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
-        Thread.sleep(800L);
+        Thread.sleep(1500L);
         event = ItemEventFactory.createStateEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
-        Thread.sleep(1000L);
+        Thread.sleep(1500L);
         verify(eventPublisher, times(1)).post(any());
     }
 
