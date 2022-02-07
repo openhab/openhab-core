@@ -137,7 +137,7 @@ public class DialogProcessor implements KSListener, STTListener {
             streamKS = stream;
             ksServiceHandle = ks.spot(this, stream, locale, keyword);
         } catch (AudioException e) {
-            logger.warn("Error creating the audio stream: {}", e.getMessage());
+            logger.warn("Encountered audio error: {}", e.getMessage());
         } catch (KSException e) {
             logger.warn("Encountered error calling spot: {}", e.getMessage());
             closeStreamKS();
@@ -166,7 +166,7 @@ public class DialogProcessor implements KSListener, STTListener {
             try {
                 stream.close();
             } catch (IOException e) {
-                logger.warn("IOException closing ks audio stream: {}", e.getMessage(), e);
+                logger.debug("IOException closing ks audio stream: {}", e.getMessage(), e);
             }
             streamKS = null;
         }
@@ -187,7 +187,7 @@ public class DialogProcessor implements KSListener, STTListener {
             try {
                 stream.close();
             } catch (IOException e) {
-                logger.warn("IOException closing stt audio stream: {}", e.getMessage(), e);
+                logger.debug("IOException closing stt audio stream: {}", e.getMessage(), e);
             }
             streamSTT = null;
         }
@@ -221,10 +221,8 @@ public class DialogProcessor implements KSListener, STTListener {
                         sttServiceHandle = stt.recognize(this, stream, locale, new HashSet<>());
                     } catch (AudioException e) {
                         logger.warn("Error creating the audio stream: {}", e.getMessage());
-                        toggleProcessing(false);
                     } catch (STTException e) {
                         closeStreamSTT();
-                        toggleProcessing(false);
                         String msg = e.getMessage();
                         String text = i18nProvider.getText(bundle, "error.stt-exception", null, locale);
                         if (msg != null) {

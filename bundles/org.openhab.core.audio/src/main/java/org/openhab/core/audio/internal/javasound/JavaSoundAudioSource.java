@@ -12,6 +12,7 @@
  */
 package org.openhab.core.audio.internal.javasound;
 
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
@@ -31,7 +32,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Kelly Davis - Initial contribution and API
  * @author Kai Kreuzer - Refactored and stabilized
- * @author Miguel Álvarez - Don't share TargetDataLine
+ * @author Miguel Álvarez - Share microphone line only under Windows OS
  *
  */
 @NonNullByDefault
@@ -50,6 +51,21 @@ public class JavaSoundAudioSource implements AudioSource {
     private final AudioFormat audioFormat = convertAudioFormat(format);
 
     /**
+     * Running on Windows OS
+     */
+    private final boolean windowsOS = System.getProperty("os.name", "Unknown").startsWith("Win");
+
+    /**
+     * TargetDataLine for sharing the mic on Windows OS due to limitations
+     */
+    private @Nullable TargetDataLine microphone;
+
+    /**
+     * Set for control microphone close on Windows OS
+     */
+    private final Set<Object> openStreamRefs = new HashSet<>();
+
+    /**
      * Constructs a JavaSoundAudioSource
      */
     public JavaSoundAudioSource() {
@@ -61,7 +77,7 @@ public class JavaSoundAudioSource implements AudioSource {
             microphone.open(format);
             return microphone;
         } catch (Exception e) {
-            throw new AudioException("Error creating the audio input stream.", e);
+            throw new AudioException("Error creating the audio input stream: " + e.getMessage(), e);
         }
     }
 
@@ -70,8 +86,30 @@ public class JavaSoundAudioSource implements AudioSource {
         if (!expectedFormat.isCompatible(audioFormat)) {
             throw new AudioException("Cannot produce streams in format " + expectedFormat);
         }
-        TargetDataLine mic = initMicrophone(format);
-        return new JavaSoundInputStream(mic, audioFormat);
+        // on OSs other than windows we can open multiple lines for the microphone
+        if (!windowsOS) {
+            return new JavaSoundInputStream(initMicrophone(format), audioFormat);
+        }
+        // on Windows OS we share the microphone line
+        var ref = new Object();
+        TargetDataLine microphoneDataLine;
+        synchronized (openStreamRefs) {
+            microphoneDataLine = this.microphone;
+            openStreamRefs.add(ref);
+            if (microphoneDataLine == null) {
+                microphoneDataLine = initMicrophone(format);
+                this.microphone = microphoneDataLine;
+            }
+        }
+        return new JavaSoundInputStream(microphoneDataLine, audioFormat, () -> {
+            synchronized (openStreamRefs) {
+                var microphone = this.microphone;
+                if (openStreamRefs.remove(ref) && openStreamRefs.isEmpty() && microphone != null) {
+                    microphone.close();
+                    this.microphone = null;
+                }
+            }
+        });
     }
 
     @Override
