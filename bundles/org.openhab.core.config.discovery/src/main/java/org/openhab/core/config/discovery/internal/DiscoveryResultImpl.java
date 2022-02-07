@@ -14,7 +14,9 @@ package org.openhab.core.config.discovery.internal;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -160,6 +162,17 @@ public class DiscoveryResultImpl implements DiscoveryResult {
         }
     }
 
+    @Override
+    public void normalizePropertiesOnConfigDescription(List<String> configurationParameters) {
+        properties = properties.entrySet().stream().map(e -> {
+            if (!configurationParameters.contains(e.getKey())) {
+                return Map.entry(e.getKey(), String.valueOf(e.getValue()));
+            } else {
+                return e;
+            }
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
     /**
      * Sets the flag of this result object.<br>
      * The flag signals e.g. if the result is {@link DiscoveryResultFlag#NEW} or has been marked as
@@ -167,7 +180,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
      * case the result object should be regarded as known by the system so that
      * further processing should be skipped.
      * <p>
-     * If the specified flag is {@code null}, {@link DiscoveryResultFlag.NEW} is set by default.
+     * If the specified flag is {@code null}, {@link DiscoveryResultFlag#NEW} is set by default.
      *
      * @param flag the flag of this result object to be set
      */

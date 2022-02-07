@@ -18,8 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.math.BigDecimal;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -103,43 +104,10 @@ public class PersistentInboxTest {
     }
 
     @Test
-    public void testConfigUpdateNormalizationGuessTypeManagedThing() {
-        Configuration config = new Configuration(Map.of("foo", 1));
-        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
-
-        when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
-        when(thingProviderMock.get(eq(THING_UID))).thenReturn(thing);
-
-        assertTrue(thing.getConfiguration().get("foo") instanceof BigDecimal);
-
-        inbox.activate();
-        inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build());
-
-        assertTrue(thing.getConfiguration().get("foo") instanceof BigDecimal);
-        // thing updated if managed
-        assertEquals(new BigDecimal(3), thing.getConfiguration().get("foo"));
-    }
-
-    @Test
-    public void testConfigUpdateNormalizationGuessTypeUnmanagedThing() {
-        Configuration config = new Configuration(Map.of("foo", 1));
-        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
-
-        when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
-
-        assertTrue(thing.getConfiguration().get("foo") instanceof BigDecimal);
-
-        inbox.activate();
-        inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build());
-
-        assertTrue(thing.getConfiguration().get("foo") instanceof BigDecimal);
-        // thing not updated if unmanaged
-        assertEquals(new BigDecimal(1), thing.getConfiguration().get("foo"));
-    }
-
-    @Test
-    public void testConfigUpdateNormalizationWithConfigDescriptionManagedThing() {
-        Configuration config = new Configuration(Map.of("foo", "1"));
+    public void testConfigUpdateNormalizationWithConfigDescription() throws URISyntaxException {
+        Map<String, Object> props = new HashMap<>();
+        props.put("foo", "1");
+        Configuration config = new Configuration(props);
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);

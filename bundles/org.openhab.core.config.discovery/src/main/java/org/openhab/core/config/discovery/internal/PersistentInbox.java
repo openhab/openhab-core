@@ -224,24 +224,28 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         if (discoveryResult == null) {
             return false;
         }
-        final DiscoveryResult result = discoveryResult;
+        ThingType thingType = thingTypeRegistry.getThingType(discoveryResult.getThingTypeUID());
+        List<String> configurationParameters = thingType != null ? getConfigDescParams(thingType).stream()
+                .map(ConfigDescriptionParameter::getName).collect(Collectors.toList()) : List.of();
 
-        ThingUID thingUID = result.getThingUID();
+        discoveryResult.normalizePropertiesOnConfigDescription(configurationParameters);
+
+        ThingUID thingUID = discoveryResult.getThingUID();
         Thing thing = thingRegistry.get(thingUID);
 
         if (thing == null) {
             DiscoveryResult inboxResult = get(thingUID);
 
             if (inboxResult == null) {
-                discoveryResultStorage.put(result.getThingUID().toString(), result);
-                notifyListeners(result, EventType.ADDED);
+                discoveryResultStorage.put(discoveryResult.getThingUID().toString(), discoveryResult);
+                notifyListeners(discoveryResult, EventType.ADDED);
                 logger.info("Added new thing '{}' to inbox.", thingUID);
                 return true;
             } else {
                 if (inboxResult instanceof DiscoveryResultImpl) {
                     DiscoveryResultImpl resultImpl = (DiscoveryResultImpl) inboxResult;
-                    resultImpl.synchronize(result);
-                    discoveryResultStorage.put(result.getThingUID().toString(), resultImpl);
+                    resultImpl.synchronize(discoveryResult);
+                    discoveryResultStorage.put(discoveryResult.getThingUID().toString(), resultImpl);
                     notifyListeners(resultImpl, EventType.UPDATED);
                     logger.debug("Updated discovery result for '{}'.", thingUID);
                     return true;
@@ -256,8 +260,8 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
                     "Discovery result with thing '{}' not added as inbox entry. It is already present as thing in the ThingRegistry.",
                     thingUID);
 
-            boolean updated = synchronizeConfiguration(result.getThingTypeUID(), result.getProperties(),
-                    thing.getConfiguration());
+            boolean updated = synchronizeConfiguration(discoveryResult.getThingTypeUID(),
+                    discoveryResult.getProperties(), thing.getConfiguration());
 
             if (updated) {
                 logger.debug("The configuration for thing '{}' is updated...", thingUID);
@@ -444,8 +448,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
      * Returns the {@link DiscoveryResult} in this {@link Inbox} associated with
      * the specified {@code Thing} ID, or {@code null}, if no {@link DiscoveryResult} could be found.
      *
-     * @param thingId
-     *            the Thing ID to which the discovery result should be returned
+     * @param thingUID the Thing UID to which the discovery result should be returned
      *
      * @return the discovery result associated with the specified Thing ID, or
      *         null, if no discovery result could be found
