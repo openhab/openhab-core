@@ -95,11 +95,11 @@ public class JavaSoundAudioSource implements AudioSource {
         TargetDataLine microphoneDataLine;
         synchronized (openStreamRefs) {
             microphoneDataLine = this.microphone;
-            openStreamRefs.add(ref);
             if (microphoneDataLine == null) {
                 microphoneDataLine = initMicrophone(format);
                 this.microphone = microphoneDataLine;
             }
+            openStreamRefs.add(ref);
         }
         return new JavaSoundInputStream(microphoneDataLine, audioFormat, () -> {
             synchronized (openStreamRefs) {
