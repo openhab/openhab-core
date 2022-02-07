@@ -32,9 +32,10 @@ final class OptionsValidator implements ConfigDescriptionParameterValidator {
         }
 
         // Option values are a string, so we can do a simple compare
-        if (!param.getOptions().stream().map(o -> o.getValue()).anyMatch(v -> v.equals(value.toString()))) {
+        if (param.getOptions().stream().map(o -> o.getValue()).noneMatch(v -> v.equals(value.toString()))) {
             MessageKey messageKey = MessageKey.OPTIONS_VIOLATED;
-            return new ConfigValidationMessage(param.getName(), messageKey.defaultMessage, messageKey.key);
+            return new ConfigValidationMessage(param.getName(), messageKey.defaultMessage, messageKey.key,
+                    param.getOptions());
         }
         return null;
     }

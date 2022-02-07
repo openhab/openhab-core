@@ -91,7 +91,7 @@ public class ConfigDescriptionValidatorTest {
     private static final String DECIMAL_MIN_PARAM_NAME = "decimal-min-name";
     private static final String DECIMAL_MAX_PARAM_NAME = "decimal-max-name";
 
-    private static final List<ParameterOption> parameterOptions = List.of( //
+    private static final List<ParameterOption> PARAMETER_OPTIONS = List.of( //
             new ParameterOption("http", "HTTP"), //
             new ParameterOption("https", "HTTPS") //
     );
@@ -116,10 +116,10 @@ public class ConfigDescriptionValidatorTest {
             .withPattern(PATTERN).build();
     private static final ConfigDescriptionParameter TXT_PARAM_WITH_LIMITED_OPTIONS = ConfigDescriptionParameterBuilder
             .create(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, ConfigDescriptionParameter.Type.TEXT)
-            .withOptions(parameterOptions).build();
+            .withOptions(PARAMETER_OPTIONS).build();
     private static final ConfigDescriptionParameter TXT_PARAM_WITH_UNLIMITED_OPTIONS = ConfigDescriptionParameterBuilder
             .create(TXT_PARAM_WITH_UNLIMITED_OPTIONS_NAME, ConfigDescriptionParameter.Type.TEXT)
-            .withOptions(parameterOptions).withLimitToOptions(false).build();
+            .withOptions(PARAMETER_OPTIONS).withLimitToOptions(false).build();
     private static final ConfigDescriptionParameter TXT_MULTIPLE_LIMIT_PARAM = ConfigDescriptionParameterBuilder
             .create(TXT_MULTIPLE_LIMIT_PARAM_NAME, Type.TEXT).withMultiple(true).withMultipleLimit(2).build();
 
@@ -435,9 +435,9 @@ public class ConfigDescriptionValidatorTest {
 
     @Test
     public void assertValidationThrowsExceptionForNotAllowedLimitedParameterOption() {
-        List<ConfigValidationMessage> expected = List
-                .of(new ConfigValidationMessage(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME,
-                        MessageKey.OPTIONS_VIOLATED.defaultMessage, MessageKey.OPTIONS_VIOLATED.key));
+        List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(
+                TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, MessageKey.OPTIONS_VIOLATED.defaultMessage,
+                MessageKey.OPTIONS_VIOLATED.key, PARAMETER_OPTIONS));
         params.put(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, "ftp");
         ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
                 () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
