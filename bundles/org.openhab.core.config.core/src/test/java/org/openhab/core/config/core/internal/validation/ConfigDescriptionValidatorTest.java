@@ -25,6 +25,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,12 +51,13 @@ import org.osgi.framework.BundleContext;
  * @author Thomas Höfer - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class ConfigDescriptionValidatorTest {
 
     private static final int MIN_VIOLATED = 1;
     private static final int MAX_VIOLATED = 1234;
 
-    private static final BigDecimal DECIMAL_MIN_VIOLATED = new BigDecimal("1");
+    private static final BigDecimal DECIMAL_MIN_VIOLATED = BigDecimal.ONE;
     private static final BigDecimal DECIMAL_MAX_VIOLATED = new BigDecimal("3.5");
 
     private static final BigDecimal MIN = BigDecimal.valueOf(2);
@@ -159,8 +162,8 @@ public class ConfigDescriptionValidatorTest {
                     DECIMAL_MAX_PARAM))
             .build();
 
-    private Map<String, Object> params;
-    private ConfigDescriptionValidatorImpl configDescriptionValidator;
+    private @NonNullByDefault({}) Map<String, Object> params;
+    private @NonNullByDefault({}) ConfigDescriptionValidatorImpl configDescriptionValidator;
 
     @BeforeEach
     public void setUp() {
@@ -186,6 +189,7 @@ public class ConfigDescriptionValidatorTest {
         params.put(TXT_MAX_PARAM_NAME, String.valueOf(MIN_VIOLATED));
         params.put(TXT_PATTERN_PARAM_NAME, "abbbc");
         params.put(TXT_MAX_PATTERN_PARAM_NAME, "abc");
+        params.put(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, "http");
         params.put(TXT_MULTIPLE_LIMIT_PARAM_NAME, List.of("1", "2"));
         params.put(INT_PARAM_NAME, null);
         params.put(INT_REQUIRED_PARAM_NAME, 0);
@@ -428,12 +432,6 @@ public class ConfigDescriptionValidatorTest {
     // ===========================================================================
 
     @Test
-    public void assertValidationThrowsNoExceptionForAllowedLimitedParameterOption() {
-        params.put(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, "http");
-        Assertions.assertDoesNotThrow(() -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
-    }
-
-    @Test
     public void assertValidationThrowsExceptionForNotAllowedLimitedParameterOption() {
         List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(
                 TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, MessageKey.OPTIONS_VIOLATED.defaultMessage,
@@ -526,7 +524,7 @@ public class ConfigDescriptionValidatorTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<ConfigValidationMessage> getConfigValidationMessages(ConfigValidationException cve) {
+    private static @Nullable List<ConfigValidationMessage> getConfigValidationMessages(ConfigValidationException cve) {
         try {
             Field field = cve.getClass().getDeclaredField("configValidationMessages");
             field.setAccessible(true);
