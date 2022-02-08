@@ -15,6 +15,8 @@ package org.openhab.core.test.storage;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 
@@ -24,6 +26,7 @@ import org.openhab.core.storage.StorageService;
  *
  * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
+@NonNullByDefault
 public class VolatileStorageService implements StorageService {
 
     @SuppressWarnings("rawtypes")
@@ -41,7 +44,7 @@ public class VolatileStorageService implements StorageService {
     }
 
     @Override
-    public <T> Storage<T> getStorage(String name, ClassLoader classLoader) {
+    public <T> Storage<T> getStorage(String name, @Nullable ClassLoader classLoader) {
         return getStorage(name);
     }
 }

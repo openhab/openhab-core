@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.io.console.rfc147.internal.extension.HelpConsoleCommandExtension;
 import org.osgi.framework.BundleContext;
@@ -43,6 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, service = {})
 public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
 
@@ -59,7 +62,7 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
 
     private final HelpConsoleCommandExtension helpCommand = new HelpConsoleCommandExtension();
 
-    private BundleContext bc;
+    private @Nullable BundleContext bundleContext;
 
     /*
      * This map will contain all console command extensions.
@@ -67,7 +70,7 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
      * The value is set to null, if the console command extension is not registered, yet (e.g. the bundle context is not
      * known). Otherwise it stores the registered service reference, so we could unregister the command extension later.
      */
-    private final Map<ConsoleCommandExtension, ServiceRegistration<?>> commands = Collections
+    private final Map<ConsoleCommandExtension, @Nullable ServiceRegistration<?>> commands = Collections
             .synchronizedMap(new HashMap<>());
 
     public ConsoleSupportRfc147() {
@@ -78,13 +81,13 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
     @Activate
     public void activate(ComponentContext ctx) {
         // Save bundle context to register services.
-        this.bc = ctx.getBundleContext();
+        this.bundleContext = ctx.getBundleContext();
 
         /*
          * The bundle context is available.
          * Register all console command extensions that are not registered before.
          */
-        for (Map.Entry<ConsoleCommandExtension, ServiceRegistration<?>> entry : commands.entrySet()) {
+        for (Map.Entry<ConsoleCommandExtension, @Nullable ServiceRegistration<?>> entry : commands.entrySet()) {
             if (entry.getValue() == null) {
                 entry.setValue(registerCommand(entry.getKey()));
             }
@@ -102,15 +105,16 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
         /*
          * De-register all previously registered command extensions.
          */
-        for (Map.Entry<ConsoleCommandExtension, ServiceRegistration<?>> entry : commands.entrySet()) {
-            if (entry.getValue() != null) {
-                unregisterCommand(entry.getValue());
+        for (Map.Entry<ConsoleCommandExtension, @Nullable ServiceRegistration<?>> entry : commands.entrySet()) {
+            ServiceRegistration<?> value = entry.getValue();
+            if (value != null) {
+                unregisterCommand(value);
                 entry.setValue(null);
             }
         }
 
         // Remove bundle context reference.
-        this.bc = null;
+        this.bundleContext = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -143,9 +147,10 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
      * @param cmd the console command extension that should be registered.
      * @return the service registration reference on success, null if the registration was not successful.
      */
-    private ServiceRegistration<?> registerCommand(final ConsoleCommandExtension cmd) {
+    private @Nullable ServiceRegistration<?> registerCommand(final ConsoleCommandExtension cmd) {
         // We could only register the service if the bundle context is known.
-        if (this.bc == null) {
+        BundleContext bundleContext = this.bundleContext;
+        if (bundleContext == null) {
             return null;
         }
 
@@ -155,7 +160,8 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
 
         try {
             final ServiceRegistration<?> serviceRegistration;
-            serviceRegistration = bc.registerService(CommandWrapper.class.getName(), new CommandWrapper(cmd), props);
+            serviceRegistration = bundleContext.registerService(CommandWrapper.class.getName(), new CommandWrapper(cmd),
+                    props);
             return serviceRegistration;
         } catch (final IllegalStateException ex) {
             logger.trace("Registration failed.");
@@ -181,7 +187,7 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
         final Set<ConsoleCommandExtension> set = new HashSet<>();
 
         // Fill set with registered commands only.
-        for (Map.Entry<ConsoleCommandExtension, ServiceRegistration<?>> entry : commands.entrySet()) {
+        for (Map.Entry<ConsoleCommandExtension, @Nullable ServiceRegistration<?>> entry : commands.entrySet()) {
             if (entry.getValue() != null) {
                 set.add(entry.getKey());
             }

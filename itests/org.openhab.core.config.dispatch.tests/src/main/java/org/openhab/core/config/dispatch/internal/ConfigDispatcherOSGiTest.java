@@ -31,8 +31,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.MethodName;
@@ -49,21 +50,19 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author Petar Valchev - Initial contribution
  */
 @TestMethodOrder(MethodName.class)
+@NonNullByDefault
 public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
-
-    public @TempDir File tmpBaseFolder;
-
-    private ConfigurationAdmin configAdmin;
-
-    private ConfigDispatcher cd;
 
     private static final String CONFIGURATION_BASE_DIR = "../../../../../target/classes/configurations";
     private static final String SEP = File.separator;
 
-    private static String defaultConfigFile;
+    private static @Nullable String defaultConfigFile;
 
-    private Configuration configuration;
-    private static String configBaseDirectory;
+    private @TempDir @NonNullByDefault({}) File tmpBaseFolder;
+
+    private @NonNullByDefault({}) ConfigurationAdmin configAdmin;
+    private @NonNullByDefault({}) String configBaseDirectory;
+    private @NonNullByDefault({}) ConfigDispatcher configDispatcher;
 
     @BeforeAll
     public static void setUpClass() {
@@ -72,7 +71,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     @BeforeEach
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, InvalidSyntaxException {
         configBaseDirectory = tmpBaseFolder.getAbsolutePath();
         final Path source = Paths.get(CONFIGURATION_BASE_DIR);
         Files.walkFileTree(source, new CopyDirectoryRecursive(source, Paths.get(configBaseDirectory)));
@@ -80,7 +79,15 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         configAdmin = getService(ConfigurationAdmin.class);
         assertThat(configAdmin, is(notNullValue()));
 
-        cd = new ConfigDispatcher(configAdmin);
+        // Delete configurations created by previous tests
+        Configuration[] configurations = configAdmin.listConfigurations(null);
+        if (configurations != null) {
+            for (Configuration configuration : configurations) {
+                configuration.delete();
+            }
+        }
+
+        configDispatcher = new ConfigDispatcher(configAdmin);
     }
 
     private class CopyDirectoryRecursive extends SimpleFileVisitor<Path> {
@@ -93,7 +100,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         }
 
         @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
+        public FileVisitResult visitFile(Path file, @NonNullByDefault({}) BasicFileAttributes attributes) {
             try {
                 Files.copy(file, targetDir.resolve(sourceDir.relativize(file)));
             } catch (IOException ex) {
@@ -102,20 +109,12 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         }
 
         @Override
-        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attributes) {
+        public FileVisitResult preVisitDirectory(Path dir, @NonNullByDefault({}) BasicFileAttributes attributes) {
             try {
                 Files.createDirectory(targetDir.resolve(sourceDir.relativize(dir)));
             } catch (IOException ex) {
             }
             return FileVisitResult.CONTINUE;
-        }
-    }
-
-    @AfterEach
-    public void tearDown() throws Exception {
-        // Clear the configuration with the current pid from the persistent store.
-        if (configuration != null) {
-            configuration.delete();
         }
     }
 
@@ -134,7 +133,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFileName);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         // Assert that a file with local pid from the root configuration directory is processed.
         verifyValueOfConfigurationProperty("local.default.pid", "default.property", "default.value");
@@ -155,7 +154,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFileName);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         // Assert that a file with local pid from the root configuration directory is processed.
         verifyValueOfConfigurationProperty("local.default.pid", "default.property", "default.value");
@@ -173,7 +172,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFileName);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that the configuration is updated with a list containing one value for a file in the root directory.
@@ -227,7 +226,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /* Assert that the configuration is updated with the name of the file in the root directory as a pid. */
         verifyValueOfConfigurationProperty("no.pid.default.file", "default.property", "default.value");
@@ -245,7 +244,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that the configuration is updated with the default
@@ -270,7 +269,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that the configuration is updated with the default namespace
@@ -296,7 +295,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         verifyValueOfConfigurationProperty(ConfigDispatcher.SERVICE_PID_NAMESPACE + ".", "default.property",
                 "default.value");
@@ -313,7 +312,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that the configuration is updated with
@@ -336,7 +335,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that the configuration is not updated with an
@@ -359,7 +358,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that the second processed property from the
@@ -382,7 +381,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that the configuration is not updated with a
@@ -405,7 +404,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that the configuration is not updated with
@@ -428,7 +427,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         // Assert that a file with global pid from the root configuration directory is processed.
         verifyValueOfConfigurationProperty("global.default.pid", "default.property", "default.value");
@@ -448,7 +447,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         // Assert that the configuration is not updated with the global pid in the root directory.
         verifyNoPropertiesForConfiguration("ignored.global.default.pid");
@@ -473,7 +472,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that a property=value pair is associated with the global pid,
@@ -518,7 +517,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that pid with no property=value pair
@@ -540,7 +539,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(null);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         // Assert that an empty-string pid from a file in the services directory is processed.
         verifyValueOfConfigurationProperty("", "global.service.property", "global.service.value");
@@ -554,7 +553,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that the configuration is updated with all the property=value
@@ -583,12 +582,12 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         // Modify this file, so that we are sure it is the last modified file in servicesDirectory.
         File fileToModify = new File(configDirectory + SEP + servicesDirectory + SEP + lastModifiedFileName);
         Files.setLastModifiedTime(fileToModify.toPath(), FileTime.from(Instant.now()));
-        cd.processConfigFile(fileToModify);
+        configDispatcher.processConfigFile(fileToModify);
 
         String value = getLastModifiedValueForPoperty(getAbsoluteConfigDirectory(configDirectory, servicesDirectory),
                 conflictProperty);
@@ -607,12 +606,12 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(null);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         // Modify this file, so that we are sure it is the last modified file
         File fileToModify = new File(configDirectory + SEP + servicesDirectory + SEP + "global.pid.service.c.file.cfg");
         Files.setLastModifiedTime(fileToModify.toPath(), FileTime.from(Instant.now()));
-        cd.processConfigFile(fileToModify);
+        configDispatcher.processConfigFile(fileToModify);
 
         /*
          * Assert that the configuration is updated only with the property=value
@@ -630,7 +629,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(null);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that the configuration is updated only with the property=value
@@ -646,7 +645,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(null);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         verifyValueOfConfigurationPropertyWithContext("service.pid#ctx1", "property1", "value1");
         verifyValueOfConfigurationPropertyWithContext("service.pid#ctx2", "property1", "value2");
@@ -659,11 +658,11 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(null);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         File srcDupFile = new File(configDirectory + SEP + "duplicate" + SEP + "service-ctx1duplicate.cfg");
 
-        cd.processConfigFile(srcDupFile);
+        configDispatcher.processConfigFile(srcDupFile);
 
         // only ctx1 is overwritten by service-ctx1duplicate.cfg
         verifyValueOfConfigurationPropertyWithContext("service.pid#ctx1", "property1", "valueDup");
@@ -677,7 +676,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(null);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         verifyValueOfConfigurationPropertyWithContext("service.pid#ctx1", "property1", "value1");
         verifyValueOfConfigurationPropertyWithContext("service.pid#ctx2", "property1", "value2");
@@ -685,7 +684,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         File serviceConfigFile = new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory),
                 "service-ctx1.cfg");
 
-        cd.fileRemoved(serviceConfigFile.getAbsolutePath());
+        configDispatcher.fileRemoved(serviceConfigFile.getAbsolutePath());
 
         Configuration c1 = getConfigurationWithContext("service.pid#ctx1");
         assertThat(c1, is(nullValue()));
@@ -701,23 +700,23 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(null);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         verifyValueOfConfigurationProperty("global.service.pid", "property1", "value1");
 
         String pid = "service.pid.cfg";
         File serviceConfigFile = new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory), pid);
 
-        cd.fileRemoved(serviceConfigFile.getAbsolutePath());
+        configDispatcher.fileRemoved(serviceConfigFile.getAbsolutePath());
 
         waitForAssert(() -> {
             try {
-                configuration = configAdmin.getConfiguration(pid);
+                Configuration configuration = configAdmin.getConfiguration(pid);
+                assertThat(configuration.getProperties(), is(nullValue()));
             } catch (IOException e) {
                 throw new IllegalArgumentException("IOException occurred while retrieving configuration for pid " + pid,
                         e);
             }
-            assertThat(configuration.getProperties(), is(nullValue()));
         });
     }
 
@@ -731,7 +730,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(null);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that the configuration is updated with all properties:
@@ -741,7 +740,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         truncateLastLine(serviceConfigFile);
 
-        cd.processConfigFile(serviceConfigFile);
+        configDispatcher.processConfigFile(serviceConfigFile);
 
         /*
          * Assert that the configuration is updated without the truncated property/value pair:
@@ -760,7 +759,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(null);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that the configuration is updated with all properties:
@@ -770,19 +769,19 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         verifyValueOfConfigurationProperty(pid, "property2", "value2");
 
         // remember the file content and delete the file:
-        cd.fileRemoved(serviceConfigFile.getAbsolutePath());
+        configDispatcher.fileRemoved(serviceConfigFile.getAbsolutePath());
 
         /*
          * Assert that the configuration was deleted from configAdmin
          */
         waitForAssert(() -> {
             try {
-                configuration = configAdmin.getConfiguration(pid);
+                Configuration configuration = configAdmin.getConfiguration(pid);
+                assertThat(configuration.getProperties(), is(nullValue()));
             } catch (IOException e) {
                 throw new IllegalArgumentException("IOException occurred while retrieving configuration for pid " + pid,
                         e);
             }
-            assertThat(configuration.getProperties(), is(nullValue()));
         });
     }
 
@@ -803,12 +802,12 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         // Modify this file, so that we are sure it is the last modified file in servicesDirectory.
         File fileToModify = new File(configDirectory + SEP + servicesDirectory + SEP + lastModifiedFileName);
         Files.setLastModifiedTime(fileToModify.toPath(), FileTime.from(Instant.now()));
-        cd.processConfigFile(fileToModify);
+        configDispatcher.processConfigFile(fileToModify);
 
         String value = getLastModifiedValueForPoperty(getAbsoluteConfigDirectory(configDirectory, servicesDirectory),
                 conflictProperty);
@@ -828,7 +827,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         // Assert that the configuration is updated with all the properties for a pid from all the processed files.
         verifyValueOfConfigurationProperty("no.conflict.global.and.local.pid", "exclusive.property", "global.value");
@@ -852,12 +851,12 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         // Modify this file, so that we are sure it is the last modified file in servicesDirectory.
         File fileToModify = new File(configDirectory + SEP + servicesDirectory + SEP + lastModifiedFileName);
         Files.setLastModifiedTime(fileToModify.toPath(), FileTime.from(Instant.now()));
-        cd.processConfigFile(fileToModify);
+        configDispatcher.processConfigFile(fileToModify);
 
         String value = getLastModifiedValueForPoperty(getAbsoluteConfigDirectory(configDirectory, servicesDirectory),
                 conflictProperty);
@@ -886,12 +885,12 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         // Modify this file, so that we are sure it is the last modified file in servicesDirectory.
         File fileToModify = new File(configDirectory + SEP + servicesDirectory + SEP + lastModifiedFileName);
         Files.setLastModifiedTime(fileToModify.toPath(), FileTime.from(Instant.now()));
-        cd.processConfigFile(fileToModify);
+        configDispatcher.processConfigFile(fileToModify);
 
         String value = getLastModifiedValueForPoperty(getAbsoluteConfigDirectory(configDirectory, servicesDirectory),
                 conflictProperty);
@@ -911,7 +910,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         initialize(defaultConfigFilePath);
 
-        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+        configDispatcher.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         /*
          * Assert that a file from the services directory is processed
@@ -922,13 +921,13 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         verifyValueOfConfigurationProperty("default.and.service.local.pid", "property2", "value2.2");
     }
 
-    private void initialize(String defaultConfigFile) {
+    private void initialize(@Nullable String defaultConfigFile) {
         setSystemProperty(ConfigDispatcher.SERVICECFG_PROG_ARGUMENT, defaultConfigFile);
 
-        cd.activate(bundleContext);
+        configDispatcher.activate(bundleContext);
     }
 
-    private Configuration getConfigurationWithContext(String pidWithContext) {
+    private @Nullable Configuration getConfigurationWithContext(String pidWithContext) {
         String pid = null;
         String configContext = null;
         if (pidWithContext.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
@@ -961,24 +960,23 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     private void verifyValueOfConfigurationPropertyWithContext(String pidWithContext, String property, String value) {
         waitForAssert(() -> {
             Configuration configuration = getConfigurationWithContext(pidWithContext);
-
             assertThat(configuration, is(notNullValue()));
             assertThat(configuration.getProperties(), is(notNullValue()));
             assertThat(configuration.getProperties().get(property), is(equalTo(value)));
         });
     }
 
-    private void verifyValueOfConfigurationProperty(String pid, String property, String value) {
+    private void verifyValueOfConfigurationProperty(String pid, String property, @Nullable String value) {
         waitForAssert(() -> {
             try {
-                configuration = configAdmin.getConfiguration(pid);
+                Configuration configuration = configAdmin.getConfiguration(pid);
+                assertThat(configuration, is(notNullValue()));
+                assertThat(configuration.getProperties(), is(notNullValue()));
+                assertThat(configuration.getProperties().get(property), is(equalTo(value)));
             } catch (IOException e) {
                 throw new IllegalArgumentException("IOException occurred while retrieving configuration for pid " + pid,
                         e);
             }
-            assertThat(configuration, is(notNullValue()));
-            assertThat(configuration.getProperties(), is(notNullValue()));
-            assertThat(configuration.getProperties().get(property), is(equalTo(value)));
         });
     }
 
@@ -986,18 +984,18 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
             Collection<String> values) {
         waitForAssert(() -> {
             try {
-                configuration = configAdmin.getConfiguration(pid);
+                Configuration configuration = configAdmin.getConfiguration(pid);
+                assertThat(configuration, is(notNullValue()));
+                assertThat(configuration.getProperties(), is(notNullValue()));
+                assertThat(configuration.getProperties().get(property), is(instanceOf(Collection.class)));
+                @SuppressWarnings("unchecked")
+                Collection<String> results = (Collection<String>) configuration.getProperties().get(property);
+                assertThat(results.size(), is(expectedSize));
+                assertThat(results, is(equalTo(values)));
             } catch (IOException e) {
                 throw new IllegalArgumentException("IOException occurred while retrieving configuration for pid " + pid,
                         e);
             }
-            assertThat(configuration, is(notNullValue()));
-            assertThat(configuration.getProperties(), is(notNullValue()));
-            assertThat(configuration.getProperties().get(property), is(instanceOf(Collection.class)));
-            @SuppressWarnings("unchecked")
-            Collection<String> results = (Collection<String>) configuration.getProperties().get(property);
-            assertThat(results.size(), is(expectedSize));
-            assertThat(results, is(equalTo(values)));
         });
     }
 
@@ -1012,13 +1010,13 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
          */
         waitForAssert(() -> {
             try {
-                configuration = configAdmin.getConfiguration(pid);
+                Configuration configuration = configAdmin.getConfiguration(pid);
+                assertThat(configuration, is(notNullValue()));
+                assertThat(configuration.getProperties(), is(nullValue()));
             } catch (IOException e) {
                 throw new IllegalArgumentException("IOException occurred while retrieving configuration for pid " + pid,
                         e);
             }
-            assertThat(configuration, is(notNullValue()));
-            assertThat(configuration.getProperties(), is(nullValue()));
         });
     }
 
@@ -1033,14 +1031,14 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
          */
         waitForAssert(() -> {
             try {
-                configuration = configAdmin.getConfiguration(pid);
+                Configuration configuration = configAdmin.getConfiguration(pid);
+                assertThat(configuration, is(notNullValue()));
+                assertThat(configuration.getProperties(), is(notNullValue()));
+                assertThat(configuration.getProperties().get(property), is(nullValue()));
             } catch (IOException e) {
                 throw new IllegalArgumentException("IOException occurred while retrieving configuration for pid " + pid,
                         e);
             }
-            assertThat(configuration, is(notNullValue()));
-            assertThat(configuration.getProperties(), is(notNullValue()));
-            assertThat(configuration.getProperties().get(property), is(nullValue()));
         });
     }
 
@@ -1048,12 +1046,12 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         // We have to wait for all the files to be processed and the configuration to be updated.
         waitForAssert(() -> {
             try {
-                configuration = configAdmin.getConfiguration(pid);
+                Configuration configuration = configAdmin.getConfiguration(pid);
+                assertThat(configuration.getProperties(), is(nullValue()));
             } catch (IOException e) {
                 throw new IllegalArgumentException("IOException occurred while retrieving configuration for pid " + pid,
                         e);
             }
-            assertThat(configuration.getProperties(), is(nullValue()));
         });
     }
 
@@ -1064,7 +1062,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
                 StandardCharsets.UTF_8);
     }
 
-    private String getLastModifiedValueForPoperty(String path, String property) {
+    private @Nullable String getLastModifiedValueForPoperty(String path, String property) {
         File file = getLastModifiedFileFromDir(path);
         if (file == null) {
             return null;
@@ -1090,7 +1088,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
      * Mainly used the code, provided in
      * http://stackoverflow.com/questions/2064694/how-do-i-find-the-last-modified-file-in-a-directory-in-java
      */
-    private File getLastModifiedFileFromDir(String dirPath) {
+    private @Nullable File getLastModifiedFileFromDir(String dirPath) {
         File dir = new File(dirPath);
         File[] files = dir.listFiles();
         if (files == null || files.length == 0) {
@@ -1106,7 +1104,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         return lastModifiedFile;
     }
 
-    private static void setSystemProperty(String systemProperty, String initialValue) {
+    private static void setSystemProperty(String systemProperty, @Nullable String initialValue) {
         if (initialValue != null) {
             System.setProperty(systemProperty, initialValue);
         } else {

@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
  * @author Chris Jackson - Initial contribution
  * @author Stefan Triller - More tests for type conversions
  */
+@NonNullByDefault
 public class HSBTypeTest {
 
     @Test

@@ -25,6 +25,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioManager;
@@ -45,6 +46,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated tests from groovy to java
  */
+@NonNullByDefault
 public class VoiceManagerImplTest extends JavaOSGiTest {
     private static final String CONFIG_DEFAULT_SINK = "defaultSink";
     private static final String CONFIG_DEFAULT_SOURCE = "defaultSource";
@@ -55,17 +57,18 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     private static final String CONFIG_DEFAULT_TTS = "defaultTTS";
     private static final String CONFIG_KEYWORD = "keyword";
     private static final String CONFIG_LANGUAGE = "language";
-    private VoiceManagerImpl voiceManager;
-    private AudioManager audioManager;
-    private LocaleProvider localeProvider;
-    private TranslationProvider i18nProvider;
-    private SinkStub sink;
-    private TTSServiceStub ttsService;
-    private VoiceStub voice;
-    private HumanLanguageInterpreterStub hliStub;
-    private KSServiceStub ksService;
-    private STTServiceStub sttService;
-    private AudioSourceStub source;
+
+    private @NonNullByDefault({}) VoiceManagerImpl voiceManager;
+    private @NonNullByDefault({}) AudioManager audioManager;
+    private @NonNullByDefault({}) LocaleProvider localeProvider;
+    private @NonNullByDefault({}) TranslationProvider i18nProvider;
+    private @NonNullByDefault({}) SinkStub sink;
+    private @NonNullByDefault({}) TTSServiceStub ttsService;
+    private @NonNullByDefault({}) VoiceStub voice;
+    private @NonNullByDefault({}) HumanLanguageInterpreterStub hliStub;
+    private @NonNullByDefault({}) KSServiceStub ksService;
+    private @NonNullByDefault({}) STTServiceStub sttService;
+    private @NonNullByDefault({}) AudioSourceStub source;
 
     @BeforeEach
     public void setUp() throws IOException {

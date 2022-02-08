@@ -20,6 +20,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.binding.BindingInfo;
@@ -33,12 +34,13 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * @author Dennis Nobel - Initial contribution
  */
+@NonNullByDefault
 public class BindingInfoI18nTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "acmeweather.bundle";
 
-    private BindingInfoRegistry bindingInfoRegistry;
-    private BindingInstaller bindingInstaller;
+    private @NonNullByDefault({}) BindingInfoRegistry bindingInfoRegistry;
+    private @NonNullByDefault({}) BindingInstaller bindingInstaller;
 
     @BeforeEach
     public void setUp() {

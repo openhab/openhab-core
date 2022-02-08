@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Marker interface for RuleActions
  *
@@ -19,6 +21,7 @@ package org.openhab.core.automation;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public interface AnnotatedActions {
 
 }

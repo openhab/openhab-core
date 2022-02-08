@@ -14,7 +14,7 @@ package org.openhab.core.automation.internal.module.provider;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,8 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.automation.AnnotatedActions;
 import org.openhab.core.automation.Visibility;
@@ -46,6 +50,8 @@ import org.openhab.core.test.java.JavaTest;
  *
  * @author Stefan Triller - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class AnnotationActionModuleTypeProviderTest extends JavaTest {
 
     private static final String TEST_ACTION_TYPE_ID = "binding.test.testMethod";
@@ -67,24 +73,20 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
     private static final String ACTION_OUTPUT2 = "output2";
     private static final String ACTION_OUTPUT2_TYPE = "java.lang.String";
 
-    private ModuleTypeI18nService moduleTypeI18nService;
+    private @Mock @NonNullByDefault({}) ModuleTypeI18nService moduleTypeI18nServiceMock;
 
-    private AnnotatedActions actionProviderConf1;
-    private AnnotatedActions actionProviderConf2;
+    private AnnotatedActions actionProviderConf1 = new TestActionProvider();
+    private AnnotatedActions actionProviderConf2 = new TestActionProvider();
 
     @BeforeEach
     public void setUp() {
-        actionProviderConf1 = new TestActionProvider();
-        actionProviderConf2 = new TestActionProvider();
-
-        moduleTypeI18nService = mock(ModuleTypeI18nService.class);
-        when(moduleTypeI18nService.getModuleTypePerLocale(any(ModuleType.class), any(), any()))
+        when(moduleTypeI18nServiceMock.getModuleTypePerLocale(any(ModuleType.class), any(), any()))
                 .thenAnswer(i -> i.getArguments()[0]);
     }
 
     @Test
     public void testMultiServiceAnnotationActions() {
-        AnnotatedActionModuleTypeProvider prov = new AnnotatedActionModuleTypeProvider(moduleTypeI18nService);
+        AnnotatedActionModuleTypeProvider prov = new AnnotatedActionModuleTypeProvider(moduleTypeI18nServiceMock);
 
         Map<String, Object> properties1 = new HashMap<>();
         properties1.put(OpenHAB.SERVICE_CONTEXT, "conf1");

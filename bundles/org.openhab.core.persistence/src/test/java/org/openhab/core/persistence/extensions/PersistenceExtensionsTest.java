@@ -26,6 +26,7 @@ import java.util.stream.IntStream;
 
 import javax.measure.quantity.Temperature;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,34 +55,35 @@ import org.openhab.core.persistence.PersistenceServiceRegistry;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class PersistenceExtensionsTest {
 
     public static final String TEST_NUMBER = "testNumber";
     public static final String TEST_QUANTITY_NUMBER = "testQuantityNumber";
     public static final String TEST_SWITCH = "testSwitch";
 
-    private @Mock UnitProvider unitProvider;
-    private @Mock ItemRegistry mockedItemRegistry;
+    private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
+    private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
 
-    private GenericItem numberItem, quantityItem, switchItem;
+    private @NonNullByDefault({}) GenericItem numberItem, quantityItem, switchItem;
 
     @BeforeEach
     public void setUp() {
-        when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
 
         CoreItemFactory itemFactory = new CoreItemFactory();
         numberItem = itemFactory.createItem(CoreItemFactory.NUMBER, TEST_NUMBER);
         quantityItem = itemFactory.createItem(CoreItemFactory.NUMBER + ItemUtil.EXTENSION_SEPARATOR + "Temperature",
                 TEST_QUANTITY_NUMBER);
-        quantityItem.setUnitProvider(unitProvider);
+        quantityItem.setUnitProvider(unitProviderMock);
         switchItem = itemFactory.createItem(CoreItemFactory.SWITCH, TEST_SWITCH);
 
-        when(mockedItemRegistry.get(TEST_NUMBER)).thenReturn(numberItem);
-        when(mockedItemRegistry.get(TEST_QUANTITY_NUMBER)).thenReturn(quantityItem);
-        when(mockedItemRegistry.get(TEST_SWITCH)).thenReturn(switchItem);
+        when(itemRegistryMock.get(TEST_NUMBER)).thenReturn(numberItem);
+        when(itemRegistryMock.get(TEST_QUANTITY_NUMBER)).thenReturn(quantityItem);
+        when(itemRegistryMock.get(TEST_SWITCH)).thenReturn(switchItem);
 
         new PersistenceExtensions(new PersistenceServiceRegistry() {
-            private final PersistenceService testPersistenceService = new TestPersistenceService(mockedItemRegistry);
+            private final PersistenceService testPersistenceService = new TestPersistenceService(itemRegistryMock);
 
             @Override
             public @Nullable String getDefaultId() {

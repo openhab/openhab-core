@@ -14,6 +14,7 @@ package org.openhab.core.library.items;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.PlayPauseType;
 import org.openhab.core.library.types.RewindFastforwardType;
@@ -22,6 +23,7 @@ import org.openhab.core.library.types.RewindFastforwardType;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public class PlayerItemTest {
 
     @Test

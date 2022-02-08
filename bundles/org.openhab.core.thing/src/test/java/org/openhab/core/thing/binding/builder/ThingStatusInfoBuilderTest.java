@@ -15,6 +15,7 @@ package org.openhab.core.thing.binding.builder;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.thing.ThingStatus;
@@ -26,9 +27,10 @@ import org.openhab.core.thing.ThingStatusInfo;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class ThingStatusInfoBuilderTest {
 
-    private ThingStatusInfoBuilder builder;
+    private @NonNullByDefault({}) ThingStatusInfoBuilder builder;
 
     @BeforeEach
     public void setup() {

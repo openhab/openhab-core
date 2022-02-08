@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.transport.modbus.test;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.openhab.core.io.transport.modbus.ModbusWriteFunctionCode;
@@ -20,6 +21,7 @@ import org.openhab.core.io.transport.modbus.ModbusWriteRequestBlueprint;
 /**
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 abstract class AbstractRequestComparer<T extends ModbusWriteRequestBlueprint> extends TypeSafeMatcher<T> {
 
     private int expectedUnitId;
@@ -36,7 +38,7 @@ abstract class AbstractRequestComparer<T extends ModbusWriteRequestBlueprint> ex
     }
 
     @Override
-    public void describeTo(Description description) {
+    public void describeTo(@NonNullByDefault({}) Description description) {
         description.appendText("should return request with");
         description.appendText(" unitID=");
         description.appendValue(expectedUnitId);

@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.items.GenericItem;
@@ -31,11 +32,12 @@ import org.openhab.core.semantics.model.property.Temperature;
 /**
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class SemanticTagsTest {
 
-    private GroupItem locationItem;
-    private GroupItem equipmentItem;
-    private GenericItem pointItem;
+    private @NonNullByDefault({}) GroupItem locationItem;
+    private @NonNullByDefault({}) GroupItem equipmentItem;
+    private @NonNullByDefault({}) GenericItem pointItem;
 
     @BeforeEach
     public void setup() {

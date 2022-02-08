@@ -35,7 +35,7 @@ public class AudioWaveUtils {
     /**
      * This "magic" packet marks the beginning of the read data
      */
-    private final static int DATA_MAGIC = 0x64617461;
+    private static final int DATA_MAGIC = 0x64617461;
 
     private static final AudioFormat DEFAULT_WAVE_AUDIO_FORMAT = new AudioFormat(AudioFormat.CONTAINER_WAVE,
             AudioFormat.CODEC_PCM_SIGNED, false, 16, 705600, 44100L, 1);

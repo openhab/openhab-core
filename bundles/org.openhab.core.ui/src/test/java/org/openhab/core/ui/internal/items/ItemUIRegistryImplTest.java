@@ -27,6 +27,7 @@ import java.util.TimeZone;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.emf.common.util.BasicEList;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -85,24 +86,25 @@ import org.openhab.core.ui.items.ItemUIProvider;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class ItemUIRegistryImplTest {
 
     // we need to get the decimal separator of the default locale for our tests
     private static final char SEP = (new DecimalFormatSymbols().getDecimalSeparator());
     private static final String ITEM_NAME = "Item";
 
-    private ItemUIRegistryImpl uiRegistry;
+    private @NonNullByDefault({}) ItemUIRegistryImpl uiRegistry;
 
-    private @Mock ItemRegistry registry;
-    private @Mock Widget widget;
-    private @Mock Item item;
+    private @Mock @NonNullByDefault({}) ItemRegistry registryMock;
+    private @Mock @NonNullByDefault({}) Widget widgetMock;
+    private @Mock @NonNullByDefault({}) Item itemMock;
 
     @BeforeEach
     public void setup() throws Exception {
-        uiRegistry = new ItemUIRegistryImpl(registry);
+        uiRegistry = new ItemUIRegistryImpl(registryMock);
 
-        when(widget.getItem()).thenReturn(ITEM_NAME);
-        when(registry.getItem(ITEM_NAME)).thenReturn(item);
+        when(widgetMock.getItem()).thenReturn(ITEM_NAME);
+        when(registryMock.getItem(ITEM_NAME)).thenReturn(itemMock);
 
         // Set default time zone to GMT-6
         TimeZone.setDefault(TimeZone.getTimeZone("GMT-6"));
@@ -112,8 +114,8 @@ public class ItemUIRegistryImplTest {
     public void getLabelPlainLabel() {
         String testLabel = "This is a plain text";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals(testLabel, label);
     }
 
@@ -121,8 +123,8 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithStaticValue() {
         String testLabel = "Label [value]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [value]", label);
     }
 
@@ -130,9 +132,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithStringValue() {
         String testLabel = "Label [%s]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new StringType("State"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new StringType("State"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [State]", label);
     }
 
@@ -140,9 +142,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithStringValueFunction() {
         String testLabel = "Label [%s]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new StringType("foo(x):y"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new StringType("foo(x):y"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [foo(x):y]", label);
     }
 
@@ -150,12 +152,12 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithoutPatterAndIntegerValue() {
         String testLabel = "Label";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new DecimalType(20));
-        when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20));
-        when(item.getStateDescription())
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new DecimalType(20));
+        when(itemMock.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20));
+        when(itemMock.getStateDescription())
                 .thenReturn(StateDescriptionFragmentBuilder.create().withPattern("%d").build().toStateDescription());
-        String label = uiRegistry.getLabel(widget);
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [20]", label);
     }
 
@@ -163,12 +165,12 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithoutPatterAndFractionalDigitsValue() {
         String testLabel = "Label";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new DecimalType(20.5));
-        when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20.5));
-        when(item.getStateDescription())
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new DecimalType(20.5));
+        when(itemMock.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20.5));
+        when(itemMock.getStateDescription())
                 .thenReturn(StateDescriptionFragmentBuilder.create().withPattern("%d").build().toStateDescription());
-        String label = uiRegistry.getLabel(widget);
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [21]", label);
     }
 
@@ -176,10 +178,10 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithIntegerValue() {
         String testLabel = "Label [%d]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new DecimalType(20));
-        when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new DecimalType(20));
+        when(itemMock.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [20]", label);
     }
 
@@ -187,10 +189,10 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithFractionalDigitsValue() {
         String testLabel = "Label [%d]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new DecimalType(20.5));
-        when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20.5));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new DecimalType(20.5));
+        when(itemMock.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20.5));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [21]", label);
     }
 
@@ -198,10 +200,10 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithIntegerValueAndWidth() {
         String testLabel = "Label [%3d]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new DecimalType(20));
-        when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new DecimalType(20));
+        when(itemMock.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [ 20]", label);
     }
 
@@ -209,10 +211,10 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithHexValueAndWidth() {
         String testLabel = "Label [%3x]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new DecimalType(20));
-        when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new DecimalType(20));
+        when(itemMock.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [ 14]", label);
     }
 
@@ -220,10 +222,10 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithDecimalValue() {
         String testLabel = "Label [%.3f]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new DecimalType(10f / 3f));
-        when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(10f / 3f));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new DecimalType(10f / 3f));
+        when(itemMock.getStateAs(DecimalType.class)).thenReturn(new DecimalType(10f / 3f));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [3" + SEP + "333]", label);
     }
 
@@ -231,9 +233,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithDecimalValueAndUnitUpdatedWithQuantityType() {
         String testLabel = "Label [%.3f " + UnitUtils.UNIT_PLACEHOLDER + "]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " °C"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " °C"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [3" + SEP + "333 °C]", label);
     }
 
@@ -241,9 +243,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithDecimalValueAndUnitUpdatedWithDecimalType() {
         String testLabel = "Label [%.3f " + UnitUtils.UNIT_PLACEHOLDER + "]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new DecimalType(10f / 3f));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new DecimalType(10f / 3f));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [3" + SEP + "333]", label);
     }
 
@@ -251,9 +253,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithDecimalValueAndUnit2() {
         String testLabel = "Label [%.0f " + UnitUtils.UNIT_PLACEHOLDER + "]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " °C"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " °C"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [3 °C]", label);
     }
 
@@ -261,9 +263,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithDecimalValueAndUnit3() {
         String testLabel = "Label [%d %%]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " %"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " %"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [3 %]", label);
     }
 
@@ -271,9 +273,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithDecimalValueAndUnit4() {
         String testLabel = "Label [%.0f %%]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " %"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " %"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [3 %]", label);
     }
 
@@ -281,9 +283,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithDecimalValueAndUnit5() {
         String testLabel = "Label [%d " + UnitUtils.UNIT_PLACEHOLDER + "]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new QuantityType<>("33 %"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new QuantityType<>("33 %"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [33 %]", label);
     }
 
@@ -291,9 +293,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithFractionalDigitsValueAndUnit5() {
         String testLabel = "Label [%d " + UnitUtils.UNIT_PLACEHOLDER + "]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " %"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " %"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [3 %]", label);
     }
 
@@ -301,9 +303,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithDecimalValueAndUnit6() {
         String testLabel = "Label [%.0f " + UnitUtils.UNIT_PLACEHOLDER + "]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " %"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " %"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [3 %]", label);
     }
 
@@ -311,9 +313,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithDecimalValueAndUnit7() {
         String testLabel = "Label [%d %%]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new QuantityType<>("33 %"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new QuantityType<>("33 %"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [33 %]", label);
     }
 
@@ -321,9 +323,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithDecimalValueAndUnitConversion() {
         String testLabel = "Label [%.2f °F]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new QuantityType<>("22 °C"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new QuantityType<>("22 °C"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [71" + SEP + "60 °F]", label);
     }
 
@@ -331,10 +333,10 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithPercent() {
         String testLabel = "Label [%.1f %%]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new DecimalType(10f / 3f));
-        when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(10f / 3f));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new DecimalType(10f / 3f));
+        when(itemMock.getStateAs(DecimalType.class)).thenReturn(new DecimalType(10f / 3f));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [3" + SEP + "3 %]", label);
     }
 
@@ -342,9 +344,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithPercentType() {
         String testLabel = "Label [%d %%]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new PercentType(42));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new PercentType(42));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [42 %]", label);
     }
 
@@ -352,21 +354,21 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithDate() {
         String testLabel = "Label [%1$td.%1$tm.%1$tY]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [01.06.2011]", label);
-        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00Z"));
-        label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00Z"));
+        label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [31.05.2011]", label);
-        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00+02"));
-        label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00+02"));
+        label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [31.05.2011]", label);
-        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00-06"));
-        label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00-06"));
+        label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [01.06.2011]", label);
-        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00-07"));
-        label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00-07"));
+        label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [01.06.2011]", label);
     }
 
@@ -378,7 +380,7 @@ public class ItemUIRegistryImplTest {
         Item item = mock(Item.class);
         when(w.getLabel()).thenReturn(testLabel);
         when(w.getItem()).thenReturn(ITEM_NAME);
-        when(registry.getItem(ITEM_NAME)).thenReturn(item);
+        when(registryMock.getItem(ITEM_NAME)).thenReturn(item);
         when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00"));
         String label = uiRegistry.getLabel(w);
         assertEquals("Label [01.06.2011]", label);
@@ -400,21 +402,21 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithTime() {
         String testLabel = "Label [%1$tT]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [15:30:59]", label);
-        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59Z"));
-        label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59Z"));
+        label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [09:30:59]", label);
-        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59+02"));
-        label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59+02"));
+        label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [07:30:59]", label);
-        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59-06"));
-        label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59-06"));
+        label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [15:30:59]", label);
-        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59-07"));
-        label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59-07"));
+        label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [16:30:59]", label);
     }
 
@@ -426,7 +428,7 @@ public class ItemUIRegistryImplTest {
         Item item = mock(Item.class);
         when(w.getLabel()).thenReturn(testLabel);
         when(w.getItem()).thenReturn(ITEM_NAME);
-        when(registry.getItem(ITEM_NAME)).thenReturn(item);
+        when(registryMock.getItem(ITEM_NAME)).thenReturn(item);
         when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59"));
         String label = uiRegistry.getLabel(w);
         assertEquals("Label [15:30:59]", label);
@@ -453,7 +455,7 @@ public class ItemUIRegistryImplTest {
 
     @Test
     public void getLabelWidgetWithoutLabel() {
-        String label = uiRegistry.getLabel(widget);
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals(ITEM_NAME, label);
     }
 
@@ -462,7 +464,7 @@ public class ItemUIRegistryImplTest {
         ItemUIProvider provider = mock(ItemUIProvider.class);
         uiRegistry.addItemUIProvider(provider);
         when(provider.getLabel(anyString())).thenReturn("ProviderLabel");
-        String label = uiRegistry.getLabel(widget);
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("ProviderLabel", label);
         uiRegistry.removeItemUIProvider(provider);
     }
@@ -471,9 +473,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelForUndefinedStringItemState() {
         String testLabel = "Label [%s]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(UnDefType.UNDEF);
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(UnDefType.UNDEF);
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [-]", label);
     }
 
@@ -481,9 +483,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelForUndefinedIntegerItemState() {
         String testLabel = "Label [%d]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(UnDefType.UNDEF);
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(UnDefType.UNDEF);
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [-]", label);
     }
 
@@ -491,9 +493,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelForUndefinedDecimalItemState() {
         String testLabel = "Label [%.2f]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(UnDefType.UNDEF);
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(UnDefType.UNDEF);
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [-]", label);
     }
 
@@ -501,9 +503,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelForUndefinedDateItemState() {
         String testLabel = "Label [%1$td.%1$tm.%1$tY]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(UnDefType.UNDEF);
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(UnDefType.UNDEF);
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [-.-.-]", label);
     }
 
@@ -511,9 +513,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelForUndefinedQuantityItemState() {
         String testLabel = "Label [%.2f " + UnitUtils.UNIT_PLACEHOLDER + "]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(UnDefType.UNDEF);
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(UnDefType.UNDEF);
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [- -]", label);
     }
 
@@ -521,10 +523,10 @@ public class ItemUIRegistryImplTest {
     public void getLabelItemNotFound() throws ItemNotFoundException {
         String testLabel = "Label [%s]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(widget.eClass()).thenReturn(SitemapFactory.eINSTANCE.createText().eClass());
-        when(registry.getItem(ITEM_NAME)).thenThrow(new ItemNotFoundException(ITEM_NAME));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(widgetMock.eClass()).thenReturn(SitemapFactory.eINSTANCE.createText().eClass());
+        when(registryMock.getItem(ITEM_NAME)).thenThrow(new ItemNotFoundException(ITEM_NAME));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [-]", label);
     }
 
@@ -532,9 +534,9 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithFunctionValue() {
         String testLabel = "Label [MAP(de.map):%s]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(new StringType("State"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(new StringType("State"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [State]", label);
     }
 
@@ -542,17 +544,17 @@ public class ItemUIRegistryImplTest {
     public void getLabelGroupLabelWithValue() {
         String testLabel = "Label [%d]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getState()).thenReturn(OnOffType.ON);
-        when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(5));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getState()).thenReturn(OnOffType.ON);
+        when(itemMock.getStateAs(DecimalType.class)).thenReturn(new DecimalType(5));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [5]", label);
     }
 
     @Test
     public void getWidgetUnknownPageId() throws ItemNotFoundException {
         Sitemap sitemap = SitemapFactory.eINSTANCE.createSitemap();
-        when(registry.getItem("unknown")).thenThrow(new ItemNotFoundException("unknown"));
+        when(registryMock.getItem("unknown")).thenThrow(new ItemNotFoundException("unknown"));
         Widget w = uiRegistry.getWidget(sitemap, "unknown");
         assertNull(w);
     }
@@ -574,7 +576,7 @@ public class ItemUIRegistryImplTest {
         colorItem.setLabel("myItem");
         colorItem.setState(colorState);
 
-        when(registry.getItem("myItem")).thenReturn(colorItem);
+        when(registryMock.getItem("myItem")).thenReturn(colorItem);
 
         Switch switchWidget = mock(Switch.class);
         when(switchWidget.getItem()).thenReturn("myItem");
@@ -593,7 +595,7 @@ public class ItemUIRegistryImplTest {
         colorItem.setLabel("myItem");
         colorItem.setState(colorState);
 
-        when(registry.getItem("myItem")).thenReturn(colorItem);
+        when(registryMock.getItem("myItem")).thenReturn(colorItem);
 
         Switch switchWidget = mock(Switch.class);
         when(switchWidget.getItem()).thenReturn("myItem");
@@ -616,7 +618,7 @@ public class ItemUIRegistryImplTest {
         colorItem.setLabel("myItem");
         colorItem.setState(colorState);
 
-        when(registry.getItem("myItem")).thenReturn(colorItem);
+        when(registryMock.getItem("myItem")).thenReturn(colorItem);
 
         Slider sliderWidget = mock(Slider.class);
         when(sliderWidget.getItem()).thenReturn("myItem");
@@ -634,10 +636,10 @@ public class ItemUIRegistryImplTest {
     public void getLabelLabelWithoutStateDescription() {
         String testLabel = "Label";
 
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getStateDescription()).thenReturn(null);
-        when(item.getState()).thenReturn(new StringType("State"));
-        String label = uiRegistry.getLabel(widget);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(null);
+        when(itemMock.getState()).thenReturn(new StringType("State"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label", label);
     }
 
@@ -646,11 +648,11 @@ public class ItemUIRegistryImplTest {
         String testLabel = "Label";
 
         StateDescription stateDescription = mock(StateDescription.class);
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getStateDescription()).thenReturn(stateDescription);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
         when(stateDescription.getPattern()).thenReturn(null);
-        when(item.getState()).thenReturn(new StringType("State"));
-        String label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new StringType("State"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label", label);
     }
 
@@ -659,11 +661,11 @@ public class ItemUIRegistryImplTest {
         String testLabel = "Label";
 
         StateDescription stateDescription = mock(StateDescription.class);
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getStateDescription()).thenReturn(stateDescription);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
         when(stateDescription.getPattern()).thenReturn("%s");
-        when(item.getState()).thenReturn(new StringType("State"));
-        String label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new StringType("State"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [State]", label);
     }
 
@@ -672,11 +674,11 @@ public class ItemUIRegistryImplTest {
         String testLabel = "Label []";
 
         StateDescription stateDescription = mock(StateDescription.class);
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getStateDescription()).thenReturn(stateDescription);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
         when(stateDescription.getPattern()).thenReturn("%s");
-        when(item.getState()).thenReturn(new StringType("State"));
-        String label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new StringType("State"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label", label);
     }
 
@@ -688,12 +690,12 @@ public class ItemUIRegistryImplTest {
         List<StateOption> options = new ArrayList<>();
         options.add(new StateOption("State0", "This is the state 0"));
         options.add(new StateOption("State1", "This is the state 1"));
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getStateDescription()).thenReturn(stateDescription);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
         when(stateDescription.getPattern()).thenReturn("%s");
         when(stateDescription.getOptions()).thenReturn(options);
-        when(item.getState()).thenReturn(new StringType("State1"));
-        String label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new StringType("State1"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [This is the state 1]", label);
     }
 
@@ -705,12 +707,12 @@ public class ItemUIRegistryImplTest {
         List<StateOption> options = new ArrayList<>();
         options.add(new StateOption("State0", "This is the state 0"));
         options.add(new StateOption("State1", "This is the state 1"));
-        when(widget.getLabel()).thenReturn(testLabel);
-        when(item.getStateDescription()).thenReturn(stateDescription);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
         when(stateDescription.getPattern()).thenReturn("%s");
         when(stateDescription.getOptions()).thenReturn(options);
-        when(item.getState()).thenReturn(new StringType("State"));
-        String label = uiRegistry.getLabel(widget);
+        when(itemMock.getState()).thenReturn(new StringType("State"));
+        String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [State]", label);
     }
 
@@ -722,7 +724,7 @@ public class ItemUIRegistryImplTest {
         Item item = mock(Item.class);
         when(w.getLabel()).thenReturn(testLabel);
         when(w.getItem()).thenReturn(ITEM_NAME);
-        when(registry.getItem(ITEM_NAME)).thenReturn(item);
+        when(registryMock.getItem(ITEM_NAME)).thenReturn(item);
         when(item.getState()).thenReturn(new StringType("State"));
         String label = uiRegistry.getLabel(w);
         assertEquals("Memory [State]", label);
@@ -732,7 +734,7 @@ public class ItemUIRegistryImplTest {
     public void getLabelColorLabelWithDecimalValue() {
         String testLabel = "Label [%.3f]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
 
         ColorArray colorArray = mock(ColorArray.class);
         when(colorArray.getState()).thenReturn("21");
@@ -740,11 +742,11 @@ public class ItemUIRegistryImplTest {
         when(colorArray.getArg()).thenReturn("yellow");
         BasicEList<ColorArray> colorArrays = new BasicEList<>();
         colorArrays.add(colorArray);
-        when(widget.getLabelColor()).thenReturn(colorArrays);
+        when(widgetMock.getLabelColor()).thenReturn(colorArrays);
 
-        when(item.getState()).thenReturn(new DecimalType(10f / 3f));
+        when(itemMock.getState()).thenReturn(new DecimalType(10f / 3f));
 
-        String color = uiRegistry.getLabelColor(widget);
+        String color = uiRegistry.getLabelColor(widgetMock);
         assertEquals("yellow", color);
     }
 
@@ -752,7 +754,7 @@ public class ItemUIRegistryImplTest {
     public void getLabelColorLabelWithUnitValue() {
         String testLabel = "Label [%.3f " + UnitUtils.UNIT_PLACEHOLDER + "]";
 
-        when(widget.getLabel()).thenReturn(testLabel);
+        when(widgetMock.getLabel()).thenReturn(testLabel);
 
         ColorArray colorArray = mock(ColorArray.class);
         when(colorArray.getState()).thenReturn("20");
@@ -760,11 +762,11 @@ public class ItemUIRegistryImplTest {
         when(colorArray.getArg()).thenReturn("yellow");
         BasicEList<ColorArray> colorArrays = new BasicEList<>();
         colorArrays.add(colorArray);
-        when(widget.getLabelColor()).thenReturn(colorArrays);
+        when(widgetMock.getLabelColor()).thenReturn(colorArrays);
 
-        when(item.getState()).thenReturn(new QuantityType<>("20 °C"));
+        when(itemMock.getState()).thenReturn(new QuantityType<>("20 °C"));
 
-        String color = uiRegistry.getLabelColor(widget);
+        String color = uiRegistry.getLabelColor(widgetMock);
         assertEquals("yellow", color);
     }
 
@@ -816,27 +818,28 @@ public class ItemUIRegistryImplTest {
         final CommandDescriptionBuilder builder = CommandDescriptionBuilder.create().withCommandOptions(
                 List.of(new CommandOption("command1", "label1"), new CommandOption("command2", "label2"),
                         new CommandOption("command3", "label3"), new CommandOption("command4", "label4")));
-        when(item.getCommandDescription()).thenReturn(builder.build());
+        when(itemMock.getCommandDescription()).thenReturn(builder.build());
         defaultWidget = uiRegistry.getDefaultWidget(NumberItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Switch.class)));
 
         // NumberItem with more than four CommandOptions should return Selection element
         builder.withCommandOption(new CommandOption("command5", "label5"));
-        when(item.getCommandDescription()).thenReturn(builder.build());
+        when(itemMock.getCommandDescription()).thenReturn(builder.build());
         defaultWidget = uiRegistry.getDefaultWidget(NumberItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Selection.class)));
 
         // NumberItem with one or more StateOptions should return Selection element
-        when(item.getStateDescription()).thenReturn(StateDescriptionFragmentBuilder.create()
+        when(itemMock.getStateDescription()).thenReturn(StateDescriptionFragmentBuilder.create()
                 .withOptions(List.of(new StateOption("value1", "label1"), new StateOption("value2", "label2"))).build()
                 .toStateDescription());
         defaultWidget = uiRegistry.getDefaultWidget(NumberItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Selection.class)));
 
         // Read-only NumberItem with one or more StateOptions should return Text element
-        when(item.getStateDescription()).thenReturn(StateDescriptionFragmentBuilder.create().withReadOnly(Boolean.TRUE)
-                .withOptions(List.of(new StateOption("value1", "label1"), new StateOption("value2", "label2"))).build()
-                .toStateDescription());
+        when(itemMock.getStateDescription())
+                .thenReturn(StateDescriptionFragmentBuilder.create().withReadOnly(Boolean.TRUE)
+                        .withOptions(List.of(new StateOption("value1", "label1"), new StateOption("value2", "label2")))
+                        .build().toStateDescription());
         defaultWidget = uiRegistry.getDefaultWidget(NumberItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Text.class)));
     }
@@ -851,34 +854,35 @@ public class ItemUIRegistryImplTest {
         final CommandDescriptionBuilder builder = CommandDescriptionBuilder.create().withCommandOptions(
                 List.of(new CommandOption("command1", "label1"), new CommandOption("command2", "label2"),
                         new CommandOption("command3", "label3"), new CommandOption("command4", "label4")));
-        when(item.getCommandDescription()).thenReturn(builder.build());
+        when(itemMock.getCommandDescription()).thenReturn(builder.build());
         defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Switch.class)));
 
         // StringItem with more than four CommandOptions should return Selection element
         builder.withCommandOption(new CommandOption("command5", "label5"));
-        when(item.getCommandDescription()).thenReturn(builder.build());
+        when(itemMock.getCommandDescription()).thenReturn(builder.build());
         defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Selection.class)));
 
         // StringItem with one or more StateOptions should return Selection element
-        when(item.getStateDescription()).thenReturn(StateDescriptionFragmentBuilder.create()
+        when(itemMock.getStateDescription()).thenReturn(StateDescriptionFragmentBuilder.create()
                 .withOptions(List.of(new StateOption("value1", "label1"), new StateOption("value2", "label2"))).build()
                 .toStateDescription());
         defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Selection.class)));
 
         // Read-only StringItem with one or more StateOptions should return Text element
-        when(item.getStateDescription()).thenReturn(StateDescriptionFragmentBuilder.create().withReadOnly(Boolean.TRUE)
-                .withOptions(List.of(new StateOption("value1", "label1"), new StateOption("value2", "label2"))).build()
-                .toStateDescription());
+        when(itemMock.getStateDescription())
+                .thenReturn(StateDescriptionFragmentBuilder.create().withReadOnly(Boolean.TRUE)
+                        .withOptions(List.of(new StateOption("value1", "label1"), new StateOption("value2", "label2")))
+                        .build().toStateDescription());
         defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Text.class)));
     }
 
     @Test
     public void getUnitForWidgetForNonNumberItem() throws Exception {
-        String unit = uiRegistry.getUnitForWidget(widget);
+        String unit = uiRegistry.getUnitForWidget(widgetMock);
 
         assertThat(unit, is(""));
     }
@@ -887,14 +891,14 @@ public class ItemUIRegistryImplTest {
     public void getUnitForWidgetWithWidgetLabel() throws Exception {
         // a NumberItem having a Dimension must be returned
         NumberItem item = mock(NumberItem.class);
-        when(registry.getItem(ITEM_NAME)).thenReturn(item);
+        when(registryMock.getItem(ITEM_NAME)).thenReturn(item);
 
         doReturn(Temperature.class).when(item).getDimension();
 
         // we set the Label on the widget itself
-        when(widget.getLabel()).thenReturn("Label [%.1f °C]");
+        when(widgetMock.getLabel()).thenReturn("Label [%.1f °C]");
 
-        String unit = uiRegistry.getUnitForWidget(widget);
+        String unit = uiRegistry.getUnitForWidget(widgetMock);
 
         assertThat(unit, is(equalTo("°C")));
     }
@@ -903,14 +907,14 @@ public class ItemUIRegistryImplTest {
     public void getUnitForWidgetWithItemLabelAndWithoutWidgetLabel() throws Exception {
         // a NumberItem having a Dimension must be returned
         NumberItem item = mock(NumberItem.class);
-        when(registry.getItem(ITEM_NAME)).thenReturn(item);
+        when(registryMock.getItem(ITEM_NAME)).thenReturn(item);
 
         doReturn(Temperature.class).when(item).getDimension();
 
         // we set the UnitSymbol on the item, this must be used as a fallback if no Widget label was used
         when(item.getUnitSymbol()).thenReturn("°C");
 
-        String unit = uiRegistry.getUnitForWidget(widget);
+        String unit = uiRegistry.getUnitForWidget(widgetMock);
 
         assertThat(unit, is(equalTo("°C")));
     }

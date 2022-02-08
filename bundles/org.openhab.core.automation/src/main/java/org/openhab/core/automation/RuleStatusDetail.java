@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This enumeration is used to represent a detail of a {@link RuleStatus}. It can be considered as a sub-status.
  * It shows the specific reasons why the status of the rule is like as is.
@@ -81,6 +83,7 @@ package org.openhab.core.automation;
  * @author Kai Kreuzer - Refactored to match ThingStatusDetail implementation
  * @author Ana Dimova - add java doc
  */
+@NonNullByDefault
 public enum RuleStatusDetail {
     NONE(0),
     HANDLER_MISSING_ERROR(1),

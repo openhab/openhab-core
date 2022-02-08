@@ -16,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.function.Consumer;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.common.AbstractUID;
@@ -25,6 +26,7 @@ import org.openhab.core.common.AbstractUID;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class UIDUtilsTest {
 
     @Test

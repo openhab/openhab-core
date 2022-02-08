@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Thing;
@@ -37,6 +38,7 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
  * @author Henning Sudbrock - Migrated from Groovy to Java
  * @author Dimitar Ivanov - replaced Firmware UID with thing UID and firmware version
  */
+@NonNullByDefault
 public class FirmwareTest extends JavaOSGiTest {
 
     private static final String FILE_NAME = "firmware.txt";
@@ -175,7 +177,6 @@ public class FirmwareTest extends JavaOSGiTest {
     public void testFirmwareSuitabilityNoPrerequisiteVersion() {
         Firmware firmware = firmwareWithVersion("2.0.0");
 
-        assertTrue(firmware.isSuitableFor(thingWithFirmwareVersion(null)));
         assertTrue(firmware.isSuitableFor(thingWithFirmwareVersion("1.0.0")));
         assertTrue(firmware.isSuitableFor(thingWithFirmwareVersion("2.0.0")));
         assertTrue(firmware.isSuitableFor(thingWithFirmwareVersion("3.0.0")));
@@ -185,7 +186,6 @@ public class FirmwareTest extends JavaOSGiTest {
     public void testFirmwareSuitabilityWithPrerequisiteVersion() {
         Firmware firmware = firmwareWithVersionAndPrerequisiteVersion("3.0.0", "2.0.0");
 
-        assertFalse(firmware.isSuitableFor(thingWithFirmwareVersion(null)));
         assertFalse(firmware.isSuitableFor(thingWithFirmwareVersion("1.0.0")));
         assertTrue(firmware.isSuitableFor(thingWithFirmwareVersion("2.0.0")));
         assertTrue(firmware.isSuitableFor(thingWithFirmwareVersion("3.0.0")));
@@ -196,7 +196,6 @@ public class FirmwareTest extends JavaOSGiTest {
     public void testFirmwareSuitabilityWithHigherPrerequisiteVersion() {
         Firmware firmware = firmwareWithVersionAndPrerequisiteVersion("1.0.0", "2.0.0");
 
-        assertFalse(firmware.isSuitableFor(thingWithFirmwareVersion(null)));
         assertFalse(firmware.isSuitableFor(thingWithFirmwareVersion("1.0.0")));
         assertTrue(firmware.isSuitableFor(thingWithFirmwareVersion("2.0.0")));
         assertTrue(firmware.isSuitableFor(thingWithFirmwareVersion("3.0.0")));

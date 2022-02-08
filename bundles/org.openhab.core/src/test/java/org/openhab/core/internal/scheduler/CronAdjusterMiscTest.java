@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.scheduler.CronAdjuster;
 
@@ -24,6 +25,7 @@ import org.openhab.core.scheduler.CronAdjuster;
  *
  * @author Hilbrand Bouwkamp - Initial contribution
  */
+@NonNullByDefault
 public class CronAdjusterMiscTest {
 
     @Test

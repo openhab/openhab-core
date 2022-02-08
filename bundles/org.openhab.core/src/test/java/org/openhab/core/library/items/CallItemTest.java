@@ -14,6 +14,7 @@ package org.openhab.core.library.items;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.StringListType;
 
@@ -22,6 +23,7 @@ import org.openhab.core.library.types.StringListType;
  * @author Gaël L'hopital - Initial contribution
  * @author Stefan Triller - Added state tests
  */
+@NonNullByDefault
 public class CallItemTest {
 
     @Test

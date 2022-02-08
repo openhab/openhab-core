@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.io.transport.modbus.ModbusBitUtilities;
@@ -33,6 +33,7 @@ import org.openhab.core.library.types.DecimalType;
 /**
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 public class BitUtilitiesExtractStateFromRegistersTest {
 
     private static ModbusRegisterArray shortArrayToRegisterArray(int... arr) {
@@ -364,12 +365,11 @@ public class BitUtilitiesExtractStateFromRegistersTest {
             return;
         }
 
-        Optional<@NonNull DecimalType> actualState = ModbusBitUtilities.extractStateFromRegisters(registers, index,
-                type);
+        Optional<DecimalType> actualState = ModbusBitUtilities.extractStateFromRegisters(registers, index, type);
         // Wrap given expectedResult to Optional, if necessary
-        Optional<@NonNull DecimalType> expectedStateWrapped = expectedResult instanceof DecimalType
+        Optional<DecimalType> expectedStateWrapped = expectedResult instanceof DecimalType
                 ? Optional.of((DecimalType) expectedResult)
-                : (Optional<@NonNull DecimalType>) expectedResult;
+                : (Optional<DecimalType>) expectedResult;
         assertThat(String.format("registers=%s, index=%d, type=%s", registers, index, type), actualState,
                 is(equalTo(expectedStateWrapped)));
     }

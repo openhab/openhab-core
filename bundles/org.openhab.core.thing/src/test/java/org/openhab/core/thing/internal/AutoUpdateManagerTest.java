@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,6 +62,7 @@ import org.openhab.core.thing.type.ChannelTypeRegistry;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class AutoUpdateManagerTest {
 
     private static final String ITEM_NAME = "test";
@@ -71,23 +74,23 @@ public class AutoUpdateManagerTest {
     private static final ChannelUID CHANNEL_UID_OFFLINE_1 = new ChannelUID(THING_UID_OFFLINE, "channel1");
     private static final ChannelUID CHANNEL_UID_ONLINE_GONE = new ChannelUID(THING_UID_ONLINE, "gone");
     private static final ChannelUID CHANNEL_UID_HANDLER_MISSING = new ChannelUID(THING_UID_HANDLER_MISSING, "channel1");
-    private ItemCommandEvent event;
-    private GenericItem item;
-    private ItemCommandEvent groupEvent;
-    private GroupItem groupItem;
+    private @NonNullByDefault({}) ItemCommandEvent event;
+    private @NonNullByDefault({}) GenericItem item;
+    private @NonNullByDefault({}) ItemCommandEvent groupEvent;
+    private @NonNullByDefault({}) GroupItem groupItem;
 
-    private @Mock ChannelTypeRegistry channelTypeRegistryMock;
-    private @Mock EventPublisher eventPublisherMock;
-    private @Mock ItemChannelLinkRegistry iclRegistryMock;
-    private @Mock ThingRegistry thingRegistryMock;
-    private @Mock Thing onlineThingMock;
-    private @Mock Thing offlineThingMock;
-    private @Mock Thing thingMissingHandlerMock;
-    private @Mock ThingHandler handlerMock;
-    private @Mock MetadataRegistry metadataRegistryMock;
+    private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistryMock;
+    private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
+    private @Mock @NonNullByDefault({}) ItemChannelLinkRegistry iclRegistryMock;
+    private @Mock @NonNullByDefault({}) ThingRegistry thingRegistryMock;
+    private @Mock @NonNullByDefault({}) Thing onlineThingMock;
+    private @Mock @NonNullByDefault({}) Thing offlineThingMock;
+    private @Mock @NonNullByDefault({}) Thing thingMissingHandlerMock;
+    private @Mock @NonNullByDefault({}) ThingHandler handlerMock;
+    private @Mock @NonNullByDefault({}) MetadataRegistry metadataRegistryMock;
 
     private final Set<ItemChannelLink> links = new HashSet<>();
-    private AutoUpdateManager aum;
+    private @NonNullByDefault({}) AutoUpdateManager aum;
     private final Map<ChannelUID, AutoUpdatePolicy> policies = new HashMap<>();
 
     @BeforeEach
@@ -133,13 +136,13 @@ public class AutoUpdateManagerTest {
         assertNothingHappened();
     }
 
-    private void assertPredictionEvent(String expectedContent, String extectedSource) {
+    private void assertPredictionEvent(String expectedContent, @Nullable String expectedSource) {
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventPublisherMock, atLeastOnce()).post(eventCaptor.capture());
         Event event = eventCaptor.getAllValues().stream().filter(e -> e instanceof ItemStatePredictedEvent).findFirst()
                 .get();
         assertEquals(expectedContent, ((ItemStatePredictedEvent) event).getPredictedState().toFullString());
-        assertEquals(extectedSource, event.getSource());
+        assertEquals(expectedSource, event.getSource());
         assertNothingHappened();
     }
 

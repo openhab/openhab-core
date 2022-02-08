@@ -22,10 +22,16 @@ import java.util.Base64;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.model.sitemap.SitemapProvider;
@@ -42,6 +48,9 @@ import org.osgi.service.http.HttpService;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class ProxyServletServiceTest {
 
     private static final String SITEMAP_NAME = "testSitemap";
@@ -63,48 +72,39 @@ public class ProxyServletServiceTest {
     private static final String VALID_IMAGE_URL = "https://openhab.org/test.jpg";
     private static final String VALID_VIDEO_URL = "https://openhab.org/test.mp4";
 
-    private static ProxyServletService service;
+    private @NonNullByDefault({}) ProxyServletService service;
 
-    private ItemUIRegistry itemUIRegistry;
-    private HttpService httpService;
-    private SitemapProvider sitemapProvider;
-    private Sitemap sitemap;
-    private HttpServletRequest request;
-    private Switch switchWidget;
-    private Image imageWidget;
-    private Video videoWidget;
+    private @Mock @NonNullByDefault({}) ItemUIRegistry itemUIRegistryMock;
+    private @Mock @NonNullByDefault({}) HttpService httpServiceMock;
+    private @Mock @NonNullByDefault({}) SitemapProvider sitemapProviderMock;
+    private @Mock @NonNullByDefault({}) Sitemap sitemapMock;
+    private @Mock @NonNullByDefault({}) HttpServletRequest requestMock;
+    private @Mock @NonNullByDefault({}) Switch switchWidgetMock;
+    private @Mock @NonNullByDefault({}) Image imageWidgetMock;
+    private @Mock @NonNullByDefault({}) Video videoWidgetMock;
 
     @BeforeEach
     public void setUp() {
-        itemUIRegistry = mock(ItemUIRegistry.class);
-        httpService = mock(HttpService.class);
+        service = new ProxyServletService(itemUIRegistryMock, httpServiceMock);
+        service.sitemapProviders.add(sitemapProviderMock);
 
-        service = new ProxyServletService(itemUIRegistry, httpService);
+        sitemapMock = mock(Sitemap.class);
+        when(sitemapProviderMock.getSitemap(eq(SITEMAP_NAME))).thenReturn(sitemapMock);
 
-        sitemapProvider = mock(SitemapProvider.class);
-        service.sitemapProviders.add(sitemapProvider);
+        when(itemUIRegistryMock.getWidget(eq(sitemapMock), eq(SWITCH_WIDGET_ID))).thenReturn(switchWidgetMock);
+        when(itemUIRegistryMock.getWidget(eq(sitemapMock), eq(IMAGE_WIDGET_ID))).thenReturn(imageWidgetMock);
+        when(itemUIRegistryMock.getWidget(eq(sitemapMock), eq(VIDEO_WIDGET_ID))).thenReturn(videoWidgetMock);
 
-        sitemap = mock(Sitemap.class);
-        when(sitemapProvider.getSitemap(eq(SITEMAP_NAME))).thenReturn(sitemap);
-
-        switchWidget = mock(Switch.class);
-        when(itemUIRegistry.getWidget(eq(sitemap), eq(SWITCH_WIDGET_ID))).thenReturn(switchWidget);
-        imageWidget = mock(Image.class);
-        when(itemUIRegistry.getWidget(eq(sitemap), eq(IMAGE_WIDGET_ID))).thenReturn(imageWidget);
-        videoWidget = mock(Video.class);
-        when(itemUIRegistry.getWidget(eq(sitemap), eq(VIDEO_WIDGET_ID))).thenReturn(videoWidget);
-
-        when(itemUIRegistry.getItemState(eq(ITEM_NAME_UNDEF_STATE))).thenReturn(UnDefType.UNDEF);
-        when(itemUIRegistry.getItemState(eq(ITEM_NAME_NULL_STATE))).thenReturn(UnDefType.NULL);
-        when(itemUIRegistry.getItemState(eq(ITEM_NAME_ON_STATE))).thenReturn(OnOffType.ON);
-        when(itemUIRegistry.getItemState(eq(ITEM_NAME_INVALID_URL))).thenReturn(new StringType(INVALID_URL));
-        when(itemUIRegistry.getItemState(eq(ITEM_NAME_VALID_IMAGE_URL)))
+        when(itemUIRegistryMock.getItemState(eq(ITEM_NAME_UNDEF_STATE))).thenReturn(UnDefType.UNDEF);
+        when(itemUIRegistryMock.getItemState(eq(ITEM_NAME_NULL_STATE))).thenReturn(UnDefType.NULL);
+        when(itemUIRegistryMock.getItemState(eq(ITEM_NAME_ON_STATE))).thenReturn(OnOffType.ON);
+        when(itemUIRegistryMock.getItemState(eq(ITEM_NAME_INVALID_URL))).thenReturn(new StringType(INVALID_URL));
+        when(itemUIRegistryMock.getItemState(eq(ITEM_NAME_VALID_IMAGE_URL)))
                 .thenReturn(new StringType(ITEM_VALID_IMAGE_URL));
-        when(itemUIRegistry.getItemState(eq(ITEM_NAME_VALID_VIDEO_URL)))
+        when(itemUIRegistryMock.getItemState(eq(ITEM_NAME_VALID_VIDEO_URL)))
                 .thenReturn(new StringType(ITEM_VALID_VIDEO_URL));
 
-        request = mock(HttpServletRequest.class);
-        when(request.getParameter(eq("sitemap"))).thenReturn(SITEMAP_NAME);
+        when(requestMock.getParameter(eq("sitemap"))).thenReturn(SITEMAP_NAME);
     }
 
     @Test
@@ -135,145 +135,145 @@ public class ProxyServletServiceTest {
 
     @Test
     public void testProxyUriUnexpectedWidgetType() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(SWITCH_WIDGET_ID);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(SWITCH_WIDGET_ID);
+        URI uri = service.uriFromRequest(requestMock);
         assertNull(uri);
     }
 
     @Test
     public void testProxyUriImageWithoutItemButValidUrl() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
-        when(imageWidget.getUrl()).thenReturn(VALID_IMAGE_URL);
-        when(imageWidget.getItem()).thenReturn(null);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
+        when(imageWidgetMock.getUrl()).thenReturn(VALID_IMAGE_URL);
+        when(imageWidgetMock.getItem()).thenReturn(null);
+        URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
         assertEquals(uri.toString(), VALID_IMAGE_URL);
     }
 
     @Test
     public void testProxyUriImageWithoutItemAndInvalidUrl() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
-        when(imageWidget.getUrl()).thenReturn(INVALID_URL);
-        when(imageWidget.getItem()).thenReturn(null);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
+        when(imageWidgetMock.getUrl()).thenReturn(INVALID_URL);
+        when(imageWidgetMock.getItem()).thenReturn(null);
+        URI uri = service.uriFromRequest(requestMock);
         assertNull(uri);
     }
 
     @Test
     public void testProxyUriImageWithItemButUndefState() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
-        when(imageWidget.getUrl()).thenReturn(VALID_IMAGE_URL);
-        when(imageWidget.getItem()).thenReturn(ITEM_NAME_UNDEF_STATE);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
+        when(imageWidgetMock.getUrl()).thenReturn(VALID_IMAGE_URL);
+        when(imageWidgetMock.getItem()).thenReturn(ITEM_NAME_UNDEF_STATE);
+        URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
         assertEquals(uri.toString(), VALID_IMAGE_URL);
     }
 
     @Test
     public void testProxyUriImageWithItemButNullState() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
-        when(imageWidget.getUrl()).thenReturn(VALID_IMAGE_URL);
-        when(imageWidget.getItem()).thenReturn(ITEM_NAME_NULL_STATE);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
+        when(imageWidgetMock.getUrl()).thenReturn(VALID_IMAGE_URL);
+        when(imageWidgetMock.getItem()).thenReturn(ITEM_NAME_NULL_STATE);
+        URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
         assertEquals(uri.toString(), VALID_IMAGE_URL);
     }
 
     @Test
     public void testProxyUriImageWithItemButUnexpectedState() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
-        when(imageWidget.getUrl()).thenReturn(VALID_IMAGE_URL);
-        when(imageWidget.getItem()).thenReturn(ITEM_NAME_ON_STATE);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
+        when(imageWidgetMock.getUrl()).thenReturn(VALID_IMAGE_URL);
+        when(imageWidgetMock.getItem()).thenReturn(ITEM_NAME_ON_STATE);
+        URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
         assertEquals(uri.toString(), VALID_IMAGE_URL);
     }
 
     @Test
     public void testProxyUriImageWithItemButStateWithInvalidUrl() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
-        when(imageWidget.getUrl()).thenReturn(VALID_IMAGE_URL);
-        when(imageWidget.getItem()).thenReturn(ITEM_NAME_INVALID_URL);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
+        when(imageWidgetMock.getUrl()).thenReturn(VALID_IMAGE_URL);
+        when(imageWidgetMock.getItem()).thenReturn(ITEM_NAME_INVALID_URL);
+        URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
         assertEquals(uri.toString(), VALID_IMAGE_URL);
     }
 
     @Test
     public void testProxyUriImageWithItemAndStateWithValidUrl() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
-        when(imageWidget.getUrl()).thenReturn(VALID_IMAGE_URL);
-        when(imageWidget.getItem()).thenReturn(ITEM_NAME_VALID_IMAGE_URL);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
+        when(imageWidgetMock.getUrl()).thenReturn(VALID_IMAGE_URL);
+        when(imageWidgetMock.getItem()).thenReturn(ITEM_NAME_VALID_IMAGE_URL);
+        URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
         assertEquals(uri.toString(), ITEM_VALID_IMAGE_URL);
     }
 
     @Test
     public void testProxyUriVideoWithoutItemButValidUrl() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
-        when(videoWidget.getUrl()).thenReturn(VALID_VIDEO_URL);
-        when(videoWidget.getItem()).thenReturn(null);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
+        when(videoWidgetMock.getUrl()).thenReturn(VALID_VIDEO_URL);
+        when(videoWidgetMock.getItem()).thenReturn(null);
+        URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
         assertEquals(uri.toString(), VALID_VIDEO_URL);
     }
 
     @Test
     public void testProxyUriVideoWithoutItemAndInvalidUrl() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
-        when(videoWidget.getUrl()).thenReturn(INVALID_URL);
-        when(videoWidget.getItem()).thenReturn(null);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
+        when(videoWidgetMock.getUrl()).thenReturn(INVALID_URL);
+        when(videoWidgetMock.getItem()).thenReturn(null);
+        URI uri = service.uriFromRequest(requestMock);
         assertNull(uri);
     }
 
     @Test
     public void testProxyUriVideoWithItemButUndefState() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
-        when(videoWidget.getUrl()).thenReturn(VALID_VIDEO_URL);
-        when(videoWidget.getItem()).thenReturn(ITEM_NAME_UNDEF_STATE);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
+        when(videoWidgetMock.getUrl()).thenReturn(VALID_VIDEO_URL);
+        when(videoWidgetMock.getItem()).thenReturn(ITEM_NAME_UNDEF_STATE);
+        URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
         assertEquals(uri.toString(), VALID_VIDEO_URL);
     }
 
     @Test
     public void testProxyUriVideoWithItemButNullState() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
-        when(videoWidget.getUrl()).thenReturn(VALID_VIDEO_URL);
-        when(videoWidget.getItem()).thenReturn(ITEM_NAME_NULL_STATE);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
+        when(videoWidgetMock.getUrl()).thenReturn(VALID_VIDEO_URL);
+        when(videoWidgetMock.getItem()).thenReturn(ITEM_NAME_NULL_STATE);
+        URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
         assertEquals(uri.toString(), VALID_VIDEO_URL);
     }
 
     @Test
     public void testProxyUriVideoWithItemButUnexpectedState() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
-        when(videoWidget.getUrl()).thenReturn(VALID_VIDEO_URL);
-        when(videoWidget.getItem()).thenReturn(ITEM_NAME_ON_STATE);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
+        when(videoWidgetMock.getUrl()).thenReturn(VALID_VIDEO_URL);
+        when(videoWidgetMock.getItem()).thenReturn(ITEM_NAME_ON_STATE);
+        URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
         assertEquals(uri.toString(), VALID_VIDEO_URL);
     }
 
     @Test
     public void testProxyUriVideoWithItemButStateWithInvalidUrl() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
-        when(videoWidget.getUrl()).thenReturn(VALID_VIDEO_URL);
-        when(videoWidget.getItem()).thenReturn(ITEM_NAME_INVALID_URL);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
+        when(videoWidgetMock.getUrl()).thenReturn(VALID_VIDEO_URL);
+        when(videoWidgetMock.getItem()).thenReturn(ITEM_NAME_INVALID_URL);
+        URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
         assertEquals(uri.toString(), VALID_VIDEO_URL);
     }
 
     @Test
     public void testProxyUriVideoWithItemAndStateWithValidUrl() {
-        when(request.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
-        when(videoWidget.getUrl()).thenReturn(VALID_VIDEO_URL);
-        when(videoWidget.getItem()).thenReturn(ITEM_NAME_VALID_VIDEO_URL);
-        URI uri = service.uriFromRequest(request);
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(VIDEO_WIDGET_ID);
+        when(videoWidgetMock.getUrl()).thenReturn(VALID_VIDEO_URL);
+        when(videoWidgetMock.getItem()).thenReturn(ITEM_NAME_VALID_VIDEO_URL);
+        URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
         assertEquals(uri.toString(), ITEM_VALID_VIDEO_URL);
     }

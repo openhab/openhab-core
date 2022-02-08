@@ -18,6 +18,7 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +45,7 @@ import org.osgi.framework.BundleContext;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 class BaseDynamicCommandDescriptionProviderTest {
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding:type");
@@ -51,25 +53,27 @@ class BaseDynamicCommandDescriptionProviderTest {
     private static final ChannelUID CHANNEL_UID = new ChannelUID(THING_UID, "channel");
 
     @Mock
-    EventPublisher mockEventPublisher;
+    @NonNullByDefault({})
+    EventPublisher eventPublisherMock;
 
     @Mock
-    ItemChannelLinkRegistry mockItemChannelLinkRegistry;
+    @NonNullByDefault({})
+    ItemChannelLinkRegistry itemChannelLinkRegistryMock;
 
     class TestDynamicCommandDescriptionProvider extends BaseDynamicCommandDescriptionProvider {
 
         public TestDynamicCommandDescriptionProvider() {
             this.bundleContext = mock(BundleContext.class);
-            this.eventPublisher = mockEventPublisher;
-            this.itemChannelLinkRegistry = mockItemChannelLinkRegistry;
+            this.eventPublisher = eventPublisherMock;
+            this.itemChannelLinkRegistry = itemChannelLinkRegistryMock;
         }
     };
 
-    private TestDynamicCommandDescriptionProvider subject;
+    private @NonNullByDefault({}) TestDynamicCommandDescriptionProvider subject;
 
     @BeforeEach
     public void setup() {
-        when(mockItemChannelLinkRegistry.getLinkedItemNames(CHANNEL_UID)).thenReturn(Set.of("item1", "item2"));
+        when(itemChannelLinkRegistryMock.getLinkedItemNames(CHANNEL_UID)).thenReturn(Set.of("item1", "item2"));
 
         subject = new TestDynamicCommandDescriptionProvider();
     }
@@ -79,7 +83,7 @@ class BaseDynamicCommandDescriptionProviderTest {
         subject.setCommandOptions(CHANNEL_UID, List.of(new CommandOption("reboot", "Reboot")));
 
         ArgumentCaptor<Event> capture = ArgumentCaptor.forClass(Event.class);
-        verify(mockEventPublisher, times(1)).post(capture.capture());
+        verify(eventPublisherMock, times(1)).post(capture.capture());
 
         Event event = capture.getValue();
         assertTrue(event instanceof ChannelDescriptionChangedEvent);
@@ -89,6 +93,6 @@ class BaseDynamicCommandDescriptionProviderTest {
         // check the event is not published again
         subject.setCommandOptions(CHANNEL_UID, List.of(new CommandOption("reboot", "Reboot")));
 
-        verify(mockEventPublisher, times(1)).post(capture.capture());
+        verify(eventPublisherMock, times(1)).post(capture.capture());
     }
 }

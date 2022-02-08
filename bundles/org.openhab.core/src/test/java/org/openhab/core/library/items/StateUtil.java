@@ -21,6 +21,7 @@ import java.util.Set;
 
 import javax.measure.quantity.Temperature;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.DecimalType;
@@ -44,6 +45,7 @@ import org.openhab.core.types.UnDefType;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public class StateUtil {
 
     public static List<State> getAllStates() {

@@ -15,6 +15,7 @@ package org.openhab.core.net;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
  * @author Stefan Triller - Initial contribution
  * @author Mark Herwege - added tests for broadcast address
  */
+@NonNullByDefault
 public class NetUtilTest {
 
     @Test

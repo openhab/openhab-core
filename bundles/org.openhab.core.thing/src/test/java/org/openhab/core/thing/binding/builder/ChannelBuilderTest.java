@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.CoreItemFactory;
@@ -37,6 +38,7 @@ import org.openhab.core.thing.type.ThingTypeBuilder;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class ChannelBuilderTest {
 
     private static final String KEY1 = "key1";
@@ -50,8 +52,8 @@ public class ChannelBuilderTest {
             put(KEY2, VALUE2);
         }
     };
-    private ChannelBuilder builder;
-    private Channel channel;
+    private @NonNullByDefault({}) ChannelBuilder builder;
+    private @NonNullByDefault({}) Channel channel;
 
     @BeforeEach
     public void setup() {

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This enumeration is used to present the main status of a {@link Rule}.
  * <table>
@@ -73,6 +75,7 @@ package org.openhab.core.automation;
  * @author Kai Kreuzer - Refactored to match ThingStatus implementation
  * @author Ana Dimova - add java doc
  */
+@NonNullByDefault
 public enum RuleStatus {
     UNINITIALIZED(1),
     INITIALIZING(2),

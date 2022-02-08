@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Duration;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class ExecUtilTest {
 
     @Test

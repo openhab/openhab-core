@@ -14,11 +14,13 @@ package org.openhab.core.library.types;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
+@NonNullByDefault
 public class StringTypeTest {
 
     @Test

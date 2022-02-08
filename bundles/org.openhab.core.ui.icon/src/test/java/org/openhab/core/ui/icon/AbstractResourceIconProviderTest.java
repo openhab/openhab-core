@@ -20,10 +20,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,17 +40,18 @@ import org.openhab.core.ui.icon.IconSet.Format;
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class AbstractResourceIconProviderTest {
 
-    private IconProvider provider;
+    private @NonNullByDefault({}) IconProvider provider;
 
-    private @Mock TranslationProvider i18nProviderMock;
+    private @Mock @NonNullByDefault({}) TranslationProvider i18nProviderMock;
 
     @BeforeEach
     public void setUp() {
         provider = new AbstractResourceIconProvider(i18nProviderMock) {
             @Override
-            protected InputStream getResource(String iconset, String resourceName) {
+            protected @Nullable InputStream getResource(String iconset, String resourceName) {
                 switch (resourceName) {
                     case "x-30.png":
                         return new ByteArrayInputStream("x-30.png".getBytes());
@@ -79,8 +81,8 @@ public class AbstractResourceIconProviderTest {
             };
 
             @Override
-            public Set<IconSet> getIconSets(Locale locale) {
-                return Collections.emptySet();
+            public Set<IconSet> getIconSets(@Nullable Locale locale) {
+                return Set.of();
             };
 
             @Override

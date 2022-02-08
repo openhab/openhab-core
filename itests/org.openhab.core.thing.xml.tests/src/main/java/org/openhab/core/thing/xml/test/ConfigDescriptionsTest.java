@@ -18,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.net.URI;
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
@@ -31,6 +32,7 @@ import org.openhab.core.thing.xml.test.LoadedTestBundle.StuffAddition;
 /**
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class ConfigDescriptionsTest extends JavaOSGiTest {
 
     private LoadedTestBundle loadedTestBundle() throws Exception {
@@ -38,7 +40,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
                 new StuffAddition().configDescriptions(3));
     }
 
-    private ConfigDescriptionRegistry configDescriptionRegistry;
+    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
 
     @BeforeEach
     public void before() {

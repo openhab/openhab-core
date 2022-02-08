@@ -12,12 +12,15 @@
  */
 package org.openhab.core.thing;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * {@link ThingStatusDetail} defines possible status details of a {@link ThingStatusInfo}.
  *
  * @author Stefan Bußweiler - Initial contribution, added new status details
  * @author Chris Jackson - Added GONE status
  */
+@NonNullByDefault
 public enum ThingStatusDetail {
     NONE,
     HANDLER_MISSING_ERROR,

@@ -22,11 +22,13 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class ConfigUtilTest {
 
     private final URI configUri = URI.create("system:ephemeris");

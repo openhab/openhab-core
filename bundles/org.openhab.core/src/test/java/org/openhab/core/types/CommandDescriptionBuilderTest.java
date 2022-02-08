@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -26,29 +26,26 @@ import org.junit.jupiter.api.Test;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class CommandDescriptionBuilderTest {
-
-    private CommandDescriptionBuilder builder;
-
-    @BeforeEach
-    public void setup() {
-        builder = CommandDescriptionBuilder.create();
-    }
 
     @Test
     public void builderWithEmptyOptions() {
+        CommandDescriptionBuilder builder = CommandDescriptionBuilder.create();
         List<CommandOption> options = List.of();
         assertThat(builder.withCommandOptions(options).build().getCommandOptions(), is(options));
     }
 
     @Test
     public void builderWithOption() {
+        CommandDescriptionBuilder builder = CommandDescriptionBuilder.create();
         CommandOption option = new CommandOption("command", "label");
         assertThat(builder.withCommandOption(option).build().getCommandOptions(), is(List.of(option)));
     }
 
     @Test
     public void builderWithOptions() {
+        CommandDescriptionBuilder builder = CommandDescriptionBuilder.create();
         List<CommandOption> options = List.of(new CommandOption("command1", "label1"),
                 new CommandOption("command2", "label2"));
         assertThat(builder.withCommandOptions(options).build().getCommandOptions(), is(options));
@@ -56,6 +53,7 @@ public class CommandDescriptionBuilderTest {
 
     @Test
     public void subsequentBuildsCreateIndependentFragments() {
+        CommandDescriptionBuilder builder = CommandDescriptionBuilder.create();
         CommandDescription commandDescription1 = builder
                 .withCommandOptions(List.of(new CommandOption("command", "label"))).build();
         CommandDescription commandDescription2 = builder.withCommandOptions(Collections.emptyList()).build();

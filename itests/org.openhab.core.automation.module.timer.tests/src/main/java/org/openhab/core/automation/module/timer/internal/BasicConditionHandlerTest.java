@@ -26,6 +26,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
@@ -66,12 +67,13 @@ import org.slf4j.LoggerFactory;
  * @author Dominik Schlierf - Initial contribution
  * @author Kai Kreuzer - Initial contribution of TimeOfDayConditionHandlerTest
  */
+@NonNullByDefault
 public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
     private final Logger logger = LoggerFactory.getLogger(BasicConditionHandlerTest.class);
     private VolatileStorageService volatileStorageService = new VolatileStorageService();
-    private RuleRegistry ruleRegistry;
-    private RuleManager ruleEngine;
-    private Event itemEvent = null;
+    private @NonNullByDefault({}) RuleRegistry ruleRegistry;
+    private @NonNullByDefault({}) RuleManager ruleEngine;
+    private @Nullable Event itemEvent;
 
     /**
      * This executes before every test and before the
@@ -80,7 +82,6 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
      */
     @BeforeEach
     public void beforeBase() {
-        @NonNullByDefault
         ItemProvider itemProvider = new ItemProvider() {
             @Override
             public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
@@ -153,7 +154,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
             }
 
             @Override
-            public EventFilter getEventFilter() {
+            public @Nullable EventFilter getEventFilter() {
                 return null;
             }
 

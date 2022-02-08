@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.library.types.DateTimeType;
 
 import com.google.gson.Gson;
@@ -32,6 +33,7 @@ import com.google.gson.GsonBuilder;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class Stream2JSONInputStream extends InputStream implements JSONInputStream {
 
     private final Iterator<String> iterator;
@@ -49,10 +51,6 @@ public class Stream2JSONInputStream extends InputStream implements JSONInputStre
      * @throws IllegalArgumentException in case the source is null.
      */
     public Stream2JSONInputStream(Stream<?> source) {
-        if (source == null) {
-            throw new IllegalArgumentException("The source must not be null!");
-        }
-
         iterator = source.map(e -> gson.toJson(e)).iterator();
         jsonElementStream = new ByteArrayInputStream(new byte[0]);
         firstIteratorElement = true;

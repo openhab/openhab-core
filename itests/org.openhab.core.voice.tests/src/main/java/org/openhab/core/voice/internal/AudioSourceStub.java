@@ -15,9 +15,9 @@ package org.openhab.core.voice.internal;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSource;
@@ -29,10 +29,10 @@ import org.openhab.core.audio.AudioStream;
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - Migrated from groovy to java
  */
+@NonNullByDefault
 public class AudioSourceStub implements AudioSource {
 
-    private static final Set<AudioFormat> SUPPORTED_FORMATS = Stream.of(AudioFormat.MP3, AudioFormat.WAV)
-            .collect(Collectors.toSet());
+    private static final Set<AudioFormat> SUPPORTED_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
 
     private static final String AUDIOSOURCE_STUB_ID = "audioSouceID";
     private static final String AUDIOSOURCE_STUB_LABEL = "audioSouceLabel";
@@ -43,7 +43,7 @@ public class AudioSourceStub implements AudioSource {
     }
 
     @Override
-    public String getLabel(Locale locale) {
+    public String getLabel(@Nullable Locale locale) {
         return AUDIOSOURCE_STUB_LABEL;
     }
 

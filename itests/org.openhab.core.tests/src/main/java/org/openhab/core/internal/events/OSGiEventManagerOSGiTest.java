@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +47,7 @@ import org.osgi.framework.ServiceRegistration;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
 
     private static final String EVENT_TYPE_A = "EVENT_TYPE_A";
@@ -63,43 +66,43 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
 
     private final Map<String, ServiceRegistration<?>> serviceRegistrations = new HashMap<>();
 
-    private EventPublisher eventPublisher;
+    private @NonNullByDefault({}) EventPublisher eventPublisher;
 
-    private @Mock EventSubscriber subscriber1;
-    private @Mock EventSubscriber subscriber2;
-    private @Mock EventSubscriber subscriber3;
-    private @Mock EventSubscriber subscriber4;
-    private @Mock EventFactory eventTypeFactoryAB;
-    private @Mock EventFactory eventTypeFactoryC;
+    private @Mock @NonNullByDefault({}) EventSubscriber subscriber1Mock;
+    private @Mock @NonNullByDefault({}) EventSubscriber subscriber2Mock;
+    private @Mock @NonNullByDefault({}) EventSubscriber subscriber3Mock;
+    private @Mock @NonNullByDefault({}) EventSubscriber subscriber4Mock;
+    private @Mock @NonNullByDefault({}) EventFactory eventTypeFactoryABMock;
+    private @Mock @NonNullByDefault({}) EventFactory eventTypeFactoryCMock;
 
     @BeforeEach
     public void beforeEach() throws Exception {
         eventPublisher = getService(EventPublisher.class);
         assertNotNull(eventPublisher);
 
-        when(eventTypeFactoryAB.getSupportedEventTypes()).thenReturn(Set.of(EVENT_TYPE_A, EVENT_TYPE_B));
-        when(eventTypeFactoryAB.createEvent(any(), any(), any(), any()))
+        when(eventTypeFactoryABMock.getSupportedEventTypes()).thenReturn(Set.of(EVENT_TYPE_A, EVENT_TYPE_B));
+        when(eventTypeFactoryABMock.createEvent(any(), any(), any(), any()))
                 .thenAnswer(answer -> createEvent(answer.getArgument(0), answer.getArgument(2), answer.getArgument(1)));
-        internalRegisterService(EVENT_TYPE_FACTORY_A_B, EventFactory.class, eventTypeFactoryAB);
+        internalRegisterService(EVENT_TYPE_FACTORY_A_B, EventFactory.class, eventTypeFactoryABMock);
 
-        when(eventTypeFactoryC.getSupportedEventTypes()).thenReturn(Set.of(EVENT_TYPE_C));
-        when(eventTypeFactoryC.createEvent(any(), any(), any(), any()))
+        when(eventTypeFactoryCMock.getSupportedEventTypes()).thenReturn(Set.of(EVENT_TYPE_C));
+        when(eventTypeFactoryCMock.createEvent(any(), any(), any(), any()))
                 .thenAnswer(answer -> createEvent(answer.getArgument(0), answer.getArgument(2), answer.getArgument(1)));
-        internalRegisterService(EVENT_TYPE_FACTORY_C, EventFactory.class, eventTypeFactoryC);
+        internalRegisterService(EVENT_TYPE_FACTORY_C, EventFactory.class, eventTypeFactoryCMock);
 
-        when(subscriber1.getSubscribedEventTypes()).thenReturn(Set.of(EVENT_TYPE_A));
-        internalRegisterService(TYPE_BASED_SUBSCRIBER_1, EventSubscriber.class, subscriber1);
+        when(subscriber1Mock.getSubscribedEventTypes()).thenReturn(Set.of(EVENT_TYPE_A));
+        internalRegisterService(TYPE_BASED_SUBSCRIBER_1, EventSubscriber.class, subscriber1Mock);
 
-        when(subscriber2.getSubscribedEventTypes()).thenReturn(Set.of(EVENT_TYPE_A));
-        internalRegisterService(TYPE_BASED_SUBSCRIBER_2, EventSubscriber.class, subscriber2);
+        when(subscriber2Mock.getSubscribedEventTypes()).thenReturn(Set.of(EVENT_TYPE_A));
+        internalRegisterService(TYPE_BASED_SUBSCRIBER_2, EventSubscriber.class, subscriber2Mock);
 
-        when(subscriber3.getSubscribedEventTypes()).thenReturn(Set.of(EVENT_TYPE_B, EVENT_TYPE_C));
-        when(subscriber3.getEventFilter()).thenReturn(new TopicEventFilter(TOPIC));
-        internalRegisterService(TOPIC_BASED_SUBSCRIBER_3, EventSubscriber.class, subscriber3);
+        when(subscriber3Mock.getSubscribedEventTypes()).thenReturn(Set.of(EVENT_TYPE_B, EVENT_TYPE_C));
+        when(subscriber3Mock.getEventFilter()).thenReturn(new TopicEventFilter(TOPIC));
+        internalRegisterService(TOPIC_BASED_SUBSCRIBER_3, EventSubscriber.class, subscriber3Mock);
 
-        when(subscriber4.getSubscribedEventTypes()).thenReturn(Set.of(EventSubscriber.ALL_EVENT_TYPES));
-        when(subscriber4.getEventFilter()).thenReturn(new TopicEventFilter(TOPIC));
-        internalRegisterService(ALL_EVENT_TYPES_SUBSCRIBER_4, EventSubscriber.class, subscriber4);
+        when(subscriber4Mock.getSubscribedEventTypes()).thenReturn(Set.of(EventSubscriber.ALL_EVENT_TYPES));
+        when(subscriber4Mock.getEventFilter()).thenReturn(new TopicEventFilter(TOPIC));
+        internalRegisterService(ALL_EVENT_TYPES_SUBSCRIBER_4, EventSubscriber.class, subscriber4Mock);
     }
 
     @AfterEach
@@ -115,10 +118,10 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
         eventPublisher.post(createEvent(EVENT_TYPE_A));
         Thread.sleep(100);
 
-        assertEvent(subscriber1, createEvent(EVENT_TYPE_A));
-        assertEvent(subscriber2, createEvent(EVENT_TYPE_A));
-        assertEventCount(subscriber3, 0);
-        assertEvent(subscriber4, createEvent(EVENT_TYPE_A));
+        assertEvent(subscriber1Mock, createEvent(EVENT_TYPE_A));
+        assertEvent(subscriber2Mock, createEvent(EVENT_TYPE_A));
+        assertEventCount(subscriber3Mock, 0);
+        assertEvent(subscriber4Mock, createEvent(EVENT_TYPE_A));
     }
 
     @Test
@@ -126,10 +129,10 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
         eventPublisher.post(createEvent(EVENT_TYPE_B));
         Thread.sleep(100);
 
-        assertEventCount(subscriber1, 0);
-        assertEventCount(subscriber2, 0);
-        assertEvent(subscriber3, createEvent(EVENT_TYPE_B));
-        assertEvent(subscriber4, createEvent(EVENT_TYPE_B));
+        assertEventCount(subscriber1Mock, 0);
+        assertEventCount(subscriber2Mock, 0);
+        assertEvent(subscriber3Mock, createEvent(EVENT_TYPE_B));
+        assertEvent(subscriber4Mock, createEvent(EVENT_TYPE_B));
     }
 
     @Test
@@ -137,10 +140,10 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
         eventPublisher.post(createEvent(EVENT_TYPE_C));
         Thread.sleep(100);
 
-        assertEventCount(subscriber1, 0);
-        assertEventCount(subscriber2, 0);
-        assertEvent(subscriber3, createEvent(EVENT_TYPE_C));
-        assertEvent(subscriber4, createEvent(EVENT_TYPE_C));
+        assertEventCount(subscriber1Mock, 0);
+        assertEventCount(subscriber2Mock, 0);
+        assertEvent(subscriber3Mock, createEvent(EVENT_TYPE_C));
+        assertEvent(subscriber4Mock, createEvent(EVENT_TYPE_C));
     }
 
     @Test
@@ -149,10 +152,10 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
         eventPublisher.post(createEvent(EVENT_TYPE_A));
         Thread.sleep(100);
 
-        assertEventCount(subscriber1, 0);
-        assertEventCount(subscriber2, 1);
-        assertEventCount(subscriber3, 0);
-        assertEventCount(subscriber4, 1);
+        assertEventCount(subscriber1Mock, 0);
+        assertEventCount(subscriber2Mock, 1);
+        assertEventCount(subscriber3Mock, 0);
+        assertEventCount(subscriber4Mock, 1);
     }
 
     @Test
@@ -162,10 +165,10 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
         eventPublisher.post(createEvent(EVENT_TYPE_A));
         Thread.sleep(100);
 
-        assertEventCount(subscriber1, 0);
-        assertEventCount(subscriber2, 0);
-        assertEventCount(subscriber3, 0);
-        assertEventCount(subscriber4, 1);
+        assertEventCount(subscriber1Mock, 0);
+        assertEventCount(subscriber2Mock, 0);
+        assertEventCount(subscriber3Mock, 0);
+        assertEventCount(subscriber4Mock, 1);
     }
 
     @Test
@@ -174,10 +177,10 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
         eventPublisher.post(createEvent(EVENT_TYPE_A));
         Thread.sleep(100);
 
-        assertEventCount(subscriber1, 0);
-        assertEventCount(subscriber2, 0);
-        assertEventCount(subscriber3, 0);
-        assertEventCount(subscriber4, 0);
+        assertEventCount(subscriber1Mock, 0);
+        assertEventCount(subscriber2Mock, 0);
+        assertEventCount(subscriber3Mock, 0);
+        assertEventCount(subscriber4Mock, 0);
     }
 
     @Test
@@ -217,11 +220,11 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
         return createEvent(eventType, "{a: 'A', b: 'B'}", TOPIC);
     }
 
-    private Event createEvent(String eventType, String payload, String topic) {
+    private Event createEvent(@Nullable String eventType, @Nullable String payload, @Nullable String topic) {
         Event event = mock(Event.class);
-        when(event.getType()).thenReturn(eventType);
-        when(event.getPayload()).thenReturn(payload);
-        when(event.getTopic()).thenReturn(topic);
+        when(event.getType()).thenReturn(eventType == null ? giveNull() : eventType);
+        when(event.getPayload()).thenReturn(payload == null ? giveNull() : payload);
+        when(event.getTopic()).thenReturn(topic == null ? giveNull() : topic);
         return event;
     }
 

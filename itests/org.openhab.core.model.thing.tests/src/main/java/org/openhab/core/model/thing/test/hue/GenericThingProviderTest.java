@@ -50,12 +50,13 @@ import org.openhab.core.thing.type.ChannelTypeUID;
 /**
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class GenericThingProviderTest extends JavaOSGiTest {
 
     private static final String TESTMODEL_NAME = "testModel.things";
 
-    private ModelRepository modelRepository;
-    private ThingRegistry thingRegistry;
+    private @NonNullByDefault({}) ModelRepository modelRepository;
+    private @NonNullByDefault({}) ThingRegistry thingRegistry;
 
     @BeforeEach
     public void setUp() {
@@ -481,7 +482,6 @@ public class GenericThingProviderTest extends JavaOSGiTest {
     public void assertThatUpdatingAnEmbeddedThingCausesTheRightBehaviorWrtAddingAndUpdatingAndNoRemovedEventsAreSent() {
         List<AbstractThingRegistryEvent> receivedEvents = new ArrayList<>();
 
-        @NonNullByDefault
         EventSubscriber thingEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {

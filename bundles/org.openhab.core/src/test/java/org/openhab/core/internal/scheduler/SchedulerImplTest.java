@@ -33,6 +33,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
@@ -47,6 +49,7 @@ import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
  * @author Simon Kaufmann - adapted to Java 8
  * @author Hilbrand Bouwkamp - moved cron and periodic scheduling to it's their own interfaces
  */
+@NonNullByDefault
 public class SchedulerImplTest {
     private SchedulerImpl scheduler = new SchedulerImpl();
 
@@ -219,7 +222,7 @@ public class SchedulerImplTest {
             throw new FileNotFoundException("testBeforeTimeoutException");
         };
 
-        ScheduledCompletableFuture<Void> schedule = scheduler.schedule(runnable, temporalAdjuster);
+        ScheduledCompletableFuture<@Nullable Void> schedule = scheduler.schedule(runnable, temporalAdjuster);
         schedule.getPromise().exceptionally(e -> {
             if (e instanceof FileNotFoundException) {
                 s.release();
@@ -301,7 +304,7 @@ public class SchedulerImplTest {
         private final AtomicInteger counter = new AtomicInteger();
 
         @Override
-        public Temporal adjustInto(Temporal arg0) {
+        public Temporal adjustInto(@NonNullByDefault({}) Temporal arg0) {
             return arg0.plus(100, ChronoUnit.MILLIS);
         }
 
@@ -326,7 +329,7 @@ public class SchedulerImplTest {
         }
 
         @Override
-        public Temporal adjustInto(Temporal arg0) {
+        public Temporal adjustInto(@NonNullByDefault({}) Temporal arg0) {
             Temporal now = arg0.plus(100, ChronoUnit.MILLIS);
             for (int i = 0; i < 5; i++) {
                 ZonedDateTime newTime = startTime.plus(duration * i, ChronoUnit.MILLIS);

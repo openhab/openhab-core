@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +45,7 @@ import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class UpnpIOServiceTest {
 
     private static final String UDN_1_STRING = "UDN";
@@ -56,18 +58,18 @@ public class UpnpIOServiceTest {
     private static final String DEVICE_TYPE = "deviceType";
     private static final String SERVICE_TYPE = "serviceType";
 
-    private @Mock UpnpIOParticipant upnpIoParticipant;
-    private @Mock UpnpIOParticipant upnpIoParticipant2;
-    private @Mock Registry upnpRegistry;
-    private @Mock ControlPoint controlPoint;
-    private @Mock UpnpService upnpServiceMock;
+    private @Mock @NonNullByDefault({}) UpnpIOParticipant upnpIoParticipantMock;
+    private @Mock @NonNullByDefault({}) UpnpIOParticipant upnpIoParticipant2Mock;
+    private @Mock @NonNullByDefault({}) Registry upnpRegistryMock;
+    private @Mock @NonNullByDefault({}) ControlPoint controlPointMock;
+    private @Mock @NonNullByDefault({}) UpnpService upnpServiceMock;
 
-    private UpnpIOServiceImpl upnpIoService;
+    private @NonNullByDefault({}) UpnpIOServiceImpl upnpIoService;
 
     @BeforeEach
     public void setup() throws Exception {
-        when(upnpIoParticipant.getUDN()).thenReturn(UDN_1_STRING);
-        when(upnpIoParticipant2.getUDN()).thenReturn(UDN_2_STRING);
+        when(upnpIoParticipantMock.getUDN()).thenReturn(UDN_1_STRING);
+        when(upnpIoParticipant2Mock.getUDN()).thenReturn(UDN_2_STRING);
 
         DeviceIdentity deviceIdentity = new DeviceIdentity(UDN_1);
         DeviceType deviceType = new DeviceType(UDAServiceId.DEFAULT_NAMESPACE, DEVICE_TYPE, 1);
@@ -81,31 +83,31 @@ public class UpnpIOServiceTest {
         LocalService<?> service2 = new LocalService<>(serviceType, serviceId2, null, null);
         LocalDevice device2 = new LocalDevice(deviceIdentity, deviceType, (DeviceDetails) null, service2);
 
-        when(upnpRegistry.getDevice(eq(UDN_1), anyBoolean())).thenReturn(device);
-        when(upnpRegistry.getDevice(eq(UDN_2), anyBoolean())).thenReturn(device2);
+        when(upnpRegistryMock.getDevice(eq(UDN_1), anyBoolean())).thenReturn(device);
+        when(upnpRegistryMock.getDevice(eq(UDN_2), anyBoolean())).thenReturn(device2);
 
-        when(upnpServiceMock.getRegistry()).thenReturn(upnpRegistry);
-        when(upnpServiceMock.getControlPoint()).thenReturn(controlPoint);
+        when(upnpServiceMock.getRegistry()).thenReturn(upnpRegistryMock);
+        when(upnpServiceMock.getControlPoint()).thenReturn(controlPointMock);
 
         upnpIoService = new UpnpIOServiceImpl(upnpServiceMock);
     }
 
     @Test
     public void testIsRegistered() {
-        assertTrue(upnpIoService.isRegistered(upnpIoParticipant));
+        assertTrue(upnpIoService.isRegistered(upnpIoParticipantMock));
     }
 
     @Test
     public void testIsRegisteredEverythingEmptyInitially() {
-        assertTrue(upnpIoService.isRegistered(upnpIoParticipant));
+        assertTrue(upnpIoService.isRegistered(upnpIoParticipantMock));
         assertThatEverythingIsEmpty();
     }
 
     @Test
     public void testRegisterParticipant() {
-        upnpIoService.registerParticipant(upnpIoParticipant);
+        upnpIoService.registerParticipant(upnpIoParticipantMock);
         assertEquals(1, upnpIoService.participants.size());
-        assertTrue(upnpIoService.participants.contains(upnpIoParticipant));
+        assertTrue(upnpIoService.participants.contains(upnpIoParticipantMock));
         assertTrue(upnpIoService.pollingJobs.keySet().isEmpty());
         assertTrue(upnpIoService.currentStates.keySet().isEmpty());
         assertTrue(upnpIoService.subscriptionCallbacks.keySet().isEmpty());
@@ -113,45 +115,45 @@ public class UpnpIOServiceTest {
 
     @Test
     public void testAddStatusListener() {
-        upnpIoService.addStatusListener(upnpIoParticipant, SERVICE_ID, ACTION_ID, 60);
+        upnpIoService.addStatusListener(upnpIoParticipantMock, SERVICE_ID, ACTION_ID, 60);
         assertEquals(1, upnpIoService.participants.size());
-        assertTrue(upnpIoService.participants.contains(upnpIoParticipant));
+        assertTrue(upnpIoService.participants.contains(upnpIoParticipantMock));
         assertEquals(1, upnpIoService.pollingJobs.keySet().size());
-        assertTrue(upnpIoService.pollingJobs.containsKey(upnpIoParticipant));
+        assertTrue(upnpIoService.pollingJobs.containsKey(upnpIoParticipantMock));
         assertEquals(1, upnpIoService.currentStates.keySet().size());
-        assertTrue(upnpIoService.currentStates.containsKey(upnpIoParticipant));
+        assertTrue(upnpIoService.currentStates.containsKey(upnpIoParticipantMock));
         assertTrue(upnpIoService.subscriptionCallbacks.keySet().isEmpty());
 
-        upnpIoService.removeStatusListener(upnpIoParticipant);
+        upnpIoService.removeStatusListener(upnpIoParticipantMock);
         assertThatEverythingIsEmpty();
     }
 
     @Test
     public void testAddSubscription() {
-        upnpIoService.addSubscription(upnpIoParticipant, SERVICE_ID, 60);
+        upnpIoService.addSubscription(upnpIoParticipantMock, SERVICE_ID, 60);
         assertEquals(1, upnpIoService.participants.size());
-        assertTrue(upnpIoService.participants.contains(upnpIoParticipant));
+        assertTrue(upnpIoService.participants.contains(upnpIoParticipantMock));
         assertTrue(upnpIoService.pollingJobs.keySet().isEmpty());
         assertTrue(upnpIoService.currentStates.keySet().isEmpty());
         assertEquals(1, upnpIoService.subscriptionCallbacks.size());
 
-        upnpIoService.addSubscription(upnpIoParticipant2, SERVICE_ID_2, 60);
+        upnpIoService.addSubscription(upnpIoParticipant2Mock, SERVICE_ID_2, 60);
         assertEquals(2, upnpIoService.participants.size());
-        assertTrue(upnpIoService.participants.contains(upnpIoParticipant));
+        assertTrue(upnpIoService.participants.contains(upnpIoParticipantMock));
         assertTrue(upnpIoService.pollingJobs.keySet().isEmpty());
         assertTrue(upnpIoService.currentStates.keySet().isEmpty());
         assertEquals(2, upnpIoService.subscriptionCallbacks.size());
 
-        upnpIoService.removeSubscription(upnpIoParticipant, SERVICE_ID);
-        upnpIoService.unregisterParticipant(upnpIoParticipant);
+        upnpIoService.removeSubscription(upnpIoParticipantMock, SERVICE_ID);
+        upnpIoService.unregisterParticipant(upnpIoParticipantMock);
         assertEquals(1, upnpIoService.participants.size());
-        assertTrue(upnpIoService.participants.contains(upnpIoParticipant2));
+        assertTrue(upnpIoService.participants.contains(upnpIoParticipant2Mock));
         assertTrue(upnpIoService.pollingJobs.keySet().isEmpty());
         assertTrue(upnpIoService.currentStates.keySet().isEmpty());
         assertEquals(1, upnpIoService.subscriptionCallbacks.size());
 
-        upnpIoService.removeSubscription(upnpIoParticipant2, SERVICE_ID_2);
-        upnpIoService.unregisterParticipant(upnpIoParticipant2);
+        upnpIoService.removeSubscription(upnpIoParticipant2Mock, SERVICE_ID_2);
+        upnpIoService.unregisterParticipant(upnpIoParticipant2Mock);
         assertThatEverythingIsEmpty();
     }
 

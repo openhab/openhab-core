@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -35,6 +36,7 @@ import org.openhab.core.thing.xml.test.LoadedTestBundle.StuffAddition;
 /**
  * @author Ivan Iliev - Initial contribution
  */
+@NonNullByDefault
 public class SystemWideChannelTypesTest extends JavaOSGiTest {
 
     private LoadedTestBundle loadedSystemChannelsBundle() throws Exception {
@@ -52,9 +54,9 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
                 new StuffAddition().thingTypes(0).channelTypes(1));
     }
 
-    private ThingTypeProvider thingTypeProvider;
-    private ChannelTypeRegistry channelTypeRegistry;
-    private ChannelTypeProvider systemChannelTypeProvider;
+    private @NonNullByDefault({}) ThingTypeProvider thingTypeProvider;
+    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    private @NonNullByDefault({}) ChannelTypeProvider systemChannelTypeProvider;
 
     @BeforeEach
     public void setUp() {

@@ -15,6 +15,7 @@ package org.openhab.core.config.discovery.inbox.events;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultBuilder;
@@ -31,6 +32,7 @@ import com.google.gson.Gson;
  * @author Stefan Bußweiler - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class InboxEventFactoryTest {
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding", "type");

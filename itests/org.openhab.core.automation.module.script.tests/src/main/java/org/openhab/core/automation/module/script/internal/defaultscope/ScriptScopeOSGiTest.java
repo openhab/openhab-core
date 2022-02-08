@@ -21,6 +21,7 @@ import java.net.URL;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
@@ -32,9 +33,10 @@ import org.openhab.core.test.java.JavaOSGiTest;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class ScriptScopeOSGiTest extends JavaOSGiTest {
 
-    private ScriptEngine engine;
+    private @NonNullByDefault({}) ScriptEngine engine;
 
     private final String path = "OH-INF/automation/jsr223/";
     private final String workingFile = "scopeWorking.js";

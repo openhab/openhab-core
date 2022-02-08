@@ -14,6 +14,7 @@ package org.openhab.core.thing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
  * @author Simon Kaufmann - Initial contribution
  * @author Christoph Weitkamp - Changed pattern for validating last segment to contain either a single `#` or none
  */
+@NonNullByDefault
 public class ChannelUIDTest {
 
     private static final String BINDING_ID = "binding";

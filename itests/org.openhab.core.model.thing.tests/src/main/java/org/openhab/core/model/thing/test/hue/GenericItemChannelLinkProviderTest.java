@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,16 +37,17 @@ import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 /**
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class GenericItemChannelLinkProviderTest extends JavaOSGiTest {
 
     private static final String THINGS_TESTMODEL_NAME = "test.things";
     private static final String ITEMS_TESTMODEL_NAME = "test.items";
 
-    private ModelRepository modelRepository;
-    private ThingRegistry thingRegistry;
-    private ItemRegistry itemRegistry;
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private ItemChannelLinkProvider itemChannelLinkProvider;
+    private @NonNullByDefault({}) ModelRepository modelRepository;
+    private @NonNullByDefault({}) ThingRegistry thingRegistry;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private @NonNullByDefault({}) ItemChannelLinkProvider itemChannelLinkProvider;
 
     @BeforeEach
     public void setUp() {

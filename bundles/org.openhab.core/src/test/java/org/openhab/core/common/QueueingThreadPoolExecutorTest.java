@@ -17,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jochen Hiller - Initial contribution
  */
+@NonNullByDefault
 public class QueueingThreadPoolExecutorTest {
 
     /**
@@ -214,7 +217,7 @@ public class QueueingThreadPoolExecutorTest {
      *
      * @return found thread or null
      */
-    private Thread getThread(String threadName) {
+    private @Nullable Thread getThread(String threadName) {
         // get top level thread group
         ThreadGroup g = Thread.currentThread().getThreadGroup();
         while (g.getParent() != null) {

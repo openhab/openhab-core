@@ -27,6 +27,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.function.LongSupplier;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,6 +69,7 @@ import net.wimpi.modbus.util.SerialParameters;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class IntegrationTestSupport extends JavaTest {
 
     private final Logger logger = LoggerFactory.getLogger(IntegrationTestSupport.class);
@@ -125,18 +127,18 @@ public class IntegrationTestSupport extends JavaTest {
     protected @Spy UDPSlaveTerminalFactory udpTerminalFactory = new UDPSlaveTerminalFactoryImpl();
     protected @Spy SerialConnectionFactory serialConnectionFactory = new SerialConnectionFactoryImpl();
 
-    protected ResultCaptor<ModbusRequest> modbustRequestCaptor;
+    protected @NonNullByDefault({}) ResultCaptor<ModbusRequest> modbustRequestCaptor;
 
-    protected ModbusTCPListener tcpListener;
-    protected ModbusUDPListener udpListener;
-    protected ModbusSerialListener serialListener;
-    protected SimpleProcessImage spi;
+    protected @NonNullByDefault({}) ModbusTCPListener tcpListener;
+    protected @NonNullByDefault({}) ModbusUDPListener udpListener;
+    protected @NonNullByDefault({}) ModbusSerialListener serialListener;
+    protected @NonNullByDefault({}) SimpleProcessImage spi;
     protected int tcpModbusPort = -1;
     protected int udpModbusPort = -1;
     protected ServerType serverType = ServerType.TCP;
     protected long artificialServerWait = 0;
 
-    protected NonOSGIModbusManager modbusManager;
+    protected @NonNullByDefault({}) NonOSGIModbusManager modbusManager;
 
     private Thread serialServerThread = new Thread("ModbusTransportTestsSerialServer") {
         @Override
@@ -282,7 +284,7 @@ public class IntegrationTestSupport extends JavaTest {
     public class SpyingModbusTCPTransportFactory extends ModbusTCPTransportFactory {
 
         @Override
-        public ModbusTransport create(Socket socket) {
+        public ModbusTransport create(@NonNullByDefault({}) Socket socket) {
             ModbusTransport transport = spy(super.create(socket));
             // Capture requests produced by our server transport
             try {
@@ -297,7 +299,7 @@ public class IntegrationTestSupport extends JavaTest {
     public class SpyingModbusUDPTransportFactory extends ModbusUDPTransportFactoryImpl {
 
         @Override
-        public ModbusTransport create(UDPTerminal terminal) {
+        public ModbusTransport create(@NonNullByDefault({}) UDPTerminal terminal) {
             ModbusTransport transport = spy(super.create(terminal));
             // Capture requests produced by our server transport
             try {
@@ -312,7 +314,7 @@ public class IntegrationTestSupport extends JavaTest {
     public class TCPSlaveConnectionFactoryImpl implements TCPSlaveConnectionFactory {
 
         @Override
-        public TCPSlaveConnection create(Socket socket) {
+        public TCPSlaveConnection create(@NonNullByDefault({}) Socket socket) {
             return new TCPSlaveConnection(socket, new SpyingModbusTCPTransportFactory());
         }
     }
@@ -320,7 +322,7 @@ public class IntegrationTestSupport extends JavaTest {
     public class UDPSlaveTerminalFactoryImpl implements UDPSlaveTerminalFactory {
 
         @Override
-        public UDPSlaveTerminal create(InetAddress interfac, int port) {
+        public UDPSlaveTerminal create(@NonNullByDefault({}) InetAddress interfac, int port) {
             UDPSlaveTerminal terminal = new UDPSlaveTerminal(interfac, new SpyingModbusUDPTransportFactory(), 1);
             terminal.setLocalPort(port);
             return terminal;
@@ -329,7 +331,7 @@ public class IntegrationTestSupport extends JavaTest {
 
     public class SerialConnectionFactoryImpl implements SerialConnectionFactory {
         @Override
-        public SerialConnection create(SerialParameters parameters) {
+        public SerialConnection create(@NonNullByDefault({}) SerialParameters parameters) {
             SerialConnection serialConnection = new SerialConnection(parameters) {
                 @Override
                 public ModbusTransport getModbusTransport() {

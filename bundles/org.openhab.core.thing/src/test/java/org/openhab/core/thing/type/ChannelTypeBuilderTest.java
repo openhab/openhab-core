@@ -19,9 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.thing.CommonTriggerEvents;
@@ -36,6 +37,7 @@ import org.openhab.core.types.StateDescriptionFragmentBuilder;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public class ChannelTypeBuilderTest {
 
     private static final String DESCRIPTION = "description";
@@ -44,22 +46,22 @@ public class ChannelTypeBuilderTest {
     private static final String LABEL = "label";
     private static final String TAG = "tag";
     private static final List<String> TAGS = List.of("TAG1", "TAG2");
-    private static URI configDescriptionUri;
+    private static final URI CONFIG_DESCRIPTION_URL = URI.create("config:dummy");
     private static final ChannelTypeUID CHANNEL_TYPE_UID = new ChannelTypeUID("bindingId", "channelId");
     private static final StateDescriptionFragment STATE_DESCRIPTION_FRAGMENT = StateDescriptionFragmentBuilder.create()
             .withMinimum(BigDecimal.ZERO).withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withPattern("%s")
             .build();
-    private static final StateDescription STATE_DESCRIPTION = STATE_DESCRIPTION_FRAGMENT.toStateDescription();
+    private static final StateDescription STATE_DESCRIPTION = Objects
+            .requireNonNull(STATE_DESCRIPTION_FRAGMENT.toStateDescription());
     private static final EventDescription EVENT_DESCRIPTION = new EventDescription(
             List.of(new EventOption(CommonTriggerEvents.DIR1_PRESSED, null),
                     new EventOption(CommonTriggerEvents.DIR1_RELEASED, null)));
 
-    private StateChannelTypeBuilder stateBuilder;
-    private TriggerChannelTypeBuilder triggerBuilder;
+    private @NonNullByDefault({}) StateChannelTypeBuilder stateBuilder;
+    private @NonNullByDefault({}) TriggerChannelTypeBuilder triggerBuilder;
 
     @BeforeEach
-    public void setup() throws URISyntaxException {
-        configDescriptionUri = new URI("config:dummy");
+    public void setup() {
         // set up a valid basic ChannelTypeBuilder
         stateBuilder = ChannelTypeBuilder.state(CHANNEL_TYPE_UID, LABEL, ITEM_TYPE);
         triggerBuilder = ChannelTypeBuilder.trigger(CHANNEL_TYPE_UID, LABEL);
@@ -120,9 +122,9 @@ public class ChannelTypeBuilderTest {
 
     @Test
     public void withConfigDescriptionURIShouldSetConfigDescriptionURI() {
-        ChannelType channelType = stateBuilder.withConfigDescriptionURI(configDescriptionUri).build();
+        ChannelType channelType = stateBuilder.withConfigDescriptionURI(CONFIG_DESCRIPTION_URL).build();
 
-        assertThat(channelType.getConfigDescriptionURI(), is(configDescriptionUri));
+        assertThat(channelType.getConfigDescriptionURI(), is(CONFIG_DESCRIPTION_URL));
     }
 
     @Test

@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
@@ -45,22 +47,21 @@ import org.osgi.service.http.HttpService;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public abstract class AbstractAudioServletTest extends JavaTest {
-
-    protected AudioServlet audioServlet;
-
-    private int port;
-    private TestServer server;
 
     private static final String AUDIO_SERVLET_PROTOCOL = "http";
     private static final String AUDIO_SERVLET_HOSTNAME = "localhost";
 
-    private CompletableFuture<Boolean> serverStarted;
+    protected @NonNullByDefault({}) AudioServlet audioServlet;
 
-    private HttpClient httpClient;
+    private int port;
+    private @NonNullByDefault({}) TestServer server;
+    private @NonNullByDefault({}) HttpClient httpClient;
+    private @NonNullByDefault({}) CompletableFuture<Boolean> serverStarted;
 
-    private @Mock HttpService httpServiceMock;
-    private @Mock HttpContext httpContextMock;
+    private @Mock @NonNullByDefault({}) HttpService httpServiceMock;
+    private @Mock @NonNullByDefault({}) HttpContext httpContextMock;
 
     @BeforeEach
     public void setupServerAndClient() {
@@ -115,7 +116,7 @@ public abstract class AbstractAudioServletTest extends JavaTest {
         return httpClient.newRequest(url).method(HttpMethod.GET);
     }
 
-    protected String serveStream(AudioStream stream, Integer timeInterval) throws Exception {
+    protected String serveStream(AudioStream stream, @Nullable Integer timeInterval) throws Exception {
         serverStarted.get(); // wait for the server thread to be started
 
         String path;

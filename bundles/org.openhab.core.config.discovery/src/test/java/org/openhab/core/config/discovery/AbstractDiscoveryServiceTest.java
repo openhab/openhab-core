@@ -22,7 +22,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.i18n.LocaleProvider;
@@ -36,6 +36,7 @@ import org.osgi.framework.Bundle;
  *
  * @author Laurent Garnier - Initial contribution
  */
+@NonNullByDefault
 public class AbstractDiscoveryServiceTest implements DiscoveryListener {
 
     private static final String BINDING_ID = "bindingId";
@@ -64,7 +65,7 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
     private TranslationProvider i18nProvider = new TranslationProvider() {
         @Override
         public @Nullable String getText(@Nullable Bundle bundle, @Nullable String key, @Nullable String defaultText,
-                @Nullable Locale locale, @Nullable Object... arguments) {
+                @Nullable Locale locale, @Nullable Object @Nullable... arguments) {
             if (Locale.ENGLISH.equals(locale)) {
                 if ("test".equals(key)) {
                     return PROPERTY_LABEL1;
@@ -87,7 +88,7 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
 
     private LocaleProvider localeProvider = new LocaleProvider() {
         @Override
-        public @NonNull Locale getLocale() {
+        public Locale getLocale() {
             return Locale.ENGLISH;
         }
     };
@@ -133,10 +134,8 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
         }
     };
 
-    private TestDiscoveryService discoveryService;
-
     @Override
-    public void thingDiscovered(@NonNull DiscoveryService source, @NonNull DiscoveryResult result) {
+    public void thingDiscovered(DiscoveryService source, DiscoveryResult result) {
         assertThat(result.getThingTypeUID(), is(THING_TYPE_UID));
         assertThat(result.getBindingId(), is(BINDING_ID));
         assertThat(result.getProperties().size(), is(2));
@@ -161,18 +160,18 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
     }
 
     @Override
-    public void thingRemoved(@NonNull DiscoveryService source, @NonNull ThingUID thingUID) {
+    public void thingRemoved(DiscoveryService source, ThingUID thingUID) {
     }
 
     @Override
-    public @Nullable Collection<@NonNull ThingUID> removeOlderResults(@NonNull DiscoveryService source, long timestamp,
-            @Nullable Collection<@NonNull ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
+    public @Nullable Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
+            @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
         return null;
     }
 
     @Test
     public void testDiscoveryResults() {
-        discoveryService = new TestDiscoveryService(i18nProvider, localeProvider);
+        TestDiscoveryService discoveryService = new TestDiscoveryService(i18nProvider, localeProvider);
         discoveryService.addDiscoveryListener(this);
         discoveryService.startScan();
     }

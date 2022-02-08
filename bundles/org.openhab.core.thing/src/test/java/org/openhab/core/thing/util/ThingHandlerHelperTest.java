@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import static org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder.create;
 import static org.openhab.core.thing.util.ThingHandlerHelper.isHandlerInitialized;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,11 +38,12 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class ThingHandlerHelperTest {
 
-    private Thing thing;
+    private @NonNullByDefault({}) Thing thing;
 
-    private @Mock ThingHandler thingHandler;
+    private @Mock @NonNullByDefault({}) ThingHandler thingHandlerMock;
 
     @BeforeEach
     public void setup() {
@@ -85,27 +87,27 @@ public class ThingHandlerHelperTest {
 
     @Test
     public void assertIsHandlerInitializedWorksCorrectlyForAThingHandler() {
-        when(thingHandler.getThing()).thenReturn(thing);
+        when(thingHandlerMock.getThing()).thenReturn(thing);
 
         thing.setStatusInfo(create(ThingStatus.UNINITIALIZED).build());
-        assertThat(isHandlerInitialized(thingHandler), is(false));
+        assertThat(isHandlerInitialized(thingHandlerMock), is(false));
 
         thing.setStatusInfo(create(ThingStatus.INITIALIZING).build());
-        assertThat(isHandlerInitialized(thingHandler), is(false));
+        assertThat(isHandlerInitialized(thingHandlerMock), is(false));
 
         thing.setStatusInfo(create(ThingStatus.REMOVING).build());
-        assertThat(isHandlerInitialized(thingHandler), is(false));
+        assertThat(isHandlerInitialized(thingHandlerMock), is(false));
 
         thing.setStatusInfo(create(ThingStatus.REMOVED).build());
-        assertThat(isHandlerInitialized(thingHandler), is(false));
+        assertThat(isHandlerInitialized(thingHandlerMock), is(false));
 
         thing.setStatusInfo(create(ThingStatus.UNKNOWN).build());
-        assertThat(isHandlerInitialized(thingHandler), is(true));
+        assertThat(isHandlerInitialized(thingHandlerMock), is(true));
 
         thing.setStatusInfo(create(ThingStatus.ONLINE).build());
-        assertThat(isHandlerInitialized(thingHandler), is(true));
+        assertThat(isHandlerInitialized(thingHandlerMock), is(true));
 
         thing.setStatusInfo(create(ThingStatus.OFFLINE).build());
-        assertThat(isHandlerInitialized(thingHandler), is(true));
+        assertThat(isHandlerInitialized(thingHandlerMock), is(true));
     }
 }

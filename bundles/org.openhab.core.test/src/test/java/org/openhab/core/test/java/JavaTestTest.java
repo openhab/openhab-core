@@ -15,6 +15,9 @@ package org.openhab.core.test.java;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Map;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,9 +26,10 @@ import org.junit.jupiter.api.Test;
  *
  * @author Henning Treu - Initial contribution.
  */
+@NonNullByDefault
 public class JavaTestTest {
 
-    private JavaTest javaTest;
+    private @NonNullByDefault({}) JavaTest javaTest;
 
     @BeforeEach
     public void setup() {
@@ -50,13 +54,12 @@ public class JavaTestTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     public void waitForAssertShouldNotCatchNPE() {
         assertThrows(NullPointerException.class, () -> {
-            javaTest.waitForAssert(() -> getObject().getClass());
+            javaTest.waitForAssert(() -> {
+                Map.of().get("key").toString();
+            });
         });
-    }
-
-    private Object getObject() {
-        return null;
     }
 }

@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.ByteBuffer;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.io.transport.modbus.ModbusBitUtilities;
 
@@ -27,6 +28,7 @@ import org.openhab.core.io.transport.modbus.ModbusBitUtilities;
  *
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 public class BitUtilitiesExtractFloat32Test {
 
     /**

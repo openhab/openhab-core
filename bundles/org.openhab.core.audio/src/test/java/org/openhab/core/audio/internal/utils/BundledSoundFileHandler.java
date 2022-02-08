@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.audio.internal.AudioManagerTest;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class BundledSoundFileHandler implements Closeable {
     private static final String MP3_FILE_NAME = "mp3AudioFile.mp3";
     private static final String WAV_FILE_NAME = "wavAudioFile.wav";

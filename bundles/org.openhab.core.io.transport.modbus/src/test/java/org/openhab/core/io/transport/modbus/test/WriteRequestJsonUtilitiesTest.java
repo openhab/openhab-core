@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.io.transport.modbus.ModbusWriteFunctionCode;
@@ -33,6 +33,7 @@ import org.openhab.core.io.transport.modbus.json.WriteRequestJsonUtilities;
 /**
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 public class WriteRequestJsonUtilitiesTest {
 
     private static final List<String> MAX_REGISTERS = IntStream.range(0, MAX_REGISTERS_WRITE_COUNT).mapToObj(i -> "1")
@@ -128,7 +129,7 @@ public class WriteRequestJsonUtilitiesTest {
 
     @Test
     public void testFC16MultipleRegistersMaxRegisters() {
-        Collection<@NonNull ModbusWriteRequestBlueprint> writes = WriteRequestJsonUtilities.fromJson(55, "[{"//
+        Collection<ModbusWriteRequestBlueprint> writes = WriteRequestJsonUtilities.fromJson(55, "[{"//
                 + "\"functionCode\": 16,"//
                 + "\"address\": 5412,"//
                 + "\"value\": [" + String.join(",", MAX_REGISTERS) + "]"//
@@ -192,7 +193,7 @@ public class WriteRequestJsonUtilitiesTest {
 
     @Test
     public void testFC15MultipleCoilsMaxCoils() {
-        Collection<@NonNull ModbusWriteRequestBlueprint> writes = WriteRequestJsonUtilities.fromJson(55, "[{"//
+        Collection<ModbusWriteRequestBlueprint> writes = WriteRequestJsonUtilities.fromJson(55, "[{"//
                 + "\"functionCode\": 15,"//
                 + "\"address\": 5412,"//
                 + "\"value\": [" + String.join(",", MAX_COILS) + "]"//

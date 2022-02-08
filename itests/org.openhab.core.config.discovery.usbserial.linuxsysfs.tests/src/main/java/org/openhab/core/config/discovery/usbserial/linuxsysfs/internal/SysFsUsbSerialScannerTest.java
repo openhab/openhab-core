@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,20 +43,21 @@ import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
  *
  * @author Henning Sudbrock - Initial contribution
  */
+@NonNullByDefault
 public class SysFsUsbSerialScannerTest {
 
-    public @TempDir File rootFolder;
+    public @TempDir @NonNullByDefault({}) File rootFolder;
 
     private static final String SYSFS_TTY_DEVICES_DIR = "sys/class/tty";
     private static final String DEV_DIR = "dev";
     private static final String SYSFS_USB_DEVICES_DIR = "sys/devices/pci0000:00/0000:00:14.0/usb1";
 
-    private SysfsUsbSerialScanner scanner;
+    private @NonNullByDefault({}) SysfsUsbSerialScanner scanner;
 
-    private Path rootPath;
-    private Path devPath;
-    private Path sysfsTtyPath;
-    private Path sysfsUsbPath;
+    private @NonNullByDefault({}) Path rootPath;
+    private @NonNullByDefault({}) Path devPath;
+    private @NonNullByDefault({}) Path sysfsTtyPath;
+    private @NonNullByDefault({}) Path sysfsUsbPath;
 
     private int deviceIndexCounter = 0;
 

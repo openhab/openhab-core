@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.test.BundleCloseable;
@@ -33,12 +34,13 @@ import org.openhab.core.thing.type.ChannelTypeProvider;
  *
  * @author Dennis Nobel - Initial contribution
  */
+@NonNullByDefault
 public class ChannelTypesTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "ChannelTypesTest.bundle";
 
-    private ChannelTypeProvider channelTypeProvider;
-    private ChannelGroupTypeProvider channelGroupTypeProvider;
+    private @NonNullByDefault({}) ChannelTypeProvider channelTypeProvider;
+    private @NonNullByDefault({}) ChannelGroupTypeProvider channelGroupTypeProvider;
 
     @BeforeEach
     public void setUp() {

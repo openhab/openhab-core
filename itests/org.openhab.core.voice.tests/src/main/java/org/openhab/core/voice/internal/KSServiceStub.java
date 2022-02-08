@@ -15,6 +15,8 @@ package org.openhab.core.voice.internal;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.voice.KSErrorEvent;
@@ -30,6 +32,7 @@ import org.openhab.core.voice.KSpottedEvent;
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated from groovy to java
  */
+@NonNullByDefault
 public class KSServiceStub implements KSService {
 
     private static final Set<AudioFormat> SUPPORTED_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
@@ -51,7 +54,7 @@ public class KSServiceStub implements KSService {
     }
 
     @Override
-    public String getLabel(Locale locale) {
+    public String getLabel(@Nullable Locale locale) {
         return KSSERVICE_STUB_LABEL;
     }
 

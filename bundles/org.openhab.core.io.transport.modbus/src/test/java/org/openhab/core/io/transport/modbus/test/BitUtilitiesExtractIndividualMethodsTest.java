@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,6 +35,7 @@ import org.openhab.core.library.types.DecimalType;
 /**
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 public class BitUtilitiesExtractIndividualMethodsTest {
 
     public static Collection<Object[]> data() {

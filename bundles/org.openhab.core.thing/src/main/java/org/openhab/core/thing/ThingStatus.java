@@ -12,12 +12,15 @@
  */
 package org.openhab.core.thing;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * {@link ThingStatus} defines possible statuses of a {@link ThingStatusInfo}.
  *
  * @author Stefan Bußweiler - Initial contribution
  * @author Simon Kaufmann - added UNKNOWN, removed numbers
  */
+@NonNullByDefault
 public enum ThingStatus {
     UNINITIALIZED,
     INITIALIZING,

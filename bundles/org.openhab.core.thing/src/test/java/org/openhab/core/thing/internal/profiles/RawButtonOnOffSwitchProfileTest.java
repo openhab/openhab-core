@@ -15,9 +15,11 @@ package org.openhab.core.thing.internal.profiles;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.thing.CommonTriggerEvents;
 import org.openhab.core.thing.profiles.ProfileCallback;
@@ -29,25 +31,22 @@ import org.openhab.core.types.Command;
  *
  * @author Mark Hilbush - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class RawButtonOnOffSwitchProfileTest {
 
-    private @Mock ProfileCallback mockCallback;
-
-    @BeforeEach
-    public void setup() {
-        mockCallback = mock(ProfileCallback.class);
-    }
+    private @Mock @NonNullByDefault({}) ProfileCallback callbackMock;
 
     @Test
     public void testOnOffSwitchItem() {
-        TriggerProfile profile = new RawButtonOnOffSwitchProfile(mockCallback);
+        TriggerProfile profile = new RawButtonOnOffSwitchProfile(callbackMock);
         verifyAction(profile, CommonTriggerEvents.PRESSED, OnOffType.ON);
         verifyAction(profile, CommonTriggerEvents.RELEASED, OnOffType.OFF);
     }
 
     private void verifyAction(TriggerProfile profile, String trigger, Command expectation) {
-        reset(mockCallback);
+        reset(callbackMock);
         profile.onTriggerFromHandler(trigger);
-        verify(mockCallback, times(1)).sendCommand(eq(expectation));
+        verify(callbackMock, times(1)).sendCommand(eq(expectation));
     }
 }

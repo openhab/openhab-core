@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.Configuration;
@@ -30,6 +31,7 @@ import org.openhab.core.thing.type.ThingTypeBuilder;
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 public class ThingPropertiesTest extends JavaOSGiTest {
 
     private final Map<String, String> properties = new HashMap<String, String>() {
@@ -39,8 +41,7 @@ public class ThingPropertiesTest extends JavaOSGiTest {
             put("key2", "value2");
         }
     };
-    private Thing thing;
-    private final String nullString = null; // trick the null-annotation tooling
+    private @NonNullByDefault({}) Thing thing;
 
     @BeforeEach
     public void setup() {
@@ -87,7 +88,7 @@ public class ThingPropertiesTest extends JavaOSGiTest {
 
     @Test
     public void testSetPropertyNullKey() {
-        assertThrows(IllegalArgumentException.class, () -> thing.setProperty(nullString, ""));
+        assertThrows(IllegalArgumentException.class, () -> thing.setProperty(giveNull(), ""));
     }
 
     @Test

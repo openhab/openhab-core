@@ -14,12 +14,14 @@ package org.openhab.core.transform.actions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.transform.TransformationException;
 
 /**
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public class TransformationTest {
 
     @Test

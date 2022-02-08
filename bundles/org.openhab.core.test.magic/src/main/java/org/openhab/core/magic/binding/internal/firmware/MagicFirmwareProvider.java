@@ -15,8 +15,9 @@ package org.openhab.core.magic.binding.internal.firmware;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.magic.binding.MagicBindingConstants;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.binding.firmware.Firmware;
@@ -29,11 +30,12 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Dimitar Ivanov - Initial contribution
  */
+@NonNullByDefault
 @Component(service = FirmwareProvider.class)
 public class MagicFirmwareProvider implements FirmwareProvider {
 
     //@formatter:off
-    private final Set<Firmware> magicFirmwares = Stream
+    private final Set<Firmware> magicFirmwares = Set
             // General firmware versions for the thing type
             .of(createFirmware(null, "0.1.0", false),
                 createFirmware(null, "1.0.0", false),
@@ -44,32 +46,33 @@ public class MagicFirmwareProvider implements FirmwareProvider {
                 createFirmware(MagicBindingConstants.MODEL_COLLOPORTUS, "1.2.0", true),
                 createFirmware(MagicBindingConstants.MODEL_LUMOS, "2.3.1", true),
                 createFirmware(MagicBindingConstants.MODEL_LUMOS, "2.5.0", true)
-                ).collect(Collectors.toSet());
+                );
     //@formatter:on
 
     @Override
-    public Firmware getFirmware(Thing thing, String version) {
+    public @Nullable Firmware getFirmware(Thing thing, String version) {
         return getFirmware(thing, version, null);
     }
 
     @SuppressWarnings("null")
     @Override
-    public Firmware getFirmware(Thing thing, String version, Locale locale) {
+    public @Nullable Firmware getFirmware(Thing thing, String version, @Nullable Locale locale) {
         return getFirmwares(thing, locale).stream().filter(firmware -> firmware.getVersion().equals(version))
                 .findFirst().get();
     }
 
     @Override
-    public Set<Firmware> getFirmwares(Thing thing) {
+    public @Nullable Set<Firmware> getFirmwares(Thing thing) {
         return getFirmwares(thing, null);
     }
 
     @Override
-    public Set<Firmware> getFirmwares(Thing thing, Locale locale) {
+    public @Nullable Set<Firmware> getFirmwares(Thing thing, @Nullable Locale locale) {
         return magicFirmwares.stream().filter(firmware -> firmware.isSuitableFor(thing)).collect(Collectors.toSet());
     }
 
-    private static Firmware createFirmware(final String model, final String version, boolean modelRestricted) {
+    private static Firmware createFirmware(final @Nullable String model, final String version,
+            boolean modelRestricted) {
         Firmware firmware = FirmwareBuilder.create(MagicBindingConstants.THING_TYPE_FIRMWARE_UPDATE, version)
                 .withModel(model).withModelRestricted(modelRestricted).build();
         return firmware;

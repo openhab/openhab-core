@@ -15,7 +15,6 @@ package org.openhab.core.thing.internal.profiles;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -27,12 +26,12 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
@@ -50,6 +49,8 @@ import org.openhab.core.types.UnDefType;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class SystemRangeStateProfileTest {
 
     private static final String STRING_FOURTY = "40";
@@ -59,7 +60,6 @@ public class SystemRangeStateProfileTest {
     private static final PercentType PERCENT_TYPE_TEN = new PercentType(BigDecimal.TEN);
     private static final PercentType PERCENT_TYPE_TWENTY_FIVE = new PercentType(BigDecimal.valueOf(25));
 
-    @NonNullByDefault
     public static class ParameterSet {
         public final List<State> states;
         public final List<State> resultingStates;
@@ -69,6 +69,7 @@ public class SystemRangeStateProfileTest {
         public final @Nullable Object upper;
         public final boolean inverted;
 
+        @SuppressWarnings("unchecked")
         public ParameterSet(List<? extends Type> sources, List<? extends Type> results, Object lower,
                 @Nullable Object upper, boolean inverted) {
             this.states = (List<State>) sources;
@@ -160,20 +161,8 @@ public class SystemRangeStateProfileTest {
         });
     }
 
-    private AutoCloseable mocksCloseable;
-
-    private @Mock ProfileCallback mockCallback;
-    private @Mock ProfileContext mockContext;
-
-    @BeforeEach
-    public void setup() {
-        mocksCloseable = openMocks(this);
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        mocksCloseable.close();
-    }
+    private @Mock @NonNullByDefault({}) ProfileCallback callbackMock;
+    private @Mock @NonNullByDefault({}) ProfileContext contextMock;
 
     @Test
     public void testWrongParameterLower() {
@@ -214,33 +203,33 @@ public class SystemRangeStateProfileTest {
         }
     }
 
-    private StateProfile initProfile(Object lower, Object upper) {
+    private StateProfile initProfile(@Nullable Object lower, @Nullable Object upper) {
         return initProfile(lower, upper, false);
     }
 
-    private StateProfile initProfile(Object lower, Object upper, boolean inverted) {
+    private StateProfile initProfile(@Nullable Object lower, @Nullable Object upper, boolean inverted) {
         final Map<String, @Nullable Object> properties = new HashMap<>(2);
         properties.put(SystemRangeStateProfile.LOWER_PARAM, lower);
         properties.put(SystemRangeStateProfile.UPPER_PARAM, upper);
         properties.put(SystemRangeStateProfile.INVERTED_PARAM, inverted);
-        when(mockContext.getConfiguration()).thenReturn(new Configuration(properties));
-        return new SystemRangeStateProfile(mockCallback, mockContext);
+        when(contextMock.getConfiguration()).thenReturn(new Configuration(properties));
+        return new SystemRangeStateProfile(callbackMock, contextMock);
     }
 
     private void verifySendCommand(StateProfile profile, Command command, @Nullable Command expectedCommand) {
-        reset(mockCallback);
+        reset(callbackMock);
         profile.onCommandFromHandler(command);
         Command eC = expectedCommand;
         if (eC == null) {
-            verifyNoInteractions(mockCallback);
+            verifyNoInteractions(callbackMock);
         } else {
-            verify(mockCallback, times(1)).sendCommand(eq(eC));
+            verify(callbackMock, times(1)).sendCommand(eq(eC));
         }
     }
 
     private void verifySendUpdate(StateProfile profile, State state, State expectedState) {
-        reset(mockCallback);
+        reset(callbackMock);
         profile.onStateUpdateFromHandler(state);
-        verify(mockCallback, times(1)).sendUpdate(eq(expectedState));
+        verify(callbackMock, times(1)).sendUpdate(eq(expectedState));
     }
 }

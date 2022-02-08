@@ -26,6 +26,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +46,7 @@ import org.openhab.core.io.rest.LocaleService;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class ConfigDescriptionResourceTest {
 
     private static final String PARAM_NAME = "name";
@@ -53,10 +55,10 @@ public class ConfigDescriptionResourceTest {
 
     private static final String CONFIG_DESCRIPTION_SYSTEM_I18N_URI = "system:i18n";
 
-    private ConfigDescriptionResource resource;
+    private @NonNullByDefault({}) ConfigDescriptionResource resource;
 
-    private @Mock ConfigDescriptionRegistry mockedConfigDescriptionRegistry;
-    private @Mock LocaleService mockedLocaleService;
+    private @Mock @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistryMock;
+    private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
 
     @BeforeEach
     public void beforeEach() throws URISyntaxException {
@@ -67,11 +69,11 @@ public class ConfigDescriptionResourceTest {
                 .build();
         final ConfigDescription systemEphemeris = ConfigDescriptionBuilder.create(new URI("system:ephemeris"))
                 .withParameter(ConfigDescriptionParameterBuilder.create(PARAM_COUNTRY, Type.TEXT).build()).build();
-        when(mockedConfigDescriptionRegistry.getConfigDescriptions(any()))
+        when(configDescriptionRegistryMock.getConfigDescriptions(any()))
                 .thenReturn(List.of(systemI18n, systemEphemeris));
-        when(mockedConfigDescriptionRegistry.getConfigDescription(eq(systemI18nURI), any())).thenReturn(systemI18n);
+        when(configDescriptionRegistryMock.getConfigDescription(eq(systemI18nURI), any())).thenReturn(systemI18n);
 
-        resource = new ConfigDescriptionResource(mockedConfigDescriptionRegistry, mockedLocaleService);
+        resource = new ConfigDescriptionResource(configDescriptionRegistryMock, localeServiceMock);
     }
 
     @Test

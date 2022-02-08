@@ -62,7 +62,6 @@ public abstract class BaseDynamicCommandDescriptionProvider extends AbstractDyna
             postEvent(ThingEventFactory.createChannelDescriptionCommandOptionsChangedEvent(channelUID,
                     itemChannelLinkRegistry != null ? itemChannelLinkRegistry.getLinkedItemNames(channelUID) : Set.of(),
                     options, oldOptions));
-
         }
     }
 

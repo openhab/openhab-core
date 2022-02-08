@@ -12,6 +12,7 @@
  */
 package org.openhab.core.internal.library.unit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
@@ -21,6 +22,7 @@ import org.openhab.core.library.unit.Units;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class UnitInitializer {
 
     static {

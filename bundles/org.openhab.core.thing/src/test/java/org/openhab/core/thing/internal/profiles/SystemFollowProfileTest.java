@@ -15,6 +15,7 @@ package org.openhab.core.thing.internal.profiles;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,42 +28,43 @@ import org.openhab.core.thing.profiles.ProfileCallback;
  * @author Simon Kaufmann - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class SystemFollowProfileTest {
 
-    private @Mock ProfileCallback mockCallback;
+    private @Mock @NonNullByDefault({}) ProfileCallback callbackMock;
 
     @Test
     public void testOnCommand() {
-        SystemFollowProfile profile = new SystemFollowProfile(mockCallback);
+        SystemFollowProfile profile = new SystemFollowProfile(callbackMock);
 
         profile.onCommandFromItem(OnOffType.ON);
 
-        verifyNoMoreInteractions(mockCallback);
+        verifyNoMoreInteractions(callbackMock);
     }
 
     @Test
     public void testOnUpdate() {
-        SystemFollowProfile profile = new SystemFollowProfile(mockCallback);
+        SystemFollowProfile profile = new SystemFollowProfile(callbackMock);
         profile.onStateUpdateFromItem(OnOffType.ON);
 
-        verify(mockCallback).handleCommand(eq(OnOffType.ON));
-        verifyNoMoreInteractions(mockCallback);
+        verify(callbackMock).handleCommand(eq(OnOffType.ON));
+        verifyNoMoreInteractions(callbackMock);
     }
 
     @Test
     public void testStateUpdated() {
-        SystemFollowProfile profile = new SystemFollowProfile(mockCallback);
+        SystemFollowProfile profile = new SystemFollowProfile(callbackMock);
         profile.onStateUpdateFromHandler(OnOffType.ON);
 
-        verifyNoMoreInteractions(mockCallback);
+        verifyNoMoreInteractions(callbackMock);
     }
 
     @Test
     public void testPostCommand() {
-        SystemFollowProfile profile = new SystemFollowProfile(mockCallback);
+        SystemFollowProfile profile = new SystemFollowProfile(callbackMock);
         profile.onCommandFromHandler(OnOffType.ON);
 
-        verify(mockCallback).sendCommand(eq(OnOffType.ON));
-        verifyNoMoreInteractions(mockCallback);
+        verify(callbackMock).sendCommand(eq(OnOffType.ON));
+        verifyNoMoreInteractions(callbackMock);
     }
 }

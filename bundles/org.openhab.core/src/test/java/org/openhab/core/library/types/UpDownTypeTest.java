@@ -14,12 +14,14 @@ package org.openhab.core.library.types;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author Simon Kaufmann - Initial contribution
  * @author Stefan Triller - more tests for type conversions
  */
+@NonNullByDefault
 public class UpDownTypeTest {
 
     @Test

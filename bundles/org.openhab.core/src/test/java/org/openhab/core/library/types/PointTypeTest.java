@@ -16,11 +16,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author Gaël L'hopital - Initial contribution
  */
+@NonNullByDefault
 public class PointTypeTest {
 
     @Test

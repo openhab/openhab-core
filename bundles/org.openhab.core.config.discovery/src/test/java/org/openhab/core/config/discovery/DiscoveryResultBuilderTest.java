@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import org.openhab.core.thing.ThingUID;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class DiscoveryResultBuilderTest {
 
     private static final String BINDING_ID = "bindingId";
@@ -49,8 +51,8 @@ public class DiscoveryResultBuilderTest {
             put(KEY2, VALUE2);
         }
     };
-    private DiscoveryResultBuilder builder;
-    private DiscoveryResult discoveryResult;
+    private @NonNullByDefault({}) DiscoveryResultBuilder builder;
+    private @NonNullByDefault({}) DiscoveryResult discoveryResult;
 
     @BeforeEach
     public void setup() {

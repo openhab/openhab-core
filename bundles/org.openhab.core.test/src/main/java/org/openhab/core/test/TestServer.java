@@ -16,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.servlet.Servlet;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
@@ -29,10 +30,11 @@ import org.slf4j.LoggerFactory;
  * @author Velin Yordanov - Initial contribution
  * @author Henning Treu - provide in base test bundle
  */
+@NonNullByDefault
 public class TestServer {
     private final Logger logger = LoggerFactory.getLogger(TestServer.class);
 
-    private Server server;
+    private final Server server = new Server();
     private final String host;
     private final int port;
     private final int timeout;
@@ -66,7 +68,6 @@ public class TestServer {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                server = new Server();
                 ServletHandler handler = new ServletHandler();
                 handler.addServletWithMapping(servletHolder, "/*");
                 server.setHandler(handler);

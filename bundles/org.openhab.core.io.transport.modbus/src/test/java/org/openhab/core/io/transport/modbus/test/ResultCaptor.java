@@ -13,8 +13,11 @@
 package org.openhab.core.io.transport.modbus.test;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.LongSupplier;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -23,22 +26,23 @@ import org.mockito.stubbing.Answer;
  *
  * @param <T>
  */
+@NonNullByDefault
 public class ResultCaptor<T> implements Answer<T> {
 
-    private ArrayList<T> results = new ArrayList<>();
+    private List<T> results = new ArrayList<>();
     private LongSupplier longSupplier;
 
     public ResultCaptor(LongSupplier longSupplier) {
         this.longSupplier = longSupplier;
     }
 
-    public ArrayList<T> getAllReturnValues() {
+    public List<T> getAllReturnValues() {
         return results;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public T answer(InvocationOnMock invocationOnMock) throws Throwable {
+    public @Nullable T answer(InvocationOnMock invocationOnMock) throws Throwable {
         T result = (T) invocationOnMock.callRealMethod();
         synchronized (this.results) {
             results.add(result);

@@ -14,6 +14,7 @@ package org.openhab.core.library.items;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.PercentType;
@@ -25,6 +26,7 @@ import org.openhab.core.types.State;
  * @author Hans Hazelius - Initial contribution
  * @author Stefan Triller - Tests for type conversions
  */
+@NonNullByDefault
 public class RollershutterItemTest {
 
     @Test
