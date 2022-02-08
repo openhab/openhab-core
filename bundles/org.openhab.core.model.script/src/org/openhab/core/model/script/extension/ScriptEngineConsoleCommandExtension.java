@@ -12,10 +12,8 @@
  */
 package org.openhab.core.model.script.extension;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -49,7 +47,7 @@ public class ScriptEngineConsoleCommandExtension extends AbstractConsoleCommandE
     public void execute(String[] args, Console console) {
         ScriptEngine scriptEngine = this.scriptEngine;
         if (scriptEngine != null) {
-            String scriptString = Arrays.stream(args).collect(Collectors.joining(" "));
+            String scriptString = String.join(" ", args);
             try {
                 Script script = scriptEngine.newScriptFromString(scriptString);
                 Object result = script.execute();

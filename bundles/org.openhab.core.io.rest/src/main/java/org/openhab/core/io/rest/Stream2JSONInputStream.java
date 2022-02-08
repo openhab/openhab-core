@@ -48,7 +48,6 @@ public class Stream2JSONInputStream extends InputStream implements JSONInputStre
      * Creates a new {@link Stream2JSONInputStream} backed by the given {@link Stream} source.
      *
      * @param source the {@link Stream} backing this input stream. Must not be null.
-     * @throws IllegalArgumentException in case the source is null.
      */
     public Stream2JSONInputStream(Stream<?> source) {
         iterator = source.map(e -> gson.toJson(e)).iterator();
