@@ -12,11 +12,11 @@
  */
 package org.openhab.core.audio.internal.javasound;
 
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
 import javax.sound.sampled.TargetDataLine;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -32,6 +32,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Kelly Davis - Initial contribution and API
  * @author Kai Kreuzer - Refactored and stabilized
+ * @author Miguel Álvarez - Share microphone line only under Windows OS
  *
  */
 @NonNullByDefault
@@ -50,9 +51,19 @@ public class JavaSoundAudioSource implements AudioSource {
     private final AudioFormat audioFormat = convertAudioFormat(format);
 
     /**
-     * TargetDataLine for the mic
+     * Running on Windows OS
+     */
+    private final boolean windowsOS = System.getProperty("os.name", "Unknown").startsWith("Win");
+
+    /**
+     * TargetDataLine for sharing the mic on Windows OS due to limitations
      */
     private @Nullable TargetDataLine microphone;
+
+    /**
+     * Set for control microphone close on Windows OS
+     */
+    private final Set<Object> openStreamRefs = new HashSet<>();
 
     /**
      * Constructs a JavaSoundAudioSource
@@ -63,16 +74,10 @@ public class JavaSoundAudioSource implements AudioSource {
     private TargetDataLine initMicrophone(javax.sound.sampled.AudioFormat format) throws AudioException {
         try {
             TargetDataLine microphone = AudioSystem.getTargetDataLine(format);
-
-            DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-            microphone = (TargetDataLine) AudioSystem.getLine(info);
-
             microphone.open(format);
-
-            this.microphone = microphone;
             return microphone;
         } catch (Exception e) {
-            throw new AudioException("Error creating the audio input stream.", e);
+            throw new AudioException("Error creating the audio input stream: " + e.getMessage(), e);
         }
     }
 
@@ -81,11 +86,30 @@ public class JavaSoundAudioSource implements AudioSource {
         if (!expectedFormat.isCompatible(audioFormat)) {
             throw new AudioException("Cannot produce streams in format " + expectedFormat);
         }
-        TargetDataLine mic = this.microphone;
-        if (mic == null) {
-            mic = initMicrophone(format);
+        // on OSs other than windows we can open multiple lines for the microphone
+        if (!windowsOS) {
+            return new JavaSoundInputStream(initMicrophone(format), audioFormat);
         }
-        return new JavaSoundInputStream(mic, audioFormat);
+        // on Windows OS we share the microphone line
+        var ref = new Object();
+        TargetDataLine microphoneDataLine;
+        synchronized (openStreamRefs) {
+            microphoneDataLine = this.microphone;
+            if (microphoneDataLine == null) {
+                microphoneDataLine = initMicrophone(format);
+                this.microphone = microphoneDataLine;
+            }
+            openStreamRefs.add(ref);
+        }
+        return new JavaSoundInputStream(microphoneDataLine, audioFormat, () -> {
+            synchronized (openStreamRefs) {
+                var microphone = this.microphone;
+                if (openStreamRefs.remove(ref) && openStreamRefs.isEmpty() && microphone != null) {
+                    microphone.close();
+                    this.microphone = null;
+                }
+            }
+        });
     }
 
     @Override
