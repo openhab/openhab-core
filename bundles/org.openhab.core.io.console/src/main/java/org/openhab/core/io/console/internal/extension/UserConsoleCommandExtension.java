@@ -12,10 +12,9 @@
  */
 package org.openhab.core.io.console.internal.extension;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.ManagedUser;
@@ -149,7 +148,6 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                     }
                     break;
                 case SUBCMD_CHANGEROLE:
-
                     if (args.length == 4) {
                         User existingUser = userRegistry.get(args[1]);
                         if (existingUser == null) {
@@ -164,7 +162,7 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                                         console.println("The role (" + args[2] + ") of the user " + args[1]
                                                 + " has been changed to the role (" + args[3] + ")");
                                     } else {
-                                        console.println("You did not put an administrator credential.");
+                                        console.println("You did not put a correct administrator credential.");
                                     }
                                 } else {
                                     userRegistry.changeRole(existingUser, args[2], args[3]);
@@ -208,11 +206,17 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                             userRegistry.getAll().forEach(user -> console.println(user.toString()));
                             return;
                         } else {
-                            if (userRegistry.removeRole(existingUser, args[2])) {
-                                console.println(
-                                        "The role " + args[2] + " of the user " + args[1] + " has been removed.");
-                            } else {
-                                console.println("The role " + args[2] + " of the user " + args[1] + " doesn't exist!");
+                            try {
+                                if (userRegistry.removeRole(existingUser, args[2])) {
+                                    console.println(
+                                            "The role " + args[2] + " of the user " + args[1] + " has been removed.");
+                                } else {
+                                    console.println(
+                                            "The role " + args[2] + " of the user " + args[1] + " doesn't exist!");
+                                }
+                            } catch (IllegalArgumentException ie) {
+                                logger.warn("IllegalArgumentException: ", ie);
+                                console.println("Look at your logs with the command <log:tail>.");
                             }
                         }
                     } else {
@@ -305,59 +309,93 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
     /**
      * Ask for the credential of a user who has the role administrator and check if the credential is correct.
      *
+     * @param console allow to print string in the console
      * @return return true if the credential of the user is correct and false otherwise.
      */
     private boolean checkAdministratorCredential(Console console) {
-        /*
-         * String WHITELIST = "A-Za-z";
-         * String[] logArgs = null;
-         * int in = 0;
-         * Scanner scanner = new Scanner(System.in);
-         * console.println(
-         * "To manage the administrator role you have to run the command line: log <userId with administrator role> <password> or the command <exit> to quit"
-         * );
-         * String scanArgs = scanner.nextLine();
-         * while (scanner.hasNext()) {
-         * // check if the command contains only letter of the alphabet.
-         * Pattern p = Pattern.compile(WHITELIST);
-         * Matcher m = p.matcher(scanArgs);
-         * if (m.find()) {
-         * console.println(
-         * "The input contains invalid characters, please run the command: log <userId with administrator role> <password> or the command <exit> to quit"
-         * );
-         * } else {
-         * logArgs = scanArgs.split(" ");
-         * if (logArgs.length == 3 || logArgs.length == 1) {
-         * console.println(
-         * "Invalid input, please run the command: log <userId with administrator role> <password> or the command <exit> to quit"
-         * );
-         * } else {
-         * if (logArgs[0].equals("log")) {
-         * User adminUser = userRegistry.get(logArgs[1]);
-         * if (adminUser == null) {
-         * console.println("the user " + logArgs[1] + " does not exist");
-         * } else {
-         * if (userRegistry.checkAdministratorCredential(adminUser, logArgs[2])) {
-         * return true;
-         * } else {
-         * console.println("The password of the user " + logArgs[1]
-         * + " is not correct. You can write the command <exit> to quit");
-         * }
-         * }
-         * } else if (logArgs[0].equals("exit")) {
-         * return false;
-         * } else {
-         * console.println(
-         * "Invalid input, please run the command: log <userId with administrator role> <password> or the command <exit> to quit"
-         * );
-         * }
-         * }
-         * }
-         * scanArgs = scanner.nextLine();
-         * }
-         * return false;
-         */
-        return true;
+        String WHITELIST = "A-Za-z";
+        String[] logArgs = null;
+        int in = 0;
+
+        // if there are no user with the administrator role return true.
+        if (!userRegistry.containRole("administrator")) {
+            return true;
+        }
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println(
+                "To manage the administrator role you have to run the command line: log <userId with administrator role> <password>");
+        console.println("The users with the administrator role are the following:");
+        printUsersWithAdministratorRole(console);
+        console.println("Or run the command <exit> to quit");
+
+        String scanArgs = null;
+        while (true) {
+
+            scanArgs = scanner.nextLine();
+
+            // check if the command contains only letter of the alphabet.
+            Pattern p = Pattern.compile(WHITELIST);
+            Matcher m = p.matcher(scanArgs);
+            if (m.find()) {
+                printHelp(console);
+            } else {
+                logArgs = scanArgs.split(" ");
+                if (logArgs.length != 3 && logArgs.length != 1) {
+                    printHelp(console);
+                } else {
+                    if (logArgs[0].equals("log")) {
+                        User adminUser = userRegistry.get(logArgs[1]);
+                        if (adminUser == null) {
+                            console.println("the user " + logArgs[1] + " does not exist");
+                        } else {
+                            if (userRegistry.checkAdministratorCredential(adminUser, logArgs[2])) {
+                                scanner.close();
+                                return true;
+                            } else {
+                                console.println("The password of the user " + logArgs[1]
+                                        + " is not correct. You can write the command <exit> to quit");
+                            }
+                        }
+                    } else if (logArgs[0].equals("exit")) {
+                        scanner.close();
+                        return false;
+                    } else {
+                        printHelp(console);
+                    }
+                }
+            }
+
+        }
+    }
+
+    /**
+     * Print some help for the checkAdministratorCredential function.
+     *
+     * @param console allow to print string in the console
+     */
+    public void printHelp(Console console) {
+        console.println("------------------------------------------------");
+        console.println(
+                "Invalid input, please run the command: log <userId who has the administrator role> <password>");
+        console.println("The users with the administrator role are the following:");
+        printUsersWithAdministratorRole(console);
+        console.println("Or run the command <exit> to quit");
+    }
+
+    /**
+     * Print in the console all the user with the role administrator
+     *
+     * @param console allow to print string in the console
+     */
+    private void printUsersWithAdministratorRole(Console console) {
+        Collection<User> usersRegistry = userRegistry.getAll();
+        for (User user : usersRegistry) {
+            Set<String> roles = user.getRoles();
+            if (roles.contains("administrator")) {
+                console.println(user.toString());
+            }
+        }
     }
 
     private String findUsage(String cmd) {

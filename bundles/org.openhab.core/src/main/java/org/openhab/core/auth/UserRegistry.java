@@ -69,6 +69,22 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
     public boolean removeRole(User user, String role);
 
     /**
+     * Checks if in the user registry there is a user with the role specified in the argument.
+     *
+     * @param role verify if a user has this role in the user registry.
+     * @return return true if at least a user in the user registry has the role and false otherwise.
+     */
+    public boolean containRole(String role);
+
+    /**
+     * Count the number of user with the role administrator.
+     *
+     * @param role role to be count
+     * @return the number of time the role is present in the user registry
+     */
+    public int countRole(String role);
+
+    /**
      * Change the password for an {@link User} in this registry. The implementation receives the new password and is
      * responsible for their secure storage (for instance by hashing the password).
      *
@@ -76,6 +92,16 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * @param newPassword the new password
      */
     public void changePassword(User user, String newPassword);
+
+    /**
+     * Check if the password of the user with administrator role is correct.
+     *
+     * @param user the user with the role administrator.
+     * @param password the password of the user with the role administrator.
+     * @return true if the password of the user is correct and if the user has the administrator role, return false
+     *         otherwise.
+     */
+    public boolean checkAdministratorCredential(User user, String password);
 
     /**
      * Adds a new session to the user profile
