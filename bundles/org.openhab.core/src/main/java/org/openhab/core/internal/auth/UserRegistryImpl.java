@@ -187,6 +187,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
         Set<String> newRoles = new HashSet<>();
         Set<String> roles = managedUser.getRoles();
+
         int append = 0;
         for (String role : roles) {
             if (oldRole.equals(role)) {
@@ -197,7 +198,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
             }
         }
         if (append == 0) {
-            throw new IllegalArgumentException("the role:" + oldRole + " does not exist");
+            throw new IllegalArgumentException("the role " + oldRole + " does not exist for the user "+ user.getName() +", we can't change it.");
         }
         managedUser.setRoles(newRoles);
         update(user);

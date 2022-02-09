@@ -28,6 +28,8 @@ import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Console command extension to manage users, sessions and API tokens
@@ -50,6 +52,8 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
     private static final String SUBCMD_ADDAPITOKEN = "addApiToken";
     private static final String SUBCMD_RMAPITOKEN = "rmApiToken";
     private static final String SUBCMD_CLEARSESSIONS = "clearSessions";
+
+    private final Logger logger = LoggerFactory.getLogger(UserConsoleCommandExtension.class);
 
     private final UserRegistry userRegistry;
 
@@ -122,14 +126,20 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                             Set<String> roles = user.getRoles();
                             String out = "";
                             if (roles.size() == 1) {
-                                out = "The username " + user.toString() + " has the role: ";
+                                out = "The username " + user.getName() + " has the role: ";
                                 for (String role : roles) {
                                     out = out + role;
                                 }
                             } else {
-                                out = "The username " + user.toString() + " has these roles: - ";
+                                out = "The username " + user.getName() + " has these roles: (";
+                                int i = 0;
                                 for (String role : roles) {
-                                    out = out + role + " - ";
+                                    if (i == roles.size() - 1) {
+                                        out = out + role + ")";
+                                    } else {
+                                        out = out + role + ", ";
+                                    }
+                                    i++;
                                 }
                             }
                             console.println(out);
@@ -139,34 +149,36 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                     }
                     break;
                 case SUBCMD_CHANGEROLE:
-                    /*
-                     * if (args.length == 4) {
-                     * User existingUser = userRegistry.get(args[1]);
-                     * if (existingUser == null) {
-                     * console.println("The user doesn't exist here you can find the available users:");
-                     * userRegistry.getAll().forEach(user -> console.println(user.toString()));
-                     * return;
-                     * } else {
-                     * try {
-                     * if (args[2].equals("administrator") || args[3].equals("administrator")) {
-                     * if (checkAdministratorCredential(console)) {
-                     * userRegistry.changeRole(existingUser, args[2], args[3]);
-                     * console.println("The role (" + args[2] + ") of the user " + args[1]
-                     * + " has been changed to the role (" + args[3] + ")");
-                     * }
-                     * } else {
-                     * userRegistry.changeRole(existingUser, args[2], args[3]);
-                     * console.println("The role (" + args[2] + ") of the user " + args[1]
-                     * + " has been changed to the role (" + args[3] + ")");
-                     * }
-                     * } catch (IllegalArgumentException ie) {
-                     * logger.warn("IllegalArgumentException: ", ie);
-                     * }
-                     * }
-                     * } else {
-                     * console.printUsage(findUsage(SUBCMD_CHANGEROLE));
-                     * }
-                     */
+
+                    if (args.length == 4) {
+                        User existingUser = userRegistry.get(args[1]);
+                        if (existingUser == null) {
+                            console.println("The user doesn't exist here you can find the available users:");
+                            userRegistry.getAll().forEach(user -> console.println(user.toString()));
+                            return;
+                        } else {
+                            try {
+                                if (args[2].equals("administrator") || args[3].equals("administrator")) {
+                                    if (checkAdministratorCredential(console)) {
+                                        userRegistry.changeRole(existingUser, args[2], args[3]);
+                                        console.println("The role (" + args[2] + ") of the user " + args[1]
+                                                + " has been changed to the role (" + args[3] + ")");
+                                    } else {
+                                        console.println("You did not put an administrator credential.");
+                                    }
+                                } else {
+                                    userRegistry.changeRole(existingUser, args[2], args[3]);
+                                    console.println("The role (" + args[2] + ") of the user " + args[1]
+                                            + " has been changed to the role (" + args[3] + ")");
+                                }
+                            } catch (IllegalArgumentException ie) {
+                                logger.warn("IllegalArgumentException: ", ie);
+                                console.println("Look at your logs with the command <log:tail>.");
+                            }
+                        }
+                    } else {
+                        console.printUsage(findUsage(SUBCMD_CHANGEROLE));
+                    }
 
                     break;
 
@@ -179,11 +191,9 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                             return;
                         } else {
                             if (userRegistry.addRole(existingUser, args[2])) {
-                                console.println(
-                                        "The role (" + args[2] + ") of the user " + args[1] + " has been added.");
+                                console.println("The role " + args[2] + " of the user " + args[1] + " has been added.");
                             } else {
-                                console.println(
-                                        "The role (" + args[2] + ") of the user " + args[2] + " already exist.");
+                                console.println("The role " + args[2] + " of the user " + args[1] + " already exist!");
                             }
                         }
                     } else {
@@ -200,10 +210,9 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                         } else {
                             if (userRegistry.removeRole(existingUser, args[2])) {
                                 console.println(
-                                        "The role (" + args[2] + ") of the user " + args[1] + " has been removed.");
+                                        "The role " + args[2] + " of the user " + args[1] + " has been removed.");
                             } else {
-                                console.println(
-                                        "The role (" + args[2] + ") of the user " + args[2] + " doesn't exist.");
+                                console.println("The role " + args[2] + " of the user " + args[1] + " doesn't exist!");
                             }
                         }
                     } else {
