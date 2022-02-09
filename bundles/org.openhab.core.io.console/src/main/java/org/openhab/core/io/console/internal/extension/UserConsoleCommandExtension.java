@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.console.internal.extension;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -40,6 +41,10 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
     private static final String SUBCMD_LIST = "list";
     private static final String SUBCMD_ADD = "add";
     private static final String SUBCMD_REMOVE = "remove";
+    private static final String SUBCMD_CHANGEROLE = "changeRole";
+    private static final String SUBCMD_LISTROLES = "listRoles";
+    private static final String SUBCMD_ADDROLE = "addRole";
+    private static final String SUBCMD_REMOVEROLE = "removeRole";
     private static final String SUBCMD_CHANGEPASSWORD = "changePassword";
     private static final String SUBCMD_LISTAPITOKENS = "listApiTokens";
     private static final String SUBCMD_ADDAPITOKEN = "addApiToken";
@@ -60,6 +65,11 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                 buildCommandUsage(SUBCMD_ADD + " <userId> <password> <role>",
                         "adds a new user with the specified role"),
                 buildCommandUsage(SUBCMD_REMOVE + " <userId>", "removes the given user"),
+                buildCommandUsage(SUBCMD_LISTROLES + " <userId>", "list the roles of the userID"),
+                buildCommandUsage(SUBCMD_CHANGEROLE + " <userId> <oldRole> <newRole>",
+                        "Change the specific role of a user with a new one"),
+                buildCommandUsage(SUBCMD_ADDROLE + " <userId> <role>", "Add the specified role to the specified user"),
+                buildCommandUsage(SUBCMD_REMOVEROLE + " <userId> <role>", "Remove the specified role of the user"),
                 buildCommandUsage(SUBCMD_CHANGEPASSWORD + " <userId> <newPassword>", "changes the password of a user"),
                 buildCommandUsage(SUBCMD_LISTAPITOKENS, "lists the API tokens for all users"),
                 buildCommandUsage(SUBCMD_ADDAPITOKEN + " <userId> <tokenName> <scope>",
@@ -103,6 +113,101 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                         }
                     } else {
                         console.printUsage(findUsage(SUBCMD_REMOVE));
+                    }
+                    break;
+                case SUBCMD_LISTROLES:
+                    if (args.length == 1) {
+                        Collection<User> usersRegistry = userRegistry.getAll();
+                        for (User user : usersRegistry) {
+                            Set<String> roles = user.getRoles();
+                            String out = "";
+                            if (roles.size() == 1) {
+                                out = "The username " + user.toString() + " has the role: ";
+                                for (String role : roles) {
+                                    out = out + role;
+                                }
+                            } else {
+                                out = "The username " + user.toString() + " has these roles: - ";
+                                for (String role : roles) {
+                                    out = out + role + " - ";
+                                }
+                            }
+                            console.println(out);
+                        }
+                    } else {
+                        console.printUsage(findUsage(SUBCMD_LISTROLES));
+                    }
+                    break;
+                case SUBCMD_CHANGEROLE:
+                    /*
+                     * if (args.length == 4) {
+                     * User existingUser = userRegistry.get(args[1]);
+                     * if (existingUser == null) {
+                     * console.println("The user doesn't exist here you can find the available users:");
+                     * userRegistry.getAll().forEach(user -> console.println(user.toString()));
+                     * return;
+                     * } else {
+                     * try {
+                     * if (args[2].equals("administrator") || args[3].equals("administrator")) {
+                     * if (checkAdministratorCredential(console)) {
+                     * userRegistry.changeRole(existingUser, args[2], args[3]);
+                     * console.println("The role (" + args[2] + ") of the user " + args[1]
+                     * + " has been changed to the role (" + args[3] + ")");
+                     * }
+                     * } else {
+                     * userRegistry.changeRole(existingUser, args[2], args[3]);
+                     * console.println("The role (" + args[2] + ") of the user " + args[1]
+                     * + " has been changed to the role (" + args[3] + ")");
+                     * }
+                     * } catch (IllegalArgumentException ie) {
+                     * logger.warn("IllegalArgumentException: ", ie);
+                     * }
+                     * }
+                     * } else {
+                     * console.printUsage(findUsage(SUBCMD_CHANGEROLE));
+                     * }
+                     */
+
+                    break;
+
+                case SUBCMD_ADDROLE:
+                    if (args.length == 3) {
+                        User existingUser = userRegistry.get(args[1]);
+                        if (existingUser == null) {
+                            console.println("The user doesn't exist here you can find the available users:");
+                            userRegistry.getAll().forEach(user -> console.println(user.toString()));
+                            return;
+                        } else {
+                            if (userRegistry.addRole(existingUser, args[2])) {
+                                console.println(
+                                        "The role (" + args[2] + ") of the user " + args[1] + " has been added.");
+                            } else {
+                                console.println(
+                                        "The role (" + args[2] + ") of the user " + args[2] + " already exist.");
+                            }
+                        }
+                    } else {
+                        console.printUsage(findUsage(SUBCMD_ADDROLE));
+                    }
+                    break;
+                case SUBCMD_REMOVEROLE:
+                    if (args.length == 3) {
+                        User existingUser = userRegistry.get(args[1]);
+                        if (existingUser == null) {
+                            console.println("The user doesn't exist here you can find the available users:");
+                            userRegistry.getAll().forEach(user -> console.println(user.toString()));
+                            return;
+                        } else {
+                            if (userRegistry.removeRole(existingUser, args[2])) {
+                                console.println(
+                                        "The role (" + args[2] + ") of the user " + args[1] + " has been removed.");
+                            } else {
+                                console.println(
+                                        "The role (" + args[2] + ") of the user " + args[2] + " doesn't exist.");
+                            }
+                        }
+                    } else {
+                        console.printUsage(findUsage(SUBCMD_REMOVEROLE));
                     }
                     break;
                 case SUBCMD_CHANGEPASSWORD:
@@ -186,6 +291,64 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
         } else {
             printUsage(console);
         }
+    }
+
+    /**
+     * Ask for the credential of a user who has the role administrator and check if the credential is correct.
+     *
+     * @return return true if the credential of the user is correct and false otherwise.
+     */
+    private boolean checkAdministratorCredential(Console console) {
+        /*
+         * String WHITELIST = "A-Za-z";
+         * String[] logArgs = null;
+         * int in = 0;
+         * Scanner scanner = new Scanner(System.in);
+         * console.println(
+         * "To manage the administrator role you have to run the command line: log <userId with administrator role> <password> or the command <exit> to quit"
+         * );
+         * String scanArgs = scanner.nextLine();
+         * while (scanner.hasNext()) {
+         * // check if the command contains only letter of the alphabet.
+         * Pattern p = Pattern.compile(WHITELIST);
+         * Matcher m = p.matcher(scanArgs);
+         * if (m.find()) {
+         * console.println(
+         * "The input contains invalid characters, please run the command: log <userId with administrator role> <password> or the command <exit> to quit"
+         * );
+         * } else {
+         * logArgs = scanArgs.split(" ");
+         * if (logArgs.length == 3 || logArgs.length == 1) {
+         * console.println(
+         * "Invalid input, please run the command: log <userId with administrator role> <password> or the command <exit> to quit"
+         * );
+         * } else {
+         * if (logArgs[0].equals("log")) {
+         * User adminUser = userRegistry.get(logArgs[1]);
+         * if (adminUser == null) {
+         * console.println("the user " + logArgs[1] + " does not exist");
+         * } else {
+         * if (userRegistry.checkAdministratorCredential(adminUser, logArgs[2])) {
+         * return true;
+         * } else {
+         * console.println("The password of the user " + logArgs[1]
+         * + " is not correct. You can write the command <exit> to quit");
+         * }
+         * }
+         * } else if (logArgs[0].equals("exit")) {
+         * return false;
+         * } else {
+         * console.println(
+         * "Invalid input, please run the command: log <userId with administrator role> <password> or the command <exit> to quit"
+         * );
+         * }
+         * }
+         * }
+         * scanArgs = scanner.nextLine();
+         * }
+         * return false;
+         */
+        return true;
     }
 
     private String findUsage(String cmd) {
