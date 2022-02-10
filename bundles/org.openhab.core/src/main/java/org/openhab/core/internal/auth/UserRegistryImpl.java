@@ -300,8 +300,8 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
             throw new IllegalArgumentException("User is not managed: " + user.getName());
         }
         ManagedUser managedUser = (ManagedUser) user;
-        Set<String> role = managedUser.getRoles();
-        if (role.contains("administrator")) {
+        Set<String> roles = managedUser.getRoles();
+        if (roles.contains("administrator")) {
             String passwordSalt = managedUser.getPasswordSalt();
             String passwordHash = managedUser.getPasswordHash();
 

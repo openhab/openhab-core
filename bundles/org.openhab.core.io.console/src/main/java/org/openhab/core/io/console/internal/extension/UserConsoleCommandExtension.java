@@ -95,9 +95,15 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                     if (args.length == 4) {
                         User existingUser = userRegistry.get(args[1]);
                         if (existingUser == null) {
-                            User newUser = userRegistry.register(args[1], args[2], Set.of(args[3]));
-                            console.println(newUser.toString());
-                            console.println("User created.");
+                            //ask for an administrator credential.
+                            if(checkAdministratorCredential(console)){
+                                User newUser = userRegistry.register(args[1], args[2], Set.of(args[3]));
+                                console.println(newUser.toString());
+                                console.println("User created.");
+                            }
+                            else{
+                                console.println("You did not put a correct administrator credential.");
+                            }
                         } else {
                             console.println("The user already exists.");
                         }
@@ -109,8 +115,13 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                     if (args.length == 2) {
                         User user = userRegistry.get(args[1]);
                         if (user != null) {
-                            userRegistry.remove(user.getName());
-                            console.println("User removed.");
+                            if(checkAdministratorCredential(console)){
+                                userRegistry.remove(user.getName());
+                                console.println("User removed.");
+                            }
+                            else{
+                                console.println("You did not put a correct administrator credential.");
+                            }
                         } else {
                             console.println("User not found.");
                         }
@@ -188,10 +199,15 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                             userRegistry.getAll().forEach(user -> console.println(user.toString()));
                             return;
                         } else {
-                            if (userRegistry.addRole(existingUser, args[2])) {
-                                console.println("The role " + args[2] + " of the user " + args[1] + " has been added.");
-                            } else {
-                                console.println("The role " + args[2] + " of the user " + args[1] + " already exist!");
+                            if(checkAdministratorCredential(console)){
+                                if (userRegistry.addRole(existingUser, args[2])) {
+                                    console.println("The role " + args[2] + " of the user " + args[1] + " has been added.");
+                                } else {
+                                    console.println("The role " + args[2] + " of the user " + args[1] + " already exist!");
+                                }
+                            }
+                            else {
+                                console.println("You did not put a correct administrator credential.");
                             }
                         }
                     } else {
@@ -207,12 +223,17 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                             return;
                         } else {
                             try {
-                                if (userRegistry.removeRole(existingUser, args[2])) {
-                                    console.println(
-                                            "The role " + args[2] + " of the user " + args[1] + " has been removed.");
-                                } else {
-                                    console.println(
-                                            "The role " + args[2] + " of the user " + args[1] + " doesn't exist!");
+                                if(checkAdministratorCredential(console)){
+                                    if (userRegistry.removeRole(existingUser, args[2])) {
+                                        console.println(
+                                                "The role " + args[2] + " of the user " + args[1] + " has been removed.");
+                                    } else {
+                                        console.println(
+                                                "The role " + args[2] + " of the user " + args[1] + " doesn't exist!");
+                                    }
+                                }
+                                else{
+                                    console.println("You did not put a correct administrator credential.");
                                 }
                             } catch (IllegalArgumentException ie) {
                                 logger.warn("IllegalArgumentException: ", ie);
@@ -227,8 +248,13 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                     if (args.length == 3) {
                         User user = userRegistry.get(args[1]);
                         if (user != null) {
-                            userRegistry.changePassword(user, args[2]);
-                            console.println("Password changed.");
+                            if(checkAdministratorCredential(console)){
+                                userRegistry.changePassword(user, args[2]);
+                                console.println("Password changed.");
+                            }
+                            else{
+                                console.println("You did not put a correct administrator credential.");
+                            }
                         } else {
                             console.println("User not found.");
                         }
@@ -249,14 +275,20 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                     if (args.length == 4) {
                         ManagedUser user = (ManagedUser) userRegistry.get(args[1]);
                         if (user != null) {
-                            Optional<UserApiToken> userApiToken = user.getApiTokens().stream()
-                                    .filter(t -> args[2].equals(t.getName())).findAny();
-                            if (userApiToken.isEmpty()) {
-                                String tokenString = userRegistry.addUserApiToken(user, args[2], args[3]);
-                                console.println(tokenString);
-                            } else {
-                                console.println("Cannot create API token: another one with the same name was found.");
+                            if(checkAdministratorCredential(console)){
+                                Optional<UserApiToken> userApiToken = user.getApiTokens().stream()
+                                        .filter(t -> args[2].equals(t.getName())).findAny();
+                                if (userApiToken.isEmpty()) {
+                                    String tokenString = userRegistry.addUserApiToken(user, args[2], args[3]);
+                                    console.println(tokenString);
+                                } else {
+                                    console.println("Cannot create API token: another one with the same name was found.");
+                                }
                             }
+                            else {
+                                console.println("You did not put a correct administrator credential.");
+                            }
+
                         } else {
                             console.println("User not found.");
                         }
@@ -268,13 +300,18 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                     if (args.length == 3) {
                         ManagedUser user = (ManagedUser) userRegistry.get(args[1]);
                         if (user != null) {
-                            Optional<UserApiToken> userApiToken = user.getApiTokens().stream()
-                                    .filter(t -> args[2].equals(t.getName())).findAny();
-                            if (userApiToken.isPresent()) {
-                                userRegistry.removeUserApiToken(user, userApiToken.get());
-                                console.println("API token revoked.");
-                            } else {
-                                console.println("No matching API token found.");
+                            if(checkAdministratorCredential(console)){
+                                Optional<UserApiToken> userApiToken = user.getApiTokens().stream()
+                                        .filter(t -> args[2].equals(t.getName())).findAny();
+                                if (userApiToken.isPresent()) {
+                                    userRegistry.removeUserApiToken(user, userApiToken.get());
+                                    console.println("API token revoked.");
+                                } else {
+                                    console.println("No matching API token found.");
+                                }
+                            }
+                            else {
+                                console.println("You did not put a correct administrator credential.");
                             }
                         } else {
                             console.println("User not found.");
@@ -287,8 +324,13 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                     if (args.length == 2) {
                         User user = userRegistry.get(args[1]);
                         if (user != null) {
-                            userRegistry.clearSessions(user);
-                            console.println("User sessions cleared.");
+                            if(checkAdministratorCredential(console)){
+                                userRegistry.clearSessions(user);
+                                console.println("User sessions cleared.");
+                            }
+                            else{
+                                console.println("You did not put a correct administrator credential.");
+                            }
                         } else {
                             console.println("User not found.");
                         }
