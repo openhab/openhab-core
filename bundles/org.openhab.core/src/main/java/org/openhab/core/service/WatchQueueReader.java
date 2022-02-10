@@ -268,16 +268,16 @@ public class WatchQueueReader implements Runnable {
                         }
                         if (services != null) {
                             File f = resolvedPath.toFile();
-                            if (kind == ENTRY_MODIFY && f.isDirectory()) {
+                            if (ENTRY_MODIFY.equals(kind) && f.isDirectory()) {
                                 logger.trace("Skipping modification event for directory: {}", f);
                             } else {
-                                if (kind == ENTRY_MODIFY) {
+                                if (ENTRY_MODIFY.equals(kind)) {
                                     processModificationEvent(key, event, resolvedPath, services);
                                 } else {
                                     services.forEach(s -> s.processWatchEvent(event, kind, resolvedPath));
                                 }
                             }
-                            if (kind == ENTRY_CREATE && f.isDirectory()) {
+                            if (ENTRY_CREATE.equals(kind) && f.isDirectory()) {
                                 for (AbstractWatchService service : services) {
                                     if (service.watchSubDirectories()
                                             && service.getWatchEventKinds(resolvedPath) != null) {
@@ -285,7 +285,7 @@ public class WatchQueueReader implements Runnable {
                                                 resolvedPath);
                                     }
                                 }
-                            } else if (kind == ENTRY_DELETE) {
+                            } else if (ENTRY_DELETE.equals(kind)) {
                                 synchronized (this) {
                                     WatchKey toCancel = null;
                                     for (Map.Entry<WatchKey, Path> entry : registeredKeys.entrySet()) {
@@ -350,7 +350,7 @@ public class WatchQueueReader implements Runnable {
                 removeScheduledNotifications(key, service, resolvedPath, true);
                 ScheduledFuture<?> future = scheduler.schedule(() -> {
                     logger.trace("Executing job for {}", resolvedPath);
-                    if (!removeScheduledNotifications(key, service, resolvedPath, false)) {
+                    if (removeScheduledNotifications(key, service, resolvedPath, false)) {
                         logger.trace("Job removed itself for {}", resolvedPath);
                     } else {
                         logger.trace("Job couldn't find itself for {}", resolvedPath);
@@ -473,10 +473,12 @@ public class WatchQueueReader implements Runnable {
 
         @Override
         public boolean equals(@Nullable Object o) {
-            if (this == o)
+            if (this == o) {
                 return true;
-            if (o == null || getClass() != o.getClass())
+            }
+            if (o == null || getClass() != o.getClass()) {
                 return false;
+            }
             Notification notification = (Notification) o;
             return key.equals(notification.key) && service.equals(notification.service)
                     && path.equals(notification.path) && future.equals(notification.future);
