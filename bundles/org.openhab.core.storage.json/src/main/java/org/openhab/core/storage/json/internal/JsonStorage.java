@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -282,12 +283,13 @@ public class JsonStorage<T> implements Storage<T> {
         return fileTimes;
     }
 
-    private void writeDatabaseFile(File dataFile, String data) {
+    private void writeDatabaseFile(File dataFile, String data) throws IOException {
         try (FileOutputStream outputStream = new FileOutputStream(dataFile, false)) {
             outputStream.write(data.getBytes());
             outputStream.flush();
-        } catch (Exception e) {
-            logger.error("Error writing JsonDB to {}. Cause {}.", dataFile.getPath(), e.getMessage());
+        } catch (IOException e) {
+            throw new IOException(
+                    String.format("Error writing JsonDB to %s. Cause %s.", dataFile.getPath(), e.getMessage()), e);
         }
     }
 
@@ -311,16 +313,21 @@ public class JsonStorage<T> implements Storage<T> {
             String json = internalMapper.toJson(map);
 
             synchronized (map) {
-                // Write the database file
-                writeDatabaseFile(file, json);
+                try {
+                    // Write the database file
+                    writeDatabaseFile(file, json);
 
-                // And also write the backup
-                writeDatabaseFile(new File(file.getParent() + File.separator + BACKUP_EXTENSION,
-                        System.currentTimeMillis() + SEPARATOR + file.getName()), json);
+                    // And also write the backup
+                    writeDatabaseFile(new File(file.getParent() + File.separator + BACKUP_EXTENSION,
+                            System.currentTimeMillis() + SEPARATOR + file.getName()), json);
 
-                cleanupBackups();
+                    cleanupBackups();
+
+                    dirty = false;
+                } catch (IOException e) {
+                    logger.error("{}", e.getMessage());
+                }
                 deferredSince = 0;
-                dirty = false;
             }
         }
     }
