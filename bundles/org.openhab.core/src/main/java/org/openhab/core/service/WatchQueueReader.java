@@ -347,10 +347,10 @@ public class WatchQueueReader implements Runnable {
         synchronized (notifications) {
             for (AbstractWatchService service : services) {
                 logger.trace("Modification event for {} ", resolvedPath);
-                removeScheduledNotifications(key, service, resolvedPath);
+                removeScheduledNotifications(key, service, resolvedPath, true);
                 ScheduledFuture<?> future = scheduler.schedule(() -> {
                     logger.trace("Executing job for {}", resolvedPath);
-                    if (removeScheduledNotifications(key, service, resolvedPath)) {
+                    if (!removeScheduledNotifications(key, service, resolvedPath, false)) {
                         logger.trace("Job removed itself for {}", resolvedPath);
                     } else {
                         logger.trace("Job couldn't find itself for {}", resolvedPath);
@@ -367,13 +367,16 @@ public class WatchQueueReader implements Runnable {
         }
     }
 
-    private boolean removeScheduledNotifications(WatchKey key, AbstractWatchService service, Path path) {
+    private boolean removeScheduledNotifications(WatchKey key, AbstractWatchService service, Path path,
+            boolean cancelJob) {
         Set<Notification> notifications = this.notifications.stream().filter(f -> f.matches(key, service, path))
                 .collect(Collectors.toSet());
         if (notifications.size() > 1) {
             logger.warn("Found more than one notification for {} / {} / {}. This is a bug.", key, service, path);
         }
-        notifications.forEach(notification -> notification.future.cancel(true));
+        if (cancelJob) {
+            notifications.forEach(notification -> notification.future.cancel(true));
+        }
         this.notifications.removeAll(notifications);
         return !notifications.isEmpty();
     }

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package service;
+package org.openhab.core.service;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 import static org.hamcrest.CoreMatchers.is;
@@ -32,8 +32,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.service.AbstractWatchService;
-import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.JavaTest;
 
 /**
  * Test for {@link AbstractWatchService}.
@@ -224,8 +223,8 @@ public class AbstractWatchServiceTest extends JavaTest {
     }
 
     private void fullEventAssertionsByKind(String fileName, Kind<?> kind, boolean osSpecific) throws Exception {
-        waitForAssert(() -> assertThat(!watchService.allFullEvents.isEmpty(), is(true)), DFL_TIMEOUT * 2,
-                DFL_SLEEP_TIME);
+        waitForAssert(() -> assertThat(!watchService.allFullEvents.isEmpty(), is(true)), JavaTest.DFL_TIMEOUT * 2,
+                JavaTest.DFL_SLEEP_TIME);
 
         if (osSpecific && ENTRY_DELETE.equals(kind)) {
             // There is possibility that one more modify event is triggered on some OS
