@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
  * The implementation of a {@link UserRegistry} for {@link ManagedUser} entities.
  *
  * @author Yannick Schaus - initial contribution
+ * @author Nicolas Gennart - roles management
  */
 @NonNullByDefault
 @Component(service = UserRegistry.class, immediate = true)
@@ -179,10 +180,10 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
             return;
         }
 
-        // we make sure that it remains at least one administrator role
-        if (countRole("administrator") == 1 && oldRole.equals("administrator")) {
+        // We make sure that it remains at least one user with the administrator role.
+        if (countRole("administrator") == 1 && oldRole.equals("administrator") && user.getRoles().contains(oldRole)) {
             throw new IllegalArgumentException(
-                    "There must always be at least one user with the administrator role, so we can't change it");
+                    "There must always be at least one user with the administrator role, so we can't remove it.");
         }
 
         if (!(user instanceof ManagedUser)) {
@@ -237,10 +238,10 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
     @Override
     public boolean removeRole(User user, String role) {
-        // we make sure that it remains at least one administrator role
-        if (countRole("administrator") == 1) {
+        // We make sure that it remains at least one user with the administrator role.
+        if (countRole("administrator") == 1 && role.equals("administrator") && user.getRoles().contains(role)) {
             throw new IllegalArgumentException(
-                    "There must always be at least one user with the administrator role, so we can't remove it");
+                    "There must always be at least one user with the administrator role, so we can't remove it.");
         }
 
         if (!(user instanceof ManagedUser)) {
