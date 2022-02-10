@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -178,14 +179,6 @@ public class FolderObserverTest extends JavaOSGiTest {
         waitForAssert(() -> assertThat(modelRepo.calledFileName, is(file.getName())));
     }
 
-    private void sleep(int millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     /**
      * The following method creates a file in an existing directory. The file's extension is
      * in the configuration properties and there is a registered ModelParser for it.
@@ -252,7 +245,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         File file = new File(EXISTING_SUBDIR_PATH, "NewlyCreatedMockFile." + noParserExtension);
         file.createNewFile();
 
-        sleep(WAIT_EVENT_TO_BE_HANDLED);
+        Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(false)));
         waitForAssert(() -> assertThat(modelRepo.isRemoveModelMethodCalled, is(false)));
@@ -273,7 +266,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         File file = new File(EXISTING_SUBDIR_PATH, "NewlyCreatedMockFile.java");
         file.createNewFile();
 
-        sleep(WAIT_EVENT_TO_BE_HANDLED);
+        Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(false)));
         waitForAssert(() -> assertThat(modelRepo.isRemoveModelMethodCalled, is(false)));
@@ -303,11 +296,11 @@ public class FolderObserverTest extends JavaOSGiTest {
      * The following method test the configuration with a non existing subdirectory.
      */
     @Test
-    public void testNonExisting() {
+    public void testNonExisting() throws Exception {
         configProps.put("nonExistingSubdir", "txt,jpg,java");
         folderObserver.activate(context);
 
-        sleep(WAIT_EVENT_TO_BE_HANDLED);
+        Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(false)));
         waitForAssert(() -> assertThat(modelRepo.isRemoveModelMethodCalled, is(false)));
     }
@@ -330,7 +323,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         File file = new File(WATCHED_DIRECTORY, Paths.get(subdir, "MockFileInNoExtSubDir.txt").toString());
         file.createNewFile();
 
-        sleep(WAIT_EVENT_TO_BE_HANDLED);
+        Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(false)));
         waitForAssert(() -> assertThat(modelRepo.isRemoveModelMethodCalled, is(false)));
@@ -342,7 +335,7 @@ public class FolderObserverTest extends JavaOSGiTest {
             @Override
             public boolean addOrRefreshModel(String name, InputStream inputStream) {
                 super.addOrRefreshModel(name, inputStream);
-                throw new RuntimeException("intentional failure.");
+                throw new IllegalStateException("intentional failure.");
             }
         };
         FolderObserver localFolderObserver = new FolderObserver(modelRepo, readyService);
@@ -414,7 +407,7 @@ public class FolderObserverTest extends JavaOSGiTest {
             }
         }
 
-        sleep(WAIT_EVENT_TO_BE_HANDLED);
+        Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(false)));
     }
 
@@ -434,7 +427,7 @@ public class FolderObserverTest extends JavaOSGiTest {
                 fileContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
                 inputStream.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
             return true;
         }

@@ -14,11 +14,12 @@ package org.openhab.core.io.transport.modbus.test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
+import java.io.UncheckedIOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -44,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import gnu.io.SerialPort;
 import net.wimpi.modbus.Modbus;
 import net.wimpi.modbus.ModbusCoupler;
-import net.wimpi.modbus.ModbusIOException;
 import net.wimpi.modbus.io.ModbusTransport;
 import net.wimpi.modbus.msg.ModbusRequest;
 import net.wimpi.modbus.net.ModbusSerialListener;
@@ -145,8 +145,12 @@ public class IntegrationTestSupport extends JavaTest {
         }
     };
 
-    protected static InetAddress localAddress() throws UnknownHostException {
-        return InetAddress.getByName("127.0.0.1");
+    protected static InetAddress localAddress() {
+        try {
+            return InetAddress.getByName("127.0.0.1");
+        } catch (UnknownHostException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @BeforeEach
@@ -188,7 +192,7 @@ public class IntegrationTestSupport extends JavaTest {
         }, MAX_WAIT_REQUESTS_MILLIS, 10);
     }
 
-    private void startServer() throws UnknownHostException, InterruptedException {
+    private void startServer() {
         spi = new SimpleProcessImage();
         ModbusCoupler.getReference().setProcessImage(spi);
         ModbusCoupler.getReference().setMaster(false);
@@ -224,7 +228,7 @@ public class IntegrationTestSupport extends JavaTest {
         }
     }
 
-    private void startUDPServer() throws UnknownHostException, InterruptedException {
+    private void startUDPServer() {
         udpListener = new ModbusUDPListener(localAddress(), udpTerminalFactory);
         for (int portCandidate = 10000 + udpServerIndex.increment(); portCandidate < 20000; portCandidate++) {
             try {
@@ -243,13 +247,13 @@ public class IntegrationTestSupport extends JavaTest {
         assertNotSame(0, udpModbusPort);
     }
 
-    private void waitForUDPServerStartup() throws InterruptedException {
+    private void waitForUDPServerStartup() {
         // Query server port. It seems to take time (probably due to thread starting)
         waitFor(() -> udpListener.getLocalPort() > 0, 5, 10_000);
         udpModbusPort = udpListener.getLocalPort();
     }
 
-    private void startTCPServer() throws UnknownHostException, InterruptedException {
+    private void startTCPServer() {
         // Serve single user at a time
         tcpListener = new ModbusTCPListener(SERVER_THREADS, localAddress(), tcpConnectionFactory);
         // Use any open port
@@ -261,14 +265,14 @@ public class IntegrationTestSupport extends JavaTest {
         assertNotSame(0, tcpModbusPort);
     }
 
-    private void waitForTCPServerStartup() throws InterruptedException {
+    private void waitForTCPServerStartup() {
         waitFor(() -> tcpListener.getLocalPort() > 0, 10_000, 5);
         tcpModbusPort = tcpListener.getLocalPort();
     }
 
-    private void startSerialServer() throws UnknownHostException, InterruptedException {
+    private void startSerialServer() {
         serialServerThread.start();
-        Thread.sleep(1000);
+        assertDoesNotThrow(() -> Thread.sleep(1000));
     }
 
     public ModbusSlaveEndpoint getEndpoint() {
@@ -285,11 +289,7 @@ public class IntegrationTestSupport extends JavaTest {
         public ModbusTransport create(Socket socket) {
             ModbusTransport transport = spy(super.create(socket));
             // Capture requests produced by our server transport
-            try {
-                doAnswer(modbustRequestCaptor).when(transport).readRequest();
-            } catch (ModbusIOException e) {
-                throw new RuntimeException(e);
-            }
+            assertDoesNotThrow(() -> doAnswer(modbustRequestCaptor).when(transport).readRequest());
             return transport;
         }
     }
@@ -300,11 +300,7 @@ public class IntegrationTestSupport extends JavaTest {
         public ModbusTransport create(UDPTerminal terminal) {
             ModbusTransport transport = spy(super.create(terminal));
             // Capture requests produced by our server transport
-            try {
-                doAnswer(modbustRequestCaptor).when(transport).readRequest();
-            } catch (ModbusIOException e) {
-                throw new RuntimeException(e);
-            }
+            assertDoesNotThrow(() -> doAnswer(modbustRequestCaptor).when(transport).readRequest());
             return transport;
         }
     }
@@ -334,11 +330,7 @@ public class IntegrationTestSupport extends JavaTest {
                 @Override
                 public ModbusTransport getModbusTransport() {
                     ModbusTransport transport = spy(super.getModbusTransport());
-                    try {
-                        doAnswer(modbustRequestCaptor).when(transport).readRequest();
-                    } catch (ModbusIOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    assertDoesNotThrow(() -> doAnswer(modbustRequestCaptor).when(transport).readRequest());
                     return transport;
                 }
             };

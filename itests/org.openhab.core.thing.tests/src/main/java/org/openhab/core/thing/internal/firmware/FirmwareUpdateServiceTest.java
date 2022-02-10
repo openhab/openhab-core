@@ -839,11 +839,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         firmwareUpdateService.addFirmwareUpdateHandler(handler4);
 
         doAnswer(invocation -> {
-            try {
-                Thread.sleep(25);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            assertDoesNotThrow(() -> Thread.sleep(25));
             updateExecutable.set(true);
             return null;
         }).when(handler4).transferFirmware(any(Firmware.class));

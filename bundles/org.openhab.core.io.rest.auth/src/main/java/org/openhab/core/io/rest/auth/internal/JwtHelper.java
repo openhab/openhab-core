@@ -68,7 +68,7 @@ public class JwtHelper {
             jwtWebKey = loadOrGenerateKey();
         } catch (Exception e) {
             logger.error("Error while initializing the JWT helper", e);
-            throw new RuntimeException(e.getMessage());
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
@@ -128,7 +128,7 @@ public class JwtHelper {
 
             return jwt;
         } catch (JoseException e) {
-            throw new RuntimeException("Error while writing JWT token", e);
+            throw new IllegalStateException("Error while writing JWT token", e);
         }
     }
 

@@ -131,7 +131,7 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
             }
         } else {
             throw new ParsingException(new ParsingNestedException(ParsingNestedException.MODULE_TYPE, null,
-                    new Exception("Parser " + parserType + " not available")));
+                    new IllegalArgumentException("Parser " + parserType + " not available")));
         }
     }
 

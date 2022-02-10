@@ -245,17 +245,21 @@ public class JsonStorageTest extends JavaTest {
             innerSetWithComparableElements.add(50);
             innerSetWithComparableElements.add(-5);
 
-            try {
-                innerMapWithNonComparableKeys.put(new URL("http://www.example.com/key2"), 1);
-                innerMapWithNonComparableKeys.put(new URL("http://www.example.com/key1"), 2);
-                innerMapWithNonComparableKeys.put(new URL("http://www.example.com/key3"), 3);
+            innerMapWithNonComparableKeys.put(newURL("http://www.example.com/key2"), 1);
+            innerMapWithNonComparableKeys.put(newURL("http://www.example.com/key1"), 2);
+            innerMapWithNonComparableKeys.put(newURL("http://www.example.com/key3"), 3);
 
-                innerSetWithNonComparableElements.add(new URL("http://www.example.com/key2"));
-                innerSetWithNonComparableElements.add(new URL("http://www.example.com/key1"));
-                innerSetWithNonComparableElements.add(new URL("http://www.example.com/key3"));
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
+            innerSetWithNonComparableElements.add(newURL("http://www.example.com/key2"));
+            innerSetWithNonComparableElements.add(newURL("http://www.example.com/key1"));
+            innerSetWithNonComparableElements.add(newURL("http://www.example.com/key3"));
+        }
+    }
+
+    private static URL newURL(String url) {
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 

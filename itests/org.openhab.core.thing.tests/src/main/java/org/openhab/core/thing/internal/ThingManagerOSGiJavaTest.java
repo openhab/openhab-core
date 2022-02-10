@@ -173,7 +173,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                                 "(openhab.xmlThingTypes=" + bundleContext.getBundle().getSymbolicName() + ")"),
                         is(notNullValue()));
             } catch (InvalidSyntaxException e) {
-                throw new RuntimeException(e);
+                throw new IllegalArgumentException(e);
             }
         });
     }
@@ -378,11 +378,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
             @Override
             public void childHandlerInitialized(ThingHandler childHandler, Thing childThing) {
-                try {
-                    childHandlerInitializedSemaphore.acquire();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                assertDoesNotThrow(() -> childHandlerInitializedSemaphore.acquire());
             };
         });
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
@@ -393,7 +389,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void initialize() {
                 if (getBridge() == null) {
-                    throw new RuntimeException("Fail because of missing bridge");
+                    throw new IllegalStateException("Fail because of missing bridge");
                 }
                 updateStatus(ThingStatus.ONLINE);
             }
@@ -401,11 +397,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void thingUpdated(Thing thing) {
                 this.thing = thing;
-                try {
-                    thingUpdatedSemapthore.acquire();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                assertDoesNotThrow(() -> thingUpdatedSemapthore.acquire());
             };
         });
 
@@ -454,13 +446,10 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
             @Override
             public void childHandlerInitialized(ThingHandler childHandler, Thing childThing) {
-                try {
-                    childHandlerInitializedSemaphore.acquire();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                assertDoesNotThrow(() -> childHandlerInitializedSemaphore.acquire());
             };
         });
+
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
             @Override
             public void handleCommand(ChannelUID channelUID, Command command) {
@@ -469,7 +458,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void initialize() {
                 if (getBridge() == null) {
-                    throw new RuntimeException("Fail because of missing bridge");
+                    throw new IllegalStateException("Fail because of missing bridge");
                 }
                 updateStatus(ThingStatus.ONLINE);
             }
@@ -477,11 +466,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void thingUpdated(Thing thing) {
                 this.thing = thing;
-                try {
-                    thingUpdatedSemapthore.acquire();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                assertDoesNotThrow(() -> thingUpdatedSemapthore.acquire());
             };
         });
 
@@ -530,11 +515,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
             @Override
             public void childHandlerInitialized(ThingHandler childHandler, Thing childThing) {
-                try {
-                    childHandlerInitializedSemaphore.acquire();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                assertDoesNotThrow(() -> childHandlerInitializedSemaphore.acquire());
             };
         });
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
@@ -550,11 +531,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void thingUpdated(Thing thing) {
                 this.thing = thing;
-                try {
-                    thingUpdatedSemapthore.acquire();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                assertDoesNotThrow(() -> thingUpdatedSemapthore.acquire());
             };
         });
 

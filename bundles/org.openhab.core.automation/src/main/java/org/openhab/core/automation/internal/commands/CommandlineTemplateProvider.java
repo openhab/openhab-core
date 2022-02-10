@@ -125,7 +125,7 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
             }
         } else {
             throw new ParsingException(new ParsingNestedException(ParsingNestedException.TEMPLATE, null,
-                    new Exception("Parser " + parserType + " not available")));
+                    new IllegalArgumentException("Parser " + parserType + " not available")));
         }
     }
 
