@@ -12,29 +12,28 @@
  */
 package org.openhab.core.model.script.internal.engine.action;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.model.script.actions.Audio;
 import org.openhab.core.model.script.engine.action.ActionService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 @Component
+@NonNullByDefault
 public class AudioActionService implements ActionService {
 
-    public static AudioManager audioManager;
+    public static @Nullable AudioManager audioManager;
+
+    @Activate
+    public AudioActionService(final @Reference AudioManager audioManager) {
+        AudioActionService.audioManager = audioManager;
+    }
 
     @Override
     public Class<?> getActionClass() {
         return Audio.class;
     }
-
-    @Reference
-    protected void setAudioManager(AudioManager audioManager) {
-        AudioActionService.audioManager = audioManager;
-    }
-
-    protected void unsetAudioManager(AudioManager audioManager) {
-        AudioActionService.audioManager = null;
-    }
-
 }

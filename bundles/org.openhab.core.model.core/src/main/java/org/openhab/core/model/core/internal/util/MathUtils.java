@@ -12,12 +12,15 @@
  */
 package org.openhab.core.model.core.internal.util;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This class provides a few mathematical helper functions that are required by
  * code of this bundle.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class MathUtils {
 
     /**

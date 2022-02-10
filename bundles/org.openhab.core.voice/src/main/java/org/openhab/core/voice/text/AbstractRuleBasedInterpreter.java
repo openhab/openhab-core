@@ -23,6 +23,8 @@ import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.GroupItem;
@@ -42,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Tilman Kamp - Initial contribution
  * @author Kai Kreuzer - Improved error handling
  */
+@NonNullByDefault
 public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInterpreter {
 
     private static final String JSGF = "JSGF";
@@ -64,12 +67,12 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     private Logger logger = LoggerFactory.getLogger(AbstractRuleBasedInterpreter.class);
 
-    private Map<Locale, List<Rule>> languageRules;
-    private Map<Locale, Set<String>> allItemTokens = null;
-    private Map<Locale, Map<Item, List<Set<String>>>> itemTokens = null;
+    private final Map<Locale, List<Rule>> languageRules = new HashMap<>();
+    private final Map<Locale, Set<String>> allItemTokens = new HashMap<>();
+    private final Map<Locale, Map<Item, List<Set<String>>>> itemTokens = new HashMap<>();
 
-    private ItemRegistry itemRegistry;
-    private EventPublisher eventPublisher;
+    private final ItemRegistry itemRegistry;
+    private final EventPublisher eventPublisher;
 
     private RegistryChangeListener<Item> registryChangeListener = new RegistryChangeListener<Item>() {
         @Override
@@ -88,6 +91,16 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         }
     };
 
+    public AbstractRuleBasedInterpreter(final EventPublisher eventPublisher, final ItemRegistry itemRegistry) {
+        this.eventPublisher = eventPublisher;
+        this.itemRegistry = itemRegistry;
+        itemRegistry.addRegistryChangeListener(registryChangeListener);
+    }
+
+    protected void deactivate() {
+        itemRegistry.removeRegistryChangeListener(registryChangeListener);
+    }
+
     /**
      * Called whenever the rules are to be (re)generated and added by {@link addRules}
      */
@@ -97,7 +110,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     public String interpret(Locale locale, String text) throws InterpretationException {
         ResourceBundle language = ResourceBundle.getBundle(LANGUAGE_SUPPORT, locale);
         Rule[] rules = getRules(locale);
-        if (language == null || rules.length == 0) {
+        if (rules.length == 0) {
             throw new InterpretationException(
                     locale.getDisplayLanguage(Locale.ENGLISH) + " is not supported at the moment.");
         }
@@ -125,9 +138,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     }
 
     private void invalidate() {
-        allItemTokens = null;
-        itemTokens = null;
-        languageRules = null;
+        allItemTokens.clear();
+        itemTokens.clear();
+        languageRules.clear();
     }
 
     /**
@@ -137,9 +150,6 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return the identifier tokens
      */
     Set<String> getAllItemTokens(Locale locale) {
-        if (allItemTokens == null) {
-            allItemTokens = new HashMap<>();
-        }
         Set<String> localeTokens = allItemTokens.get(locale);
         if (localeTokens == null) {
             allItemTokens.put(locale, localeTokens = new HashSet<>());
@@ -160,9 +170,6 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return the list of identifier token sets per item
      */
     Map<Item, List<Set<String>>> getItemTokens(Locale locale) {
-        if (itemTokens == null) {
-            itemTokens = new HashMap<>();
-        }
         Map<Item, List<Set<String>>> localeTokens = itemTokens.get(locale);
         if (localeTokens == null) {
             itemTokens.put(locale, localeTokens = new HashMap<>());
@@ -209,13 +216,12 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param stopper Stop expression that, if matching, will stop this expression from consuming further tokens.
      * @return Expression that represents a name of an item.
      */
-    protected Expression name(Expression stopper) {
+    protected Expression name(@Nullable Expression stopper) {
         return tag(NAME, star(new ExpressionIdentifier(this, stopper)));
     }
 
     private Map<Locale, List<Rule>> getLanguageRules() {
-        if (languageRules == null) {
-            languageRules = new HashMap<>();
+        if (languageRules.isEmpty()) {
             createRules();
         }
         return languageRules;
@@ -291,7 +297,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param tailExpression The tail expression.
      * @return The created rule.
      */
-    protected Rule itemRule(Object headExpression, Object tailExpression) {
+    protected Rule itemRule(Object headExpression, @Nullable Object tailExpression) {
         Expression tail = exp(tailExpression);
         Expression expression = tail == null ? seq(headExpression, name()) : seq(headExpression, name(tail), tail);
         return new Rule(expression) {
@@ -309,7 +315,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 } else {
                     command = new StringType(cmdNode.getValueAsString());
                 }
-                if (name != null && command != null) {
+                if (name != null) {
                     try {
                         return new InterpretationResult(true, executeSingle(language, name, command));
                     } catch (InterpretationException ex) {
@@ -328,7 +334,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param obj the object that's to be converted
      * @return resulting expression
      */
-    protected Expression exp(Object obj) {
+    protected @Nullable Expression exp(@Nullable Object obj) {
         if (obj instanceof Expression) {
             return (Expression) obj;
         } else {
@@ -385,7 +391,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param tag the tag that's to be set
      * @return resulting expression
      */
-    protected Expression tag(String name, Object expression, Object tag) {
+    protected Expression tag(@Nullable String name, Object expression, @Nullable Object tag) {
         return new ExpressionLet(name, exp(expression), null, tag);
     }
 
@@ -407,7 +413,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param command the command that should be added
      * @return resulting expression
      */
-    protected Expression cmd(Object expression, Command command) {
+    protected Expression cmd(Object expression, @Nullable Command command) {
         return tag(CMD, expression, command);
     }
 
@@ -499,7 +505,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 try {
                     State newState = (State) command;
                     State oldState = item.getStateAs(newState.getClass());
-                    if (oldState.equals(newState)) {
+                    if (newState.equals(oldState)) {
                         String template = language.getString(STATE_ALREADY_SINGULAR);
                         String cmdName = "state_" + command.toString().toLowerCase();
                         String stateText = null;
@@ -538,7 +544,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      *            Provide {null} if there is no need for a certain command to be supported.
      * @return All matching items from the item registry.
      */
-    protected List<Item> getMatchingItems(ResourceBundle language, String[] labelFragments, Class<?> commandType) {
+    protected List<Item> getMatchingItems(ResourceBundle language, String[] labelFragments,
+            @Nullable Class<?> commandType) {
         List<Item> items = new ArrayList<>();
         Map<Item, List<Set<String>>> map = getItemTokens(language.getLocale());
         for (Item item : map.keySet()) {
@@ -583,18 +590,17 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param text the text that should be tokenized
      * @return resulting tokens
      */
-    protected List<String> tokenize(Locale locale, String text) {
-        final Locale localeSafe = locale != null ? locale : Locale.getDefault();
+    protected List<String> tokenize(Locale locale, @Nullable String text) {
         List<String> parts = new ArrayList<>();
         if (text == null) {
             return parts;
         }
         String[] split;
-        if (Locale.FRENCH.getLanguage().equalsIgnoreCase(localeSafe.getLanguage())) {
-            split = text.toLowerCase(localeSafe).replaceAll("[\\']", " ").replaceAll("[^\\w\\sàâäçéèêëîïôùûü]", " ")
+        if (Locale.FRENCH.getLanguage().equalsIgnoreCase(locale.getLanguage())) {
+            split = text.toLowerCase(locale).replaceAll("[\\']", " ").replaceAll("[^\\w\\sàâäçéèêëîïôùûü]", " ")
                     .split("\\s");
         } else {
-            split = text.toLowerCase(localeSafe).replaceAll("[\\']", "").replaceAll("[^\\w\\s]", " ").split("\\s");
+            split = text.toLowerCase(locale).replaceAll("[\\']", "").replaceAll("[^\\w\\s]", " ").split("\\s");
         }
         for (String s : split) {
             String part = s.trim();
@@ -672,7 +678,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             return exp;
         }
 
-        private void emit(Object obj) {
+        private void emit(@Nullable Object obj) {
             builder.append(obj);
         }
 
@@ -834,45 +840,16 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             for (Expression e : shared) {
                 emitDefinition(e);
             }
-            String grammar = builder.toString();
-            return grammar;
+            return builder.toString();
         }
     }
 
     @Override
-    public String getGrammar(Locale locale, String format) {
+    public @Nullable String getGrammar(Locale locale, String format) {
         if (!JSGF.equals(format)) {
             return null;
         }
         JSGFGenerator generator = new JSGFGenerator(ResourceBundle.getBundle(LANGUAGE_SUPPORT, locale));
         return generator.getGrammar();
-    }
-
-    public void setItemRegistry(ItemRegistry itemRegistry) {
-        if (this.itemRegistry == null) {
-            this.itemRegistry = itemRegistry;
-            this.itemRegistry.addRegistryChangeListener(registryChangeListener);
-        }
-    }
-
-    @SuppressWarnings("PMD.CompareObjectsWithEquals")
-    public void unsetItemRegistry(ItemRegistry itemRegistry) {
-        if (itemRegistry == this.itemRegistry) {
-            this.itemRegistry.removeRegistryChangeListener(registryChangeListener);
-            this.itemRegistry = null;
-        }
-    }
-
-    public void setEventPublisher(EventPublisher eventPublisher) {
-        if (this.eventPublisher == null) {
-            this.eventPublisher = eventPublisher;
-        }
-    }
-
-    @SuppressWarnings("PMD.CompareObjectsWithEquals")
-    public void unsetEventPublisher(EventPublisher eventPublisher) {
-        if (eventPublisher == this.eventPublisher) {
-            this.eventPublisher = null;
-        }
     }
 }

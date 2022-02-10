@@ -14,6 +14,7 @@ package org.openhab.core.model.lsp.internal;
 
 import java.util.concurrent.ExecutorService;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.xtext.ide.ExecutorServiceProvider;
 import org.eclipse.xtext.ide.server.DefaultProjectDescriptionFactory;
@@ -37,6 +38,7 @@ import com.google.inject.AbstractModule;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class RuntimeServerModule extends AbstractModule {
 
     private final ScriptServiceUtil scriptServiceUtil;

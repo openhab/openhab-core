@@ -17,6 +17,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
@@ -42,6 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, service = HumanLanguageInterpreter.class, configurationPid = "org.openhab.rulehli", //
         property = Constants.SERVICE_PID + "=org.openhab.rulehli")
 @ConfigurableService(category = "voice", label = "Rule Voice Interpreter", description_uri = RuleHumanLanguageInterpreter.CONFIG_URI)
@@ -83,7 +86,7 @@ public class RuleHumanLanguageInterpreter implements HumanLanguageInterpreter {
     }
 
     @Override
-    public String getLabel(Locale locale) {
+    public String getLabel(@Nullable Locale locale) {
         return "Rule-based Interpreter";
     }
 
@@ -91,18 +94,18 @@ public class RuleHumanLanguageInterpreter implements HumanLanguageInterpreter {
     public String interpret(Locale locale, String text) throws InterpretationException {
         Event event = ItemEventFactory.createCommandEvent(itemName, new StringType(text));
         eventPublisher.post(event);
-        return null;
+        return "";
     }
 
     @Override
-    public String getGrammar(Locale locale, String format) {
+    public @Nullable String getGrammar(Locale locale, String format) {
         return null;
     }
 
     @Override
     public Set<Locale> getSupportedLocales() {
-        // we do not care about locales, so we return null here to indicate this
-        return null;
+        // we do not care about locales, so we return an empty set here to indicate this
+        return Set.of();
     }
 
     @Override

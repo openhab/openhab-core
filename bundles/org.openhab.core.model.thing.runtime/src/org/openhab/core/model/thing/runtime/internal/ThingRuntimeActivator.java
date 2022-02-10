@@ -12,12 +12,14 @@
  */
 package org.openhab.core.model.thing.runtime.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.thing.ThingStandaloneSetup;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@NonNullByDefault
 @Component(immediate = true)
 public class ThingRuntimeActivator implements ModelParser {
 

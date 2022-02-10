@@ -15,11 +15,15 @@ package org.openhab.core.voice.text;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This is the interface that a human language text interpreter has to implement.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 public interface HumanLanguageInterpreter {
 
     /**
@@ -35,7 +39,7 @@ public interface HumanLanguageInterpreter {
      * @param locale the locale to provide the label for
      * @return a localized string to be used in UIs
      */
-    public String getLabel(Locale locale);
+    public String getLabel(@Nullable Locale locale);
 
     /**
      * Interprets a human language text fragment of a given {@link Locale}
@@ -53,6 +57,7 @@ public interface HumanLanguageInterpreter {
      * @param format the grammar format
      * @return a grammar of the specified format
      */
+    @Nullable
     String getGrammar(Locale locale, String format);
 
     /**

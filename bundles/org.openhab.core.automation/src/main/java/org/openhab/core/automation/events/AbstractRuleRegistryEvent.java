@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.dto.RuleDTO;
 import org.openhab.core.events.AbstractEvent;
 
@@ -21,6 +23,7 @@ import org.openhab.core.events.AbstractEvent;
  * @author Benedikt Niehues - Initial contribution
  * @author Markus Rathgeb - Use the DTO for the Rule representation
  */
+@NonNullByDefault
 public abstract class AbstractRuleRegistryEvent extends AbstractEvent {
 
     private final RuleDTO rule;
@@ -33,7 +36,7 @@ public abstract class AbstractRuleRegistryEvent extends AbstractEvent {
      * @param source the source of the event
      * @param ruleDTO the ruleDTO for which this event is created
      */
-    public AbstractRuleRegistryEvent(String topic, String payload, String source, RuleDTO rule) {
+    public AbstractRuleRegistryEvent(String topic, String payload, @Nullable String source, RuleDTO rule) {
         super(topic, payload, source);
         this.rule = rule;
     }

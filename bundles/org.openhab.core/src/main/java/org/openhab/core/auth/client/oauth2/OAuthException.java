@@ -12,11 +12,14 @@
  */
 package org.openhab.core.auth.client.oauth2;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * For all exceptions arising during oauth.
  *
  * @author Gary Tse - Initial contribution
  */
+@NonNullByDefault
 public class OAuthException extends Exception {
 
     private static final long serialVersionUID = -2548612391437480321L;

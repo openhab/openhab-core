@@ -23,6 +23,8 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.internal.Constants;
 import org.osgi.service.component.annotations.Activate;
@@ -49,6 +51,7 @@ import org.slf4j.LoggerFactory;
         "service.pid=org.openhab.core.cors" }, configurationPid = "org.openhab.cors", configurationPolicy = ConfigurationPolicy.REQUIRE)
 @JaxrsExtension
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@NonNullByDefault
 public class CorsFilter implements ContainerResponseFilter {
 
     static final String HTTP_HEAD_METHOD = "HEAD";
@@ -87,8 +90,8 @@ public class CorsFilter implements ContainerResponseFilter {
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
-            throws IOException {
+    public void filter(@NonNullByDefault({}) ContainerRequestContext requestContext,
+            @NonNullByDefault({}) ContainerResponseContext responseContext) throws IOException {
         if (isEnabled && !processPreflight(requestContext, responseContext)) {
             processRequest(requestContext, responseContext);
         }
@@ -150,9 +153,8 @@ public class CorsFilter implements ContainerResponseFilter {
      * @param header
      * @return The first value from the given header or null if the header is
      *         not found.
-     *
      */
-    private String getValue(MultivaluedMap<String, String> headers, String header) {
+    private @Nullable String getValue(MultivaluedMap<String, String> headers, String header) {
         List<String> values = headers.get(header);
         if (values == null || values.isEmpty()) {
             return null;
@@ -177,7 +179,7 @@ public class CorsFilter implements ContainerResponseFilter {
     }
 
     @Activate
-    protected void activate(Map<String, Object> properties) {
+    protected void activate(@Nullable Map<String, Object> properties) {
         if (properties != null) {
             String corsPropertyValue = (String) properties.get(Constants.CORS_PROPERTY);
             this.isEnabled = "true".equalsIgnoreCase(corsPropertyValue);

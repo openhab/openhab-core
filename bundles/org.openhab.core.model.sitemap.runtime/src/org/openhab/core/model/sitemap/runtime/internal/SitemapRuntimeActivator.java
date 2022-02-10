@@ -12,12 +12,14 @@
  */
 package org.openhab.core.model.sitemap.runtime.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.sitemap.SitemapStandaloneSetup;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@NonNullByDefault
 @Component(immediate = true)
 public class SitemapRuntimeActivator implements ModelParser {
 

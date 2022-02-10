@@ -15,14 +15,18 @@ package org.openhab.core.model.lazygen;
 import org.eclipse.emf.mwe.core.WorkflowContext;
 import org.eclipse.emf.mwe.core.issues.Issues;
 import org.eclipse.emf.mwe.core.monitor.ProgressMonitor;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.generator.Generator;
 
 /**
  *
  * @author Holger Schill, Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class LazyGenerator extends Generator {
 
+    @Nullable
     LazyLanguageConfig langConfig = null;
 
     public void addLazyLanguage(LazyLanguageConfig langConfig) {
@@ -31,12 +35,13 @@ public class LazyGenerator extends Generator {
     }
 
     @Override
-    protected void invokeInternal(WorkflowContext ctx, ProgressMonitor monitor, Issues issues) {
+    protected void invokeInternal(@NonNullByDefault({}) WorkflowContext ctx,
+            @NonNullByDefault({}) ProgressMonitor monitor, @NonNullByDefault({}) Issues issues) {
         super.checkConfigurationInternal(issues);
         super.invokeInternal(ctx, monitor, issues);
     }
 
     @Override
-    protected void checkConfigurationInternal(Issues issues) {
+    protected void checkConfigurationInternal(@NonNullByDefault({}) Issues issues) {
     }
 }

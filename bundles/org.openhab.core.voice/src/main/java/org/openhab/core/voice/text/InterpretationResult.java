@@ -12,11 +12,15 @@
  */
 package org.openhab.core.voice.text;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Bundles results of an interpretation. Represents final outcome and user feedback. This class is immutable.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 public final class InterpretationResult {
 
     /**
@@ -35,8 +39,8 @@ public final class InterpretationResult {
     public static final InterpretationResult SEMANTIC_ERROR = new InterpretationResult(false, "Semantic error.");
 
     private boolean success = false;
-    private InterpretationException exception;
-    private String response;
+    private @Nullable InterpretationException exception;
+    private String response = "";
 
     /**
      * Constructs a successful result.
@@ -82,7 +86,7 @@ public final class InterpretationResult {
     /**
      * @return the exception
      */
-    public InterpretationException getException() {
+    public @Nullable InterpretationException getException() {
         return exception;
     }
 

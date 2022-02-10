@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
@@ -39,6 +40,7 @@ import io.micrometer.core.instrument.Tag;
  *
  * @author Robert Bach - Initial contribution
  */
+@NonNullByDefault
 public class EventCountMetric implements OpenhabCoreMeterBinder, EventSubscriber {
 
     public static final String METRIC_NAME = "event_count";
@@ -47,7 +49,7 @@ public class EventCountMetric implements OpenhabCoreMeterBinder, EventSubscriber
     private static final String TOPIC_TAG_NAME = "topic";
     private @Nullable MeterRegistry meterRegistry;
     private final Set<Tag> tags = new HashSet<>();
-    private ServiceRegistration<?> eventSubscriberRegistration;
+    private @Nullable ServiceRegistration<?> eventSubscriberRegistration;
     private BundleContext bundleContext;
 
     public EventCountMetric(BundleContext bundleContext, Collection<Tag> tags) {
@@ -57,7 +59,7 @@ public class EventCountMetric implements OpenhabCoreMeterBinder, EventSubscriber
     }
 
     @Override
-    public void bindTo(MeterRegistry meterRegistry) {
+    public void bindTo(@NonNullByDefault({}) MeterRegistry meterRegistry) {
         unbind();
         logger.debug("EventCountMetric is being bound...");
         this.meterRegistry = meterRegistry;

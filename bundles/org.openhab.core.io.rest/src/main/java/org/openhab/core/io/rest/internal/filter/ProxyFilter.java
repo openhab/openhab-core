@@ -24,6 +24,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
@@ -43,6 +45,7 @@ import org.slf4j.LoggerFactory;
 @JaxrsExtension
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @PreMatching
+@NonNullByDefault
 public class ProxyFilter implements ContainerRequestFilter {
 
     static final String PROTO_PROXY_HEADER = "x-forwarded-proto";
@@ -52,7 +55,7 @@ public class ProxyFilter implements ContainerRequestFilter {
     private final transient Logger logger = LoggerFactory.getLogger(ProxyFilter.class);
 
     @Override
-    public void filter(ContainerRequestContext ctx) throws IOException {
+    public void filter(@NonNullByDefault({}) ContainerRequestContext ctx) throws IOException {
         String host = getValue(ctx.getHeaders(), HOST_PROXY_HEADER);
         String scheme = getValue(ctx.getHeaders(), PROTO_PROXY_HEADER);
 
@@ -114,7 +117,7 @@ public class ProxyFilter implements ContainerRequestFilter {
         ctx.setRequestUri(baseBuilder.build(), requestBuilder.build());
     }
 
-    private String getValue(MultivaluedMap<String, String> headers, String header) {
+    private @Nullable String getValue(MultivaluedMap<String, String> headers, String header) {
         List<String> values = headers.get(header);
         if (values == null || values.isEmpty()) {
             return null;

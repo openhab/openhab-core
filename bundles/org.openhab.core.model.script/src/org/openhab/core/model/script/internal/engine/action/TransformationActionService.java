@@ -12,8 +12,8 @@
  */
 package org.openhab.core.model.script.internal.engine.action;
 
-import org.openhab.core.transform.actions.Transformation;
 import org.openhab.core.model.script.engine.action.ActionService;
+import org.openhab.core.transform.actions.Transformation;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -24,12 +24,8 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true)
 public class TransformationActionService implements ActionService {
 
-    public TransformationActionService() {
-    }
-
     @Override
     public Class<?> getActionClass() {
         return Transformation.class;
     }
-
 }

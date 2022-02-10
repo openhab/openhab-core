@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
@@ -28,6 +30,7 @@ import org.osgi.service.component.ComponentContext;
 /**
  * @author Benedikt Niehues - Initial contribution
  */
+@NonNullByDefault
 public class TestHueThingHandlerFactoryX extends BaseThingHandlerFactory implements ThingHandlerFactory {
 
     public static final String BINDING_ID = "Xhue";
@@ -36,10 +39,8 @@ public class TestHueThingHandlerFactoryX extends BaseThingHandlerFactory impleme
     public static final ThingTypeUID THING_TYPE_LCT001 = new ThingTypeUID(BINDING_ID, "XLCT001");
     public static final ThingTypeUID THING_TYPE_TEST = new ThingTypeUID(BINDING_ID, "XTEST");
 
-    public static final Set<ThingTypeUID> SUPPORTED_BRIDGE_TYPES = Stream.of(THING_TYPE_BRIDGE)
-            .collect(Collectors.toSet());
-    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Stream.of(THING_TYPE_LCT001, THING_TYPE_TEST)
-            .collect(Collectors.toSet());
+    public static final Set<ThingTypeUID> SUPPORTED_BRIDGE_TYPES = Set.of(THING_TYPE_BRIDGE);
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Set.of(THING_TYPE_LCT001, THING_TYPE_TEST);
     public static final Set<ThingTypeUID> SUPPORTED_TYPES = Stream
             .concat(SUPPORTED_BRIDGE_TYPES.stream(), SUPPORTED_THING_TYPES.stream()).collect(Collectors.toSet());
 
@@ -61,8 +62,8 @@ public class TestHueThingHandlerFactoryX extends BaseThingHandlerFactory impleme
     }
 
     @Override
-    public Thing createThing(ThingTypeUID thingTypeUID, Configuration configuration, ThingUID thingUID,
-            ThingUID bridgeUID) {
+    public @Nullable Thing createThing(ThingTypeUID thingTypeUID, Configuration configuration,
+            @Nullable ThingUID thingUID, @Nullable ThingUID bridgeUID) {
         if (SUPPORTED_BRIDGE_TYPES.contains(thingTypeUID)) {
             ThingUID hueBridgeUID = getBridgeThingUID(thingTypeUID, thingUID, configuration);
             return super.createThing(thingTypeUID, configuration, hueBridgeUID, null);
@@ -79,7 +80,8 @@ public class TestHueThingHandlerFactoryX extends BaseThingHandlerFactory impleme
         return SUPPORTED_TYPES.contains(thingTypeUID);
     }
 
-    private ThingUID getBridgeThingUID(ThingTypeUID thingTypeUID, ThingUID thingUID, Configuration configuration) {
+    private ThingUID getBridgeThingUID(ThingTypeUID thingTypeUID, @Nullable ThingUID thingUID,
+            Configuration configuration) {
         if (thingUID != null) {
             return thingUID;
         } else {
@@ -88,8 +90,8 @@ public class TestHueThingHandlerFactoryX extends BaseThingHandlerFactory impleme
         }
     }
 
-    private ThingUID getLightUID(ThingTypeUID thingTypeUID, ThingUID thingUID, Configuration configuration,
-            ThingUID bridgeUID) {
+    private ThingUID getLightUID(ThingTypeUID thingTypeUID, @Nullable ThingUID thingUID, Configuration configuration,
+            @Nullable ThingUID bridgeUID) {
         if (thingUID != null) {
             return thingUID;
         } else {
@@ -99,7 +101,7 @@ public class TestHueThingHandlerFactoryX extends BaseThingHandlerFactory impleme
     }
 
     @Override
-    protected ThingHandler createHandler(Thing thing) {
+    protected @Nullable ThingHandler createHandler(Thing thing) {
         return null;
     }
 

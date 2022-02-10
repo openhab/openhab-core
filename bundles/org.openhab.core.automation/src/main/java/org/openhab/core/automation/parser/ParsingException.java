@@ -12,8 +12,10 @@
  */
 package org.openhab.core.automation.parser;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * This class extends the {@link Exception} class functionality with functionality serving to accumulate the all
@@ -22,12 +24,13 @@ import java.util.List;
  * @author Ana Dimova - Initial contribution
  */
 @SuppressWarnings("serial")
+@NonNullByDefault
 public class ParsingException extends Exception {
 
     /**
      * Keeps all accumulated exceptions.
      */
-    List<ParsingNestedException> exceptions;
+    private List<ParsingNestedException> exceptions;
 
     /**
      * Creates the holder for one exception during the parsing process.
@@ -35,8 +38,7 @@ public class ParsingException extends Exception {
      * @param e is an exception during the parsing process.
      */
     public ParsingException(ParsingNestedException e) {
-        exceptions = new ArrayList<>();
-        exceptions.add(e);
+        exceptions = List.of(e);
     }
 
     /**
@@ -49,7 +51,7 @@ public class ParsingException extends Exception {
     }
 
     @Override
-    public String getMessage() {
+    public @Nullable String getMessage() {
         StringBuilder writer = new StringBuilder();
         for (ParsingNestedException e : exceptions) {
             writer.append(e.getMessage() + "\n");

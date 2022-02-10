@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
  *
  * @author Robert Bach - Initial contribution
  */
+@NonNullByDefault
 public class ThreadPoolMetric implements OpenhabCoreMeterBinder {
 
     private final Logger logger = LoggerFactory.getLogger(ThreadPoolMetric.class);
@@ -46,7 +48,7 @@ public class ThreadPoolMetric implements OpenhabCoreMeterBinder {
     }
 
     @Override
-    public void bindTo(MeterRegistry registry) {
+    public void bindTo(@NonNullByDefault({}) MeterRegistry registry) {
         unbind();
         logger.debug("ThreadPoolMetric is being bound...");
         this.meterRegistry = registry;

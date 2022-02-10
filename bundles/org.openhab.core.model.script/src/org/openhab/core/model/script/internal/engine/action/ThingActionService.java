@@ -15,6 +15,8 @@ package org.openhab.core.model.script.internal.engine.action;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.script.actions.Things;
 import org.openhab.core.model.script.engine.action.ActionService;
 import org.openhab.core.thing.Thing;
@@ -36,11 +38,12 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Maoliang Huang - Initial contribution
  * @author Kai Kreuzer - Extended for general thing access
  */
+@NonNullByDefault
 @Component(immediate = true)
 public class ThingActionService implements ActionService {
 
     private static final Map<String, ThingActions> THING_ACTIONS_MAP = new HashMap<>();
-    private static ThingRegistry thingRegistry;
+    private static @Nullable ThingRegistry thingRegistry;
 
     @Activate
     public ThingActionService(final @Reference ThingRegistry thingRegistry) {
@@ -52,7 +55,7 @@ public class ThingActionService implements ActionService {
         return Things.class;
     }
 
-    public static ThingStatusInfo getThingStatusInfo(String thingUid) {
+    public static @Nullable ThingStatusInfo getThingStatusInfo(String thingUid) {
         ThingUID uid = new ThingUID(thingUid);
         Thing thing = thingRegistry.get(uid);
 
@@ -71,7 +74,7 @@ public class ThingActionService implements ActionService {
      *
      * @return actions the actions instance or null, if not available
      */
-    public static ThingActions getActions(String scope, String thingUid) {
+    public static @Nullable ThingActions getActions(String scope, String thingUid) {
         ThingUID uid = new ThingUID(thingUid);
         Thing thing = thingRegistry.get(uid);
         if (thing != null) {

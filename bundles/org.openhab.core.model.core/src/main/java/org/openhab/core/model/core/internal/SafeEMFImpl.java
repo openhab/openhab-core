@@ -14,6 +14,7 @@ package org.openhab.core.model.core.internal;
 
 import java.util.function.Supplier;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.model.core.SafeEMF;
 import org.osgi.service.component.annotations.Component;
 
@@ -23,6 +24,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Markus Rathgeb - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class SafeEMFImpl implements SafeEMF {
 
     @Override

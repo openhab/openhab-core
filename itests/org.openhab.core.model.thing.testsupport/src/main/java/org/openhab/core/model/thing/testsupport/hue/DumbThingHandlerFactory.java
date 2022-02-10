@@ -14,6 +14,8 @@ package org.openhab.core.model.thing.testsupport.hue;
 
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
@@ -31,6 +33,7 @@ import org.osgi.service.component.ComponentContext;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class DumbThingHandlerFactory extends BaseThingHandlerFactory implements ThingHandlerFactory {
 
     public static final String BINDING_ID = "dumb";
@@ -51,8 +54,8 @@ public class DumbThingHandlerFactory extends BaseThingHandlerFactory implements 
     }
 
     @Override
-    public Thing createThing(ThingTypeUID thingTypeUID, Configuration configuration, ThingUID thingUID,
-            ThingUID bridgeUID) {
+    public @Nullable Thing createThing(ThingTypeUID thingTypeUID, Configuration configuration,
+            @Nullable ThingUID thingUID, @Nullable ThingUID bridgeUID) {
         if (dumb) {
             return null;
         } else {
@@ -69,7 +72,7 @@ public class DumbThingHandlerFactory extends BaseThingHandlerFactory implements 
     }
 
     @Override
-    protected ThingHandler createHandler(Thing thing) {
+    protected @Nullable ThingHandler createHandler(Thing thing) {
         return null;
     }
 

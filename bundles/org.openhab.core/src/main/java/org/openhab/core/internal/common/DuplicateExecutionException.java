@@ -12,11 +12,14 @@
  */
 package org.openhab.core.internal.common;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Denotes that there already is a thread occupied by the same context.
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 class DuplicateExecutionException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 

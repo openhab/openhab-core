@@ -12,11 +12,14 @@
  */
 package org.openhab.core.voice.text;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * An exception used by {@link HumanLanguageInterpreter}s, if an error occurs.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 public class InterpretationException extends Exception {
 
     private static final long serialVersionUID = 76120119745036525L;

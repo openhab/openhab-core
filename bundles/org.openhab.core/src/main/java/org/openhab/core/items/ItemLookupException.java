@@ -12,12 +12,15 @@
  */
 package org.openhab.core.items;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This is an abstract parent exception to be extended by any exceptions
  * related to item lookups in the item registry.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public abstract class ItemLookupException extends Exception {
 
     public ItemLookupException(String string) {

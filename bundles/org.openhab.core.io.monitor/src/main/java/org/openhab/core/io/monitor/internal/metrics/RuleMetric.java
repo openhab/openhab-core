@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleRegistry;
@@ -40,6 +41,7 @@ import io.micrometer.core.instrument.Tag;
  *
  * @author Robert Bach - Initial contribution
  */
+@NonNullByDefault
 public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
 
     public static final String METRIC_NAME = "openhab.rule.runs";
@@ -53,7 +55,7 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
     private static final String RULE_NAME_TAG_NAME = "rulename";
     private @Nullable MeterRegistry meterRegistry;
     private final Set<Tag> tags = new HashSet<>();
-    private ServiceRegistration<?> eventSubscriberRegistration;
+    private @Nullable ServiceRegistration<?> eventSubscriberRegistration;
     private BundleContext bundleContext;
     private RuleRegistry ruleRegistry;
 
@@ -65,7 +67,7 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
     }
 
     @Override
-    public void bindTo(MeterRegistry meterRegistry) {
+    public void bindTo(@NonNullByDefault({}) MeterRegistry meterRegistry) {
         unbind();
         logger.debug("RuleMetric is being bound...");
         this.meterRegistry = meterRegistry;
@@ -130,7 +132,7 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
         meterRegistry.counter(METRIC_NAME, tagsWithRule).increment();
     }
 
-    private String getRuleName(String ruleId) {
+    private @Nullable String getRuleName(String ruleId) {
         Rule rule = ruleRegistry.get(ruleId);
         return rule == null ? null : rule.getName();
     }

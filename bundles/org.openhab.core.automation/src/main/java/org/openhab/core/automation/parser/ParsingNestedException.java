@@ -12,6 +12,9 @@
  */
 package org.openhab.core.automation.parser;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This class extends the {@link Exception} class functionality with keeping additional information about reasons for
  * exception during the parsing process.
@@ -19,6 +22,7 @@ package org.openhab.core.automation.parser;
  * @author Ana Dimova - Initial contribution
  */
 @SuppressWarnings("serial")
+@NonNullByDefault
 public class ParsingNestedException extends Exception {
 
     public static final int MODULE_TYPE = 1;
@@ -28,7 +32,7 @@ public class ParsingNestedException extends Exception {
     /**
      * Keeps information about the UID of the automation object for parsing - module type, template or rule.
      */
-    private final String id;
+    private final @Nullable String id;
 
     /**
      * Keeps information about the type of the automation object for parsing - module type, template or rule.
@@ -44,7 +48,7 @@ public class ParsingNestedException extends Exception {
      * @param msg is the additional message with additional information about the parsing process.
      * @param t is the exception thrown during the parsing.
      */
-    public ParsingNestedException(int type, String id, String msg, Throwable t) {
+    public ParsingNestedException(int type, @Nullable String id, String msg, Throwable t) {
         super(msg, t);
         this.id = id;
         this.type = type;
@@ -58,14 +62,14 @@ public class ParsingNestedException extends Exception {
      * @param id is the UID of the automation object for parsing.
      * @param t is the exception thrown during the parsing.
      */
-    public ParsingNestedException(int type, String id, Throwable t) {
+    public ParsingNestedException(int type, @Nullable String id, Throwable t) {
         super(t);
         this.id = id;
         this.type = type;
     }
 
     @Override
-    public String getMessage() {
+    public @Nullable String getMessage() {
         StringBuilder sb = new StringBuilder();
         switch (type) {
             case MODULE_TYPE:

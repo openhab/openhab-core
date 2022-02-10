@@ -12,9 +12,12 @@
  */
 package org.openhab.core.model.script.internal.engine.action;
 
-import org.openhab.core.voice.VoiceManager;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.script.actions.Voice;
 import org.openhab.core.model.script.engine.action.ActionService;
+import org.openhab.core.voice.VoiceManager;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -23,23 +26,19 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true)
 public class VoiceActionService implements ActionService {
 
-    public static VoiceManager voiceManager;
+    public static @Nullable VoiceManager voiceManager;
+
+    @Activate
+    public VoiceActionService(final @Reference VoiceManager voiceManager) {
+        VoiceActionService.voiceManager = voiceManager;
+    }
 
     @Override
     public Class<?> getActionClass() {
         return Voice.class;
     }
-
-    @Reference
-    protected void setVoiceManager(VoiceManager voiceManager) {
-        VoiceActionService.voiceManager = voiceManager;
-    }
-
-    protected void unsetVoiceManager(VoiceManager voiceManager) {
-        VoiceActionService.voiceManager = null;
-    }
-
 }
