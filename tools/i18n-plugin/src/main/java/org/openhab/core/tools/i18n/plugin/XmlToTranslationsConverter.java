@@ -51,8 +51,8 @@ import org.openhab.core.types.StateDescription;
 public class XmlToTranslationsConverter {
 
     public Translations convert(BundleInfo bundleInfo) {
-        BindingInfoXmlResult bindingInfoXml = bundleInfo.getBindingInfoXml();
-        return bindingInfoXml == null ? configTranslations(bundleInfo) : bindingTranslations(bundleInfo);
+        String bindingId = bundleInfo.getBindingId();
+        return bindingId.isBlank() ? configTranslations(bundleInfo) : bindingTranslations(bundleInfo);
     }
 
     private Translations bindingTranslations(BundleInfo bundleInfo) {
