@@ -38,6 +38,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * @author Yannick Schaus - Initial contribution
+ * @author Nicolas Gennart - roles management
  */
 @ExtendWith(MockitoExtension.class)
 public class UserRegistryImplTest {

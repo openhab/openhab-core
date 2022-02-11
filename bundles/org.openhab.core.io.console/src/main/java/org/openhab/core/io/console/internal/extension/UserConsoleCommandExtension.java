@@ -53,6 +53,8 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
     private static final String SUBCMD_RMAPITOKEN = "rmApiToken";
     private static final String SUBCMD_CLEARSESSIONS = "clearSessions";
 
+    private Scanner scanner = new Scanner(System.in);
+
     private final Logger logger = LoggerFactory.getLogger(UserConsoleCommandExtension.class);
 
     private final UserRegistry userRegistry;
@@ -360,7 +362,6 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
             return true;
         }
 
-        Scanner scanner = new Scanner(System.in);
         System.out.println(
                 "To manage the administrator role you have to run the command line: log <userId with administrator role> <password>");
         console.println("The users with the administrator role are the following:");
@@ -370,7 +371,7 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
         String scanArgs = null;
         while (true) {
 
-            scanArgs = scanner.nextLine();
+            scanArgs = this.scanner.nextLine();
 
             // check if the command contains only letter of the alphabet.
             Pattern p = Pattern.compile(WHITELIST);
@@ -388,7 +389,6 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                             console.println("the user " + logArgs[1] + " does not exist");
                         } else {
                             if (userRegistry.checkAdministratorCredential(adminUser, logArgs[2])) {
-                                scanner.close();
                                 return true;
                             } else {
                                 console.println("The password of the user " + logArgs[1]
@@ -396,7 +396,6 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                             }
                         }
                     } else if (logArgs[0].equals("exit")) {
-                        scanner.close();
                         return false;
                     } else {
                         printHelp(console);
