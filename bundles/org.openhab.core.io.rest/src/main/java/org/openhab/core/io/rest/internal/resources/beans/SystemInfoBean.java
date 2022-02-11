@@ -15,7 +15,6 @@ package org.openhab.core.io.rest.internal.resources.beans;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
-import org.openhab.core.service.StartLevelService;
 
 /**
  * This is a java bean that is used to define system information for the REST interface.
