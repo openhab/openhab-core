@@ -178,6 +178,10 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             ThingStatusInfoChangedEvent event = (ThingStatusInfoChangedEvent) value;
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_THING),
                     event.getThingUID().toString());
+            evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_PREVIOUS_STATUS),
+                    event.getOldStatusInfo().getStatus().toString());
+            evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_NEW_STATUS),
+                    event.getStatusInfo().getStatus().toString());
         }
 
         return evalContext;
