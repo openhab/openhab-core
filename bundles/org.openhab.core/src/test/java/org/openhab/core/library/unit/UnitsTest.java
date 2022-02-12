@@ -76,6 +76,14 @@ public class UnitsTest {
     }
 
     @Test
+    public void testPascal2psiConversion() {
+        Quantity<Pressure> pascal = Quantities.getQuantity(new BigDecimal("6894.757"), SIUnits.PASCAL);
+
+        assertThat(pascal.to(ImperialUnits.POUND_FORCE_SQUARE_INCH),
+                isQuantityEquals(Quantities.getQuantity(BigDecimal.ONE, ImperialUnits.POUND_FORCE_SQUARE_INCH)));
+    }
+
+    @Test
     public void testmmHg2PascalConversion() {
         Quantity<Pressure> mmHg = Quantities.getQuantity(BigDecimal.ONE, Units.MILLIMETRE_OF_MERCURY);
 
