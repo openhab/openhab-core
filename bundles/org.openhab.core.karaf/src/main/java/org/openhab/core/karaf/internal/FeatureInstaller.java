@@ -16,6 +16,7 @@ import static java.util.function.Predicate.not;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -40,6 +42,8 @@ import java.util.stream.Stream;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.kar.KarService;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.AddonEventFactory;
 import org.openhab.core.common.NamedThreadFactory;
@@ -101,9 +105,11 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private final ConfigurationAdmin configurationAdmin;
     private final FeaturesService featuresService;
+    private final KarService karService;
     private static EventPublisher eventPublisher;
 
     private ScheduledExecutorService scheduler;
+    private @Nullable ScheduledFuture<?> installJob;
 
     private boolean paxCfgUpdated = true; // a flag used to check whether CM has already successfully updated the pax
                                           // configuration as this must be waited for before trying to add feature repos
@@ -121,9 +127,10 @@ public class FeatureInstaller implements ConfigurationListener {
 
     @Activate
     public FeatureInstaller(final @Reference ConfigurationAdmin configurationAdmin,
-            final @Reference FeaturesService featuresService) {
+            final @Reference FeaturesService featuresService, final @Reference KarService karService) {
         this.configurationAdmin = configurationAdmin;
         this.featuresService = featuresService;
+        this.karService = karService;
     }
 
     @Reference
@@ -197,8 +204,33 @@ public class FeatureInstaller implements ConfigurationListener {
                 // which we will receive as another call to modified
                 return;
             }
-            installAddons(config);
+            // if there is an install job running, we cancel it.
+            ScheduledFuture<?> installJob = this.installJob;
+            if (installJob != null) {
+                logger.trace("Configuration changed. Cancelling install job.");
+                installJob.cancel(false); // do not cancel running job, this might cause problems
+                this.installJob = null;
+            }
+            installAddons(config); // we don't have to wait even if the job is running, because method is synchronized
         });
+    }
+
+    private boolean allKarsInstalled() {
+        try {
+            List<String> karRepos = karService.list();
+            Dictionary<String, Object> felixProperties = configurationAdmin
+                    .getConfiguration("org.apache.felix.fileinstall~deploy").getProperties();
+            String addonsDirectory = (String) felixProperties.get("felix.fileinstall.dir");
+            if (addonsDirectory != null) {
+                return Files.list(Path.of(addonsDirectory)).map(Path::getFileName).map(Path::toString)
+                        .filter(file -> file.endsWith(".kar"))
+                        .map(karFileName -> karFileName.substring(0, karFileName.lastIndexOf(".")))
+                        .allMatch(karRepos::contains);
+            }
+        } catch (Exception ignored) {
+        }
+        logger.warn("Could not determine addons folder, its content or the list of installed repositories!");
+        return false;
     }
 
     private void waitForConfigUpdateEvent() {
@@ -332,7 +364,7 @@ public class FeatureInstaller implements ConfigurationListener {
                     }
                 }
                 if (changed) {
-                    properties.put(PROPERTY_MVN_REPOS, repoCfg.stream().collect(Collectors.joining(",")));
+                    properties.put(PROPERTY_MVN_REPOS, String.join(",", repoCfg));
                     paxCfg.update(properties);
                 }
             } catch (IOException e) {
@@ -344,6 +376,15 @@ public class FeatureInstaller implements ConfigurationListener {
     }
 
     private synchronized void installAddons(final Map<String, Object> config) {
+        if (!allKarsInstalled()) {
+            // some kars are not installed, delay installation for 15s
+            logger.info("Some .kar files are not installed yet. Delaying add-on installation by 15s.");
+            installJob = scheduler.schedule(() -> installAddons(config), 15, TimeUnit.SECONDS);
+            return;
+        }
+
+        installJob = null; // either this is called by the job itself or it is null anyway
+
         final Set<String> currentAddons = new HashSet<>(); // the currently installed ones
         final Set<String> targetAddons = new HashSet<>(); // the target we want to have installed afterwards
         final Set<String> installAddons = new HashSet<>(); // the ones to be installed (the diff)
