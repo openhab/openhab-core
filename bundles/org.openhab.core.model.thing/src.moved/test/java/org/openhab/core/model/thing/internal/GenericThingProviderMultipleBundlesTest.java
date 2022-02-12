@@ -120,7 +120,7 @@ public class GenericThingProviderMultipleBundlesTest {
 
     @Test
     public void testDifferentHandlerFactoriesForBridgeAndThing() {
-        thingProvider.onReadyMarkerAdded(new ReadyMarker("", BUNDLE_NAME));
+        thingProvider.onReadyMarkerAdded(new ReadyMarker("openhab.xmlThingTypes", BUNDLE_NAME));
         thingProvider.modelChanged(TEST_MODEL_THINGS, EventType.ADDED);
 
         verify(bridgeHandlerFactory).createThing(eq(BRIDGE_TYPE_UID), any(Configuration.class), eq(BRIDGE_UID),
