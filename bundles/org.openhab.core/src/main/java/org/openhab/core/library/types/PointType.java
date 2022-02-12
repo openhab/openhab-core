@@ -129,6 +129,24 @@ public class PointType implements ComplexType, Command, State {
     }
 
     /**
+     * Return the bearing in degrees from otherPoint following a great circle path.
+     *
+     * @param otherPoint
+     * @return bearing in degrees
+     * @see <a href="http://www.movable-type.co.uk/scripts/latlong.html">Calculate distance, bearing and more between
+     *      Latitude/Longitude points</a>
+     */
+    public DecimalType bearingTo(PointType otherPoint) {
+        double y = Math.sin(otherPoint.longitude.doubleValue() - this.longitude.doubleValue())
+                * Math.cos(otherPoint.latitude.doubleValue());
+        double x = Math.cos(this.latitude.doubleValue()) * Math.sin(otherPoint.latitude.doubleValue())
+                - Math.sin(this.latitude.doubleValue()) * Math.cos(otherPoint.latitude.doubleValue())
+                        * Math.cos(otherPoint.longitude.doubleValue() - this.longitude.doubleValue());
+        double deg = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+        return new DecimalType(deg);
+    }
+
+    /**
      * Return the distance in meters from otherPoint, ignoring altitude. This algorithm also
      * ignores the oblate spheroid shape of Earth and assumes a perfect sphere, so results
      * are inexact.
