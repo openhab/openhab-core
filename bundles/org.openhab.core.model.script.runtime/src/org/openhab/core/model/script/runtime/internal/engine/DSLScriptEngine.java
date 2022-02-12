@@ -38,6 +38,7 @@ import org.openhab.core.model.script.engine.ScriptParsingException;
 import org.openhab.core.model.script.jvmmodel.ScriptJvmModelInferrer;
 import org.openhab.core.model.script.runtime.DSLScriptContextProvider;
 import org.openhab.core.thing.events.ChannelTriggeredEvent;
+import org.openhab.core.thing.events.ThingStatusInfoChangedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,6 +173,11 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             ItemEvent event = (ItemEvent) value;
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM_NAME),
                     event.getItemName());
+        }
+        if (value instanceof ThingStatusInfoChangedEvent) {
+            ThingStatusInfoChangedEvent event = (ThingStatusInfoChangedEvent) value;
+            evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_THING),
+                    event.getThingUID().toString());
         }
 
         return evalContext;
