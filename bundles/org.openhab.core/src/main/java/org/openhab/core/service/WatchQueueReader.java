@@ -252,7 +252,7 @@ public class WatchQueueReader implements Runnable {
                 }
                 for (WatchEvent<?> event : key.pollEvents()) {
                     Kind<?> kind = event.kind();
-                    if (kind == OVERFLOW) {
+                    if (OVERFLOW.equals(kind)) {
                         logger.warn(
                                 "Found an event of kind 'OVERFLOW': {}. File system changes might have been missed.",
                                 event);
