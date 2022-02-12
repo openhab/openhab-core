@@ -24,7 +24,7 @@ import org.openhab.core.OpenHAB;
 @NonNullByDefault
 public class SystemInfoBean {
 
-    public final SystemInfo systemInfo = new SystemInfo();
+    public final SystemInfo systemInfo;
 
     public static class SystemInfo {
         public final String configFolder = OpenHAB.getConfigFolder();
@@ -39,5 +39,14 @@ public class SystemInfoBean {
         public final int availableProcessors = Runtime.getRuntime().availableProcessors();
         public final long freeMemory = Runtime.getRuntime().freeMemory();
         public final long totalMemory = Runtime.getRuntime().totalMemory();
+        public final int startLevel;
+
+        public SystemInfo(int startLevel) {
+            this.startLevel = startLevel;
+        }
+    }
+
+    public SystemInfoBean(int startLevel) {
+        systemInfo = new SystemInfo(startLevel);
     }
 }
