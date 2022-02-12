@@ -58,7 +58,7 @@
     <dependency>
       <groupId>org.apache.karaf.kar</groupId>
       <artifactId>org.apache.karaf.kar.core</artifactId>
-      <version>${karaf.tooling.version}</version>
+      <version>${karaf.compile.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

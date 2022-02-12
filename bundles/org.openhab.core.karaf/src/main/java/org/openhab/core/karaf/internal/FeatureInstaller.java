@@ -207,8 +207,8 @@ public class FeatureInstaller implements ConfigurationListener {
             // if there is an install job running, we cancel it.
             ScheduledFuture<?> installJob = this.installJob;
             if (installJob != null) {
-                logger.trace("Configuration changed. Cancelling install job.");
-                installJob.cancel(false); // do not cancel running job, this might cause problems
+                logger.trace("Configuration changed. Cancelling installation job.");
+                installJob.cancel(false); // do not interrupt running job, this might cause problems
                 this.installJob = null;
             }
             installAddons(config); // we don't have to wait even if the job is running, because method is synchronized
