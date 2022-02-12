@@ -252,7 +252,7 @@ public class WatchQueueReader implements Runnable {
                 }
                 for (WatchEvent<?> event : key.pollEvents()) {
                     Kind<?> kind = event.kind();
-                    if (kind == OVERFLOW) {
+                    if (OVERFLOW.equals(kind)) {
                         logger.warn(
                                 "Found an event of kind 'OVERFLOW': {}. File system changes might have been missed.",
                                 event);
@@ -268,16 +268,16 @@ public class WatchQueueReader implements Runnable {
                         }
                         if (services != null) {
                             File f = resolvedPath.toFile();
-                            if (kind == ENTRY_MODIFY && f.isDirectory()) {
+                            if (ENTRY_MODIFY.equals(kind) && f.isDirectory()) {
                                 logger.trace("Skipping modification event for directory: {}", f);
                             } else {
-                                if (kind == ENTRY_MODIFY) {
+                                if (ENTRY_MODIFY.equals(kind)) {
                                     processModificationEvent(key, event, resolvedPath, services);
                                 } else {
                                     services.forEach(s -> s.processWatchEvent(event, kind, resolvedPath));
                                 }
                             }
-                            if (kind == ENTRY_CREATE && f.isDirectory()) {
+                            if (ENTRY_CREATE.equals(kind) && f.isDirectory()) {
                                 for (AbstractWatchService service : services) {
                                     if (service.watchSubDirectories()
                                             && service.getWatchEventKinds(resolvedPath) != null) {
@@ -285,7 +285,7 @@ public class WatchQueueReader implements Runnable {
                                                 resolvedPath);
                                     }
                                 }
-                            } else if (kind == ENTRY_DELETE) {
+                            } else if (ENTRY_DELETE.equals(kind)) {
                                 synchronized (this) {
                                     WatchKey toCancel = null;
                                     for (Map.Entry<WatchKey, Path> entry : registeredKeys.entrySet()) {
@@ -347,10 +347,10 @@ public class WatchQueueReader implements Runnable {
         synchronized (notifications) {
             for (AbstractWatchService service : services) {
                 logger.trace("Modification event for {} ", resolvedPath);
-                removeScheduledNotifications(key, service, resolvedPath);
+                removeScheduledNotifications(key, service, resolvedPath, true);
                 ScheduledFuture<?> future = scheduler.schedule(() -> {
                     logger.trace("Executing job for {}", resolvedPath);
-                    if (removeScheduledNotifications(key, service, resolvedPath)) {
+                    if (removeScheduledNotifications(key, service, resolvedPath, false)) {
                         logger.trace("Job removed itself for {}", resolvedPath);
                     } else {
                         logger.trace("Job couldn't find itself for {}", resolvedPath);
@@ -367,13 +367,16 @@ public class WatchQueueReader implements Runnable {
         }
     }
 
-    private boolean removeScheduledNotifications(WatchKey key, AbstractWatchService service, Path path) {
+    private boolean removeScheduledNotifications(WatchKey key, AbstractWatchService service, Path path,
+            boolean cancelJob) {
         Set<Notification> notifications = this.notifications.stream().filter(f -> f.matches(key, service, path))
                 .collect(Collectors.toSet());
         if (notifications.size() > 1) {
             logger.warn("Found more than one notification for {} / {} / {}. This is a bug.", key, service, path);
         }
-        notifications.forEach(notification -> notification.future.cancel(true));
+        if (cancelJob) {
+            notifications.forEach(notification -> notification.future.cancel(true));
+        }
         this.notifications.removeAll(notifications);
         return !notifications.isEmpty();
     }
@@ -470,10 +473,12 @@ public class WatchQueueReader implements Runnable {
 
         @Override
         public boolean equals(@Nullable Object o) {
-            if (this == o)
+            if (this == o) {
                 return true;
-            if (o == null || getClass() != o.getClass())
+            }
+            if (o == null || getClass() != o.getClass()) {
                 return false;
+            }
             Notification notification = (Notification) o;
             return key.equals(notification.key) && service.equals(notification.service)
                     && path.equals(notification.path) && future.equals(notification.future);
