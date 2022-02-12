@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.defaultscope.ScriptBusEvent;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.GroupItem;
@@ -34,19 +36,20 @@ import org.slf4j.LoggerFactory;
  * Items should not be updated directly (setting the state property), but updates should
  * be sent to the bus, so that all interested bundles are notified.
  *
- * Note: This class is a copy from the {@link BusEvent} class, which resides in the model.script bundle.
- *
+ * Note: This class is a copy from the {@link org.openhab.core.model.script.actions.BusEvent} class
+ * 
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class ScriptBusEventImpl implements ScriptBusEvent {
+
+    private @Nullable ItemRegistry itemRegistry;
+    private @Nullable EventPublisher eventPublisher;
 
     ScriptBusEventImpl(ItemRegistry itemRegistry, EventPublisher eventPublisher) {
         this.itemRegistry = itemRegistry;
         this.eventPublisher = eventPublisher;
     }
-
-    private ItemRegistry itemRegistry;
-    private EventPublisher eventPublisher;
 
     public void dispose() {
         this.itemRegistry = null;
@@ -54,7 +57,7 @@ public class ScriptBusEventImpl implements ScriptBusEvent {
     }
 
     @Override
-    public Object sendCommand(Item item, String commandString) {
+    public @Nullable Object sendCommand(@Nullable Item item, @Nullable String commandString) {
         if (item != null) {
             return sendCommand(item.getName(), commandString);
         } else {
@@ -63,7 +66,7 @@ public class ScriptBusEventImpl implements ScriptBusEvent {
     }
 
     @Override
-    public Object sendCommand(Item item, Number number) {
+    public @Nullable Object sendCommand(@Nullable Item item, @Nullable Number number) {
         if (item != null && number != null) {
             return sendCommand(item.getName(), number.toString());
         } else {
@@ -72,8 +75,10 @@ public class ScriptBusEventImpl implements ScriptBusEvent {
     }
 
     @Override
-    public Object sendCommand(String itemName, String commandString) {
-        if (eventPublisher != null && itemRegistry != null) {
+    public @Nullable Object sendCommand(@Nullable String itemName, @Nullable String commandString) {
+        EventPublisher eventPublisher = this.eventPublisher;
+        ItemRegistry itemRegistry = this.itemRegistry;
+        if (eventPublisher != null && itemRegistry != null && itemName != null && commandString != null) {
             try {
                 Item item = itemRegistry.getItem(itemName);
                 Command command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), commandString);
@@ -91,15 +96,16 @@ public class ScriptBusEventImpl implements ScriptBusEvent {
     }
 
     @Override
-    public Object sendCommand(Item item, Command command) {
-        if (eventPublisher != null && item != null) {
+    public @Nullable Object sendCommand(@Nullable Item item, @Nullable Command command) {
+        EventPublisher eventPublisher = this.eventPublisher;
+        if (eventPublisher != null && item != null && command != null) {
             eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command));
         }
         return null;
     }
 
     @Override
-    public Object postUpdate(Item item, Number state) {
+    public @Nullable Object postUpdate(@Nullable Item item, @Nullable Number state) {
         if (item != null && state != null) {
             return postUpdate(item.getName(), state.toString());
         } else {
@@ -108,7 +114,7 @@ public class ScriptBusEventImpl implements ScriptBusEvent {
     }
 
     @Override
-    public Object postUpdate(Item item, String stateAsString) {
+    public @Nullable Object postUpdate(@Nullable Item item, @Nullable String stateAsString) {
         if (item != null) {
             return postUpdate(item.getName(), stateAsString);
         } else {
@@ -117,8 +123,10 @@ public class ScriptBusEventImpl implements ScriptBusEvent {
     }
 
     @Override
-    public Object postUpdate(String itemName, String stateString) {
-        if (eventPublisher != null && itemRegistry != null) {
+    public @Nullable Object postUpdate(@Nullable String itemName, @Nullable String stateString) {
+        EventPublisher eventPublisher = this.eventPublisher;
+        ItemRegistry itemRegistry = this.itemRegistry;
+        if (eventPublisher != null && itemRegistry != null && itemName != null && stateString != null) {
             try {
                 Item item = itemRegistry.getItem(itemName);
                 State state = TypeParser.parseState(item.getAcceptedDataTypes(), stateString);
@@ -136,15 +144,16 @@ public class ScriptBusEventImpl implements ScriptBusEvent {
     }
 
     @Override
-    public Object postUpdate(Item item, State state) {
-        if (eventPublisher != null && item != null) {
+    public @Nullable Object postUpdate(@Nullable Item item, @Nullable State state) {
+        EventPublisher eventPublisher = this.eventPublisher;
+        if (eventPublisher != null && item != null && state != null) {
             eventPublisher.post(ItemEventFactory.createStateEvent(item.getName(), state));
         }
         return null;
     }
 
     @Override
-    public Map<Item, State> storeStates(Item... items) {
+    public Map<Item, State> storeStates(Item @Nullable... items) {
         Map<Item, State> statesMap = new HashMap<>();
         if (items != null) {
             for (Item item : items) {
@@ -162,7 +171,7 @@ public class ScriptBusEventImpl implements ScriptBusEvent {
     }
 
     @Override
-    public Object restoreStates(Map<Item, State> statesMap) {
+    public @Nullable Object restoreStates(@Nullable Map<Item, State> statesMap) {
         if (statesMap != null) {
             for (Entry<Item, State> entry : statesMap.entrySet()) {
                 if (entry.getValue() instanceof Command) {

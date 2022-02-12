@@ -14,6 +14,8 @@ package org.openhab.core.automation.module.script.defaultscope;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
@@ -27,7 +29,9 @@ import org.openhab.core.types.State;
  * Note: This class is a copy from the {@link BusEvent} class, which resides in the model.script bundle.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Jan N. Klug - Refactored to interface
  */
+@NonNullByDefault
 public interface ScriptBusEvent {
     /**
      * Sends a command for a specified item to the event bus.
@@ -35,7 +39,8 @@ public interface ScriptBusEvent {
      * @param item the item to send the command to
      * @param commandString the command to send
      */
-    Object sendCommand(Item item, String commandString);
+    @Nullable
+    Object sendCommand(@Nullable Item item, @Nullable String commandString);
 
     /**
      * Sends a number as a command for a specified item to the event bus.
@@ -43,7 +48,8 @@ public interface ScriptBusEvent {
      * @param item the item to send the command to
      * @param number the number to send as a command
      */
-    Object sendCommand(Item item, Number number);
+    @Nullable
+    Object sendCommand(@Nullable Item item, @Nullable Number number);
 
     /**
      * Sends a command for a specified item to the event bus.
@@ -51,7 +57,8 @@ public interface ScriptBusEvent {
      * @param itemName the name of the item to send the command to
      * @param commandString the command to send
      */
-    Object sendCommand(String itemName, String commandString);
+    @Nullable
+    Object sendCommand(@Nullable String itemName, @Nullable String commandString);
 
     /**
      * Sends a command for a specified item to the event bus.
@@ -59,7 +66,8 @@ public interface ScriptBusEvent {
      * @param item the item to send the command to
      * @param command the command to send
      */
-    Object sendCommand(Item item, Command command);
+    @Nullable
+    Object sendCommand(@Nullable Item item, @Nullable Command command);
 
     /**
      * Posts a status update for a specified item to the event bus.
@@ -67,7 +75,8 @@ public interface ScriptBusEvent {
      * @param item the item to send the status update for
      * @param state the new state of the item as a number
      */
-    Object postUpdate(Item item, Number state);
+    @Nullable
+    Object postUpdate(@Nullable Item item, @Nullable Number state);
 
     /**
      * Posts a status update for a specified item to the event bus.
@@ -75,7 +84,8 @@ public interface ScriptBusEvent {
      * @param item the item to send the status update for
      * @param stateAsString the new state of the item
      */
-    Object postUpdate(Item item, String stateAsString);
+    @Nullable
+    Object postUpdate(@Nullable Item item, @Nullable String stateAsString);
 
     /**
      * Posts a status update for a specified item to the event bus.
@@ -83,7 +93,8 @@ public interface ScriptBusEvent {
      * @param itemName the name of the item to send the status update for
      * @param stateAsString the new state of the item
      */
-    Object postUpdate(String itemName, String stateString);
+    @Nullable
+    Object postUpdate(@Nullable String itemName, @Nullable String stateAsString);
 
     /**
      * Posts a status update for a specified item to the event bus.
@@ -92,7 +103,8 @@ public interface ScriptBusEvent {
      * @param item the item to send the status update for
      * @param state the new state of the item
      */
-    Object postUpdate(Item item, State state);
+    @Nullable
+    Object postUpdate(@Nullable Item item, @Nullable State state);
 
     /**
      * Stores the current states for a list of items in a map.
@@ -101,7 +113,7 @@ public interface ScriptBusEvent {
      * @param items the items for which the state should be stored
      * @return the map of items with their states
      */
-    Map<Item, State> storeStates(Item... items);
+    Map<Item, State> storeStates(Item @Nullable... items);
 
     /**
      * Restores item states from a map.
@@ -112,5 +124,6 @@ public interface ScriptBusEvent {
      * @param statesMap a map with ({@link Item}, {@link State}) entries
      * @return null
      */
-    Object restoreStates(Map<Item, State> statesMap);
+    @Nullable
+    Object restoreStates(@Nullable Map<Item, State> statesMap);
 }
