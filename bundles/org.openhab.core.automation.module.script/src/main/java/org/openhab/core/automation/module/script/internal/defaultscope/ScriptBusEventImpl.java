@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
  * Note: This class is a copy from the {@link org.openhab.core.model.script.actions.BusEvent} class
  * 
  * @author Kai Kreuzer - Initial contribution
+ * @author Jan N. Klug - Moved implementation to internal class
  */
 @NonNullByDefault
 public class ScriptBusEventImpl implements ScriptBusEvent {

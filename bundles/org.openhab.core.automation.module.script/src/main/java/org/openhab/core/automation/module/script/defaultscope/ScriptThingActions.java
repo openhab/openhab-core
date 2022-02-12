@@ -12,15 +12,20 @@
  */
 package org.openhab.core.automation.module.script.defaultscope;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.binding.ThingActions;
 
 /**
  * The methods of this class are made available as functions in the scripts.
  *
- * Note: This class is a copy from the {@link ThingActions} class, which resides in the model.script bundle.
+ * Note: This class is a copy from the {@link org.openhab.core.model.script.internal.engine.action.ThingActionService}
+ * class
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Jan N. Klug - Refactored to interface
  */
+@NonNullByDefault
 public interface ScriptThingActions {
     /**
      * Gets an actions instance of a certain scope for a given thing UID
@@ -29,5 +34,6 @@ public interface ScriptThingActions {
      * @param thingUid the UID of the thing
      * @return actions the actions instance or null, if not available
      */
-    ThingActions get(String scope, String thingUid);
+    @Nullable
+    ThingActions get(@Nullable String scope, @Nullable String thingUid);
 }
