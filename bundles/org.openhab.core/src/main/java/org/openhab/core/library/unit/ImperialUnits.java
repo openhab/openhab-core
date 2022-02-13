@@ -49,6 +49,9 @@ public final class ImperialUnits extends CustomUnits {
     public static final Unit<Pressure> INCH_OF_MERCURY = addUnit(new TransformedUnit<>("inHg", Units.PASCAL,
             MultiplyConverter.ofRational(BigInteger.valueOf(3386388), BigInteger.valueOf(1000))));
 
+    public static final Unit<Pressure> POUND_FORCE_SQUARE_INCH = addUnit(new TransformedUnit<>("psi", Units.PASCAL,
+            MultiplyConverter.ofRational(BigInteger.valueOf(6894757), BigInteger.valueOf(1000))));
+
     public static final Unit<Temperature> FAHRENHEIT = addUnit(
             new TransformedUnit<>("°F", Units.KELVIN, MultiplyConverter
                     .ofRational(BigInteger.valueOf(5), BigInteger.valueOf(9)).concatenate(new AddConverter(459.67))));
@@ -104,6 +107,7 @@ public final class ImperialUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(LEAGUE, LEAGUE.getSymbol());
         SimpleUnitFormat.getInstance().label(GALLON_LIQUID_US, GALLON_LIQUID_US.getSymbol());
         SimpleUnitFormat.getInstance().label(GALLON_PER_MINUTE, "gal/min");
+        SimpleUnitFormat.getInstance().label(POUND_FORCE_SQUARE_INCH, POUND_FORCE_SQUARE_INCH.getSymbol());
     }
 
     private ImperialUnits() {
