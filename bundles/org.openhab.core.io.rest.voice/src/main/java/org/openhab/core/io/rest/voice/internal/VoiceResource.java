@@ -221,7 +221,7 @@ public class VoiceResource implements RESTResource {
     }
 
     @POST
-    @Path("/dialog/{sourceId: [a-zA-Z_0-9]+}/start")
+    @Path("/dialog/start")
     @Consumes(MediaType.TEXT_PLAIN)
     @Operation(operationId = "startDialog", summary = "Start dialog processing for a given audio source.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -229,7 +229,7 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "400", description = "Services are missing or dialog processing is already started for the audio source.") })
     public Response startDialog(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @PathParam("sourceId") @Parameter(description = "source ID") String sourceId,
+            @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId,
             @QueryParam("ksId") @Parameter(description = "keywork spotter ID") @Nullable String ksId,
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
             @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
@@ -237,9 +237,12 @@ public class VoiceResource implements RESTResource {
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("keyword") @Parameter(description = "keyword") @Nullable String keyword,
             @QueryParam("listeningItem") @Parameter(description = "listening item") @Nullable String listeningItem) {
-        AudioSource source = getSource(sourceId);
-        if (source == null) {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
+        AudioSource source = null;
+        if (sourceId != null) {
+            source = getSource(sourceId);
+            if (source == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
+            }
         }
         KSService ks = null;
         if (ksId != null) {
@@ -287,16 +290,20 @@ public class VoiceResource implements RESTResource {
     }
 
     @POST
-    @Path("/dialog/{sourceId: [a-zA-Z_0-9]+}/stop")
+    @Path("/dialog/stop")
     @Consumes(MediaType.TEXT_PLAIN)
     @Operation(operationId = "stopDialog", summary = "Stop dialog processing for a given audio source.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "No audio source was found."),
             @ApiResponse(responseCode = "400", description = "No dialog processing is started for the audio source.") })
-    public Response stopDialog(@PathParam("sourceId") @Parameter(description = "source ID") String sourceId) {
-        AudioSource source = getSource(sourceId);
-        if (source == null) {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
+    public Response stopDialog(
+            @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId) {
+        AudioSource source = null;
+        if (sourceId != null) {
+            source = getSource(sourceId);
+            if (source == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
+            }
         }
 
         try {
