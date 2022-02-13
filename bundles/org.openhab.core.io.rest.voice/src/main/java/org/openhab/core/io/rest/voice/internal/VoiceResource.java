@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.voice.internal;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
@@ -32,11 +33,17 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.audio.AudioManager;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSource;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.voice.KSService;
+import org.openhab.core.voice.STTService;
+import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
@@ -81,13 +88,16 @@ public class VoiceResource implements RESTResource {
     public static final String PATH_VOICE = "voice";
 
     private final LocaleService localeService;
+    private final AudioManager audioManager;
     private final VoiceManager voiceManager;
 
     @Activate
     public VoiceResource( //
             final @Reference LocaleService localeService, //
+            final @Reference AudioManager audioManager, //
             final @Reference VoiceManager voiceManager) {
         this.localeService = localeService;
+        this.audioManager = audioManager;
         this.voiceManager = voiceManager;
     }
 
@@ -208,5 +218,109 @@ public class VoiceResource implements RESTResource {
             @QueryParam("sinkid") @Parameter(description = "audio sink id") @Nullable String sinkId) {
         voiceManager.say(text, voiceId, sinkId);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
+    }
+
+    @POST
+    @Path("/dialog/start")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "startDialog", summary = "Start dialog processing for a given audio source.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "One of the given ids is wrong."),
+            @ApiResponse(responseCode = "400", description = "Services are missing or dialog processing is already started for the audio source.") })
+    public Response startDialog(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId,
+            @QueryParam("ksId") @Parameter(description = "keywork spotter ID") @Nullable String ksId,
+            @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
+            @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
+            @QueryParam("hliId") @Parameter(description = "interpreter ID") @Nullable String hliId,
+            @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
+            @QueryParam("keyword") @Parameter(description = "keyword") @Nullable String keyword,
+            @QueryParam("listeningItem") @Parameter(description = "listening item") @Nullable String listeningItem) {
+        AudioSource source = null;
+        if (sourceId != null) {
+            source = getSource(sourceId);
+            if (source == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
+            }
+        }
+        KSService ks = null;
+        if (ksId != null) {
+            ks = voiceManager.getKS(ksId);
+            if (ks == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Keyword spotter not found");
+            }
+        }
+        STTService stt = null;
+        if (sttId != null) {
+            stt = voiceManager.getSTT(sttId);
+            if (stt == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Speech-to-Text not found");
+            }
+        }
+        TTSService tts = null;
+        if (ttsId != null) {
+            tts = voiceManager.getTTS(ttsId);
+            if (tts == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Text-to-Speech not found");
+            }
+        }
+        HumanLanguageInterpreter hli = null;
+        if (hliId != null) {
+            hli = voiceManager.getHLI(hliId);
+            if (hli == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
+            }
+        }
+        AudioSink sink = null;
+        if (sinkId != null) {
+            sink = audioManager.getSink(sinkId);
+            if (sink == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio sink not found");
+            }
+        }
+        final Locale locale = localeService.getLocale(language);
+
+        try {
+            voiceManager.startDialog(ks, stt, tts, hli, source, sink, locale, keyword, listeningItem);
+            return Response.ok(null, MediaType.TEXT_PLAIN).build();
+        } catch (IllegalStateException e) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @POST
+    @Path("/dialog/stop")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "stopDialog", summary = "Stop dialog processing for a given audio source.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "No audio source was found."),
+            @ApiResponse(responseCode = "400", description = "No dialog processing is started for the audio source.") })
+    public Response stopDialog(
+            @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId) {
+        AudioSource source = null;
+        if (sourceId != null) {
+            source = getSource(sourceId);
+            if (source == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
+            }
+        }
+
+        try {
+            voiceManager.stopDialog(source);
+            return Response.ok(null, MediaType.TEXT_PLAIN).build();
+        } catch (IllegalStateException e) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    private @Nullable AudioSource getSource(String sourceId) {
+        Set<AudioSource> sources = audioManager.getAllSources();
+        for (AudioSource source : sources) {
+            if (source.getId().equals(sourceId)) {
+                return source;
+            }
+        }
+        return null;
     }
 }
