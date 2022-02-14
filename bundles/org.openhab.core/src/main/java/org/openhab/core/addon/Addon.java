@@ -13,6 +13,7 @@
 package org.openhab.core.addon;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ public class Addon {
     private final String contentType;
     private final @Nullable String link;
     private final String author;
-    private boolean verifiedAuthor;
+    private final boolean verifiedAuthor;
     private boolean installed;
     private final String type;
     private final @Nullable String description;
@@ -47,6 +48,7 @@ public class Addon {
     private final @Nullable String backgroundColor;
     private final @Nullable String imageLink;
     private final Map<String, Object> properties;
+    private final List<String> loggerPackages;
 
     /**
      * Creates a new Addon instance
@@ -77,7 +79,8 @@ public class Addon {
             @Nullable String link, String author, boolean verifiedAuthor, boolean installed,
             @Nullable String description, @Nullable String detailedDescription, String configDescriptionURI,
             String keywords, String countries, @Nullable String license, String connection,
-            @Nullable String backgroundColor, @Nullable String imageLink, @Nullable Map<String, Object> properties) {
+            @Nullable String backgroundColor, @Nullable String imageLink, @Nullable Map<String, Object> properties,
+            List<String> loggerBundles) {
         this.id = id;
         this.label = label;
         this.version = version;
@@ -98,6 +101,7 @@ public class Addon {
         this.installed = installed;
         this.type = type;
         this.properties = properties == null ? Map.of() : properties;
+        this.loggerPackages = loggerBundles;
     }
 
     /**
@@ -247,6 +251,13 @@ public class Addon {
         return imageLink;
     }
 
+    /**
+     * The package names that are associated with this addon
+     */
+    public List<String> getLoggerPackages() {
+        return loggerPackages;
+    }
+
     public static Builder create(String id) {
         return new Builder(id);
     }
@@ -272,6 +283,7 @@ public class Addon {
         private @Nullable String backgroundColor;
         private @Nullable String imageLink;
         private Map<String, Object> properties = new HashMap<>();
+        private List<String> loggerPackages = List.of();
 
         private Builder(String id) {
             this.id = id;
@@ -378,10 +390,15 @@ public class Addon {
             return this;
         }
 
+        public Builder withLoggerPackages(List<String> loggerPackages) {
+            this.loggerPackages = loggerPackages;
+            return this;
+        }
+
         public Addon build() {
             return new Addon(id, type, label, version, maturity, contentType, link, author, verifiedAuthor, installed,
                     description, detailedDescription, configDescriptionURI, keywords, countries, license, connection,
-                    backgroundColor, imageLink, properties.isEmpty() ? null : properties);
+                    backgroundColor, imageLink, properties.isEmpty() ? null : properties, loggerPackages);
         }
     }
 }
