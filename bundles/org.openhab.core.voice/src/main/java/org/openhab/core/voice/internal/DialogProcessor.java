@@ -244,7 +244,6 @@ public class DialogProcessor implements KSListener, STTListener {
     public synchronized void sttEventReceived(STTEvent sttEvent) {
         if (sttEvent instanceof SpeechRecognitionEvent) {
             if (!isSTTServerAborting) {
-                abortSTT();
                 SpeechRecognitionEvent sre = (SpeechRecognitionEvent) sttEvent;
                 String question = sre.getTranscript();
                 try {
@@ -259,6 +258,7 @@ public class DialogProcessor implements KSListener, STTListener {
                         say(msg);
                     }
                 }
+                abortSTT();
             }
         } else if (sttEvent instanceof RecognitionStartEvent) {
             toggleProcessing(true);
