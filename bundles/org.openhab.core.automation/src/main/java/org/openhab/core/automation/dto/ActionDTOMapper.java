@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.config.core.Configuration;
@@ -26,6 +28,7 @@ import org.openhab.core.config.core.Configuration;
  * @author Markus Rathgeb - Initial contribution
  * @author Kai Kreuzer - Changed to using ModuleBuilder
  */
+@NonNullByDefault
 public class ActionDTOMapper extends ModuleDTOMapper {
 
     public static ActionDTO map(final Action action) {
@@ -41,9 +44,9 @@ public class ActionDTOMapper extends ModuleDTOMapper {
                 .withLabel(actionDto.label).withDescription(actionDto.description).build();
     }
 
-    public static List<ActionDTO> map(final Collection<? extends Action> actions) {
+    public static List<ActionDTO> map(final @Nullable Collection<? extends Action> actions) {
         if (actions == null) {
-            return null;
+            return List.of();
         }
         final List<ActionDTO> dtos = new ArrayList<>(actions.size());
         for (final Action action : actions) {
@@ -52,9 +55,9 @@ public class ActionDTOMapper extends ModuleDTOMapper {
         return dtos;
     }
 
-    public static List<Action> mapDto(final Collection<ActionDTO> dtos) {
+    public static List<Action> mapDto(final @Nullable Collection<ActionDTO> dtos) {
         if (dtos == null) {
-            return null;
+            return List.of();
         }
         final List<Action> actions = new ArrayList<>(dtos.size());
         for (final ActionDTO dto : dtos) {

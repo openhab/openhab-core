@@ -13,8 +13,11 @@
 package org.openhab.core.automation.internal.provider.file;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * This class isolates the java 1.7 functionality which tracks the file system changes.
@@ -22,6 +25,7 @@ import java.util.Map;
  * @author Ana Dimova - Initial contribution
  */
 @SuppressWarnings("rawtypes")
+@NonNullByDefault
 public class WatchServiceUtil {
 
     private static final Map<AbstractFileProvider, Map<String, AutomationWatchService>> WATCH_SERVICES = new HashMap<>();
@@ -46,17 +50,22 @@ public class WatchServiceUtil {
     }
 
     public static void deactivateWatchService(String watchingDir, AbstractFileProvider provider) {
-        AutomationWatchService aws;
+        AutomationWatchService aws = null;
         synchronized (WATCH_SERVICES) {
             Map<String, AutomationWatchService> watchers = WATCH_SERVICES.get(provider);
-            aws = watchers.remove(watchingDir);
-            if (watchers.isEmpty()) {
-                WATCH_SERVICES.remove(provider);
+            if (watchers != null) {
+                aws = watchers.remove(watchingDir);
+                if (watchers.isEmpty()) {
+                    WATCH_SERVICES.remove(provider);
+                }
             }
         }
         if (aws != null) {
             aws.deactivate();
-            provider.removeResources(aws.getSourcePath().toFile());
+            Path sourcePath = aws.getSourcePath();
+            if (sourcePath != null) {
+                provider.removeResources(sourcePath.toFile());
+            }
         }
     }
 }

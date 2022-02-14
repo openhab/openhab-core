@@ -15,6 +15,8 @@ package org.openhab.core.automation.internal.module.handler;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Trigger;
@@ -22,6 +24,7 @@ import org.openhab.core.automation.handler.BaseModuleHandlerFactory;
 import org.openhab.core.automation.handler.ModuleHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
 import org.openhab.core.scheduler.CronScheduler;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
@@ -35,6 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Knauf - Initial contribution
  * @author Kai Kreuzer - added new module types
  */
+@NonNullByDefault
 @Component(immediate = true, service = ModuleHandlerFactory.class)
 public class TimerModuleHandlerFactory extends BaseModuleHandlerFactory {
 
@@ -45,21 +49,17 @@ public class TimerModuleHandlerFactory extends BaseModuleHandlerFactory {
             .asList(new String[] { GenericCronTriggerHandler.MODULE_TYPE_ID, TimeOfDayTriggerHandler.MODULE_TYPE_ID,
                     TimeOfDayConditionHandler.MODULE_TYPE_ID, DayOfWeekConditionHandler.MODULE_TYPE_ID });
 
-    private CronScheduler scheduler;
+    private final CronScheduler scheduler;
+
+    @Activate
+    public TimerModuleHandlerFactory(final @Reference CronScheduler scheduler) {
+        this.scheduler = scheduler;
+    }
 
     @Override
     @Deactivate
     public void deactivate() {
         super.deactivate();
-    }
-
-    @Reference
-    protected void setCronScheduler(CronScheduler scheduler) {
-        this.scheduler = scheduler;
-    }
-
-    protected void unsetCronScheduler(CronScheduler scheduler) {
-        this.scheduler = null;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class TimerModuleHandlerFactory extends BaseModuleHandlerFactory {
     }
 
     @Override
-    protected ModuleHandler internalCreate(Module module, String ruleUID) {
+    protected @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
         logger.trace("create {} -> {}", module.getId(), module.getTypeUID());
         String moduleTypeUID = module.getTypeUID();
         if (GenericCronTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Trigger) {

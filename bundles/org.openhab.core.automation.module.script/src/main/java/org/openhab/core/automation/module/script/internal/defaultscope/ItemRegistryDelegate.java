@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -28,6 +29,7 @@ import org.openhab.core.types.State;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class ItemRegistryDelegate implements Map<String, State> {
 
     private final ItemRegistry itemRegistry;
@@ -47,10 +49,11 @@ public class ItemRegistryDelegate implements Map<String, State> {
     }
 
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(@Nullable Object key) {
         if (key instanceof String) {
             try {
-                return itemRegistry.getItem((String) key) != null;
+                itemRegistry.getItem((String) key);
+                return true;
             } catch (ItemNotFoundException e) {
                 return false;
             }
@@ -60,12 +63,12 @@ public class ItemRegistryDelegate implements Map<String, State> {
     }
 
     @Override
-    public boolean containsValue(Object value) {
+    public boolean containsValue(@Nullable Object value) {
         return false;
     }
 
     @Override
-    public State get(@Nullable Object key) {
+    public @Nullable State get(@Nullable Object key) {
         if (key == null) {
             return null;
         }
@@ -77,12 +80,12 @@ public class ItemRegistryDelegate implements Map<String, State> {
     }
 
     @Override
-    public State put(String key, State value) {
+    public @Nullable State put(String key, State value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public State remove(Object key) {
+    public @Nullable State remove(@Nullable Object key) {
         throw new UnsupportedOperationException();
     }
 

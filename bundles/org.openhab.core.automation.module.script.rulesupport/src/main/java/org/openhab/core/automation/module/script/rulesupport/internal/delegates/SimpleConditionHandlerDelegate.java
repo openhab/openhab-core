@@ -14,6 +14,7 @@ package org.openhab.core.automation.module.script.rulesupport.internal.delegates
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.automation.module.script.rulesupport.shared.simple.SimpleConditionHandler;
@@ -23,6 +24,7 @@ import org.openhab.core.automation.module.script.rulesupport.shared.simple.Simpl
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 public class SimpleConditionHandlerDelegate extends BaseConditionModuleHandler {
 
     private SimpleConditionHandler conditionHandler;

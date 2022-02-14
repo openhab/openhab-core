@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.Trigger;
@@ -49,7 +48,7 @@ public interface TriggerHandlerCallback extends ModuleHandlerCallback {
      *            <li><code>value</code> - represents output value of the {@link Trigger}'s {@link Output}
      *            </ul>
      */
-    public void triggered(Trigger trigger, @Nullable Map<String, ?> context);
+    public void triggered(Trigger trigger, Map<String, ?> context);
 
     /**
      * @return the scheduler of this rule

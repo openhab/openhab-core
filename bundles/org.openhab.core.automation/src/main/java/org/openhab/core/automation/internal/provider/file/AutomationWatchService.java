@@ -19,6 +19,8 @@ import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.service.AbstractWatchService;
 
 /**
@@ -30,6 +32,7 @@ import org.openhab.core.service.AbstractWatchService;
  * @author Ana Dimova - Initial contribution
  */
 @SuppressWarnings("rawtypes")
+@NonNullByDefault
 public class AutomationWatchService extends AbstractWatchService {
 
     private AbstractFileProvider provider;
@@ -45,7 +48,7 @@ public class AutomationWatchService extends AbstractWatchService {
     }
 
     @Override
-    protected Kind<?>[] getWatchEventKinds(Path subDir) {
+    protected Kind<?> @Nullable [] getWatchEventKinds(Path subDir) {
         return new Kind<?>[] { ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY };
     }
 

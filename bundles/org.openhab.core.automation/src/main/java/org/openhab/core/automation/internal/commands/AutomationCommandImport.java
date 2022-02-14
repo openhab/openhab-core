@@ -16,6 +16,8 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.parser.Parser;
 
 /**
@@ -28,6 +30,7 @@ import org.openhab.core.automation.parser.Parser;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public class AutomationCommandImport extends AutomationCommand {
 
     /**
@@ -45,7 +48,7 @@ public class AutomationCommandImport extends AutomationCommand {
     /**
      * This field keeps URL of the source of automation objects that has to be imported.
      */
-    private URL url;
+    private @Nullable URL url;
 
     /**
      * @see AutomationCommand#AutomationCommand(String, String[], int, AutomationCommandsPluggable)
@@ -65,7 +68,8 @@ public class AutomationCommandImport extends AutomationCommand {
      */
     @Override
     public String execute() {
-        if (parsingResult != SUCCESS) {
+        URL url = this.url;
+        if (!SUCCESS.equals(parsingResult) || url == null) {
             return parsingResult;
         }
         try {
@@ -95,7 +99,7 @@ public class AutomationCommandImport extends AutomationCommand {
      * @return an {@link URL} object created from the string that is passed as parameter of the command or <b>null</b>
      *         if either no legal protocol could be found in the specified string or the string could not be parsed.
      */
-    private URL initURL(String parameterValue) {
+    private @Nullable URL initURL(String parameterValue) {
         try {
             return new URL(parameterValue);
         } catch (MalformedURLException mue) {

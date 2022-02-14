@@ -15,6 +15,8 @@ package org.openhab.core.automation.internal.module.handler;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.openhab.core.config.core.Configuration;
@@ -39,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - use rule engine instead of registry
  */
+@NonNullByDefault
 public class RunRuleActionHandler extends BaseActionModuleHandler {
 
     /**
@@ -86,7 +89,7 @@ public class RunRuleActionHandler extends BaseActionModuleHandler {
     }
 
     @Override
-    public Map<String, Object> execute(Map<String, Object> context) {
+    public @Nullable Map<String, Object> execute(Map<String, Object> context) {
         // execute each rule after the other; at the moment synchronously
         for (String uid : ruleUIDs) {
             if (callback != null) {

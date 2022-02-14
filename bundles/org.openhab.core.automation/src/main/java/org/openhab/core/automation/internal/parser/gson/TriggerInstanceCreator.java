@@ -14,6 +14,7 @@ package org.openhab.core.automation.internal.parser.gson;
 
 import java.lang.reflect.Type;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.type.CompositeTriggerType;
 import org.openhab.core.automation.type.TriggerType;
 
@@ -24,10 +25,11 @@ import com.google.gson.InstanceCreator;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public class TriggerInstanceCreator implements InstanceCreator<CompositeTriggerType> {
 
     @Override
-    public CompositeTriggerType createInstance(Type type) {
+    public CompositeTriggerType createInstance(@NonNullByDefault({}) Type type) {
         return new CompositeTriggerType(null, null, null, null);
     }
 }

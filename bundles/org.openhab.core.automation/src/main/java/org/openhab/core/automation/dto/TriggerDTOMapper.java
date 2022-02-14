@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.config.core.Configuration;
@@ -26,6 +28,7 @@ import org.openhab.core.config.core.Configuration;
  * @author Markus Rathgeb - Initial contribution
  * @author Kai Kreuzer - Changed to using ModuleBuilder
  */
+@NonNullByDefault
 public class TriggerDTOMapper extends ModuleDTOMapper {
 
     public static TriggerDTO map(final Trigger trigger) {
@@ -40,9 +43,9 @@ public class TriggerDTOMapper extends ModuleDTOMapper {
                 .withDescription(triggerDto.description).build();
     }
 
-    public static List<TriggerDTO> map(final Collection<? extends Trigger> triggers) {
+    public static List<TriggerDTO> map(final @Nullable Collection<? extends Trigger> triggers) {
         if (triggers == null) {
-            return null;
+            return List.of();
         }
         final List<TriggerDTO> dtos = new ArrayList<>(triggers.size());
         for (final Trigger trigger : triggers) {
@@ -51,9 +54,9 @@ public class TriggerDTOMapper extends ModuleDTOMapper {
         return dtos;
     }
 
-    public static List<Trigger> mapDto(final Collection<TriggerDTO> dtos) {
+    public static List<Trigger> mapDto(final @Nullable Collection<TriggerDTO> dtos) {
         if (dtos == null) {
-            return null;
+            return List.of();
         }
         final List<Trigger> triggers = new ArrayList<>(dtos.size());
         for (final TriggerDTO dto : dtos) {

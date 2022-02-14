@@ -12,6 +12,9 @@
  */
 package org.openhab.core.automation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This class is used to present status of a rule. The status consists of three parts:
  * The main status, a status detail and a string description.
@@ -19,11 +22,12 @@ package org.openhab.core.automation;
  * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - Refactored to match ThingStatusInfo implementation
  */
+@NonNullByDefault
 public class RuleStatusInfo {
 
-    private RuleStatus status;
-    private RuleStatusDetail statusDetail;
-    private String description;
+    private @NonNullByDefault({}) RuleStatus status;
+    private @NonNullByDefault({}) RuleStatusDetail statusDetail;
+    private @Nullable String description;
 
     /**
      * Default constructor for deserialization e.g. by Gson.
@@ -35,9 +39,8 @@ public class RuleStatusInfo {
      * Constructs a status info.
      *
      * @param status the status (must not be null)
-     * @throws IllegalArgumentException if status is null
      */
-    public RuleStatusInfo(RuleStatus status) throws IllegalArgumentException {
+    public RuleStatusInfo(RuleStatus status) {
         this(status, RuleStatusDetail.NONE);
     }
 
@@ -46,9 +49,8 @@ public class RuleStatusInfo {
      *
      * @param status the status (must not be null)
      * @param statusDetail the detail of the status (must not be null)
-     * @throws IllegalArgumentException if status or status detail is null
      */
-    public RuleStatusInfo(RuleStatus status, RuleStatusDetail statusDetail) throws IllegalArgumentException {
+    public RuleStatusInfo(RuleStatus status, RuleStatusDetail statusDetail) {
         this(status, statusDetail, null);
     }
 
@@ -58,16 +60,8 @@ public class RuleStatusInfo {
      * @param status the status (must not be null)
      * @param statusDetail the detail of the status (must not be null)
      * @param description the description of the status
-     * @throws IllegalArgumentException if status or status detail is null
      */
-    public RuleStatusInfo(RuleStatus status, RuleStatusDetail statusDetail, String description)
-            throws IllegalArgumentException {
-        if (status == null) {
-            throw new IllegalArgumentException("Thing status must not be null");
-        }
-        if (statusDetail == null) {
-            throw new IllegalArgumentException("Thing status detail must not be null");
-        }
+    public RuleStatusInfo(RuleStatus status, RuleStatusDetail statusDetail, @Nullable String description) {
         this.status = status;
         this.statusDetail = statusDetail;
         this.description = description;
@@ -96,7 +90,7 @@ public class RuleStatusInfo {
      *
      * @return the description
      */
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 
@@ -118,7 +112,7 @@ public class RuleStatusInfo {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

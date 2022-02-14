@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.CompositeActionType;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
@@ -26,6 +28,7 @@ import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
  * @author Markus Rathgeb - Initial contribution
  * @author Ana Dimova - extends Action Module type DTOs with composites
  */
+@NonNullByDefault
 public class ActionTypeDTOMapper extends ModuleTypeDTOMapper {
 
     public static ActionTypeDTO map(final ActionType actionType) {
@@ -51,9 +54,9 @@ public class ActionTypeDTOMapper extends ModuleTypeDTOMapper {
         }
     }
 
-    public static List<ActionTypeDTO> map(final Collection<ActionType> types) {
+    public static List<ActionTypeDTO> map(final @Nullable Collection<ActionType> types) {
         if (types == null) {
-            return null;
+            return List.of();
         }
         final List<ActionTypeDTO> dtos = new ArrayList<>(types.size());
         for (final ActionType type : types) {

@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.automation.handler.TimeBasedConditionHandler;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class DayOfWeekConditionHandler extends BaseConditionModuleHandler implements TimeBasedConditionHandler {
 
     public static final String MODULE_TYPE_ID = "timer.DayOfWeekCondition";

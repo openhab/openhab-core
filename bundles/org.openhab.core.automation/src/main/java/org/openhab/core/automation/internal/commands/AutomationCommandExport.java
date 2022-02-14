@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.parser.Parser;
 
 /**
@@ -30,6 +32,7 @@ import org.openhab.core.automation.parser.Parser;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public class AutomationCommandExport extends AutomationCommand {
 
     /**
@@ -47,7 +50,7 @@ public class AutomationCommandExport extends AutomationCommand {
     /**
      * This field keeps the path of the output file where the automation objects to be exported.
      */
-    private File file;
+    private @Nullable File file;
 
     /**
      * This field stores the value of <b>locale</b> parameter of the command.
@@ -75,7 +78,8 @@ public class AutomationCommandExport extends AutomationCommand {
     @SuppressWarnings("unchecked")
     @Override
     public String execute() {
-        if (parsingResult != SUCCESS) {
+        File file = this.file;
+        if (!SUCCESS.equals(parsingResult) || file == null) {
             return parsingResult;
         }
         @SuppressWarnings("rawtypes")
@@ -84,17 +88,11 @@ public class AutomationCommandExport extends AutomationCommand {
             case AutomationCommands.MODULE_TYPE_PROVIDER:
                 @SuppressWarnings("rawtypes")
                 Collection collection = autoCommands.getTriggers(locale);
-                if (collection != null) {
-                    set.addAll(collection);
-                }
+                set.addAll(collection);
                 collection = autoCommands.getConditions(locale);
-                if (collection != null) {
-                    set.addAll(collection);
-                }
+                set.addAll(collection);
                 collection = autoCommands.getActions(locale);
-                if (collection != null) {
-                    set.addAll(collection);
-                }
+                set.addAll(collection);
                 try {
                     return autoCommands.exportModuleTypes(parserType, set, file);
                 } catch (Exception e) {
@@ -102,9 +100,7 @@ public class AutomationCommandExport extends AutomationCommand {
                 }
             case AutomationCommands.TEMPLATE_PROVIDER:
                 collection = autoCommands.getTemplates(locale);
-                if (collection != null) {
-                    set.addAll(collection);
-                }
+                set.addAll(collection);
                 try {
                     return autoCommands.exportTemplates(parserType, set, file);
                 } catch (Exception e) {
@@ -112,9 +108,7 @@ public class AutomationCommandExport extends AutomationCommand {
                 }
             case AutomationCommands.RULE_PROVIDER:
                 collection = autoCommands.getRules();
-                if (collection != null) {
-                    set.addAll(collection);
-                }
+                set.addAll(collection);
                 try {
                     return autoCommands.exportRules(parserType, set, file);
                 } catch (Exception e) {
@@ -132,7 +126,7 @@ public class AutomationCommandExport extends AutomationCommand {
      * @return a {@link File} object created from the string that is passed as a parameter of the command or <b>null</b>
      *         if the parent directory could not be found or created or the string could not be parsed.
      */
-    private File initFile(String parameterValue) {
+    private @Nullable File initFile(String parameterValue) {
         File f = new File(parameterValue);
         File parent = f.getParentFile();
         return (parent == null || (!parent.isDirectory() && !parent.mkdirs())) ? null : f;
@@ -174,7 +168,8 @@ public class AutomationCommandExport extends AutomationCommand {
             } else if (parameterValues[i].charAt(0) == '-') {
                 return String.format("Unsupported option: %s", parameterValues[i]);
             } else if (getFile) {
-                file = initFile(parameterValues[i]);
+                File file = initFile(parameterValues[i]);
+                this.file = file;
                 if (file != null) {
                     getFile = false;
                 }

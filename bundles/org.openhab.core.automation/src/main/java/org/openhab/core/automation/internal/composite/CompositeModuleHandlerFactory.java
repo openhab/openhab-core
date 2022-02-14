@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
@@ -53,6 +55,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yordan Mihaylov - Initial contribution
  */
+@NonNullByDefault
 public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory implements ModuleHandlerFactory {
 
     private final ModuleTypeRegistry mtRegistry;
@@ -116,13 +119,13 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
     }
 
     @Override
-    public ModuleHandler internalCreate(Module module, String ruleUID) {
+    public @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
         ModuleHandler handler = null;
         String moduleType = module.getTypeUID();
         ModuleType mt = mtRegistry.get(moduleType);
         if (mt instanceof CompositeTriggerType) {
             List<Trigger> childModules = ((CompositeTriggerType) mt).getChildren();
-            LinkedHashMap<Trigger, TriggerHandler> mapModuleToHandler = getChildHandlers(module.getId(),
+            LinkedHashMap<Trigger, @Nullable TriggerHandler> mapModuleToHandler = getChildHandlers(module.getId(),
                     module.getConfiguration(), childModules, ruleUID);
             if (mapModuleToHandler != null) {
                 handler = new CompositeTriggerHandler((Trigger) module, (CompositeTriggerType) mt, mapModuleToHandler,
@@ -130,7 +133,7 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
             }
         } else if (mt instanceof CompositeConditionType) {
             List<Condition> childModules = ((CompositeConditionType) mt).getChildren();
-            LinkedHashMap<Condition, ConditionHandler> mapModuleToHandler = getChildHandlers(module.getId(),
+            LinkedHashMap<Condition, @Nullable ConditionHandler> mapModuleToHandler = getChildHandlers(module.getId(),
                     module.getConfiguration(), childModules, ruleUID);
             if (mapModuleToHandler != null) {
                 handler = new CompositeConditionHandler((Condition) module, (CompositeConditionType) mt,
@@ -138,7 +141,7 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
             }
         } else if (mt instanceof CompositeActionType) {
             List<Action> childModules = ((CompositeActionType) mt).getChildren();
-            LinkedHashMap<Action, ActionHandler> mapModuleToHandler = getChildHandlers(module.getId(),
+            LinkedHashMap<Action, @Nullable ActionHandler> mapModuleToHandler = getChildHandlers(module.getId(),
                     module.getConfiguration(), childModules, ruleUID);
             if (mapModuleToHandler != null) {
                 handler = new CompositeActionHandler((Action) module, (CompositeActionType) mt, mapModuleToHandler,
@@ -170,8 +173,8 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
      *         handler.
      */
     @SuppressWarnings("unchecked")
-    private <T extends Module, MT extends ModuleHandler> LinkedHashMap<T, MT> getChildHandlers(String compositeModuleId,
-            Configuration compositeConfig, List<T> childModules, String childModulePrefix) {
+    private <T extends Module, @Nullable MT extends ModuleHandler> @Nullable LinkedHashMap<T, MT> getChildHandlers(
+            String compositeModuleId, Configuration compositeConfig, List<T> childModules, String childModulePrefix) {
         LinkedHashMap<T, MT> mapModuleToHandler = new LinkedHashMap<>();
         for (T child : childModules) {
             String ruleId = getRuleId(childModulePrefix);

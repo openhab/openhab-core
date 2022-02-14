@@ -14,11 +14,14 @@ package org.openhab.core.library.dimension;
 
 import javax.measure.Quantity;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Define Area density type (basic unit is kg/m^2)
  * https://en.wikipedia.org/wiki/Area_density
  *
  * @author Gaël L'hopital - Initial contribution
  */
+@NonNullByDefault
 public interface ArealDensity extends Quantity<ArealDensity> {
 }
