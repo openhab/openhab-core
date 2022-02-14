@@ -438,12 +438,12 @@ public class AutomaticInboxProcessorTest {
     @Disabled("Should this test pass? It will fail currently, as RuntimeExceptions are not explicitly caught in AutomaticInboxProcessor#isToBeAutoApproved")
     public void testRogueInboxAutoApprovePredicatesDoNoHarm() {
         automaticInboxProcessor.addInboxAutoApprovePredicate(discoveryResult -> {
-            throw new RuntimeException("I am an evil inboxAutoApprovePredicate");
+            throw new IllegalArgumentException("I am an evil inboxAutoApprovePredicate");
         });
         automaticInboxProcessor.addInboxAutoApprovePredicate(
                 discoveryResult -> THING_TYPE_UID.equals(discoveryResult.getThingTypeUID()));
         automaticInboxProcessor.addInboxAutoApprovePredicate(discoveryResult -> {
-            throw new RuntimeException("I am another evil inboxAutoApprovePredicate");
+            throw new IllegalArgumentException("I am another evil inboxAutoApprovePredicate");
         });
 
         // The discovery result is auto-approved in the presence of the evil predicates

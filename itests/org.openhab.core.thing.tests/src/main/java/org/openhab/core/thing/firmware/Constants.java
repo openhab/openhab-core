@@ -12,9 +12,9 @@
  */
 package org.openhab.core.thing.firmware;
 
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 
@@ -29,7 +29,7 @@ import org.openhab.core.thing.binding.firmware.FirmwareBuilder;
 public class Constants {
 
     public static final String UNKNOWN = "unknown";
-    public static final URI CONFIG_URI = newURI("simple:simple");
+    public static final URI CONFIG_URI = URI.create("simple:simple");
     public static final String BINDING_ID = "simpleBinding";
     public static final String THING_TYPE_ID1 = "simpleThingType1";
     public static final String THING_TYPE_ID2 = "simpleThingType2";
@@ -131,19 +131,11 @@ public class Constants {
             .withChangelog("English changelog valpha")
             .withOnlineChangelog(newURL("http://url/changelog-valpha?lang=en")).withModelRestricted(true).build();
 
-    private static URL newURL(String urlString) {
+    private static URL newURL(String url) {
         try {
-            return new URL(urlString);
+            return new URL(url);
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static URI newURI(String urlString) {
-        try {
-            return new URI(urlString);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 }

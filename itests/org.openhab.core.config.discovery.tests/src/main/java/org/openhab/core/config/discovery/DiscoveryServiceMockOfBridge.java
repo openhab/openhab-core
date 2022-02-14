@@ -34,7 +34,7 @@ public class DiscoveryServiceMockOfBridge extends DiscoveryServiceMock {
     @Override
     public void startScan() {
         if (faulty) {
-            throw new RuntimeException();
+            throw new IllegalStateException();
         }
         thingDiscovered(DiscoveryResultBuilder
                 .create(new ThingUID(thingType, bridgeUID, "test" + new Random().nextInt(999999999)))

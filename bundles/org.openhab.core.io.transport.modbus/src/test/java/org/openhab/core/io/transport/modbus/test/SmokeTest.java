@@ -27,7 +27,6 @@ import java.net.SocketImpl;
 import java.net.SocketImplFactory;
 import java.net.SocketOption;
 import java.net.StandardSocketOptions;
-import java.net.UnknownHostException;
 import java.util.BitSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -832,7 +831,7 @@ public class SmokeTest extends IntegrationTestSupport {
     }
 
     @Test
-    public void testConnectionCloseAfterLastCommunicationInterfaceClosed() throws IllegalArgumentException, Exception {
+    public void testConnectionCloseAfterLastCommunicationInterfaceClosed() throws Exception {
         assumeFalse(isRunningInCI(), "Running in CI! Will not test timing-sensitive details");
         ModbusSlaveEndpoint endpoint = getEndpoint();
         assumeTrue(endpoint instanceof ModbusTCPSlaveEndpoint,
@@ -896,7 +895,7 @@ public class SmokeTest extends IntegrationTestSupport {
     }
 
     @Test
-    public void testConnectionCloseAfterOneOffPoll() throws IllegalArgumentException, Exception {
+    public void testConnectionCloseAfterOneOffPoll() throws Exception {
         assumeFalse(isRunningInCI(), "Running in CI! Will not test timing-sensitive details");
         ModbusSlaveEndpoint endpoint = getEndpoint();
         assumeTrue(endpoint instanceof ModbusTCPSlaveEndpoint,
@@ -941,11 +940,7 @@ public class SmokeTest extends IntegrationTestSupport {
     }
 
     private long getNumberOfOpenClients(SpyingSocketFactory socketSpy) {
-        try {
-            localAddress();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
+        localAddress();
         return socketSpy.sockets.stream().filter(this::isConnectedToTestServer).count();
     }
 
@@ -1009,17 +1004,12 @@ public class SmokeTest extends IntegrationTestSupport {
                 return (SocketImpl) Objects.requireNonNull(socksSocketImplConstructor.newInstance(socketImpl));
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
     private boolean isConnectedToTestServer(SocketImpl impl) {
-        final InetAddress testServerAddress;
-        try {
-            testServerAddress = localAddress();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
+        final InetAddress testServerAddress = localAddress();
 
         final int port;
         boolean connected = true;
@@ -1046,9 +1036,8 @@ public class SmokeTest extends IntegrationTestSupport {
                     throw e;
                 }
             }
-        } catch (InvocationTargetException | SecurityException | IllegalArgumentException | IllegalAccessException
-                | NoSuchMethodException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
         }
         return port == tcpModbusPort && connected && address.equals(testServerAddress);
     }
