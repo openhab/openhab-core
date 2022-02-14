@@ -22,6 +22,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -46,15 +48,16 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated tests from groovy to java
  */
+@NonNullByDefault
 public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
 
     private static final String CONFIG_DEFAULT_TTS = "defaultTTS";
     private static final String SUBCMD_SAY = "say";
 
-    private static TTSServiceStub ttsService;
+    private static @Nullable TTSServiceStub ttsService;
 
-    private SinkStub sink;
-    private VoiceStub voice;
+    private @NonNullByDefault({}) SinkStub sink;
+    private @NonNullByDefault({}) VoiceStub voice;
 
     @BeforeEach
     public void setUp() {
@@ -90,7 +93,7 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
     @ParameterizedTest
     @MethodSource("data")
     public void testSayCommand(boolean shouldItemsBePassed, boolean shouldItemsBeRegistered,
-            boolean shouldMultipleItemsBeRegistered, TTSService defaultTTSService,
+            boolean shouldMultipleItemsBeRegistered, @Nullable TTSService defaultTTSService,
             boolean ttsServiceMockShouldBeRegistered, boolean shouldStreamBeExpected) throws IOException {
         String[] methodParameters = new String[2];
         methodParameters[0] = SUBCMD_SAY;
@@ -107,7 +110,8 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
             configuration.update(voiceConfig);
         }
 
-        if (ttsServiceMockShouldBeRegistered) {
+        TTSService ttsService = SayCommandTest.ttsService;
+        if (ttsServiceMockShouldBeRegistered && ttsService != null) {
             registerService(ttsService);
         }
 

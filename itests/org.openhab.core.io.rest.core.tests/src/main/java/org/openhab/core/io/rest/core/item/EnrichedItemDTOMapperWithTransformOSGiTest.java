@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,25 +36,26 @@ import org.openhab.core.types.StateOption;
  * @author Henning Treu - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class EnrichedItemDTOMapperWithTransformOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM_NAME = "Item1";
 
-    private @Mock StateDescriptionService stateDescriptionService;
+    private @Mock @NonNullByDefault({}) StateDescriptionService stateDescriptionServiceMock;
 
     @BeforeEach
     public void beforeEach() {
         StateDescription stateDescription = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                 .withMaximum(BigDecimal.valueOf(100)).withStep(BigDecimal.TEN).withPattern("%d °C").withReadOnly(true)
                 .withOption(new StateOption("SOUND", "My great sound.")).build().toStateDescription();
-        when(stateDescriptionService.getStateDescription(ITEM_NAME, null)).thenReturn(stateDescription);
+        when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null)).thenReturn(stateDescription);
     }
 
     @Test
     public void shouldConsiderTraformationWhenPresent() {
         NumberItem item1 = new NumberItem("Item1");
         item1.setState(new DecimalType("12.34"));
-        item1.setStateDescriptionService(stateDescriptionService);
+        item1.setStateDescriptionService(stateDescriptionServiceMock);
 
         EnrichedItemDTO enrichedDTO = EnrichedItemDTOMapper.map(item1, false, null, null, null);
         assertThat(enrichedDTO, is(notNullValue()));

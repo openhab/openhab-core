@@ -31,6 +31,7 @@ import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
 import javax.measure.quantity.Time;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -50,6 +51,7 @@ import tech.units.indriya.unit.UnitDimension;
  * @author Gaël L'hopital - Initial contribution
  */
 @SuppressWarnings("null")
+@NonNullByDefault
 public class QuantityTypeTest {
 
     /**

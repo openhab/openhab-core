@@ -28,6 +28,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +46,7 @@ import org.mockito.quality.Strictness;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class CorsFilterTest {
 
     private static final String CONTENT_TYPE_HEADER = HttpHeaders.CONTENT_TYPE;
@@ -55,11 +58,11 @@ public class CorsFilterTest {
     private static final String VARY_HEADER_VALUE = "Content-Type";
     private static final String REQUEST_HEADERS = "X-Custom, X-Mine";
 
-    private CorsFilter filter;
+    private @NonNullByDefault({}) CorsFilter filter;
     private MultivaluedMap<String, String> responseHeaders = new MultivaluedHashMap<>();
 
-    private @Mock ContainerRequestContext requestContext;
-    private @Mock ContainerResponseContext responseContext;
+    private @Mock @NonNullByDefault({}) ContainerRequestContext requestContextMock;
+    private @Mock @NonNullByDefault({}) ContainerResponseContext responseContextMock;
 
     @BeforeEach
     public void setUp() {
@@ -72,7 +75,7 @@ public class CorsFilterTest {
         setupRequestContext(HTTP_OPTIONS_METHOD, null, null, null);
         setupResponseContext(null);
 
-        filter.filter(requestContext, responseContext);
+        filter.filter(requestContextMock, responseContextMock);
 
         // Not a CORS request, thus no CORS headers should be added.
         assertResponseWithoutHeader(ACCESS_CONTROL_ALLOW_METHODS_HEADER);
@@ -86,7 +89,7 @@ public class CorsFilterTest {
         setupRequestContext(HTTP_GET_METHOD, null, null, null);
         setupResponseContext(null);
 
-        filter.filter(requestContext, responseContext);
+        filter.filter(requestContextMock, responseContextMock);
 
         // Not a CORS request, thus no CORS headers should be added.
         assertResponseWithoutHeader(ACCESS_CONTROL_ALLOW_METHODS_HEADER);
@@ -100,7 +103,7 @@ public class CorsFilterTest {
         setupRequestContext(HTTP_OPTIONS_METHOD, ECLIPSE_ORIGIN, HTTP_GET_METHOD, REQUEST_HEADERS);
         setupResponseContext(VARY_HEADER_VALUE);
 
-        filter.filter(requestContext, responseContext);
+        filter.filter(requestContextMock, responseContextMock);
 
         assertResponseHasHeader(ACCESS_CONTROL_ALLOW_METHODS_HEADER, ACCEPTED_HTTP_METHODS);
         assertResponseHasHeader(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, ECLIPSE_ORIGIN);
@@ -114,7 +117,7 @@ public class CorsFilterTest {
         setupRequestContext(HTTP_OPTIONS_METHOD, ECLIPSE_ORIGIN, null, REQUEST_HEADERS);
         setupResponseContext(VARY_HEADER_VALUE);
 
-        filter.filter(requestContext, responseContext);
+        filter.filter(requestContextMock, responseContextMock);
 
         // Since the requestMethod header is not present in the request, it is not a valid Preflight CORS request.
         // Thus, no CORS header should be added to the response.
@@ -129,7 +132,7 @@ public class CorsFilterTest {
         setupRequestContext(HTTP_OPTIONS_METHOD, ECLIPSE_ORIGIN, HTTP_GET_METHOD, null);
         setupResponseContext(VARY_HEADER_VALUE);
 
-        filter.filter(requestContext, responseContext);
+        filter.filter(requestContextMock, responseContextMock);
 
         // Since the requestMethod header is not present in the request, it is not a valid Preflight CORS request.
         // Thus, no CORS header should be added to the response.
@@ -144,7 +147,7 @@ public class CorsFilterTest {
         setupRequestContext(HTTP_GET_METHOD, ECLIPSE_ORIGIN, null, null);
         setupResponseContext(null);
 
-        filter.filter(requestContext, responseContext);
+        filter.filter(requestContextMock, responseContextMock);
 
         // Not a CORS request, thus no CORS headers should be added.
         assertResponseWithoutHeader(ACCESS_CONTROL_ALLOW_METHODS_HEADER);
@@ -162,8 +165,8 @@ public class CorsFilterTest {
         assertTrue(responseHeaders.get(header).contains(value));
     }
 
-    private void setupRequestContext(String methodValue, String originValue, final String requestMethodValue,
-            String requestHeadersValue) {
+    private void setupRequestContext(String methodValue, @Nullable String originValue,
+            @Nullable String requestMethodValue, @Nullable String requestHeadersValue) {
         MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
         if (originValue != null) {
             headers.put(ORIGIN_HEADER, List.of(originValue));
@@ -175,17 +178,18 @@ public class CorsFilterTest {
             headers.put(ACCESS_CONTROL_REQUEST_HEADERS, List.of(requestHeadersValue));
         }
 
-        when(requestContext.getHeaders()).thenReturn(headers);
-        when(requestContext.getMethod()).thenReturn(methodValue);
+        when(requestContextMock.getHeaders()).thenReturn(headers);
+        when(requestContextMock.getMethod()).thenReturn(methodValue);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void setupResponseContext(String varyHeaderValue) {
-        if (varyHeaderValue != null) {
-            responseHeaders.put(VARY_HEADER, Stream.of(varyHeaderValue).collect(toList()));
+    private void setupResponseContext(@Nullable String varyHeaderValue) {
+        String localVaryHeaderValue = varyHeaderValue;
+        if (localVaryHeaderValue != null) {
+            responseHeaders.put(VARY_HEADER, Stream.of(localVaryHeaderValue).collect(toList()));
         }
 
-        when(responseContext.getHeaders()).thenReturn((MultivaluedHashMap) responseHeaders);
-        when(responseContext.getStringHeaders()).thenReturn(responseHeaders);
+        when(responseContextMock.getHeaders()).thenReturn((MultivaluedHashMap) responseHeaders);
+        when(responseContextMock.getStringHeaders()).thenReturn(responseHeaders);
     }
 }

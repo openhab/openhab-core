@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,6 +60,7 @@ import org.openhab.core.test.storage.VolatileStorageService;
  */
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("null")
+@NonNullByDefault
 public class ItemRegistryImplTest extends JavaTest {
 
     private static final String ITEM_NAME = "switchItem";
@@ -71,10 +73,10 @@ public class ItemRegistryImplTest extends JavaTest {
     private static final String SENSOR_TAG = "sensor";
     private static final String OTHER_TAG = "other";
 
-    private ItemRegistry itemRegistry;
-    private ManagedItemProvider itemProvider;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) ManagedItemProvider itemProvider;
 
-    private @Mock EventPublisher eventPublisher;
+    private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
 
     @BeforeEach
     public void beforeEach() {
@@ -103,7 +105,7 @@ public class ItemRegistryImplTest extends JavaTest {
             {
                 addProvider(itemProvider);
                 setManagedProvider(itemProvider);
-                setEventPublisher(ItemRegistryImplTest.this.eventPublisher);
+                setEventPublisher(ItemRegistryImplTest.this.eventPublisherMock);
                 setStateDescriptionService(mock(StateDescriptionService.class));
                 setUnitProvider(mock(UnitProvider.class));
                 setItemStateConverter(mock(ItemStateConverter.class));
@@ -284,21 +286,21 @@ public class ItemRegistryImplTest extends JavaTest {
         Item item = new SwitchItem("SomeSwitch");
         itemRegistry.add(item);
 
-        verify(eventPublisher).post(org.mockito.ArgumentMatchers.isA(ItemAddedEvent.class));
+        verify(eventPublisherMock).post(org.mockito.ArgumentMatchers.isA(ItemAddedEvent.class));
     }
 
     @Test
     public void testItemUpdatedEvent() {
         itemRegistry.add(new SwitchItem("SomeSwitch"));
-        InOrder inOrder = inOrder(eventPublisher);
-        inOrder.verify(eventPublisher).post(any());
+        InOrder inOrder = inOrder(eventPublisherMock);
+        inOrder.verify(eventPublisherMock).post(any());
 
         SwitchItem item = new SwitchItem("SomeSwitch");
         item.addTag(OTHER_TAG);
         itemRegistry.update(item);
 
         ArgumentCaptor<ItemUpdatedEvent> captor = ArgumentCaptor.forClass(ItemUpdatedEvent.class);
-        inOrder.verify(eventPublisher).post(captor.capture());
+        inOrder.verify(eventPublisherMock).post(captor.capture());
         assertTrue(captor.getValue().getItem().tags.contains(OTHER_TAG));
     }
 
@@ -308,13 +310,13 @@ public class ItemRegistryImplTest extends JavaTest {
         item.addTag(OTHER_TAG);
         itemRegistry.add(item);
 
-        InOrder inOrder = inOrder(eventPublisher);
-        inOrder.verify(eventPublisher).post(any());
+        InOrder inOrder = inOrder(eventPublisherMock);
+        inOrder.verify(eventPublisherMock).post(any());
 
         itemRegistry.remove("SomeSwitch");
 
         ArgumentCaptor<ItemRemovedEvent> captor = ArgumentCaptor.forClass(ItemRemovedEvent.class);
-        inOrder.verify(eventPublisher).post(captor.capture());
+        inOrder.verify(eventPublisherMock).post(captor.capture());
         assertTrue(captor.getValue().getItem().tags.contains(OTHER_TAG));
     }
 

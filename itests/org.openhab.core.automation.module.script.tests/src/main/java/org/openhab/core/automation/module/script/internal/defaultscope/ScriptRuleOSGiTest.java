@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
@@ -53,20 +54,16 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-
+@NonNullByDefault
 public class ScriptRuleOSGiTest extends JavaOSGiTest {
 
     private final Logger logger = LoggerFactory.getLogger(ScriptRuleOSGiTest.class);
     private VolatileStorageService volatileStorageService = new VolatileStorageService();
 
-    private ItemCommandEvent receivedEvent;
-
-    public ScriptRuleOSGiTest() {
-    }
+    private @NonNullByDefault({}) ItemCommandEvent receivedEvent;
 
     @BeforeEach
     public void before() {
-        @NonNullByDefault
         ItemProvider itemProvider = new ItemProvider() {
             @Override
             public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
@@ -98,7 +95,7 @@ public class ScriptRuleOSGiTest extends JavaOSGiTest {
             }
 
             @Override
-            public EventFilter getEventFilter() {
+            public @Nullable EventFilter getEventFilter() {
                 return null;
             }
         };

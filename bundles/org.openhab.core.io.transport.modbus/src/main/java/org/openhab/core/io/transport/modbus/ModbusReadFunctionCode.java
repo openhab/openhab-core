@@ -12,11 +12,14 @@
  */
 package org.openhab.core.io.transport.modbus;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Modbus read function codes supported by this transport
  *
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 public enum ModbusReadFunctionCode {
     READ_COILS,
     READ_INPUT_DISCRETES,

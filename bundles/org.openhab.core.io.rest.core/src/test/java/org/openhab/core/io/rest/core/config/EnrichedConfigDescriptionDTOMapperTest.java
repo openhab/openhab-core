@@ -19,6 +19,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import java.net.URI;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
@@ -31,6 +32,7 @@ import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 /**
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class EnrichedConfigDescriptionDTOMapperTest {
 
     private static final URI CONFIG_URI = URI.create("system:ephemeris");

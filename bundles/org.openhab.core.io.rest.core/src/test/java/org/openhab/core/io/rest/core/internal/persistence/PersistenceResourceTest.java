@@ -24,6 +24,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,21 +47,23 @@ import org.openhab.core.types.State;
  * @author Stefan Triller - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class PersistenceResourceTest {
 
     private static final String PERSISTENCE_SERVICE_ID = "TestServiceID";
 
-    private PersistenceResource pResource;
-    private List<HistoricItem> items;
+    private @NonNullByDefault({}) PersistenceResource pResource;
+    private @NonNullByDefault({}) List<HistoricItem> items;
 
-    private @Mock ItemRegistry itemRegistry;
-    private @Mock LocaleService localeService;
-    private @Mock PersistenceServiceRegistry persistenceServiceRegistry;
-    private @Mock TimeZoneProvider timeZoneProvider;
+    private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
+    private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
+    private @Mock @NonNullByDefault({}) PersistenceServiceRegistry persistenceServiceRegistryMock;
+    private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
 
     @BeforeEach
     public void beforeEach() {
-        pResource = new PersistenceResource(itemRegistry, localeService, persistenceServiceRegistry, timeZoneProvider);
+        pResource = new PersistenceResource(itemRegistryMock, localeServiceMock, persistenceServiceRegistryMock,
+                timeZoneProviderMock);
 
         int startValue = 2016;
         int endValue = 2018;
@@ -92,8 +95,8 @@ public class PersistenceResourceTest {
         QueryablePersistenceService pService = mock(QueryablePersistenceService.class);
         when(pService.query(any())).thenReturn(items);
 
-        when(persistenceServiceRegistry.get(PERSISTENCE_SERVICE_ID)).thenReturn(pService);
-        when(timeZoneProvider.getTimeZone()).thenReturn(ZoneId.systemDefault());
+        when(persistenceServiceRegistryMock.get(PERSISTENCE_SERVICE_ID)).thenReturn(pService);
+        when(timeZoneProviderMock.getTimeZone()).thenReturn(ZoneId.systemDefault());
     }
 
     @Test

@@ -14,6 +14,7 @@ package org.openhab.core.automation.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.RulePredicates;
 
@@ -22,6 +23,7 @@ import org.openhab.core.automation.RulePredicates;
  *
  * @author Victor Toni - Initial contribution
  */
+@NonNullByDefault
 public class RulePrefixTest {
 
     private static final String TESTING_PREFIX = "Testing";

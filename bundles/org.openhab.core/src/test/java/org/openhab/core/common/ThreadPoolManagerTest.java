@@ -23,6 +23,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Test;
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Kaufmann - migrated from Groovy to Java
  */
+@NonNullByDefault
 public class ThreadPoolManagerTest {
 
     @Test

@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -35,12 +37,13 @@ import org.osgi.service.component.runtime.dto.ReferenceDTO;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class MissingServiceAnalyzer {
 
-    private final PrintStream ps;
+    private final @Nullable PrintStream ps;
     private final BundleContext bundleContext;
 
-    public MissingServiceAnalyzer(PrintStream ps, BundleContext bundleContext) {
+    public MissingServiceAnalyzer(@Nullable PrintStream ps, BundleContext bundleContext) {
         this.ps = ps;
         this.bundleContext = bundleContext;
     }

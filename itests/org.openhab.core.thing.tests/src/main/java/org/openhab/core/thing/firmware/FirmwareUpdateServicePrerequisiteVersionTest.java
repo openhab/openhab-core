@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -38,30 +39,26 @@ import org.openhab.core.thing.binding.firmware.FirmwareUpdateHandler;
  *
  * @author Henning Sudbrock - Initial contribution
  */
+@NonNullByDefault
 public class FirmwareUpdateServicePrerequisiteVersionTest extends JavaOSGiTest {
 
-    private ThingTypeUID thingTypeUID;
+    private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding:thingtype");
 
-    private Firmware firmwareV1;
-    private Firmware firmwareV2;
-    private Firmware firmwareV3;
+    private static final Firmware FIRMWARE_V1 = FirmwareBuilder.create(THING_TYPE_UID, "1.0.0").build();
+    private static final Firmware FIRMWARE_V2 = FirmwareBuilder.create(THING_TYPE_UID, "2.0.0").build();
+    private static final Firmware FIRMWARE_V3 = FirmwareBuilder.create(THING_TYPE_UID, "3.0.0")
+            .withPrerequisiteVersion("2.0.0").build();
 
-    private Thing thingWithFirmwareV1;
-    private Thing thingWithFirmwareV2;
+    private @NonNullByDefault({}) Thing thingWithFirmwareV1;
+    private @NonNullByDefault({}) Thing thingWithFirmwareV2;
 
     @BeforeEach
     public void setup() {
-        thingTypeUID = new ThingTypeUID("binding:thingtype");
+        thingWithFirmwareV1 = createThing(THING_TYPE_UID, "thingWithFirmwareV1", FIRMWARE_V1);
+        thingWithFirmwareV2 = createThing(THING_TYPE_UID, "thingWithFirmwareV2", FIRMWARE_V2);
 
-        firmwareV1 = FirmwareBuilder.create(thingTypeUID, "1.0.0").build();
-        firmwareV2 = FirmwareBuilder.create(thingTypeUID, "2.0.0").build();
-        firmwareV3 = FirmwareBuilder.create(thingTypeUID, "3.0.0").withPrerequisiteVersion("2.0.0").build();
-
-        thingWithFirmwareV1 = createThing(thingTypeUID, "thingWithFirmwareV1", firmwareV1);
-        thingWithFirmwareV2 = createThing(thingTypeUID, "thingWithFirmwareV2", firmwareV2);
-
-        registerService(createFirmwareProvider(thingWithFirmwareV1, firmwareV1, firmwareV2, firmwareV3));
-        registerService(createFirmwareProvider(thingWithFirmwareV2, firmwareV1, firmwareV2, firmwareV3));
+        registerService(createFirmwareProvider(thingWithFirmwareV1, FIRMWARE_V1, FIRMWARE_V2, FIRMWARE_V3));
+        registerService(createFirmwareProvider(thingWithFirmwareV2, FIRMWARE_V1, FIRMWARE_V2, FIRMWARE_V3));
         registerService(createFirmwareUpdateHandler(thingWithFirmwareV1));
         registerService(createFirmwareUpdateHandler(thingWithFirmwareV2));
     }

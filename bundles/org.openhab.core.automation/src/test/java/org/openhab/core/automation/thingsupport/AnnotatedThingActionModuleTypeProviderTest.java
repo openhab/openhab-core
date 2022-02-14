@@ -14,7 +14,7 @@ package org.openhab.core.automation.thingsupport;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,9 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
@@ -49,6 +53,8 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
 
     private static final ThingTypeUID TEST_THING_TYPE_UID = new ThingTypeUID("binding", "thing-type");
@@ -72,36 +78,33 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
     private static final String ACTION_OUTPUT2 = "output2";
     private static final String ACTION_OUTPUT2_TYPE = "java.lang.String";
 
-    private ModuleTypeI18nService moduleTypeI18nService;
+    private @Mock @NonNullByDefault({}) ModuleTypeI18nService moduleTypeI18nServiceMock;
+    private @Mock @NonNullByDefault({}) ThingHandler handler1Mock;
+    private @Mock @NonNullByDefault({}) ThingHandler handler2Mock;
 
-    private ThingHandler mockHandler1;
-    private ThingHandler mockHandler2;
-
-    private ThingActions actionProviderConf1;
-    private ThingActions actionProviderConf2;
+    private ThingActions actionProviderConf1 = new TestThingActionProvider();
+    private ThingActions actionProviderConf2 = new TestThingActionProvider();
 
     @BeforeEach
     public void setUp() {
-        mockHandler1 = mock(ThingHandler.class);
-        when(mockHandler1.getThing()).thenReturn(ThingBuilder.create(TEST_THING_TYPE_UID, "test1").build());
+        when(handler1Mock.getThing()).thenReturn(ThingBuilder.create(TEST_THING_TYPE_UID, "test1").build());
 
         actionProviderConf1 = new TestThingActionProvider();
-        actionProviderConf1.setThingHandler(mockHandler1);
+        actionProviderConf1.setThingHandler(handler1Mock);
 
-        mockHandler2 = mock(ThingHandler.class);
-        when(mockHandler2.getThing()).thenReturn(ThingBuilder.create(TEST_THING_TYPE_UID, "test2").build());
+        when(handler2Mock.getThing()).thenReturn(ThingBuilder.create(TEST_THING_TYPE_UID, "test2").build());
 
         actionProviderConf2 = new TestThingActionProvider();
-        actionProviderConf2.setThingHandler(mockHandler2);
+        actionProviderConf2.setThingHandler(handler2Mock);
 
-        moduleTypeI18nService = mock(ModuleTypeI18nService.class);
-        when(moduleTypeI18nService.getModuleTypePerLocale(any(ModuleType.class), any(), any()))
+        when(moduleTypeI18nServiceMock.getModuleTypePerLocale(any(ModuleType.class), any(), any()))
                 .thenAnswer(i -> i.getArguments()[0]);
     }
 
     @Test
     public void testMultiServiceAnnotationActions() {
-        AnnotatedThingActionModuleTypeProvider prov = new AnnotatedThingActionModuleTypeProvider(moduleTypeI18nService);
+        AnnotatedThingActionModuleTypeProvider prov = new AnnotatedThingActionModuleTypeProvider(
+                moduleTypeI18nServiceMock);
 
         prov.addAnnotatedThingActions(actionProviderConf1);
 

@@ -20,6 +20,8 @@ import static org.openhab.core.thing.firmware.FirmwareStatus.*;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -43,6 +45,7 @@ import org.openhab.core.thing.type.ThingTypeBuilder;
  * @author Henning Sudbrock - Initial contribution
  * @author Dimitar Ivanov - replaced Firmware UID with thing UID and firmware version
  */
+@NonNullByDefault
 public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
 
     private static final String THING_ID_1 = "thing1";
@@ -60,9 +63,9 @@ public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
     private static final ThingType THING_TYPE = ThingTypeBuilder
             .instance(new ThingTypeUID("bindingId", "thingTypeId"), "label").build();
 
-    private ThingRegistry thingRegistry;
-    private FirmwareUpdateService firmwareUpdateService;
-    private ManagedThingProvider managedThingProvider;
+    private @NonNullByDefault({}) ThingRegistry thingRegistry;
+    private @NonNullByDefault({}) FirmwareUpdateService firmwareUpdateService;
+    private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
 
     @BeforeEach
     public void setup() {
@@ -216,7 +219,7 @@ public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
         return new FirmwareProvider() {
 
             @Override
-            public Set<Firmware> getFirmwares(Thing thing, Locale locale) {
+            public @Nullable Set<Firmware> getFirmwares(Thing thing, @Nullable Locale locale) {
                 if (thing.getThingTypeUID().equals(THING_TYPE.getUID())) {
                     return Set.of(firmwares);
                 } else {
@@ -225,12 +228,12 @@ public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
             }
 
             @Override
-            public Set<Firmware> getFirmwares(Thing thing) {
+            public @Nullable Set<Firmware> getFirmwares(Thing thing) {
                 return getFirmwares(thing, null);
             }
 
             @Override
-            public Firmware getFirmware(Thing thing, String version, Locale locale) {
+            public @Nullable Firmware getFirmware(Thing thing, String version, @Nullable Locale locale) {
                 for (Firmware firmware : getFirmwares(thing, locale)) {
                     if (firmware.getVersion().equals(version)) {
                         return firmware;
@@ -240,7 +243,7 @@ public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
             }
 
             @Override
-            public Firmware getFirmware(Thing thing, String version) {
+            public @Nullable Firmware getFirmware(Thing thing, String version) {
                 return getFirmware(thing, version, null);
             }
         };

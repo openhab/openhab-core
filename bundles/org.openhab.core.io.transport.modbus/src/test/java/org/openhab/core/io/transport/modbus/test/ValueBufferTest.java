@@ -17,12 +17,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.nio.BufferOverflowException;
 import java.nio.InvalidMarkException;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.io.transport.modbus.ValueBuffer;
 
 /**
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 public class ValueBufferTest {
 
     @Test

@@ -14,6 +14,7 @@ package org.openhab.core.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
  * @author Kai Kreuzer - Initial contribution
  * @author Martin van Wingerden - Implemented the reverse operation
  */
+@NonNullByDefault
 public class HexUtilsTest {
 
     @Test

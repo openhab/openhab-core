@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 import com.google.gson.JsonObject;
@@ -27,6 +28,7 @@ import com.google.gson.JsonObject;
  *
  * @author Pauli Anttila - Initial contribution
  */
+@NonNullByDefault
 public class Bin2JsonTest {
 
     @Test

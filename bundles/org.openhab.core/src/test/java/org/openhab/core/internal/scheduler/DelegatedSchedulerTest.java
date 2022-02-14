@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,29 +40,30 @@ import org.openhab.core.scheduler.ScheduledCompletableFuture;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class DelegatedSchedulerTest {
 
-    private DelegatedSchedulerImpl delegatedscheduler;
+    private @NonNullByDefault({}) DelegatedSchedulerImpl delegatedscheduler;
 
-    private @Mock SchedulerImpl scheduler;
-    private @Mock ScheduledCompletableFuture<Instant> temporalScheduledFuture;
-    private @Mock CompletableFuture<Instant> completableFuture;
+    private @Mock @NonNullByDefault({}) SchedulerImpl schedulerMock;
+    private @Mock @NonNullByDefault({}) ScheduledCompletableFuture<Instant> temporalScheduledFutureMock;
+    private @Mock @NonNullByDefault({}) CompletableFuture<Instant> completableFutureMock;
 
     @BeforeEach
     public void setUp() {
-        when(scheduler.after(any())).thenReturn(temporalScheduledFuture);
-        when(temporalScheduledFuture.getPromise()).thenReturn(completableFuture);
-        delegatedscheduler = new DelegatedSchedulerImpl(scheduler);
+        when(schedulerMock.after(any())).thenReturn(temporalScheduledFutureMock);
+        when(temporalScheduledFutureMock.getPromise()).thenReturn(completableFutureMock);
+        delegatedscheduler = new DelegatedSchedulerImpl(schedulerMock);
     }
 
     @Test
     public void testAddAndDeactivate() throws InterruptedException, ExecutionException {
         final AtomicBoolean check = new AtomicBoolean();
-        when(completableFuture.handle(any())).thenAnswer(a -> null);
+        when(completableFutureMock.handle(any())).thenAnswer(a -> null);
         doAnswer(a -> {
             check.set(true);
             return null;
-        }).when(temporalScheduledFuture).cancel(true);
+        }).when(temporalScheduledFutureMock).cancel(true);
         delegatedscheduler.after(Duration.ofMillis(100));
         assertFalse(check.get(), "Check if cancel was not called");
         delegatedscheduler.deactivate();
@@ -74,8 +76,8 @@ public class DelegatedSchedulerTest {
         doAnswer(a -> {
             check.set(true);
             return null;
-        }).when(temporalScheduledFuture).cancel(true);
-        when(completableFuture.handle(any())).thenAnswer(a -> {
+        }).when(temporalScheduledFutureMock).cancel(true);
+        when(completableFutureMock.handle(any())).thenAnswer(a -> {
             ((BiFunction<?, ?, ?>) a.getArgument(0)).apply(null, null);
             return null;
         });

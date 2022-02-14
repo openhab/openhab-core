@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.discovery.DiscoveryResult;
@@ -35,6 +36,7 @@ import org.openhab.core.thing.ThingUID;
  *
  * @author Andre Fuechsel - Initial contribution
  */
+@NonNullByDefault
 public class InboxPredicatesTest {
 
     private static final String BINDING_ID1 = "bindingId1";

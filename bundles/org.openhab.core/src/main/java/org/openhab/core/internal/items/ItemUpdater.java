@@ -12,6 +12,7 @@
  */
 package org.openhab.core.internal.items;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Stefan Bußweiler - Migration to new ESH event concept
  */
+@NonNullByDefault
 @Component(immediate = true, service = EventSubscriber.class)
 public class ItemUpdater extends AbstractItemEventSubscriber {
 

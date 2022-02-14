@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.binding.BindingInfo;
@@ -34,14 +35,15 @@ import org.openhab.core.test.java.JavaOSGiTest;
  * @author Alex Tugarev - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class BindingInfoTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "BundleInfoTest.bundle";
     private static final String TEST_BUNDLE_NAME2 = "BundleInfoTestNoAuthor.bundle";
 
-    private BindingInfoRegistry bindingInfoRegistry;
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-    private BindingInstaller bindingInstaller;
+    private @NonNullByDefault({}) BindingInfoRegistry bindingInfoRegistry;
+    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
+    private @NonNullByDefault({}) BindingInstaller bindingInstaller;
 
     @BeforeEach
     public void setUp() {

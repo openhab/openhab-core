@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,6 +66,7 @@ import org.openhab.core.thing.type.ThingTypeRegistry;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class PersistentInboxTest {
 
     private static final String THING_OTHER_ID = "other";
@@ -72,33 +75,34 @@ public class PersistentInboxTest {
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "test");
     private static final ThingUID THING_OTHER_UID = new ThingUID(THING_TYPE_UID, THING_OTHER_ID);
 
-    private PersistentInbox inbox;
-    private Thing lastAddedThing = null;
+    private @NonNullByDefault({}) PersistentInbox inbox;
+    private @Nullable Thing lastAddedThing;
 
-    private @Mock ThingRegistry thingRegistry;
-    private @Mock StorageService storageService;
-    private @Mock Storage<Object> storage;
-    private @Mock ManagedThingProvider thingProvider;
-    private @Mock ThingTypeRegistry thingTypeRegistry;
-    private @Mock ConfigDescriptionRegistry configDescriptionRegistry;
-    private @Mock ThingHandlerFactory thingHandlerFactory;
+    private @Mock @NonNullByDefault({}) ThingRegistry thingRegistryMock;
+    private @Mock @NonNullByDefault({}) StorageService storageServiceMock;
+    private @Mock @NonNullByDefault({}) Storage<Object> storageMock;
+    private @Mock @NonNullByDefault({}) ManagedThingProvider thingProviderMock;
+    private @Mock @NonNullByDefault({}) ThingTypeRegistry thingTypeRegistryMock;
+    private @Mock @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistryMock;
+    private @Mock @NonNullByDefault({}) ThingHandlerFactory thingHandlerFactoryMock;
 
     @BeforeEach
     public void setup() {
-        when(storageService.getStorage(any(String.class), any(ClassLoader.class))).thenReturn(storage);
-        doAnswer(invocation -> lastAddedThing = (Thing) invocation.getArguments()[0]).when(thingRegistry)
+        when(storageServiceMock.getStorage(any(String.class), any(ClassLoader.class))).thenReturn(storageMock);
+        doAnswer(invocation -> lastAddedThing = (Thing) invocation.getArguments()[0]).when(thingRegistryMock)
                 .add(any(Thing.class));
-        when(thingHandlerFactory.supportsThingType(eq(THING_TYPE_UID))).thenReturn(true);
-        when(thingHandlerFactory.createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_UID), any()))
+        when(thingHandlerFactoryMock.supportsThingType(eq(THING_TYPE_UID))).thenReturn(true);
+        when(thingHandlerFactoryMock.createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_UID), any()))
                 .then(invocation -> ThingBuilder.create(THING_TYPE_UID, "test")
                         .withConfiguration((Configuration) invocation.getArguments()[1]).build());
-        when(thingHandlerFactory.createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_OTHER_UID), any()))
-                .then(invocation -> ThingBuilder.create(THING_TYPE_UID, THING_OTHER_ID)
-                        .withConfiguration((Configuration) invocation.getArguments()[1]).build());
+        when(thingHandlerFactoryMock
+                .createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_OTHER_UID), any()))
+                        .then(invocation -> ThingBuilder.create(THING_TYPE_UID, THING_OTHER_ID)
+                                .withConfiguration((Configuration) invocation.getArguments()[1]).build());
 
-        inbox = new PersistentInbox(storageService, mock(DiscoveryServiceRegistry.class), thingRegistry, thingProvider,
-                thingTypeRegistry, configDescriptionRegistry);
-        inbox.addThingHandlerFactory(thingHandlerFactory);
+        inbox = new PersistentInbox(storageServiceMock, mock(DiscoveryServiceRegistry.class), thingRegistryMock,
+                thingProviderMock, thingTypeRegistryMock, configDescriptionRegistryMock);
+        inbox.addThingHandlerFactory(thingHandlerFactoryMock);
     }
 
     @Test
@@ -108,7 +112,7 @@ public class PersistentInboxTest {
         Configuration config = new Configuration(props);
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
 
-        when(thingRegistry.get(eq(THING_UID))).thenReturn(thing);
+        when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
 
         assertTrue(thing.getConfiguration().get("foo") instanceof BigDecimal);
 
@@ -126,7 +130,7 @@ public class PersistentInboxTest {
         Configuration config = new Configuration(props);
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
-        when(thingRegistry.get(eq(THING_UID))).thenReturn(thing);
+        when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
 
         assertTrue(thing.getConfiguration().get("foo") instanceof String);
 
@@ -141,7 +145,7 @@ public class PersistentInboxTest {
     public void testApproveNormalization() throws URISyntaxException {
         DiscoveryResult result = DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
-        when(storage.getValues()).thenReturn(List.of(result));
+        when(storageMock.getValues()).thenReturn(List.of(result));
 
         inbox.activate();
         inbox.approve(THING_UID, "Test", null);
@@ -155,7 +159,7 @@ public class PersistentInboxTest {
     public void testApproveWithThingId() throws URISyntaxException {
         DiscoveryResult result = DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
-        when(storage.getValues()).thenReturn(List.of(result));
+        when(storageMock.getValues()).thenReturn(List.of(result));
 
         inbox.activate();
         inbox.approve(THING_UID, "Test", THING_OTHER_ID);
@@ -169,7 +173,7 @@ public class PersistentInboxTest {
     public void testApproveWithInvalidThingId() throws URISyntaxException {
         DiscoveryResult result = DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
-        when(storage.getValues()).thenReturn(List.of(result));
+        when(storageMock.getValues()).thenReturn(List.of(result));
 
         inbox.activate();
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -190,7 +194,7 @@ public class PersistentInboxTest {
         EventPublisher eventPublisher = mock(EventPublisher.class);
         inbox.setEventPublisher(eventPublisher);
 
-        when(storage.get(THING_UID.toString())) //
+        when(storageMock.get(THING_UID.toString())) //
                 .thenReturn(null) //
                 .thenReturn(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", "bar").build());
 
@@ -200,7 +204,7 @@ public class PersistentInboxTest {
         // 1st call checks existence of the result in the storage (returns null)
         // 2nd call retrieves the stored instance before the event gets emitted
         // (modified due to storage mock configuration)
-        verify(storage, times(2)).get(THING_UID.toString());
+        verify(storageMock, times(2)).get(THING_UID.toString());
 
         ArgumentCaptor<InboxAddedEvent> eventCaptor = ArgumentCaptor.forClass(InboxAddedEvent.class);
         verify(eventPublisher).post(eventCaptor.capture());
@@ -214,7 +218,7 @@ public class PersistentInboxTest {
         EventPublisher eventPublisher = mock(EventPublisher.class);
         inbox.setEventPublisher(eventPublisher);
 
-        when(storage.get(THING_UID.toString())) //
+        when(storageMock.get(THING_UID.toString())) //
                 .thenReturn(result) //
                 .thenReturn(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", "bar").build());
 
@@ -224,7 +228,7 @@ public class PersistentInboxTest {
         // 1st call checks existence of the result in the storage (returns the original result)
         // 2nd call retrieves the stored instance before the event gets emitted
         // (modified due to storage mock configuration)
-        verify(storage, times(2)).get(THING_UID.toString());
+        verify(storageMock, times(2)).get(THING_UID.toString());
 
         ArgumentCaptor<InboxUpdatedEvent> eventCaptor = ArgumentCaptor.forClass(InboxUpdatedEvent.class);
         verify(eventPublisher).post(eventCaptor.capture());
@@ -238,7 +242,7 @@ public class PersistentInboxTest {
         ConfigDescription configDesc = ConfigDescriptionBuilder.create(configDescriptionURI)
                 .withParameter(ConfigDescriptionParameterBuilder.create(paramName, type).build()).build();
 
-        when(thingTypeRegistry.getThingType(THING_TYPE_UID)).thenReturn(thingType);
-        when(configDescriptionRegistry.getConfigDescription(eq(configDescriptionURI))).thenReturn(configDesc);
+        when(thingTypeRegistryMock.getThingType(THING_TYPE_UID)).thenReturn(thingType);
+        when(configDescriptionRegistryMock.getConfigDescription(eq(configDescriptionURI))).thenReturn(configDesc);
     }
 }

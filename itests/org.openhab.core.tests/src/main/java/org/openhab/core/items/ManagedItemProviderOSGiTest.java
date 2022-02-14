@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,10 +49,11 @@ import org.openhab.core.types.State;
  * @author Andre Fuechsel - added tests for tags
  * @author Simon Kaufmann - added test for late registration of item factory
  */
+@NonNullByDefault
 public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
 
-    private ManagedItemProvider itemProvider;
-    private ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) ManagedItemProvider itemProvider;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
 
     @BeforeEach
     public void setUp() {
@@ -88,7 +91,7 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
 
     private static class StrangeItemFactory implements ItemFactory {
         @Override
-        public GenericItem createItem(String itemTypeName, String itemName) {
+        public @Nullable GenericItem createItem(@Nullable String itemTypeName, String itemName) {
             return new StrangeItem(itemName);
         }
 

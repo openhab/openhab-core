@@ -14,6 +14,7 @@ package org.openhab.core.io.transport.modbus.test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.io.transport.modbus.ModbusBitUtilities;
 
@@ -23,6 +24,7 @@ import org.openhab.core.io.transport.modbus.ModbusBitUtilities;
  *
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 public class BitUtilitiesExtractBitTest {
 
     @Test

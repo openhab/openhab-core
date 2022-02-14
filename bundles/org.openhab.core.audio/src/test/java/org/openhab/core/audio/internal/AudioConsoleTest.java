@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,19 +42,16 @@ import org.openhab.core.io.console.Console;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class AudioConsoleTest extends AbstractAudioServletTest {
 
-    private BundledSoundFileHandler fileHandler;
-
-    private AudioConsoleCommandExtension audioConsoleCommandExtension;
-
-    private AudioManagerImpl audioManager;
-
-    private AudioSinkFake audioSink;
+    private @NonNullByDefault({}) AudioConsoleCommandExtension audioConsoleCommandExtension;
+    private @NonNullByDefault({}) AudioManagerImpl audioManager;
+    private @NonNullByDefault({}) AudioSinkFake audioSink;
+    private @NonNullByDefault({}) String consoleOutput;
+    private @NonNullByDefault({}) BundledSoundFileHandler fileHandler;
 
     private final byte[] testByteArray = new byte[] { 0, 1, 2 };
-
-    private String consoleOutput;
     private final Console consoleMock = new Console() {
 
         @Override

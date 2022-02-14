@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
@@ -66,11 +68,8 @@ import org.osgi.service.component.ComponentContext;
  * @author Simon Kaufmann - Initial contribution
  */
 @SuppressWarnings("null")
+@NonNullByDefault
 public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
-
-    private ManagedThingProvider managedThingProvider;
-    private SampleThingHandlerFactory thingHandlerFactory;
-    private boolean selfChanging = false;
 
     private static final String BINDING_ID = "testBinding";
     private static final String THING_TYPE_GENERIC_ID = "generic";
@@ -99,12 +98,17 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
     private final Map<URI, ConfigDescription> configDescriptions = new HashMap<>();
     private final Map<ChannelTypeUID, ChannelType> channelTypes = new HashMap<>();
     private final Map<ChannelGroupTypeUID, ChannelGroupType> channelGroupTypes = new HashMap<>();
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-    private ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
-    private ManagedItemProvider managedItemProvider;
 
-    private ThingType thingTypeGeneric;
-    private ThingType thingTypeSpecific;
+    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
+    private @NonNullByDefault({}) ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
+    private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
+    private @NonNullByDefault({}) ManagedItemProvider managedItemProvider;
+    private @NonNullByDefault({}) SampleThingHandlerFactory thingHandlerFactory;
+
+    private @NonNullByDefault({}) ThingType thingTypeGeneric;
+    private @NonNullByDefault({}) ThingType thingTypeSpecific;
+
+    private boolean selfChanging = false;
 
     private int specificInits = 0;
     private int genericInits = 0;
@@ -184,7 +188,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         }
 
         @Override
-        protected ThingHandler createHandler(Thing thing) {
+        protected @Nullable ThingHandler createHandler(Thing thing) {
             if (THING_TYPE_GENERIC_UID.equals(thing.getThingTypeUID())) {
                 return new GenericThingHandler(thing);
             }

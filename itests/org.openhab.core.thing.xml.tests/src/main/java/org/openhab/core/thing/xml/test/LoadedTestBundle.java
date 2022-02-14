@@ -15,6 +15,7 @@ package org.openhab.core.thing.xml.test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.test.SyntheticBundleInstaller;
@@ -29,6 +30,7 @@ import org.osgi.framework.BundleException;
 /**
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class LoadedTestBundle extends JavaTest implements AutoCloseable {
 
     @FunctionalInterface
@@ -66,10 +68,10 @@ public class LoadedTestBundle extends JavaTest implements AutoCloseable {
         }
     }
 
-    private final ThingTypeProvider thingTypeProvider;
-    private final ChannelTypeRegistry channelTypeRegistry;
-    private final ChannelGroupTypeRegistry channelGroupTypeRegistry;
-    private final ConfigDescriptionRegistry configDescriptionRegistry;
+    private final @NonNullByDefault({}) ThingTypeProvider thingTypeProvider;
+    private final @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    private final @NonNullByDefault({}) ChannelGroupTypeRegistry channelGroupTypeRegistry;
+    private final @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
 
     private final int initialNumberOfThingTypes;
     private final int initialNumberOfChannelTypes;

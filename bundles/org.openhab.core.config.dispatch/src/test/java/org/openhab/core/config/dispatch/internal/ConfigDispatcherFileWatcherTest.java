@@ -20,6 +20,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,15 +32,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * @author Stefan Triller - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class ConfigDispatcherFileWatcherTest {
 
-    private TestConfigDispatcherFileWatcher configDispatcherFileWatcher;
+    private @NonNullByDefault({}) TestConfigDispatcherFileWatcher configDispatcherFileWatcher;
 
-    private @Mock ConfigDispatcher configDispatcher;
+    private @Mock @NonNullByDefault({}) ConfigDispatcher configDispatcherMock;
 
     @BeforeEach
     public void setUp() throws Exception {
-        configDispatcherFileWatcher = new TestConfigDispatcherFileWatcher(configDispatcher);
+        configDispatcherFileWatcher = new TestConfigDispatcherFileWatcher(configDispatcherMock);
     }
 
     @Test
@@ -48,7 +50,7 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_CREATE,
                 new File(path).toPath());
 
-        verify(configDispatcher).processConfigFile(new File(path));
+        verify(configDispatcherMock).processConfigFile(new File(path));
     }
 
     @Test
@@ -57,7 +59,7 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_MODIFY,
                 new File(path).toPath());
 
-        verify(configDispatcher).processConfigFile(new File(path));
+        verify(configDispatcherMock).processConfigFile(new File(path));
     }
 
     @Test
@@ -66,7 +68,7 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_CREATE,
                 new File(path).toPath());
 
-        verifyNoInteractions(configDispatcher);
+        verifyNoInteractions(configDispatcherMock);
     }
 
     @Test
@@ -75,7 +77,7 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_MODIFY,
                 new File(path).toPath());
 
-        verifyNoInteractions(configDispatcher);
+        verifyNoInteractions(configDispatcherMock);
     }
 
     @Test
@@ -84,7 +86,7 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_DELETE,
                 new File(path).toPath());
 
-        verify(configDispatcher).fileRemoved(new File(path).getAbsolutePath());
+        verify(configDispatcherMock).fileRemoved(new File(path).getAbsolutePath());
     }
 
     @Test
@@ -93,7 +95,7 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_DELETE,
                 new File(path).toPath());
 
-        verifyNoInteractions(configDispatcher);
+        verifyNoInteractions(configDispatcherMock);
     }
 
     public static class TestConfigDispatcherFileWatcher extends ConfigDispatcherFileWatcher {
@@ -107,10 +109,10 @@ public class ConfigDispatcherFileWatcherTest {
         }
     }
 
-    private static class TestWatchEvent implements WatchEvent<Path> {
+    private static class TestWatchEvent implements WatchEvent<@Nullable Path> {
 
         @Override
-        public Kind<Path> kind() {
+        public Kind<@Nullable Path> kind() {
             return StandardWatchEventKinds.ENTRY_CREATE;
         }
 

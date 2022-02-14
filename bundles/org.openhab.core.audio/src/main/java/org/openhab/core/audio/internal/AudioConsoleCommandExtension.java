@@ -17,6 +17,7 @@ import static java.util.Comparator.comparing;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -170,7 +171,8 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
         try {
             audioManager.playFile(fileName, sinkId, volume);
         } catch (AudioException e) {
-            console.println(e.getMessage());
+            console.println(Objects.requireNonNullElse(e.getMessage(),
+                    String.format("An error occurred while playing '%s' on sink '%s'", fileName, sinkId)));
         }
     }
 
@@ -197,7 +199,8 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
         try {
             audioManager.stream(url, sinkId);
         } catch (AudioException e) {
-            console.println(e.getMessage());
+            console.println(Objects.requireNonNullElse(e.getMessage(),
+                    String.format("An error occurred while streaming '%s' to sink '%s'", url, sinkId)));
         }
     }
 }

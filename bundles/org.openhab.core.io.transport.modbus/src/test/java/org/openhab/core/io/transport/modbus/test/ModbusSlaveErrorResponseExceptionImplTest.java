@@ -14,6 +14,7 @@ package org.openhab.core.io.transport.modbus.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.io.transport.modbus.internal.ModbusSlaveErrorResponseExceptionImpl;
 
@@ -22,6 +23,7 @@ import net.wimpi.modbus.ModbusSlaveException;
 /**
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 public class ModbusSlaveErrorResponseExceptionImplTest {
 
     @Test

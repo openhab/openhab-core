@@ -16,11 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author Gary Tse - Initial contribution
  */
+@NonNullByDefault
 public class AccessTokenResponseTest {
 
     @Test

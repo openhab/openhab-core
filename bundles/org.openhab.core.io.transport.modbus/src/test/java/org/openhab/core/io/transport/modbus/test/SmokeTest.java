@@ -29,6 +29,7 @@ import java.net.SocketOption;
 import java.net.StandardSocketOptions;
 import java.net.UnknownHostException;
 import java.util.BitSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -37,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.io.transport.modbus.BitArray;
@@ -67,6 +68,7 @@ import net.wimpi.modbus.util.BitVector;
 /**
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 public class SmokeTest extends IntegrationTestSupport {
 
     private static final int COIL_EVERY_N_TRUE = 2;
@@ -257,7 +259,7 @@ public class SmokeTest extends IntegrationTestSupport {
         try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, null)) {
             comms.submitOneTimePoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID, functionCode, offset, count, 1),
                     result -> {
-                        Optional<@NonNull BitArray> bitsOptional = result.getBits();
+                        Optional<BitArray> bitsOptional = result.getBits();
                         if (bitsOptional.isPresent()) {
                             lastData.set(bitsOptional.get());
                         } else {
@@ -356,7 +358,7 @@ public class SmokeTest extends IntegrationTestSupport {
         try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, null)) {
             comms.submitOneTimePoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
                     ModbusReadFunctionCode.READ_MULTIPLE_REGISTERS, 1, 15, 1), result -> {
-                        Optional<@NonNull ModbusRegisterArray> registersOptional = result.getRegisters();
+                        Optional<ModbusRegisterArray> registersOptional = result.getRegisters();
                         if (registersOptional.isPresent()) {
                             lastData.set(registersOptional.get());
                         } else {
@@ -391,7 +393,7 @@ public class SmokeTest extends IntegrationTestSupport {
         try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, null)) {
             comms.submitOneTimePoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
                     ModbusReadFunctionCode.READ_INPUT_REGISTERS, 1, 15, 1), result -> {
-                        Optional<@NonNull ModbusRegisterArray> registersOptional = result.getRegisters();
+                        Optional<ModbusRegisterArray> registersOptional = result.getRegisters();
                         if (registersOptional.isPresent()) {
                             lastData.set(registersOptional.get());
                         } else {
@@ -585,7 +587,7 @@ public class SmokeTest extends IntegrationTestSupport {
             comms.registerRegularPoll(
                     new ModbusReadRequestBlueprint(SLAVE_UNIT_ID, ModbusReadFunctionCode.READ_COILS, 1, 15, 1), 150, 0,
                     result -> {
-                        Optional<@NonNull BitArray> bitsOptional = result.getBits();
+                        Optional<BitArray> bitsOptional = result.getBits();
                         if (bitsOptional.isPresent()) {
                             BitArray bits = bitsOptional.get();
                             dataReceived.incrementAndGet();
@@ -630,7 +632,7 @@ public class SmokeTest extends IntegrationTestSupport {
         try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, null)) {
             comms.registerRegularPoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
                     ModbusReadFunctionCode.READ_MULTIPLE_REGISTERS, 1, 15, 1), 150, 0, result -> {
-                        Optional<@NonNull ModbusRegisterArray> registersOptional = result.getRegisters();
+                        Optional<ModbusRegisterArray> registersOptional = result.getRegisters();
                         if (registersOptional.isPresent()) {
                             ModbusRegisterArray registers = registersOptional.get();
                             dataReceived.incrementAndGet();
@@ -667,7 +669,7 @@ public class SmokeTest extends IntegrationTestSupport {
         try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, null)) {
             comms.registerRegularPoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
                     ModbusReadFunctionCode.READ_MULTIPLE_REGISTERS, 1, 15, 1), 150, 0, result -> {
-                        Optional<@NonNull ModbusRegisterArray> registersOptional = result.getRegisters();
+                        Optional<ModbusRegisterArray> registersOptional = result.getRegisters();
                         if (registersOptional.isPresent()) {
                             ModbusRegisterArray registers = registersOptional.get();
                             dataReceived.incrementAndGet();
@@ -730,7 +732,7 @@ public class SmokeTest extends IntegrationTestSupport {
         try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, null)) {
             comms.registerRegularPoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
                     ModbusReadFunctionCode.READ_MULTIPLE_REGISTERS, 1, 15, 1), 200, 0, result -> {
-                        Optional<@NonNull ModbusRegisterArray> registersOptional = result.getRegisters();
+                        Optional<ModbusRegisterArray> registersOptional = result.getRegisters();
                         if (registersOptional.isPresent()) {
                             expectedReceived.incrementAndGet();
                             successfulCountDownLatch.countDown();
@@ -774,7 +776,7 @@ public class SmokeTest extends IntegrationTestSupport {
         try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, null)) {
             PollTask task = comms.registerRegularPoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
                     ModbusReadFunctionCode.READ_MULTIPLE_REGISTERS, 1, 15, 1), 200, 0, result -> {
-                        Optional<@NonNull ModbusRegisterArray> registersOptional = result.getRegisters();
+                        Optional<ModbusRegisterArray> registersOptional = result.getRegisters();
                         if (registersOptional.isPresent()) {
                             expectedReceived.incrementAndGet();
                         } else {
@@ -991,7 +993,7 @@ public class SmokeTest extends IntegrationTestSupport {
             try {
                 Constructor<?> constructor = socksSocketImplClass.getDeclaredConstructor();
                 constructor.setAccessible(true);
-                return (SocketImpl) constructor.newInstance();
+                return (SocketImpl) Objects.requireNonNull(constructor.newInstance());
             } catch (NoSuchMethodException e) {
                 // Newer Javas (Java 14->) do not have default constructor 'SocksSocketImpl()'
                 // Instead we use "static SocketImpl.createPlatformSocketImpl" and "SocksSocketImpl(SocketImpl)
@@ -1004,7 +1006,7 @@ public class SmokeTest extends IntegrationTestSupport {
                 Constructor<?> socksSocketImplConstructor = socksSocketImplClass
                         .getDeclaredConstructor(socketImplClass);
                 socksSocketImplConstructor.setAccessible(true);
-                return (SocketImpl) socksSocketImplConstructor.newInstance(socketImpl);
+                return (SocketImpl) Objects.requireNonNull(socksSocketImplConstructor.newInstance(socketImpl));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

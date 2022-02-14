@@ -27,6 +27,8 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +46,7 @@ import org.osgi.service.http.HttpService;
  * @author Wouter Born - Migrate tests from Groovy to Java and use Mockito
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class IconServletTest {
 
     private class ByteArrayServletOutputStream extends ServletOutputStream {
@@ -56,7 +59,7 @@ public class IconServletTest {
         }
 
         @Override
-        public void setWriteListener(WriteListener arg0) {
+        public void setWriteListener(@Nullable WriteListener arg0) {
         }
 
         @Override
@@ -73,17 +76,17 @@ public class IconServletTest {
         }
     };
 
-    private IconServlet servlet;
+    private @NonNullByDefault({}) IconServlet servlet;
     private ByteArrayServletOutputStream responseOutputStream = new ByteArrayServletOutputStream();
 
-    private @Mock HttpContext httpContextMock;
-    private @Mock HttpService httpServiceMock;
+    private @Mock @NonNullByDefault({}) HttpContext httpContextMock;
+    private @Mock @NonNullByDefault({}) HttpService httpServiceMock;
 
-    private @Mock HttpServletRequest requestMock;
-    private @Mock HttpServletResponse responseMock;
+    private @Mock @NonNullByDefault({}) HttpServletRequest requestMock;
+    private @Mock @NonNullByDefault({}) HttpServletResponse responseMock;
 
-    private @Mock IconProvider provider1Mock;
-    private @Mock IconProvider provider2Mock;
+    private @Mock @NonNullByDefault({}) IconProvider provider1Mock;
+    private @Mock @NonNullByDefault({}) IconProvider provider2Mock;
 
     @BeforeEach
     public void before() throws IOException {

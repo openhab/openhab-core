@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.voice.internal.HumanLanguageInterpreterStub;
@@ -35,6 +36,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  *
  * @author Velin Yordanov - Migrated tests from groovy to java
  */
+@NonNullByDefault
 public class InterpretCommandTest extends VoiceConsoleCommandExtensionTest {
     private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
     private static final String CONFIG_DEFAULT_TTS = "defaultTTS";
@@ -43,9 +45,9 @@ public class InterpretCommandTest extends VoiceConsoleCommandExtensionTest {
     private static final String INTERPRETED_TEXT = "Interpreted text";
     private static final String EXCEPTION_MESSAGE = "interpretation exception";
 
-    private HumanLanguageInterpreterStub hliStub;
-    private VoiceStub voice;
-    private TTSServiceStub ttsService;
+    private @NonNullByDefault({}) HumanLanguageInterpreterStub hliStub;
+    private @NonNullByDefault({}) VoiceStub voice;
+    private @NonNullByDefault({}) TTSServiceStub ttsService;
 
     @BeforeEach
     public void setUp() throws IOException, InterruptedException {

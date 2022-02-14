@@ -19,6 +19,7 @@ import static org.mockito.Mockito.*;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,29 +37,30 @@ import org.openhab.core.library.CoreItemFactory;
  * @author Simon Kaufmann - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class ItemBuilderTest {
 
-    private ItemBuilderFactoryImpl itemBuilderFactory;
-    private @Mock ItemFactory mockFactory;
-    private @Mock ActiveItem mockItem;
-    private @Mock Item originalItem;
+    private @NonNullByDefault({}) ItemBuilderFactoryImpl itemBuilderFactory;
+    private @Mock @NonNullByDefault({}) ItemFactory factoryMock;
+    private @Mock @NonNullByDefault({}) ActiveItem itemMock;
+    private @Mock @NonNullByDefault({}) Item originalItemMock;
 
     @BeforeEach
     public void setup() {
-        itemBuilderFactory = new ItemBuilderFactoryImpl(mockFactory);
+        itemBuilderFactory = new ItemBuilderFactoryImpl(factoryMock);
     }
 
     @Test
     public void testMinimal() {
-        when(mockFactory.createItem(anyString(), anyString())).thenReturn(mockItem);
+        when(factoryMock.createItem(anyString(), anyString())).thenReturn(itemMock);
 
         Item res = itemBuilderFactory.newItemBuilder(CoreItemFactory.STRING, "test").build();
 
-        assertSame(mockItem, res);
-        verify(mockFactory).createItem(eq(CoreItemFactory.STRING), eq("test"));
-        verify(mockItem).setLabel(isNull());
-        verify(mockItem).setCategory(isNull());
-        verify(mockItem).addGroupNames(eq(Collections.emptyList()));
+        assertSame(itemMock, res);
+        verify(factoryMock).createItem(eq(CoreItemFactory.STRING), eq("test"));
+        verify(itemMock).setLabel(isNull());
+        verify(itemMock).setCategory(isNull());
+        verify(itemMock).addGroupNames(eq(Collections.emptyList()));
     }
 
     @Test
@@ -67,7 +69,7 @@ public class ItemBuilderTest {
 
         assertEquals(GroupItem.class, resItem.getClass());
         GroupItem res = (GroupItem) resItem;
-        verifyNoMoreInteractions(mockFactory);
+        verifyNoMoreInteractions(factoryMock);
         assertNull(res.getCategory());
         assertEquals(Collections.emptyList(), res.getGroupNames());
         assertNull(res.getLabel());
@@ -77,7 +79,7 @@ public class ItemBuilderTest {
 
     @Test
     public void testFull() {
-        when(mockFactory.createItem(anyString(), anyString())).thenReturn(mockItem);
+        when(factoryMock.createItem(anyString(), anyString())).thenReturn(itemMock);
 
         Item res = itemBuilderFactory.newItemBuilder(CoreItemFactory.STRING, "test") //
                 .withCategory("category") //
@@ -85,11 +87,11 @@ public class ItemBuilderTest {
                 .withLabel("label") //
                 .build();
 
-        assertSame(mockItem, res);
-        verify(mockFactory).createItem(eq(CoreItemFactory.STRING), eq("test"));
-        verify(mockItem).setCategory(eq("category"));
-        verify(mockItem).addGroupNames(eq(List.of("a", "b")));
-        verify(mockItem).setLabel(eq("label"));
+        assertSame(itemMock, res);
+        verify(factoryMock).createItem(eq(CoreItemFactory.STRING), eq("test"));
+        verify(itemMock).setCategory(eq("category"));
+        verify(itemMock).addGroupNames(eq(List.of("a", "b")));
+        verify(itemMock).setLabel(eq("label"));
     }
 
     @Test
@@ -107,7 +109,7 @@ public class ItemBuilderTest {
 
         assertEquals(GroupItem.class, resItem.getClass());
         GroupItem res = (GroupItem) resItem;
-        verifyNoMoreInteractions(mockFactory);
+        verifyNoMoreInteractions(factoryMock);
         assertEquals("category", res.getCategory());
         assertEquals(List.of("a", "b"), res.getGroupNames());
         assertEquals("label", res.getLabel());
@@ -117,21 +119,21 @@ public class ItemBuilderTest {
 
     @Test
     public void testClone() {
-        when(originalItem.getType()).thenReturn("type");
-        when(originalItem.getName()).thenReturn("name");
-        when(originalItem.getLabel()).thenReturn("label");
-        when(originalItem.getCategory()).thenReturn("category");
-        when(originalItem.getGroupNames()).thenReturn(List.of("a", "b"));
+        when(originalItemMock.getType()).thenReturn("type");
+        when(originalItemMock.getName()).thenReturn("name");
+        when(originalItemMock.getLabel()).thenReturn("label");
+        when(originalItemMock.getCategory()).thenReturn("category");
+        when(originalItemMock.getGroupNames()).thenReturn(List.of("a", "b"));
 
-        when(mockFactory.createItem(anyString(), anyString())).thenReturn(mockItem);
+        when(factoryMock.createItem(anyString(), anyString())).thenReturn(itemMock);
 
-        Item res = itemBuilderFactory.newItemBuilder(originalItem).build();
+        Item res = itemBuilderFactory.newItemBuilder(originalItemMock).build();
 
-        assertSame(mockItem, res);
-        verify(mockFactory).createItem(eq("type"), eq("name"));
-        verify(mockItem).setCategory(eq("category"));
-        verify(mockItem).addGroupNames(eq(List.of("a", "b")));
-        verify(mockItem).setLabel(eq("label"));
+        assertSame(itemMock, res);
+        verify(factoryMock).createItem(eq("type"), eq("name"));
+        verify(itemMock).setCategory(eq("category"));
+        verify(itemMock).addGroupNames(eq(List.of("a", "b")));
+        verify(itemMock).setLabel(eq("label"));
     }
 
     @Test
@@ -147,7 +149,7 @@ public class ItemBuilderTest {
 
         assertEquals(GroupItem.class, resItem.getClass());
         GroupItem res = (GroupItem) resItem;
-        verifyNoMoreInteractions(mockFactory);
+        verifyNoMoreInteractions(factoryMock);
         assertEquals("category", res.getCategory());
         assertEquals(List.of("a", "b"), res.getGroupNames());
         assertEquals("label", res.getLabel());
@@ -157,7 +159,7 @@ public class ItemBuilderTest {
 
     @Test
     public void testNoFactory() {
-        when(mockFactory.createItem(anyString(), anyString())).thenReturn(null);
+        when(factoryMock.createItem(anyString(), anyString())).thenReturn(null);
         assertThrows(IllegalStateException.class,
                 () -> itemBuilderFactory.newItemBuilder(CoreItemFactory.STRING, "test").build());
     }

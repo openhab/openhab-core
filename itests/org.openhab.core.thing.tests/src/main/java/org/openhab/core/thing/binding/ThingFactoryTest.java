@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -71,6 +72,7 @@ import org.openhab.core.thing.type.ThingTypeBuilder;
  * @author Thomas Höfer - Thing type constructor modified because of thing properties introduction
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class ThingFactoryTest extends JavaOSGiTest {
 
     @Test
@@ -138,7 +140,7 @@ public class ThingFactoryTest extends JavaOSGiTest {
         when(configDescriptionRegistry.getConfigDescription(any(URI.class)))
                 .thenAnswer(new Answer<ConfigDescription>() {
                     @Override
-                    public ConfigDescription answer(InvocationOnMock invocation) throws Throwable {
+                    public @Nullable ConfigDescription answer(InvocationOnMock invocation) throws Throwable {
                         URI uri = (URI) invocation.getArgument(0);
                         return ConfigDescriptionBuilder.create(uri).withParameter(ConfigDescriptionParameterBuilder
                                 .create("testProperty", ConfigDescriptionParameter.Type.TEXT).withContext("context")
@@ -168,7 +170,7 @@ public class ThingFactoryTest extends JavaOSGiTest {
         when(configDescriptionRegistry.getConfigDescription(any(URI.class)))
                 .thenAnswer(new Answer<ConfigDescription>() {
                     @Override
-                    public ConfigDescription answer(InvocationOnMock invocation) throws Throwable {
+                    public @Nullable ConfigDescription answer(InvocationOnMock invocation) throws Throwable {
                         URI uri = (URI) invocation.getArgument(0);
 
                         ConfigDescriptionParameter p1 = ConfigDescriptionParameterBuilder

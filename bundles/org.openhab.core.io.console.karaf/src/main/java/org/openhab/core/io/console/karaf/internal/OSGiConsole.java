@@ -12,12 +12,14 @@
  */
 package org.openhab.core.io.console.karaf.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.console.Console;
 
 /**
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class OSGiConsole implements Console {
 
     private final String scope;

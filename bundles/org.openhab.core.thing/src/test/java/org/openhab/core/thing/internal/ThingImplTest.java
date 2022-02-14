@@ -14,6 +14,7 @@ package org.openhab.core.thing.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.thing.ChannelUID;
@@ -27,6 +28,7 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class ThingImplTest {
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("test", "test");

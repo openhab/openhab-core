@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class ChannelTest {
 
     @Test

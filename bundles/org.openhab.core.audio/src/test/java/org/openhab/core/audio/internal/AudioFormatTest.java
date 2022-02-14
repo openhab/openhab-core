@@ -18,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioFormat;
 
@@ -27,6 +28,7 @@ import org.openhab.core.audio.AudioFormat;
  * @author Petar Valchev - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class AudioFormatTest {
     private final String testContainer = AudioFormat.CONTAINER_WAVE;
     private final String testCodec = AudioFormat.CODEC_PCM_SIGNED;

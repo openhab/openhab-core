@@ -17,10 +17,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.openhab.core.scheduler.CronJob;
@@ -34,6 +37,7 @@ import org.openhab.core.scheduler.ScheduledCompletableFuture;
  * @author Simon Kaufmann - adapted to Java 8
  * @author Hilbrand Bouwkamp - moved cron scheduling to it's own class
  */
+@NonNullByDefault
 public class CronSchedulerImplTest {
     private final CronSchedulerImpl cronScheduler = new CronSchedulerImpl(new SchedulerImpl());
 
@@ -42,7 +46,7 @@ public class CronSchedulerImplTest {
     public void testCronReboot() throws InterruptedException {
         Instant start = Instant.now();
         Semaphore s = new Semaphore(0);
-        ScheduledCompletableFuture<Void> future = cronScheduler.schedule(() -> {
+        ScheduledCompletableFuture<@Nullable Void> future = cronScheduler.schedule(() -> {
         }, "@reboot");
         future.getPromise().thenAccept(x -> s.release());
         s.acquire(1);
@@ -63,7 +67,7 @@ public class CronSchedulerImplTest {
         Semaphore s = new Semaphore(0);
         cronScheduler.schedule(foo -> {
             s.release();
-            ref.set(foo.get("foo"));
+            ref.set(Objects.requireNonNull(foo.get("foo")));
         }, Map.of("foo", "bar"), "#\n" //
                 + "\n" //
                 + " foo = bar \n" //

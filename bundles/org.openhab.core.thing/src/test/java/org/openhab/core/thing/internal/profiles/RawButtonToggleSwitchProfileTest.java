@@ -15,9 +15,11 @@ package org.openhab.core.thing.internal.profiles;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
@@ -32,18 +34,15 @@ import org.openhab.core.types.UnDefType;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class RawButtonToggleSwitchProfileTest {
 
-    private @Mock ProfileCallback mockCallback;
-
-    @BeforeEach
-    public void setup() {
-        mockCallback = mock(ProfileCallback.class);
-    }
+    private @Mock @NonNullByDefault({}) ProfileCallback callbackMock;
 
     @Test
     public void testSwitchItem() {
-        TriggerProfile profile = new RawButtonToggleSwitchProfile(mockCallback);
+        TriggerProfile profile = new RawButtonToggleSwitchProfile(callbackMock);
         verifyAction(profile, UnDefType.NULL, OnOffType.ON);
         verifyAction(profile, OnOffType.ON, OnOffType.OFF);
         verifyAction(profile, OnOffType.OFF, OnOffType.ON);
@@ -51,7 +50,7 @@ public class RawButtonToggleSwitchProfileTest {
 
     @Test
     public void testDimmerItem() {
-        TriggerProfile profile = new RawButtonToggleSwitchProfile(mockCallback);
+        TriggerProfile profile = new RawButtonToggleSwitchProfile(callbackMock);
         verifyAction(profile, UnDefType.NULL, OnOffType.ON);
         verifyAction(profile, PercentType.HUNDRED, OnOffType.OFF);
         verifyAction(profile, PercentType.ZERO, OnOffType.ON);
@@ -60,7 +59,7 @@ public class RawButtonToggleSwitchProfileTest {
 
     @Test
     public void testColorItem() {
-        TriggerProfile profile = new RawButtonToggleSwitchProfile(mockCallback);
+        TriggerProfile profile = new RawButtonToggleSwitchProfile(callbackMock);
         verifyAction(profile, UnDefType.NULL, OnOffType.ON);
         verifyAction(profile, HSBType.WHITE, OnOffType.OFF);
         verifyAction(profile, HSBType.BLACK, OnOffType.ON);
@@ -68,9 +67,9 @@ public class RawButtonToggleSwitchProfileTest {
     }
 
     private void verifyAction(TriggerProfile profile, State preCondition, Command expectation) {
-        reset(mockCallback);
+        reset(callbackMock);
         profile.onStateUpdateFromItem(preCondition);
         profile.onTriggerFromHandler(CommonTriggerEvents.PRESSED);
-        verify(mockCallback, times(1)).sendCommand(eq(expectation));
+        verify(callbackMock, times(1)).sendCommand(eq(expectation));
     }
 }

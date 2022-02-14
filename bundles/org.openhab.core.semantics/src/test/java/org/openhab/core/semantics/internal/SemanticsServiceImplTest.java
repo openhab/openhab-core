@@ -19,6 +19,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,16 +38,17 @@ import org.openhab.core.semantics.model.location.LivingRoom;
  * @author Kai Kreuzer - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class SemanticsServiceImplTest {
 
-    private @Mock ItemRegistry itemRegistry;
-    private @Mock MetadataRegistry metadataRegistry;
+    private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
+    private @Mock @NonNullByDefault({}) MetadataRegistry metadataRegistryMock;
 
-    private GroupItem locationItem;
-    private GroupItem equipmentItem;
-    private GenericItem pointItem;
+    private @NonNullByDefault({}) GroupItem locationItem;
+    private @NonNullByDefault({}) GroupItem equipmentItem;
+    private @NonNullByDefault({}) GenericItem pointItem;
 
-    private SemanticsServiceImpl service;
+    private @NonNullByDefault({}) SemanticsServiceImpl service;
 
     @BeforeEach
     public void setup() throws Exception {
@@ -65,11 +67,11 @@ public class SemanticsServiceImplTest {
         pointItem.addGroupName(locationItem.getName());
         locationItem.addMember(pointItem);
 
-        when(itemRegistry.stream()).thenReturn(Stream.of(locationItem, equipmentItem, pointItem))
+        when(itemRegistryMock.stream()).thenReturn(Stream.of(locationItem, equipmentItem, pointItem))
                 .thenReturn(Stream.of(locationItem, equipmentItem, pointItem))
                 .thenReturn(Stream.of(locationItem, equipmentItem, pointItem));
 
-        service = new SemanticsServiceImpl(itemRegistry, metadataRegistry);
+        service = new SemanticsServiceImpl(itemRegistryMock, metadataRegistryMock);
     }
 
     @Test

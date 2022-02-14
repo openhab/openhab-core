@@ -16,7 +16,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
@@ -26,17 +26,13 @@ import org.openhab.core.test.java.JavaTest;
 /**
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class EnrichedItemDTOMapperTest extends JavaTest {
-
-    private CoreItemFactory itemFactory;
-
-    @BeforeEach
-    public void setup() {
-        itemFactory = new CoreItemFactory();
-    }
 
     @Test
     public void testFiltering() {
+        CoreItemFactory itemFactory = new CoreItemFactory();
+
         GroupItem group = new GroupItem("TestGroup");
         GroupItem subGroup = new GroupItem("TestSubGroup");
         GenericItem switchItem = itemFactory.createItem(CoreItemFactory.SWITCH, "TestSwitch");

@@ -14,6 +14,7 @@ package org.openhab.core.semantics;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.items.GenericItem;
@@ -27,11 +28,12 @@ import org.openhab.core.semantics.model.property.Temperature;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class SemanticsPredicatesTest {
 
-    private GroupItem locationItem;
-    private GroupItem equipmentItem;
-    private GenericItem pointItem;
+    private @NonNullByDefault({}) GroupItem locationItem;
+    private @NonNullByDefault({}) GroupItem equipmentItem;
+    private @NonNullByDefault({}) GenericItem pointItem;
 
     @BeforeEach
     public void setup() {

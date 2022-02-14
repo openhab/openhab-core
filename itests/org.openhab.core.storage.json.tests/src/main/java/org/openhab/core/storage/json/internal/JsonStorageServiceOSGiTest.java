@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,13 +43,14 @@ import org.openhab.core.test.java.JavaOSGiTest;
 /**
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
 
     private static final String KEY1 = "Key1";
     private static final String KEY2 = "Key2";
 
-    private StorageService storageService;
-    private Storage<PersistedItem> storage;
+    private @NonNullByDefault({}) StorageService storageService;
+    private @NonNullByDefault({}) Storage<PersistedItem> storage;
 
     @BeforeEach
     public void setUp() {
@@ -163,9 +166,9 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
 
     public static class PersistedItem {
 
-        public String itemType;
-        public List<String> groupNames;
-        public String baseItemType;
+        public @Nullable String itemType;
+        public @Nullable List<String> groupNames;
+        public @Nullable String baseItemType;
 
         /**
          * Package protected default constructor to allow reflective instantiation.
@@ -179,7 +182,7 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
             this(itemType, groupNames, null);
         }
 
-        public PersistedItem(String itemType, List<String> groupNames, String baseItemType) {
+        public PersistedItem(String itemType, List<String> groupNames, @Nullable String baseItemType) {
             this.itemType = itemType;
             this.groupNames = groupNames;
             this.baseItemType = baseItemType;

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.magic.service;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigurableService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
@@ -20,7 +21,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Stefan Triller - Initial contribution
  */
-
+@NonNullByDefault
 @Component(immediate = true, service = MagicMultiInstanceServiceMarker.class, //
         property = Constants.SERVICE_PID + "=org.openhab.magicMultiInstance")
 @ConfigurableService(category = "test", label = "MagicMultiInstanceService", description_uri = "test:multipleMagic", factory = true)

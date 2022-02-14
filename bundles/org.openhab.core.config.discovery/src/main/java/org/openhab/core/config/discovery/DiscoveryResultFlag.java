@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.discovery;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link DiscoveryResultFlag} class specifies a list of flags
  * which a {@link DiscoveryResult} object can take.
@@ -20,6 +22,7 @@ package org.openhab.core.config.discovery;
  *
  * @see DiscoveryResult
  */
+@NonNullByDefault
 public enum DiscoveryResultFlag {
 
     /**

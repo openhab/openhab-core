@@ -26,6 +26,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
@@ -63,15 +64,13 @@ import org.slf4j.LoggerFactory;
  * @author Markus Rathgeb - fix module timer test
  * @author Kai Kreuzer - migrated to Java
  */
+@NonNullByDefault
 public class RuntimeRuleTest extends JavaOSGiTest {
 
     private final Logger logger = LoggerFactory.getLogger(RuntimeRuleTest.class);
     private VolatileStorageService volatileStorageService = new VolatileStorageService();
-    private RuleRegistry ruleRegistry;
-    private RuleManager ruleEngine;
-
-    public RuntimeRuleTest() {
-    }
+    private @NonNullByDefault({}) RuleRegistry ruleRegistry;
+    private @NonNullByDefault({}) RuleManager ruleEngine;
 
     @BeforeEach
     public void before() {
@@ -170,7 +169,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
             }
 
             @Override
-            public EventFilter getEventFilter() {
+            public @Nullable EventFilter getEventFilter() {
                 return null;
             };
         };
@@ -214,7 +213,6 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         });
     }
 
-    @NonNullByDefault
     class TestItemProvider implements ItemProvider {
         private final Collection<Item> items;
 

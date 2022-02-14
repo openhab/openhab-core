@@ -17,6 +17,7 @@ import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -80,7 +81,8 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
                             }
                             inbox.approve(thingUID, label, newThingId);
                         } catch (IllegalArgumentException e) {
-                            console.println(e.getMessage());
+                            console.println(Objects.requireNonNullElse(e.getMessage(),
+                                    String.format("An error occurred while approving '%s'", args[1])));
                         }
                     } else {
                         console.println("Specify thing id to approve: inbox approve <thingUID> <label> [<newThingID>]");

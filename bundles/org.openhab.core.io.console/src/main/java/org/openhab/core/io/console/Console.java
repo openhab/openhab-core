@@ -12,12 +12,15 @@
  */
 package org.openhab.core.io.console;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This interface must be implemented by consoles which want to use the {@link ConsoleInterpreter}.
  * It allows basic output commands.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface Console {
 
     default void printf(String format, Object... args) {

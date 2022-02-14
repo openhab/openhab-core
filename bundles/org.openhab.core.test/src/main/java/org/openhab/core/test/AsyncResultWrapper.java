@@ -12,11 +12,15 @@
  */
 package org.openhab.core.test;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * @author Tanya Georgieva - Initial contribution
  */
+@NonNullByDefault
 public class AsyncResultWrapper<T> {
-    private T wrappedObject;
+    private @Nullable T wrappedObject;
     private boolean isSet = false;
 
     public void set(T wrappedObject) {
@@ -24,7 +28,7 @@ public class AsyncResultWrapper<T> {
         isSet = true;
     }
 
-    public T getWrappedObject() {
+    public @Nullable T getWrappedObject() {
         return wrappedObject;
     }
 

@@ -16,12 +16,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.items.Metadata;
 
 /**
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class GenericMetadataProviderTest {
 
     @Test

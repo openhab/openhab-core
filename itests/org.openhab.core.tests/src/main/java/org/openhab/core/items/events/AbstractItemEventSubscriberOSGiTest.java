@@ -18,6 +18,8 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,23 +44,25 @@ import org.openhab.core.test.java.JavaOSGiTest;
  * @author Stefan Bußweiler - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM_NAME = "SomeItem";
-    private EventPublisher eventPublisher;
-    private ItemCommandEvent commandEvent;
-    private ItemStateEvent updateEvent;
 
-    private @Mock ItemProvider itemProvider;
-    private @Mock MetadataProvider mockMetadataProvider;
+    private @NonNullByDefault({}) EventPublisher eventPublisher;
+    private @NonNullByDefault({}) ItemCommandEvent commandEvent;
+    private @NonNullByDefault({}) ItemStateEvent updateEvent;
+
+    private @Mock @NonNullByDefault({}) ItemProvider itemProviderMock;
+    private @Mock @NonNullByDefault({}) MetadataProvider mockMetadataProviderMock;
 
     @BeforeEach
     public void beforeEach() {
         eventPublisher = getService(EventPublisher.class);
         assertNotNull(eventPublisher);
 
-        when(itemProvider.getAll()).thenReturn(List.of(new SwitchItem(ITEM_NAME)));
-        registerService(itemProvider);
+        when(itemProviderMock.getAll()).thenReturn(List.of(new SwitchItem(ITEM_NAME)));
+        registerService(itemProviderMock);
 
         EventSubscriber itemEventSubscriber = new AbstractItemEventSubscriber() {
             @Override
@@ -73,9 +77,9 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
         };
         registerService(itemEventSubscriber, EventSubscriber.class.getName());
 
-        when(mockMetadataProvider.getAll()).thenReturn(
+        when(mockMetadataProviderMock.getAll()).thenReturn(
                 List.of(new Metadata(new MetadataKey("autoupdate", ITEM_NAME), Boolean.toString(false), null)));
-        registerService(mockMetadataProvider);
+        registerService(mockMetadataProviderMock);
     }
 
     @Test
@@ -97,7 +101,8 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
         String someEventType = "SOME_EVENT_TYPE";
         EventFactory someEventFactory = new EventFactory() {
             @Override
-            public Event createEvent(String eventType, String topic, String payload, String source) throws Exception {
+            public Event createEvent(String eventType, String topic, String payload, @Nullable String source)
+                    throws Exception {
                 return new Event() {
                     @Override
                     public String getType() {
@@ -115,7 +120,7 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
                     }
 
                     @Override
-                    public String getSource() {
+                    public @Nullable String getSource() {
                         return source;
                     }
                 };
@@ -145,7 +150,7 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
             }
 
             @Override
-            public String getSource() {
+            public @Nullable String getSource() {
                 return null;
             }
         };

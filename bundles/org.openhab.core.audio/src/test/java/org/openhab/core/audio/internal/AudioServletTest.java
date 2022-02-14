@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.*;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
  * @author Petar Valchev - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class AudioServletTest extends AbstractAudioServletTest {
 
     private static final String MEDIA_TYPE_AUDIO_WAV = "audio/wav";

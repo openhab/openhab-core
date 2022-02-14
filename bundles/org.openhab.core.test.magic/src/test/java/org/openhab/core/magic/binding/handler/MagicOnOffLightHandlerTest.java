@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,17 +36,18 @@ import org.openhab.core.thing.binding.ThingHandlerCallback;
  * @author Henning Treu - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class MagicOnOffLightHandlerTest {
 
-    private ThingHandler handler;
+    private @NonNullByDefault({}) ThingHandler handler;
 
-    private @Mock ThingHandlerCallback callback;
-    private @Mock Thing thing;
+    private @Mock @NonNullByDefault({}) ThingHandlerCallback callbackMock;
+    private @Mock @NonNullByDefault({}) Thing thingMock;
 
     @BeforeEach
     public void setUp() {
-        handler = new MagicOnOffLightHandler(thing);
-        handler.setCallback(callback);
+        handler = new MagicOnOffLightHandler(thingMock);
+        handler.setCallback(callbackMock);
     }
 
     @Test
@@ -54,7 +56,7 @@ public class MagicOnOffLightHandlerTest {
 
         ArgumentCaptor<ThingStatusInfo> statusInfoCaptor = ArgumentCaptor.forClass(ThingStatusInfo.class);
 
-        verify(callback).statusUpdated(eq(thing), statusInfoCaptor.capture());
+        verify(callbackMock).statusUpdated(eq(thingMock), statusInfoCaptor.capture());
 
         ThingStatusInfo thingStatusInfo = statusInfoCaptor.getValue();
         assertThat(thingStatusInfo.getStatus(), is(equalTo(ThingStatus.ONLINE)));

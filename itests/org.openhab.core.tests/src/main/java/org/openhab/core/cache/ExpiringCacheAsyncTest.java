@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaTest;
 
@@ -27,6 +28,7 @@ import org.openhab.core.test.java.JavaTest;
  *
  * @author David Graeff - Initial contribution
  */
+@NonNullByDefault
 public class ExpiringCacheAsyncTest extends JavaTest {
 
     private double theValue = 0;

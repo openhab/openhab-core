@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Refactored to Java
  */
 @SuppressWarnings("deprecation")
+@NonNullByDefault
 public class HostFragmentSupportTest extends JavaOSGiTest {
 
     private static final Locale BULGARIAN = new Locale("bg");
@@ -49,8 +51,8 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
     private static final List<Locale> LOCALES = List.of(BULGARIAN, DEFAULT, GERMAN);
 
     private final Logger logger = LoggerFactory.getLogger(HostFragmentSupportTest.class);
-    private ModuleTypeRegistry registry;
-    private PackageAdmin pkgAdmin;
+    private @NonNullByDefault({}) ModuleTypeRegistry registry;
+    private @NonNullByDefault({}) PackageAdmin pkgAdmin;
 
     private static final String EXT = ".jar";
     private static final String PATH = "/";
@@ -135,7 +137,7 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
 
         FrameworkListener listener = new FrameworkListener() {
             @Override
-            public void frameworkEvent(FrameworkEvent event) {
+            public void frameworkEvent(@NonNullByDefault({}) FrameworkEvent event) {
                 waiting = false;
             }
         };
@@ -242,7 +244,7 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
         waiting = true;
         FrameworkListener listener = new FrameworkListener() {
             @Override
-            public void frameworkEvent(FrameworkEvent event) {
+            public void frameworkEvent(@NonNullByDefault({}) FrameworkEvent event) {
                 waiting = false;
             }
         };

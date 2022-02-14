@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,13 +53,14 @@ import org.osgi.service.component.ComponentContext;
  * @author Simon Kaufmann - Initial contribution and API
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class GenericThingProviderTest3 extends JavaOSGiTest {
-    private DumbThingHandlerFactory dumbThingHandlerFactory;
 
     private static final String TESTMODEL_NAME = "testModel3.things";
 
-    private ModelRepository modelRepository;
-    private ThingRegistry thingRegistry;
+    private @NonNullByDefault({}) DumbThingHandlerFactory dumbThingHandlerFactory;
+    private @NonNullByDefault({}) ModelRepository modelRepository;
+    private @NonNullByDefault({}) ThingRegistry thingRegistry;
 
     @BeforeEach
     public void setUp() throws Exception {

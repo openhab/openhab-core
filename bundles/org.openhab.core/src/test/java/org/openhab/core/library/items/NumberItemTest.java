@@ -19,6 +19,7 @@ import static org.mockito.Mockito.*;
 
 import javax.measure.quantity.Temperature;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,16 +46,18 @@ import org.openhab.core.types.util.UnitUtils;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class NumberItemTest {
 
     private static final String ITEM_NAME = "test";
 
-    private @Mock StateDescriptionService stateDescriptionService;
+    private @Mock @NonNullByDefault({}) StateDescriptionService stateDescriptionServiceMock;
 
     @BeforeEach
     public void setup() {
-        when(stateDescriptionService.getStateDescription(ITEM_NAME, null)).thenReturn(StateDescriptionFragmentBuilder
-                .create().withPattern("%.1f " + UnitUtils.UNIT_PLACEHOLDER).build().toStateDescription());
+        when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null))
+                .thenReturn(StateDescriptionFragmentBuilder.create().withPattern("%.1f " + UnitUtils.UNIT_PLACEHOLDER)
+                        .build().toStateDescription());
     }
 
     @Test
@@ -124,7 +127,7 @@ public class NumberItemTest {
     @Test
     public void testStripUnitPlaceholderFromPlainNumberItem() {
         NumberItem item = new NumberItem("Number", ITEM_NAME);
-        item.setStateDescriptionService(stateDescriptionService);
+        item.setStateDescriptionService(stateDescriptionServiceMock);
 
         assertThat(item.getStateDescription().getPattern(), is("%.1f"));
     }
@@ -133,7 +136,7 @@ public class NumberItemTest {
     @Test
     public void testLeaveUnitPlaceholderOnDimensionNumberItem() {
         NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
-        item.setStateDescriptionService(stateDescriptionService);
+        item.setStateDescriptionService(stateDescriptionServiceMock);
 
         assertThat(item.getStateDescription().getPattern(), is("%.1f " + UnitUtils.UNIT_PLACEHOLDER));
     }

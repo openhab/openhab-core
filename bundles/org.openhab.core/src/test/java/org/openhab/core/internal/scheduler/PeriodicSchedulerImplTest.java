@@ -21,6 +21,7 @@ import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
@@ -33,6 +34,7 @@ import org.openhab.core.scheduler.ScheduledCompletableFuture;
  * @author Simon Kaufmann - adapted to Java 8
  * @author Hilbrand Bouwkamp - moved periodic scheduling to it's own interface, rewritten test not to use sleep
  */
+@NonNullByDefault
 public class PeriodicSchedulerImplTest {
     private final PeriodicSchedulerImpl periodicScheduler = new PeriodicSchedulerImpl(new SchedulerImpl());
 

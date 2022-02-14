@@ -14,6 +14,7 @@ package org.openhab.core.config.discovery.usbserial.linuxsysfs.testutil;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 
 /**
@@ -21,6 +22,7 @@ import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
  *
  * @author Henning Sudbrock - Initial contribution
  */
+@NonNullByDefault
 public class UsbSerialDeviceInformationGenerator {
 
     private final AtomicInteger counter = new AtomicInteger(0);

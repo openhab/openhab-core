@@ -15,12 +15,15 @@ package org.openhab.core.test;
 import java.io.IOException;
 import java.net.ServerSocket;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * {@link TestPortUtil} provides helper methods for working with ports in tests.
  *
  * @author Henning Treu - Initial contribution
  * @author Wouter Born - Increase reusability
  */
+@NonNullByDefault
 public final class TestPortUtil {
 
     private TestPortUtil() {

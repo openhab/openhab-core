@@ -21,6 +21,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonEventFactory;
 import org.openhab.core.addon.AddonService;
@@ -40,24 +42,21 @@ import org.osgi.service.component.annotations.Reference;
  * @author Kai Kreuzer - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class SampleAddonService implements AddonService {
 
     private static final String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.";
 
     private static final String[] COLOR_VALUES = new String[] { "80", "C8", "FF" };
 
-    private EventPublisher eventPublisher;
+    private final EventPublisher eventPublisher;
 
-    List<AddonType> types = new ArrayList<>(3);
-    Map<String, Addon> extensions = new HashMap<>(30);
+    private List<AddonType> types = new ArrayList<>(3);
+    private Map<String, Addon> extensions = new HashMap<>(30);
 
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
+    @Activate
+    public SampleAddonService(final @Reference EventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
     }
 
     @Activate
@@ -149,36 +148,32 @@ public class SampleAddonService implements AddonService {
     }
 
     @Override
-    public List<Addon> getAddons(Locale locale) {
+    public List<Addon> getAddons(@Nullable Locale locale) {
         return new ArrayList<>(extensions.values());
     }
 
     @Override
-    public Addon getAddon(String id, Locale locale) {
+    public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
         return extensions.get(id);
     }
 
     @Override
-    public List<AddonType> getTypes(Locale locale) {
+    public List<AddonType> getTypes(@Nullable Locale locale) {
         return types;
     }
 
     @Override
-    public String getAddonId(URI extensionURI) {
+    public @Nullable String getAddonId(URI extensionURI) {
         return null;
     }
 
     private void postInstalledEvent(String extensionId) {
-        if (eventPublisher != null) {
-            Event event = AddonEventFactory.createAddonInstalledEvent(extensionId);
-            eventPublisher.post(event);
-        }
+        Event event = AddonEventFactory.createAddonInstalledEvent(extensionId);
+        eventPublisher.post(event);
     }
 
     private void postUninstalledEvent(String extensionId) {
-        if (eventPublisher != null) {
-            Event event = AddonEventFactory.createAddonUninstalledEvent(extensionId);
-            eventPublisher.post(event);
-        }
+        Event event = AddonEventFactory.createAddonUninstalledEvent(extensionId);
+        eventPublisher.post(event);
     }
 }

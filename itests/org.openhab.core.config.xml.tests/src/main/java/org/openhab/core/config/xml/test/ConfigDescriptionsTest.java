@@ -22,8 +22,11 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
@@ -42,14 +45,15 @@ import org.openhab.core.test.java.JavaOSGiTest;
  * @author Thomas Höfer - Added unit
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class ConfigDescriptionsTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "ConfigDescriptionsTest.bundle";
     private static final String FRAGMENT_TEST_HOST_NAME = "ConfigDescriptionsFragmentTest.host";
     private static final String FRAGMENT_TEST_FRAGMENT_NAME = "ConfigDescriptionsFragmentTest.fragment";
 
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-    private BindingInstaller bindingInstaller;
+    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
+    private @NonNullByDefault({}) BindingInstaller bindingInstaller;
 
     @BeforeEach
     public void setUp() {
@@ -64,8 +68,8 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
             Collection<ConfigDescription> englishConfigDescriptions = configDescriptionRegistry
                     .getConfigDescriptions(Locale.ENGLISH);
 
-            ConfigDescription englishDescription = findDescription(englishConfigDescriptions, "config:dummyConfig");
-            assertThat(englishDescription, is(notNullValue()));
+            ConfigDescription englishDescription = Objects
+                    .requireNonNull(findDescription(englishConfigDescriptions, "config:dummyConfig"));
 
             List<ConfigDescriptionParameter> parameters = englishDescription.getParameters();
             assertThat(parameters.size(), is(14));
@@ -204,9 +208,8 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
             assertThat(group2.isAdvanced(), is(true));
             assertThat(group2.getContext(), is("Context-Group2"));
 
-            ConfigDescription germanDescription = findDescription(
-                    configDescriptionRegistry.getConfigDescriptions(Locale.GERMAN), "config:dummyConfig");
-            assertThat(germanDescription, is(notNullValue()));
+            ConfigDescription germanDescription = Objects.requireNonNull(findDescription(
+                    configDescriptionRegistry.getConfigDescriptions(Locale.GERMAN), "config:dummyConfig"));
 
             unitSeconds = findParameter(germanDescription, "unit-seconds");
             assertThat(unitSeconds, is(notNullValue()));
@@ -236,8 +239,8 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
                     Collection<ConfigDescription> configDescriptions = configDescriptionRegistry
                             .getConfigDescriptions();
 
-                    ConfigDescription description = findDescription(configDescriptions, "config:fragmentConfig");
-                    assertThat(description, is(notNullValue()));
+                    ConfigDescription description = Objects
+                            .requireNonNull(findDescription(configDescriptions, "config:fragmentConfig"));
 
                     List<ConfigDescriptionParameter> parameters = description.getParameters();
                     assertThat(parameters.size(), is(1));
@@ -257,7 +260,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
         });
     }
 
-    private static ConfigDescription findDescription(Collection<ConfigDescription> descriptions, String uri) {
+    private static @Nullable ConfigDescription findDescription(Collection<ConfigDescription> descriptions, String uri) {
         try {
             return findDescription(descriptions, new URI(uri));
         } catch (URISyntaxException e) {

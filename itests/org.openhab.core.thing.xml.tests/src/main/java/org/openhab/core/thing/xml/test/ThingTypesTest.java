@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.CoreItemFactory;
@@ -40,6 +41,7 @@ import org.openhab.core.types.StateDescription;
 /**
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class ThingTypesTest extends JavaOSGiTest {
 
     private LoadedTestBundle loadedTestBundle() throws Exception {
@@ -47,9 +49,9 @@ public class ThingTypesTest extends JavaOSGiTest {
                 new StuffAddition().thingTypes(4));
     }
 
-    private ThingTypeProvider thingTypeProvider;
-    private ChannelTypeRegistry channelTypeRegistry;
-    private ChannelGroupTypeRegistry channelGroupTypeRegistry;
+    private @NonNullByDefault({}) ThingTypeProvider thingTypeProvider;
+    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    private @NonNullByDefault({}) ChannelGroupTypeRegistry channelGroupTypeRegistry;
 
     @BeforeEach
     public void setUp() {

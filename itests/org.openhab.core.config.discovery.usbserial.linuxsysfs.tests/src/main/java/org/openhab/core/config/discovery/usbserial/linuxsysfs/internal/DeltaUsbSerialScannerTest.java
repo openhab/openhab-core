@@ -18,13 +18,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.DeltaUsbSerialScanner.Delta;
 import org.openhab.core.config.discovery.usbserial.linuxsysfs.testutil.UsbSerialDeviceInformationGenerator;
@@ -34,17 +38,18 @@ import org.openhab.core.config.discovery.usbserial.linuxsysfs.testutil.UsbSerial
  *
  * @author Henning Sudbrock - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class DeltaUsbSerialScannerTest {
 
     private UsbSerialDeviceInformationGenerator usbDeviceInfoGenerator = new UsbSerialDeviceInformationGenerator();
 
-    private UsbSerialScanner usbSerialScanner;
-    private DeltaUsbSerialScanner deltaUsbSerialScanner;
+    private @Mock @NonNullByDefault({}) UsbSerialScanner usbSerialScannerMock;
+    private @NonNullByDefault({}) DeltaUsbSerialScanner deltaUsbSerialScanner;
 
     @BeforeEach
     public void setup() {
-        usbSerialScanner = mock(UsbSerialScanner.class);
-        deltaUsbSerialScanner = new DeltaUsbSerialScanner(usbSerialScanner);
+        deltaUsbSerialScanner = new DeltaUsbSerialScanner(usbSerialScannerMock);
     }
 
     /**
@@ -52,7 +57,7 @@ public class DeltaUsbSerialScannerTest {
      */
     @Test
     public void testInitialEmptyResult() throws IOException {
-        when(usbSerialScanner.scan()).thenReturn(emptySet());
+        when(usbSerialScannerMock.scan()).thenReturn(emptySet());
 
         Delta<UsbSerialDeviceInformation> delta = deltaUsbSerialScanner.scan();
 
@@ -68,7 +73,7 @@ public class DeltaUsbSerialScannerTest {
     public void testInitialNonEmptyResult() throws IOException {
         UsbSerialDeviceInformation usb1 = usbDeviceInfoGenerator.generate();
         UsbSerialDeviceInformation usb2 = usbDeviceInfoGenerator.generate();
-        when(usbSerialScanner.scan()).thenReturn(Set.of(usb1, usb2));
+        when(usbSerialScannerMock.scan()).thenReturn(Set.of(usb1, usb2));
 
         Delta<UsbSerialDeviceInformation> delta = deltaUsbSerialScanner.scan();
 
@@ -87,10 +92,10 @@ public class DeltaUsbSerialScannerTest {
         UsbSerialDeviceInformation usb2 = usbDeviceInfoGenerator.generate();
         UsbSerialDeviceInformation usb3 = usbDeviceInfoGenerator.generate();
 
-        when(usbSerialScanner.scan()).thenReturn(Set.of(usb1, usb2));
+        when(usbSerialScannerMock.scan()).thenReturn(Set.of(usb1, usb2));
         deltaUsbSerialScanner.scan();
 
-        when(usbSerialScanner.scan()).thenReturn(Set.of(usb2, usb3));
+        when(usbSerialScannerMock.scan()).thenReturn(Set.of(usb2, usb3));
         Delta<UsbSerialDeviceInformation> delta = deltaUsbSerialScanner.scan();
 
         assertThat(delta.getAdded(), contains(usb3));

@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.items.SwitchItem;
 
@@ -25,6 +26,7 @@ import org.openhab.core.library.items.SwitchItem;
  *
  * @author Andre Fuechsel - Initial contribution
  */
+@NonNullByDefault
 public class ItemTagTest {
 
     private static final String TAG1 = "tag1";

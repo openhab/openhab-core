@@ -50,6 +50,7 @@ import org.openhab.core.types.UnDefType;
  * @author Christoph Weitkamp - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class SystemHysteresisStateProfileTest {
 
     private static final String STRING_TEN = "10";
@@ -60,7 +61,6 @@ public class SystemHysteresisStateProfileTest {
     private static final PercentType PERCENT_TYPE_TEN = new PercentType(BigDecimal.TEN);
     private static final PercentType PERCENT_TYPE_TWENTY_FIVE = new PercentType(BigDecimal.valueOf(25));
 
-    @NonNullByDefault
     public static class ParameterSet {
         public final List<State> states;
         public final List<State> resultingStates;
@@ -69,6 +69,7 @@ public class SystemHysteresisStateProfileTest {
         public final Object lower;
         public final @Nullable Object upper;
 
+        @SuppressWarnings("unchecked")
         public ParameterSet(List<? extends Type> sources, List<? extends Type> results, Object lower,
                 @Nullable Object upper) {
             this.states = (List<State>) sources;
@@ -170,8 +171,8 @@ public class SystemHysteresisStateProfileTest {
         });
     }
 
-    private @Mock ProfileCallback mockCallback;
-    private @Mock ProfileContext mockContext;
+    private @Mock @NonNullByDefault({}) ProfileCallback mockCallback;
+    private @Mock @NonNullByDefault({}) ProfileContext mockContext;
 
     @Test
     public void testWrongParameterLower() {
@@ -210,11 +211,11 @@ public class SystemHysteresisStateProfileTest {
         }
     }
 
-    private StateProfile initProfile(Object lower, @Nullable Object upper) {
+    private StateProfile initProfile(@Nullable Object lower, @Nullable Object upper) {
         return initProfile(lower, upper, false);
     }
 
-    private StateProfile initProfile(Object lower, @Nullable Object upper, boolean inverted) {
+    private StateProfile initProfile(@Nullable Object lower, @Nullable Object upper, boolean inverted) {
         final Map<String, @Nullable Object> properties = new HashMap<>(2);
         properties.put("lower", lower);
         properties.put("upper", upper);

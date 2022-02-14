@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -32,6 +33,7 @@ import org.openhab.core.scheduler.CronAdjuster;
  * @author Simon Kaufmann - adapted to Java 8
  * @author Hilbrand Bouwkamp - refactored to run as parameterized unit test and added missing cases to complete coverage
  */
+@NonNullByDefault
 public class CronAdjusterTest {
 
     private static final String JAN_1ST_2000 = "2000-01-01T00:00:00";

@@ -14,6 +14,7 @@ package org.openhab.core.library.items;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
@@ -25,6 +26,7 @@ import org.openhab.core.library.types.PercentType;
  * @author Simon Kaufmann - Initial contribution
  * @author Stefan Triller - test with on/off type
  */
+@NonNullByDefault
 public class ColorItemTest {
 
     @Test

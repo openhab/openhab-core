@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Module;
 import org.openhab.core.config.core.Configuration;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Vasil Ilchev - Initial contribution
  */
+@NonNullByDefault
 public class ReferenceResolverUtilTest {
     private static final String CONTEXT_PROPERTY1 = "contextProperty1";
     private static final String CONTEXT_PROPERTY2 = "contextProperty2";
@@ -36,9 +39,9 @@ public class ReferenceResolverUtilTest {
 
     private static final Map<String, Object> CONTEXT = new HashMap<>();
     private static final Map<String, Object> MODULE_CONFIGURATION = new HashMap<>();
-    private static final Map<String, Object> EXPECTED_MODULE_CONFIGURATION = new HashMap<>();
+    private static final Map<String, @Nullable Object> EXPECTED_MODULE_CONFIGURATION = new HashMap<>();
     private static final Map<String, String> COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES = new HashMap<>();
-    private static final Map<String, Object> EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT = new HashMap<>();
+    private static final Map<String, @Nullable Object> EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT = new HashMap<>();
 
     private final Logger logger = LoggerFactory.getLogger(ReferenceResolverUtilTest.class);
 
