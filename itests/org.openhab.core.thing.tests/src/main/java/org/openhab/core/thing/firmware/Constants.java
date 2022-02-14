@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.firmware;
 
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -134,7 +135,7 @@ public class Constants {
         try {
             return new URL(url);
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException(e);
+            throw new UncheckedIOException(e);
         }
     }
 }
