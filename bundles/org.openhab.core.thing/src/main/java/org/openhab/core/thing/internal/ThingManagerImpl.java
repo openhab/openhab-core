@@ -401,9 +401,10 @@ public class ThingManagerImpl
         this.thingStatusInfoI18nLocalizationService = thingStatusInfoI18nLocalizationService;
         this.thingTypeRegistry = thingTypeRegistry;
 
+        storage = storageService.getStorage(THING_STATUS_STORAGE_NAME, this.getClass().getClassLoader());
+
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(XML_THING_TYPE));
         this.thingRegistry.addThingTracker(this);
-        storage = storageService.getStorage(THING_STATUS_STORAGE_NAME, this.getClass().getClassLoader());
         initializeStartLevelSetter();
     }
 
@@ -1130,19 +1131,24 @@ public class ThingManagerImpl
 
     private void registerAndInitializeHandler(final Thing thing,
             final @Nullable ThingHandlerFactory thingHandlerFactory) {
-        if (thingHandlerFactory != null) {
-            final String identifier = getBundleIdentifier(thingHandlerFactory);
-            if (loadedXmlThingTypes.contains(identifier)) {
-                registerHandler(thing, thingHandlerFactory);
-                initializeHandler(thing);
-            } else {
-                logger.debug(
-                        "Not registering a handler at this point. The thing types of bundle '{}' are not fully loaded yet.",
-                        identifier);
-            }
+        if (isDisabledByStorage(thing.getUID())) {
+            logger.debug("Not registering a handler at this point. Thing is disabled.");
+            thing.setStatusInfo(new ThingStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.DISABLED, null));
         } else {
-            logger.debug("Not registering a handler at this point. No handler factory for thing '{}' found.",
-                    thing.getUID());
+            if (thingHandlerFactory != null) {
+                final String identifier = getBundleIdentifier(thingHandlerFactory);
+                if (loadedXmlThingTypes.contains(identifier)) {
+                    registerHandler(thing, thingHandlerFactory);
+                    initializeHandler(thing);
+                } else {
+                    logger.debug(
+                            "Not registering a handler at this point. The thing types of bundle '{}' are not fully loaded yet.",
+                            identifier);
+                }
+            } else {
+                logger.debug("Not registering a handler at this point. No handler factory for thing '{}' found.",
+                        thing.getUID());
+            }
         }
     }
 

@@ -89,6 +89,8 @@ public class ThingManagerImplTest {
     public void thingHandlerFactoryLifecycle() {
         ThingHandlerFactory mockFactory1 = mock(ThingHandlerFactory.class);
         ThingHandlerFactory mockFactory2 = mock(ThingHandlerFactory.class);
+        when(storageServiceMock.getStorage(any(), any())).thenReturn(storageMock);
+        when(storageMock.get(any())).thenReturn(null);
 
         ThingManagerImpl thingManager = createThingManager();
 
