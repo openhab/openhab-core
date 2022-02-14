@@ -117,6 +117,9 @@ public class BundleInfoReader {
                     } else if (type instanceof ChannelTypeXmlResult) {
                         ChannelTypeXmlResult result = (ChannelTypeXmlResult) type;
                         bundleInfo.getChannelTypesXml().add(result);
+                        if (bundleInfo.getBindingId().isBlank()) {
+                            bundleInfo.setBindingId(result.toChannelType().getUID().getBindingId());
+                        }
                     }
                 }
             } catch (ConversionException | MalformedURLException e) {
