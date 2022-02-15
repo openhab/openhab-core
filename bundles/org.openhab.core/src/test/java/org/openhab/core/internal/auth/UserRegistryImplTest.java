@@ -79,30 +79,14 @@ public class UserRegistryImplTest {
         assertNotNull(user);
         assertTrue(registry.containRole("administrator"));
         assertEquals(registry.countRole("administrator"), 1);
-        registry.authenticate(new UsernamePasswordCredentials("username", "password"));
-        registry.changePassword(user, "password2");
-        registry.authenticate(new UsernamePasswordCredentials("username", "password2"));
-        registry.remove(user.getName());
-        registry.removed(managedProvider, user);
-        user = registry.get("username");
-        assertNull(user);
-    }
 
-    @Test
-    public void testRolesManagement() throws Exception {
-        User user = registry.register("username", "password", Set.of("administrator"));
-        registry.added(managedProvider, user);
-        assertNotNull(user);
-
-        assertTrue(registry.containRole("administrator"));
-
+        // test roles management.
         registry.addRole(user, "test");
         user = registry.get("username");
         Set<String> roles = user.getRoles();
         assertTrue(roles.contains("test"));
         assertTrue(registry.containRole("test"));
         assertEquals(registry.countRole("test"), 1);
-
         registry.changeRole(user, "test", "testChange");
         user = registry.get("username");
         roles = user.getRoles();
@@ -132,6 +116,11 @@ public class UserRegistryImplTest {
         roles = user.getRoles();
         assertFalse(roles.contains("testChange"));
 
+        // test to modify the password and to authenticate a user
+        registry.authenticate(new UsernamePasswordCredentials("username", "password"));
+        registry.changePassword(user, "password2");
+
+        registry.authenticate(new UsernamePasswordCredentials("username", "password2"));
         registry.remove(user.getName());
         registry.removed(managedProvider, user);
         user = registry.get("username");
