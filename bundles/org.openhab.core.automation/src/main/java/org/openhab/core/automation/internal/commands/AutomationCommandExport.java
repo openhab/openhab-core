@@ -13,7 +13,6 @@
 package org.openhab.core.automation.internal.commands;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -86,29 +85,23 @@ public class AutomationCommandExport extends AutomationCommand {
         Set set = new HashSet();
         switch (providerType) {
             case AutomationCommands.MODULE_TYPE_PROVIDER:
-                @SuppressWarnings("rawtypes")
-                Collection collection = autoCommands.getTriggers(locale);
-                set.addAll(collection);
-                collection = autoCommands.getConditions(locale);
-                set.addAll(collection);
-                collection = autoCommands.getActions(locale);
-                set.addAll(collection);
+                set.addAll(autoCommands.getTriggers(locale));
+                set.addAll(autoCommands.getConditions(locale));
+                set.addAll(autoCommands.getActions(locale));
                 try {
                     return autoCommands.exportModuleTypes(parserType, set, file);
                 } catch (Exception e) {
                     return getStackTrace(e);
                 }
             case AutomationCommands.TEMPLATE_PROVIDER:
-                collection = autoCommands.getTemplates(locale);
-                set.addAll(collection);
+                set.addAll(autoCommands.getTemplates(locale));
                 try {
                     return autoCommands.exportTemplates(parserType, set, file);
                 } catch (Exception e) {
                     return getStackTrace(e);
                 }
             case AutomationCommands.RULE_PROVIDER:
-                collection = autoCommands.getRules();
-                set.addAll(collection);
+                set.addAll(autoCommands.getRules());
                 try {
                     return autoCommands.exportRules(parserType, set, file);
                 } catch (Exception e) {
