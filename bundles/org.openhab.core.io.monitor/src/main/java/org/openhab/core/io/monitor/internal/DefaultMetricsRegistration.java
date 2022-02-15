@@ -83,31 +83,21 @@ public class DefaultMetricsRegistration implements ReadyService.ReadyTracker, Me
     }
 
     private void registerMeters() {
-        try {
-            logger.debug("Registering meters...");
-            Set<Tag> tags = Set.of(OH_CORE_METRIC_TAG);
-            meters.add(new JVMMetric(tags));
-            meters.add(new ThreadPoolMetric(tags));
-            meters.add(new BundleStateMetric(bundleContext, tags));
-            meters.add(new ThingStateMetric(bundleContext, thingRegistry, tags));
-            meters.add(new EventCountMetric(bundleContext, tags));
-            meters.add(new RuleMetric(bundleContext, tags, ruleRegistry));
-            meters.add(new ThreadPoolMetric(tags));
+        logger.debug("Registering meters...");
+        Set<Tag> tags = Set.of(OH_CORE_METRIC_TAG);
+        meters.add(new JVMMetric(tags));
+        meters.add(new ThreadPoolMetric(tags));
+        meters.add(new BundleStateMetric(bundleContext, tags));
+        meters.add(new ThingStateMetric(bundleContext, thingRegistry, tags));
+        meters.add(new EventCountMetric(bundleContext, tags));
+        meters.add(new RuleMetric(bundleContext, tags, ruleRegistry));
+        meters.add(new ThreadPoolMetric(tags));
 
-            meters.forEach(m -> m.bindTo(registry));
-        } catch (Throwable e) {
-            // handle exceptions gracefully to not break StartLevelService run
-            logger.error("Exception caught during meter registration", e);
-        }
+        meters.forEach(m -> m.bindTo(registry));
     }
 
     private void unregisterMeters() {
-        try {
-            meters.forEach(OpenhabCoreMeterBinder::unbind);
-        } catch (Throwable e) {
-            // handle exceptions gracefully to not break StartLevelService run
-            logger.error("Exception caught during meter de-registration", e);
-        }
+        meters.forEach(OpenhabCoreMeterBinder::unbind);
     }
 
     @Override
