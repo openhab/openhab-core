@@ -20,7 +20,6 @@ import static org.mockito.Mockito.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,15 +143,7 @@ public class ConfigDescriptionValidatorTest {
     private static final ConfigDescriptionParameter DECIMAL_MAX_PARAM = ConfigDescriptionParameterBuilder
             .create(DECIMAL_MAX_PARAM_NAME, ConfigDescriptionParameter.Type.DECIMAL).withMaximum(DECIMAL_MAX).build();
 
-    private static final URI CONFIG_DESCRIPTION_URI = createURI("config:dummy");
-
-    private static final URI createURI(String s) {
-        try {
-            return new URI(s);
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException("Failed to create URI: " + e.getMessage(), e);
-        }
-    }
+    private static final URI CONFIG_DESCRIPTION_URI = URI.create("config:dummy");
 
     private static final ConfigDescription CONFIG_DESCRIPTION = ConfigDescriptionBuilder.create(CONFIG_DESCRIPTION_URI)
             .withParameters(List.of(BOOL_PARAM, BOOL_REQUIRED_PARAM, TXT_PARAM, TXT_REQUIRED_PARAM, TXT_MIN_PARAM,

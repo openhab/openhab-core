@@ -21,7 +21,6 @@ import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -116,6 +115,7 @@ import org.osgi.service.component.ComponentContext;
 @NonNullByDefault
 public class ThingManagerOSGiTest extends JavaOSGiTest {
 
+    private static final URI THING_CONFIG_URI = URI.create("test:test");
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding:type");
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "id");
     private static final ChannelUID CHANNEL_UID = new ChannelUID(THING_UID, "channel");
@@ -2051,17 +2051,9 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         });
     }
 
-    private URI configDescriptionUri() {
-        try {
-            return new URI("test:test");
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException("Error creating config description URI");
-        }
-    }
-
     private void registerThingTypeProvider() {
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("binding", "type"), "label")
-                .withConfigDescriptionURI(configDescriptionUri()).build();
+                .withConfigDescriptionURI(THING_CONFIG_URI).build();
 
         ThingTypeProvider thingTypeProvider = mock(ThingTypeProvider.class);
         when(thingTypeProvider.getThingType(any(ThingTypeUID.class), nullable(Locale.class))).thenReturn(thingType);
@@ -2073,7 +2065,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     }
 
     private void registerConfigDescriptionProvider(boolean withRequiredParameter) {
-        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configDescriptionUri())
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(THING_CONFIG_URI)
                 .withParameter(
                         ConfigDescriptionParameterBuilder.create("parameter", ConfigDescriptionParameter.Type.TEXT)
                                 .withRequired(withRequiredParameter).build())

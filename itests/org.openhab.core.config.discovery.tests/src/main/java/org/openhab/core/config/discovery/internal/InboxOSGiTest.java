@@ -20,7 +20,6 @@ import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -130,7 +129,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
             .withBridge(OTHER_BRIDGE_THING_UID).withProperty("Thing4", "12345").withRepresentationProperty("Thing4")
             .withLabel("thing4").withTTL(DEFAULT_TTL).build();
 
-    private final URI testURI = createURI("http:dummy");
+    private final URI testURI = URI.create("http:dummy");
     private final String testThingLabel = "dummy_thing";
     private final ThingUID testUID = new ThingUID("binding:type:id");
     private final ThingTypeUID testTypeUID = new ThingTypeUID("binding:type");
@@ -202,14 +201,6 @@ public class InboxOSGiTest extends JavaOSGiTest {
         inboxListeners.clear();
         registry.remove(BRIDGE_THING_UID);
         managedThingProvider.getAll().forEach(thing -> managedThingProvider.remove(thing.getUID()));
-    }
-
-    private static URI createURI(String s) {
-        try {
-            return new URI(s);
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException("Failed to create URI for: " + s, e);
-        }
     }
 
     private boolean addDiscoveryResult(DiscoveryResult discoveryResult) {

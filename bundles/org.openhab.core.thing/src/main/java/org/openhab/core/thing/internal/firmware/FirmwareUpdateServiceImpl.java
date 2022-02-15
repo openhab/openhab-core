@@ -15,7 +15,6 @@ package org.openhab.core.thing.internal.firmware;
 import static org.openhab.core.thing.firmware.FirmwareStatusInfo.*;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -79,7 +78,7 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
     protected static final String PERIOD_CONFIG_KEY = "period";
     protected static final String DELAY_CONFIG_KEY = "delay";
     protected static final String TIME_UNIT_CONFIG_KEY = "timeUnit";
-    private static final String CONFIG_DESC_URI_KEY = "system:firmware-status-info-job";
+    private static final URI CONFIG_DESC_URI = URI.create("system:firmware-status-info-job");
 
     private final Logger logger = LoggerFactory.getLogger(FirmwareUpdateServiceImpl.class);
 
@@ -433,8 +432,8 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
         }
 
         try {
-            configDescriptionValidator.validate(config, new URI(CONFIG_DESC_URI_KEY));
-        } catch (URISyntaxException | ConfigValidationException e) {
+            configDescriptionValidator.validate(config, CONFIG_DESC_URI);
+        } catch (ConfigValidationException e) {
             logger.debug("Validation of new configuration values failed. Will keep current configuration.", e);
             return false;
         }

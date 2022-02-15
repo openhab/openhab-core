@@ -20,8 +20,6 @@ import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -107,9 +105,7 @@ public class PersistentInboxTest {
 
     @Test
     public void testConfigUpdateNormalizationGuessType() {
-        Map<String, Object> props = new HashMap<>();
-        props.put("foo", 1);
-        Configuration config = new Configuration(props);
+        Configuration config = new Configuration(Map.of("foo", 1));
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
 
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
@@ -124,10 +120,8 @@ public class PersistentInboxTest {
     }
 
     @Test
-    public void testConfigUpdateNormalizationWithConfigDescription() throws URISyntaxException {
-        Map<String, Object> props = new HashMap<>();
-        props.put("foo", "1");
-        Configuration config = new Configuration(props);
+    public void testConfigUpdateNormalizationWithConfigDescription() {
+        Configuration config = new Configuration(Map.of("foo", "1"));
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
@@ -142,7 +136,7 @@ public class PersistentInboxTest {
     }
 
     @Test
-    public void testApproveNormalization() throws URISyntaxException {
+    public void testApproveNormalization() {
         DiscoveryResult result = DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
         when(storageMock.getValues()).thenReturn(List.of(result));
@@ -156,7 +150,7 @@ public class PersistentInboxTest {
     }
 
     @Test
-    public void testApproveWithThingId() throws URISyntaxException {
+    public void testApproveWithThingId() {
         DiscoveryResult result = DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
         when(storageMock.getValues()).thenReturn(List.of(result));
@@ -170,7 +164,7 @@ public class PersistentInboxTest {
     }
 
     @Test
-    public void testApproveWithInvalidThingId() throws URISyntaxException {
+    public void testApproveWithInvalidThingId() {
         DiscoveryResult result = DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
         when(storageMock.getValues()).thenReturn(List.of(result));
@@ -235,8 +229,8 @@ public class PersistentInboxTest {
         assertThat(eventCaptor.getValue().getDiscoveryResult().properties, hasEntry("foo", "bar"));
     }
 
-    private void configureConfigDescriptionRegistryMock(String paramName, Type type) throws URISyntaxException {
-        URI configDescriptionURI = new URI("thing-type:test:test");
+    private void configureConfigDescriptionRegistryMock(String paramName, Type type) {
+        URI configDescriptionURI = URI.create("thing-type:test:test");
         ThingType thingType = ThingTypeBuilder.instance(THING_TYPE_UID, "Test")
                 .withConfigDescriptionURI(configDescriptionURI).build();
         ConfigDescription configDesc = ConfigDescriptionBuilder.create(configDescriptionURI)

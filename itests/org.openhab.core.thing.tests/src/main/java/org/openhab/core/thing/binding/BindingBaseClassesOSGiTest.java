@@ -20,7 +20,6 @@ import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,6 +96,7 @@ import org.osgi.service.component.ComponentContext;
 @NonNullByDefault
 public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
+    private static final URI BINDING_CONFIG_URI = URI.create("test:test");
     private static final String BINDING_ID = "testBinding";
     private static final String THING_TYPE_ID = "testThingType";
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID(BINDING_ID, THING_TYPE_ID);
@@ -741,18 +741,10 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         return null;
     }
 
-    private URI configDescriptionUri() {
-        try {
-            return new URI("test:test");
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException("Error creating config description URI");
-        }
-    }
-
     private void registerThingTypeAndConfigDescription() {
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID(BINDING_ID, THING_TYPE_ID), "label")
-                .withConfigDescriptionURI(configDescriptionUri()).build();
-        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configDescriptionUri())
+                .withConfigDescriptionURI(BINDING_CONFIG_URI).build();
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(BINDING_CONFIG_URI)
                 .withParameter(ConfigDescriptionParameterBuilder
                         .create("parameter", ConfigDescriptionParameter.Type.TEXT).withRequired(true).build())
                 .build();
@@ -774,7 +766,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
     private void registerThingTypeProvider() {
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID(BINDING_ID, THING_TYPE_ID), "label")
-                .withConfigDescriptionURI(configDescriptionUri()).build();
+                .withConfigDescriptionURI(BINDING_CONFIG_URI).build();
 
         ThingTypeProvider thingTypeProvider = mock(ThingTypeProvider.class);
         when(thingTypeProvider.getThingType(ArgumentMatchers.any(ThingTypeUID.class),
@@ -787,7 +779,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
     }
 
     private void registerConfigDescriptionProvider(boolean withRequiredParameter) {
-        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configDescriptionUri())
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(BINDING_CONFIG_URI)
                 .withParameter(
                         ConfigDescriptionParameterBuilder.create("parameter", ConfigDescriptionParameter.Type.TEXT)
                                 .withRequired(withRequiredParameter).build())

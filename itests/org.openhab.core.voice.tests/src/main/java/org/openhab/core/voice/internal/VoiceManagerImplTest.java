@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -48,6 +47,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  */
 @NonNullByDefault
 public class VoiceManagerImplTest extends JavaOSGiTest {
+    private static final URI VOICE_CONFIG_URI = URI.create("system:voice");
     private static final String CONFIG_DEFAULT_SINK = "defaultSink";
     private static final String CONFIG_DEFAULT_SOURCE = "defaultSource";
     private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
@@ -418,14 +418,14 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     }
 
     @Test
-    public void getParameterOptionsForTheDefaultHli() throws URISyntaxException {
+    public void getParameterOptionsForTheDefaultHli() {
         hliStub = new HumanLanguageInterpreterStub();
         registerService(hliStub);
 
         boolean isHliStubInTheOptions = false;
 
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(new URI("system:voice"), "defaultHLI",
-                null, null);
+        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultHLI", null,
+                null);
 
         assertNotNull(options);
 
@@ -443,14 +443,14 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     }
 
     @Test
-    public void getParameterOptionsForTheDefaultKs() throws URISyntaxException {
+    public void getParameterOptionsForTheDefaultKs() {
         ksService = new KSServiceStub();
         registerService(ksService);
 
         boolean isKSStubInTheOptions = false;
 
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(new URI("system:voice"), "defaultKS",
-                null, null);
+        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultKS", null,
+                null);
 
         assertNotNull(options);
 
@@ -468,14 +468,14 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     }
 
     @Test
-    public void getParameterOptionsForTheDefaultSTT() throws URISyntaxException {
+    public void getParameterOptionsForTheDefaultSTT() {
         sttService = new STTServiceStub();
         registerService(sttService);
 
         boolean isSTTStubInTheOptions = false;
 
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(new URI("system:voice"), "defaultSTT",
-                null, null);
+        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultSTT", null,
+                null);
         assertNotNull(options);
 
         for (ParameterOption option : options) {
@@ -492,14 +492,14 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     }
 
     @Test
-    public void getParameterOptionsForTheDefaultTts() throws URISyntaxException {
+    public void getParameterOptionsForTheDefaultTts() {
         ttsService = new TTSServiceStub();
         registerService(ttsService);
 
         boolean isTTSStubInTheOptions = false;
 
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(new URI("system:voice"), "defaultTTS",
-                null, null);
+        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultTTS", null,
+                null);
 
         assertNotNull(options);
 
@@ -517,7 +517,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     }
 
     @Test
-    public void getParameterOptionsForTheDefaultVoice() throws URISyntaxException {
+    public void getParameterOptionsForTheDefaultVoice() {
         BundleContext context = bundleContext;
         ttsService = new TTSServiceStub(context);
         registerService(ttsService);
@@ -525,8 +525,8 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
 
         boolean isVoiceStubInTheOptions = false;
 
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(new URI("system:voice"), "defaultVoice",
-                null, null);
+        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultVoice", null,
+                null);
 
         assertNotNull(options);
 

@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
@@ -105,11 +104,7 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
     }
 
     private static @Nullable ConfigDescription findDescription(Collection<ConfigDescription> descriptions, String uri) {
-        try {
-            return findDescription(descriptions, new URI(uri));
-        } catch (URISyntaxException e) {
-            return null;
-        }
+        return findDescription(descriptions, URI.create(uri));
     }
 
     private static ConfigDescription findDescription(Collection<ConfigDescription> descriptions, URI uri) {

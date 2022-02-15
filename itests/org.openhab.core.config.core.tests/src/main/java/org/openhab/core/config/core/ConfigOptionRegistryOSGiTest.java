@@ -19,7 +19,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -50,7 +49,7 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
     private @Mock @NonNullByDefault({}) ConfigOptionProvider configOptionsProviderMock;
 
     @BeforeEach
-    public void setUp() throws URISyntaxException {
+    public void setUp() {
         // Register config registry
         configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
         ConfigDescriptionParameter param1 = ConfigDescriptionParameterBuilder

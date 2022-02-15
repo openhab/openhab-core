@@ -20,7 +20,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -61,13 +60,13 @@ public class ConfigDescriptionResourceTest {
     private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
 
     @BeforeEach
-    public void beforeEach() throws URISyntaxException {
-        final URI systemI18nURI = new URI(CONFIG_DESCRIPTION_SYSTEM_I18N_URI);
+    public void beforeEach() {
+        final URI systemI18nURI = URI.create(CONFIG_DESCRIPTION_SYSTEM_I18N_URI);
         final ConfigDescription systemI18n = ConfigDescriptionBuilder.create(systemI18nURI)
                 .withParameter(ConfigDescriptionParameterBuilder.create(PARAM_NAME, Type.TEXT)
                         .withDefault(PARAMETER_NAME_DEFAULT_VALUE).build())
                 .build();
-        final ConfigDescription systemEphemeris = ConfigDescriptionBuilder.create(new URI("system:ephemeris"))
+        final ConfigDescription systemEphemeris = ConfigDescriptionBuilder.create(URI.create("system:ephemeris"))
                 .withParameter(ConfigDescriptionParameterBuilder.create(PARAM_COUNTRY, Type.TEXT).build()).build();
         when(configDescriptionRegistryMock.getConfigDescriptions(any()))
                 .thenReturn(List.of(systemI18n, systemEphemeris));
