@@ -92,25 +92,6 @@ public class UserRegistryImplTest {
         roles = user.getRoles();
         assertTrue(roles.contains("testChange"));
 
-        // We make sure that it remains at least one user with the administrator role.
-        try {
-            registry.changeRole(user, "administrator", "test");
-            assertFalse(true);
-        } catch (IllegalArgumentException ie) {
-            String message = ie.getMessage();
-            assertEquals("There must always be at least one user with the administrator role, so we can't remove it.",
-                    message);
-        }
-
-        try {
-            registry.removeRole(user, "administrator");
-            assertFalse(true);
-        } catch (IllegalArgumentException ie) {
-            String message = ie.getMessage();
-            assertEquals("There must always be at least one user with the administrator role, so we can't remove it.",
-                    message);
-        }
-
         registry.removeRole(user, "testChange");
         user = registry.get("username");
         roles = user.getRoles();
