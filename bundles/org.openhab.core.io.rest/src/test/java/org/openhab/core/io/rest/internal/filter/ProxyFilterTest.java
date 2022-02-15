@@ -17,7 +17,6 @@ import static org.mockito.Mockito.*;
 import static org.openhab.core.io.rest.internal.filter.ProxyFilter.*;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -159,14 +158,10 @@ public class ProxyFilterTest {
     }
 
     private void setupContextURIs(String baseURI, String requestURI) {
-        try {
-            when(uriInfoMock.getBaseUri()).thenReturn(new URI(baseURI));
-            when(uriInfoMock.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri(baseURI));
-            when(uriInfoMock.getRequestUri()).thenReturn(new URI(requestURI));
-            when(uriInfoMock.getRequestUriBuilder()).thenReturn(UriBuilder.fromUri(requestURI));
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException("Error while setting up context mock", e);
-        }
+        when(uriInfoMock.getBaseUri()).thenReturn(URI.create(baseURI));
+        when(uriInfoMock.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri(baseURI));
+        when(uriInfoMock.getRequestUri()).thenReturn(URI.create(requestURI));
+        when(uriInfoMock.getRequestUriBuilder()).thenReturn(UriBuilder.fromUri(requestURI));
     }
 
     private void setupContextHeaders(@Nullable String protoHeader, @Nullable String hostHeader) {

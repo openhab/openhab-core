@@ -17,7 +17,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Base64;
 
 import javax.servlet.http.HttpServletRequest;
@@ -108,27 +107,27 @@ public class ProxyServletServiceTest {
     }
 
     @Test
-    public void testMaybeAppendAuthHeaderWithFullCredentials() throws URISyntaxException {
+    public void testMaybeAppendAuthHeaderWithFullCredentials() {
         Request request = mock(Request.class);
-        URI uri = new URI("http://testuser:testpassword@127.0.0.1:8080/content");
+        URI uri = URI.create("http://testuser:testpassword@127.0.0.1:8080/content");
         service.maybeAppendAuthHeader(uri, request);
         verify(request).header(HttpHeader.AUTHORIZATION,
                 "Basic " + Base64.getEncoder().encodeToString("testuser:testpassword".getBytes()));
     }
 
     @Test
-    public void testMaybeAppendAuthHeaderWithoutPassword() throws URISyntaxException {
+    public void testMaybeAppendAuthHeaderWithoutPassword() {
         Request request = mock(Request.class);
-        URI uri = new URI("http://testuser@127.0.0.1:8080/content");
+        URI uri = URI.create("http://testuser@127.0.0.1:8080/content");
         service.maybeAppendAuthHeader(uri, request);
         verify(request).header(HttpHeader.AUTHORIZATION,
                 "Basic " + Base64.getEncoder().encodeToString("testuser:".getBytes()));
     }
 
     @Test
-    public void testMaybeAppendAuthHeaderWithoutCredentials() throws URISyntaxException {
+    public void testMaybeAppendAuthHeaderWithoutCredentials() {
         Request request = mock(Request.class);
-        URI uri = new URI("http://127.0.0.1:8080/content");
+        URI uri = URI.create("http://127.0.0.1:8080/content");
         service.maybeAppendAuthHeader(uri, request);
         verify(request, never()).header(any(HttpHeader.class), anyString());
     }

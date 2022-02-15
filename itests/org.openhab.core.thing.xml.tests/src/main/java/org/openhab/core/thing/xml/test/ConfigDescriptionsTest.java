@@ -57,7 +57,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
     @Test
     public void configDescriptionsShouldLoadProperly() throws Exception {
         try (final AutoCloseable unused = loadedTestBundle()) {
-            URI bridgeURI = new URI("thing-type:hue:bridge");
+            URI bridgeURI = URI.create("thing-type:hue:bridge");
             ConfigDescription bridgeConfigDescription = configDescriptionRegistry.getConfigDescriptions().stream()
                     .filter(it -> it.getUID().equals(bridgeURI)).findFirst().get();
 
@@ -87,7 +87,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
             assertThat(userNameParameter.getDescription(),
                     is("Name of a registered hue bridge user, that allows to access the API."));
 
-            URI colorURI = new URI("channel-type:hue:color");
+            URI colorURI = URI.create("channel-type:hue:color");
             ConfigDescription colorConfigDescription = configDescriptionRegistry.getConfigDescriptions().stream()
                     .filter(it -> it.getUID().equals(colorURI)).findFirst().get();
 
@@ -116,7 +116,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
     @Test
     public void parametersWithOptionsAndFiltersShouldLoadProperly() throws Exception {
         try (final AutoCloseable unused = loadedTestBundle()) {
-            URI dummyURI = new URI("thing-type:hue:dummy");
+            URI dummyURI = URI.create("thing-type:hue:dummy");
             ConfigDescription bridgeConfigDescription = configDescriptionRegistry.getConfigDescriptions().stream()
                     .filter(it -> it.getUID().equals(dummyURI)).findFirst().get();
             assertThat(bridgeConfigDescription, is(notNullValue()));
