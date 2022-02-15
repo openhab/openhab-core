@@ -93,6 +93,7 @@ public class UserRegistryImplTest {
         User user = registry.register("username", "password", Set.of("administrator"));
         registry.added(managedProvider, user);
         assertNotNull(user);
+
         assertTrue(registry.containRole("administrator"));
 
         registry.addRole(user, "test");
