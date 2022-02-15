@@ -38,7 +38,7 @@ public class RuleStatusInfo {
     /**
      * Constructs a status info.
      *
-     * @param status the status (must not be null)
+     * @param status the status
      */
     public RuleStatusInfo(RuleStatus status) {
         this(status, RuleStatusDetail.NONE);
@@ -47,8 +47,8 @@ public class RuleStatusInfo {
     /**
      * Constructs a status info.
      *
-     * @param status the status (must not be null)
-     * @param statusDetail the detail of the status (must not be null)
+     * @param status the status
+     * @param statusDetail the detail of the status
      */
     public RuleStatusInfo(RuleStatus status, RuleStatusDetail statusDetail) {
         this(status, statusDetail, null);
@@ -57,8 +57,8 @@ public class RuleStatusInfo {
     /**
      * Constructs a status info.
      *
-     * @param status the status (must not be null)
-     * @param statusDetail the detail of the status (must not be null)
+     * @param status the status
+     * @param statusDetail the detail of the status
      * @param description the description of the status
      */
     public RuleStatusInfo(RuleStatus status, RuleStatusDetail statusDetail, @Nullable String description) {
@@ -70,7 +70,7 @@ public class RuleStatusInfo {
     /**
      * Gets the status itself.
      *
-     * @return the status (not null)
+     * @return the status
      */
     public RuleStatus getStatus() {
         return status;
@@ -79,7 +79,7 @@ public class RuleStatusInfo {
     /**
      * Gets the detail of the status.
      *
-     * @return the status detail (not null)
+     * @return the status detail
      */
     public RuleStatusDetail getStatusDetail() {
         return statusDetail;
