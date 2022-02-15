@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.JavaTest;
 
 /**
  * Tests cases for {@link ExpiringAsyncCache}.

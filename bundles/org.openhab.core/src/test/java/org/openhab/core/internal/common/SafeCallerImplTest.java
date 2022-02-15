@@ -46,8 +46,8 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openhab.core.JavaTest;
 import org.openhab.core.common.QueueingThreadPoolExecutor;
-import org.openhab.core.test.java.JavaTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
