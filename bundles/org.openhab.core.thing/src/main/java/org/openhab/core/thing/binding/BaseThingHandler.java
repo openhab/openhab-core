@@ -451,8 +451,9 @@ public abstract class BaseThingHandler implements ThingHandler {
         try {
             callback.validateConfigurationParameters(this.thing, configuration.getProperties());
         } catch (ConfigValidationException e) {
-            logger.warn("Attempt to apply invalid configuration '{}' on thing '{}' blocked. This is most likely a bug.",
-                    configuration, thing.getUID());
+            logger.warn(
+                    "Attempt to apply invalid configuration '{}' on thing '{}' blocked. This is most likely a bug: {}",
+                    configuration, thing.getUID(), e.getValidationMessages());
             return;
         }
         try {
