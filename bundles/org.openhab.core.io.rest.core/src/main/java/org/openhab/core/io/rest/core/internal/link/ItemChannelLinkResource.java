@@ -39,12 +39,24 @@ import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.io.rest.core.link.EnrichedItemChannelLinkDTO;
 import org.openhab.core.io.rest.core.link.EnrichedItemChannelLinkDTOMapper;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.ItemUtil;
+import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.link.AbstractLink;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
+import org.openhab.core.thing.profiles.ProfileType;
+import org.openhab.core.thing.profiles.ProfileTypeRegistry;
+import org.openhab.core.thing.profiles.TriggerProfileType;
+import org.openhab.core.thing.type.ChannelKind;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -91,12 +103,21 @@ public class ItemChannelLinkResource implements RESTResource {
 
     private final ItemChannelLinkRegistry itemChannelLinkRegistry;
     private final ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
+    private final ThingRegistry thingRegistry;
+    private final ItemRegistry itemRegistry;
+    private final ProfileTypeRegistry profileTypeRegistry;
 
     @Activate
-    public ItemChannelLinkResource(final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
+    public ItemChannelLinkResource(final @Reference ItemRegistry itemRegistry,
+            final @Reference ThingRegistry thingRegistry, final @Reference ChannelTypeRegistry channelTypeRegistry,
+            final @Reference ProfileTypeRegistry profileTypeRegistry,
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
             final @Reference ManagedItemChannelLinkProvider managedItemChannelLinkProvider) {
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
         this.managedItemChannelLinkProvider = managedItemChannelLinkProvider;
+        this.thingRegistry = thingRegistry;
+        this.itemRegistry = itemRegistry;
+        this.profileTypeRegistry = profileTypeRegistry;
     }
 
     @GET
@@ -154,12 +175,53 @@ public class ItemChannelLinkResource implements RESTResource {
     public Response link(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
             @PathParam("channelUID") @Parameter(description = "channelUID") String channelUid,
             @Parameter(description = "link data") @Nullable ItemChannelLinkDTO bean) {
+        Item item;
+        try {
+            item = itemRegistry.getItem(itemName);
+        } catch (ItemNotFoundException e) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+
         ChannelUID uid;
         try {
             uid = new ChannelUID(channelUid);
         } catch (IllegalArgumentException e) {
             return Response.status(Status.BAD_REQUEST).build();
         }
+
+        Channel channel = getChannel(uid);
+        if (channel == null) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+        ChannelKind channelKind = channel.getKind();
+
+        if (ChannelKind.TRIGGER.equals(channelKind)) {
+            String itemType = ItemUtil.getMainItemType(item.getType());
+            if (bean == null || bean.configuration == null) {
+                // configuration is needed because a profile is mandatory
+                return Response.status(Status.BAD_REQUEST).build();
+            }
+            String profileUid = (String) bean.configuration.get("profile");
+            if (profileUid == null) {
+                // profile is mandatory for trigger channel links
+                return Response.status(Status.BAD_REQUEST).build();
+            }
+            ProfileType profileType = profileTypeRegistry.getProfileTypes().stream()
+                    .filter(p -> profileUid.equals(p.getUID().getAsString())).findFirst().orElse(null);
+            if (!(profileType instanceof TriggerProfileType)) {
+                // only trigger profiles are allowed
+                return Response.status(Status.BAD_REQUEST).build();
+            }
+            if (!(profileType.getSupportedItemTypes().isEmpty()
+                    || profileType.getSupportedItemTypes().contains(itemType))
+                    || !(((TriggerProfileType) profileType).getSupportedChannelTypeUIDs().isEmpty()
+                            || ((TriggerProfileType) profileType).getSupportedChannelTypeUIDs()
+                                    .contains(channel.getChannelTypeUID()))) {
+                // item or channel type not matching
+                return Response.status(Status.BAD_REQUEST).build();
+            }
+        }
+
         ItemChannelLink link;
         if (bean == null) {
             link = new ItemChannelLink(itemName, uid, new Configuration());
@@ -213,5 +275,13 @@ public class ItemChannelLinkResource implements RESTResource {
 
     private boolean isEditable(String linkId) {
         return managedItemChannelLinkProvider.get(linkId) != null;
+    }
+
+    private @Nullable Channel getChannel(ChannelUID channelUID) {
+        Thing thing = thingRegistry.get(channelUID.getThingUID());
+        if (thing == null) {
+            return null;
+        }
+        return thing.getChannel(channelUID);
     }
 }
