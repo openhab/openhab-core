@@ -402,7 +402,6 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                     }
                 }
             }
-
         }
     }
 
