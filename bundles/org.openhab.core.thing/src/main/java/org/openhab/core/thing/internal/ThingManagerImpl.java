@@ -41,6 +41,7 @@ import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.Provider;
+import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
@@ -303,6 +304,30 @@ public class ThingManagerImpl
                     configDescriptionValidator.validate(configurationParameters, configDescriptionURI);
                 }
             }
+        }
+
+        @Override
+        public @Nullable ConfigDescription getConfigDescription(ChannelTypeUID channelTypeUID) {
+            ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID);
+            if (channelType != null) {
+                URI configDescriptionUri = channelType.getConfigDescriptionURI();
+                if (configDescriptionUri != null) {
+                    return configDescriptionRegistry.getConfigDescription(configDescriptionUri);
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public @Nullable ConfigDescription getConfigDescription(ThingTypeUID thingTypeUID) {
+            ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
+            if (thingType != null) {
+                URI configDescriptionUri = thingType.getConfigDescriptionURI();
+                if (configDescriptionUri != null) {
+                    return configDescriptionRegistry.getConfigDescription(configDescriptionUri);
+                }
+            }
+            return null;
         }
 
         @Override
