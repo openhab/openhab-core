@@ -12,7 +12,11 @@
  */
 package org.openhab.core.io.console.internal.extension;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * Console command extension to manage users, sessions and API tokens
  *
  * @author Yannick Schaus - Initial contribution
- * @autor Nicolas Gennart - roles management
+ * @author Nicolas Gennart - roles management
  */
 @Component(service = ConsoleCommandExtension.class)
 @NonNullByDefault

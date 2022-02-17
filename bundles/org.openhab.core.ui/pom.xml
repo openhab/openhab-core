@@ -49,7 +49,7 @@
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.model.sitemap</artifactId>
-      <version>3.3.0-SNAPSHOT</version>
+      <version>3.2.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
