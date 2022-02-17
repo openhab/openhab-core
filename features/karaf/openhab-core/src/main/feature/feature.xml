@@ -152,6 +152,11 @@
 		<feature dependency="true">openhab.tp-swagger-jaxrs</feature>
 	</feature>
 
+	<feature name="openhab-core-io-rest-transform" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.transform/${project.version}</bundle>
+	</feature>
+
 	<feature name="openhab-core-io-rest-audio" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.audio/${project.version}</bundle>
@@ -382,6 +387,7 @@
 		<feature>openhab-core-io-rest-auth</feature>
 		<feature>openhab-core-io-rest-sitemap</feature>
 		<feature>openhab-core-io-rest-audio</feature>
+		<feature>openhab-core-io-rest-transform</feature>
 		<feature>openhab-core-io-rest-voice</feature>
 		<feature>openhab-core-io-rest-swagger</feature>
 		<feature>openhab-core-io-rest-mdns</feature>
