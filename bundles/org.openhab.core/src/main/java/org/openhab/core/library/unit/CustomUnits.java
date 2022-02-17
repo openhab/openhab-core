@@ -12,6 +12,8 @@
  */
 package org.openhab.core.library.unit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import tech.units.indriya.AbstractSystemOfUnits;
 
 /**
@@ -19,6 +21,7 @@ import tech.units.indriya.AbstractSystemOfUnits;
  *
  * @author Hilbrand Bouwkamp - Initial contribution
  */
+@NonNullByDefault
 class CustomUnits extends AbstractSystemOfUnits {
 
     @Override

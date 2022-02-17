@@ -14,6 +14,9 @@ package org.openhab.core.config.xml.util;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The {@link NodeValue} class contains the node name and its according value for an XML tag.
  * <p>
@@ -24,23 +27,25 @@ import java.util.Map;
  *
  * @author Michael Grammling - Initial contribution
  */
+@NonNullByDefault
 public class NodeValue implements NodeName {
 
     private String nodeName;
-    private Map<String, String> attributes;
-    private Object value;
+    private @Nullable Map<String, String> attributes;
+    private @Nullable Object value;
 
     /**
      * Creates a new instance of this class with the specified parameters.
      *
-     * @param nodeName the name of the node this object belongs to (must neither be null, nor empty)
-     * @param attributes the attributes of the node this object belongs to (could be null or empty)
-     * @param value the value of the node this object belongs to (could be null or empty)
-     * @throws IllegalArgumentException if the name of the node is null or empty
+     * @param nodeName the name of the node this object belongs to (must not be empty)
+     * @param attributes the attributes of the node this object belongs to
+     * @param value the value of the node this object belongs to
+     * @throws IllegalArgumentException if the name of the node is empty
      */
-    public NodeValue(String nodeName, Map<String, String> attributes, Object value) throws IllegalArgumentException {
-        if ((nodeName == null) || (nodeName.isEmpty())) {
-            throw new IllegalArgumentException("The name of the node must neither be null nor empty!");
+    public NodeValue(String nodeName, @Nullable Map<String, String> attributes, @Nullable Object value)
+            throws IllegalArgumentException {
+        if (nodeName.isEmpty()) {
+            throw new IllegalArgumentException("The name of the node must not be empty!");
         }
 
         this.nodeName = nodeName;
@@ -48,7 +53,7 @@ public class NodeValue implements NodeName {
         this.value = formatText(value);
     }
 
-    private Object formatText(Object object) {
+    private @Nullable Object formatText(@Nullable Object object) {
         // fixes a formatting problem with line breaks in text
         if (object instanceof String) {
             return ((String) object).replaceAll("\\n\\s*", " ").trim();
@@ -65,9 +70,9 @@ public class NodeValue implements NodeName {
     /**
      * Returns the attributes of the node.
      *
-     * @return the attributes of the node (could be null or empty)
+     * @return the attributes of the node
      */
-    public Map<String, String> getAttributes() {
+    public @Nullable Map<String, String> getAttributes() {
         return this.attributes;
     }
 
@@ -76,7 +81,7 @@ public class NodeValue implements NodeName {
      *
      * @return the value of the node (could be null or empty)
      */
-    public Object getValue() {
+    public @Nullable Object getValue() {
         return this.value;
     }
 

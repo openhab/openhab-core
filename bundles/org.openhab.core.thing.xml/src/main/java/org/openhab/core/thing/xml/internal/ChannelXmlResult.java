@@ -12,11 +12,13 @@
  */
 package org.openhab.core.thing.xml.internal;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.xml.util.NodeValue;
 import org.openhab.core.thing.type.AutoUpdatePolicy;
 import org.openhab.core.thing.type.ChannelDefinition;
@@ -30,14 +32,15 @@ import com.thoughtworks.xstream.converters.ConversionException;
  *
  * @author Chris Jackson - Initial contribution
  */
+@NonNullByDefault
 public class ChannelXmlResult {
 
     private final String id;
     private final String typeId;
-    String label;
-    String description;
-    List<NodeValue> properties;
-    private final AutoUpdatePolicy autoUpdatePolicy;
+    private final @Nullable String label;
+    private final @Nullable String description;
+    private final @Nullable List<NodeValue> properties;
+    private final @Nullable AutoUpdatePolicy autoUpdatePolicy;
 
     /**
      * Constructs a new {@link ChannelXmlResult}
@@ -48,8 +51,8 @@ public class ChannelXmlResult {
      * @param description the channel description
      * @param properties a {@link List} of channel properties
      */
-    public ChannelXmlResult(String id, String typeId, String label, String description, List<NodeValue> properties,
-            AutoUpdatePolicy autoUpdatePolicy) {
+    public ChannelXmlResult(String id, String typeId, @Nullable String label, @Nullable String description,
+            @Nullable List<NodeValue> properties, @Nullable AutoUpdatePolicy autoUpdatePolicy) {
         this.id = id;
         this.typeId = typeId;
         this.label = label;
@@ -64,7 +67,7 @@ public class ChannelXmlResult {
      * @return channel id
      */
     public String getId() {
-        return this.id;
+        return id;
     }
 
     /**
@@ -73,36 +76,33 @@ public class ChannelXmlResult {
      * @return type ID
      */
     public String getTypeId() {
-        return this.typeId;
+        return typeId;
     }
 
     /**
      * Retrieves the properties for this channel
      *
-     * @return properties list (not null)
+     * @return properties list
      */
     public List<NodeValue> getProperties() {
-        if (this.properties == null) {
-            return new ArrayList<>(0);
-        }
-        return this.properties;
+        return Objects.requireNonNullElse(properties, List.of());
     }
 
     /**
      * Get the label for this channel
      *
-     * @return the channel label. Can be null
+     * @return the channel label
      */
-    public String getLabel() {
+    public @Nullable String getLabel() {
         return label;
     }
 
     /**
      * Get the description for this channel
      *
-     * @return the channel description. Can be null
+     * @return the channel description
      */
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 
@@ -111,7 +111,7 @@ public class ChannelXmlResult {
      *
      * @return the auto update policy
      */
-    public AutoUpdatePolicy getAutoUpdatePolicy() {
+    public @Nullable AutoUpdatePolicy getAutoUpdatePolicy() {
         return autoUpdatePolicy;
     }
 
@@ -121,15 +121,19 @@ public class ChannelXmlResult {
     }
 
     protected ChannelDefinition toChannelDefinition(String bindingId) throws ConversionException {
-        String id = getId();
-        String typeId = getTypeId();
-
         String typeUID = getTypeUID(bindingId, typeId);
 
         // Convert the channel properties into a map
         Map<String, String> propertiesMap = new HashMap<>();
         for (NodeValue property : getProperties()) {
-            propertiesMap.put(property.getAttributes().get("name"), (String) property.getValue());
+            Map<String, String> attributes = property.getAttributes();
+            if (attributes != null) {
+                String name = attributes.get("name");
+                String value = (String) property.getValue();
+                if (name != null && value != null) {
+                    propertiesMap.put(name, value);
+                }
+            }
         }
 
         return new ChannelDefinitionBuilder(id, new ChannelTypeUID(typeUID)).withProperties(propertiesMap)

@@ -16,6 +16,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.thoughtworks.xstream.converters.ConversionException;
 
 /**
@@ -26,7 +30,8 @@ import com.thoughtworks.xstream.converters.ConversionException;
  *
  * @author Michael Grammling - Initial contribution
  */
-public class NodeIterator implements Iterator<Object> {
+@NonNullByDefault
+public class NodeIterator implements Iterator<@Nullable Object> {
 
     private List<?> nodes;
     private int index = 0;
@@ -36,8 +41,8 @@ public class NodeIterator implements Iterator<Object> {
      *
      * @param nodes the list of nodes to be iterated through (could be null or empty)
      */
-    public NodeIterator(List<?> nodes) {
-        this.nodes = (nodes != null) ? nodes : new ArrayList<>(0);
+    public NodeIterator(@Nullable List<?> nodes) {
+        this.nodes = nodes != null ? nodes : new ArrayList<>(0);
     }
 
     @Override
@@ -46,7 +51,7 @@ public class NodeIterator implements Iterator<Object> {
     }
 
     @Override
-    public Object next() {
+    public @Nullable Object next() {
         if (hasNext()) {
             return this.nodes.get(index++);
         }
@@ -78,13 +83,13 @@ public class NodeIterator implements Iterator<Object> {
      */
     public void assertEndOfType() throws ConversionException {
         if (hasNext()) {
-            List<Object> nodes = new ArrayList<>();
+            List<@Nullable Object> nodes = new ArrayList<>();
             while (hasNext()) {
                 nodes.add(next());
             }
 
             throw new ConversionException(
-                    "The document is invalid, it contains further" + " unsupported data: " + nodes + "!");
+                    "The document is invalid, it contains further unsupported data: " + nodes + "!");
         }
     }
 
@@ -100,7 +105,7 @@ public class NodeIterator implements Iterator<Object> {
      * @throws ConversionException if the specified node could not be found in the next node
      *             however it was specified as required
      */
-    public Object next(String nodeName, boolean required) throws ConversionException {
+    public @Nullable Object next(String nodeName, boolean required) throws ConversionException {
         if (hasNext()) {
             Object nextNode = next();
 
@@ -137,7 +142,8 @@ public class NodeIterator implements Iterator<Object> {
      * @throws ConversionException if the specified node's attribute could not be found in the
      *             next node however it was specified as required
      */
-    public String nextAttribute(String nodeName, String attributeName, boolean required) throws ConversionException {
+    public @Nullable String nextAttribute(String nodeName, String attributeName, boolean required)
+            throws ConversionException {
         if (hasNext()) {
             Object nextNode = next();
 
@@ -171,7 +177,7 @@ public class NodeIterator implements Iterator<Object> {
      * @throws ConversionException if the specified node's value could not be found in the
      *             next node however it was specified as required
      */
-    public Object nextValue(String nodeName, boolean required) throws ConversionException {
+    public @Nullable Object nextValue(String nodeName, boolean required) throws ConversionException {
         Object value = next(nodeName, required);
 
         if (value instanceof NodeValue) {
@@ -194,7 +200,7 @@ public class NodeIterator implements Iterator<Object> {
      * @throws ConversionException if the specified node's list of values could not be found
      *             in the next node however it was specified as required
      */
-    public List<?> nextList(String nodeName, boolean required) throws ConversionException {
+    public @Nullable List<@NonNull ?> nextList(String nodeName, boolean required) throws ConversionException {
         Object list = next(nodeName, required);
 
         if (list instanceof NodeList) {

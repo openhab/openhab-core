@@ -15,6 +15,8 @@ package org.openhab.core.thing.xml.internal;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link ThingDescriptionList} is the XML conversion result object which
  * is a list of {@link ThingTypeXmlResult}, {@link BridgeTypeXmlResult} and {@link ChannelTypeXmlResult} objects.
@@ -22,6 +24,7 @@ import java.util.Collection;
  * @author Michael Grammling - Initial contribution
  */
 @SuppressWarnings({ "serial", "rawtypes" })
+@NonNullByDefault
 public class ThingDescriptionList extends ArrayList {
 
     @SuppressWarnings("unchecked")

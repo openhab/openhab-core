@@ -32,12 +32,7 @@ public class BindingInfoXmlResult {
     private BindingInfo bindingInfo;
     private @Nullable ConfigDescription configDescription;
 
-    public BindingInfoXmlResult(BindingInfo bindingInfo, @Nullable ConfigDescription configDescription)
-            throws IllegalArgumentException {
-        if (bindingInfo == null) {
-            throw new IllegalArgumentException("The BindingInfo must not be null!");
-        }
-
+    public BindingInfoXmlResult(BindingInfo bindingInfo, @Nullable ConfigDescription configDescription) {
         this.bindingInfo = bindingInfo;
         this.configDescription = configDescription;
     }

@@ -12,12 +12,16 @@
  */
 package org.openhab.core.thing.type;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * A binding's recommendation to the framework whether a state update should be automatically sent to an item if a
  * command was received.
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public enum AutoUpdatePolicy {
     /**
      * No automatic state update should be sent by the framework. The handler will make sure it sends a state update and
@@ -45,7 +49,7 @@ public enum AutoUpdatePolicy {
      * @return the parsed AutoUpdatePolicy
      * @throws IllegalArgumentException if the input couldn't be parsed.
      */
-    public static AutoUpdatePolicy parse(String input) {
+    public static AutoUpdatePolicy parse(@Nullable String input) {
         if (input == null) {
             return DEFAULT;
         }

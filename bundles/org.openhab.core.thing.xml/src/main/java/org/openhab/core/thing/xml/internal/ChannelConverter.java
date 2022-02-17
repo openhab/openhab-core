@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.xml.util.NodeIterator;
@@ -38,6 +40,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * @author Simon Kaufmann - Fixing wrong inheritance
  * @author Chris Jackson - Added label and description
  */
+@NonNullByDefault
 public class ChannelConverter extends GenericUnmarshaller<ChannelXmlResult> {
 
     private final ConverterAttributeMapValidator attributeMapValidator;
@@ -50,26 +53,23 @@ public class ChannelConverter extends GenericUnmarshaller<ChannelXmlResult> {
     }
 
     @SuppressWarnings("unchecked")
-    protected List<NodeValue> getProperties(NodeIterator nodeIterator) {
+    protected @Nullable List<NodeValue> getProperties(NodeIterator nodeIterator) {
         return (List<NodeValue>) nodeIterator.nextList("properties", false);
     }
 
     protected ChannelXmlResult unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
-        String id = attributes.get("id");
-        String typeId = attributes.get("typeId");
+        String id = requireNonEmpty(attributes.get("id"), "Channel id attribute is null or empty");
+        String typeId = requireNonEmpty(attributes.get("typeId"), "Channel typeId attribute is null or empty");
         String label = (String) nodeIterator.nextValue("label", false);
         String description = (String) nodeIterator.nextValue("description", false);
         List<NodeValue> properties = getProperties(nodeIterator);
         AutoUpdatePolicy autoUpdatePolicy = readAutoUpdatePolicy(nodeIterator);
 
-        ChannelXmlResult channelXmlResult = new ChannelXmlResult(id, typeId, label, description, properties,
-                autoUpdatePolicy);
-
-        return channelXmlResult;
+        return new ChannelXmlResult(id, typeId, label, description, properties, autoUpdatePolicy);
     }
 
-    private AutoUpdatePolicy readAutoUpdatePolicy(NodeIterator nodeIterator) {
+    private @Nullable AutoUpdatePolicy readAutoUpdatePolicy(NodeIterator nodeIterator) {
         String string = (String) nodeIterator.nextValue("autoUpdatePolicy", false);
         if (string != null) {
             return AutoUpdatePolicy.valueOf(string.toUpperCase(Locale.ENGLISH));
@@ -78,7 +78,7 @@ public class ChannelConverter extends GenericUnmarshaller<ChannelXmlResult> {
     }
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         // read attributes
         Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);
 

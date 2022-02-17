@@ -14,6 +14,9 @@ package org.openhab.core.config.xml.util;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -25,6 +28,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *
  * @author Michael Grammling - Initial contribution
  */
+@NonNullByDefault
 public class NodeAttributesConverter extends GenericUnmarshaller<NodeAttributes> {
 
     public NodeAttributesConverter() {
@@ -32,7 +36,7 @@ public class NodeAttributesConverter extends GenericUnmarshaller<NodeAttributes>
     }
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         String nodeName = reader.getNodeName();
 
         Map<String, String> attributes = ConverterAttributeMapValidator.readValidatedAttributes(reader, null);

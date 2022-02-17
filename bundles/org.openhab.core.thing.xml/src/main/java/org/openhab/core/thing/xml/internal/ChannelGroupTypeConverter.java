@@ -15,6 +15,8 @@ package org.openhab.core.thing.xml.internal;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.xml.util.NodeIterator;
 import org.openhab.core.thing.type.ChannelGroupTypeUID;
@@ -36,6 +38,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * @author Chris Jackson - Modified to support channel properties
  * @author Christoph Weitkamp - Removed "advanced" attribute
  */
+@NonNullByDefault
 public class ChannelGroupTypeConverter extends AbstractDescriptionTypeConverter<ChannelGroupTypeXmlResult> {
 
     public ChannelGroupTypeConverter() {
@@ -45,13 +48,15 @@ public class ChannelGroupTypeConverter extends AbstractDescriptionTypeConverter<
     }
 
     @SuppressWarnings("unchecked")
-    protected List<ChannelXmlResult> readChannelTypeDefinitions(NodeIterator nodeIterator) throws ConversionException {
+    protected @Nullable List<ChannelXmlResult> readChannelTypeDefinitions(NodeIterator nodeIterator)
+            throws ConversionException {
         return (List<ChannelXmlResult>) nodeIterator.nextList("channels", false);
     }
 
     @Override
-    protected ChannelGroupTypeXmlResult unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
-            Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
+    protected @Nullable ChannelGroupTypeXmlResult unmarshalType(HierarchicalStreamReader reader,
+            UnmarshallingContext context, Map<String, String> attributes, NodeIterator nodeIterator)
+            throws ConversionException {
         ChannelGroupTypeUID channelGroupTypeUID = new ChannelGroupTypeUID(super.getUID(attributes, context));
 
         String label = super.readLabel(nodeIterator);
@@ -59,13 +64,10 @@ public class ChannelGroupTypeConverter extends AbstractDescriptionTypeConverter<
         String category = readCategory(nodeIterator);
         List<ChannelXmlResult> channelTypeDefinitions = readChannelTypeDefinitions(nodeIterator);
 
-        ChannelGroupTypeXmlResult groupChannelType = new ChannelGroupTypeXmlResult(channelGroupTypeUID, label,
-                description, category, channelTypeDefinitions);
-
-        return groupChannelType;
+        return new ChannelGroupTypeXmlResult(channelGroupTypeUID, label, description, category, channelTypeDefinitions);
     }
 
-    private String readCategory(NodeIterator nodeIterator) {
+    private @Nullable String readCategory(NodeIterator nodeIterator) {
         Object category = nodeIterator.nextValue("category", false);
         return category == null ? null : category.toString();
     }

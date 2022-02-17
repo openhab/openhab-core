@@ -12,11 +12,14 @@
  */
 package org.openhab.core.thing.xml.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Utility class containing helper methods to be used in XML generation.
  *
  * @author Ivan Iliev - Initial contribution
  */
+@NonNullByDefault
 public class XmlHelper {
 
     public static final String SYSTEM_NAMESPACE_PREFIX = "system.";

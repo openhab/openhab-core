@@ -14,11 +14,15 @@ package org.openhab.core.persistence.strategy;
 
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This class holds a strategy to persist items.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class PersistenceStrategy {
     public static class Globals {
         public static final PersistenceStrategy UPDATE = new PersistenceStrategy("everyUpdate");
@@ -45,7 +49,7 @@ public class PersistenceStrategy {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         if (this == obj) {
             return true;
         }

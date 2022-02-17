@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -27,6 +30,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *
  * @author Michael Grammling - Initial contribution
  */
+@NonNullByDefault
 public class NodeListConverter extends GenericUnmarshaller<NodeList> {
 
     public NodeListConverter() {
@@ -34,7 +38,7 @@ public class NodeListConverter extends GenericUnmarshaller<NodeList> {
     }
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         Map<String, String> attributes = ConverterAttributeMapValidator.readValidatedAttributes(reader, null);
 
         String nodeName = reader.getNodeName();

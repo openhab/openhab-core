@@ -15,6 +15,8 @@ package org.openhab.core.thing.xml.internal;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.xml.util.GenericUnmarshaller;
 
@@ -31,6 +33,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *
  * @author Michael Grammling - Initial contribution
  */
+@NonNullByDefault
 public class ThingDescriptionConverter extends GenericUnmarshaller<ThingDescriptionList> {
 
     private ConverterAttributeMapValidator attributeMapValidator;
@@ -43,7 +46,7 @@ public class ThingDescriptionConverter extends GenericUnmarshaller<ThingDescript
     }
 
     @Override
-    public final Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public final @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         // read attributes
         Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);
         String bindingId = attributes.get("bindingId");

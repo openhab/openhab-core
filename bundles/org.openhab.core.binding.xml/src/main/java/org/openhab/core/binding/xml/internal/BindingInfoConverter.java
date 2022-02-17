@@ -17,6 +17,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.binding.BindingInfo;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
@@ -38,6 +40,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * @author Michael Grammling - Initial contribution
  * @author Andre Fuechsel - Made author tag optional
  */
+@NonNullByDefault
 public class BindingInfoConverter extends GenericUnmarshaller<BindingInfoXmlResult> {
 
     private ConverterAttributeMapValidator attributeMapValidator;
@@ -45,11 +48,11 @@ public class BindingInfoConverter extends GenericUnmarshaller<BindingInfoXmlResu
     public BindingInfoConverter() {
         super(BindingInfoXmlResult.class);
 
-        this.attributeMapValidator = new ConverterAttributeMapValidator(
+        attributeMapValidator = new ConverterAttributeMapValidator(
                 new String[][] { { "id", "true" }, { "schemaLocation", "false" } });
     }
 
-    private URI readConfigDescriptionURI(NodeIterator nodeIterator) throws ConversionException {
+    private @Nullable URI readConfigDescriptionURI(NodeIterator nodeIterator) throws ConversionException {
         String uriText = nodeIterator.nextAttribute("config-description-ref", "uri", false);
 
         if (uriText != null) {
@@ -64,7 +67,7 @@ public class BindingInfoConverter extends GenericUnmarshaller<BindingInfoXmlResu
         return null;
     }
 
-    private ConfigDescription readConfigDescription(NodeIterator nodeIterator) {
+    private @Nullable ConfigDescription readConfigDescription(NodeIterator nodeIterator) {
         Object nextNode = nodeIterator.next();
 
         if (nextNode != null) {
@@ -79,17 +82,11 @@ public class BindingInfoConverter extends GenericUnmarshaller<BindingInfoXmlResu
     }
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-        BindingInfoXmlResult bindingInfoXmlResult = null;
-        BindingInfo bindingInfo = null;
-
+    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         // read attributes
-        Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);
+        Map<String, String> attributes = attributeMapValidator.readValidatedAttributes(reader);
 
-        String id = attributes.get("id");
-        if (id == null) {
-            throw new ConversionException("Binding id attribute is null");
-        }
+        String id = requireNonEmpty(attributes.get("id"), "Binding id attribute is null or empty");
 
         // set automatically extracted URI for a possible 'config-description' section
         context.put("config-description.uri", "binding:" + id);
@@ -98,7 +95,8 @@ public class BindingInfoConverter extends GenericUnmarshaller<BindingInfoXmlResu
         List<?> nodes = (List<?>) context.convertAnother(context, List.class);
         NodeIterator nodeIterator = new NodeIterator(nodes);
 
-        String name = (String) nodeIterator.nextValue("name", true);
+        String name = requireNonEmpty((String) nodeIterator.nextValue("name", true),
+                "Binding name attribute is null or empty");
         String description = (String) nodeIterator.nextValue("description", false);
         String author = (String) nodeIterator.nextValue("author", false);
         String serviceId = (String) nodeIterator.nextValue("service-id", false);
@@ -115,9 +113,7 @@ public class BindingInfoConverter extends GenericUnmarshaller<BindingInfoXmlResu
         nodeIterator.assertEndOfType();
 
         // create object
-        bindingInfo = new BindingInfo(id, name, description, author, serviceId, configDescriptionURI);
-        bindingInfoXmlResult = new BindingInfoXmlResult(bindingInfo, configDescription);
-
-        return bindingInfoXmlResult;
+        BindingInfo bindingInfo = new BindingInfo(id, name, description, author, serviceId, configDescriptionURI);
+        return new BindingInfoXmlResult(bindingInfo, configDescription);
     }
 }

@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.xml.util.NodeIterator;
 import org.openhab.core.config.xml.util.NodeList;
@@ -43,6 +45,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * @author Chris Jackson - Added channel properties
  * @author Andre Fuechsel - Added representationProperty
  */
+@NonNullByDefault
 public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTypeXmlResult> {
 
     public ThingTypeConverter() {
@@ -62,7 +65,8 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
                 new String[][] { { "id", "true" }, { "listed", "false" }, { "extensible", "false" } });
     }
 
-    protected List<String> readSupportedBridgeTypeUIDs(NodeIterator nodeIterator, UnmarshallingContext context) {
+    protected @Nullable List<String> readSupportedBridgeTypeUIDs(NodeIterator nodeIterator,
+            UnmarshallingContext context) {
         Object nextNode = nodeIterator.next("supported-bridge-type-refs", false);
 
         if (nextNode != null) {
@@ -91,21 +95,19 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
     }
 
     @SuppressWarnings("unchecked")
-    protected List<NodeValue> getProperties(NodeIterator nodeIterator) {
+    protected @Nullable List<NodeValue> getProperties(NodeIterator nodeIterator) {
         return (List<NodeValue>) nodeIterator.nextList("properties", false);
     }
 
     @Override
-    protected ThingTypeXmlResult unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
+    protected @Nullable ThingTypeXmlResult unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
-        ThingTypeXmlResult thingTypeXmlResult = new ThingTypeXmlResult(
-                new ThingTypeUID(super.getUID(attributes, context)), readSupportedBridgeTypeUIDs(nodeIterator, context),
-                super.readLabel(nodeIterator), super.readDescription(nodeIterator), readCategory(nodeIterator),
-                getListed(attributes), getExtensibleChannelTypeIds(attributes),
-                getChannelTypeReferenceObjects(nodeIterator), getProperties(nodeIterator),
-                getRepresentationProperty(nodeIterator), super.getConfigDescriptionObjects(nodeIterator));
-
-        return thingTypeXmlResult;
+        return new ThingTypeXmlResult(new ThingTypeUID(super.getUID(attributes, context)),
+                readSupportedBridgeTypeUIDs(nodeIterator, context), super.readLabel(nodeIterator),
+                super.readDescription(nodeIterator), readCategory(nodeIterator), getListed(attributes),
+                getExtensibleChannelTypeIds(attributes), getChannelTypeReferenceObjects(nodeIterator),
+                getProperties(nodeIterator), getRepresentationProperty(nodeIterator),
+                super.getConfigDescriptionObjects(nodeIterator));
     }
 
     protected List<String> getExtensibleChannelTypeIds(Map<String, String> attributes) {
@@ -117,7 +119,7 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
         return Arrays.stream(extensible.split(",")).map(String::trim).collect(toList());
     }
 
-    protected String readCategory(NodeIterator nodeIterator) {
+    protected @Nullable String readCategory(NodeIterator nodeIterator) {
         Object category = nodeIterator.nextValue("category", false);
         if (category != null) {
             return category.toString();
@@ -134,7 +136,7 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
         return true;
     }
 
-    protected String getRepresentationProperty(NodeIterator nodeIterator) {
+    protected @Nullable String getRepresentationProperty(NodeIterator nodeIterator) {
         return (String) nodeIterator.nextValue("representation-property", false);
     }
 }

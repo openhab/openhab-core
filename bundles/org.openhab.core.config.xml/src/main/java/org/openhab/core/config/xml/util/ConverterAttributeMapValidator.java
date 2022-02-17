@@ -15,6 +15,9 @@ package org.openhab.core.config.xml.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
@@ -24,9 +27,10 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *
  * @author Michael Grammling - Initial contribution
  */
+@NonNullByDefault
 public class ConverterAttributeMapValidator {
 
-    private Map<String, Boolean> validationMaskTemplate;
+    private @Nullable Map<String, Boolean> validationMaskTemplate;
 
     /**
      * Creates a new instance of this class with the specified parameter.
@@ -45,13 +49,14 @@ public class ConverterAttributeMapValidator {
      *
      * @param validationMaskTemplate the two-dimensional key-required list (could be null or empty)
      */
-    public ConverterAttributeMapValidator(String[][] validationMaskTemplate) {
+    public ConverterAttributeMapValidator(String @Nullable [][] validationMaskTemplate) {
         if (validationMaskTemplate != null) {
-            this.validationMaskTemplate = new HashMap<>(validationMaskTemplate.length);
+            Map<String, Boolean> template = new HashMap<>(validationMaskTemplate.length);
 
             for (String[] validationProperty : validationMaskTemplate) {
-                this.validationMaskTemplate.put(validationProperty[0], Boolean.parseBoolean(validationProperty[1]));
+                template.put(validationProperty[0], Boolean.parseBoolean(validationProperty[1]));
             }
+            this.validationMaskTemplate = template;
         }
     }
 
@@ -66,7 +71,7 @@ public class ConverterAttributeMapValidator {
      *
      * @param validationMaskTemplate the key-required map (could be null or empty)
      */
-    public ConverterAttributeMapValidator(Map<String, Boolean> validationMaskTemplate) {
+    public ConverterAttributeMapValidator(@Nullable Map<String, Boolean> validationMaskTemplate) {
         this.validationMaskTemplate = validationMaskTemplate;
     }
 
@@ -79,7 +84,7 @@ public class ConverterAttributeMapValidator {
      * @throws ConversionException if the validation check fails
      */
     public Map<String, String> readValidatedAttributes(HierarchicalStreamReader reader) throws ConversionException {
-        return readValidatedAttributes(reader, this.validationMaskTemplate);
+        return readValidatedAttributes(reader, validationMaskTemplate);
     }
 
     /**
@@ -95,7 +100,7 @@ public class ConverterAttributeMapValidator {
      * @throws ConversionException if the validation check fails
      */
     public static Map<String, String> readValidatedAttributes(HierarchicalStreamReader reader,
-            Map<String, Boolean> validationMaskTemplate) throws ConversionException {
+            @Nullable Map<String, Boolean> validationMaskTemplate) throws ConversionException {
         Map<String, String> attributeMap = new HashMap<>(reader.getAttributeCount());
 
         Map<String, Boolean> validationMask = null;

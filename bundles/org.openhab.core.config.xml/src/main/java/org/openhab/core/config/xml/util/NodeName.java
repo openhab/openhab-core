@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.xml.util;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link NodeName} interface defines common features for all {@code Node}* classes.
  * <p>
@@ -19,12 +21,13 @@ package org.openhab.core.config.xml.util;
  *
  * @author Michael Grammling - Initial contribution
  */
+@NonNullByDefault
 public interface NodeName {
 
     /**
      * Returns the name of the node this object belongs to.
      *
-     * @return the name of the node this object belongs to (neither null, nor empty)
+     * @return the name of the node this object belongs to (not empty)
      */
     String getNodeName();
 }

@@ -17,6 +17,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.xml.util.GenericUnmarshaller;
@@ -39,6 +41,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *
  * @author Michael Grammling - Initial contribution
  */
+@NonNullByDefault
 public abstract class AbstractDescriptionTypeConverter<T> extends GenericUnmarshaller<T> {
 
     protected ConverterAttributeMapValidator attributeMapValidator;
@@ -53,76 +56,72 @@ public abstract class AbstractDescriptionTypeConverter<T> extends GenericUnmarsh
      */
     public AbstractDescriptionTypeConverter(Class<T> clazz, String type) {
         super(clazz);
-
         this.type = type;
-
         this.attributeMapValidator = new ConverterAttributeMapValidator(new String[][] { { "id", "true" } });
     }
 
     /**
      * Returns the {@code id} attribute of the specific XML type definition.
      *
-     * @param attributes the attributes where to extract the ID information (must not be null)
-     * @return the ID of the type definition (neither null, nor empty)
+     * @param attributes the attributes where to extract the ID information
+     * @return the ID of the type definition (not empty)
      */
     protected String getID(Map<String, String> attributes) {
-        return attributes.get("id");
+        return requireNonEmpty(attributes.get("id"), "The 'id' attribute cannot be null or empty!");
     }
 
     /**
      * Returns the full extracted UID of the specific XML type definition.
      *
-     * @param attributes the attributes where to extract the ID information (must not be null)
-     * @param context the context where to extract the binding ID information (must not be null)
+     * @param attributes the attributes where to extract the ID information
+     * @param context the context where to extract the binding ID information
      *
-     * @return the UID of the type definition (neither null, nor empty)
+     * @return the UID of the type definition (not empty)
      */
     protected String getUID(Map<String, String> attributes, UnmarshallingContext context) {
         String bindingId = (String) context.get("thing-descriptions.bindingId");
         String typeId = getID(attributes);
-
-        String uid = String.format("%s:%s", bindingId, typeId);
-
-        return uid;
+        return String.format("%s:%s", bindingId, typeId);
     }
 
     /**
      * Returns the value of the {@code label} tag from the specific XML type definition.
      *
-     * @param nodeIterator the iterator to be used to extract the information (must not be null)
-     * @return the value of the label (neither null, nor empty)
+     * @param nodeIterator the iterator to be used to extract the information
+     * @return the value of the label (not empty)
      * @throws ConversionException if the label could not be read
      */
     protected String readLabel(NodeIterator nodeIterator) throws ConversionException {
-        return (String) nodeIterator.nextValue("label", true);
+        return requireNonEmpty((String) nodeIterator.nextValue("label", true),
+                "The 'label' node cannot be null or empty!");
     }
 
     /**
      * Returns the value of the {@code description} tag from the specific XML type definition.
      *
-     * @param nodeIterator the iterator to be used to extract the information (must not be null)
-     * @return the value of the description (could be null or empty)
+     * @param nodeIterator the iterator to be used to extract the information
+     * @return the value of the description (could be empty)
      */
-    protected String readDescription(NodeIterator nodeIterator) {
+    protected @Nullable String readDescription(NodeIterator nodeIterator) {
         return (String) nodeIterator.nextValue("description", false);
     }
 
-    private URI readConfigDescriptionURI(NodeIterator nodeIterator) throws ConversionException {
+    private @Nullable URI readConfigDescriptionURI(NodeIterator nodeIterator) throws ConversionException {
         String uriText = nodeIterator.nextAttribute("config-description-ref", "uri", false);
 
         if (uriText != null) {
             try {
                 return new URI(uriText);
             } catch (URISyntaxException ex) {
-                throw new ConversionException(
-                        "The URI '" + uriText + "' in node " + "'config-description-ref' is invalid!", ex);
+                throw new ConversionException("The URI '" + uriText + "' in node 'config-description-ref' is invalid!",
+                        ex);
             }
         }
 
         return null;
     }
 
-    private ConfigDescription readConfigDescription(NodeIterator nodeIterator) {
+    private @Nullable ConfigDescription readConfigDescription(NodeIterator nodeIterator) {
         Object nextNode = nodeIterator.next();
 
         if (nextNode != null) {
@@ -175,16 +174,16 @@ public abstract class AbstractDescriptionTypeConverter<T> extends GenericUnmarsh
      *
      * @throws ConversionException if any conversion error occurs
      */
-    protected abstract T unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
+    protected abstract @Nullable T unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException;
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         // read attributes
-        Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);
+        Map<String, String> attributes = attributeMapValidator.readValidatedAttributes(reader);
 
         // set automatically extracted URI for a possible 'config-description' section
-        context.put("config-description.uri", this.type + ":" + getUID(attributes, context));
+        context.put("config-description.uri", type + ":" + getUID(attributes, context));
 
         // read values
         List<?> nodes = (List<?>) context.convertAnother(context, List.class);

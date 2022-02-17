@@ -12,6 +12,8 @@
  */
 package org.openhab.core.thing.type;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.Thing;
 
 /**
@@ -24,30 +26,27 @@ import org.openhab.core.thing.Thing;
  * @author Michael Grammling - Initial contribution
  * @author Dennis Nobel - Introduced ChannelTypeRegistry and channel type references
  */
+@NonNullByDefault
 public class ChannelGroupDefinition {
 
     private String id;
     private ChannelGroupTypeUID typeUID;
-    private final String label;
-    private final String description;
+    private final @Nullable String label;
+    private final @Nullable String description;
 
     /**
      * Creates a new instance of this class with the specified parameters.
      *
-     * @param id the identifier of the channel group (must neither be null nor empty)
-     * @param typeUID the type UID of the channel group (must not be null)
-     * @param label the label for the channel group to override ChannelGroupType (could be null)
-     * @param description the description for the channel group to override ChannelGroupType (could be null)
-     * @throws IllegalArgumentException if the ID is null or empty, or the type is null
+     * @param id the identifier of the channel group (must not be empty)
+     * @param typeUID the type UID of the channel group
+     * @param label the label for the channel group to override ChannelGroupType
+     * @param description the description for the channel group to override ChannelGroupType
+     * @throws IllegalArgumentException if the ID is empty
      */
-    public ChannelGroupDefinition(String id, ChannelGroupTypeUID typeUID, String label, String description)
-            throws IllegalArgumentException {
-        if ((id == null) || (id.isEmpty())) {
-            throw new IllegalArgumentException("The ID must neither be null nor empty!");
-        }
-
-        if (typeUID == null) {
-            throw new IllegalArgumentException("The channel group type UID must not be null");
+    public ChannelGroupDefinition(String id, ChannelGroupTypeUID typeUID, @Nullable String label,
+            @Nullable String description) throws IllegalArgumentException {
+        if (id.isEmpty()) {
+            throw new IllegalArgumentException("The ID must not be empty!");
         }
 
         this.id = id;
@@ -59,9 +58,9 @@ public class ChannelGroupDefinition {
     /**
      * Creates a new instance of this class with the specified parameters.
      *
-     * @param id the identifier of the channel group (must neither be null nor empty)
-     * @param typeUID the type UID of the channel group (must not be null)
-     * @throws IllegalArgumentException if the ID is null or empty, or the type is null
+     * @param id the identifier of the channel group (must not be empty)
+     * @param typeUID the type UID of the channel group
+     * @throws IllegalArgumentException if the ID is empty
      */
     public ChannelGroupDefinition(String id, ChannelGroupTypeUID typeUID) throws IllegalArgumentException {
         this(id, typeUID, null, null);
@@ -70,29 +69,29 @@ public class ChannelGroupDefinition {
     /**
      * Returns the identifier of the channel group.
      *
-     * @return the identifier of the channel group (neither null, nor empty)
+     * @return the identifier of the channel group (not empty)
      */
     public String getId() {
-        return this.id;
+        return id;
     }
 
     /**
      * Returns the type UID of the channel group.
      *
-     * @return the type UID of the channel group (not null)
+     * @return the type UID of the channel group
      */
     public ChannelGroupTypeUID getTypeUID() {
-        return this.typeUID;
+        return typeUID;
     }
 
     /**
      * Returns the label (if set).
      * If no label is set, getLabel will return null and the default label for the {@link ChannelGroupType} is used.
      *
-     * @return the label for the channel group. Can be null.
+     * @return the label for the channel group.
      */
-    public String getLabel() {
-        return this.label;
+    public @Nullable String getLabel() {
+        return label;
     }
 
     /**
@@ -100,10 +99,10 @@ public class ChannelGroupDefinition {
      * If no description is set, getDescription will return null and the default description for the
      * {@link ChannelGroupType} is used.
      *
-     * @return the description for the channel group. Can be null.
+     * @return the description for the channel group.
      */
-    public String getDescription() {
-        return this.description;
+    public @Nullable String getDescription() {
+        return description;
     }
 
     @Override

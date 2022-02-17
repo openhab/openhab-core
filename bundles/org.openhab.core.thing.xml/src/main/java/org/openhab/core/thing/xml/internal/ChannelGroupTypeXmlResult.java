@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.type.ChannelDefinition;
 import org.openhab.core.thing.type.ChannelGroupType;
 import org.openhab.core.thing.type.ChannelGroupTypeBuilder;
@@ -33,16 +35,18 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * @author Chris Jackson - Updated to support channel properties
  * @author Christoph Weitkamp - Removed "advanced" attribute
  */
+@NonNullByDefault
 public class ChannelGroupTypeXmlResult {
 
     private final ChannelGroupTypeUID channelGroupTypeUID;
     private final String label;
-    private final String description;
-    private final String category;
-    private final List<ChannelXmlResult> channelTypeReferences;
+    private final @Nullable String description;
+    private final @Nullable String category;
+    private final @Nullable List<ChannelXmlResult> channelTypeReferences;
 
-    public ChannelGroupTypeXmlResult(ChannelGroupTypeUID channelGroupTypeUID, String label, String description,
-            String category, List<ChannelXmlResult> channelTypeReferences) {
+    public ChannelGroupTypeXmlResult(ChannelGroupTypeUID channelGroupTypeUID, String label,
+            @Nullable String description, @Nullable String category,
+            @Nullable List<ChannelXmlResult> channelTypeReferences) {
         this.channelGroupTypeUID = channelGroupTypeUID;
         this.label = label;
         this.description = description;
@@ -54,8 +58,8 @@ public class ChannelGroupTypeXmlResult {
         return channelGroupTypeUID;
     }
 
-    protected List<ChannelDefinition> toChannelDefinitions(List<ChannelXmlResult> channelTypeReferences)
-            throws ConversionException {
+    protected @Nullable List<ChannelDefinition> toChannelDefinitions(
+            @Nullable List<ChannelXmlResult> channelTypeReferences) throws ConversionException {
         List<ChannelDefinition> channelTypeDefinitions = null;
 
         if (channelTypeReferences != null && !channelTypeReferences.isEmpty()) {
@@ -71,9 +75,11 @@ public class ChannelGroupTypeXmlResult {
 
     public ChannelGroupType toChannelGroupType() throws ConversionException {
         ChannelGroupTypeBuilder builder = ChannelGroupTypeBuilder.instance(channelGroupTypeUID, label);
+        String description = this.description;
         if (description != null) {
             builder.withDescription(description);
         }
+        String category = this.category;
         if (category != null) {
             builder.withCategory(category);
         }

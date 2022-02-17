@@ -71,13 +71,13 @@ public class ThingTypeI18nUtil {
     }
 
     public @Nullable String getChannelGroupDescription(Bundle bundle, ThingTypeUID thingTypeUID,
-            ChannelGroupDefinition channelGroup, String defaultDescription, @Nullable Locale locale) {
+            ChannelGroupDefinition channelGroup, @Nullable String defaultDescription, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultDescription,
                 () -> inferThingTypeKey(thingTypeUID, channelGroup, "description"));
         return i18nProvider.getText(bundle, key, defaultDescription, locale);
     }
 
-    public @Nullable String getChannelLabel(Bundle bundle, ChannelTypeUID channelTypeUID, String defaultLabel,
+    public @Nullable String getChannelLabel(Bundle bundle, ChannelTypeUID channelTypeUID, @Nullable String defaultLabel,
             @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferChannelKey(channelTypeUID, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
@@ -97,34 +97,34 @@ public class ThingTypeI18nUtil {
     }
 
     public @Nullable String getChannelGroupLabel(Bundle bundle, ChannelGroupTypeUID channelGroupTypeUID,
-            String defaultLabel, @Nullable Locale locale) {
+            @Nullable String defaultLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferChannelGroupKey(channelGroupTypeUID, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }
 
     public @Nullable String getChannelGroupLabel(Bundle bundle, ThingTypeUID thingTypeUID,
-            ChannelGroupDefinition channelGroup, String defaultLabel, @Nullable Locale locale) {
+            ChannelGroupDefinition channelGroup, @Nullable String defaultLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel,
                 () -> inferThingTypeKey(thingTypeUID, channelGroup, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }
 
     public @Nullable String getChannelStateOption(Bundle bundle, ChannelTypeUID channelTypeUID, String optionValue,
-            String defaultOptionLabel, @Nullable Locale locale) {
+            @Nullable String defaultOptionLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultOptionLabel,
                 () -> inferChannelKey(channelTypeUID, "state.option." + optionValue));
         return i18nProvider.getText(bundle, key, defaultOptionLabel, locale);
     }
 
     public @Nullable String getChannelCommandOption(Bundle bundle, ChannelTypeUID channelTypeUID, String optionValue,
-            String defaultOptionLabel, @Nullable Locale locale) {
+            @Nullable String defaultOptionLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultOptionLabel,
                 () -> inferChannelKey(channelTypeUID, "command.option." + optionValue));
         return i18nProvider.getText(bundle, key, defaultOptionLabel, locale);
     }
 
-    public @Nullable String getChannelStatePattern(Bundle bundle, ChannelTypeUID channelTypeUID, String defaultPattern,
-            @Nullable Locale locale) {
+    public @Nullable String getChannelStatePattern(Bundle bundle, ChannelTypeUID channelTypeUID,
+            @Nullable String defaultPattern, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultPattern, () -> inferChannelKey(channelTypeUID, "state.pattern"));
         return i18nProvider.getText(bundle, key, defaultPattern, locale);
     }
@@ -135,7 +135,7 @@ public class ThingTypeI18nUtil {
         return i18nProvider.getText(bundle, key, defaultDescription, locale);
     }
 
-    public @Nullable String getLabel(Bundle bundle, ThingTypeUID thingTypeUID, String defaultLabel,
+    public @Nullable String getLabel(Bundle bundle, ThingTypeUID thingTypeUID, @Nullable String defaultLabel,
             @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferThingTypeKey(thingTypeUID, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.internal.firmware;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -19,6 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Dimitar Ivanov - Initial contribution
  */
+@NonNullByDefault
 class ParameterChecks {
 
     static void checkNotNull(@Nullable Object object, String argumentName) {
