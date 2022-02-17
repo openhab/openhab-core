@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.type.ChannelDefinition;
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author Simon Kaufmann - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class DumbThingTypeProvider implements ThingTypeProvider {
 
     private final Logger logger = LoggerFactory.getLogger(DumbThingTypeProvider.class);
@@ -56,12 +59,12 @@ public class DumbThingTypeProvider implements ThingTypeProvider {
     }
 
     @Override
-    public Collection<ThingType> getThingTypes(Locale locale) {
+    public Collection<ThingType> getThingTypes(@Nullable Locale locale) {
         return THING_TYPES.values();
     }
 
     @Override
-    public ThingType getThingType(ThingTypeUID thingTypeUID, Locale locale) {
+    public @Nullable ThingType getThingType(ThingTypeUID thingTypeUID, @Nullable Locale locale) {
         return THING_TYPES.get(thingTypeUID);
     }
 }

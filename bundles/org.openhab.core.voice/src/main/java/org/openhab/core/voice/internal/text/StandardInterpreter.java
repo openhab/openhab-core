@@ -14,6 +14,8 @@ package org.openhab.core.voice.internal.text;
 
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.HSBType;
@@ -28,7 +30,9 @@ import org.openhab.core.types.RefreshType;
 import org.openhab.core.voice.text.AbstractRuleBasedInterpreter;
 import org.openhab.core.voice.text.Expression;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
@@ -38,8 +42,21 @@ import org.osgi.service.component.annotations.Reference;
  * @author Kai Kreuzer - Added further German interpretation rules
  * @author Laurent Garnier - Added French interpretation rules
  */
+@NonNullByDefault
 @Component(service = HumanLanguageInterpreter.class)
 public class StandardInterpreter extends AbstractRuleBasedInterpreter {
+
+    @Activate
+    public StandardInterpreter(final @Reference EventPublisher eventPublisher,
+            final @Reference ItemRegistry itemRegistry) {
+        super(eventPublisher, itemRegistry);
+    }
+
+    @Override
+    @Deactivate
+    protected void deactivate() {
+        super.deactivate();
+    }
 
     @Override
     public void createRules() {
@@ -308,29 +325,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
     }
 
     @Override
-    public String getLabel(Locale locale) {
+    public String getLabel(@Nullable Locale locale) {
         return "Built-in Interpreter";
-    }
-
-    @Override
-    @Reference
-    public void setItemRegistry(ItemRegistry ItemRegistry) {
-        super.setItemRegistry(ItemRegistry);
-    }
-
-    @Override
-    public void unsetItemRegistry(ItemRegistry itemRegistry) {
-        super.unsetItemRegistry(itemRegistry);
-    }
-
-    @Override
-    @Reference
-    public void setEventPublisher(EventPublisher EventPublisher) {
-        super.setEventPublisher(EventPublisher);
-    }
-
-    @Override
-    public void unsetEventPublisher(EventPublisher eventPublisher) {
-        super.unsetEventPublisher(eventPublisher);
     }
 }

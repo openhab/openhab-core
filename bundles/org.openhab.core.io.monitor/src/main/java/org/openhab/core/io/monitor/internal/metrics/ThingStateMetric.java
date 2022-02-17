@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
@@ -46,6 +47,7 @@ import io.micrometer.core.instrument.Tags;
  *
  * @author Robert Bach - Initial contribution
  */
+@NonNullByDefault
 public class ThingStateMetric implements OpenhabCoreMeterBinder, EventSubscriber {
     private final Logger logger = LoggerFactory.getLogger(ThingStateMetric.class);
     public static final String METRIC_NAME = "openhab.thing.state";
@@ -66,7 +68,7 @@ public class ThingStateMetric implements OpenhabCoreMeterBinder, EventSubscriber
     }
 
     @Override
-    public void bindTo(@io.micrometer.core.lang.NonNull MeterRegistry meterRegistry) {
+    public void bindTo(@NonNullByDefault({}) MeterRegistry meterRegistry) {
         unbind();
         logger.debug("ThingStateMetric is being bound...");
         this.meterRegistry = meterRegistry;

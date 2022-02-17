@@ -12,11 +12,14 @@
  */
 package org.openhab.core.model.core;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This class holds all important constants relevant for this bundle.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class ModelCoreConstants {
 
     /** The service pid used for the managed service (without the "org.openhab.core" prefix */

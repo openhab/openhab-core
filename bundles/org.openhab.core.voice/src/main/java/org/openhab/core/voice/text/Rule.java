@@ -14,12 +14,15 @@ package org.openhab.core.voice.text;
 
 import java.util.ResourceBundle;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Represents an expression plus action code that will be executed after successful parsing. This class is immutable and
  * deriving classes should conform to this principle.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 public abstract class Rule {
 
     private Expression expression;

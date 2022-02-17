@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.dto.RuleDTO;
 
 /**
@@ -19,6 +21,7 @@ import org.openhab.core.automation.dto.RuleDTO;
  *
  * @author Benedikt Niehues - Initial contribution
  */
+@NonNullByDefault
 public class RuleAddedEvent extends AbstractRuleRegistryEvent {
 
     public static final String TYPE = RuleAddedEvent.class.getSimpleName();
@@ -31,7 +34,7 @@ public class RuleAddedEvent extends AbstractRuleRegistryEvent {
      * @param source the source of the event
      * @param ruleDTO the rule for which this event is created
      */
-    public RuleAddedEvent(String topic, String payload, String source, RuleDTO rule) {
+    public RuleAddedEvent(String topic, String payload, @Nullable String source, RuleDTO rule) {
         super(topic, payload, source, rule);
     }
 

@@ -14,12 +14,15 @@ package org.openhab.core.items;
 
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This exception can be thrown whenever a search pattern does not uniquely identify
  * an item. The list of matching items must be made available through this exception.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class ItemNotUniqueException extends ItemLookupException {
 
     private static final long serialVersionUID = 5154625234283910124L;
@@ -33,7 +36,7 @@ public class ItemNotUniqueException extends ItemLookupException {
 
     /**
      * Returns all items that match the search pattern
-     * 
+     *
      * @return collection of items matching the search pattern
      */
     public Collection<Item> getMatchingItems() {

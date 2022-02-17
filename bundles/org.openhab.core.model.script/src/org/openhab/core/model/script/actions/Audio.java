@@ -15,6 +15,7 @@ package org.openhab.core.model.script.actions;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.model.script.engine.action.ActionDoc;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  */
+@NonNullByDefault
 public class Audio {
 
     private static final Logger logger = LoggerFactory.getLogger(Audio.class);

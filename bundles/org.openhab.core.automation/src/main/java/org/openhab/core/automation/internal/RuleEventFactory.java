@@ -17,6 +17,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.dto.RuleDTO;
@@ -38,6 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - Initial contribution
  * @author Markus Rathgeb - Use the DTO for the Rule representation
  */
+@NonNullByDefault
 @Component(service = EventFactory.class, immediate = true)
 public class RuleEventFactory extends AbstractEventFactory {
 
@@ -65,7 +68,8 @@ public class RuleEventFactory extends AbstractEventFactory {
     }
 
     @Override
-    protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
+    protected Event createEventByType(String eventType, String topic, String payload, @Nullable String source)
+            throws Exception {
         logger.trace("creating ruleEvent of type: {}", eventType);
         if (RuleAddedEvent.TYPE.equals(eventType)) {
             return createRuleAddedEvent(topic, payload, source);
@@ -79,7 +83,7 @@ public class RuleEventFactory extends AbstractEventFactory {
         throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");
     }
 
-    private Event createRuleUpdatedEvent(String topic, String payload, String source) {
+    private Event createRuleUpdatedEvent(String topic, String payload, @Nullable String source) {
         RuleDTO[] ruleDTO = deserializePayload(payload, RuleDTO[].class);
         if (ruleDTO.length != 2) {
             throw new IllegalArgumentException("Creation of RuleUpdatedEvent failed: invalid payload: " + payload);
@@ -87,17 +91,17 @@ public class RuleEventFactory extends AbstractEventFactory {
         return new RuleUpdatedEvent(topic, payload, source, ruleDTO[0], ruleDTO[1]);
     }
 
-    private Event createRuleStatusInfoEvent(String topic, String payload, String source) {
+    private Event createRuleStatusInfoEvent(String topic, String payload, @Nullable String source) {
         RuleStatusInfo statusInfo = deserializePayload(payload, RuleStatusInfo.class);
         return new RuleStatusInfoEvent(topic, payload, source, statusInfo, getRuleId(topic));
     }
 
-    private Event createRuleRemovedEvent(String topic, String payload, String source) {
+    private Event createRuleRemovedEvent(String topic, String payload, @Nullable String source) {
         RuleDTO ruleDTO = deserializePayload(payload, RuleDTO.class);
         return new RuleRemovedEvent(topic, payload, source, ruleDTO);
     }
 
-    private Event createRuleAddedEvent(String topic, String payload, String source) {
+    private Event createRuleAddedEvent(String topic, String payload, @Nullable String source) {
         RuleDTO ruleDTO = deserializePayload(payload, RuleDTO.class);
         return new RuleAddedEvent(topic, payload, source, ruleDTO);
     }

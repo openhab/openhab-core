@@ -18,11 +18,12 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.XtextPackage;
 import org.eclipse.xtext.resource.FileExtensionProvider;
 import org.eclipse.xtext.resource.IResourceFactory;
 import org.eclipse.xtext.resource.IResourceServiceProvider;
-import org.eclipse.xtext.resource.IResourceServiceProvider.Registry;
 import org.eclipse.xtext.resource.impl.BinaryGrammarResourceFactoryImpl;
 import org.eclipse.xtext.resource.impl.ResourceServiceProviderRegistryImpl;
 import org.openhab.core.model.ide.ItemsIdeSetup;
@@ -46,9 +47,10 @@ import com.google.inject.Singleton;
  * @author Simon Kaufmann - Initial contribution
  */
 @Singleton
+@NonNullByDefault
 public class RegistryProvider implements Provider<IResourceServiceProvider.Registry> {
 
-    private IResourceServiceProvider.Registry registry;
+    private IResourceServiceProvider.@Nullable Registry registry;
     private final ScriptServiceUtil scriptServiceUtil;
     private final ScriptEngine scriptEngine;
 
@@ -59,13 +61,12 @@ public class RegistryProvider implements Provider<IResourceServiceProvider.Regis
 
     @Override
     public synchronized IResourceServiceProvider.Registry get() {
-        if (registry == null) {
-            registry = createRegistry();
-        }
+        IResourceServiceProvider.Registry registry = Objects.requireNonNullElse(this.registry, createRegistry());
+        this.registry = registry;
         return registry;
     }
 
-    private Registry createRegistry() {
+    private IResourceServiceProvider.Registry createRegistry() {
         registerDefaultFactories();
 
         IResourceServiceProvider.Registry registry = new ResourceServiceProviderRegistryImpl();

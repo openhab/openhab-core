@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.core.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -19,21 +21,22 @@ import org.osgi.framework.BundleContext;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class ModelCoreActivator implements BundleActivator {
 
-    private static BundleContext context;
+    private static @Nullable BundleContext context;
 
-    static BundleContext getContext() {
+    static @Nullable BundleContext getContext() {
         return context;
     }
 
     @Override
-    public void start(BundleContext bundleContext) throws Exception {
+    public void start(@Nullable BundleContext bundleContext) throws Exception {
         ModelCoreActivator.context = bundleContext;
     }
 
     @Override
-    public void stop(BundleContext bundleContext) throws Exception {
+    public void stop(@Nullable BundleContext bundleContext) throws Exception {
         ModelCoreActivator.context = null;
     }
 }

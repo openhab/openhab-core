@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -36,6 +37,7 @@ import io.micrometer.core.instrument.Tags;
  *
  * @author Robert Bach - Initial contribution
  */
+@NonNullByDefault
 public class BundleStateMetric implements OpenhabCoreMeterBinder, BundleListener {
     private final Logger logger = LoggerFactory.getLogger(BundleStateMetric.class);
     public static final String METRIC_NAME = "openhab.bundle.state";
@@ -52,7 +54,7 @@ public class BundleStateMetric implements OpenhabCoreMeterBinder, BundleListener
     }
 
     @Override
-    public void bindTo(@io.micrometer.core.lang.NonNull MeterRegistry meterRegistry) {
+    public void bindTo(@NonNullByDefault({}) MeterRegistry meterRegistry) {
         unbind();
         logger.debug("BundleStateMetric is being bound...");
         this.meterRegistry = meterRegistry;
@@ -63,7 +65,7 @@ public class BundleStateMetric implements OpenhabCoreMeterBinder, BundleListener
     }
 
     @Override
-    public void bundleChanged(BundleEvent bundleEvent) {
+    public void bundleChanged(@NonNullByDefault({}) BundleEvent bundleEvent) {
         if (meterRegistry == null) {
             return;
         }

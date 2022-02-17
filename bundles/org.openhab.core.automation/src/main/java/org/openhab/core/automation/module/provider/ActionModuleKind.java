@@ -12,11 +12,14 @@
  */
 package org.openhab.core.automation.module.provider;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Type to distinguish annotated ActionModules
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public enum ActionModuleKind {
     SINGLE,
     SERVICE,

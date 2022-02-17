@@ -12,11 +12,14 @@
  */
 package org.openhab.core.model.script.engine.action;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This interface must be implemented by services that want to contribute script actions.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface ActionService {
 
     /**

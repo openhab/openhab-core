@@ -17,6 +17,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.thing.type.ChannelDefinitionBuilder;
 import org.openhab.core.thing.type.ChannelGroupType;
@@ -36,6 +38,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Dennis Nobel - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class TestHueChannelTypeProvider implements ChannelTypeProvider, ChannelGroupTypeProvider {
 
     public static final ChannelTypeUID COLORX_TEMP_CHANNEL_TYPE_UID = new ChannelTypeUID("Xhue:Xcolor_temperature");
@@ -45,8 +48,8 @@ public class TestHueChannelTypeProvider implements ChannelTypeProvider, ChannelG
 
     public static final ChannelGroupTypeUID GROUP_CHANNEL_GROUP_TYPE_UID = new ChannelGroupTypeUID("hue", "group");
 
-    private List<ChannelType> channelTypes;
-    private List<ChannelGroupType> channelGroupTypes;
+    private List<ChannelType> channelTypes = List.of();
+    private List<ChannelGroupType> channelGroupTypes = List.of();
 
     public TestHueChannelTypeProvider() {
         try {
@@ -84,12 +87,12 @@ public class TestHueChannelTypeProvider implements ChannelTypeProvider, ChannelG
     }
 
     @Override
-    public Collection<ChannelType> getChannelTypes(Locale locale) {
+    public Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
         return channelTypes;
     }
 
     @Override
-    public ChannelType getChannelType(ChannelTypeUID channelTypeUID, Locale locale) {
+    public @Nullable ChannelType getChannelType(ChannelTypeUID channelTypeUID, @Nullable Locale locale) {
         for (ChannelType channelType : channelTypes) {
             if (channelType.getUID().equals(channelTypeUID)) {
                 return channelType;
@@ -99,7 +102,8 @@ public class TestHueChannelTypeProvider implements ChannelTypeProvider, ChannelG
     }
 
     @Override
-    public ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID, Locale locale) {
+    public @Nullable ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID,
+            @Nullable Locale locale) {
         for (ChannelGroupType channelGroupType : channelGroupTypes) {
             if (channelGroupType.getUID().equals(channelGroupTypeUID)) {
                 return channelGroupType;
@@ -109,7 +113,7 @@ public class TestHueChannelTypeProvider implements ChannelTypeProvider, ChannelG
     }
 
     @Override
-    public Collection<ChannelGroupType> getChannelGroupTypes(Locale locale) {
+    public Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
         return channelGroupTypes;
     }
 }

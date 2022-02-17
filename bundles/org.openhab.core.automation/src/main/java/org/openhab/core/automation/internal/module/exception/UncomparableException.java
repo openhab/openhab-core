@@ -12,11 +12,14 @@
  */
 package org.openhab.core.automation.internal.module.exception;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This Exception is used as an indicator for not matching types during comparation
  *
  * @author Benedikt Niehues - Initial contribution
  */
+@NonNullByDefault
 public class UncomparableException extends Exception {
 
     private static final long serialVersionUID = 4891205711357448390L;

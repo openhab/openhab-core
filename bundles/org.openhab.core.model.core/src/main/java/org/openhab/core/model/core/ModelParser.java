@@ -12,11 +12,14 @@
  */
 package org.openhab.core.model.core;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This interface has to be implemented by services that register an EMF model parser
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface ModelParser {
 
     /**

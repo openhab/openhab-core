@@ -12,6 +12,8 @@
  */
 package org.openhab.core.auth.client.oauth2;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This is an exception class for OAUTH specific errors. i.e. The error responses described in the
  * RFC6749. Do NOT confuse this with Java errors.
@@ -29,6 +31,7 @@ package org.openhab.core.auth.client.oauth2;
  * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.2.1">rfc6749 section-4.1.2.1</a>
  * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.2">rfc6749 section-5.2</a>
  */
+@NonNullByDefault
 public class OAuthResponseException extends Exception {
 
     private static final long serialVersionUID = -3268280125111194474L;
@@ -38,10 +41,10 @@ public class OAuthResponseException extends Exception {
      * Must be one of { invalid_request, invalid_client, invalid_grant, unauthorized_client, unsupported_grant_type,
      * invalid_scope, access_denied, unsupported_response_type, server_error, temporarily_unavailable }
      */
-    private String error;
-    private String errorDescription;
-    private String errorUri;
-    private String state;
+    private String error = "";
+    private String errorDescription = "";
+    private String errorUri = "";
+    private String state = "";
 
     public String getError() {
         return error;

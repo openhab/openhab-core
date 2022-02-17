@@ -14,11 +14,14 @@ package org.openhab.core.model.core;
 
 import java.util.function.Supplier;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Service interface to execute EMF methods in a single based thread.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public interface SafeEMF {
 
     /**

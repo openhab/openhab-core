@@ -18,6 +18,8 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xpand2.XpandExecutionContext;
 import org.eclipse.xtext.Grammar;
 import org.eclipse.xtext.ecore.EcoreSupportStandaloneSetup;
@@ -32,21 +34,23 @@ import org.slf4j.LoggerFactory;
  *
  * @author Holger Schill, Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class LazyLanguageConfig extends LanguageConfig {
 
     private final Logger logger = LoggerFactory.getLogger(LazyLanguageConfig.class);
+    @Nullable
     String uri = null;
     boolean isUI = false;
 
     @Override
-    public void setUri(String uri) {
+    public void setUri(@Nullable String uri) {
         this.uri = uri;
     }
 
-    private Grammar grammar;
+    private @Nullable Grammar grammar;
 
     @Override
-    public Grammar getGrammar() {
+    public @Nullable Grammar getGrammar() {
         setUriReally(uri);
         return grammar;
     }
@@ -61,22 +65,23 @@ public class LazyLanguageConfig extends LanguageConfig {
     }
 
     @Override
-    protected void validateGrammar(Grammar grammar) {
+    protected void validateGrammar(@NonNullByDefault({}) Grammar grammar) {
     }
 
     @Override
-    public void generate(Grammar grammar, XpandExecutionContext ctx) {
+    public void generate(@NonNullByDefault({}) Grammar grammar, @NonNullByDefault({}) XpandExecutionContext ctx) {
         initializeReally();
         super.generate(grammar, ctx);
     }
 
     @Override
-    public void generate(LanguageConfig config, XpandExecutionContext ctx) throws CompositeGeneratorException {
+    public void generate(@NonNullByDefault({}) LanguageConfig config, @NonNullByDefault({}) XpandExecutionContext ctx)
+            throws CompositeGeneratorException {
         initializeReally();
         super.generate(config, ctx);
     }
 
-    public void setUriReally(String uri) {
+    public void setUriReally(@Nullable String uri) {
         ResourceSet rs = GlobalResourceSet.getINSTANCE();
         for (String loadedResource : getLoadedResources()) {
             URI loadedResourceUri = URI.createURI(loadedResource);

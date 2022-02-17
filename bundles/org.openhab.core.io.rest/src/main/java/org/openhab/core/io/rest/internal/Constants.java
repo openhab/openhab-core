@@ -12,11 +12,14 @@
  */
 package org.openhab.core.io.rest.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Utility class for constants.
  *
  * @author Ivan Iliev - Initial contribution
  */
+@NonNullByDefault
 public class Constants {
     public static final String CORS_PROPERTY = "enable";
 }

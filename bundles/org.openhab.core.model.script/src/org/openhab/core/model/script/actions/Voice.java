@@ -12,6 +12,10 @@
  */
 package org.openhab.core.model.script.actions;
 
+import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.model.script.engine.action.ActionDoc;
 import org.openhab.core.model.script.engine.action.ParamDoc;
@@ -25,6 +29,7 @@ import org.openhab.core.voice.text.InterpretationException;
  * @author Kai Kreuzer - Initial contribution
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  */
+@NonNullByDefault
 public class Voice {
 
     /**
@@ -49,7 +54,7 @@ public class Voice {
      */
     @ActionDoc(text = "says a given text with the default voice and the given volume")
     public static void say(@ParamDoc(name = "text") Object text,
-            @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
+            @ParamDoc(name = "volume", text = "the volume to be used") @Nullable PercentType volume) {
         say(text, null, null, volume);
     }
 
@@ -64,7 +69,7 @@ public class Voice {
      *            voiceId is assumed to be available on the default TTS service.
      */
     @ActionDoc(text = "says a given text with a given voice")
-    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") String voice) {
+    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice) {
         say(text, voice, null, null);
     }
 
@@ -80,7 +85,7 @@ public class Voice {
      * @param volume The volume to be used
      */
     @ActionDoc(text = "says a given text with a given voice and the given volume")
-    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") String voice,
+    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
             @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
         say(text, voice, null, volume);
     }
@@ -96,8 +101,8 @@ public class Voice {
      *            be used
      */
     @ActionDoc(text = "says a given text with a given voice through the given sink")
-    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") String voice,
-            @ParamDoc(name = "sink") String sink) {
+    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
+            @ParamDoc(name = "sink") @Nullable String sink) {
         say(text, voice, sink, null);
     }
 
@@ -113,9 +118,9 @@ public class Voice {
      * @param volume The volume to be used
      */
     @ActionDoc(text = "says a given text with a given voice and the given volume through the given sink")
-    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") String voice,
-            @ParamDoc(name = "sink") String sink,
-            @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
+    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
+            @ParamDoc(name = "sink") @Nullable String sink,
+            @ParamDoc(name = "volume", text = "the volume to be used") @Nullable PercentType volume) {
         String output = text.toString();
         if (!output.isBlank()) {
             VoiceActionService.voiceManager.say(output, voice, sink, volume);
@@ -145,13 +150,14 @@ public class Voice {
      */
     @ActionDoc(text = "interprets a given text by a given human language interpreter", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
-            @ParamDoc(name = "interpreter") String interpreter) {
+            @ParamDoc(name = "interpreter") @Nullable String interpreter) {
         String response;
         try {
             response = VoiceActionService.voiceManager.interpret(text.toString(), interpreter);
         } catch (InterpretationException e) {
-            say(e.getMessage());
-            response = e.getMessage();
+            String message = Objects.requireNonNullElse(e.getMessage(), "");
+            say(message);
+            response = message;
         }
         return response;
     }
@@ -168,15 +174,16 @@ public class Voice {
      */
     @ActionDoc(text = "interprets a given text by a given human language interpreter", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
-            @ParamDoc(name = "interpreter") String interpreter, @ParamDoc(name = "sink") String sink) {
+            @ParamDoc(name = "interpreter") String interpreter, @ParamDoc(name = "sink") @Nullable String sink) {
         String response;
         try {
             response = VoiceActionService.voiceManager.interpret(text.toString(), interpreter);
         } catch (InterpretationException e) {
+            String message = Objects.requireNonNullElse(e.getMessage(), "");
             if (sink != null) {
-                say(e.getMessage(), null, sink);
+                say(message, null, sink);
             }
-            response = e.getMessage();
+            response = message;
         }
         return response;
     }

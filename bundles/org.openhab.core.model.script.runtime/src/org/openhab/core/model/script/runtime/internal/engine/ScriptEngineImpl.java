@@ -24,14 +24,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.openhab.core.model.core.ModelParser;
-import org.openhab.core.model.script.ScriptServiceUtil;
-import org.openhab.core.model.script.ScriptStandaloneSetup;
-import org.openhab.core.model.script.engine.Script;
-import org.openhab.core.model.script.engine.ScriptEngine;
-import org.openhab.core.model.script.engine.ScriptExecutionException;
-import org.openhab.core.model.script.engine.ScriptParsingException;
-import org.openhab.core.model.script.runtime.ScriptRuntime;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
@@ -41,6 +33,14 @@ import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 import org.eclipse.xtext.validation.Issue;
 import org.eclipse.xtext.xbase.XExpression;
+import org.openhab.core.model.core.ModelParser;
+import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.model.script.ScriptStandaloneSetup;
+import org.openhab.core.model.script.engine.Script;
+import org.openhab.core.model.script.engine.ScriptEngine;
+import org.openhab.core.model.script.engine.ScriptExecutionException;
+import org.openhab.core.model.script.engine.ScriptParsingException;
+import org.openhab.core.model.script.runtime.ScriptRuntime;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -190,7 +190,7 @@ public class ScriptEngineImpl implements ScriptEngine, ModelParser {
     private void deleteResource(Resource resource) {
         try {
             resource.delete(Collections.emptyMap());
-        } catch(IOException e) {
+        } catch (IOException e) {
             // Do nothing
         }
     }

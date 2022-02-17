@@ -12,11 +12,14 @@
  */
 package org.openhab.core.model.core;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * These are the event types that can occur as model repository changes
- * 
+ *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public enum EventType {
     ADDED,
     REMOVED,

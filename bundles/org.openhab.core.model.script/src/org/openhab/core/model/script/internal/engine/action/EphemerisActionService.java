@@ -12,9 +12,12 @@
  */
 package org.openhab.core.model.script.internal.engine.action;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.ephemeris.EphemerisManager;
 import org.openhab.core.model.script.actions.Ephemeris;
 import org.openhab.core.model.script.engine.action.ActionService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -24,22 +27,18 @@ import org.osgi.service.component.annotations.Reference;
  * @author Gaël L'hopital - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class EphemerisActionService implements ActionService {
 
-    public static EphemerisManager ephemerisManager;
+    public static @Nullable EphemerisManager ephemerisManager;
+
+    @Activate
+    public EphemerisActionService(final @Reference EphemerisManager ephemerisManager) {
+        EphemerisActionService.ephemerisManager = ephemerisManager;
+    }
 
     @Override
     public Class<?> getActionClass() {
         return Ephemeris.class;
     }
-
-    @Reference
-    protected void setEphemerisManager(EphemerisManager ephemerisManager) {
-        EphemerisActionService.ephemerisManager = ephemerisManager;
-    }
-
-    protected void unsetEphemerisManager(EphemerisManager ephemerisManager) {
-        EphemerisActionService.ephemerisManager = null;
-    }
-
 }

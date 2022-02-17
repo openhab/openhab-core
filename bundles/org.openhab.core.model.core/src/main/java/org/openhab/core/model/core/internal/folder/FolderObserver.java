@@ -34,6 +34,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.core.ModelRepository;
@@ -59,6 +61,7 @@ import org.slf4j.LoggerFactory;
  * @author Fabio Marini - Refactoring to use WatchService
  * @author Ana Dimova - reduce to a single watch thread for all class instances
  */
+@NonNullByDefault
 @Component(name = "org.openhab.core.folder", immediate = true, configurationPid = "org.openhab.folder", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class FolderObserver extends AbstractWatchService {
     private Logger logger = LoggerFactory.getLogger(FolderObserver.class);
@@ -163,7 +166,7 @@ public class FolderObserver extends AbstractWatchService {
     }
 
     @Override
-    protected Kind<?>[] getWatchEventKinds(Path directory) {
+    protected Kind<?> @Nullable [] getWatchEventKinds(Path directory) {
         if (directory != null && isNotEmpty(folderFileExtMap)) {
             String folderName = directory.getFileName().toString();
             if (folderFileExtMap.containsKey(folderName)) {
@@ -228,7 +231,7 @@ public class FolderObserver extends AbstractWatchService {
         }
 
         @Override
-        public boolean accept(File dir, String name) {
+        public boolean accept(@NonNullByDefault({}) File dir, @NonNullByDefault({}) String name) {
             if (validExtensions != null && validExtensions.length > 0) {
                 for (String extension : validExtensions) {
                     if (name.toLowerCase().endsWith("." + extension)) {
@@ -267,7 +270,7 @@ public class FolderObserver extends AbstractWatchService {
         }
     }
 
-    private File getFileByFileExtMap(Map<String, String[]> folderFileExtMap, String filename) {
+    private @Nullable File getFileByFileExtMap(Map<String, String[]> folderFileExtMap, String filename) {
         if (filename != null && !filename.trim().isEmpty() && isNotEmpty(folderFileExtMap)) {
             String extension = getExtension(filename);
             if (extension != null && !extension.trim().isEmpty()) {

@@ -12,11 +12,13 @@
  */
 package org.openhab.core.model.rule.runtime.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.rule.RulesStandaloneSetup;
 import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.model.script.engine.ScriptEngine;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -27,12 +29,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, service = { ModelParser.class, RuleRuntimeActivator.class })
 public class RuleRuntimeActivator implements ModelParser {
 
     private final Logger logger = LoggerFactory.getLogger(RuleRuntimeActivator.class);
-    private ScriptServiceUtil scriptServiceUtil;
-    private ScriptEngine scriptEngine;
+    private final ScriptServiceUtil scriptServiceUtil;
+    private final ScriptEngine scriptEngine;
+
+    @Activate
+    public RuleRuntimeActivator(final @Reference ScriptEngine scriptEngine,
+            final @Reference ScriptServiceUtil scriptServiceUtil) {
+        this.scriptEngine = scriptEngine;
+        this.scriptServiceUtil = scriptServiceUtil;
+    }
 
     public void activate(BundleContext bc) throws Exception {
         RulesStandaloneSetup.doSetup(scriptServiceUtil, scriptEngine);
@@ -47,23 +57,4 @@ public class RuleRuntimeActivator implements ModelParser {
     public String getExtension() {
         return "rules";
     }
-
-    @Reference
-    protected void setScriptServiceUtil(ScriptServiceUtil scriptServiceUtil) {
-        this.scriptServiceUtil = scriptServiceUtil;
-    }
-
-    protected void unsetScriptServiceUtil(ScriptServiceUtil scriptServiceUtil) {
-        this.scriptServiceUtil = null;
-    }
-
-    @Reference
-    public void setScriptEngine(ScriptEngine scriptEngine) {
-        this.scriptEngine = scriptEngine;
-    }
-
-    public void unsetScriptEngine(ScriptEngine scriptEngine) {
-        this.scriptEngine = null;
-    }
-
 }

@@ -13,12 +13,14 @@
 package org.openhab.core.model.lazygen;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
 /**
  *
  * @author Holger Schill, Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class GlobalResourceSet {
 
     public static ResourceSet getINSTANCE() {

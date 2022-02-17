@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.ide.server.UriExtensions;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class MappingUriExtensions extends UriExtensions {
 
     private final Logger logger = LoggerFactory.getLogger(MappingUriExtensions.class);
@@ -55,7 +57,7 @@ public class MappingUriExtensions extends UriExtensions {
     }
 
     @Override
-    public URI toUri(String pathWithScheme) {
+    public URI toUri(@NonNullByDefault({}) String pathWithScheme) {
         String decodedPathWithScheme = URLDecoder.decode(pathWithScheme, StandardCharsets.UTF_8);
         String localClientLocation = clientLocation;
         if (localClientLocation != null && decodedPathWithScheme.startsWith(localClientLocation)) {
@@ -76,7 +78,7 @@ public class MappingUriExtensions extends UriExtensions {
     }
 
     @Override
-    public String toUriString(URI uri) {
+    public String toUriString(@NonNullByDefault({}) URI uri) {
         if (clientLocation == null) {
             return uri.toString();
         }
@@ -84,7 +86,7 @@ public class MappingUriExtensions extends UriExtensions {
     }
 
     @Override
-    public String toUriString(java.net.URI uri) {
+    public String toUriString(@NonNullByDefault({}) java.net.URI uri) {
         return toUriString(URI.createURI(uri.toString()));
     }
 
@@ -158,8 +160,9 @@ public class MappingUriExtensions extends UriExtensions {
         return ret;
     }
 
-    private java.net.URI toURI(String pathWithScheme, String currentPath) {
-        return java.net.URI.create(pathWithScheme.replace(currentPath, serverLocation));
+    private java.net.URI toURI(String pathWithScheme, @Nullable String currentPath) {
+        String path = currentPath == null ? pathWithScheme : pathWithScheme.replace(currentPath, serverLocation);
+        return java.net.URI.create(path);
     }
 
     private String toPathAsInXtext212(java.net.URI uri) {
