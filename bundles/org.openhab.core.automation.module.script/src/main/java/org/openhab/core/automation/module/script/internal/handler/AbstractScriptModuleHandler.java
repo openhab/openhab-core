@@ -138,7 +138,6 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
      * @param engine the script engine that is used
      * @param context the variables and types to put into the execution context
      */
-
     protected void resetExecutionContext(ScriptEngine engine, Map<String, ?> context) {
         ScriptContext executionContext = engine.getContext();
 
