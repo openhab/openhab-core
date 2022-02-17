@@ -35,7 +35,7 @@ final class OptionsValidator implements ConfigDescriptionParameterValidator {
         if (param.getOptions().stream().map(o -> o.getValue()).noneMatch(v -> v.equals(value.toString()))) {
             MessageKey messageKey = MessageKey.OPTIONS_VIOLATED;
             return new ConfigValidationMessage(param.getName(), messageKey.defaultMessage, messageKey.key,
-                    param.getOptions());
+                    String.valueOf(value), param.getOptions());
         }
         return null;
     }
