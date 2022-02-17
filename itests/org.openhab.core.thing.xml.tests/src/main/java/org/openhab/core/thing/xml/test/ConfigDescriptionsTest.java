@@ -18,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.net.URI;
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
@@ -31,6 +32,7 @@ import org.openhab.core.thing.xml.test.LoadedTestBundle.StuffAddition;
 /**
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class ConfigDescriptionsTest extends JavaOSGiTest {
 
     private LoadedTestBundle loadedTestBundle() throws Exception {
@@ -38,7 +40,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
                 new StuffAddition().configDescriptions(3));
     }
 
-    private ConfigDescriptionRegistry configDescriptionRegistry;
+    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
 
     @BeforeEach
     public void before() {
@@ -55,7 +57,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
     @Test
     public void configDescriptionsShouldLoadProperly() throws Exception {
         try (final AutoCloseable unused = loadedTestBundle()) {
-            URI bridgeURI = new URI("thing-type:hue:bridge");
+            URI bridgeURI = URI.create("thing-type:hue:bridge");
             ConfigDescription bridgeConfigDescription = configDescriptionRegistry.getConfigDescriptions().stream()
                     .filter(it -> it.getUID().equals(bridgeURI)).findFirst().get();
 
@@ -85,7 +87,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
             assertThat(userNameParameter.getDescription(),
                     is("Name of a registered hue bridge user, that allows to access the API."));
 
-            URI colorURI = new URI("channel-type:hue:color");
+            URI colorURI = URI.create("channel-type:hue:color");
             ConfigDescription colorConfigDescription = configDescriptionRegistry.getConfigDescriptions().stream()
                     .filter(it -> it.getUID().equals(colorURI)).findFirst().get();
 
@@ -114,7 +116,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
     @Test
     public void parametersWithOptionsAndFiltersShouldLoadProperly() throws Exception {
         try (final AutoCloseable unused = loadedTestBundle()) {
-            URI dummyURI = new URI("thing-type:hue:dummy");
+            URI dummyURI = URI.create("thing-type:hue:dummy");
             ConfigDescription bridgeConfigDescription = configDescriptionRegistry.getConfigDescriptions().stream()
                     .filter(it -> it.getUID().equals(dummyURI)).findFirst().get();
             assertThat(bridgeConfigDescription, is(notNullValue()));

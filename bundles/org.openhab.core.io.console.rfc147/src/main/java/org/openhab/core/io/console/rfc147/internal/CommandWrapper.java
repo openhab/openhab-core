@@ -14,6 +14,7 @@ package org.openhab.core.io.console.rfc147.internal;
 
 import java.util.Arrays;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.console.ConsoleInterpreter;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 
@@ -21,6 +22,7 @@ import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class CommandWrapper {
 
     private final ConsoleCommandExtension command;

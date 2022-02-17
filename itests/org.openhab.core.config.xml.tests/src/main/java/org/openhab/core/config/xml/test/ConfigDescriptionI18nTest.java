@@ -17,11 +17,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
@@ -38,11 +40,12 @@ import org.openhab.core.test.java.JavaOSGiTest;
  * @author Alex Tugarev - Initial contribution; Extended tests for options and filters
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class ConfigDescriptionI18nTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "acmeweather.bundle";
 
-    private ConfigDescriptionProvider configDescriptionProvider;
+    private @NonNullByDefault({}) ConfigDescriptionProvider configDescriptionProvider;
 
     @BeforeEach
     public void setUp() {
@@ -60,8 +63,7 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
             Collection<ConfigDescription> configDescriptions = configDescriptionProvider
                     .getConfigDescriptions(Locale.GERMAN);
 
-            ConfigDescription config = findDescription(configDescriptions, "config:Dummy");
-            assertThat(config, is(notNullValue()));
+            ConfigDescription config = Objects.requireNonNull(findDescription(configDescriptions, "config:Dummy"));
 
             String expected = "location.label = Ort\n" + //
                     "location.description = Ort der Wetterinformation.\n" + //
@@ -101,12 +103,8 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
         return sb.toString();
     }
 
-    private static ConfigDescription findDescription(Collection<ConfigDescription> descriptions, String uri) {
-        try {
-            return findDescription(descriptions, new URI(uri));
-        } catch (URISyntaxException e) {
-            return null;
-        }
+    private static @Nullable ConfigDescription findDescription(Collection<ConfigDescription> descriptions, String uri) {
+        return findDescription(descriptions, URI.create(uri));
     }
 
     private static ConfigDescription findDescription(Collection<ConfigDescription> descriptions, URI uri) {

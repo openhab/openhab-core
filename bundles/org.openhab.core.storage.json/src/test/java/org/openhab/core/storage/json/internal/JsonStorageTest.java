@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.Configuration;
@@ -44,10 +45,11 @@ import com.google.gson.reflect.TypeToken;
  * @author Stefan Triller - Initial contribution
  * @author Samie Salonen - test for ensuring ordering of keys in json
  */
+@NonNullByDefault
 public class JsonStorageTest extends JavaTest {
 
-    private JsonStorage<DummyObject> objectStorage;
-    private File tmpFile;
+    private @NonNullByDefault({}) JsonStorage<DummyObject> objectStorage;
+    private @NonNullByDefault({}) File tmpFile;
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -245,17 +247,21 @@ public class JsonStorageTest extends JavaTest {
             innerSetWithComparableElements.add(50);
             innerSetWithComparableElements.add(-5);
 
-            try {
-                innerMapWithNonComparableKeys.put(new URL("http://www.example.com/key2"), 1);
-                innerMapWithNonComparableKeys.put(new URL("http://www.example.com/key1"), 2);
-                innerMapWithNonComparableKeys.put(new URL("http://www.example.com/key3"), 3);
+            innerMapWithNonComparableKeys.put(newURL("http://www.example.com/key2"), 1);
+            innerMapWithNonComparableKeys.put(newURL("http://www.example.com/key1"), 2);
+            innerMapWithNonComparableKeys.put(newURL("http://www.example.com/key3"), 3);
 
-                innerSetWithNonComparableElements.add(new URL("http://www.example.com/key2"));
-                innerSetWithNonComparableElements.add(new URL("http://www.example.com/key1"));
-                innerSetWithNonComparableElements.add(new URL("http://www.example.com/key3"));
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
+            innerSetWithNonComparableElements.add(newURL("http://www.example.com/key2"));
+            innerSetWithNonComparableElements.add(newURL("http://www.example.com/key1"));
+            innerSetWithNonComparableElements.add(newURL("http://www.example.com/key3"));
+        }
+    }
+
+    private static URL newURL(String url) {
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 

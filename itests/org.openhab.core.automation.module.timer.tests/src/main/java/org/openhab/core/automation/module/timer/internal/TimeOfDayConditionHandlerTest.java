@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.internal.module.handler.DayOfWeekConditionHandler;
@@ -35,10 +36,8 @@ import org.openhab.core.config.core.Configuration;
  *
  * @author Dominik Schlierf - Initial contribution
  */
+@NonNullByDefault
 public class TimeOfDayConditionHandlerTest extends BasicConditionHandlerTest {
-
-    public TimeOfDayConditionHandlerTest() {
-    }
 
     /**
      * This checks if the condition on its own works properly.

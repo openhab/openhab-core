@@ -15,6 +15,7 @@ package org.openhab.core.automation.module.timer.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.RuleRegistry;
@@ -28,13 +29,11 @@ import org.openhab.core.test.storage.VolatileStorageService;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class TimeOfDayTriggerHandlerTest extends JavaOSGiTest {
 
     private VolatileStorageService volatileStorageService = new VolatileStorageService();
-    private RuleRegistry ruleRegistry;
-
-    public TimeOfDayTriggerHandlerTest() {
-    }
+    private @NonNullByDefault({}) RuleRegistry ruleRegistry;
 
     @BeforeEach
     public void before() {

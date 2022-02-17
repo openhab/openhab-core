@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
@@ -31,6 +32,7 @@ import org.openhab.core.thing.ThingUID;
  * @author Thomas Höfer - Added representation
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class DiscoveryResultImplTest {
 
     private static final int DEFAULT_TTL = 60;

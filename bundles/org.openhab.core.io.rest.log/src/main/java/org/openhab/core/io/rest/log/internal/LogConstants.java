@@ -12,12 +12,15 @@
  */
 package org.openhab.core.io.rest.log.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link LogConstants} class defines common constants, which are
  * used across the whole module.
  *
  * @author Sebastian Janzen - Initial contribution
  */
+@NonNullByDefault
 public class LogConstants {
 
     // Log and response message to express, that the log severity addressed is not handled.

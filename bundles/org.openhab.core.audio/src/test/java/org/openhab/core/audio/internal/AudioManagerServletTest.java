@@ -15,6 +15,8 @@ package org.openhab.core.audio.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioFormat;
@@ -31,11 +33,11 @@ import org.openhab.core.audio.internal.fake.AudioSinkFake;
  * @author Wouter Born - Migrate tests from Groovy to Java
  * @author Henning Treu - extract servlet tests
  */
+@NonNullByDefault
 public class AudioManagerServletTest extends AbstractAudioServletTest {
 
-    private AudioManagerImpl audioManager;
-
-    private AudioSinkFake audioSink;
+    private @NonNullByDefault({}) AudioManagerImpl audioManager;
+    private @NonNullByDefault({}) AudioSinkFake audioSink;
 
     @BeforeEach
     public void setup() {
@@ -62,7 +64,7 @@ public class AudioManagerServletTest extends AbstractAudioServletTest {
         assertServedStream(streamTimeout);
     }
 
-    private void assertServedStream(Integer timeInterval) throws Exception {
+    private void assertServedStream(@Nullable Integer timeInterval) throws Exception {
         AudioStream audioStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED);
         String url = serveStream(audioStream, timeInterval);
 

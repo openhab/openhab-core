@@ -16,11 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public class ConnectionValidatorTest {
 
     @Test

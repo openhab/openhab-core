@@ -24,6 +24,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +41,7 @@ import org.osgi.service.component.ComponentContext;
  * @author Stefan Triller - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class I18nProviderImplTest {
 
     private static final String LOCATION_ZERO = "0,0";
@@ -60,21 +62,21 @@ public class I18nProviderImplTest {
 
     private static final String TIMEZONE_GMT9 = "Etc/GMT-9";
 
-    private I18nProviderImpl i18nProviderImpl;
+    private @NonNullByDefault({}) I18nProviderImpl i18nProviderImpl;
     private Dictionary<String, Object> initialConfig = new Hashtable<>();
 
-    private @Mock ComponentContext componentContext;
-    private @Mock BundleContext bundleContext;
-    private @Mock Bundle bundle;
+    private @Mock @NonNullByDefault({}) ComponentContext componentContextMock;
+    private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
+    private @Mock @NonNullByDefault({}) Bundle bundleMock;
 
     @BeforeEach
     public void setup() {
         initialConfig = buildInitialConfig();
-        when(componentContext.getProperties()).thenReturn(initialConfig);
-        when(componentContext.getBundleContext()).thenReturn(bundleContext);
-        when(bundleContext.getBundles()).thenReturn(new Bundle[] { bundle });
+        when(componentContextMock.getProperties()).thenReturn(initialConfig);
+        when(componentContextMock.getBundleContext()).thenReturn(bundleContextMock);
+        when(bundleContextMock.getBundles()).thenReturn(new Bundle[] { bundleMock });
 
-        i18nProviderImpl = new I18nProviderImpl(componentContext);
+        i18nProviderImpl = new I18nProviderImpl(componentContextMock);
     }
 
     @SuppressWarnings("unchecked")

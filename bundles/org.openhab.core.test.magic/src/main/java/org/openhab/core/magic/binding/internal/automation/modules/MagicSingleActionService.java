@@ -15,6 +15,7 @@ package org.openhab.core.magic.binding.internal.automation.modules;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.AnnotatedActions;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 @Component(configurationPid = "org.openhab.magicsingleaction", //
         property = Constants.SERVICE_PID + "=org.openhab.automation.action.magicSingleActionService")
 @ConfigurableService(category = "RuleActions", label = "Magic Single Action Service", description_uri = "automationAction:magicSingleAction")
@@ -41,7 +43,7 @@ public class MagicSingleActionService implements AnnotatedActions {
 
     private final Logger logger = LoggerFactory.getLogger(MagicSingleActionService.class);
 
-    protected Map<String, Object> config;
+    protected Map<String, Object> config = Map.of();
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -62,7 +64,7 @@ public class MagicSingleActionService implements AnnotatedActions {
         result.put("output1", 42);
         result.put("output2", "myOutput2 String");
 
-        String configParam = (String) this.config.get("confParam1");
+        String configParam = (String) config.get("confParam1");
 
         logger.debug(
                 "Magic Magic Single Service method: executed map method with inputs: {}, {}, {}, {} and configuration parameter: {}",

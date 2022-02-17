@@ -23,7 +23,6 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public interface ModbusSlaveEndpointVisitor<R> {
-
     @Nullable
     R visit(ModbusTCPSlaveEndpoint endpoint);
 

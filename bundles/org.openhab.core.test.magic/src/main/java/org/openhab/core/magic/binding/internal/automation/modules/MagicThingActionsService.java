@@ -15,6 +15,8 @@ package org.openhab.core.magic.binding.internal.automation.modules;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
 import org.openhab.core.automation.annotation.ActionScope;
@@ -30,12 +32,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 @ActionScope(name = "magic")
 public class MagicThingActionsService implements ThingActions {
 
     private final Logger logger = LoggerFactory.getLogger(MagicThingActionsService.class);
 
-    private MagicActionModuleThingHandler handler;
+    private @Nullable MagicActionModuleThingHandler handler;
 
     @RuleAction(label = "Magic thingHandlerAction", description = "Action that calls some logic in a thing handler")
     public @ActionOutput(name = "output1", type = "java.lang.String") @ActionOutput(name = "output2", type = "java.lang.String") Map<String, Object> thingHandlerAction(
@@ -62,7 +65,7 @@ public class MagicThingActionsService implements ThingActions {
     }
 
     @Override
-    public ThingHandler getThingHandler() {
+    public @Nullable ThingHandler getThingHandler() {
         return this.handler;
     }
 }

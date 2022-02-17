@@ -256,7 +256,6 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyServ
             } else {
                 logger.error("Script loading error, ignoring file: {}", fileName);
             }
-
         } catch (IOException e) {
             logger.error("Failed to load file '{}': {}", ref.getScriptFileURL().getFile(), e.getMessage());
         }

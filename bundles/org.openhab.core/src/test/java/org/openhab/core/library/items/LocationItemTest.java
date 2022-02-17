@@ -14,6 +14,7 @@ package org.openhab.core.library.items;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.PointType;
@@ -22,6 +23,7 @@ import org.openhab.core.library.types.PointType;
  * @author Gaël L'hopital - Initial contribution
  * @author Stefan Triller - tests for undef and illegal states
  */
+@NonNullByDefault
 public class LocationItemTest {
 
     @Test

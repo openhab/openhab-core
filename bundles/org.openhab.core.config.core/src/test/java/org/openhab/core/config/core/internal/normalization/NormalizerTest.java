@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
@@ -29,6 +30,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
  * @author Simon Kaufmann - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class NormalizerTest {
 
     @Test

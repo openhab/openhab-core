@@ -14,6 +14,7 @@ package org.openhab.core.library.items;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.DateTimeType;
 
@@ -21,6 +22,7 @@ import org.openhab.core.library.types.DateTimeType;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public class DateTimeItemTest {
 
     @Test

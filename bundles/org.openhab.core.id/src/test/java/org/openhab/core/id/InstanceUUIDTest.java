@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.OpenHAB;
 
@@ -26,6 +27,7 @@ import org.openhab.core.OpenHAB;
  * @author Kai Kreuzer - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class InstanceUUIDTest {
 
     @Test

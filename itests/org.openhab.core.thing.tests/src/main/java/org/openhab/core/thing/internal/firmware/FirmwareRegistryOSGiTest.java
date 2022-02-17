@@ -14,6 +14,7 @@ package org.openhab.core.thing.internal.firmware;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.openhab.core.thing.firmware.Constants.*;
 
 import java.io.IOException;
@@ -46,21 +47,25 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author Dimitar Ivanov - Adapted the test for registry using thing and version instead of firmware UID
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
 
     private static final int FW1 = 0;
     private static final int FW2 = 1;
     private static final int FW3 = 2;
 
-    private Locale defaultLocale;
+    private static final Thing THING1 = ThingBuilder.create(THING_TYPE_UID1, THING1_ID).build();
+    private static final Thing THING2 = ThingBuilder.create(THING_TYPE_UID1, THING2_ID).build();
+    private static final Thing THING3 = ThingBuilder.create(THING_TYPE_UID2, THING3_ID).build();
 
-    private FirmwareRegistry firmwareRegistry;
+    private @NonNullByDefault({}) ConfigurationAdmin configurationAdmin;
+    private @NonNullByDefault({}) Locale defaultLocale;
+    private @NonNullByDefault({}) FirmwareRegistry firmwareRegistry;
 
-    @NonNullByDefault
     private FirmwareProvider basicFirmwareProviderMock = new FirmwareProvider() {
         @Override
         public @Nullable Firmware getFirmware(Thing thing, String version, @Nullable Locale locale) {
-            if (!thing.equals(thing1)) {
+            if (!thing.equals(THING1)) {
                 return null;
             }
 
@@ -82,7 +87,7 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
 
         @Override
         public @Nullable Set<Firmware> getFirmwares(Thing thing, @Nullable Locale locale) {
-            if (!thing.equals(thing1)) {
+            if (!thing.equals(THING1)) {
                 return Set.of();
             }
             if (Locale.ENGLISH.equals(locale)) {
@@ -103,7 +108,6 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
         }
     };
 
-    @NonNullByDefault
     private FirmwareProvider additionalFirmwareProviderMock = new FirmwareProvider() {
         @Override
         public @Nullable Firmware getFirmware(Thing thing, String version, @Nullable Locale locale) {
@@ -164,7 +168,6 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
         }
     };
 
-    @NonNullByDefault
     private FirmwareProvider nullProviderMock = new FirmwareProvider() {
         @Override
         public @Nullable Firmware getFirmware(Thing thing, String version, @Nullable Locale locale) {
@@ -186,182 +189,178 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
             return null;
         }
     };
-    private Thing thing1;
-    private Thing thing2;
-    private Thing thing3;
 
     @BeforeEach
     public void setup() throws IOException {
+        configurationAdmin = getService(ConfigurationAdmin.class);
+        assertNotNull(configurationAdmin);
+
         LocaleProvider localeProvider = getService(LocaleProvider.class);
         assertThat(localeProvider, is(notNullValue()));
         defaultLocale = localeProvider.getLocale();
 
-        new DefaultLocaleSetter(getService(ConfigurationAdmin.class)).setDefaultLocale(Locale.ENGLISH);
+        new DefaultLocaleSetter(configurationAdmin).setDefaultLocale(Locale.ENGLISH);
         waitForAssert(() -> assertThat(localeProvider.getLocale(), is(Locale.ENGLISH)));
 
         firmwareRegistry = getService(FirmwareRegistry.class);
         assertThat(firmwareRegistry, is(notNullValue()));
 
         registerService(basicFirmwareProviderMock);
-
-        thing1 = ThingBuilder.create(THING_TYPE_UID1, THING1_ID).build();
-        thing2 = ThingBuilder.create(THING_TYPE_UID1, THING2_ID).build();
-        thing3 = ThingBuilder.create(THING_TYPE_UID2, THING3_ID).build();
     }
 
     @AfterEach
     public void teardown() throws IOException {
-        new DefaultLocaleSetter(getService(ConfigurationAdmin.class)).setDefaultLocale(defaultLocale);
+        new DefaultLocaleSetter(configurationAdmin).setDefaultLocale(defaultLocale);
         waitForAssert(() -> assertThat(getService(LocaleProvider.class).getLocale(), is(defaultLocale)));
     }
 
     @Test
     public void assertThatRegistryWorksWithSingleProvider() {
-        List<Firmware> firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(thing1));
+        List<Firmware> firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(THING1));
         assertThat(firmwares.size(), is(2));
         assertThat(firmwares.get(FW1), is(FW112_EN));
         assertThat(firmwares.get(FW2), is(FW111_EN));
 
-        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(thing1, Locale.ENGLISH));
+        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(THING1, Locale.ENGLISH));
         assertThat(firmwares.size(), is(2));
         assertThat(firmwares.get(FW1), is(FW112_EN));
         assertThat(firmwares.get(FW2), is(FW111_EN));
 
-        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(thing1, Locale.GERMAN));
+        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(THING1, Locale.GERMAN));
         assertThat(firmwares.size(), is(2));
         assertThat(firmwares.get(FW1), is(FW112_DE));
         assertThat(firmwares.get(FW2), is(FW111_DE));
 
-        Firmware firmware = firmwareRegistry.getFirmware(thing1, V111);
+        Firmware firmware = firmwareRegistry.getFirmware(THING1, V111);
         assertThat(firmware, is(FW111_EN));
 
-        firmware = firmwareRegistry.getFirmware(thing1, V112, Locale.ENGLISH);
+        firmware = firmwareRegistry.getFirmware(THING1, V112, Locale.ENGLISH);
         assertThat(firmware, is(FW112_EN));
 
-        firmware = firmwareRegistry.getFirmware(thing1, V112, Locale.GERMAN);
+        firmware = firmwareRegistry.getFirmware(THING1, V112, Locale.GERMAN);
         assertThat(firmware, is(FW112_DE));
     }
 
     @Test
     public void assertThatRegistryWorksWithSeveralProviders() {
-        List<Firmware> firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(thing1));
+        List<Firmware> firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(THING1));
         assertThat(firmwares.size(), is(2));
 
-        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(thing2));
+        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(THING2));
         assertThat(firmwares.size(), is(0));
 
         registerService(additionalFirmwareProviderMock);
 
-        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(thing1));
+        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(THING1));
         assertThat(firmwares.size(), is(3));
         assertThat(firmwares.get(FW1), is(FW112_EN));
         assertThat(firmwares.get(FW2), is(FW111_FIX_EN));
         assertThat(firmwares.get(FW3), is(FW111_EN));
 
-        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(thing1, Locale.ENGLISH));
+        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(THING1, Locale.ENGLISH));
         assertThat(firmwares.size(), is(3));
         assertThat(firmwares.get(FW1), is(FW112_EN));
         assertThat(firmwares.get(FW2), is(FW111_FIX_EN));
         assertThat(firmwares.get(FW3), is(FW111_EN));
 
-        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(thing1, Locale.GERMAN));
+        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(THING1, Locale.GERMAN));
         assertThat(firmwares.size(), is(3));
         assertThat(firmwares.get(FW1), is(FW112_DE));
         assertThat(firmwares.get(FW2), is(FW111_FIX_DE));
         assertThat(firmwares.get(FW3), is(FW111_DE));
 
-        Firmware firmware = firmwareRegistry.getFirmware(thing1, V111_FIX);
+        Firmware firmware = firmwareRegistry.getFirmware(THING1, V111_FIX);
         assertThat(firmware, is(FW111_FIX_EN));
 
-        firmware = firmwareRegistry.getFirmware(thing1, V111_FIX, Locale.ENGLISH);
+        firmware = firmwareRegistry.getFirmware(THING1, V111_FIX, Locale.ENGLISH);
         assertThat(firmware, is(FW111_FIX_EN));
 
-        firmware = firmwareRegistry.getFirmware(thing1, V111_FIX, Locale.GERMAN);
+        firmware = firmwareRegistry.getFirmware(THING1, V111_FIX, Locale.GERMAN);
         assertThat(firmware, is(FW111_FIX_DE));
 
-        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(thing3));
+        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(THING3));
         assertThat(firmwares.size(), is(3));
         assertThat(firmwares.get(FW1), is(FWGAMMA_EN));
         assertThat(firmwares.get(FW2), is(FWBETA_EN));
         assertThat(firmwares.get(FW3), is(FWALPHA_EN));
 
-        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(thing3, Locale.ENGLISH));
+        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(THING3, Locale.ENGLISH));
         assertThat(firmwares.size(), is(3));
         assertThat(firmwares.get(FW1), is(FWGAMMA_EN));
         assertThat(firmwares.get(FW2), is(FWBETA_EN));
         assertThat(firmwares.get(FW3), is(FWALPHA_EN));
 
-        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(thing3, Locale.GERMAN));
+        firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(THING3, Locale.GERMAN));
         assertThat(firmwares.size(), is(3));
         assertThat(firmwares.get(FW1), is(FWGAMMA_DE));
         assertThat(firmwares.get(FW2), is(FWBETA_DE));
         assertThat(firmwares.get(FW3), is(FWALPHA_DE));
 
-        firmware = firmwareRegistry.getFirmware(thing3, VALPHA);
+        firmware = firmwareRegistry.getFirmware(THING3, VALPHA);
         assertThat(firmware, is(FWALPHA_EN));
 
-        firmware = firmwareRegistry.getFirmware(thing3, VALPHA, Locale.ENGLISH);
+        firmware = firmwareRegistry.getFirmware(THING3, VALPHA, Locale.ENGLISH);
         assertThat(firmware, is(FWALPHA_EN));
 
-        firmware = firmwareRegistry.getFirmware(thing3, VALPHA, Locale.GERMAN);
+        firmware = firmwareRegistry.getFirmware(THING3, VALPHA, Locale.GERMAN);
         assertThat(firmware, is(FWALPHA_DE));
 
-        firmware = firmwareRegistry.getFirmware(thing3, VBETA);
+        firmware = firmwareRegistry.getFirmware(THING3, VBETA);
         assertThat(firmware, is(FWBETA_EN));
 
-        firmware = firmwareRegistry.getFirmware(thing3, VBETA, Locale.ENGLISH);
+        firmware = firmwareRegistry.getFirmware(THING3, VBETA, Locale.ENGLISH);
         assertThat(firmware, is(FWBETA_EN));
 
-        firmware = firmwareRegistry.getFirmware(thing3, VBETA, Locale.GERMAN);
+        firmware = firmwareRegistry.getFirmware(THING3, VBETA, Locale.GERMAN);
         assertThat(firmware, is(FWBETA_DE));
 
-        firmware = firmwareRegistry.getFirmware(thing3, VGAMMA);
+        firmware = firmwareRegistry.getFirmware(THING3, VGAMMA);
         assertThat(firmware, is(FWGAMMA_EN));
 
-        firmware = firmwareRegistry.getFirmware(thing3, VGAMMA, Locale.ENGLISH);
+        firmware = firmwareRegistry.getFirmware(THING3, VGAMMA, Locale.ENGLISH);
         assertThat(firmware, is(FWGAMMA_EN));
 
-        firmware = firmwareRegistry.getFirmware(thing3, VGAMMA, Locale.GERMAN);
+        firmware = firmwareRegistry.getFirmware(THING3, VGAMMA, Locale.GERMAN);
         assertThat(firmware, is(FWGAMMA_DE));
     }
 
     @Test
     public void assertThatRegistryReturnsEmptySetForThingAndGetFirmwaresOperation() {
-        Collection<Firmware> firmwares = firmwareRegistry.getFirmwares(thing3);
+        Collection<Firmware> firmwares = firmwareRegistry.getFirmwares(THING3);
         assertThat(firmwares.size(), is(0));
 
-        firmwares = firmwareRegistry.getFirmwares(thing3, null);
+        firmwares = firmwareRegistry.getFirmwares(THING3, null);
         assertThat(firmwares.size(), is(0));
     }
 
     @Test
     public void assertThatRegistryReturnsNullForUnknownFirmwareUidAndGetFirmwareOperation() {
-        Firmware firmware = firmwareRegistry.getFirmware(thing1, Constants.UNKNOWN);
+        Firmware firmware = firmwareRegistry.getFirmware(THING1, Constants.UNKNOWN);
         assertThat(firmware, is(nullValue()));
 
-        firmware = firmwareRegistry.getFirmware(thing2, VALPHA, Locale.GERMAN);
+        firmware = firmwareRegistry.getFirmware(THING2, VALPHA, Locale.GERMAN);
         assertThat(firmware, is(nullValue()));
     }
 
     public void assertThatRegistryReturnsCorrectLatestFirmware() {
         registerService(additionalFirmwareProviderMock);
 
-        Firmware firmware = firmwareRegistry.getLatestFirmware(thing1);
+        Firmware firmware = firmwareRegistry.getLatestFirmware(THING1);
         assertThat(firmware, is(FW112_EN));
 
-        firmware = firmwareRegistry.getLatestFirmware(thing1, Locale.ENGLISH);
+        firmware = firmwareRegistry.getLatestFirmware(THING1, Locale.ENGLISH);
         assertThat(firmware, is(FW112_EN));
 
-        firmware = firmwareRegistry.getLatestFirmware(thing1, Locale.GERMAN);
+        firmware = firmwareRegistry.getLatestFirmware(THING1, Locale.GERMAN);
         assertThat(firmware, is(FW112_DE));
 
-        firmware = firmwareRegistry.getLatestFirmware(thing2);
+        firmware = firmwareRegistry.getLatestFirmware(THING2);
         assertThat(firmware, is(FWALPHA_EN));
 
-        firmware = firmwareRegistry.getLatestFirmware(thing2, Locale.ENGLISH);
+        firmware = firmwareRegistry.getLatestFirmware(THING2, Locale.ENGLISH);
         assertThat(firmware, is(FWALPHA_EN));
 
-        firmware = firmwareRegistry.getLatestFirmware(thing2, Locale.GERMAN);
+        firmware = firmwareRegistry.getLatestFirmware(THING2, Locale.GERMAN);
         assertThat(firmware, is(FWALPHA_DE));
     }
 
@@ -369,18 +368,18 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
     public void assertThatFirmwarePropertiesAreProvided() {
         registerService(additionalFirmwareProviderMock);
 
-        Firmware firmware = firmwareRegistry.getFirmware(thing3, FWALPHA_DE.getVersion());
+        Firmware firmware = firmwareRegistry.getFirmware(THING3, FWALPHA_DE.getVersion());
         assertThat(firmware, is(notNullValue()));
         assertThat(firmware.getProperties(), is(notNullValue()));
         assertThat(firmware.getProperties().isEmpty(), is(true));
 
-        firmware = firmwareRegistry.getFirmware(thing3, FWBETA_DE.getVersion());
+        firmware = firmwareRegistry.getFirmware(THING3, FWBETA_DE.getVersion());
         assertThat(firmware, is(notNullValue()));
         assertThat(firmware.getProperties(), is(notNullValue()));
         assertThat(firmware.getProperties().size(), is(1));
         assertThat(firmware.getProperties().get(Firmware.PROPERTY_REQUIRES_FACTORY_RESET), is("true"));
 
-        firmware = firmwareRegistry.getFirmware(thing3, FWGAMMA_DE.getVersion());
+        firmware = firmwareRegistry.getFirmware(THING3, FWGAMMA_DE.getVersion());
         assertThat(firmware, is(notNullValue()));
         assertThat(firmware.getProperties(), is(notNullValue()));
         assertThat(firmware.getProperties().size(), is(2));
@@ -390,10 +389,10 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertThatRegistryReturnsNullForUnknownThingTypeUidAndGetLatestFirmwareOperation() {
-        Firmware firmware = firmwareRegistry.getLatestFirmware(thing3);
+        Firmware firmware = firmwareRegistry.getLatestFirmware(THING3);
         assertThat(firmware, is(nullValue()));
 
-        firmware = firmwareRegistry.getLatestFirmware(thing3, Locale.GERMAN);
+        firmware = firmwareRegistry.getLatestFirmware(THING3, Locale.GERMAN);
         assertThat(firmware, is(nullValue()));
     }
 
@@ -402,15 +401,15 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
         unregisterService(basicFirmwareProviderMock);
         registerService(nullProviderMock);
 
-        firmwareRegistry.getFirmwares(thing3);
-        firmwareRegistry.getFirmware(thing3, FWALPHA_DE.getVersion());
+        firmwareRegistry.getFirmwares(THING3);
+        firmwareRegistry.getFirmware(THING3, FWALPHA_DE.getVersion());
     }
 
     @Test
     public void assertFirmwareThatInvalidProvidersAreSkipped() {
         registerService(nullProviderMock);
 
-        List<Firmware> firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(thing1));
+        List<Firmware> firmwares = new ArrayList<>(firmwareRegistry.getFirmwares(THING1));
         assertThat(firmwares.size(), is(2));
         assertThat(firmwares.get(FW1), is(FW112_EN));
         assertThat(firmwares.get(FW2), is(FW111_EN));

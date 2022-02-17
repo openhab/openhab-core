@@ -18,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -33,6 +34,7 @@ import org.openhab.core.thing.xml.test.LoadedTestBundle.StuffAddition;
 /**
  * @author Simon Kaufmann - Initial contribution and API
  */
+@NonNullByDefault
 public class SystemChannelsInChannelGroupsTest extends JavaOSGiTest {
 
     private LoadedTestBundle loadedTestBundle() throws Exception {
@@ -40,9 +42,9 @@ public class SystemChannelsInChannelGroupsTest extends JavaOSGiTest {
                 new StuffAddition().thingTypes(1).channelTypes(1).channelGroupTypes(1));
     }
 
-    private ThingTypeProvider thingTypeProvider;
-    private ChannelTypeRegistry channelTypeRegistry;
-    private ChannelGroupTypeRegistry channelGroupTypeRegistry;
+    private @NonNullByDefault({}) ThingTypeProvider thingTypeProvider;
+    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    private @NonNullByDefault({}) ChannelGroupTypeRegistry channelGroupTypeRegistry;
 
     @BeforeEach
     public void setUp() {

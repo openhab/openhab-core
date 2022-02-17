@@ -16,16 +16,19 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.test.java.JavaOSGiTest;
 
 /**
@@ -34,21 +37,24 @@ import org.openhab.core.test.java.JavaOSGiTest;
  * @author Chris Jackson - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
 
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-    private ConfigDescriptionProvider configDescriptionProviderMock;
-    private ConfigOptionProvider configOptionsProviderMock;
-    private URI dummyURI;
+    private static final URI DUMMY_URI = URI.create("config:Dummy");
+
+    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
+
+    private @Mock @NonNullByDefault({}) ConfigDescriptionProvider configDescriptionProviderMock;
+    private @Mock @NonNullByDefault({}) ConfigOptionProvider configOptionsProviderMock;
 
     @BeforeEach
-    public void setUp() throws URISyntaxException {
+    public void setUp() {
         // Register config registry
         configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
-        dummyURI = new URI("config:Dummy");
         ConfigDescriptionParameter param1 = ConfigDescriptionParameterBuilder
                 .create("Param1", ConfigDescriptionParameter.Type.INTEGER).build();
-        ConfigDescription configDescription = ConfigDescriptionBuilder.create(dummyURI).withParameter(param1).build();
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(DUMMY_URI).withParameter(param1).build();
 
         // Create config option list
         List<ParameterOption> oList1 = new ArrayList<>();
@@ -57,10 +63,8 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
         parameterOption = new ParameterOption("Option2", "Option2");
         oList1.add(parameterOption);
 
-        configOptionsProviderMock = mock(ConfigOptionProvider.class);
         when(configOptionsProviderMock.getParameterOptions(any(), any(), any(), any())).thenReturn(oList1);
 
-        configDescriptionProviderMock = mock(ConfigDescriptionProvider.class);
         when(configDescriptionProviderMock.getConfigDescriptions(any())).thenReturn(Set.of(configDescription));
         when(configDescriptionProviderMock.getConfigDescription(any(), any())).thenReturn(configDescription);
     }
@@ -74,9 +78,9 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
 
         configDescriptionRegistry.addConfigOptionProvider(configOptionsProviderMock);
 
-        ConfigDescription configDescriptions = configDescriptionRegistry.getConfigDescription(dummyURI);
+        ConfigDescription configDescriptions = configDescriptionRegistry.getConfigDescription(DUMMY_URI);
         assertThat(configDescriptions, is(not(nullValue())));
-        assertThat("Config is found", configDescriptions.getUID(), is(dummyURI));
+        assertThat("Config is found", configDescriptions.getUID(), is(DUMMY_URI));
         assertThat("Config contains parameter", configDescriptions.getParameters(), hasSize(1));
         assertThat("Config parameter found", configDescriptions.getParameters().get(0).getName(),
                 is(equalTo("Param1")));

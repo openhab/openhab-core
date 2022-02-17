@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -48,10 +49,11 @@ import org.openhab.core.test.java.JavaOSGiTest;
  * @author Marin Mitev - Initial contribution
  * @author Thomas Höfer - Added config description parameter unit
  */
+@NonNullByDefault
 public class RuleEngineTest extends JavaOSGiTest {
 
-    private RuleEngineImpl ruleEngine;
-    private RuleRegistry ruleRegistry;
+    private @NonNullByDefault({}) RuleEngineImpl ruleEngine;
+    private @NonNullByDefault({}) RuleRegistry ruleRegistry;
 
     @BeforeEach
     public void setup() {

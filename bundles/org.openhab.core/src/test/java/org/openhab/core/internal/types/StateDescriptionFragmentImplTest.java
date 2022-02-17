@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.is;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.types.StateDescription;
@@ -30,9 +31,10 @@ import org.openhab.core.types.StateOption;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class StateDescriptionFragmentImplTest {
 
-    private StateDescriptionFragmentImpl source;
+    private @NonNullByDefault({}) StateDescriptionFragmentImpl source;
 
     @BeforeEach
     public void setup() {

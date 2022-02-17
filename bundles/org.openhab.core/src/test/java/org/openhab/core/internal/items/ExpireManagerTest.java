@@ -21,7 +21,7 @@ import java.util.HashMap;
 
 import javax.measure.quantity.Temperature;
 
-import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,73 +51,73 @@ import org.openhab.core.types.UnDefType;
  * @author Kai Kreuzer - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 class ExpireManagerTest {
 
     private static final String ITEMNAME = "Test";
     private static final MetadataKey METADATA_KEY = new MetadataKey(ExpireManager.METADATA_NAMESPACE, ITEMNAME);
 
-    private ExpireManager expireManager;
-    private @Mock EventPublisher eventPublisher;
-    private @Mock MetadataRegistry metadataRegistry;
-    private @Mock ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) ExpireManager expireManager;
+    private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
+    private @Mock @NonNullByDefault({}) MetadataRegistry metadataRegistryMock;
+    private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
 
     @BeforeEach
     public void setup() {
-        expireManager = new ExpireManager(new HashMap<String, @Nullable Object>(), eventPublisher, metadataRegistry,
-                itemRegistry);
+        expireManager = new ExpireManager(new HashMap<>(), eventPublisherMock, metadataRegistryMock, itemRegistryMock);
     }
 
     @Test
     void testDefaultStateExpiry() throws InterruptedException {
-        when(metadataRegistry.get(METADATA_KEY)).thenReturn(new Metadata(METADATA_KEY, "1s", null));
+        when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(new Metadata(METADATA_KEY, "1s", null));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, OnOffType.ON);
 
         expireManager.receive(event);
 
-        verify(eventPublisher, never()).post(any());
+        verify(eventPublisherMock, never()).post(any());
         Thread.sleep(2500L);
-        verify(eventPublisher)
+        verify(eventPublisherMock)
                 .post(eq(ItemEventFactory.createStateEvent(ITEMNAME, UnDefType.UNDEF, ExpireManager.EVENT_SOURCE)));
     }
 
     @Test
     void testStateExpiryWithCustomState() throws InterruptedException, ItemNotFoundException {
         Item testItem = new SwitchItem(ITEMNAME);
-        when(itemRegistry.getItem(ITEMNAME)).thenReturn(testItem);
-        when(metadataRegistry.get(METADATA_KEY)).thenReturn(config("1s,state=OFF"));
+        when(itemRegistryMock.getItem(ITEMNAME)).thenReturn(testItem);
+        when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(config("1s,state=OFF"));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, OnOffType.ON);
 
         expireManager.receive(event);
 
-        verify(eventPublisher, never()).post(any());
+        verify(eventPublisherMock, never()).post(any());
         Thread.sleep(2500L);
-        verify(eventPublisher)
+        verify(eventPublisherMock)
                 .post(eq(ItemEventFactory.createStateEvent(ITEMNAME, OnOffType.OFF, ExpireManager.EVENT_SOURCE)));
     }
 
     @Test
     void testStateExpiryWithCustomCommand() throws InterruptedException, ItemNotFoundException {
         Item testItem = new SwitchItem(ITEMNAME);
-        when(itemRegistry.getItem(ITEMNAME)).thenReturn(testItem);
-        when(metadataRegistry.get(METADATA_KEY)).thenReturn(config("1s,command=ON"));
+        when(itemRegistryMock.getItem(ITEMNAME)).thenReturn(testItem);
+        when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(config("1s,command=ON"));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, OnOffType.OFF);
 
         expireManager.receive(event);
 
-        verify(eventPublisher, never()).post(any());
+        verify(eventPublisherMock, never()).post(any());
         Thread.sleep(2500L);
-        verify(eventPublisher)
+        verify(eventPublisherMock)
                 .post(eq(ItemEventFactory.createCommandEvent(ITEMNAME, OnOffType.ON, ExpireManager.EVENT_SOURCE)));
     }
 
     @Test
     void testCancelExpiry() throws InterruptedException, ItemNotFoundException {
         Item testItem = new SwitchItem(ITEMNAME);
-        when(itemRegistry.getItem(ITEMNAME)).thenReturn(testItem);
-        when(metadataRegistry.get(METADATA_KEY)).thenReturn(config("1s,ON"));
+        when(itemRegistryMock.getItem(ITEMNAME)).thenReturn(testItem);
+        when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(config("1s,ON"));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, OnOffType.OFF);
         expireManager.receive(event);
@@ -125,31 +125,31 @@ class ExpireManagerTest {
         event = ItemEventFactory.createCommandEvent(ITEMNAME, OnOffType.ON);
         expireManager.receive(event);
         Thread.sleep(2000L);
-        verify(eventPublisher, never()).post(any());
+        verify(eventPublisherMock, never()).post(any());
     }
 
     @Test
     void testMetadataChange() throws InterruptedException, ItemNotFoundException {
         Metadata md = new Metadata(METADATA_KEY, "1s", null);
-        when(metadataRegistry.get(METADATA_KEY)).thenReturn(md);
+        when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(md);
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, OnOffType.ON);
         expireManager.receive(event);
 
-        verify(eventPublisher, never()).post(any());
+        verify(eventPublisherMock, never()).post(any());
         Thread.sleep(2500L);
-        verify(eventPublisher)
+        verify(eventPublisherMock)
                 .post(eq(ItemEventFactory.createStateEvent(ITEMNAME, UnDefType.UNDEF, ExpireManager.EVENT_SOURCE)));
 
-        when(metadataRegistry.get(METADATA_KEY)).thenReturn(null);
+        when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(null);
         expireManager.metadataChangeListener.removed(md);
-        reset(eventPublisher);
+        reset(eventPublisherMock);
 
         event = ItemEventFactory.createCommandEvent(ITEMNAME, OnOffType.ON);
         expireManager.receive(event);
-        verify(eventPublisher, never()).post(any());
+        verify(eventPublisherMock, never()).post(any());
         Thread.sleep(2500L);
-        verify(eventPublisher, never()).post(any());
+        verify(eventPublisherMock, never()).post(any());
     }
 
     @Test

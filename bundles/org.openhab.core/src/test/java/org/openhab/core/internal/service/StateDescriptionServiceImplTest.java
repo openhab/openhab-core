@@ -19,7 +19,9 @@ import static org.mockito.Mockito.*;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.items.NumberItem;
@@ -34,7 +36,7 @@ import org.openhab.core.types.StateOption;
  *
  * @author Lyubomir Papazov - Initial contribution
  */
-@SuppressWarnings("null")
+@NonNullByDefault
 public class StateDescriptionServiceImplTest {
 
     private static final String ITEM_NAME = "Item1";
@@ -46,8 +48,8 @@ public class StateDescriptionServiceImplTest {
     private static final Boolean STATE_DESCRIPTION_PROVIDER_DEFAULT_IS_READONLY = Boolean.FALSE;
     private static final List<StateOption> STATE_DESCRIPTION_PROVIDER_DEFAULT_OPTIONS = Collections.emptyList();
 
-    private StateDescriptionServiceImpl stateDescriptionService;
-    private NumberItem item;
+    private @NonNullByDefault({}) StateDescriptionServiceImpl stateDescriptionService;
+    private @NonNullByDefault({}) NumberItem item;
 
     @BeforeEach
     public void setup() {
@@ -69,8 +71,7 @@ public class StateDescriptionServiceImplTest {
         registerStateDescriptionFragmentProvider(stateDescriptionFragment,
                 STATE_DESCRIPTION_PROVIDER_DEFAULT_SERVICE_RANKING);
 
-        StateDescription stateDescription = item.getStateDescription();
-
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
         assertThat(stateDescription.getMinimum(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_MIN_VALUE));
         assertThat(stateDescription.getMaximum(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_MAX_VALUE));
         assertThat(stateDescription.getStep(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_STEP));
@@ -95,7 +96,7 @@ public class StateDescriptionServiceImplTest {
                 .withPattern("pattern2").build();
         registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
 
-        StateDescription stateDescription = item.getStateDescription();
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
 
         assertThat(stateDescription.getMinimum(), is(stateDescriptionFragment1.getMinimum()));
         assertThat(stateDescription.getMaximum(), is(stateDescriptionFragment1.getMaximum()));
@@ -112,7 +113,7 @@ public class StateDescriptionServiceImplTest {
                 .withReadOnly(Boolean.TRUE).build();
         registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
 
-        StateDescription stateDescription = item.getStateDescription();
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
 
         assertThat(stateDescription.isReadOnly(), is(stateDescriptionFragment2.isReadOnly()));
     }
@@ -126,7 +127,7 @@ public class StateDescriptionServiceImplTest {
         StateDescriptionFragment stateDescriptionFragment2 = StateDescriptionFragmentBuilder.create().build();
         registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
 
-        StateDescription stateDescription = item.getStateDescription();
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
 
         assertThat(stateDescription.isReadOnly(), is(stateDescriptionFragment1.isReadOnly()));
     }
@@ -140,7 +141,7 @@ public class StateDescriptionServiceImplTest {
         StateDescriptionFragment stateDescriptionFragment2 = StateDescriptionFragmentBuilder.create().build();
         registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
 
-        StateDescription stateDescription = item.getStateDescription();
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
 
         assertThat(stateDescription.getOptions(), is(stateDescriptionFragment1.getOptions()));
     }
@@ -154,7 +155,7 @@ public class StateDescriptionServiceImplTest {
                 .withOption(new StateOption("value", "label")).build();
         registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
 
-        StateDescription stateDescription = item.getStateDescription();
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
 
         assertThat(stateDescription.getOptions(), is(stateDescriptionFragment2.getOptions()));
     }
@@ -178,7 +179,7 @@ public class StateDescriptionServiceImplTest {
                 .withOptions(options).build();
         registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
 
-        StateDescription stateDescription = item.getStateDescription();
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
 
         assertThat(stateDescription.getMinimum(), is(BigDecimal.ZERO));
         assertThat(stateDescription.getMaximum(), is(BigDecimal.TEN));
@@ -187,7 +188,8 @@ public class StateDescriptionServiceImplTest {
         assertThat(stateDescription.isReadOnly(), is(true));
         assertThat(stateDescription.getOptions(), is(options));
         // check that fragement2 is not merged into fragement1
-        assertThat(stateDescriptionFragment1.getOptions().size(), is(0));
+        List<StateOption> fragment1Options = Objects.requireNonNull(stateDescriptionFragment1.getOptions());
+        assertThat(fragment1Options.size(), is(0));
     }
 
     private void registerStateDescriptionFragmentProvider(StateDescriptionFragment stateDescriptionFragment,

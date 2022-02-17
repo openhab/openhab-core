@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,10 +31,11 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class MappingUriExtensionsTest {
 
-    public @TempDir File folder;
-    private File confFolder;
+    public @TempDir @NonNullByDefault({}) File folder;
+    private @NonNullByDefault({}) File confFolder;
 
     public static Collection<Object[]> data() {
         return List.of(new Object[][] { //
@@ -102,7 +105,7 @@ public class MappingUriExtensionsTest {
     private MappingUriExtensions createMapper(String conf) {
         return new MappingUriExtensions(conf) {
             @Override
-            protected String calcServerLocation(String configFolder) {
+            protected String calcServerLocation(@Nullable String configFolder) {
                 // ensure test execution is independent from the current working directory
                 return removeTrailingSlash(confFolder.toPath().toUri().toString());
             }

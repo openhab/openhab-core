@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.ChannelUID;
@@ -31,6 +32,7 @@ import org.openhab.core.thing.internal.ThingImpl;
 /**
  * @author Alex Tugarev - Initial contribution
  */
+@NonNullByDefault
 public class ThingHelperTest {
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding:type");

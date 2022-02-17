@@ -12,11 +12,14 @@
  */
 package org.openhab.core.io.rest;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Public constants for the REST API
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class RESTConstants {
 
     @Deprecated

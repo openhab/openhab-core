@@ -26,6 +26,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -46,10 +47,11 @@ import org.osgi.service.cm.ConfigurationAdmin;
  *
  * @author Henning Sudbrock - Initial contribution
  */
+@NonNullByDefault
 public class UsbSerialDiscoveryServiceTest extends JavaOSGiTest {
 
-    private UsbSerialDiscovery usbSerialDiscovery;
-    private UsbSerialDiscoveryService usbSerialDiscoveryService;
+    private @NonNullByDefault({}) UsbSerialDiscovery usbSerialDiscovery;
+    private @NonNullByDefault({}) UsbSerialDiscoveryService usbSerialDiscoveryService;
 
     private final UsbSerialDeviceInformationGenerator usbSerialDeviceInformationGenerator = new UsbSerialDeviceInformationGenerator();
 

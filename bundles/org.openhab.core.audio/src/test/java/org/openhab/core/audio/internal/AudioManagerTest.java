@@ -25,8 +25,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,14 +52,13 @@ import org.openhab.core.library.types.PercentType;
  * @author Wouter Born - Migrate tests from Groovy to Java
  * @author Henning Treu - Convert to plain java tests
  */
+@NonNullByDefault
 public class AudioManagerTest {
 
-    private BundledSoundFileHandler fileHandler;
-
-    private AudioManagerImpl audioManager;
-
-    private AudioSinkFake audioSink;
-    private AudioSource audioSource;
+    private @NonNullByDefault({}) AudioManagerImpl audioManager;
+    private @NonNullByDefault({}) AudioSinkFake audioSink;
+    private @NonNullByDefault({}) AudioSource audioSource;
+    private @NonNullByDefault({}) BundledSoundFileHandler fileHandler;
 
     @BeforeEach
     public void setup() throws IOException {
@@ -283,12 +284,12 @@ public class AudioManagerTest {
             case AudioManagerImpl.CONFIG_DEFAULT_SINK:
                 audioManager.addAudioSink(audioSink);
                 id = audioSink.getId();
-                label = audioSink.getLabel(locale);
+                label = Objects.requireNonNull(audioSink.getLabel(locale));
                 break;
             case AudioManagerImpl.CONFIG_DEFAULT_SOURCE:
                 audioManager.addAudioSource(audioSource);
                 id = audioSource.getId();
-                label = audioSource.getLabel(locale);
+                label = Objects.requireNonNull(audioSource.getLabel(locale));
                 break;
             default:
                 fail("The parameter must be either default sink or default source");

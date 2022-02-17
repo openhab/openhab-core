@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.test.BundleCloseable;
@@ -38,13 +39,14 @@ import org.openhab.core.thing.type.ThingType;
  *
  * @author Dennis Nobel - Initial contribution
  */
+@NonNullByDefault
 public class ChannelTypesI18nTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "ChannelTypesI18nTest.bundle";
 
-    private ChannelTypeProvider channelTypeProvider;
-    private ChannelGroupTypeProvider channelGroupTypeProvider;
-    private ThingTypeProvider thingTypeProvider;
+    private @NonNullByDefault({}) ChannelTypeProvider channelTypeProvider;
+    private @NonNullByDefault({}) ChannelGroupTypeProvider channelGroupTypeProvider;
+    private @NonNullByDefault({}) ThingTypeProvider thingTypeProvider;
 
     @BeforeEach
     public void setUp() {

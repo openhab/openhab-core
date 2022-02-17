@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,29 +42,30 @@ import org.osgi.framework.ServiceReference;
  * @author Nicolas Gennart - roles management
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class UserRegistryImplTest {
 
     @SuppressWarnings("rawtypes")
-    private @Mock ServiceReference managedProviderRef;
-    private @Mock BundleContext bundleContext;
-    private @Mock ManagedUserProvider managedProvider;
+    private @Mock @NonNullByDefault({}) ServiceReference managedProviderRefMock;
+    private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
+    private @Mock @NonNullByDefault({}) ManagedUserProvider managedProviderMock;
 
-    private UserRegistryImpl registry;
-    private ServiceListener providerTracker;
+    private @NonNullByDefault({}) UserRegistryImpl registry;
+    private @NonNullByDefault({}) ServiceListener providerTracker;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     public void setup() throws Exception {
-        when(bundleContext.getService(same(managedProviderRef))).thenReturn(managedProvider);
+        when(bundleContextMock.getService(same(managedProviderRefMock))).thenReturn(managedProviderMock);
 
-        registry = new UserRegistryImpl(bundleContext, Map.of());
-        registry.setManagedProvider(managedProvider);
+        registry = new UserRegistryImpl(bundleContextMock, Map.of());
+        registry.setManagedProvider(managedProviderMock);
         registry.waitForCompletedAsyncActivationTasks();
 
         ArgumentCaptor<ServiceListener> captor = ArgumentCaptor.forClass(ServiceListener.class);
-        verify(bundleContext).addServiceListener(captor.capture(), any());
+        verify(bundleContextMock).addServiceListener(captor.capture(), any());
         providerTracker = captor.getValue();
-        providerTracker.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, managedProviderRef));
+        providerTracker.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, managedProviderRefMock));
     }
 
     @Test
@@ -75,7 +77,7 @@ public class UserRegistryImplTest {
     @Test
     public void testUserManagement() throws Exception {
         User user = registry.register("username", "password", Set.of("administrator"));
-        registry.added(managedProvider, user);
+        registry.added(managedProviderMock, user);
         assertNotNull(user);
         assertTrue(registry.containRole("administrator"));
         assertEquals(registry.countRole("administrator"), 1);
@@ -103,7 +105,7 @@ public class UserRegistryImplTest {
 
         registry.authenticate(new UsernamePasswordCredentials("username", "password2"));
         registry.remove(user.getName());
-        registry.removed(managedProvider, user);
+        registry.removed(managedProviderMock, user);
         user = registry.get("username");
         assertNull(user);
     }
@@ -111,7 +113,7 @@ public class UserRegistryImplTest {
     @Test
     public void testSessions() throws Exception {
         ManagedUser user = (ManagedUser) registry.register("username", "password", Set.of("administrator"));
-        registry.added(managedProvider, user);
+        registry.added(managedProviderMock, user);
         assertNotNull(user);
         UserSession session1 = new UserSession(UUID.randomUUID().toString(), "s1", "urn:test", "urn:test", "scope");
         UserSession session2 = new UserSession(UUID.randomUUID().toString(), "s2", "urn:test", "urn:test", "scope2");
@@ -129,7 +131,7 @@ public class UserRegistryImplTest {
     @Test
     public void testApiTokens() throws Exception {
         ManagedUser user = (ManagedUser) registry.register("username", "password", Set.of("administrator"));
-        registry.added(managedProvider, user);
+        registry.added(managedProviderMock, user);
         assertNotNull(user);
         String token1 = registry.addUserApiToken(user, "token1", "scope1");
         String token2 = registry.addUserApiToken(user, "token2", "scope2");

@@ -33,6 +33,7 @@ import org.openhab.core.automation.module.script.ScriptDependencyListener;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
+import org.openhab.core.automation.module.script.ScriptExtensionManagerWrapper;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -136,8 +137,8 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 if (engine != null) {
                     Map<String, Object> scriptExManager = new HashMap<>();
                     result = new ScriptEngineContainer(engine, engineFactory, engineIdentifier);
-                    ScriptExtensionManagerWrapper wrapper = new ScriptExtensionManagerWrapper(scriptExtensionManager,
-                            result);
+                    ScriptExtensionManagerWrapper wrapper = new ScriptExtensionManagerWrapperImpl(
+                            scriptExtensionManager, result);
                     scriptExManager.put("scriptExtension", wrapper);
                     scriptExManager.put("se", wrapper);
                     engineFactory.scopeValues(engine, scriptExManager);

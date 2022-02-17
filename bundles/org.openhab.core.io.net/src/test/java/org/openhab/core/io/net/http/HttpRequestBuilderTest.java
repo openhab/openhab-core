@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.api.ContentProvider;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
@@ -33,6 +34,7 @@ import org.mockito.ArgumentMatchers;
  *
  * @author Martin van Wingerden & Wouter Born - Initial contribution
  */
+@NonNullByDefault
 public class HttpRequestBuilderTest extends BaseHttpUtilTest {
 
     @Test

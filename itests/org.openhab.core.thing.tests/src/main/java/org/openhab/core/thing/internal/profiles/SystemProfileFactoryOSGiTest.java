@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,23 +50,24 @@ import org.openhab.core.thing.type.ChannelType;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
 
     private final Map<String, Object> properties = Map.of(SystemOffsetProfile.OFFSET_PARAM, BigDecimal.ZERO,
             SystemHysteresisStateProfile.LOWER_PARAM, BigDecimal.TEN, SystemRangeStateProfile.UPPER_PARAM,
             BigDecimal.valueOf(40));
 
-    private SystemProfileFactory profileFactory;
+    private @NonNullByDefault({}) SystemProfileFactory profileFactory;
 
-    private @Mock ProfileCallback mockCallback;
-    private @Mock ProfileContext mockContext;
+    private @Mock @NonNullByDefault({}) ProfileCallback callbackMock;
+    private @Mock @NonNullByDefault({}) ProfileContext contextMock;
 
     @BeforeEach
     public void beforeEach() {
         profileFactory = getService(ProfileTypeProvider.class, SystemProfileFactory.class);
         assertNotNull(profileFactory);
 
-        when(mockContext.getConfiguration()).thenReturn(new Configuration(properties));
+        when(contextMock.getConfiguration()).thenReturn(new Configuration(properties));
     }
 
     @Test
@@ -80,7 +82,7 @@ public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
     @Test
     public void testFactoryCreatesAvailableProfiles() {
         for (ProfileTypeUID profileTypeUID : profileFactory.getSupportedProfileTypeUIDs()) {
-            assertNotNull(profileFactory.createProfile(profileTypeUID, mockCallback, mockContext));
+            assertNotNull(profileFactory.createProfile(profileTypeUID, callbackMock, contextMock));
         }
     }
 

@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
@@ -27,6 +28,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
  *
  * @author Christoph Knauf - Initial contribution
  */
+@NonNullByDefault
 public class ConfigDescriptionParameterBuilderTest {
 
     @Test

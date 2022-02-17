@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package service;
+package org.openhab.core.service;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 import static org.hamcrest.CoreMatchers.is;
@@ -28,12 +28,13 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.service.AbstractWatchService;
-import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.JavaTest;
 
 /**
  * Test for {@link AbstractWatchService}.
@@ -43,6 +44,7 @@ import org.openhab.core.test.java.JavaTest;
  * @author Ana Dimova - reduce to a single watch thread for all class instances
  * @author Simon Kaufmann - ported it from Groovy to Java
  */
+@NonNullByDefault
 public class AbstractWatchServiceTest extends JavaTest {
 
     private static final String WATCHED_DIRECTORY = "watchDirectory";
@@ -50,7 +52,7 @@ public class AbstractWatchServiceTest extends JavaTest {
     // Fail if no event has been received within the given timeout
     private static int noEventTimeoutInSeconds;
 
-    private RelativeWatchService watchService;
+    private @NonNullByDefault({}) RelativeWatchService watchService;
 
     @BeforeAll
     public static void setUpBeforeClass() {
@@ -224,8 +226,8 @@ public class AbstractWatchServiceTest extends JavaTest {
     }
 
     private void fullEventAssertionsByKind(String fileName, Kind<?> kind, boolean osSpecific) throws Exception {
-        waitForAssert(() -> assertThat(!watchService.allFullEvents.isEmpty(), is(true)), DFL_TIMEOUT * 2,
-                DFL_SLEEP_TIME);
+        waitForAssert(() -> assertThat(!watchService.allFullEvents.isEmpty(), is(true)), JavaTest.DFL_TIMEOUT * 2,
+                JavaTest.DFL_SLEEP_TIME);
 
         if (osSpecific && ENTRY_DELETE.equals(kind)) {
             // There is possibility that one more modify event is triggered on some OS
@@ -286,7 +288,7 @@ public class AbstractWatchServiceTest extends JavaTest {
         }
 
         @Override
-        protected Kind<?>[] getWatchEventKinds(Path subDir) {
+        protected Kind<?> @Nullable [] getWatchEventKinds(Path subDir) {
             return new Kind[] { ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY };
         }
 

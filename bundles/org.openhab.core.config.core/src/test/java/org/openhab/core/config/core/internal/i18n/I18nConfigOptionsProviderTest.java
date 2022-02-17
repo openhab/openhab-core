@@ -18,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.net.URI;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ParameterOption;
@@ -27,6 +28,7 @@ import org.openhab.core.config.core.ParameterOption;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class I18nConfigOptionsProviderTest {
 
     private final I18nConfigOptionsProvider provider = new I18nConfigOptionsProvider();

@@ -20,7 +20,7 @@ import java.util.List;
 
 import javax.measure.quantity.Temperature;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.items.NumberItem;
@@ -28,21 +28,13 @@ import org.openhab.core.library.items.NumberItem;
 /**
  * @author Henning Treu - Initial contribution
  */
-@SuppressWarnings("null")
+@NonNullByDefault
 public class CoreItemFactoryTest {
-
-    private CoreItemFactory coreItemFactory;
-
-    private List<String> itemTypeNames;
-
-    @BeforeEach
-    public void setup() {
-        coreItemFactory = new CoreItemFactory();
-        itemTypeNames = List.of(coreItemFactory.getSupportedItemTypes());
-    }
 
     @Test
     public void shouldCreateItems() {
+        CoreItemFactory coreItemFactory = new CoreItemFactory();
+        List<String> itemTypeNames = List.of(coreItemFactory.getSupportedItemTypes());
         for (String itemTypeName : itemTypeNames) {
             GenericItem item = coreItemFactory.createItem(itemTypeName, itemTypeName.toLowerCase());
 
@@ -53,6 +45,7 @@ public class CoreItemFactoryTest {
 
     @Test
     public void createNumberItemWithDimension() {
+        CoreItemFactory coreItemFactory = new CoreItemFactory();
         NumberItem numberItem = (NumberItem) coreItemFactory.createItem(CoreItemFactory.NUMBER + ":Temperature",
                 "myNumberItem");
 
@@ -61,6 +54,7 @@ public class CoreItemFactoryTest {
 
     @Test
     public void shouldReturnNullForUnsupportedItemTypeName() {
+        CoreItemFactory coreItemFactory = new CoreItemFactory();
         GenericItem item = coreItemFactory.createItem("NoValidItemTypeName", "IWantMyItem");
 
         assertThat(item, is(nullValue()));

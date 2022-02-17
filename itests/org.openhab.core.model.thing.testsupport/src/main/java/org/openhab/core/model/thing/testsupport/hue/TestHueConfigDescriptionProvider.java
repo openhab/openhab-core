@@ -12,14 +12,10 @@
  */
 package org.openhab.core.model.thing.testsupport.hue;
 
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
-
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
-import java.util.stream.Stream;
 
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
@@ -39,27 +35,18 @@ public class TestHueConfigDescriptionProvider implements ConfigDescriptionProvid
 
     @Override
     public Collection<ConfigDescription> getConfigDescriptions(Locale locale) {
-        return emptyList();
+        return List.of();
     }
 
     @Override
     public ConfigDescription getConfigDescription(URI uri, Locale locale) {
-        if (uri.equals(createURI("hue:LCT001:color"))) {
+        if (uri.equals(URI.create("hue:LCT001:color"))) {
             ConfigDescriptionParameter paramDefault = ConfigDescriptionParameterBuilder
                     .create("defaultConfig", Type.TEXT).withDefault("defaultValue").build();
             ConfigDescriptionParameter paramCustom = ConfigDescriptionParameterBuilder.create("customConfig", Type.TEXT)
                     .withDefault("none").build();
-            return ConfigDescriptionBuilder.create(uri)
-                    .withParameters(Stream.of(paramDefault, paramCustom).collect(toList())).build();
+            return ConfigDescriptionBuilder.create(uri).withParameters(List.of(paramDefault, paramCustom)).build();
         }
         return null;
-    }
-
-    private URI createURI(String s) {
-        try {
-            return new URI(s);
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException("Failed to create URI: " + s, e);
-        }
     }
 }

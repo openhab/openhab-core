@@ -17,6 +17,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
  * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Martin van Wingerden - Added tests based on HttpClientFactory
  */
+@NonNullByDefault
 public class HttpUtilTest extends BaseHttpUtilTest {
 
     @Test

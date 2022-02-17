@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.console.eclipse.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.openhab.core.io.console.Console;
 
@@ -20,6 +21,7 @@ import org.openhab.core.io.console.Console;
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Split to separate file
  */
+@NonNullByDefault
 public class OSGiConsole implements Console {
 
     private final String baseCommand;

@@ -18,7 +18,6 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -61,8 +60,8 @@ class ConfigDescriptionDTOTest {
     private static final String PARAMETER_GROUP_LABEL = "label";
 
     @Test
-    public void testConfigDescriptionDTOMappingContainsDecodedURIString() throws URISyntaxException {
-        final URI systemI18nURI = new URI(CONFIG_DESCRIPTION_SYSTEM_I18N_URI);
+    public void testConfigDescriptionDTOMappingContainsDecodedURIString() {
+        final URI systemI18nURI = URI.create(CONFIG_DESCRIPTION_SYSTEM_I18N_URI);
         ConfigDescription subject = ConfigDescriptionBuilder.create(systemI18nURI).build();
 
         ConfigDescriptionDTO result = ConfigDescriptionDTOMapper.map(subject);

@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,7 @@ import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
  * @author Henning Treu - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class EnrichedThingDTOMapperTest {
 
     private static final String ITEM_TYPE = "itemType";
@@ -53,42 +55,43 @@ public class EnrichedThingDTOMapperTest {
     private static final String THING_LABEL = "label";
     private static final String LOCATION = "location";
 
-    private @Mock Thing thing;
-    private @Mock ThingStatusInfo thingStatusInfo;
-    private @Mock FirmwareStatusDTO firmwareStatus;
-    private @Mock Map<String, Set<String>> linkedItemsMap;
-    private @Mock Configuration configuration;
-    private @Mock Map<String, String> properties;
+    private @Mock @NonNullByDefault({}) Thing thingMock;
+    private @Mock @NonNullByDefault({}) ThingStatusInfo thingStatusInfoMock;
+    private @Mock @NonNullByDefault({}) FirmwareStatusDTO firmwareStatusMock;
+    private @Mock @NonNullByDefault({}) Map<String, Set<String>> linkedItemsMapMock;
+    private @Mock @NonNullByDefault({}) Configuration configurationMock;
+    private @Mock @NonNullByDefault({}) Map<String, String> propertiesMock;
 
     @BeforeEach
     public void setup() {
-        when(thing.getThingTypeUID()).thenReturn(new ThingTypeUID(THING_TYPE_UID));
-        when(thing.getUID()).thenReturn(new ThingUID(UID));
-        when(thing.getLabel()).thenReturn(THING_LABEL);
-        when(thing.getChannels()).thenReturn(mockChannels());
-        when(thing.getConfiguration()).thenReturn(configuration);
-        when(thing.getProperties()).thenReturn(properties);
-        when(thing.getLocation()).thenReturn(LOCATION);
+        when(thingMock.getThingTypeUID()).thenReturn(new ThingTypeUID(THING_TYPE_UID));
+        when(thingMock.getUID()).thenReturn(new ThingUID(UID));
+        when(thingMock.getLabel()).thenReturn(THING_LABEL);
+        when(thingMock.getChannels()).thenReturn(mockChannels());
+        when(thingMock.getConfiguration()).thenReturn(configurationMock);
+        when(thingMock.getProperties()).thenReturn(propertiesMock);
+        when(thingMock.getLocation()).thenReturn(LOCATION);
     }
 
     @Test
     public void shouldMapEnrichedThingDTO() {
-        when(linkedItemsMap.get("1")).thenReturn(Stream.of("linkedItem1", "linkedItem2").collect(Collectors.toSet()));
+        when(linkedItemsMapMock.get("1"))
+                .thenReturn(Stream.of("linkedItem1", "linkedItem2").collect(Collectors.toSet()));
 
-        EnrichedThingDTO enrichedThingDTO = EnrichedThingDTOMapper.map(thing, thingStatusInfo, firmwareStatus,
-                linkedItemsMap, true);
+        EnrichedThingDTO enrichedThingDTO = EnrichedThingDTOMapper.map(thingMock, thingStatusInfoMock,
+                firmwareStatusMock, linkedItemsMapMock, true);
 
         assertThat(enrichedThingDTO.editable, is(true));
-        assertThat(enrichedThingDTO.firmwareStatus, is(equalTo(firmwareStatus)));
-        assertThat(enrichedThingDTO.statusInfo, is(equalTo(thingStatusInfo)));
-        assertThat(enrichedThingDTO.thingTypeUID, is(equalTo(thing.getThingTypeUID().getAsString())));
+        assertThat(enrichedThingDTO.firmwareStatus, is(equalTo(firmwareStatusMock)));
+        assertThat(enrichedThingDTO.statusInfo, is(equalTo(thingStatusInfoMock)));
+        assertThat(enrichedThingDTO.thingTypeUID, is(equalTo(thingMock.getThingTypeUID().getAsString())));
         assertThat(enrichedThingDTO.label, is(equalTo(THING_LABEL)));
         assertThat(enrichedThingDTO.bridgeUID, is(CoreMatchers.nullValue()));
 
         assertChannels(enrichedThingDTO);
 
         assertThat(enrichedThingDTO.configuration.values(), is(empty()));
-        assertThat(enrichedThingDTO.properties, is(equalTo(properties)));
+        assertThat(enrichedThingDTO.properties, is(equalTo(propertiesMock)));
         assertThat(enrichedThingDTO.location, is(equalTo(LOCATION)));
     }
 
@@ -96,7 +99,7 @@ public class EnrichedThingDTOMapperTest {
         assertThat(enrichedThingDTO.channels, hasSize(2));
         assertThat(enrichedThingDTO.channels.get(0), is(instanceOf(EnrichedChannelDTO.class)));
 
-        EnrichedChannelDTO channel1 = (EnrichedChannelDTO) enrichedThingDTO.channels.get(0);
+        EnrichedChannelDTO channel1 = enrichedThingDTO.channels.get(0);
         assertThat(channel1.linkedItems, hasSize(2));
     }
 

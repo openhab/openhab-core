@@ -15,6 +15,7 @@ package org.openhab.core.thing.internal.profiles;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,35 +28,36 @@ import org.openhab.core.thing.profiles.ProfileCallback;
  * @author Simon Kaufmann - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class SystemDefaultProfileTest {
 
-    private @Mock ProfileCallback mockCallback;
+    private @Mock @NonNullByDefault({}) ProfileCallback callbackMock;
 
     @Test
     public void testOnCommand() {
-        SystemDefaultProfile profile = new SystemDefaultProfile(mockCallback);
+        SystemDefaultProfile profile = new SystemDefaultProfile(callbackMock);
 
         profile.onCommandFromItem(OnOffType.ON);
 
-        verify(mockCallback).handleCommand(eq(OnOffType.ON));
-        verifyNoMoreInteractions(mockCallback);
+        verify(callbackMock).handleCommand(eq(OnOffType.ON));
+        verifyNoMoreInteractions(callbackMock);
     }
 
     @Test
     public void testStateUpdated() {
-        SystemDefaultProfile profile = new SystemDefaultProfile(mockCallback);
+        SystemDefaultProfile profile = new SystemDefaultProfile(callbackMock);
         profile.onStateUpdateFromHandler(OnOffType.ON);
 
-        verify(mockCallback).sendUpdate(eq(OnOffType.ON));
-        verifyNoMoreInteractions(mockCallback);
+        verify(callbackMock).sendUpdate(eq(OnOffType.ON));
+        verifyNoMoreInteractions(callbackMock);
     }
 
     @Test
     public void testPostCommand() {
-        SystemDefaultProfile profile = new SystemDefaultProfile(mockCallback);
+        SystemDefaultProfile profile = new SystemDefaultProfile(callbackMock);
         profile.onCommandFromHandler(OnOffType.ON);
 
-        verify(mockCallback).sendCommand(eq(OnOffType.ON));
-        verifyNoMoreInteractions(mockCallback);
+        verify(callbackMock).sendCommand(eq(OnOffType.ON));
+        verifyNoMoreInteractions(callbackMock);
     }
 }

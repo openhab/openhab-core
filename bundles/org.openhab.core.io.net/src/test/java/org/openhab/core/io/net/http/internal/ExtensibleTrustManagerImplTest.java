@@ -29,6 +29,7 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,128 +46,129 @@ import org.openhab.core.io.net.http.TlsTrustManagerProvider;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class ExtensibleTrustManagerImplTest {
 
-    private X509Certificate[] chain;
-    private ExtensibleTrustManagerImpl subject;
+    private @NonNullByDefault({}) X509Certificate[] chain;
+    private @NonNullByDefault({}) ExtensibleTrustManagerImpl subject;
 
-    private @Mock TlsTrustManagerProvider trustmanagerProvider;
-    private @Mock TlsTrustManagerProvider trustmanagerProviderHostPort;
-    private @Mock X509ExtendedTrustManager trustmanager;
-    private @Mock X509ExtendedTrustManager trustmanager2;
-    private @Mock X509ExtendedTrustManager defaultTrustManager;
-    private @Mock SSLEngine sslEngine;
-    private @Mock X509Certificate topOfChain;
-    private @Mock X509Certificate bottomOfChain;
+    private @Mock @NonNullByDefault({}) TlsTrustManagerProvider trustmanagerProviderMock;
+    private @Mock @NonNullByDefault({}) TlsTrustManagerProvider trustmanagerProviderHostPortMock;
+    private @Mock @NonNullByDefault({}) X509ExtendedTrustManager trustmanagerMock;
+    private @Mock @NonNullByDefault({}) X509ExtendedTrustManager trustmanager2Mock;
+    private @Mock @NonNullByDefault({}) X509ExtendedTrustManager defaultTrustManagerMock;
+    private @Mock @NonNullByDefault({}) SSLEngine sslEngineMock;
+    private @Mock @NonNullByDefault({}) X509Certificate topOfChainMock;
+    private @Mock @NonNullByDefault({}) X509Certificate bottomOfChainMock;
 
     @BeforeEach
     public void setup() {
-        when(trustmanagerProvider.getHostName()).thenReturn("example.org");
-        when(trustmanagerProvider.getTrustManager()).thenReturn(trustmanager);
+        when(trustmanagerProviderMock.getHostName()).thenReturn("example.org");
+        when(trustmanagerProviderMock.getTrustManager()).thenReturn(trustmanagerMock);
 
-        when(trustmanagerProviderHostPort.getHostName()).thenReturn("example.org:443");
-        when(trustmanagerProviderHostPort.getTrustManager()).thenReturn(trustmanager2);
+        when(trustmanagerProviderHostPortMock.getHostName()).thenReturn("example.org:443");
+        when(trustmanagerProviderHostPortMock.getTrustManager()).thenReturn(trustmanager2Mock);
 
         subject = new ExtensibleTrustManagerImpl();
-        subject.addTlsTrustManagerProvider(trustmanagerProvider);
-        subject.addTlsTrustManagerProvider(trustmanagerProviderHostPort);
+        subject.addTlsTrustManagerProvider(trustmanagerProviderMock);
+        subject.addTlsTrustManagerProvider(trustmanagerProviderHostPortMock);
 
-        chain = new X509Certificate[] { topOfChain, bottomOfChain };
+        chain = new X509Certificate[] { topOfChainMock, bottomOfChainMock };
     }
 
     @Test
     public void shouldForwardCallsToMockForMatchingCN() throws CertificateException {
-        when(topOfChain.getSubjectX500Principal())
+        when(topOfChainMock.getSubjectX500Principal())
                 .thenReturn(new X500Principal("CN=example.org, OU=Core, O=openHAB, C=DE"));
 
         subject.checkServerTrusted(chain, "just");
 
-        verify(trustmanager).checkServerTrusted(chain, "just", (Socket) null);
-        verifyNoMoreInteractions(trustmanager, trustmanager2);
+        verify(trustmanagerMock).checkServerTrusted(chain, "just", (Socket) null);
+        verifyNoMoreInteractions(trustmanagerMock, trustmanager2Mock);
     }
 
     @Test
     public void shouldForwardCallsToMockForMatchingHost() throws CertificateException {
-        when(sslEngine.getPeerHost()).thenReturn("example.org");
-        when(sslEngine.getPeerPort()).thenReturn(443);
+        when(sslEngineMock.getPeerHost()).thenReturn("example.org");
+        when(sslEngineMock.getPeerPort()).thenReturn(443);
 
-        subject.checkServerTrusted(chain, "just", sslEngine);
+        subject.checkServerTrusted(chain, "just", sslEngineMock);
 
-        verify(trustmanager2).checkServerTrusted(chain, "just", sslEngine);
-        verifyNoMoreInteractions(trustmanager, trustmanager2);
+        verify(trustmanager2Mock).checkServerTrusted(chain, "just", sslEngineMock);
+        verifyNoMoreInteractions(trustmanagerMock, trustmanager2Mock);
     }
 
     @Test
     public void shouldForwardCallsToMockForMatchingAlternativeNames() throws CertificateException {
-        when(topOfChain.getSubjectX500Principal())
+        when(topOfChainMock.getSubjectX500Principal())
                 .thenReturn(new X500Principal("CN=example.com, OU=Core, O=openHAB, C=DE"));
-        when(topOfChain.getSubjectAlternativeNames())
+        when(topOfChainMock.getSubjectAlternativeNames())
                 .thenReturn(constructAlternativeNames("example1.com", "example.org"));
 
         subject.checkClientTrusted(chain, "just");
 
-        verify(trustmanager).checkClientTrusted(chain, "just", (Socket) null);
-        verifyNoMoreInteractions(trustmanager);
+        verify(trustmanagerMock).checkClientTrusted(chain, "just", (Socket) null);
+        verifyNoMoreInteractions(trustmanagerMock);
     }
 
     @Test
     public void shouldBeResilientAgainstNullSubjectAlternativeNames()
             throws CertificateException, IllegalAccessException, NoSuchFieldException, SecurityException {
-        writeField(subject, "defaultTrustManager", defaultTrustManager, true);
+        writeField(subject, "defaultTrustManager", defaultTrustManagerMock, true);
 
-        when(topOfChain.getSubjectX500Principal())
+        when(topOfChainMock.getSubjectX500Principal())
                 .thenReturn(new X500Principal("CN=example.com, OU=Core, O=openHAB, C=DE"));
-        when(topOfChain.getSubjectAlternativeNames()).thenReturn(null);
+        when(topOfChainMock.getSubjectAlternativeNames()).thenReturn(null);
 
         subject.checkClientTrusted(chain, "just");
 
-        verify(defaultTrustManager).checkClientTrusted(chain, "just", (Socket) null);
-        verifyNoMoreInteractions(trustmanager);
+        verify(defaultTrustManagerMock).checkClientTrusted(chain, "just", (Socket) null);
+        verifyNoMoreInteractions(trustmanagerMock);
     }
 
     @Test
     public void shouldBeResilientAgainstMissingCommonNames() throws CertificateException, IllegalAccessException,
             NoSuchFieldException, SecurityException, IllegalArgumentException {
-        writeField(subject, "defaultTrustManager", defaultTrustManager, true);
+        writeField(subject, "defaultTrustManager", defaultTrustManagerMock, true);
 
-        when(topOfChain.getSubjectX500Principal()).thenReturn(new X500Principal("OU=Core, O=openHAB, C=DE"));
+        when(topOfChainMock.getSubjectX500Principal()).thenReturn(new X500Principal("OU=Core, O=openHAB, C=DE"));
 
         subject.checkClientTrusted(chain, "just");
 
-        verify(defaultTrustManager).checkClientTrusted(chain, "just", (Socket) null);
-        verifyNoMoreInteractions(trustmanager);
+        verify(defaultTrustManagerMock).checkClientTrusted(chain, "just", (Socket) null);
+        verifyNoMoreInteractions(trustmanagerMock);
     }
 
     @Test
     public void shouldBeResilientAgainstInvalidCertificates() throws CertificateException, IllegalAccessException,
             NoSuchFieldException, SecurityException, IllegalArgumentException {
-        writeField(subject, "defaultTrustManager", defaultTrustManager, true);
+        writeField(subject, "defaultTrustManager", defaultTrustManagerMock, true);
 
-        when(topOfChain.getSubjectX500Principal())
+        when(topOfChainMock.getSubjectX500Principal())
                 .thenReturn(new X500Principal("CN=example.com, OU=Core, O=openHAB, C=DE"));
-        when(topOfChain.getSubjectAlternativeNames())
+        when(topOfChainMock.getSubjectAlternativeNames())
                 .thenThrow(new CertificateParsingException("Invalid certificate!!!"));
 
         subject.checkClientTrusted(chain, "just");
 
-        verify(defaultTrustManager).checkClientTrusted(chain, "just", (Socket) null);
-        verifyNoMoreInteractions(trustmanager);
+        verify(defaultTrustManagerMock).checkClientTrusted(chain, "just", (Socket) null);
+        verifyNoMoreInteractions(trustmanagerMock);
     }
 
     @Test
     public void shouldNotForwardCallsToMockForDifferentCN() throws CertificateException, IllegalAccessException,
             NoSuchFieldException, SecurityException, IllegalArgumentException {
-        writeField(subject, "defaultTrustManager", defaultTrustManager, true);
-        mockSubjectForCertificate(topOfChain, "CN=example.com, OU=Core, O=openHAB, C=DE");
-        mockIssuerForCertificate(topOfChain, "CN=openHAB, OU=Core, O=openHAB, C=DE");
-        mockSubjectForCertificate(bottomOfChain, "CN=openHAB, OU=Core, O=openHAB, C=DE");
-        mockIssuerForCertificate(bottomOfChain, "");
-        when(topOfChain.getEncoded()).thenReturn(new byte[0]);
+        writeField(subject, "defaultTrustManager", defaultTrustManagerMock, true);
+        mockSubjectForCertificate(topOfChainMock, "CN=example.com, OU=Core, O=openHAB, C=DE");
+        mockIssuerForCertificate(topOfChainMock, "CN=openHAB, OU=Core, O=openHAB, C=DE");
+        mockSubjectForCertificate(bottomOfChainMock, "CN=openHAB, OU=Core, O=openHAB, C=DE");
+        mockIssuerForCertificate(bottomOfChainMock, "");
+        when(topOfChainMock.getEncoded()).thenReturn(new byte[0]);
 
         subject.checkServerTrusted(chain, "just");
 
-        verify(defaultTrustManager).checkServerTrusted(chain, "just", (Socket) null);
-        verifyNoInteractions(trustmanager);
+        verify(defaultTrustManagerMock).checkServerTrusted(chain, "just", (Socket) null);
+        verifyNoInteractions(trustmanagerMock);
     }
 
     private Collection<List<?>> constructAlternativeNames(String... alternatives) {

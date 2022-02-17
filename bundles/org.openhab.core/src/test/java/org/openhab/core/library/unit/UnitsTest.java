@@ -28,6 +28,8 @@ import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.hamcrest.Matcher;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
@@ -43,6 +45,7 @@ import tech.units.indriya.quantity.Quantities;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class UnitsTest {
 
     private static final double DEFAULT_ERROR = 0.000000000000001d;
@@ -73,6 +76,14 @@ public class UnitsTest {
 
         assertThat(pascal.to(ImperialUnits.INCH_OF_MERCURY),
                 isQuantityEquals(Quantities.getQuantity(BigDecimal.ONE, ImperialUnits.INCH_OF_MERCURY)));
+    }
+
+    @Test
+    public void testPascal2psiConversion() {
+        Quantity<Pressure> pascal = Quantities.getQuantity(new BigDecimal("6894.757"), SIUnits.PASCAL);
+
+        assertThat(pascal.to(ImperialUnits.POUND_FORCE_SQUARE_INCH),
+                isQuantityEquals(Quantities.getQuantity(BigDecimal.ONE, ImperialUnits.POUND_FORCE_SQUARE_INCH)));
     }
 
     @Test
@@ -376,7 +387,7 @@ public class UnitsTest {
         }
 
         @Override
-        public boolean matches(Object actualValue) {
+        public boolean matches(@Nullable Object actualValue) {
             if (actualValue instanceof Quantity) {
                 Quantity<?> other = (Quantity<?>) actualValue;
 

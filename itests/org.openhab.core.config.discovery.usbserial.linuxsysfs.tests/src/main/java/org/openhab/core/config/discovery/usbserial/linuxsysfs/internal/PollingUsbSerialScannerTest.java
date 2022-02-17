@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,14 +40,15 @@ import org.openhab.core.config.discovery.usbserial.linuxsysfs.testutil.UsbSerial
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class PollingUsbSerialScannerTest {
 
     private UsbSerialDeviceInformationGenerator usbDeviceInfoGenerator = new UsbSerialDeviceInformationGenerator();
 
-    private PollingUsbSerialScanner pollingScanner;
+    private @NonNullByDefault({}) PollingUsbSerialScanner pollingScanner;
 
-    private @Mock UsbSerialDiscoveryListener discoveryListenerMock;
-    private @Mock UsbSerialScanner usbSerialScannerMock;
+    private @Mock @NonNullByDefault({}) UsbSerialDiscoveryListener discoveryListenerMock;
+    private @Mock @NonNullByDefault({}) UsbSerialScanner usbSerialScannerMock;
 
     @BeforeEach
     public void beforeEach() {

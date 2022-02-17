@@ -33,6 +33,7 @@ import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLHandshakeException;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -50,17 +51,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * @author Kai Kreuzer - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class WebClientFactoryImplTest {
 
-    private WebClientFactoryImpl webClientFactory;
+    private @NonNullByDefault({}) WebClientFactoryImpl webClientFactory;
 
     private static final String TEST_URL = "https://www.eclipse.org/";
 
-    private @Mock ExtensibleTrustManagerImpl extensibleTrustManager;
+    private @Mock @NonNullByDefault({}) ExtensibleTrustManagerImpl extensibleTrustManagerMock;
 
     @BeforeEach
     public void setup() {
-        webClientFactory = new WebClientFactoryImpl(extensibleTrustManager);
+        webClientFactory = new WebClientFactoryImpl(extensibleTrustManagerMock);
         webClientFactory.activate(createConfigMap(4, 200, 60, 2, 10, 60));
     }
 
@@ -95,9 +97,9 @@ public class WebClientFactoryImplTest {
             fail("Statuscode != 200");
         }
 
-        verify(extensibleTrustManager).checkServerTrusted(certificateChainCaptor.capture(), anyString(),
+        verify(extensibleTrustManagerMock).checkServerTrusted(certificateChainCaptor.capture(), anyString(),
                 sslEngineCaptor.capture());
-        verifyNoMoreInteractions(extensibleTrustManager);
+        verifyNoMoreInteractions(extensibleTrustManagerMock);
         assertThat(sslEngineCaptor.getValue().getPeerHost(), is("www.eclipse.org"));
         assertThat(sslEngineCaptor.getValue().getPeerPort(), is(443));
         assertThat(certificateChainCaptor.getValue()[0].getSubjectX500Principal().getName(),
@@ -107,7 +109,7 @@ public class WebClientFactoryImplTest {
     @Disabled("connecting to the outside world makes this test flaky")
     @Test
     public void testCommonClientUsesExtensibleTrustManagerFailure() throws Exception {
-        doThrow(new CertificateException()).when(extensibleTrustManager).checkServerTrusted(
+        doThrow(new CertificateException()).when(extensibleTrustManagerMock).checkServerTrusted(
                 ArgumentMatchers.any(X509Certificate[].class), anyString(), ArgumentMatchers.any(SSLEngine.class));
         HttpClient httpClient = webClientFactory.getCommonHttpClient();
 

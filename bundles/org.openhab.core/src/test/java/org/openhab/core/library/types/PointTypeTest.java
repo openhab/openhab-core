@@ -16,11 +16,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author Gaël L'hopital - Initial contribution
  */
+@NonNullByDefault
 public class PointTypeTest {
 
     @Test
@@ -96,13 +98,16 @@ public class PointTypeTest {
     }
 
     @Test
-    public void testDistance() {
+    public void testDefaultConstructor() {
         // Ensure presence of default constructor
         PointType middleOfTheOcean = new PointType();
         assertEquals(0, middleOfTheOcean.getLongitude().doubleValue(), 0.0000001);
         assertEquals(0, middleOfTheOcean.getLatitude().doubleValue(), 0.0000001);
         assertEquals(0, middleOfTheOcean.getAltitude().doubleValue(), 0.0000001);
+    }
 
+    @Test
+    public void testGravity() {
         PointType pointParis = PointType.valueOf("48.8566140,2.3522219");
 
         assertEquals(2.3522219, pointParis.getLongitude().doubleValue(), 0.0000001);
@@ -110,8 +115,10 @@ public class PointTypeTest {
 
         double gravParis = pointParis.getGravity().doubleValue();
         assertEquals(gravParis, 9.809, 0.001);
+    }
 
-        // Check canonization of position
+    @Test
+    public void testCanonicalization() {
         PointType point3 = PointType.valueOf("-100,200");
         double lat3 = point3.getLatitude().doubleValue();
         double lon3 = point3.getLongitude().doubleValue();
@@ -119,7 +126,10 @@ public class PointTypeTest {
         assertTrue(lat3 < 90);
         assertTrue(lon3 < 180);
         assertTrue(lon3 > -180);
+    }
 
+    @Test
+    public void testConstructorToString() {
         PointType pointTest1 = new PointType("48.8566140,2.3522219,118");
         PointType pointTest2 = new PointType(pointTest1.toString());
         assertEquals(pointTest1.getAltitude().longValue(), pointTest2.getAltitude().longValue());
@@ -128,6 +138,27 @@ public class PointTypeTest {
 
         // Ensure that constructor and toString are consistent
         // https://bugs.eclipse.org/bugs/show_bug.cgi?id=467612#c17
+        PointType point3 = PointType.valueOf("-100,200");
         assertTrue(point3.equals(PointType.valueOf(point3.toString())));
+    }
+
+    @Test
+    public void testDistance() {
+        PointType pointParis = PointType.valueOf("48.8566140,2.3522219");
+        PointType greenwich = PointType.valueOf("51.477338,0.0");
+
+        assertEquals(336474.0, pointParis.distanceFrom(greenwich).doubleValue(), 1);
+    }
+
+    @Test
+    public void testBearing() {
+        PointType middleOfTheOcean = PointType.valueOf("0.0,0.0");
+        PointType greenwich = PointType.valueOf("51.477338,0.0");
+        PointType mudchute = PointType.valueOf("51.492148,-0.012126");
+
+        assertEquals(0.0, middleOfTheOcean.bearingTo(greenwich).doubleValue());
+        assertEquals(180, greenwich.bearingTo(middleOfTheOcean).doubleValue());
+        assertEquals(344.0, greenwich.bearingTo(mudchute).doubleValue(), 1);
+        assertEquals(164.0, mudchute.bearingTo(greenwich).doubleValue(), 1);
     }
 }

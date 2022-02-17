@@ -72,20 +72,20 @@ import org.slf4j.LoggerFactory;
  * @author Stefan Triller - Added test for ItemAddedEvents with multiple model files
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class GenericItemProviderTest extends JavaOSGiTest {
 
     private static final String ITEMS_MODEL_TYPE = "items";
     private static final String TESTMODEL_NAME = "testModel.items";
     private static final String TESTMODEL_NAME2 = "testModel2.items";
 
-    private static final Collection<String> TESTMODEL_NAMES = Stream.of(TESTMODEL_NAME, TESTMODEL_NAME2)
-            .collect(Collectors.toList());
+    private static final Collection<String> TESTMODEL_NAMES = List.of(TESTMODEL_NAME, TESTMODEL_NAME2);
 
     private final Logger logger = LoggerFactory.getLogger(GenericItemProviderTest.class);
 
-    private ItemRegistry itemRegistry;
-    private MetadataRegistry metadataRegistry;
-    private ModelRepository modelRepository;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) MetadataRegistry metadataRegistry;
+    private @NonNullByDefault({}) ModelRepository modelRepository;
 
     @BeforeEach
     public void setUp() {
@@ -124,7 +124,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
             };
 
             List<AbstractItemRegistryEvent> removedItemEvents = new ArrayList<>();
-            @NonNullByDefault
+
             EventSubscriber itemEventSubscriber = new EventSubscriber() {
                 @Override
                 public void receive(Event event) {
@@ -262,7 +262,6 @@ public class GenericItemProviderTest extends JavaOSGiTest {
     public void assertThatItemEventsAreSentCorrectly() {
         List<AbstractItemRegistryEvent> receivedEvents = new ArrayList<>();
 
-        @NonNullByDefault
         EventSubscriber itemEventSubscriber = new EventSubscriber() {
             @Override
             public void receive(Event event) {
@@ -330,7 +329,6 @@ public class GenericItemProviderTest extends JavaOSGiTest {
     public void assertThatItemEventsAreSentOnlyOncePerItemEvenWithMultipleItemFiles() {
         List<AbstractItemRegistryEvent> receivedEvents = new ArrayList<>();
 
-        @NonNullByDefault
         EventSubscriber itemEventSubscriber = new EventSubscriber() {
             @Override
             public void receive(Event event) {
@@ -590,7 +588,6 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         Collection<Item> itemsToRemove = itemRegistry.getAll();
         List<AbstractItemRegistryEvent> removedItemEvents = new ArrayList<>();
 
-        @NonNullByDefault
         EventSubscriber itemEventSubscriber = new EventSubscriber() {
             @Override
             public void receive(Event event) {

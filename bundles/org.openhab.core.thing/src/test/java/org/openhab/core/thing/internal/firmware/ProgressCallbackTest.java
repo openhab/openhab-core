@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,6 +51,7 @@ import org.osgi.framework.Bundle;
  * @author Dimitar Ivanov - Adapted the tests to use firmware instead of firmware UID
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public final class ProgressCallbackTest {
 
     private static final String BINDING_ID = "simpleBinding";
@@ -57,19 +59,19 @@ public final class ProgressCallbackTest {
     private static final ThingTypeUID THING_TYPE_UID1 = new ThingTypeUID(BINDING_ID, THING_TYPE_ID1);
     private static final String THING1_ID = "simpleThing1";
 
-    private ProgressCallbackImpl sut;
-    private List<Event> postedEvents;
-    private ThingUID expectedThingUID;
-    private Firmware expectedFirmware;
-    private String cancelMessageKey = "update-canceled";
-    private String usedMessagedKey;
+    private static final String CANCEL_MESSAGE_KEY = "update-canceled";
+    private static final ThingTypeUID THING_TYPE = new ThingTypeUID("thing:type");
+    private static final ThingUID EXPECTED_THING_UID = new ThingUID(THING_TYPE, "thingid");
+
+    private @NonNullByDefault({}) ProgressCallbackImpl sut;
+    private @NonNullByDefault({}) Firmware expectedFirmware;
+    private final List<Event> postedEvents = new LinkedList<>();
+    private @Nullable String usedMessagedKey;
 
     @BeforeEach
     public void setUp() {
-        ThingTypeUID thingType = new ThingTypeUID("thing:type");
-        expectedThingUID = new ThingUID(thingType, "thingid");
-        expectedFirmware = FirmwareBuilder.create(thingType, "1").build();
-        postedEvents = new LinkedList<>();
+        expectedFirmware = FirmwareBuilder.create(THING_TYPE, "1").build();
+        postedEvents.clear();
 
         EventPublisher publisher = new EventPublisher() {
             @Override
@@ -81,7 +83,7 @@ public final class ProgressCallbackTest {
         TranslationProvider i18nProvider = new TranslationProvider() {
             @Override
             public @Nullable String getText(@Nullable Bundle bundle, @Nullable String key, @Nullable String defaultText,
-                    @Nullable Locale locale, @Nullable Object... arguments) {
+                    @Nullable Locale locale, @Nullable Object @Nullable... arguments) {
                 usedMessagedKey = key;
                 return "Dummy Message";
             }
@@ -101,7 +103,7 @@ public final class ProgressCallbackTest {
         when(bundleResolver.resolveBundle(any(Class.class))).thenReturn(bundle);
 
         sut = new ProgressCallbackImpl(new DummyFirmwareHandler(), publisher, i18nProvider, bundleResolver,
-                expectedThingUID, expectedFirmware, null);
+                EXPECTED_THING_UID, expectedFirmware, null);
     }
 
     @Test
@@ -257,9 +259,9 @@ public final class ProgressCallbackTest {
         assertThat(postedEvents.size(), is(1));
         assertThat(postedEvents.get(0), is(instanceOf(FirmwareUpdateResultInfoEvent.class)));
         FirmwareUpdateResultInfoEvent resultEvent = (FirmwareUpdateResultInfoEvent) postedEvents.get(0);
-        assertThat(resultEvent.getFirmwareUpdateResultInfo().getThingUID(), is(expectedThingUID));
+        assertThat(resultEvent.getFirmwareUpdateResultInfo().getThingUID(), is(EXPECTED_THING_UID));
         assertThat(resultEvent.getFirmwareUpdateResultInfo().getResult(), is(FirmwareUpdateResult.CANCELED));
-        assertThat(usedMessagedKey, is(cancelMessageKey));
+        assertThat(usedMessagedKey, is(CANCEL_MESSAGE_KEY));
     }
 
     /*
@@ -303,7 +305,7 @@ public final class ProgressCallbackTest {
     @Test
     public void assertThatCancelThrowsNoIllegalStateExceptionIfStepSequenceIsNotDefined() {
         sut.canceled();
-        assertThatUpdateResultEventIsValid(postedEvents.get(0), cancelMessageKey, FirmwareUpdateResult.CANCELED);
+        assertThatUpdateResultEventIsValid(postedEvents.get(0), CANCEL_MESSAGE_KEY, FirmwareUpdateResult.CANCELED);
     }
 
     @Test
@@ -360,23 +362,23 @@ public final class ProgressCallbackTest {
         assertThrows(IllegalStateException.class, () -> sut.pending());
     }
 
-    private void assertThatProgressInfoEventIsValid(Event event, ProgressStep expectedStep, boolean expectedPending,
-            Integer expectedProgress) {
+    private void assertThatProgressInfoEventIsValid(Event event, @Nullable ProgressStep expectedStep,
+            boolean expectedPending, @Nullable Integer expectedProgress) {
         assertThat(event, is(instanceOf(FirmwareUpdateProgressInfoEvent.class)));
         FirmwareUpdateProgressInfoEvent fpiEvent = (FirmwareUpdateProgressInfoEvent) event;
-        assertThat(fpiEvent.getProgressInfo().getThingUID(), is(expectedThingUID));
+        assertThat(fpiEvent.getProgressInfo().getThingUID(), is(EXPECTED_THING_UID));
         assertThat(fpiEvent.getProgressInfo().getFirmwareVersion(), is(expectedFirmware.getVersion()));
         assertThat(fpiEvent.getProgressInfo().getProgressStep(), is(expectedStep));
         assertThat(fpiEvent.getProgressInfo().getProgress(), is(expectedProgress));
         assertThat(fpiEvent.getProgressInfo().isPending(), (is(expectedPending)));
     }
 
-    private void assertThatUpdateResultEventIsValid(Event event, String expectedMessageKey,
+    private void assertThatUpdateResultEventIsValid(Event event, @Nullable String expectedMessageKey,
             FirmwareUpdateResult expectedResult) {
         assertThat(event, is(instanceOf(FirmwareUpdateResultInfoEvent.class)));
         FirmwareUpdateResultInfoEvent fpiEvent = (FirmwareUpdateResultInfoEvent) event;
         assertThat(usedMessagedKey, is(expectedMessageKey));
-        assertThat(fpiEvent.getFirmwareUpdateResultInfo().getThingUID(), is(expectedThingUID));
+        assertThat(fpiEvent.getFirmwareUpdateResultInfo().getThingUID(), is(EXPECTED_THING_UID));
         assertThat(fpiEvent.getFirmwareUpdateResultInfo().getResult(), is(expectedResult));
     }
 

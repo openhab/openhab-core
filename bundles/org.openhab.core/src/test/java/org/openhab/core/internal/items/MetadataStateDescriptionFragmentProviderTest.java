@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,36 +42,37 @@ import org.osgi.framework.ServiceReference;
  * @author Yannick Schaus - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class MetadataStateDescriptionFragmentProviderTest {
 
     private static final String ITEM_NAME = "itemName";
 
     @SuppressWarnings("rawtypes")
-    private @Mock ServiceReference managedProviderRef;
-    private @Mock BundleContext bundleContext;
-    private @Mock ManagedMetadataProvider managedProvider;
+    private @Mock @NonNullByDefault({}) ServiceReference managedProviderRefMock;
+    private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
+    private @Mock @NonNullByDefault({}) ManagedMetadataProvider managedProviderMock;
 
-    private @Mock MetadataRegistryImpl metadataRegistry;
-    private MetadataStateDescriptionFragmentProvider stateDescriptionFragmentProvider;
+    private @Mock @NonNullByDefault({}) MetadataRegistryImpl metadataRegistryMock;
+    private @NonNullByDefault({}) MetadataStateDescriptionFragmentProvider stateDescriptionFragmentProvider;
 
-    private ServiceListener providerTracker;
+    private @NonNullByDefault({}) ServiceListener providerTracker;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     public void setup() throws Exception {
-        when(bundleContext.getService(same(managedProviderRef))).thenReturn(managedProvider);
+        when(bundleContextMock.getService(same(managedProviderRefMock))).thenReturn(managedProviderMock);
 
-        metadataRegistry = new MetadataRegistryImpl();
-        metadataRegistry.setManagedProvider(managedProvider);
-        metadataRegistry.activate(bundleContext);
-        metadataRegistry.waitForCompletedAsyncActivationTasks();
+        metadataRegistryMock = new MetadataRegistryImpl();
+        metadataRegistryMock.setManagedProvider(managedProviderMock);
+        metadataRegistryMock.activate(bundleContextMock);
+        metadataRegistryMock.waitForCompletedAsyncActivationTasks();
 
         ArgumentCaptor<ServiceListener> captor = ArgumentCaptor.forClass(ServiceListener.class);
-        verify(bundleContext).addServiceListener(captor.capture(), any());
+        verify(bundleContextMock).addServiceListener(captor.capture(), any());
         providerTracker = captor.getValue();
-        providerTracker.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, managedProviderRef));
+        providerTracker.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, managedProviderRefMock));
 
-        stateDescriptionFragmentProvider = new MetadataStateDescriptionFragmentProvider(metadataRegistry,
+        stateDescriptionFragmentProvider = new MetadataStateDescriptionFragmentProvider(metadataRegistryMock,
                 new HashMap<>());
     }
 
@@ -93,7 +95,7 @@ public class MetadataStateDescriptionFragmentProviderTest {
         metadataConfig.put("readOnly", "true");
         metadataConfig.put("options", "OPTION1,OPTION2 , 3 =Option 3 ");
         Metadata metadata = new Metadata(metadataKey, "N/A", metadataConfig);
-        metadataRegistry.added(managedProvider, metadata);
+        metadataRegistryMock.added(managedProviderMock, metadata);
 
         StateDescriptionFragment stateDescriptionFragment = stateDescriptionFragmentProvider
                 .getStateDescriptionFragment(ITEM_NAME, null);

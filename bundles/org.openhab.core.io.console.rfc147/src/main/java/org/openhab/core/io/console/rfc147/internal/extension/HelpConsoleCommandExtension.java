@@ -14,6 +14,8 @@ package org.openhab.core.io.console.rfc147.internal.extension;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.ConsoleInterpreter;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
@@ -24,15 +26,16 @@ import org.openhab.core.io.console.rfc147.internal.ConsoleSupportRfc147;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class HelpConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
-    private ConsoleCommandsContainer commandsContainer;
+    private @Nullable ConsoleCommandsContainer commandsContainer;
 
     public HelpConsoleCommandExtension() {
         super("help", "Get help for all available commands.");
     }
 
-    public void setConsoleCommandsContainer(final ConsoleCommandsContainer commandsContainer) {
+    public void setConsoleCommandsContainer(final @Nullable ConsoleCommandsContainer commandsContainer) {
         this.commandsContainer = commandsContainer;
     }
 
@@ -43,9 +46,10 @@ public class HelpConsoleCommandExtension extends AbstractConsoleCommandExtension
 
     @Override
     public void execute(String[] args, Console console) {
-        if (this.commandsContainer != null) {
+        ConsoleCommandsContainer commandsContainer = this.commandsContainer;
+        if (commandsContainer != null) {
             ConsoleInterpreter.printHelp(console, ConsoleSupportRfc147.CONSOLE.getBase(), ":",
-                    this.commandsContainer.getConsoleCommandExtensions());
+                    commandsContainer.getConsoleCommandExtensions());
         }
     }
 

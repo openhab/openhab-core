@@ -12,6 +12,7 @@
  */
 package org.openhab.core.test;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -23,6 +24,7 @@ import org.osgi.framework.BundleException;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class BundleCloseable implements AutoCloseable {
 
     private final Bundle bundle;

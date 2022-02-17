@@ -16,6 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.module.script.defaultscope.ScriptBusEvent;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -33,32 +36,29 @@ import org.slf4j.LoggerFactory;
  * Items should not be updated directly (setting the state property), but updates should
  * be sent to the bus, so that all interested bundles are notified.
  *
- * Note: This class is a copy from the {@link BusEvent} class, which resides in the model.script bundle.
- *
+ * Note: This class is a copy from the {@link org.openhab.core.model.script.actions.BusEvent} class
+ * 
  * @author Kai Kreuzer - Initial contribution
+ * @author Jan N. Klug - Moved implementation to internal class
  */
-public class ScriptBusEvent {
+@NonNullByDefault
+public class ScriptBusEventImpl implements ScriptBusEvent {
 
-    ScriptBusEvent(ItemRegistry itemRegistry, EventPublisher eventPublisher) {
+    private @Nullable ItemRegistry itemRegistry;
+    private @Nullable EventPublisher eventPublisher;
+
+    ScriptBusEventImpl(ItemRegistry itemRegistry, EventPublisher eventPublisher) {
         this.itemRegistry = itemRegistry;
         this.eventPublisher = eventPublisher;
     }
-
-    private ItemRegistry itemRegistry;
-    private EventPublisher eventPublisher;
 
     public void dispose() {
         this.itemRegistry = null;
         this.eventPublisher = null;
     }
 
-    /**
-     * Sends a command for a specified item to the event bus.
-     *
-     * @param item the item to send the command to
-     * @param commandString the command to send
-     */
-    public Object sendCommand(Item item, String commandString) {
+    @Override
+    public @Nullable Object sendCommand(@Nullable Item item, @Nullable String commandString) {
         if (item != null) {
             return sendCommand(item.getName(), commandString);
         } else {
@@ -66,13 +66,8 @@ public class ScriptBusEvent {
         }
     }
 
-    /**
-     * Sends a number as a command for a specified item to the event bus.
-     *
-     * @param item the item to send the command to
-     * @param number the number to send as a command
-     */
-    public Object sendCommand(Item item, Number number) {
+    @Override
+    public @Nullable Object sendCommand(@Nullable Item item, @Nullable Number number) {
         if (item != null && number != null) {
             return sendCommand(item.getName(), number.toString());
         } else {
@@ -80,50 +75,38 @@ public class ScriptBusEvent {
         }
     }
 
-    /**
-     * Sends a command for a specified item to the event bus.
-     *
-     * @param itemName the name of the item to send the command to
-     * @param commandString the command to send
-     */
-    public Object sendCommand(String itemName, String commandString) {
-        if (eventPublisher != null && itemRegistry != null) {
+    @Override
+    public @Nullable Object sendCommand(@Nullable String itemName, @Nullable String commandString) {
+        EventPublisher eventPublisher = this.eventPublisher;
+        ItemRegistry itemRegistry = this.itemRegistry;
+        if (eventPublisher != null && itemRegistry != null && itemName != null && commandString != null) {
             try {
                 Item item = itemRegistry.getItem(itemName);
                 Command command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), commandString);
                 if (command != null) {
                     eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command));
                 } else {
-                    LoggerFactory.getLogger(ScriptBusEvent.class).warn("Command '{}' cannot be parsed for item '{}'.",
-                            commandString, item);
+                    LoggerFactory.getLogger(ScriptBusEventImpl.class)
+                            .warn("Command '{}' cannot be parsed for item '{}'.", commandString, item);
                 }
             } catch (ItemNotFoundException e) {
-                LoggerFactory.getLogger(ScriptBusEvent.class).warn("Item '{}' does not exist.", itemName);
+                LoggerFactory.getLogger(ScriptBusEventImpl.class).warn("Item '{}' does not exist.", itemName);
             }
         }
         return null;
     }
 
-    /**
-     * Sends a command for a specified item to the event bus.
-     *
-     * @param item the item to send the command to
-     * @param command the command to send
-     */
-    public Object sendCommand(Item item, Command command) {
-        if (eventPublisher != null && item != null) {
+    @Override
+    public @Nullable Object sendCommand(@Nullable Item item, @Nullable Command command) {
+        EventPublisher eventPublisher = this.eventPublisher;
+        if (eventPublisher != null && item != null && command != null) {
             eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command));
         }
         return null;
     }
 
-    /**
-     * Posts a status update for a specified item to the event bus.
-     *
-     * @param item the item to send the status update for
-     * @param state the new state of the item as a number
-     */
-    public Object postUpdate(Item item, Number state) {
+    @Override
+    public @Nullable Object postUpdate(@Nullable Item item, @Nullable Number state) {
         if (item != null && state != null) {
             return postUpdate(item.getName(), state.toString());
         } else {
@@ -131,13 +114,8 @@ public class ScriptBusEvent {
         }
     }
 
-    /**
-     * Posts a status update for a specified item to the event bus.
-     *
-     * @param item the item to send the status update for
-     * @param stateAsString the new state of the item
-     */
-    public Object postUpdate(Item item, String stateAsString) {
+    @Override
+    public @Nullable Object postUpdate(@Nullable Item item, @Nullable String stateAsString) {
         if (item != null) {
             return postUpdate(item.getName(), stateAsString);
         } else {
@@ -145,52 +123,38 @@ public class ScriptBusEvent {
         }
     }
 
-    /**
-     * Posts a status update for a specified item to the event bus.
-     *
-     * @param itemName the name of the item to send the status update for
-     * @param stateAsString the new state of the item
-     */
-    public Object postUpdate(String itemName, String stateString) {
-        if (eventPublisher != null && itemRegistry != null) {
+    @Override
+    public @Nullable Object postUpdate(@Nullable String itemName, @Nullable String stateString) {
+        EventPublisher eventPublisher = this.eventPublisher;
+        ItemRegistry itemRegistry = this.itemRegistry;
+        if (eventPublisher != null && itemRegistry != null && itemName != null && stateString != null) {
             try {
                 Item item = itemRegistry.getItem(itemName);
                 State state = TypeParser.parseState(item.getAcceptedDataTypes(), stateString);
                 if (state != null) {
                     eventPublisher.post(ItemEventFactory.createStateEvent(itemName, state));
                 } else {
-                    LoggerFactory.getLogger(ScriptBusEvent.class).warn("State '{}' cannot be parsed for item '{}'.",
+                    LoggerFactory.getLogger(ScriptBusEventImpl.class).warn("State '{}' cannot be parsed for item '{}'.",
                             stateString, itemName);
                 }
             } catch (ItemNotFoundException e) {
-                LoggerFactory.getLogger(ScriptBusEvent.class).warn("Item '{}' does not exist.", itemName);
+                LoggerFactory.getLogger(ScriptBusEventImpl.class).warn("Item '{}' does not exist.", itemName);
             }
         }
         return null;
     }
 
-    /**
-     * Posts a status update for a specified item to the event bus.
-     * t
-     *
-     * @param item the item to send the status update for
-     * @param state the new state of the item
-     */
-    public Object postUpdate(Item item, State state) {
-        if (eventPublisher != null && item != null) {
+    @Override
+    public @Nullable Object postUpdate(@Nullable Item item, @Nullable State state) {
+        EventPublisher eventPublisher = this.eventPublisher;
+        if (eventPublisher != null && item != null && state != null) {
             eventPublisher.post(ItemEventFactory.createStateEvent(item.getName(), state));
         }
         return null;
     }
 
-    /**
-     * Stores the current states for a list of items in a map.
-     * A group item is not itself put into the map, but instead all its members.
-     *
-     * @param items the items for which the state should be stored
-     * @return the map of items with their states
-     */
-    public Map<Item, State> storeStates(Item... items) {
+    @Override
+    public Map<Item, State> storeStates(Item @Nullable... items) {
         Map<Item, State> statesMap = new HashMap<>();
         if (items != null) {
             for (Item item : items) {
@@ -207,16 +171,8 @@ public class ScriptBusEvent {
         return statesMap;
     }
 
-    /**
-     * Restores item states from a map.
-     * If the saved state can be interpreted as a command, a command is sent for the item
-     * (and the physical device can send a status update if occurred). If it is no valid
-     * command, the item state is directly updated to the saved value.
-     *
-     * @param statesMap a map with ({@link Item}, {@link State}) entries
-     * @return null
-     */
-    public Object restoreStates(Map<Item, State> statesMap) {
+    @Override
+    public @Nullable Object restoreStates(@Nullable Map<Item, State> statesMap) {
         if (statesMap != null) {
             for (Entry<Item, State> entry : statesMap.entrySet()) {
                 if (entry.getValue() instanceof Command) {

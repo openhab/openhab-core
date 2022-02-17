@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class ChannelGroupTypeBuilderTest {
 
     private static final String DESCRIPTION = "description";
@@ -34,7 +36,7 @@ public class ChannelGroupTypeBuilderTest {
     private static final ChannelGroupTypeUID CHANNEL_GROUP_TYPE_UID = new ChannelGroupTypeUID("bindingId",
             "channelGroupId");
 
-    private ChannelGroupTypeBuilder builder;
+    private @NonNullByDefault({}) ChannelGroupTypeBuilder builder;
 
     @BeforeEach
     public void setup() {

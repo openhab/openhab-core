@@ -71,17 +71,18 @@ import org.slf4j.LoggerFactory;
  * @author Marin Mitev - make the test to pass on each run
  * @author Kai Kreuzer - refactored to Java
  */
+@NonNullByDefault
 public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
     private final Logger logger = LoggerFactory.getLogger(AutomationIntegrationJsonTest.class);
-    private EventPublisher eventPublisher;
-    private ItemRegistry itemRegistry;
-    private RuleRegistry ruleRegistry;
-    private RuleManager ruleManager;
-    private ManagedRuleProvider managedRuleProvider;
-    private ModuleTypeRegistry moduleTypeRegistry;
-    private @SuppressWarnings("unused") Event ruleEvent;
-    public Event itemEvent;
+    private @NonNullByDefault({}) EventPublisher eventPublisher;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) RuleRegistry ruleRegistry;
+    private @NonNullByDefault({}) RuleManager ruleManager;
+    private @NonNullByDefault({}) ManagedRuleProvider managedRuleProvider;
+    private @NonNullByDefault({}) ModuleTypeRegistry moduleTypeRegistry;
+    private @Nullable @SuppressWarnings("unused") Event ruleEvent;
+    public @Nullable Event itemEvent;
 
     // keep storage rules imported from json files
     public static final VolatileStorageService VOLATILE_STORAGE_SERVICE = new VolatileStorageService();
@@ -92,7 +93,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
         getService(ItemRegistry.class);
 
-        @NonNullByDefault
         ItemProvider itemProvider = new ItemProvider() {
 
             @Override
@@ -117,7 +117,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         registerService(itemProvider);
         registerVolatileStorageService();
 
-        @NonNullByDefault
         EventSubscriber ruleEventHandler = new EventSubscriber() {
 
             @Override

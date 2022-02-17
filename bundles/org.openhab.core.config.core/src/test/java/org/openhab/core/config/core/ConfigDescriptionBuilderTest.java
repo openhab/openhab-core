@@ -19,6 +19,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import java.net.URI;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -28,6 +29,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class ConfigDescriptionBuilderTest {
 
     private static final URI CONFIG_URI = URI.create("system:ephemeris");
@@ -39,7 +41,7 @@ public class ConfigDescriptionBuilderTest {
             .create("TEST GROUP 1").withLabel("Test Group 1").build();
     private static final ConfigDescriptionParameterGroup GROUP2 = ConfigDescriptionParameterGroupBuilder
             .create("TEST GROUP 2").withAdvanced(Boolean.TRUE).withLabel("Test Group 2").build();
-    private ConfigDescriptionBuilder builder;
+    private @NonNullByDefault({}) ConfigDescriptionBuilder builder;
 
     @BeforeEach
     public void setup() {

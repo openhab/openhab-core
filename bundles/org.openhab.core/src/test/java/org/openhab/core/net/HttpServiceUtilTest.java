@@ -19,6 +19,7 @@ import static org.mockito.Mockito.*;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,66 +37,67 @@ import org.osgi.framework.ServiceReference;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class HttpServiceUtilTest {
 
     private static final String ORG_OSGI_SERVICE_HTTP_SERVICE = "org.osgi.service.http.HttpService";
     private static final String HTTP_PORT = "org.osgi.service.http.port";
     private static final String HTTP_PORT_SECURE = "org.osgi.service.http.port.secure";
 
-    private @Mock BundleContext bundleContext;
+    private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
 
     @BeforeEach
     public void setup() throws InvalidSyntaxException {
         ServiceReference<?>[] httpServiceReferences = getHttpServiceReferences();
         ServiceReference<?>[] secureHttpServiceReferences = getSecureHttpServiceReferences();
 
-        when(bundleContext.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null)).thenReturn(
+        when(bundleContextMock.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null)).thenReturn(
                 Stream.concat(Arrays.stream(httpServiceReferences), Arrays.stream(secureHttpServiceReferences))
                         .toArray(ServiceReference<?>[]::new));
     }
 
     @Test
     public void shouldReturnHttpServicePortFromServiceReference() {
-        int port = HttpServiceUtil.getHttpServicePort(bundleContext);
+        int port = HttpServiceUtil.getHttpServicePort(bundleContextMock);
 
         assertThat(port, is(8080));
     }
 
     @Test
     public void shouldReturnHttpServicePortSecureFromServiceReference() {
-        int port = HttpServiceUtil.getHttpServicePortSecure(bundleContext);
+        int port = HttpServiceUtil.getHttpServicePortSecure(bundleContextMock);
 
         assertThat(port, is(48080));
     }
 
     @Test
     public void shouldReturnHttpServicePortFromSystemProperty() throws InvalidSyntaxException {
-        when(bundleContext.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null))
+        when(bundleContextMock.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null))
                 .thenReturn(new ServiceReference[0]);
-        when(bundleContext.getProperty(HTTP_PORT)).thenReturn("9090");
+        when(bundleContextMock.getProperty(HTTP_PORT)).thenReturn("9090");
 
-        int port = HttpServiceUtil.getHttpServicePort(bundleContext);
+        int port = HttpServiceUtil.getHttpServicePort(bundleContextMock);
 
         assertThat(port, is(9090));
     }
 
     @Test
     public void shouldReturnHttpServicePortSecureFromSystemProperty() throws InvalidSyntaxException {
-        when(bundleContext.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null))
+        when(bundleContextMock.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null))
                 .thenReturn(new ServiceReference[0]);
-        when(bundleContext.getProperty(HTTP_PORT_SECURE)).thenReturn("49090");
+        when(bundleContextMock.getProperty(HTTP_PORT_SECURE)).thenReturn("49090");
 
-        int port = HttpServiceUtil.getHttpServicePortSecure(bundleContext);
+        int port = HttpServiceUtil.getHttpServicePortSecure(bundleContextMock);
 
         assertThat(port, is(49090));
     }
 
     @Test
     public void shouldReturnUndefinedForException() throws InvalidSyntaxException {
-        when(bundleContext.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null))
+        when(bundleContextMock.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null))
                 .thenThrow(new InvalidSyntaxException(null, null));
 
-        int undfinedPort = HttpServiceUtil.getHttpServicePort(bundleContext);
+        int undfinedPort = HttpServiceUtil.getHttpServicePort(bundleContextMock);
         assertThat(undfinedPort, is(-1));
     }
 

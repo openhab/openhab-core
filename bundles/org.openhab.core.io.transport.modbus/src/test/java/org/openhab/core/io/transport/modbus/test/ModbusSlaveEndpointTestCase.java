@@ -14,6 +14,7 @@ package org.openhab.core.io.transport.modbus.test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.io.transport.modbus.endpoint.ModbusSerialSlaveEndpoint;
 import org.openhab.core.io.transport.modbus.endpoint.ModbusTCPSlaveEndpoint;
@@ -25,6 +26,7 @@ import net.wimpi.modbus.Modbus;
 /**
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 public class ModbusSlaveEndpointTestCase {
 
     @Test

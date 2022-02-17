@@ -215,7 +215,7 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
     private String getThingUID(ThingActions annotatedThingActions) {
         ThingHandler handler = annotatedThingActions.getThingHandler();
         if (handler == null) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     String.format("ThingHandler for '%s' is missing.", annotatedThingActions.getClass()));
         }
         return handler.getThing().getUID().getAsString();

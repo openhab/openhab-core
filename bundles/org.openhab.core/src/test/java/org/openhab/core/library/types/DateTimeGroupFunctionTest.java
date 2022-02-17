@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupFunction;
@@ -32,19 +32,13 @@ import org.openhab.core.types.UnDefType;
 /**
  * @author Robert Michalak - Initial contribution
  */
+@NonNullByDefault
 public class DateTimeGroupFunctionTest {
-
-    private GroupFunction function;
-    private Set<Item> items;
-
-    @BeforeEach
-    public void init() {
-        items = new HashSet<>();
-    }
 
     @Test
     public void testLatestFunction() {
         ZonedDateTime expectedDateTime = ZonedDateTime.now();
+        Set<Item> items = new HashSet<>();
         items.add(new TestItem("TestItem1", new DateTimeType(expectedDateTime)));
         items.add(new TestItem("TestItem2", UnDefType.UNDEF));
         items.add(new TestItem("TestItem3", new DateTimeType(expectedDateTime.minusDays(10))));
@@ -52,7 +46,7 @@ public class DateTimeGroupFunctionTest {
         items.add(new TestItem("TestItem5", UnDefType.UNDEF));
         items.add(new TestItem("TestItem6", new DateTimeType(expectedDateTime.minusSeconds(1))));
 
-        function = new DateTimeGroupFunction.Latest();
+        GroupFunction function = new DateTimeGroupFunction.Latest();
         State state = function.calculate(items);
 
         assertTrue(expectedDateTime.isEqual(((DateTimeType) state).getZonedDateTime()));
@@ -61,6 +55,7 @@ public class DateTimeGroupFunctionTest {
     @Test
     public void testEarliestFunction() {
         ZonedDateTime expectedDateTime = ZonedDateTime.now();
+        Set<Item> items = new HashSet<>();
         items.add(new TestItem("TestItem1", new DateTimeType(expectedDateTime)));
         items.add(new TestItem("TestItem2", UnDefType.UNDEF));
         items.add(new TestItem("TestItem3", new DateTimeType(expectedDateTime.plusDays(10))));
@@ -68,7 +63,7 @@ public class DateTimeGroupFunctionTest {
         items.add(new TestItem("TestItem5", UnDefType.UNDEF));
         items.add(new TestItem("TestItem6", new DateTimeType(expectedDateTime.plusSeconds(1))));
 
-        function = new DateTimeGroupFunction.Earliest();
+        GroupFunction function = new DateTimeGroupFunction.Earliest();
         State state = function.calculate(items);
 
         assertTrue(expectedDateTime.isEqual(((DateTimeType) state).getZonedDateTime()));

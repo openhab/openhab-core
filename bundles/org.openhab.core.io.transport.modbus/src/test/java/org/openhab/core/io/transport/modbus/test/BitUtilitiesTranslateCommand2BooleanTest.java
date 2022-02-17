@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Optional;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.io.transport.modbus.ModbusBitUtilities;
 import org.openhab.core.library.types.DecimalType;
@@ -27,6 +28,7 @@ import org.openhab.core.library.types.OpenClosedType;
 /**
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 public class BitUtilitiesTranslateCommand2BooleanTest {
 
     @Test

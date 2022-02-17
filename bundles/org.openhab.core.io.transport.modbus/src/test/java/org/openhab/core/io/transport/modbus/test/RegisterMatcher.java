@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.hamcrest.Description;
 import org.openhab.core.io.transport.modbus.ModbusRegisterArray;
 import org.openhab.core.io.transport.modbus.ModbusWriteFunctionCode;
@@ -25,6 +26,7 @@ import org.openhab.core.io.transport.modbus.ModbusWriteRegisterRequestBlueprint;
 /**
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 class RegisterMatcher extends AbstractRequestComparer<ModbusWriteRegisterRequestBlueprint> {
 
     private Integer[] expectedRegisterValues;
@@ -36,7 +38,7 @@ class RegisterMatcher extends AbstractRequestComparer<ModbusWriteRegisterRequest
     }
 
     @Override
-    public void describeTo(Description description) {
+    public void describeTo(@NonNullByDefault({}) Description description) {
         super.describeTo(description);
         description.appendText(" registers=");
         description.appendValue(Arrays.toString(expectedRegisterValues));

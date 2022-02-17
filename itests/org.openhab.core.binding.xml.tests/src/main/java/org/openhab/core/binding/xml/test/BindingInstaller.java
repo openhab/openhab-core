@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.function.Consumer;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.binding.BindingInfoRegistry;
 import org.openhab.core.test.BundleCloseable;
 import org.openhab.core.test.SyntheticBundleInstaller;
@@ -25,6 +26,7 @@ import org.osgi.framework.BundleContext;
 /**
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class BindingInstaller {
 
     private final Consumer<Runnable> waitForAssert;

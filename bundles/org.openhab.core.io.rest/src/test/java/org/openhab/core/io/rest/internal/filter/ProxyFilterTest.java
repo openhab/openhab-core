@@ -17,7 +17,6 @@ import static org.mockito.Mockito.*;
 import static org.openhab.core.io.rest.internal.filter.ProxyFilter.*;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -26,6 +25,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,16 +43,17 @@ import org.mockito.quality.Strictness;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class ProxyFilterTest {
 
     private final ProxyFilter filter = new ProxyFilter();
 
-    private @Mock ContainerRequestContext context;
-    private @Mock UriInfo uriInfo;
+    private @Mock @NonNullByDefault({}) ContainerRequestContext contextMock;
+    private @Mock @NonNullByDefault({}) UriInfo uriInfoMock;
 
     @BeforeEach
     public void before() {
-        when(context.getUriInfo()).thenReturn(uriInfo);
+        when(contextMock.getUriInfo()).thenReturn(uriInfoMock);
     }
 
     @Test
@@ -62,11 +64,11 @@ public class ProxyFilterTest {
 
         setupContextHeaders("https", "eclipse.org");
 
-        filter.filter(context);
+        filter.filter(contextMock);
 
         URI newBaseURI = new URI("https://eclipse.org/rest");
         URI newRequestURI = new URI("https://eclipse.org/rest/test");
-        verify(context).setRequestUri(eq(newBaseURI), eq(newRequestURI));
+        verify(contextMock).setRequestUri(eq(newBaseURI), eq(newRequestURI));
     }
 
     @Test
@@ -77,11 +79,11 @@ public class ProxyFilterTest {
 
         setupContextHeaders("http", "eclipse.org:8081");
 
-        filter.filter(context);
+        filter.filter(contextMock);
 
         URI newBaseURI = new URI("http://eclipse.org:8081/rest");
         URI newRequestURI = new URI("http://eclipse.org:8081/rest/test");
-        verify(context).setRequestUri(eq(newBaseURI), eq(newRequestURI));
+        verify(contextMock).setRequestUri(eq(newBaseURI), eq(newRequestURI));
     }
 
     @Test
@@ -92,9 +94,9 @@ public class ProxyFilterTest {
 
         setupContextHeaders(null, null);
 
-        filter.filter(context);
+        filter.filter(contextMock);
 
-        verify(context, never()).setRequestUri(any(URI.class), any(URI.class));
+        verify(contextMock, never()).setRequestUri(any(URI.class), any(URI.class));
     }
 
     @Test
@@ -105,11 +107,11 @@ public class ProxyFilterTest {
 
         setupContextHeaders("https", null);
 
-        filter.filter(context);
+        filter.filter(contextMock);
 
         URI newBaseURI = new URI("https://localhost:8080/rest");
         URI newRequestURI = new URI("https://localhost:8080/rest/test");
-        verify(context).setRequestUri(eq(newBaseURI), eq(newRequestURI));
+        verify(contextMock).setRequestUri(eq(newBaseURI), eq(newRequestURI));
     }
 
     @Test
@@ -120,11 +122,11 @@ public class ProxyFilterTest {
 
         setupContextHeaders("https", null);
 
-        filter.filter(context);
+        filter.filter(contextMock);
 
         URI newBaseURI = new URI("https://localhost/rest");
         URI newRequestURI = new URI("https://localhost/rest/test");
-        verify(context).setRequestUri(eq(newBaseURI), eq(newRequestURI));
+        verify(contextMock).setRequestUri(eq(newBaseURI), eq(newRequestURI));
     }
 
     @Test
@@ -135,11 +137,11 @@ public class ProxyFilterTest {
 
         setupContextHeaders(null, "eclipse.org:8081");
 
-        filter.filter(context);
+        filter.filter(contextMock);
 
         URI newBaseURI = new URI("http://eclipse.org:8081/rest");
         URI newRequestURI = new URI("http://eclipse.org:8081/rest/test");
-        verify(context).setRequestUri(eq(newBaseURI), eq(newRequestURI));
+        verify(contextMock).setRequestUri(eq(newBaseURI), eq(newRequestURI));
     }
 
     @Test
@@ -150,23 +152,19 @@ public class ProxyFilterTest {
 
         setupContextHeaders("https", "://sometext\\\\///");
 
-        filter.filter(context);
+        filter.filter(contextMock);
 
-        verify(context, never()).setRequestUri(any(URI.class), any(URI.class));
+        verify(contextMock, never()).setRequestUri(any(URI.class), any(URI.class));
     }
 
     private void setupContextURIs(String baseURI, String requestURI) {
-        try {
-            when(uriInfo.getBaseUri()).thenReturn(new URI(baseURI));
-            when(uriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri(baseURI));
-            when(uriInfo.getRequestUri()).thenReturn(new URI(requestURI));
-            when(uriInfo.getRequestUriBuilder()).thenReturn(UriBuilder.fromUri(requestURI));
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException("Error while setting up context mock", e);
-        }
+        when(uriInfoMock.getBaseUri()).thenReturn(URI.create(baseURI));
+        when(uriInfoMock.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri(baseURI));
+        when(uriInfoMock.getRequestUri()).thenReturn(URI.create(requestURI));
+        when(uriInfoMock.getRequestUriBuilder()).thenReturn(UriBuilder.fromUri(requestURI));
     }
 
-    private void setupContextHeaders(String protoHeader, String hostHeader) {
+    private void setupContextHeaders(@Nullable String protoHeader, @Nullable String hostHeader) {
         MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
         if (protoHeader != null) {
             headers.put(PROTO_PROXY_HEADER, List.of(protoHeader));
@@ -174,6 +172,6 @@ public class ProxyFilterTest {
         if (hostHeader != null) {
             headers.put(HOST_PROXY_HEADER, List.of(hostHeader));
         }
-        when(context.getHeaders()).thenReturn(headers);
+        when(contextMock.getHeaders()).thenReturn(headers);
     }
 }

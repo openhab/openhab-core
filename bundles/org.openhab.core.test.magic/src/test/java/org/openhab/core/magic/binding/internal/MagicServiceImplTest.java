@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.net.URI;
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ParameterOption;
@@ -29,11 +30,12 @@ import org.openhab.core.magic.binding.MagicService;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class MagicServiceImplTest {
 
     private static final String PARAMETER_NAME = "select_decimal_limit";
 
-    private MagicService magicService;
+    private @NonNullByDefault({}) MagicService magicService;
 
     @BeforeEach
     public void setup() {

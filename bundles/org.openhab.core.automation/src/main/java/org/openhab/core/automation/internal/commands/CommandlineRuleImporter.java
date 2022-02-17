@@ -110,7 +110,7 @@ public class CommandlineRuleImporter extends AbstractCommandProvider<Rule> {
             }
         } else {
             throw new ParsingException(new ParsingNestedException(ParsingNestedException.RULE, null,
-                    new Exception("Parser " + parserType + " not available")));
+                    new IllegalArgumentException("Parser " + parserType + " not available")));
         }
     }
 

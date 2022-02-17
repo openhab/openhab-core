@@ -14,6 +14,7 @@ package org.openhab.core.library.items;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
@@ -24,6 +25,7 @@ import org.openhab.core.library.types.PercentType;
  * @author Chris Jackson - Initial contribution
  * @author Stefan Triller - more tests for type conversions
  */
+@NonNullByDefault
 public class SwitchItemTest {
 
     @Test

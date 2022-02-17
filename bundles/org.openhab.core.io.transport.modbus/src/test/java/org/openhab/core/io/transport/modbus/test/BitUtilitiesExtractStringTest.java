@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.io.transport.modbus.ModbusBitUtilities;
@@ -30,6 +31,7 @@ import org.openhab.core.io.transport.modbus.ModbusRegisterArray;
 /**
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault
 public class BitUtilitiesExtractStringTest {
 
     private static ModbusRegisterArray shortArrayToRegisterArray(int... arr) {

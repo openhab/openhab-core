@@ -15,6 +15,8 @@ package org.openhab.core.thing.internal;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.type.ThingType;
@@ -22,6 +24,7 @@ import org.openhab.core.thing.type.ThingType;
 /**
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class SimpleThingTypeProvider implements ThingTypeProvider {
     private final Collection<ThingType> thingTypes;
 
@@ -30,12 +33,12 @@ public class SimpleThingTypeProvider implements ThingTypeProvider {
     }
 
     @Override
-    public Collection<ThingType> getThingTypes(final Locale locale) {
+    public Collection<ThingType> getThingTypes(final @Nullable Locale locale) {
         return this.thingTypes;
     }
 
     @Override
-    public ThingType getThingType(final ThingTypeUID thingTypeUID, final Locale locale) {
+    public @Nullable ThingType getThingType(final ThingTypeUID thingTypeUID, final @Nullable Locale locale) {
         for (final ThingType thingType : thingTypes) {
             if (thingType.getUID().equals(thingTypeUID)) {
                 return thingType;

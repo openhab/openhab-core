@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,46 +31,47 @@ import org.osgi.service.http.HttpContext;
  * @author Łukasz Dywicki - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class HttpContextFactoryServiceImplTest {
 
     private static final String RESOURCE = "resource";
 
-    private HttpContextFactoryServiceImpl httpContextFactoryService;
+    private @NonNullByDefault({}) HttpContextFactoryServiceImpl httpContextFactoryService;
 
-    private @Mock Bundle bundle;
-    private @Mock WrappingHttpContext httpContext;
+    private @Mock @NonNullByDefault({}) Bundle bundleMock;
+    private @Mock @NonNullByDefault({}) WrappingHttpContext httpContextMock;
 
     @BeforeEach
     public void setup() {
         httpContextFactoryService = new HttpContextFactoryServiceImpl();
-        httpContextFactoryService.setHttpContext(httpContext);
+        httpContextFactoryService.setHttpContext(httpContextMock);
 
-        when(httpContext.wrap(bundle)).thenReturn(new BundleHttpContext(httpContext, bundle));
+        when(httpContextMock.wrap(bundleMock)).thenReturn(new BundleHttpContext(httpContextMock, bundleMock));
     }
 
     @Test
     public void shouldCreateHttpContext() {
-        HttpContext context = httpContextFactoryService.createDefaultHttpContext(bundle);
+        HttpContext context = httpContextFactoryService.createDefaultHttpContext(bundleMock);
         assertThat(context, is(notNullValue()));
 
-        verify(httpContext).wrap(bundle);
+        verify(httpContextMock).wrap(bundleMock);
     }
 
     @Test
     public void httpContextShouldCallgetResourceOnBundle() {
-        HttpContext context = httpContextFactoryService.createDefaultHttpContext(bundle);
+        HttpContext context = httpContextFactoryService.createDefaultHttpContext(bundleMock);
         context.getResource(RESOURCE);
 
-        verify(httpContext).wrap(bundle);
-        verify(bundle).getResource(RESOURCE);
+        verify(httpContextMock).wrap(bundleMock);
+        verify(bundleMock).getResource(RESOURCE);
     }
 
     @Test
     public void httpContextShouldCallgetResourceOnBundleWithoutLeadingSlash() {
-        HttpContext context = httpContextFactoryService.createDefaultHttpContext(bundle);
+        HttpContext context = httpContextFactoryService.createDefaultHttpContext(bundleMock);
         context.getResource("/" + RESOURCE);
 
-        verify(httpContext).wrap(bundle);
-        verify(bundle).getResource(RESOURCE);
+        verify(httpContextMock).wrap(bundleMock);
+        verify(bundleMock).getResource(RESOURCE);
     }
 }

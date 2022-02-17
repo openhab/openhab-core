@@ -21,6 +21,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.i18n.LocaleProvider;
@@ -37,13 +38,15 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated tests from groovy to java
  */
+@NonNullByDefault
 public class VoicesCommandTest extends VoiceConsoleCommandExtensionTest {
     private static final String CONFIG_LANGUAGE = "language";
     private static final String SUBCMD_VOICES = "voices";
-    private LocaleProvider localeProvider;
-    private TTSServiceStub ttsService;
-    private SinkStub sink;
-    private VoiceStub voice;
+
+    private @NonNullByDefault({}) LocaleProvider localeProvider;
+    private @NonNullByDefault({}) TTSServiceStub ttsService;
+    private @NonNullByDefault({}) SinkStub sink;
+    private @NonNullByDefault({}) VoiceStub voice;
 
     @BeforeEach
     public void setUp() throws IOException {

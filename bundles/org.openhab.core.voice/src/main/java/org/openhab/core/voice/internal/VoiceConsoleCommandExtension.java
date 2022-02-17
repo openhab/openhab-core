@@ -15,6 +15,7 @@ package org.openhab.core.voice.internal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -122,14 +123,16 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         String keyword = args.length < 5 ? null : args[4];
                         voiceManager.startDialog(null, null, null, hli, source, sink, null, keyword, null);
                     } catch (IllegalStateException e) {
-                        console.println(e.getMessage());
+                        console.println(Objects.requireNonNullElse(e.getMessage(),
+                                "An error occurred while starting the dialog"));
                     }
                     break;
                 case SUBCMD_STOP_DIALOG:
                     try {
                         voiceManager.stopDialog(args.length < 2 ? null : getSource(args[1]));
                     } catch (IllegalStateException e) {
-                        console.println(e.getMessage());
+                        console.println(Objects.requireNonNullElse(e.getMessage(),
+                                "An error occurred while stopping the dialog"));
                     }
                     break;
                 default:
@@ -164,7 +167,8 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 console.println(result);
             }
         } catch (InterpretationException ie) {
-            console.println(ie.getMessage());
+            console.println(Objects.requireNonNullElse(ie.getMessage(),
+                    String.format("An error occurred while interpreting '%s'", msg)));
         }
     }
 

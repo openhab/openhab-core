@@ -83,15 +83,15 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
 
     private final Map<String, Object> elements = new ConcurrentHashMap<>();
 
-    private final ScriptBusEvent busEvent;
-    private final ScriptThingActions thingActions;
+    private final ScriptBusEventImpl busEvent;
+    private final ScriptThingActionsImpl thingActions;
 
     @Activate
     public DefaultScriptScopeProvider(final @Reference ItemRegistry itemRegistry,
             final @Reference ThingRegistry thingRegistry, final @Reference RuleRegistry ruleRegistry,
             final @Reference EventPublisher eventPublisher) {
-        this.busEvent = new ScriptBusEvent(itemRegistry, eventPublisher);
-        this.thingActions = new ScriptThingActions(thingRegistry);
+        this.busEvent = new ScriptBusEventImpl(itemRegistry, eventPublisher);
+        this.thingActions = new ScriptThingActionsImpl(thingRegistry);
 
         elements.put("State", State.class);
         elements.put("Command", Command.class);

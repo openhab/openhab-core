@@ -28,6 +28,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
 import com.google.gson.JsonObject;
@@ -37,6 +38,7 @@ import com.google.gson.JsonObject;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class JSONResponseTest {
 
     private static final String ENTITY_VALUE = "entityValue";

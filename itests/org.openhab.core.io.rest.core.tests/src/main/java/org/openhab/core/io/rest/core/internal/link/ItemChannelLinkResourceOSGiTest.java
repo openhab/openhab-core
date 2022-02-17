@@ -17,7 +17,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +30,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,6 +56,7 @@ import com.jayway.jsonpath.JsonPath;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class ItemChannelLinkResourceOSGiTest extends JavaOSGiTest {
 
     private static final String THING_TYPE_UID = "thing:type:uid";
@@ -65,18 +67,18 @@ public class ItemChannelLinkResourceOSGiTest extends JavaOSGiTest {
     private static final String CHANNEL_UID1 = THING_TYPE_UID + ":" + UID + ":1";
     private static final String CHANNEL_UID2 = THING_TYPE_UID + ":" + UID + ":2";
 
-    private ItemChannelLink link1;
-    private ItemChannelLink link2;
-    private ItemChannelLink link3;
+    private @NonNullByDefault({}) ItemChannelLink link1;
+    private @NonNullByDefault({}) ItemChannelLink link2;
+    private @NonNullByDefault({}) ItemChannelLink link3;
 
-    private @Mock ItemChannelLinkProvider itemChannelLinkProvider;
+    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private @NonNullByDefault({}) ItemChannelLinkResource itemChannelLinkResource;
+    private @NonNullByDefault({}) ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
 
-    private UriInfo uriInfo;
-    private HttpHeaders httpHeaders;
-
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private ItemChannelLinkResource itemChannelLinkResource;
-    private ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
+    private @Mock @NonNullByDefault({}) HttpHeaders httpHeadersMock;
+    private @Mock @NonNullByDefault({}) ItemChannelLinkProvider itemChannelLinkProviderMock;
+    private @Mock @NonNullByDefault({}) UriBuilder uriBuilderMock;
+    private @Mock @NonNullByDefault({}) UriInfo uriInfoMock;
 
     @BeforeEach
     public void beforeEach() {
@@ -95,20 +97,19 @@ public class ItemChannelLinkResourceOSGiTest extends JavaOSGiTest {
         link2 = new ItemChannelLink(ITEM_NAME2, new ChannelUID(CHANNEL_UID2));
         link3 = new ItemChannelLink(ITEM_NAME3, new ChannelUID(THING_TYPE_UID + ":" + UID + ":3"));
 
-        when(itemChannelLinkProvider.getAll()).thenReturn(List.of(link1, link2, link3));
-        registerService(itemChannelLinkProvider);
+        when(itemChannelLinkProviderMock.getAll()).thenReturn(List.of(link1, link2, link3));
+        registerService(itemChannelLinkProviderMock);
 
         waitForAssert(() -> {
             assertThat(itemChannelLinkRegistry.getAll(), hasSize(3));
         });
 
-        UriBuilder uriBuilder = mock(UriBuilder.class);
-        when(uriBuilder.build(any())).thenReturn(URI.create(""));
-        uriInfo = mock(UriInfo.class);
-        when(uriInfo.getAbsolutePathBuilder()).thenReturn(uriBuilder);
-        when(uriInfo.getPath()).thenReturn("");
-        httpHeaders = mock(HttpHeaders.class);
-        when(httpHeaders.getHeaderString(anyString())).thenReturn(null);
+        when(uriBuilderMock.build(any())).thenReturn(URI.create(""));
+
+        when(uriInfoMock.getAbsolutePathBuilder()).thenReturn(uriBuilderMock);
+        when(uriInfoMock.getPath()).thenReturn("");
+
+        when(httpHeadersMock.getHeaderString(anyString())).thenReturn(null);
     }
 
     @Test

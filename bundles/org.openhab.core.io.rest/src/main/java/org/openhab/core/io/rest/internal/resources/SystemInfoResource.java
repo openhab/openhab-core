@@ -26,8 +26,10 @@ import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.internal.resources.beans.SystemInfoBean;
+import org.openhab.core.service.StartLevelService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -61,8 +63,11 @@ public class SystemInfoResource implements RESTResource {
     /** The URI path to this resource */
     public static final String PATH_SYSTEMINFO = "systeminfo";
 
+    private final StartLevelService startLevelService;
+
     @Activate
-    public SystemInfoResource() {
+    public SystemInfoResource(@Reference StartLevelService startLevelService) {
+        this.startLevelService = startLevelService;
     }
 
     @GET
@@ -71,7 +76,7 @@ public class SystemInfoResource implements RESTResource {
     @Operation(operationId = "getSystemInformation", summary = "Gets information about the system.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SystemInfoBean.class))) })
     public Response getSystemInfo(@Context UriInfo uriInfo) {
-        final SystemInfoBean bean = new SystemInfoBean();
+        final SystemInfoBean bean = new SystemInfoBean(startLevelService.getStartLevel());
         return Response.ok(bean).build();
     }
 }

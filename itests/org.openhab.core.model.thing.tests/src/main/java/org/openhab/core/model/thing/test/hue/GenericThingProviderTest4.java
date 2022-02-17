@@ -19,6 +19,8 @@ import static org.mockito.Mockito.*;
 import java.io.ByteArrayInputStream;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,18 +55,19 @@ import org.osgi.service.component.ComponentContext;
  *
  * @author Simon Kaufmann - Initial contribution and API.
  */
+@NonNullByDefault
 public class GenericThingProviderTest4 extends JavaOSGiTest {
-    private TestHueThingTypeProvider thingTypeProvider;
-    private ReadyService readyService;
-    private Bundle bundle;
-    private ThingHandlerFactory hueThingHandlerFactory;
+    private static final String TESTMODEL_NAME = "testModelX.things";
+
     private int bridgeInitializeCounter;
     boolean slowInit;
 
-    private static final String TESTMODEL_NAME = "testModelX.things";
-
-    ModelRepository modelRepository;
-    ThingRegistry thingRegistry;
+    private @NonNullByDefault({}) Bundle bundle;
+    private @NonNullByDefault({}) ThingHandlerFactory hueThingHandlerFactory;
+    private @NonNullByDefault({}) ModelRepository modelRepository;
+    private @NonNullByDefault({}) ReadyService readyService;
+    private @NonNullByDefault({}) ThingRegistry thingRegistry;
+    private @NonNullByDefault({}) TestHueThingTypeProvider thingTypeProvider;
 
     public static Stream<Arguments> data() {
         return Stream.of(Arguments.of(false), Arguments.of(true));
@@ -116,7 +119,7 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
 
         hueThingHandlerFactory = new TestHueThingHandlerFactoryX(componentContextMock) {
             @Override
-            protected ThingHandler createHandler(final Thing thing) {
+            protected @Nullable ThingHandler createHandler(final Thing thing) {
                 if (thing instanceof Bridge) {
                     return new TestBridgeHandler((Bridge) thing);
                 } else {

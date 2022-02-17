@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,7 @@ import org.openhab.core.test.java.JavaTest;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.WARN)
+@NonNullByDefault
 public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
 
     private static final String LIBERAL = "liberal";
@@ -53,34 +55,34 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
 
     private static final URI URI_RESTRICTED_DIMMER = URI.create(SCHEME + SEPARATOR + RESTRICTED + SEPARATOR + "dimmer");
 
-    private @Mock MetadataConfigDescriptionProvider mockProviderRestricted;
-    private @Mock MetadataConfigDescriptionProvider mockProviderLiberal;
+    private @Mock @NonNullByDefault({}) MetadataConfigDescriptionProvider providerRestrictedMock;
+    private @Mock @NonNullByDefault({}) MetadataConfigDescriptionProvider providerLiberalMock;
 
-    private MetadataConfigDescriptionProviderImpl service;
+    private MetadataConfigDescriptionProviderImpl service = new MetadataConfigDescriptionProviderImpl();
 
     @BeforeEach
     public void setup() {
         service = new MetadataConfigDescriptionProviderImpl();
 
-        when(mockProviderRestricted.getNamespace()).thenReturn(RESTRICTED);
-        when(mockProviderRestricted.getDescription(any())).thenReturn("Restricted");
-        when(mockProviderRestricted.getParameterOptions(any())).thenReturn(List.of( //
+        when(providerRestrictedMock.getNamespace()).thenReturn(RESTRICTED);
+        when(providerRestrictedMock.getDescription(any())).thenReturn("Restricted");
+        when(providerRestrictedMock.getParameterOptions(any())).thenReturn(List.of( //
                 new ParameterOption("dimmer", "Dimmer"), //
                 new ParameterOption("switch", "Switch") //
         ));
-        when(mockProviderRestricted.getParameters(eq("dimmer"), any())).thenReturn(List.of( //
+        when(providerRestrictedMock.getParameters(eq("dimmer"), any())).thenReturn(List.of( //
                 ConfigDescriptionParameterBuilder.create("width", Type.INTEGER).build(), //
                 ConfigDescriptionParameterBuilder.create("height", Type.INTEGER).build() //
         ));
 
-        when(mockProviderLiberal.getNamespace()).thenReturn(LIBERAL);
-        when(mockProviderLiberal.getDescription(any())).thenReturn("Liberal");
-        when(mockProviderLiberal.getParameterOptions(any())).thenReturn(null);
+        when(providerLiberalMock.getNamespace()).thenReturn(LIBERAL);
+        when(providerLiberalMock.getDescription(any())).thenReturn("Liberal");
+        when(providerLiberalMock.getParameterOptions(any())).thenReturn(null);
     }
 
     @Test
     public void testGetConfigDescriptionsNoOptions() {
-        service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
+        service.addMetadataConfigDescriptionProvider(providerLiberalMock);
 
         Collection<ConfigDescription> res = service.getConfigDescriptions(Locale.ENGLISH);
         assertNotNull(res);
@@ -98,7 +100,7 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
 
     @Test
     public void testGetConfigDescriptionsWithOptions() {
-        service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
+        service.addMetadataConfigDescriptionProvider(providerRestrictedMock);
 
         Collection<ConfigDescription> res = service.getConfigDescriptions(Locale.ENGLISH);
         assertNotNull(res);
@@ -118,16 +120,16 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
 
     @Test
     public void testGetConfigDescriptionWrongScheme() {
-        service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
-        service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
+        service.addMetadataConfigDescriptionProvider(providerRestrictedMock);
+        service.addMetadataConfigDescriptionProvider(providerLiberalMock);
 
         assertNull(service.getConfigDescription(URI.create("some:nonsense"), null));
     }
 
     @Test
     public void testGetConfigDescriptionValueDescription() {
-        service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
-        service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
+        service.addMetadataConfigDescriptionProvider(providerRestrictedMock);
+        service.addMetadataConfigDescriptionProvider(providerLiberalMock);
 
         ConfigDescription desc = service.getConfigDescription(URI_LIBERAL, null);
         assertNotNull(desc);
@@ -142,8 +144,8 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
 
     @Test
     public void testGetConfigDescriptionValueDescriptionNonExistingNamespace() {
-        service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
-        service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
+        service.addMetadataConfigDescriptionProvider(providerRestrictedMock);
+        service.addMetadataConfigDescriptionProvider(providerLiberalMock);
 
         ConfigDescription desc = service.getConfigDescription(URI.create("metadata:nonsense"), null);
         assertNull(desc);
@@ -151,8 +153,8 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
 
     @Test
     public void testGetConfigDescriptionPropertiesDescription() {
-        service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
-        service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
+        service.addMetadataConfigDescriptionProvider(providerRestrictedMock);
+        service.addMetadataConfigDescriptionProvider(providerLiberalMock);
 
         ConfigDescription desc = service.getConfigDescription(URI_RESTRICTED_DIMMER, null);
         assertNotNull(desc);
@@ -168,8 +170,8 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
 
     @Test
     public void testGetConfigDescriptionPropertiesDescriptionNonExistingNamespace() {
-        service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
-        service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
+        service.addMetadataConfigDescriptionProvider(providerRestrictedMock);
+        service.addMetadataConfigDescriptionProvider(providerLiberalMock);
 
         ConfigDescription desc = service.getConfigDescription(URI.create("metadata:nonsense:nonsense"), null);
         assertNull(desc);
@@ -177,8 +179,8 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
 
     @Test
     public void testGetConfigDescriptionPropertiesDescriptionNonExistingValue() {
-        service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
-        service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
+        service.addMetadataConfigDescriptionProvider(providerRestrictedMock);
+        service.addMetadataConfigDescriptionProvider(providerLiberalMock);
 
         ConfigDescription desc = service.getConfigDescription(URI.create("metadata:foo:nonsense"), null);
         assertNull(desc);

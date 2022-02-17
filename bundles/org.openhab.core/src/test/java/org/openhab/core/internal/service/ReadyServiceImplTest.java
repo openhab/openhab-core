@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
@@ -25,6 +26,7 @@ import org.openhab.core.service.ReadyService.ReadyTracker;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class ReadyServiceImplTest {
 
     @Test

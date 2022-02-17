@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @NonNullByDefault
-@Component(immediate = true, configurationPid = "org.openhab.startlevel", configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(immediate = true, service = StartLevelService.class, configurationPid = "org.openhab.startlevel", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class StartLevelService {
 
     public static final String STARTLEVEL_MARKER_TYPE = "startlevel";

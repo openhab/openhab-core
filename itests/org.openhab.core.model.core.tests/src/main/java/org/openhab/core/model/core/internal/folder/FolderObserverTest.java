@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +33,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,6 +73,7 @@ import org.osgi.service.component.ComponentContext;
  * @author Simon Kaufmann - ported to Java
  */
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class FolderObserverTest extends JavaOSGiTest {
 
     private static final boolean IS_OS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
@@ -85,14 +88,14 @@ public class FolderObserverTest extends JavaOSGiTest {
 
     private static final String INITIAL_FILE_CONTENT = "Initial content";
 
-    private Dictionary<String, Object> configProps;
-    private String defaultWatchedDir;
-    private FolderObserver folderObserver;
-    private ModelRepoDummy modelRepo;
+    private @NonNullByDefault({}) Dictionary<String, Object> configProps;
+    private @NonNullByDefault({}) String defaultWatchedDir;
+    private @NonNullByDefault({}) FolderObserver folderObserver;
+    private @NonNullByDefault({}) ModelRepoDummy modelRepo;
 
-    private @Mock ModelParser modelParser;
-    private @Mock ReadyService readyService;
-    private @Mock ComponentContext context;
+    private @Mock @NonNullByDefault({}) ModelParser modelParserMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
+    private @Mock @NonNullByDefault({}) ComponentContext contextMock;
 
     @BeforeEach
     public void beforeEach() {
@@ -116,13 +119,13 @@ public class FolderObserverTest extends JavaOSGiTest {
     }
 
     private void setUpServices() {
-        when(modelParser.getExtension()).thenReturn("java");
-        when(context.getProperties()).thenReturn(configProps);
+        when(modelParserMock.getExtension()).thenReturn("java");
+        when(contextMock.getProperties()).thenReturn(configProps);
 
         modelRepo = new ModelRepoDummy();
 
-        folderObserver = new FolderObserver(modelRepo, readyService);
-        folderObserver.addModelParser(modelParser);
+        folderObserver = new FolderObserver(modelRepo, readyServiceMock);
+        folderObserver.addModelParser(modelParserMock);
     }
 
     /**
@@ -158,7 +161,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         String validExtension = "java";
 
         configProps.put(EXISTING_SUBDIR_NAME, "txt,jpg," + validExtension);
-        folderObserver.activate(context);
+        folderObserver.activate(contextMock);
 
         File file = new File(EXISTING_SUBDIR_PATH, "NewlyCreatedMockFile." + validExtension);
         file.createNewFile();
@@ -178,14 +181,6 @@ public class FolderObserverTest extends JavaOSGiTest {
         waitForAssert(() -> assertThat(modelRepo.calledFileName, is(file.getName())));
     }
 
-    private void sleep(int millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     /**
      * The following method creates a file in an existing directory. The file's extension is
      * in the configuration properties and there is a registered ModelParser for it.
@@ -199,7 +194,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         String validExtension = "java";
 
         configProps.put(EXISTING_SUBDIR_NAME, "txt,jpg," + validExtension);
-        folderObserver.activate(context);
+        folderObserver.activate(contextMock);
 
         File file = new File(EXISTING_SUBDIR_PATH, "MockFileForModification." + validExtension);
         file.createNewFile();
@@ -247,12 +242,12 @@ public class FolderObserverTest extends JavaOSGiTest {
         String noParserExtension = "jpg";
 
         configProps.put(EXISTING_SUBDIR_NAME, "java,txt," + noParserExtension);
-        folderObserver.activate(context);
+        folderObserver.activate(contextMock);
 
         File file = new File(EXISTING_SUBDIR_PATH, "NewlyCreatedMockFile." + noParserExtension);
         file.createNewFile();
 
-        sleep(WAIT_EVENT_TO_BE_HANDLED);
+        Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(false)));
         waitForAssert(() -> assertThat(modelRepo.isRemoveModelMethodCalled, is(false)));
@@ -268,12 +263,12 @@ public class FolderObserverTest extends JavaOSGiTest {
     @Test
     public void testCreationUntrackedDirectory() throws Exception {
         configProps.put(EXISTING_SUBDIR_NAME, "txt,jpg");
-        folderObserver.activate(context);
+        folderObserver.activate(contextMock);
 
         File file = new File(EXISTING_SUBDIR_PATH, "NewlyCreatedMockFile.java");
         file.createNewFile();
 
-        sleep(WAIT_EVENT_TO_BE_HANDLED);
+        Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(false)));
         waitForAssert(() -> assertThat(modelRepo.isRemoveModelMethodCalled, is(false)));
@@ -287,13 +282,13 @@ public class FolderObserverTest extends JavaOSGiTest {
     @Test
     public void testShutdown() {
         configProps.put(EXISTING_SUBDIR_NAME, "java,txt,jpg");
-        folderObserver.activate(context);
+        folderObserver.activate(contextMock);
 
         modelRepo.clean();
 
         folderObserver.deactivate();
         configProps.remove(EXISTING_SUBDIR_NAME);
-        folderObserver.activate(context);
+        folderObserver.activate(contextMock);
 
         waitForAssert(() -> assertThat(modelRepo.isRemoveModelMethodCalled, is(true)));
         waitForAssert(() -> assertThat(modelRepo.calledFileName, is(MOCK_MODEL_TO_BE_REMOVED)));
@@ -303,11 +298,11 @@ public class FolderObserverTest extends JavaOSGiTest {
      * The following method test the configuration with a non existing subdirectory.
      */
     @Test
-    public void testNonExisting() {
+    public void testNonExisting() throws Exception {
         configProps.put("nonExistingSubdir", "txt,jpg,java");
-        folderObserver.activate(context);
+        folderObserver.activate(contextMock);
 
-        sleep(WAIT_EVENT_TO_BE_HANDLED);
+        Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(false)));
         waitForAssert(() -> assertThat(modelRepo.isRemoveModelMethodCalled, is(false)));
     }
@@ -325,12 +320,12 @@ public class FolderObserverTest extends JavaOSGiTest {
         new File(WATCHED_DIRECTORY, subdir).mkdirs();
 
         configProps.put(subdir, "");
-        folderObserver.activate(context);
+        folderObserver.activate(contextMock);
 
         File file = new File(WATCHED_DIRECTORY, Paths.get(subdir, "MockFileInNoExtSubDir.txt").toString());
         file.createNewFile();
 
-        sleep(WAIT_EVENT_TO_BE_HANDLED);
+        Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(false)));
         waitForAssert(() -> assertThat(modelRepo.isRemoveModelMethodCalled, is(false)));
@@ -342,15 +337,15 @@ public class FolderObserverTest extends JavaOSGiTest {
             @Override
             public boolean addOrRefreshModel(String name, InputStream inputStream) {
                 super.addOrRefreshModel(name, inputStream);
-                throw new RuntimeException("intentional failure.");
+                throw new IllegalStateException("intentional failure.");
             }
         };
-        FolderObserver localFolderObserver = new FolderObserver(modelRepo, readyService);
-        localFolderObserver.addModelParser(modelParser);
+        FolderObserver localFolderObserver = new FolderObserver(modelRepo, readyServiceMock);
+        localFolderObserver.addModelParser(modelParserMock);
 
         String validExtension = "java";
         configProps.put(EXISTING_SUBDIR_NAME, "txt,jpg," + validExtension);
-        localFolderObserver.activate(context);
+        localFolderObserver.activate(contextMock);
 
         File mockFileWithValidExt = new File(EXISTING_SUBDIR_PATH, "MockFileForModification." + validExtension);
         mockFileWithValidExt.createNewFile();
@@ -381,7 +376,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         String validExtension = "java";
 
         configProps.put(EXISTING_SUBDIR_NAME, "txt,jpg," + validExtension);
-        folderObserver.activate(context);
+        folderObserver.activate(contextMock);
 
         String filename = ".HiddenNewlyCreatedMockFile." + validExtension;
 
@@ -414,7 +409,7 @@ public class FolderObserverTest extends JavaOSGiTest {
             }
         }
 
-        sleep(WAIT_EVENT_TO_BE_HANDLED);
+        Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(false)));
     }
 
@@ -422,9 +417,8 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         public boolean isAddOrRefreshModelMethodCalled = false;
         public boolean isRemoveModelMethodCalled = false;
-        public String calledFileName;
-
-        public String fileContent;
+        public @Nullable String calledFileName;
+        public @Nullable String fileContent;
 
         @Override
         public boolean addOrRefreshModel(String name, InputStream inputStream) {
@@ -434,7 +428,7 @@ public class FolderObserverTest extends JavaOSGiTest {
                 fileContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
                 inputStream.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
             return true;
         }
