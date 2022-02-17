@@ -424,10 +424,11 @@ public class ConfigDescriptionValidatorTest {
 
     @Test
     public void assertValidationThrowsExceptionForNotAllowedLimitedParameterOption() {
+        String parameterValue = "ftp";
         List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(
                 TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, MessageKey.OPTIONS_VIOLATED.defaultMessage,
-                MessageKey.OPTIONS_VIOLATED.key, PARAMETER_OPTIONS));
-        params.put(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, "ftp");
+                MessageKey.OPTIONS_VIOLATED.key, parameterValue, PARAMETER_OPTIONS));
+        params.put(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, parameterValue);
         ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
                 () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
         assertThat(getConfigValidationMessages(exception), is(expected));
