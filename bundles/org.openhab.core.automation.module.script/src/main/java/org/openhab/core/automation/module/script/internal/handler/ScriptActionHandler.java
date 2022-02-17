@@ -65,6 +65,7 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
                 logger.error("Script execution of rule with UID '{}' failed: {}", ruleUID, e.getMessage(),
                         logger.isDebugEnabled() ? e : null);
             }
+            resetExecutionContext(scriptEngine, context);
         });
 
         return resultMap;

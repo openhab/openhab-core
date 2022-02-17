@@ -101,11 +101,11 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     }
 
     /**
-     * Adds the passed context variables of the rule engine to the context scope of the ScriptEngine, this should be
-     * updated each time the module is executed
+     * Adds the passed context variables of the rule engine to the context scope of the ScriptEngine
+     * this should be done each time the module is executed to prevent leaking context to later executions
      *
      * @param engine the script engine that is used
-     * @param context the variables and types to put into the execution context
+     * @param context the variables and types to remove from the execution context
      */
     protected void setExecutionContext(ScriptEngine engine, Map<String, ?> context) {
         ScriptContext executionContext = engine.getContext();
@@ -128,6 +128,27 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
                 key = key.substring(dotIndex + 1);
             }
             executionContext.setAttribute(key, value, ScriptContext.ENGINE_SCOPE);
+        }
+    }
+
+    /**
+     * Removes passed context variables of the rule engine from the context scope of the ScriptEngine, this should be
+     * updated each time the module is executed
+     *
+     * @param engine the script engine that is used
+     * @param context the variables and types to put into the execution context
+     */
+    protected void resetExecutionContext(ScriptEngine engine, Map<String, ?> context) {
+        ScriptContext executionContext = engine.getContext();
+
+        for (Entry<String, ?> entry : context.entrySet()) {
+            Object value = entry.getValue();
+            String key = entry.getKey();
+            int dotIndex = key.indexOf('.');
+            if (dotIndex != -1) {
+                key = key.substring(dotIndex + 1);
+            }
+            executionContext.removeAttribute(key, ScriptContext.ENGINE_SCOPE);
         }
     }
 }
