@@ -116,7 +116,7 @@ public class JsonStorageService implements StorageService {
         logger.debug("Json Storage Service: Deactivated.");
     }
 
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings("unchecked")
     @Override
     public <T> Storage<T> getStorage(String name, @Nullable ClassLoader classLoader) {
         File legacyFile = new File(dbFolderName, name + ".json");
@@ -127,12 +127,14 @@ public class JsonStorageService implements StorageService {
             file = legacyFile;
         }
 
-        JsonStorage<T> newStorage = new JsonStorage<>(file, classLoader, maxBackupFiles, writeDelay, maxDeferredPeriod);
-
-        JsonStorage<Object> oldStorage = storageList.put(name, (JsonStorage<Object>) newStorage);
+        JsonStorage<Object> oldStorage = storageList.get(name);
         if (oldStorage != null) {
             oldStorage.flush();
         }
+
+        JsonStorage<T> newStorage = new JsonStorage<>(file, classLoader, maxBackupFiles, writeDelay, maxDeferredPeriod);
+        storageList.put(name, (JsonStorage<Object>) newStorage);
+
         return newStorage;
     }
 
