@@ -12,7 +12,7 @@
  */
 package org.openhab.core.io.rest.core.internal;
 
-import java.io.EOFException;
+import java.io.IOException;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -44,7 +44,7 @@ public class JSONResponseExceptionMapper implements ExceptionMapper<Exception> {
 
     @Override
     public @Nullable Response toResponse(Exception e) {
-        if (e instanceof EOFException) {
+        if (e instanceof IOException) {
             // we catch this exception to avoid confusion errors in the log file, since this is not any error situation
             // see https://github.com/openhab/openhab-distro/issues/1188
             logger.debug("Failed writing HTTP response, since other side closed the connection");
