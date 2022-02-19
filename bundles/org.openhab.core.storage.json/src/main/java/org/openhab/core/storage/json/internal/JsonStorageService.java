@@ -16,6 +16,7 @@ import java.io.File;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -24,6 +25,7 @@ import org.openhab.core.OpenHAB;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
+import org.openhab.core.storage.json.internal.migration.TypeMigrator;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -45,6 +47,11 @@ import org.slf4j.LoggerFactory;
 public class JsonStorageService implements StorageService {
 
     private static final int MAX_FILENAME_LENGTH = 127;
+
+    /**
+     * Contains a map of needed migrations, key is the storage name
+     */
+    private static final Map<String, List<TypeMigrator>> MIGRATORS = Map.of();
 
     private final Logger logger = LoggerFactory.getLogger(JsonStorageService.class);
 
@@ -120,9 +127,8 @@ public class JsonStorageService implements StorageService {
     @Override
     public <T> Storage<T> getStorage(String name, @Nullable ClassLoader classLoader) {
         File legacyFile = new File(dbFolderName, name + ".json");
-        File escapedFile = new File(dbFolderName, urlEscapeUnwantedChars(name) + ".json");
+        File file = new File(dbFolderName, urlEscapeUnwantedChars(name) + ".json");
 
-        File file = escapedFile;
         if (legacyFile.exists()) {
             file = legacyFile;
         }
@@ -132,7 +138,8 @@ public class JsonStorageService implements StorageService {
             oldStorage.flush();
         }
 
-        JsonStorage<T> newStorage = new JsonStorage<>(file, classLoader, maxBackupFiles, writeDelay, maxDeferredPeriod);
+        JsonStorage<T> newStorage = new JsonStorage<>(file, classLoader, maxBackupFiles, writeDelay, maxDeferredPeriod,
+                MIGRATORS.getOrDefault(name, List.of()));
         storageList.put(name, (JsonStorage<Object>) newStorage);
 
         return newStorage;
