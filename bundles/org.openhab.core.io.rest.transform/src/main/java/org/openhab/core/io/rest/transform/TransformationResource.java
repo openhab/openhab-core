@@ -19,6 +19,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,7 +67,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * The {@link TransformationResource} is a
+ * The {@link TransformationResource} provides REST endpoints for editing transformation configuration
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -164,11 +165,9 @@ public class TransformationResource implements RESTResource {
                 return Response.status(Response.Status.FORBIDDEN).build();
             }
 
-            ManagedTransformationService transformationService = transformationServices.stream()
-                    .filter(t -> t.supportedFileExtensions().stream().anyMatch(fileName::endsWith)).findAny()
-                    .orElse(null);
+            Optional<ManagedTransformationService> transformationService = getTransformationService(filePath);
 
-            if (transformationService != null && transformationService.configurationIsValid(content)) {
+            if (transformationService.isPresent() && transformationService.get().configurationIsValid(content)) {
                 Files.writeString(filePath, Objects.requireNonNullElse(content, ""), StandardCharsets.UTF_8,
                         StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 
@@ -191,15 +190,15 @@ public class TransformationResource implements RESTResource {
      */
     private boolean fileFilter(java.nio.file.Path path) {
         try {
-            return Files.isRegularFile(path) && !Files.isHidden(path) && hasValidExtension(path);
+            return Files.isRegularFile(path) && !Files.isHidden(path) && getTransformationService(path).isPresent();
         } catch (IOException ignored) {
         }
         return false;
     }
 
-    private boolean hasValidExtension(java.nio.file.Path path) {
-        String pathStr = path.toString();
-        return transformationServices.stream().map(ManagedTransformationService::supportedFileExtensions)
-                .flatMap(List::stream).anyMatch(pathStr::endsWith);
+    private Optional<ManagedTransformationService> getTransformationService(java.nio.file.Path path) {
+        String fileName = path.toString();
+        return transformationServices.stream()
+                .filter(t -> t.supportedFileExtensions().stream().anyMatch(fileName::endsWith)).findAny();
     }
 }

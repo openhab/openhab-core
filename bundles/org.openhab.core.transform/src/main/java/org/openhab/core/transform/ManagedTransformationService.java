@@ -26,9 +26,22 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public interface ManagedTransformationService {
 
+    /**
+     * Check if the provided configuration is valid
+     *
+     * Services that don't provide validation can rely on the default implementation which returns true
+     *
+     * @param configuration the configuration to check
+     * @return true if configuration is valid or service does not implement validation
+     */
     default boolean configurationIsValid(@Nullable String configuration) {
         return true;
     };
 
+    /**
+     * Get a list of all file extensions supported by this service
+     * 
+     * @return A list of file extensions
+     */
     List<String> supportedFileExtensions();
 }
