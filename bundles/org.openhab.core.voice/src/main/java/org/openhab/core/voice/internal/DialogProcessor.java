@@ -249,10 +249,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 String question = sre.getTranscript();
                 try {
                     toggleProcessing(false);
-                    String answer = hli.interpret(locale, question);
-                    if (answer != null) {
-                        say(answer);
-                    }
+                    say(hli.interpret(locale, question));
                 } catch (InterpretationException e) {
                     String msg = e.getMessage();
                     if (msg != null) {
@@ -280,7 +277,11 @@ public class DialogProcessor implements KSListener, STTListener {
      *
      * @param text The text to say
      */
-    protected void say(String text) {
+    protected void say(@Nullable String text) {
+        if (text == null || text.isEmpty()) {
+            logger.debug("Empty value, nothing to say");
+            return;
+        }
         try {
             Voice voice = null;
             for (Voice currentVoice : tts.getAvailableVoices()) {
