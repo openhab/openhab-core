@@ -36,6 +36,7 @@ import org.openhab.core.voice.KSpottedEvent;
 public class KSServiceStub implements KSService {
 
     private static final Set<AudioFormat> SUPPORTED_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
+    private static final Set<Locale> SUPPORTED_LOCALES = Set.of(Locale.ENGLISH);
 
     private static final String KSSERVICE_STUB_ID = "ksServiceStubID";
     private static final String KSSERVICE_STUB_LABEL = "ksServiceStubLabel";
@@ -60,7 +61,7 @@ public class KSServiceStub implements KSService {
 
     @Override
     public Set<Locale> getSupportedLocales() {
-        return Set.of();
+        return SUPPORTED_LOCALES;
     }
 
     @Override

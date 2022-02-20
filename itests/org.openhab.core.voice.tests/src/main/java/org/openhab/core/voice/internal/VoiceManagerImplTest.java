@@ -194,6 +194,24 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     }
 
     @Test
+    public void verifyThatADialogIsNotStartedWhenLocaleIsNotSupported() {
+        sttService = new STTServiceStub();
+        ksService = new KSServiceStub();
+        hliStub = new HumanLanguageInterpreterStub();
+
+        registerService(sttService);
+        registerService(ksService);
+        registerService(ttsService);
+        registerService(hliStub);
+
+        assertThrows(IllegalStateException.class, () -> voiceManager.startDialog(ksService, sttService, ttsService,
+                hliStub, source, sink, Locale.FRENCH, "mot", null));
+
+        assertFalse(ksService.isWordSpotted());
+        assertFalse(sink.getIsStreamProcessed());
+    }
+
+    @Test
     public void startDialogWhenAllOfTheRequiredServicesAreAvailable() {
         sttService = new STTServiceStub();
         ksService = new KSServiceStub();

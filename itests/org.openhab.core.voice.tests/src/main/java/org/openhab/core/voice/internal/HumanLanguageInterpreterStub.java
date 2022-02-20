@@ -32,6 +32,8 @@ import org.openhab.core.voice.text.InterpretationException;
 @NonNullByDefault
 public class HumanLanguageInterpreterStub implements HumanLanguageInterpreter {
 
+    private static final Set<Locale> SUPPORTED_LOCALES = Set.of(Locale.ENGLISH);
+
     private static final String INTERPRETED_TEXT = "Interpreted text";
     private static final String EXCEPTION_MESSAGE = "interpretation exception";
 
@@ -71,8 +73,7 @@ public class HumanLanguageInterpreterStub implements HumanLanguageInterpreter {
 
     @Override
     public Set<Locale> getSupportedLocales() {
-        // This method will not be used in the tests
-        return Set.of();
+        return SUPPORTED_LOCALES;
     }
 
     @Override

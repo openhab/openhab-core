@@ -36,6 +36,7 @@ import org.openhab.core.voice.SpeechRecognitionEvent;
 public class STTServiceStub implements STTService {
 
     private static final Set<AudioFormat> SUPPORTED_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
+    private static final Set<Locale> SUPPORTED_LOCALES = Set.of(Locale.ENGLISH);
 
     private static final String STTSERVICE_STUB_ID = "sttServiceStubID";
     private static final String STTSERVICE_STUB_LABEL = "sttServiceStubLabel";
@@ -60,7 +61,7 @@ public class STTServiceStub implements STTService {
 
     @Override
     public Set<Locale> getSupportedLocales() {
-        return Set.of();
+        return SUPPORTED_LOCALES;
     }
 
     @Override
