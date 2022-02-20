@@ -232,6 +232,25 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Override
+    public @Nullable AudioSource getSource(@Nullable String sourceId) {
+        return (sourceId == null) ? getSource() : audioSources.get(sourceId);
+    }
+
+    @Override
+    public Set<String> getSourceIds(String pattern) {
+        String regex = pattern.replace("?", ".?").replace("*", ".*?");
+        Set<String> matchedSources = new HashSet<>();
+
+        for (String aSource : audioSources.keySet()) {
+            if (aSource.matches(regex)) {
+                matchedSources.add(aSource);
+            }
+        }
+
+        return matchedSources;
+    }
+
+    @Override
     public @Nullable AudioSink getSink() {
         AudioSink sink = null;
         if (defaultSink != null) {
@@ -250,20 +269,6 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     @Override
     public Set<AudioSink> getAllSinks() {
         return new HashSet<>(audioSinks.values());
-    }
-
-    @Override
-    public Set<String> getSourceIds(String pattern) {
-        String regex = pattern.replace("?", ".?").replace("*", ".*?");
-        Set<String> matchedSources = new HashSet<>();
-
-        for (String aSource : audioSources.keySet()) {
-            if (aSource.matches(regex)) {
-                matchedSources.add(aSource);
-            }
-        }
-
-        return matchedSources;
     }
 
     @Override
