@@ -47,7 +47,7 @@ public class JSONResponseExceptionMapper implements ExceptionMapper<Exception> {
         if (e instanceof IOException) {
             // we catch this exception to avoid confusion errors in the log file, since this is not any error situation
             // see https://github.com/openhab/openhab-distro/issues/1188
-            logger.debug("Failed writing HTTP response, since other side closed the connection");
+            logger.debug("Failed writing HTTP response, since other side closed the connection", e);
             // Returning null results in a Response.Status.NO_CONTENT response.
             return null;
         } else {
