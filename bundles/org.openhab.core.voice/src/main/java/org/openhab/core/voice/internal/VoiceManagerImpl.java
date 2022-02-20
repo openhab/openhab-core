@@ -500,8 +500,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         String item = (listeningItem == null) ? this.listeningItem : listeningItem;
         Bundle b = bundle;
 
-        if (ksService != null && sttService != null && ttsService != null && interpreter != null && audioSource != null
-                && audioSink != null && b != null) {
+        if (ksService == null || sttService == null || ttsService == null || interpreter == null || audioSource == null
+                || audioSink == null || b == null) {
+            throw new IllegalStateException("Cannot start dialog as services are missing.");
+        } else if (!ksService.getSupportedLocales().contains(loc) || !sttService.getSupportedLocales().contains(loc)
+                || !interpreter.getSupportedLocales().contains(loc)) {
+            throw new IllegalStateException("Cannot start dialog as provided locale is not supported by all services.");
+        } else {
             DialogProcessor processor = dialogProcessors.get(audioSource.getId());
             if (processor == null) {
                 logger.debug("Starting a new dialog for source {} ({})", audioSource.getLabel(null),
@@ -515,8 +520,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                         String.format("Cannot start dialog as a dialog is already started for audio source '%s'.",
                                 audioSource.getLabel(null)));
             }
-        } else {
-            throw new IllegalStateException("Cannot start dialog as services are missing.");
         }
     }
 

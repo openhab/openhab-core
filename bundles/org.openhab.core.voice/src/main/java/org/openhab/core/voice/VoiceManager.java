@@ -128,8 +128,8 @@ public interface VoiceManager {
      *
      * Only one dialog can be started for the default audio source.
      *
-     * @throws IllegalStateException if required services are not available or the dialog is already started for the
-     *             default audio source
+     * @throws IllegalStateException if required services are not all available or the provided locale is not supported
+     *             by all these services or the dialog is already started for the default audio source
      */
     void startDialog() throws IllegalStateException;
 
@@ -149,8 +149,8 @@ public interface VoiceManager {
      * @param Locale the locale to use or null to use the default locale
      * @param keyword the keyword to use during keyword spotting or null to use the default keyword
      * @param listeningItem the item to switch ON while listening to a question
-     * @throws IllegalStateException if required services are not available or the dialog is already started for this
-     *             audio source
+     * @throws IllegalStateException if required services are not all available or the provided locale is not supported
+     *             by all these services or the dialog is already started for this audio source
      */
     void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
             @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
