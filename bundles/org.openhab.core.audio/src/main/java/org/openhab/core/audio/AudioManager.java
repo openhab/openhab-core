@@ -150,6 +150,23 @@ public interface AudioManager {
     Set<AudioSource> getAllSources();
 
     /**
+     * Retrieves the audio sources for a given id
+     *
+     * @param sourceId the id of the audio sources or null for the default
+     * @return the audio sources for the id or the default audio sources
+     */
+    @Nullable
+    AudioSource getSource(@Nullable String sourceId);
+
+    /**
+     * Get a list of source ids that match a given pattern
+     *
+     * @param pattern pattern to search, can include `*` and `?` placeholders
+     * @return ids of matching sources
+     */
+    Set<String> getSourceIds(String pattern);
+
+    /**
      * Retrieves an AudioSink.
      * If a default name is configured and the service available, this is returned. If no default name is configured,
      * the first available service is returned, if one exists. If no service with the default name is found, null is
@@ -167,14 +184,6 @@ public interface AudioManager {
      * @return all audio sinks
      */
     Set<AudioSink> getAllSinks();
-
-    /**
-     * Get a list of source ids that match a given pattern
-     *
-     * @param pattern pattern to search, can include `*` and `?` placeholders
-     * @return ids of matching sources
-     */
-    Set<String> getSourceIds(String pattern);
 
     /**
      * Retrieves the sink for a given id
