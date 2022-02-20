@@ -13,7 +13,6 @@
 package org.openhab.core.io.rest.core.internal.item;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -45,16 +44,16 @@ public class MetadataSelectorMatcher {
     }
 
     /**
-     * Filter existing metadata namespaces against the given namespaeSelector. The given String might consist of a comma
-     * separated list of namespaces as well as a regular expression.
+     * Filter existing metadata namespaces against the given namespaceSelector. The given String might consist of a
+     * comma separated list of namespaces as well as a regular expression.
      *
-     * @param namespaceSelector a comma separated list of namespaces or regular expression.
+     * @param namespaceSelector a comma separated list of namespaces or a regular expression.
      * @param locale the locale for config descriptions with the scheme "metadata".
      * @return a {@link Set} of matching namespaces.
      */
     public Set<String> filterNamespaces(@Nullable String namespaceSelector, @Nullable Locale locale) {
         if (namespaceSelector == null || namespaceSelector.isEmpty()) {
-            return Collections.emptySet();
+            return Set.of();
         } else {
             Set<String> originalNamespaces = Arrays.stream(namespaceSelector.split(",")) //
                     .filter(n -> !metadataRegistry.isInternalNamespace(n)) //
