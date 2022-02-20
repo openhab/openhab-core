@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -117,7 +116,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     return;
                 case SUBCMD_START_DIALOG:
                     try {
-                        AudioSource source = args.length < 2 ? null : getSource(args[1]);
+                        AudioSource source = args.length < 2 ? null : audioManager.getSource(args[1]);
                         HumanLanguageInterpreter hli = args.length < 3 ? null : voiceManager.getHLI(args[2]);
                         AudioSink sink = args.length < 4 ? null : audioManager.getSink(args[3]);
                         String keyword = args.length < 5 ? null : args[4];
@@ -129,7 +128,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     break;
                 case SUBCMD_STOP_DIALOG:
                     try {
-                        voiceManager.stopDialog(args.length < 2 ? null : getSource(args[1]));
+                        voiceManager.stopDialog(args.length < 2 ? null : audioManager.getSource(args[1]));
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while stopping the dialog"));
@@ -194,15 +193,5 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             msg.append(" ");
         }
         voiceManager.say(msg.toString());
-    }
-
-    private @Nullable AudioSource getSource(@Nullable String sourceId) {
-        Set<AudioSource> sources = audioManager.getAllSources();
-        for (AudioSource source : sources) {
-            if (source.getId().equals(sourceId)) {
-                return source;
-            }
-        }
-        return null;
     }
 }

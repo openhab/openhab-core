@@ -14,7 +14,6 @@ package org.openhab.core.io.rest.voice.internal;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
@@ -239,7 +238,7 @@ public class VoiceResource implements RESTResource {
             @QueryParam("listeningItem") @Parameter(description = "listening item") @Nullable String listeningItem) {
         AudioSource source = null;
         if (sourceId != null) {
-            source = getSource(sourceId);
+            source = audioManager.getSource(sourceId);
             if (source == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
             }
@@ -300,7 +299,7 @@ public class VoiceResource implements RESTResource {
             @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId) {
         AudioSource source = null;
         if (sourceId != null) {
-            source = getSource(sourceId);
+            source = audioManager.getSource(sourceId);
             if (source == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
             }
@@ -312,15 +311,5 @@ public class VoiceResource implements RESTResource {
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
         }
-    }
-
-    private @Nullable AudioSource getSource(String sourceId) {
-        Set<AudioSource> sources = audioManager.getAllSources();
-        for (AudioSource source : sources) {
-            if (source.getId().equals(sourceId)) {
-                return source;
-            }
-        }
-        return null;
     }
 }

@@ -13,6 +13,7 @@
 package org.openhab.core.automation.module.script.internal.defaultscope;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,12 +30,14 @@ import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.test.java.JavaOSGiTest;
 
 /**
- * This tests the script modules
+ * This tests the script modules if the Nashorn JavaScript engine is available.
  *
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public class ScriptScopeOSGiTest extends JavaOSGiTest {
+
+    private static final boolean NASHORN_AVAILABLE = isNashornAvailable();
 
     private @NonNullByDefault({}) ScriptEngine engine;
 
@@ -42,8 +45,25 @@ public class ScriptScopeOSGiTest extends JavaOSGiTest {
     private final String workingFile = "scopeWorking.js";
     private final String failureFile = "scopeFailure.js";
 
+    /**
+     * Returns if the Nashorn JavaScript engine is available based on the Java specification version property.
+     * Nashorn has been removed from JDK 15 and onwards.
+     *
+     * @return {@code true} if Nashorn is available, {@code false} otherwise
+     */
+    private static boolean isNashornAvailable() {
+        try {
+            String javaVersion = System.getProperty("java.specification.version");
+            return javaVersion == null ? false : Long.parseLong(javaVersion) < 15;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     @BeforeEach
     public void init() {
+        assumeTrue(NASHORN_AVAILABLE);
+
         ScriptEngineManager scriptManager = getService(ScriptEngineManager.class);
         ScriptEngineContainer container = scriptManager.createScriptEngine("js", "myJSEngine");
         engine = container.getScriptEngine();
