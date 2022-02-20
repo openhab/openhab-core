@@ -68,6 +68,7 @@ public class BundleInfoReader {
             try {
                 BindingInfoXmlResult bindingInfoXml = reader.readFromXML(path.toUri().toURL());
                 if (bindingInfoXml != null) {
+                    bundleInfo.setBindingId(bindingInfoXml.getBindingInfo().getUID());
                     bundleInfo.setBindingInfoXml(bindingInfoXml);
                 }
             } catch (ConversionException | MalformedURLException e) {
@@ -102,11 +103,23 @@ public class BundleInfoReader {
                 }
                 for (Object type : types) {
                     if (type instanceof ThingTypeXmlResult) {
-                        bundleInfo.getThingTypesXml().add((ThingTypeXmlResult) type);
+                        ThingTypeXmlResult result = (ThingTypeXmlResult) type;
+                        bundleInfo.getThingTypesXml().add(result);
+                        if (bundleInfo.getBindingId().isBlank()) {
+                            bundleInfo.setBindingId(result.getUID().getBindingId());
+                        }
                     } else if (type instanceof ChannelGroupTypeXmlResult) {
-                        bundleInfo.getChannelGroupTypesXml().add((ChannelGroupTypeXmlResult) type);
+                        ChannelGroupTypeXmlResult result = (ChannelGroupTypeXmlResult) type;
+                        bundleInfo.getChannelGroupTypesXml().add(result);
+                        if (bundleInfo.getBindingId().isBlank()) {
+                            bundleInfo.setBindingId(result.getUID().getBindingId());
+                        }
                     } else if (type instanceof ChannelTypeXmlResult) {
-                        bundleInfo.getChannelTypesXml().add((ChannelTypeXmlResult) type);
+                        ChannelTypeXmlResult result = (ChannelTypeXmlResult) type;
+                        bundleInfo.getChannelTypesXml().add(result);
+                        if (bundleInfo.getBindingId().isBlank()) {
+                            bundleInfo.setBindingId(result.toChannelType().getUID().getBindingId());
+                        }
                     }
                 }
             } catch (ConversionException | MalformedURLException e) {

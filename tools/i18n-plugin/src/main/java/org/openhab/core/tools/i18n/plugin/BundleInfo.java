@@ -33,11 +33,20 @@ import org.openhab.core.thing.xml.internal.ThingTypeXmlResult;
 @NonNullByDefault
 public class BundleInfo {
 
+    private String bindingId = "";
     private @Nullable BindingInfoXmlResult bindingInfoXml;
     private List<ConfigDescription> configDescriptions = new ArrayList<>(5);
     private List<ChannelGroupTypeXmlResult> channelGroupTypesXml = new ArrayList<>(5);
     private List<ChannelTypeXmlResult> channelTypesXml = new ArrayList<>(5);
     private List<ThingTypeXmlResult> thingTypesXml = new ArrayList<>(5);
+
+    public String getBindingId() {
+        return bindingId;
+    }
+
+    public void setBindingId(String bindingId) {
+        this.bindingId = bindingId;
+    }
 
     public @Nullable BindingInfoXmlResult getBindingInfoXml() {
         return bindingInfoXml;
@@ -77,11 +86,6 @@ public class BundleInfo {
 
     public void setThingTypesXml(List<ThingTypeXmlResult> thingTypesXml) {
         this.thingTypesXml = thingTypesXml;
-    }
-
-    public String getBindingId() {
-        BindingInfoXmlResult localBindingInfoXml = bindingInfoXml;
-        return localBindingInfoXml == null ? "" : localBindingInfoXml.getBindingInfo().getUID();
     }
 
     public Optional<ConfigDescription> getConfigDescription(@Nullable URI uri) {
