@@ -14,7 +14,6 @@ package org.openhab.core.model.script.actions;
 
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -221,7 +220,7 @@ public class Voice {
             @ParamDoc(name = "locale") @Nullable String locale, @ParamDoc(name = "keyword") @Nullable String keyword) {
         AudioSource audioSource = null;
         if (source != null) {
-            audioSource = getSource(source);
+            audioSource = VoiceActionService.audioManager.getSource(source);
             if (audioSource == null) {
                 logger.warn("Failed starting dialog processing: audio source '{}' not found", source);
                 return;
@@ -294,7 +293,7 @@ public class Voice {
     public static void stopDialog(@ParamDoc(name = "source") @Nullable String source) {
         AudioSource audioSource = null;
         if (source != null) {
-            audioSource = getSource(source);
+            audioSource = VoiceActionService.audioManager.getSource(source);
             if (audioSource == null) {
                 logger.warn("Failed stopping dialog processing: audio source '{}' not found", source);
                 return;
@@ -305,15 +304,5 @@ public class Voice {
         } catch (IllegalStateException e) {
             logger.warn("Failed stopping dialog processing: {}", e.getMessage());
         }
-    }
-
-    private static @Nullable AudioSource getSource(String sourceId) {
-        Set<AudioSource> sources = VoiceActionService.audioManager.getAllSources();
-        for (AudioSource source : sources) {
-            if (source.getId().equals(sourceId)) {
-                return source;
-            }
-        }
-        return null;
     }
 }
