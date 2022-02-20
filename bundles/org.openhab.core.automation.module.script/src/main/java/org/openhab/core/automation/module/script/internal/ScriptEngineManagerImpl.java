@@ -54,9 +54,9 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(service = ScriptEngineManager.class)
 public class ScriptEngineManagerImpl implements ScriptEngineManager {
+    private static final String THREAD_POOL_NAME = "OH-scriptenginemanager";
 
-    private final ScheduledExecutorService scheduler = ThreadPoolManager
-            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
+    private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(THREAD_POOL_NAME);
 
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineManagerImpl.class);
     private final Map<String, ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
@@ -222,6 +222,9 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             }
 
             if (scriptEngine instanceof AutoCloseable) {
+                // we cannot not use ScheduledExecutorService.execute here as it might execute the task in the calling
+                // thread (calling ScriptEngine.close in the same thread may result in a deadlock if the ScriptEngine
+                // tries to Thread.join)
                 scheduler.schedule(() -> {
                     AutoCloseable closeable = (AutoCloseable) scriptEngine;
                     try {
@@ -229,7 +232,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     } catch (Exception e) {
                         logger.error("Error while closing script engine", e);
                     }
-                }, 1, TimeUnit.MILLISECONDS);
+                }, 0, TimeUnit.SECONDS);
             } else {
                 logger.trace("ScriptEngine does not support AutoCloseable interface");
             }
