@@ -14,6 +14,7 @@ package org.openhab.core.model.script.internal.engine.action;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.audio.AudioManager;
 import org.openhab.core.model.script.actions.Voice;
 import org.openhab.core.model.script.engine.action.ActionService;
 import org.openhab.core.voice.VoiceManager;
@@ -31,10 +32,12 @@ import org.osgi.service.component.annotations.Reference;
 public class VoiceActionService implements ActionService {
 
     public static @Nullable VoiceManager voiceManager;
+    public static @Nullable AudioManager audioManager;
 
     @Activate
-    public VoiceActionService(final @Reference VoiceManager voiceManager) {
+    public VoiceActionService(final @Reference VoiceManager voiceManager, final @Reference AudioManager audioManager) {
         VoiceActionService.voiceManager = voiceManager;
+        VoiceActionService.audioManager = audioManager;
     }
 
     @Override
