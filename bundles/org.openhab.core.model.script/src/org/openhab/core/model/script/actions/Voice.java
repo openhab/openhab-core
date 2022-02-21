@@ -209,8 +209,8 @@ public class Voice {
      * @param source the name of audio source to use or null to use the default source
      * @param sink the name of audio sink to use or null to use the default sink
      * @param Locale the locale to use or null to use the default locale
-     * @param listeningItem the item to switch ON while listening to a question
      * @param keyword the keyword to use during keyword spotting or null to use the default keyword
+     * @param listeningItem the item to switch ON while listening to a question
      */
     @ActionDoc(text = "starts dialog processing for a given audio source")
     public static void startDialog(@ParamDoc(name = "keyword spotting service") @Nullable String ks,
