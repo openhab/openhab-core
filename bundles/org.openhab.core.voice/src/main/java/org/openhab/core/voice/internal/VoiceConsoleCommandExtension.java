@@ -30,6 +30,8 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemNotUniqueException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.voice.KSService;
+import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
@@ -55,6 +57,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private static final String SUBCMD_VOICES = "voices";
     private static final String SUBCMD_START_DIALOG = "startdialog";
     private static final String SUBCMD_STOP_DIALOG = "stopdialog";
+    private static final String SUBCMD_LISTEN_ANSWER = "listenandanswer";
 
     private final ItemRegistry itemRegistry;
     private final VoiceManager voiceManager;
@@ -77,10 +80,13 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         return List.of(buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"),
                 buildCommandUsage(SUBCMD_INTERPRET + " <command>", "interprets a human language command"),
                 buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services"),
-                buildCommandUsage(SUBCMD_START_DIALOG + " [<source> [<interpreter> [<sink> [<keyword>]]]]",
+                buildCommandUsage(
+                        SUBCMD_START_DIALOG + " [<source> [<sink> [<interpreter> [<tts> [<stt> [<ks> [<keyword>]]]]]]]",
                         "start a new dialog processing using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_STOP_DIALOG + " [<source>]",
-                        "stop the dialog processing for the default audio source or the audio source identified with provided argument"));
+                        "stop the dialog processing for the default audio source or the audio source identified with provided argument"),
+                buildCommandUsage(SUBCMD_LISTEN_ANSWER + " [<source> [<sink> [<interpreter> [<tts> [<stt>]]]]]",
+                        "Execute a simple dialog sequence without keyword spotting using the default services or the services identified with provided arguments"));
     }
 
     @Override
@@ -117,10 +123,13 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 case SUBCMD_START_DIALOG:
                     try {
                         AudioSource source = args.length < 2 ? null : audioManager.getSource(args[1]);
-                        HumanLanguageInterpreter hli = args.length < 3 ? null : voiceManager.getHLI(args[2]);
-                        AudioSink sink = args.length < 4 ? null : audioManager.getSink(args[3]);
-                        String keyword = args.length < 5 ? null : args[4];
-                        voiceManager.startDialog(null, null, null, hli, source, sink, null, keyword, null);
+                        AudioSink sink = args.length < 3 ? null : audioManager.getSink(args[2]);
+                        HumanLanguageInterpreter hli = args.length < 4 ? null : voiceManager.getHLI(args[3]);
+                        TTSService tts = args.length < 5 ? null : voiceManager.getTTS(args[4]);
+                        STTService stt = args.length < 6 ? null : voiceManager.getSTT(args[5]);
+                        KSService ks = args.length < 7 ? null : voiceManager.getKS(args[6]);
+                        String keyword = args.length < 8 ? null : args[7];
+                        voiceManager.startDialog(ks, stt, tts, hli, source, sink, null, keyword, null);
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while starting the dialog"));
@@ -132,6 +141,19 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while stopping the dialog"));
+                    }
+                    break;
+                case SUBCMD_LISTEN_ANSWER:
+                    try {
+                        AudioSource source = args.length < 2 ? null : audioManager.getSource(args[1]);
+                        AudioSink sink = args.length < 3 ? null : audioManager.getSink(args[2]);
+                        HumanLanguageInterpreter hli = args.length < 4 ? null : voiceManager.getHLI(args[3]);
+                        TTSService tts = args.length < 5 ? null : voiceManager.getTTS(args[4]);
+                        STTService stt = args.length < 6 ? null : voiceManager.getSTT(args[5]);
+                        voiceManager.listenAndAnswer(stt, tts, hli, source, sink, null);
+                    } catch (IllegalStateException e) {
+                        console.println(Objects.requireNonNullElse(e.getMessage(),
+                                "An error occurred while executing the simple dialog sequence"));
                     }
                     break;
                 default:

@@ -312,4 +312,63 @@ public class VoiceResource implements RESTResource {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
         }
     }
+
+    @POST
+    @Path("/listenandanswer")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "listenAndAnswer", summary = "Executes a simple dialog sequence without keyword spotting for a given audio source.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "One of the given ids is wrong."),
+            @ApiResponse(responseCode = "400", description = "Services are missing or language is not supported by services or dialog processing is already started for the audio source.") })
+    public Response listenAndAnswer(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId,
+            @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
+            @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
+            @QueryParam("hliId") @Parameter(description = "interpreter ID") @Nullable String hliId,
+            @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId) {
+        AudioSource source = null;
+        if (sourceId != null) {
+            source = audioManager.getSource(sourceId);
+            if (source == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
+            }
+        }
+        STTService stt = null;
+        if (sttId != null) {
+            stt = voiceManager.getSTT(sttId);
+            if (stt == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Speech-to-Text not found");
+            }
+        }
+        TTSService tts = null;
+        if (ttsId != null) {
+            tts = voiceManager.getTTS(ttsId);
+            if (tts == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Text-to-Speech not found");
+            }
+        }
+        HumanLanguageInterpreter hli = null;
+        if (hliId != null) {
+            hli = voiceManager.getHLI(hliId);
+            if (hli == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
+            }
+        }
+        AudioSink sink = null;
+        if (sinkId != null) {
+            sink = audioManager.getSink(sinkId);
+            if (sink == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio sink not found");
+            }
+        }
+        final Locale locale = localeService.getLocale(language);
+
+        try {
+            voiceManager.listenAndAnswer(stt, tts, hli, source, sink, locale);
+            return Response.ok(null, MediaType.TEXT_PLAIN).build();
+        } catch (IllegalStateException e) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
+        }
+    }
 }
