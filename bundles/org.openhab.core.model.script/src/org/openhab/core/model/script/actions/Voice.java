@@ -200,6 +200,19 @@ public class Voice {
     }
 
     /**
+     * Starts dialog processing for a given audio source using default keyword spotting service, default speech-to-text
+     * service, default text-to-speech service and default human language text interpreter.
+     *
+     * @param source the name of audio source to use or null to use the default source
+     * @param sink the name of audio sink to use or null to use the default sink
+     */
+    @ActionDoc(text = "starts dialog processing for a given audio source")
+    public static void startDialog(@ParamDoc(name = "source") @Nullable String source,
+            @ParamDoc(name = "sink") @Nullable String sink) {
+        startDialog(null, null, null, null, source, sink, null, null, null);
+    }
+
+    /**
      * Starts dialog processing for a given audio source.
      *
      * @param ks the keyword spotting service to use or null to use the default service
