@@ -12,15 +12,24 @@
  */
 package org.openhab.core.model.script.actions;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSource;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.model.script.engine.action.ActionDoc;
 import org.openhab.core.model.script.engine.action.ParamDoc;
 import org.openhab.core.model.script.internal.engine.action.VoiceActionService;
+import org.openhab.core.voice.KSService;
+import org.openhab.core.voice.STTService;
+import org.openhab.core.voice.TTSService;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The static methods of this class are made available as functions in the scripts.
@@ -31,6 +40,8 @@ import org.openhab.core.voice.text.InterpretationException;
  */
 @NonNullByDefault
 public class Voice {
+
+    private static final Logger logger = LoggerFactory.getLogger(Voice.class);
 
     /**
      * Says the given text.
@@ -188,4 +199,125 @@ public class Voice {
         return response;
     }
 
+    /**
+     * Starts dialog processing for a given audio source using default keyword spotting service, default speech-to-text
+     * service, default text-to-speech service and default human language text interpreter.
+     *
+     * @param source the name of audio source to use or null to use the default source
+     * @param sink the name of audio sink to use or null to use the default sink
+     */
+    @ActionDoc(text = "starts dialog processing for a given audio source")
+    public static void startDialog(@ParamDoc(name = "source") @Nullable String source,
+            @ParamDoc(name = "sink") @Nullable String sink) {
+        startDialog(null, null, null, null, source, sink, null, null, null);
+    }
+
+    /**
+     * Starts dialog processing for a given audio source.
+     *
+     * @param ks the keyword spotting service to use or null to use the default service
+     * @param stt the speech-to-text service to use or null to use the default service
+     * @param tts the text-to-speech service to use or null to use the default service
+     * @param interpreter the human language text interpreter to use or null to use the default service
+     * @param source the name of audio source to use or null to use the default source
+     * @param sink the name of audio sink to use or null to use the default sink
+     * @param Locale the locale to use or null to use the default locale
+     * @param keyword the keyword to use during keyword spotting or null to use the default keyword
+     * @param listeningItem the item to switch ON while listening to a question
+     */
+    @ActionDoc(text = "starts dialog processing for a given audio source")
+    public static void startDialog(@ParamDoc(name = "keyword spotting service") @Nullable String ks,
+            @ParamDoc(name = "speech-to-text service") @Nullable String stt,
+            @ParamDoc(name = "text-to-speech service") @Nullable String tts,
+            @ParamDoc(name = "interpreter") @Nullable String interpreter,
+            @ParamDoc(name = "source") @Nullable String source, @ParamDoc(name = "sink") @Nullable String sink,
+            @ParamDoc(name = "locale") @Nullable String locale, @ParamDoc(name = "keyword") @Nullable String keyword,
+            @ParamDoc(name = "listening item") @Nullable String listeningItem) {
+        AudioSource audioSource = null;
+        if (source != null) {
+            audioSource = VoiceActionService.audioManager.getSource(source);
+            if (audioSource == null) {
+                logger.warn("Failed starting dialog processing: audio source '{}' not found", source);
+                return;
+            }
+        }
+        KSService ksService = null;
+        if (ks != null) {
+            ksService = VoiceActionService.voiceManager.getKS(ks);
+            if (ksService == null) {
+                logger.warn("Failed starting dialog processing: keyword spotting service '{}' not found", ks);
+                return;
+            }
+        }
+        STTService sttService = null;
+        if (stt != null) {
+            sttService = VoiceActionService.voiceManager.getSTT(stt);
+            if (sttService == null) {
+                logger.warn("Failed starting dialog processing: speech-to-text service '{}' not found", stt);
+                return;
+            }
+        }
+        TTSService ttsService = null;
+        if (tts != null) {
+            ttsService = VoiceActionService.voiceManager.getTTS(tts);
+            if (ttsService == null) {
+                logger.warn("Failed starting dialog processing: text-to-speech service '{}' not found", tts);
+                return;
+            }
+        }
+        HumanLanguageInterpreter hliService = null;
+        if (interpreter != null) {
+            hliService = VoiceActionService.voiceManager.getHLI(interpreter);
+            if (hliService == null) {
+                logger.warn("Failed starting dialog processing: interpreter '{}' not found", interpreter);
+                return;
+            }
+        }
+        AudioSink audioSink = null;
+        if (sink != null) {
+            audioSink = VoiceActionService.audioManager.getSink(sink);
+            if (audioSink == null) {
+                logger.warn("Failed starting dialog processing: audio sink '{}' not found", sink);
+                return;
+            }
+        }
+        Locale loc = null;
+        if (locale != null) {
+            String[] split = locale.split("-");
+            if (split.length == 2) {
+                loc = new Locale(split[0], split[1]);
+            } else {
+                loc = new Locale(split[0]);
+            }
+        }
+
+        try {
+            VoiceActionService.voiceManager.startDialog(ksService, sttService, ttsService, hliService, audioSource,
+                    audioSink, loc, keyword, listeningItem);
+        } catch (IllegalStateException e) {
+            logger.warn("Failed starting dialog processing: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Stops dialog processing for a given audio source.
+     *
+     * @param source the name of audio source or null to consider the default audio source
+     */
+    @ActionDoc(text = "stops dialog processing for a given audio source")
+    public static void stopDialog(@ParamDoc(name = "source") @Nullable String source) {
+        AudioSource audioSource = null;
+        if (source != null) {
+            audioSource = VoiceActionService.audioManager.getSource(source);
+            if (audioSource == null) {
+                logger.warn("Failed stopping dialog processing: audio source '{}' not found", source);
+                return;
+            }
+        }
+        try {
+            VoiceActionService.voiceManager.stopDialog(audioSource);
+        } catch (IllegalStateException e) {
+            logger.warn("Failed stopping dialog processing: {}", e.getMessage());
+        }
+    }
 }
