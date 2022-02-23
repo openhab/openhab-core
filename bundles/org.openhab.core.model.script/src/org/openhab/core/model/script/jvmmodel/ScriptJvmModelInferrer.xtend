@@ -65,10 +65,10 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     public static final String VAR_TRIGGERING_THING = "triggeringThing";
     
     /** Variable name for the previous status of the triggering thing in a "thing status trigger" rule */
-    public static final String VAR_PREVIOUS_STATUS = "previousStatus";
+    public static final String VAR_PREVIOUS_STATUS = "previousThingStatus";
     
     /** Variable name for the new status of the triggering thing in a "thing status trigger" rule */
-    public static final String VAR_NEW_STATUS = "newStatus";
+    public static final String VAR_NEW_STATUS = "newThingStatus";
     
     /**
      * conveninence API to build and initialize JvmTypes and their members.
