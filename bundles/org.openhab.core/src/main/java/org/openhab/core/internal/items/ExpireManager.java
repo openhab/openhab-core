@@ -73,8 +73,8 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
     protected static final String METADATA_NAMESPACE = "expire";
     protected static final String PROPERTY_ENABLED = "enabled";
 
-    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE,
-            GroupItemStateChangedEvent.TYPE);
+    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Set.of(ItemStateEvent.TYPE, ItemStateChangedEvent.TYPE,
+            ItemCommandEvent.TYPE, GroupItemStateChangedEvent.TYPE);
 
     private final Logger logger = LoggerFactory.getLogger(ExpireManager.class);
 
