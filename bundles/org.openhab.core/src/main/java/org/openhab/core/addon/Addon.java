@@ -74,13 +74,14 @@ public class Addon {
      * @param backgroundColor for displaying the add-on (may be null)
      * @param imageLink the link to an image (png/svg) (may be null)
      * @param properties a {@link Map} containing addition information
+     * @param loggerPackages a {@link List} containing the package names belonging to this add-on
      */
     private Addon(String id, String type, String label, String version, @Nullable String maturity, String contentType,
             @Nullable String link, String author, boolean verifiedAuthor, boolean installed,
             @Nullable String description, @Nullable String detailedDescription, String configDescriptionURI,
             String keywords, String countries, @Nullable String license, String connection,
             @Nullable String backgroundColor, @Nullable String imageLink, @Nullable Map<String, Object> properties,
-            List<String> loggerBundles) {
+            List<String> loggerPackages) {
         this.id = id;
         this.label = label;
         this.version = version;
@@ -101,7 +102,7 @@ public class Addon {
         this.installed = installed;
         this.type = type;
         this.properties = properties == null ? Map.of() : properties;
-        this.loggerPackages = loggerBundles;
+        this.loggerPackages = loggerPackages;
     }
 
     /**
@@ -252,7 +253,7 @@ public class Addon {
     }
 
     /**
-     * The package names that are associated with this addon
+     * The package names that are associated with this add-on
      */
     public List<String> getLoggerPackages() {
         return loggerPackages;
