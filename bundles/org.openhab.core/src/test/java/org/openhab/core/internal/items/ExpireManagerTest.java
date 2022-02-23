@@ -132,8 +132,8 @@ class ExpireManagerTest {
     @Test
     void testIgnoreStateUpdateExtendsExpiryOnStateChange() throws InterruptedException, ItemNotFoundException {
         Item testItem = new NumberItem(ITEMNAME);
-        when(itemRegistry.getItem(ITEMNAME)).thenReturn(testItem);
-        when(metadataRegistry.get(METADATA_KEY)).thenReturn(config("2s,ignoreStateUpdates"));
+        when(itemRegistryMock.getItem(ITEMNAME)).thenReturn(testItem);
+        when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(config("2s,ignoreStateUpdates"));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
@@ -141,16 +141,16 @@ class ExpireManagerTest {
         event = ItemEventFactory.createStateChangedEvent(ITEMNAME, new DecimalType(2), new DecimalType(1));
         expireManager.receive(event);
         Thread.sleep(1500L);
-        verify(eventPublisher, never()).post(any());
+        verify(eventPublisherMock, never()).post(any());
         Thread.sleep(2000L);
-        verify(eventPublisher, times(1)).post(any());
+        verify(eventPublisherMock, times(1)).post(any());
     }
 
     @Test
     void testIgnoreStateUpdateExtendsExpiryOnCommand() throws InterruptedException, ItemNotFoundException {
         Item testItem = new NumberItem(ITEMNAME);
-        when(itemRegistry.getItem(ITEMNAME)).thenReturn(testItem);
-        when(metadataRegistry.get(METADATA_KEY)).thenReturn(config("2s,ignoreStateUpdates"));
+        when(itemRegistryMock.getItem(ITEMNAME)).thenReturn(testItem);
+        when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(config("2s,ignoreStateUpdates"));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
@@ -158,16 +158,16 @@ class ExpireManagerTest {
         event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
         Thread.sleep(1500L);
-        verify(eventPublisher, never()).post(any());
+        verify(eventPublisherMock, never()).post(any());
         Thread.sleep(2000L);
-        verify(eventPublisher, times(1)).post(any());
+        verify(eventPublisherMock, times(1)).post(any());
     }
 
     @Test
     void testIgnoreStateUpdateDoesNotExtendExpiryOnStateUpdate() throws InterruptedException, ItemNotFoundException {
         Item testItem = new NumberItem(ITEMNAME);
-        when(itemRegistry.getItem(ITEMNAME)).thenReturn(testItem);
-        when(metadataRegistry.get(METADATA_KEY)).thenReturn(config("2s,ignoreStateUpdates"));
+        when(itemRegistryMock.getItem(ITEMNAME)).thenReturn(testItem);
+        when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(config("2s,ignoreStateUpdates"));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
@@ -175,7 +175,7 @@ class ExpireManagerTest {
         event = ItemEventFactory.createStateEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
         Thread.sleep(1500L);
-        verify(eventPublisher, times(1)).post(any());
+        verify(eventPublisherMock, times(1)).post(any());
     }
 
     @Test
