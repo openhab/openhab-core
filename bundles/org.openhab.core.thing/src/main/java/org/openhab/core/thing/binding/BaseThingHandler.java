@@ -205,7 +205,7 @@ public abstract class BaseThingHandler implements ThingHandler {
     /**
      * Get the {@link ConfigDescription} of the thing
      *
-     * @return the config description (or null if not found or handler dispsed)
+     * @return the config description (or null if not found or handler disposed)
      */
     protected @Nullable ConfigDescription getConfigDescription() {
         ThingHandlerCallback callback = this.callback;
@@ -221,7 +221,7 @@ public abstract class BaseThingHandler implements ThingHandler {
     /**
      * Get the {@link ConfigDescription} for a {@link ChannelTypeUID}
      *
-     * @return the config description (or null if not found or handler dispsed)
+     * @return the config description (or null if not found or handler disposed)
      */
     protected @Nullable ConfigDescription getConfigDescription(ChannelTypeUID channelTypeUID) {
         ThingHandlerCallback callback = this.callback;
