@@ -78,7 +78,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
 
     private final Logger logger = LoggerFactory.getLogger(ExpireManager.class);
 
-    private final Map<String, @Nullable Optional<ExpireConfig>> itemExpireConfig = new ConcurrentHashMap<>();
+    private final Map<String, Optional<ExpireConfig>> itemExpireConfig = new ConcurrentHashMap<>();
     private final Map<String, Instant> itemExpireMap = new ConcurrentHashMap<>();
 
     private final ScheduledExecutorService threadPool = ThreadPoolManager
@@ -177,7 +177,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                 try {
                     Item item = itemRegistry.getItem(itemName);
                     try {
-                        ExpireConfig cfg = new ExpireConfig(item, metadata.getValue());
+                        ExpireConfig cfg = new ExpireConfig(item, metadata.getValue(), metadata.getConfiguration());
                         itemExpireConfig.put(itemName, Optional.of(cfg));
                         return cfg;
                     } catch (IllegalArgumentException e) {
@@ -318,7 +318,8 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
          * @param configString the string that the user specified in the metadate
          * @throws IllegalArgumentException if it is ill-formatted
          */
-        public ExpireConfig(Item item, String configString) throws IllegalArgumentException {
+        public ExpireConfig(Item item, String configString, Map<String, Object> configuration)
+                throws IllegalArgumentException {
             int commaPos = configString.indexOf(',');
 
             durationString = (commaPos >= 0) ? configString.substring(0, commaPos).trim() : configString.trim();
@@ -328,12 +329,11 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                     ? configString.substring(commaPos + 1).trim()
                     : null;
 
-            if (stateOrCommand != null && stateOrCommand.endsWith(",ignoreStateUpdates")) {
-                stateOrCommand = stateOrCommand.substring(0, stateOrCommand.lastIndexOf(","));
-                ignoreStateUpdates = true;
-            } else if ("ignoreStateUpdates".equals(stateOrCommand)) {
-                stateOrCommand = null;
-                ignoreStateUpdates = true;
+            Object ignoreStateUpdatesConfigObject = configuration.get("ignoreStateUpdates");
+            if (ignoreStateUpdatesConfigObject instanceof String) {
+                ignoreStateUpdates = Boolean.parseBoolean((String) ignoreStateUpdatesConfigObject);
+            } else if (ignoreStateUpdatesConfigObject instanceof Boolean) {
+                ignoreStateUpdates = (Boolean) ignoreStateUpdatesConfigObject;
             } else {
                 ignoreStateUpdates = false;
             }
