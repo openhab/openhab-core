@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.thing.Bridge;
@@ -35,6 +36,7 @@ import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
+import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.util.ThingHandlerHelper;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
@@ -191,12 +193,46 @@ public abstract class BaseThingHandler implements ThingHandler {
      *             their declarations in the configuration description
      */
     protected void validateConfigurationParameters(Map<String, Object> configurationParameters) {
-        if (this.callback != null) {
-            this.callback.validateConfigurationParameters(this.getThing(), configurationParameters);
+        ThingHandlerCallback callback = this.callback;
+        if (callback != null) {
+            callback.validateConfigurationParameters(this.getThing(), configurationParameters);
         } else {
             logger.warn("Handler {} tried validating its configuration although the handler was already disposed.",
                     this.getClass().getSimpleName());
         }
+    }
+
+    /**
+     * Get the {@link ConfigDescription} of the thing
+     *
+     * @return the config description (or null if not found or handler disposed)
+     */
+    protected @Nullable ConfigDescription getConfigDescription() {
+        ThingHandlerCallback callback = this.callback;
+        if (callback != null) {
+            return callback.getConfigDescription(this.thing.getThingTypeUID());
+        } else {
+            logger.warn("Handler {} tried retrieving its config description although the handler was already disposed.",
+                    this.getClass().getSimpleName());
+        }
+        return null;
+    }
+
+    /**
+     * Get the {@link ConfigDescription} for a {@link ChannelTypeUID}
+     *
+     * @return the config description (or null if not found or handler disposed)
+     */
+    protected @Nullable ConfigDescription getConfigDescription(ChannelTypeUID channelTypeUID) {
+        ThingHandlerCallback callback = this.callback;
+        if (callback != null) {
+            return callback.getConfigDescription(channelTypeUID);
+        } else {
+            logger.warn(
+                    "Handler {} tried retrieving a channel config description although the handler was already disposed.",
+                    this.getClass().getSimpleName());
+        }
+        return null;
     }
 
     /**
