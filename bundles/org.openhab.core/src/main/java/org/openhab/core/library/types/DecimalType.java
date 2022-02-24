@@ -42,19 +42,27 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
     protected BigDecimal value;
 
     public DecimalType() {
-        this.value = BigDecimal.ZERO;
+        this(BigDecimal.ZERO);
+    }
+
+    public DecimalType(Number value) {
+        this(bigDecimal(value));
+    }
+
+    private static BigDecimal bigDecimal(Number value) {
+        if (value instanceof QuantityType) {
+            return ((QuantityType<?>) value).toBigDecimal();
+        }
+
+        if (value instanceof HSBType) {
+            return ((HSBType) value).toBigDecimal();
+        }
+
+        return new BigDecimal(value.toString());
     }
 
     public DecimalType(BigDecimal value) {
         this.value = value;
-    }
-
-    public DecimalType(long value) {
-        this.value = BigDecimal.valueOf(value);
-    }
-
-    public DecimalType(double value) {
-        this.value = BigDecimal.valueOf(value);
     }
 
     /**
