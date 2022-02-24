@@ -134,7 +134,8 @@ class ExpireManagerTest {
     void testIgnoreStateUpdateExtendsExpiryOnStateChange() throws InterruptedException, ItemNotFoundException {
         Item testItem = new NumberItem(ITEMNAME);
         when(itemRegistryMock.getItem(ITEMNAME)).thenReturn(testItem);
-        when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(config("2s", Map.of("ignoreStateUpdates", true)));
+        when(metadataRegistryMock.get(METADATA_KEY))
+                .thenReturn(config("2s", Map.of(ExpireConfig.CONFIG_IGNORE_STATE_UPDATES, true)));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
@@ -151,7 +152,8 @@ class ExpireManagerTest {
     void testIgnoreStateUpdateExtendsExpiryOnCommand() throws InterruptedException, ItemNotFoundException {
         Item testItem = new NumberItem(ITEMNAME);
         when(itemRegistryMock.getItem(ITEMNAME)).thenReturn(testItem);
-        when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(config("2s", Map.of("ignoreStateUpdates", true)));
+        when(metadataRegistryMock.get(METADATA_KEY))
+                .thenReturn(config("2s", Map.of(ExpireConfig.CONFIG_IGNORE_STATE_UPDATES, true)));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
@@ -168,7 +170,8 @@ class ExpireManagerTest {
     void testIgnoreStateUpdateDoesNotExtendExpiryOnStateUpdate() throws InterruptedException, ItemNotFoundException {
         Item testItem = new NumberItem(ITEMNAME);
         when(itemRegistryMock.getItem(ITEMNAME)).thenReturn(testItem);
-        when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(config("2s", Map.of("ignoreStateUpdates", true)));
+        when(metadataRegistryMock.get(METADATA_KEY))
+                .thenReturn(config("2s", Map.of(ExpireConfig.CONFIG_IGNORE_STATE_UPDATES, true)));
 
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
@@ -236,13 +239,15 @@ class ExpireManagerTest {
         assertEquals(OnOffType.OFF, cfg.expireCommand);
         assertFalse(cfg.ignoreStateUpdates);
 
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=OFF", Map.of("ignoreStateUpdates", true));
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=OFF",
+                Map.of(ExpireConfig.CONFIG_IGNORE_STATE_UPDATES, true));
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertNull(cfg.expireState);
         assertEquals(OnOffType.OFF, cfg.expireCommand);
         assertTrue(cfg.ignoreStateUpdates);
 
-        cfg = new ExpireManager.ExpireConfig(testItem, "5h 3m 2s", Map.of("ignoreStateUpdates", "true"));
+        cfg = new ExpireManager.ExpireConfig(testItem, "5h 3m 2s",
+                Map.of(ExpireConfig.CONFIG_IGNORE_STATE_UPDATES, "true"));
         assertEquals(Duration.ofHours(5).plusMinutes(3).plusSeconds(2), cfg.duration);
         assertEquals(UnDefType.UNDEF, cfg.expireState);
         assertNull(cfg.expireCommand);

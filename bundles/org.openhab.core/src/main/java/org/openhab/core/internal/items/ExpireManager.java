@@ -288,6 +288,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
     }
 
     static class ExpireConfig {
+        static final String CONFIG_IGNORE_STATE_UPDATES = "ignoreStateUpdates";
 
         private static final StringType STRING_TYPE_NULL_HYPHEN = new StringType("'NULL'");
         private static final StringType STRING_TYPE_NULL = new StringType("NULL");
@@ -329,7 +330,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                     ? configString.substring(commaPos + 1).trim()
                     : null;
 
-            Object ignoreStateUpdatesConfigObject = configuration.get("ignoreStateUpdates");
+            Object ignoreStateUpdatesConfigObject = configuration.get(CONFIG_IGNORE_STATE_UPDATES);
             if (ignoreStateUpdatesConfigObject instanceof String) {
                 ignoreStateUpdates = Boolean.parseBoolean((String) ignoreStateUpdatesConfigObject);
             } else if (ignoreStateUpdatesConfigObject instanceof Boolean) {
