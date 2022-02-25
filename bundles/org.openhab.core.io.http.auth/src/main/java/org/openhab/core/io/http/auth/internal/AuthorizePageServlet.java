@@ -184,7 +184,7 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
             resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, authorizationCode, null, state));
             resp.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
         } catch (AuthenticationException e) {
-            processFailedLogin(resp, params, e.getMessage());
+            processFailedLogin(resp, req.getRemoteAddr(), params, e.getMessage());
         } catch (IllegalArgumentException e) {
             @Nullable
             String baseRedirectUri = params.containsKey("redirect_uri") ? params.get("redirect_uri")[0] : null;

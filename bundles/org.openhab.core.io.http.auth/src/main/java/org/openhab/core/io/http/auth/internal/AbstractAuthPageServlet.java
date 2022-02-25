@@ -142,12 +142,12 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
         return user;
     }
 
-    protected void processFailedLogin(HttpServletResponse resp, Map<String, String[]> params, @Nullable String message)
-            throws IOException {
+    protected void processFailedLogin(HttpServletResponse resp, String remoteAddr, Map<String, String[]> params,
+            @Nullable String message) throws IOException {
         lastAuthenticationFailure = Instant.now();
         authenticationFailureCount += 1;
         resp.setContentType("text/html;charset=UTF-8");
-        logger.warn("Authentication failed: {}", message);
+        logger.warn("Authentication failed from {}: {}", remoteAddr, message);
         resp.getWriter().append(getPageBody(params, getLocalizedMessage("auth.login.fail"), false));
         resp.getWriter().close();
     }
