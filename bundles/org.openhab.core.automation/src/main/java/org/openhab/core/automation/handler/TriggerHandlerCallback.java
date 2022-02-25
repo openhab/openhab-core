@@ -36,7 +36,7 @@ public interface TriggerHandlerCallback extends ModuleHandlerCallback {
 
     /**
      * This method is used by the {@link TriggerHandler} to notify the RuleManager when
-     * the liked {@link Trigger} instance was fired.
+     * the linked {@link Trigger} instance was fired.
      *
      * @param trigger instance of trigger which was fired. When one TriggerHandler
      *            serve more then one {@link Trigger} instances, this parameter
@@ -48,7 +48,7 @@ public interface TriggerHandlerCallback extends ModuleHandlerCallback {
 
     /**
      * This method is used by the {@link TriggerHandler} to notify the RuleManager when
-     * the liked {@link Trigger} instance was fired.
+     * the linked {@link Trigger} instance was fired.
      *
      * @param trigger instance of trigger which was fired. When one TriggerHandler
      *            serve more then one {@link Trigger} instances, this parameter
