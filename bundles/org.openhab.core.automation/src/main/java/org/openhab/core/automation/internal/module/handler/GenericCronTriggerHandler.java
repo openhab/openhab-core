@@ -12,8 +12,6 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
-import java.util.Map;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.ModuleHandlerCallback;
@@ -82,7 +80,7 @@ public class GenericCronTriggerHandler extends BaseTriggerModuleHandler
     @Override
     public void run() {
         if (callback != null) {
-            ((TriggerHandlerCallback) callback).triggered(module, Map.of());
+            ((TriggerHandlerCallback) callback).triggered(module);
         } else {
             logger.debug("Tried to trigger, but callback isn't available!");
         }

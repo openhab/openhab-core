@@ -41,6 +41,18 @@ public interface TriggerHandlerCallback extends ModuleHandlerCallback {
      * @param trigger instance of trigger which was fired. When one TriggerHandler
      *            serve more then one {@link Trigger} instances, this parameter
      *            defines which trigger was fired.
+     */
+    default void triggered(Trigger trigger) {
+        triggered(trigger, Map.of());
+    }
+
+    /**
+     * This method is used by the {@link TriggerHandler} to notify the RuleManager when
+     * the liked {@link Trigger} instance was fired.
+     *
+     * @param trigger instance of trigger which was fired. When one TriggerHandler
+     *            serve more then one {@link Trigger} instances, this parameter
+     *            defines which trigger was fired.
      * @param context is a {@link Map} of output values of the triggered {@link Trigger}. Each entry of the map
      *            contains:
      *            <ul>
@@ -48,10 +60,10 @@ public interface TriggerHandlerCallback extends ModuleHandlerCallback {
      *            <li><code>value</code> - represents output value of the {@link Trigger}'s {@link Output}
      *            </ul>
      */
-    public void triggered(Trigger trigger, Map<String, ?> context);
+    void triggered(Trigger trigger, Map<String, ?> context);
 
     /**
      * @return the scheduler of this rule
      */
-    public ScheduledExecutorService getScheduler();
+    ScheduledExecutorService getScheduler();
 }

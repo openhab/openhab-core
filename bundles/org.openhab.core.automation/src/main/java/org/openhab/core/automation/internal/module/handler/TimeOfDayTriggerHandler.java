@@ -13,7 +13,6 @@
 package org.openhab.core.automation.internal.module.handler;
 
 import java.text.MessageFormat;
-import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -84,7 +83,7 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
     @Override
     public void run() {
         if (callback != null) {
-            ((TriggerHandlerCallback) callback).triggered(module, Map.of());
+            ((TriggerHandlerCallback) callback).triggered(module);
         } else {
             logger.debug("Tried to trigger, but callback isn't available!");
         }
