@@ -87,6 +87,21 @@ public class ProxyFilterTest {
     }
 
     @Test
+    public void hostListTest() throws Exception {
+        String baseURI = "http://localhost:8080/rest";
+        String requestURI = "http://localhost:8080/rest/test";
+        setupContextURIs(baseURI, requestURI);
+
+        setupContextHeaders("https", "eclipse.org, foo.bar");
+
+        filter.filter(contextMock);
+
+        URI newBaseURI = new URI("https://eclipse.org/rest");
+        URI newRequestURI = new URI("https://eclipse.org/rest/test");
+        verify(contextMock).setRequestUri(eq(newBaseURI), eq(newRequestURI));
+    }
+
+    @Test
     public void noHeaderTest() throws Exception {
         String baseURI = "http://localhost:8080/rest";
         String requestURI = "http://localhost:8080/rest/test";
