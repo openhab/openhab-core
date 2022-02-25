@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
@@ -36,10 +38,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 public abstract class AbstractScriptedModuleHandlerFactory extends BaseModuleHandlerFactory {
     Logger logger = LoggerFactory.getLogger(AbstractScriptedModuleHandlerFactory.class);
 
-    protected ModuleHandler getModuleHandler(Module module, ScriptedHandler scriptedHandler) {
+    protected @Nullable ModuleHandler getModuleHandler(Module module, @Nullable ScriptedHandler scriptedHandler) {
         ModuleHandler moduleHandler = null;
 
         if (scriptedHandler != null) {

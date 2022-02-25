@@ -17,6 +17,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.ConditionHandler;
 import org.openhab.core.automation.type.CompositeConditionType;
@@ -28,12 +30,13 @@ import org.openhab.core.automation.type.CompositeConditionType;
  *
  * @author Yordan Mihaylov - Initial contribution
  */
+@NonNullByDefault
 public class CompositeConditionHandler
         extends AbstractCompositeModuleHandler<Condition, CompositeConditionType, ConditionHandler>
         implements ConditionHandler {
 
     public CompositeConditionHandler(Condition condition, CompositeConditionType mt,
-            LinkedHashMap<Condition, ConditionHandler> mapModuleToHandler, String ruleUID) {
+            LinkedHashMap<Condition, @Nullable ConditionHandler> mapModuleToHandler, String ruleUID) {
         super(condition, mt, mapModuleToHandler);
     }
 

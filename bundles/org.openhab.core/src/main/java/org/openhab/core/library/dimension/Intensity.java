@@ -14,11 +14,14 @@ package org.openhab.core.library.dimension;
 
 import javax.measure.Quantity;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This interface represents the intensity dimension.
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public interface Intensity extends Quantity<Intensity> {
 
 }

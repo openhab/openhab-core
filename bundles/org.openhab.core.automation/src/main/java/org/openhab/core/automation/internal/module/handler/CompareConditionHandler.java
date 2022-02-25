@@ -17,6 +17,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Benedikt Niehues - Initial contribution
  */
+@NonNullByDefault
 public class CompareConditionHandler extends BaseConditionModuleHandler {
 
     public static final String MODULE_TYPE = "core.GenericCompareCondition";
@@ -47,7 +49,7 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
     }
 
     @Override
-    public boolean isSatisfied(Map<String, Object> context) {
+    public boolean isSatisfied(Map<String, @Nullable Object> context) {
         Object operatorObj = this.module.getConfiguration().get(OPERATOR);
         String operator = (operatorObj != null && operatorObj instanceof String) ? (String) operatorObj : null;
         Object rightObj = this.module.getConfiguration().get(RIGHT_OP);
@@ -151,7 +153,7 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
         throw new UncomparableException();
     }
 
-    private @Nullable Object getRightOperandValue(String rightOperandString2, Object toCompare) {
+    private @Nullable Object getRightOperandValue(String rightOperandString2, @Nullable Object toCompare) {
         if ("null".equals(rightOperandString2)) {
             return rightOperandString2;
         }
@@ -169,7 +171,7 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
         return null;
     }
 
-    private Object getCompareValue(Object leftObj, String leftObjFieldName) {
+    private @Nullable Object getCompareValue(@Nullable Object leftObj, @Nullable String leftObjFieldName) {
         if (leftObj == null || leftObjFieldName == null || leftObjFieldName.isEmpty() || leftObj instanceof String
                 || leftObj instanceof Integer || leftObj instanceof Long || leftObj instanceof Double) {
             return leftObj;

@@ -14,6 +14,7 @@ package org.openhab.core.automation.module.script.rulesupport.shared.simple;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedHandler;
 
@@ -21,6 +22,7 @@ import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedHand
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 public abstract class SimpleConditionHandler implements ScriptedHandler {
     public void init(Condition condition) {
     }

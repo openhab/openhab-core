@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.shared.factories;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.ConditionHandler;
 import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedHandler;
@@ -20,6 +22,7 @@ import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedHand
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 public interface ScriptedConditionHandlerFactory extends ScriptedHandler {
-    public ConditionHandler get(Condition module);
+    public @Nullable ConditionHandler get(Condition module);
 }

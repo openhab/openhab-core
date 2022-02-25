@@ -14,6 +14,8 @@ package org.openhab.core.automation.internal.module.handler;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.events.Event;
@@ -26,6 +28,7 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - refactored and simplified customized module handling
  */
+@NonNullByDefault
 public class GenericEventConditionHandler extends BaseConditionModuleHandler {
 
     public static final String MODULETYPE_ID = "core.GenericEventCondition";
@@ -41,7 +44,7 @@ public class GenericEventConditionHandler extends BaseConditionModuleHandler {
         super(module);
     }
 
-    private boolean isConfiguredAndMatches(String keyParam, String value) {
+    private boolean isConfiguredAndMatches(String keyParam, @Nullable String value) {
         Object mo = module.getConfiguration().get(keyParam);
         String configValue = mo != null && mo instanceof String ? (String) mo : null;
         if (configValue != null) {

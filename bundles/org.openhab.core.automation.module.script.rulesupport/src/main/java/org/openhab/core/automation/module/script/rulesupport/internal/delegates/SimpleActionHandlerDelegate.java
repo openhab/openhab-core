@@ -17,6 +17,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.openhab.core.automation.module.script.rulesupport.shared.simple.SimpleActionHandler;
@@ -26,6 +28,7 @@ import org.openhab.core.automation.module.script.rulesupport.shared.simple.Simpl
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 public class SimpleActionHandlerDelegate extends BaseActionModuleHandler {
 
     private org.openhab.core.automation.module.script.rulesupport.shared.simple.SimpleActionHandler actionHandler;
@@ -41,10 +44,10 @@ public class SimpleActionHandlerDelegate extends BaseActionModuleHandler {
     }
 
     @Override
-    public Map<String, Object> execute(Map<String, Object> inputs) {
+    public @Nullable Map<String, Object> execute(Map<String, @Nullable Object> inputs) {
         Set<String> keys = new HashSet<>(inputs.keySet());
 
-        Map<String, Object> extendedInputs = new HashMap<>(inputs);
+        Map<String, @Nullable Object> extendedInputs = new HashMap<>(inputs);
         for (String key : keys) {
             Object value = extendedInputs.get(key);
             int dotIndex = key.indexOf('.');

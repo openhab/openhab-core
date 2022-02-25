@@ -235,6 +235,9 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
                         true);
                 if (finalMI != null) {
                     ActionType moduleType = helper.buildModuleType(module.getTypeUID(), moduleInformation);
+                    if (moduleType == null) {
+                        return null;
+                    }
                     return new AnnotationActionHandler(actionModule, moduleType, finalMI.getMethod(),
                             finalMI.getActionProvider());
                 }

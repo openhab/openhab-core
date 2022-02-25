@@ -53,6 +53,7 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
 
     private final Set<String> types;
     private final BundleContext bundleContext;
+    private final ItemRegistry itemRegistry;
 
     public static final String MODULE_TYPE_ID = "core.GroupCommandTrigger";
 
@@ -60,14 +61,14 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
     public static final String CFG_COMMAND = "command";
 
     private ServiceRegistration<?> eventSubscriberRegistration;
-    private @Nullable ItemRegistry itemRegistry;
 
-    public GroupCommandTriggerHandler(Trigger module, BundleContext bundleContext) {
+    public GroupCommandTriggerHandler(Trigger module, BundleContext bundleContext, ItemRegistry itemRegistry) {
         super(module);
         this.groupName = (String) module.getConfiguration().get(CFG_GROUPNAME);
         this.command = (String) module.getConfiguration().get(CFG_COMMAND);
         this.types = Set.of(ItemCommandEvent.TYPE);
         this.bundleContext = bundleContext;
+        this.itemRegistry = itemRegistry;
         Dictionary<String, Object> properties = new Hashtable<>();
         this.topic = "openhab/items/";
         properties.put("event.topics", topic);
@@ -95,16 +96,15 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
             if (event instanceof ItemCommandEvent) {
                 ItemCommandEvent icEvent = (ItemCommandEvent) event;
                 String itemName = icEvent.getItemName();
-                if (itemRegistry != null) {
-                    Item item = itemRegistry.get(itemName);
-                    if (item != null && item.getGroupNames().contains(groupName)) {
-                        Command itemCommand = icEvent.getItemCommand();
-                        if (command == null || command.equals(itemCommand.toFullString())) {
-                            values.put("triggeringItem", item);
-                            values.put("command", itemCommand);
-                            values.put("event", event);
-                            cb.triggered(this.module, values);
-                        }
+                Item item = itemRegistry.get(itemName);
+                if (item != null && item.getGroupNames().contains(groupName)) {
+                    String command = this.command;
+                    Command itemCommand = icEvent.getItemCommand();
+                    if (command == null || command.equals(itemCommand.toFullString())) {
+                        values.put("triggeringItem", item);
+                        values.put("command", itemCommand);
+                        values.put("event", event);
+                        cb.triggered(this.module, values);
                     }
                 }
             }
@@ -124,13 +124,5 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}", event.getTopic());
         return event.getTopic().startsWith(topic);
-    }
-
-    public void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    public void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
     }
 }

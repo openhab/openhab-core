@@ -15,6 +15,8 @@ package org.openhab.core.automation.module.script.rulesupport.internal;
 import java.util.Collection;
 import java.util.HashMap;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.ModuleHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
@@ -31,6 +33,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, service = { ScriptedCustomModuleHandlerFactory.class, ModuleHandlerFactory.class })
 public class ScriptedCustomModuleHandlerFactory extends AbstractScriptedModuleHandlerFactory {
     private final HashMap<String, ScriptedHandler> typesHandlers = new HashMap<>();
@@ -41,7 +44,7 @@ public class ScriptedCustomModuleHandlerFactory extends AbstractScriptedModuleHa
     }
 
     @Override
-    protected ModuleHandler internalCreate(Module module, String ruleUID) {
+    protected @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
         ScriptedHandler scriptedHandler = typesHandlers.get(module.getTypeUID());
 
         return getModuleHandler(module, scriptedHandler);

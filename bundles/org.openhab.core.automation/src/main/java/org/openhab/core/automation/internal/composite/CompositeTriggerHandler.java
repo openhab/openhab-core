@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.RuleStatus;
@@ -38,11 +39,12 @@ import org.openhab.core.automation.util.ReferenceResolver;
  *
  * @author Yordan Mihaylov - Initial contribution
  */
+@NonNullByDefault
 public class CompositeTriggerHandler
         extends AbstractCompositeModuleHandler<Trigger, CompositeTriggerType, TriggerHandler>
         implements TriggerHandler, TriggerHandlerCallback {
 
-    private TriggerHandlerCallback callback;
+    private @NonNullByDefault({}) TriggerHandlerCallback callback;
 
     /**
      * Constructor of this system handler.
@@ -53,7 +55,7 @@ public class CompositeTriggerHandler
      * @param ruleUID UID of rule where the parent trigger is part of
      */
     public CompositeTriggerHandler(Trigger trigger, CompositeTriggerType mt,
-            LinkedHashMap<Trigger, TriggerHandler> mapModuleToHandler, String ruleUID) {
+            LinkedHashMap<Trigger, @Nullable TriggerHandler> mapModuleToHandler, String ruleUID) {
         super(trigger, mt, mapModuleToHandler);
     }
 
@@ -125,7 +127,9 @@ public class CompositeTriggerHandler
             List<Trigger> children = getChildren();
             for (Trigger child : children) {
                 TriggerHandler handler = moduleHandlerMap.get(child);
-                handler.setCallback(this);
+                if (handler != null) {
+                    handler.setCallback(this);
+                }
             }
         }
     }
@@ -142,7 +146,7 @@ public class CompositeTriggerHandler
     }
 
     @Override
-    public Boolean isEnabled(String ruleUID) {
+    public @Nullable Boolean isEnabled(String ruleUID) {
         return callback.isEnabled(ruleUID);
     }
 
@@ -152,12 +156,12 @@ public class CompositeTriggerHandler
     }
 
     @Override
-    public RuleStatusInfo getStatusInfo(String ruleUID) {
+    public @Nullable RuleStatusInfo getStatusInfo(String ruleUID) {
         return callback.getStatusInfo(ruleUID);
     }
 
     @Override
-    public RuleStatus getStatus(String ruleUID) {
+    public @Nullable RuleStatus getStatus(String ruleUID) {
         return callback.getStatus(ruleUID);
     }
 
@@ -167,7 +171,7 @@ public class CompositeTriggerHandler
     }
 
     @Override
-    public void runNow(String uid, boolean considerConditions, Map<String, Object> context) {
+    public void runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context) {
         callback.runNow(uid, considerConditions, context);
     }
 }

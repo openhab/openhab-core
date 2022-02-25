@@ -14,12 +14,14 @@ package org.openhab.core.automation.module.script.rulesupport.shared.simple;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
 
 /**
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 public interface SimpleTriggerHandlerCallback extends TriggerHandlerCallback {
     public void triggered(Map<String, ?> context);
 }

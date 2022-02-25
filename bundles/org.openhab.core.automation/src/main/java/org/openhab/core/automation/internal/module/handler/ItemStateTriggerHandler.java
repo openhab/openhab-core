@@ -18,6 +18,9 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
@@ -41,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
     public static final String UPDATE_MODULE_TYPE_ID = "core.ItemStateUpdateTrigger";
@@ -53,12 +57,12 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
     private final Logger logger = LoggerFactory.getLogger(ItemStateTriggerHandler.class);
 
     private final String itemName;
-    private final String state;
+    private final @Nullable String state;
     private final String previousState;
     private Set<String> types;
     private final BundleContext bundleContext;
 
-    private ServiceRegistration<?> eventSubscriberRegistration;
+    private @Nullable ServiceRegistration<?> eventSubscriberRegistration;
 
     public ItemStateTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
@@ -83,28 +87,30 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
     }
 
     @Override
-    public EventFilter getEventFilter() {
+    public @Nullable EventFilter getEventFilter() {
         return this;
     }
 
     @Override
     public void receive(Event event) {
+        ModuleHandlerCallback callback = this.callback;
         if (callback != null) {
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
             Map<String, Object> values = new HashMap<>();
             if (event instanceof ItemStateEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-                State state = ((ItemStateEvent) event).getItemState();
-                if ((this.state == null || this.state.equals(state.toFullString()))) {
-                    values.put("state", state);
+                String state = this.state;
+                State itemState = ((ItemStateEvent) event).getItemState();
+                if ((state == null || state.equals(itemState.toFullString()))) {
+                    values.put("state", itemState);
                 }
             } else if (event instanceof ItemStateChangedEvent && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-                State state = ((ItemStateChangedEvent) event).getItemState();
-                State oldState = ((ItemStateChangedEvent) event).getOldItemState();
+                State itemState = ((ItemStateChangedEvent) event).getItemState();
+                State oldItemState = ((ItemStateChangedEvent) event).getOldItemState();
 
-                if (stateMatches(this.state, state) && stateMatches(this.previousState, oldState)) {
-                    values.put("oldState", oldState);
-                    values.put("newState", state);
+                if (stateMatches(this.state, itemState) && stateMatches(this.previousState, oldItemState)) {
+                    values.put("oldState", oldItemState);
+                    values.put("newState", itemState);
                 }
             }
             if (!values.isEmpty()) {
@@ -114,7 +120,7 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
         }
     }
 
-    private boolean stateMatches(String requiredState, State state) {
+    private boolean stateMatches(@Nullable String requiredState, State state) {
         if (requiredState == null) {
             return true;
         }

@@ -17,6 +17,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
@@ -48,10 +50,11 @@ import org.openhab.core.automation.util.ReferenceResolver;
  * @param <H> type of module handler. It can be {@link TriggerHandler}, {@link ConditionHandler} or
  *            {@link ActionHandler}
  */
+@NonNullByDefault
 public abstract class AbstractCompositeModuleHandler<M extends Module, MT extends ModuleType, H extends ModuleHandler>
         implements ModuleHandler {
 
-    protected LinkedHashMap<M, H> moduleHandlerMap;
+    protected LinkedHashMap<M, @Nullable H> moduleHandlerMap;
     protected M module;
     protected MT moduleType;
 
@@ -64,7 +67,7 @@ public abstract class AbstractCompositeModuleHandler<M extends Module, MT extend
      * @param mapModuleToHandler map containing pairs of child modules instances (defined by module type) and their
      *            handlers
      */
-    public AbstractCompositeModuleHandler(M module, MT moduleType, LinkedHashMap<M, H> mapModuleToHandler) {
+    public AbstractCompositeModuleHandler(M module, MT moduleType, LinkedHashMap<M, @Nullable H> mapModuleToHandler) {
         this.module = module;
         this.moduleType = moduleType;
         this.moduleHandlerMap = mapModuleToHandler;
@@ -102,15 +105,18 @@ public abstract class AbstractCompositeModuleHandler<M extends Module, MT extend
                 childHandler.dispose();
             }
         }
-        moduleHandlerMap = null;
+        moduleHandlerMap.clear();
     }
 
     @Override
     public void setCallback(ModuleHandlerCallback callback) {
         List<M> children = getChildren();
         for (M child : children) {
+            @Nullable
             H handler = moduleHandlerMap.get(child);
-            handler.setCallback(callback);
+            if (handler != null) {
+                handler.setCallback(callback);
+            }
         }
     }
 

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.dto;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.config.core.Configuration;
@@ -23,6 +24,7 @@ import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
  * @author Markus Rathgeb - Initial contribution
  * @author Kai Kreuzer - Changed to using RuleBuilder
  */
+@NonNullByDefault
 public class RuleDTOMapper {
 
     public static RuleDTO map(final Rule rule) {

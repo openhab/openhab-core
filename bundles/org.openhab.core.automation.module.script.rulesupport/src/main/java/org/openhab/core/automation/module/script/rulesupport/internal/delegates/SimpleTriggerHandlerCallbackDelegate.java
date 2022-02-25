@@ -15,6 +15,8 @@ package org.openhab.core.automation.module.script.rulesupport.internal.delegates
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
@@ -26,6 +28,7 @@ import org.openhab.core.automation.module.script.rulesupport.shared.simple.Simpl
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 public class SimpleTriggerHandlerCallbackDelegate implements SimpleTriggerHandlerCallback {
     private final Trigger trigger;
     private final TriggerHandlerCallback callback;
@@ -51,7 +54,7 @@ public class SimpleTriggerHandlerCallbackDelegate implements SimpleTriggerHandle
     }
 
     @Override
-    public Boolean isEnabled(String ruleUID) {
+    public @Nullable Boolean isEnabled(String ruleUID) {
         return callback.isEnabled(ruleUID);
     }
 
@@ -61,12 +64,12 @@ public class SimpleTriggerHandlerCallbackDelegate implements SimpleTriggerHandle
     }
 
     @Override
-    public RuleStatusInfo getStatusInfo(String ruleUID) {
+    public @Nullable RuleStatusInfo getStatusInfo(String ruleUID) {
         return callback.getStatusInfo(ruleUID);
     }
 
     @Override
-    public RuleStatus getStatus(String ruleUID) {
+    public @Nullable RuleStatus getStatus(String ruleUID) {
         return callback.getStatus(ruleUID);
     }
 
@@ -76,7 +79,7 @@ public class SimpleTriggerHandlerCallbackDelegate implements SimpleTriggerHandle
     }
 
     @Override
-    public void runNow(String uid, boolean considerConditions, Map<String, Object> context) {
+    public void runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context) {
         callback.runNow(uid, considerConditions, context);
     }
 }

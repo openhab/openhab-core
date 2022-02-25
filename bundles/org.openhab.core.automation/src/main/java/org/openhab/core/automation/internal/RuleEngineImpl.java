@@ -662,7 +662,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @param msg provides the {@link RuleStatusInfo} description, corresponding to the new <b>uninitialized</b>
      *            status, should be {@code null} if the status will be skipped.
      */
-    private void unregister(@Nullable WrappedRule r, @Nullable RuleStatusDetail detail, @Nullable String msg) {
+    private void unregister(@Nullable WrappedRule r, RuleStatusDetail detail, @Nullable String msg) {
         if (r != null) {
             unregister(r);
             setStatus(r.getUID(), new RuleStatusInfo(RuleStatus.UNINITIALIZED, detail, msg));

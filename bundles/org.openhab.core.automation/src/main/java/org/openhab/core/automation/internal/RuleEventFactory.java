@@ -91,8 +91,12 @@ public class RuleEventFactory extends AbstractEventFactory {
         return new RuleUpdatedEvent(topic, payload, source, ruleDTO[0], ruleDTO[1]);
     }
 
+    @SuppressWarnings("null")
     private Event createRuleStatusInfoEvent(String topic, String payload, @Nullable String source) {
         RuleStatusInfo statusInfo = deserializePayload(payload, RuleStatusInfo.class);
+        if (statusInfo.getStatus() == null || statusInfo.getStatusDetail() == null) {
+            throw new IllegalArgumentException("Creation of RuleStatusInfo failed: invalid payload: " + payload);
+        }
         return new RuleStatusInfoEvent(topic, payload, source, statusInfo, getRuleId(topic));
     }
 

@@ -14,6 +14,8 @@ package org.openhab.core.automation.internal.parser.gson;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.dto.CompositeActionTypeDTO;
 import org.openhab.core.automation.dto.CompositeConditionTypeDTO;
 import org.openhab.core.automation.dto.CompositeTriggerTypeDTO;
@@ -24,11 +26,12 @@ import org.openhab.core.automation.dto.CompositeTriggerTypeDTO;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class ModuleTypeParsingContainer {
 
-    public List<CompositeTriggerTypeDTO> triggers;
+    public @Nullable List<CompositeTriggerTypeDTO> triggers;
 
-    public List<CompositeConditionTypeDTO> conditions;
+    public @Nullable List<CompositeConditionTypeDTO> conditions;
 
-    public List<CompositeActionTypeDTO> actions;
+    public @Nullable List<CompositeActionTypeDTO> actions;
 }

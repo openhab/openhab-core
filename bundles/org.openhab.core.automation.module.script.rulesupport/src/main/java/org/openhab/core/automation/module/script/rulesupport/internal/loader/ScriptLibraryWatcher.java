@@ -18,6 +18,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.service.AbstractWatchService;
 
 /**
@@ -25,6 +27,7 @@ import org.openhab.core.service.AbstractWatchService;
  *
  * @author Jonathan Gilbert - Initial contribution
  */
+@NonNullByDefault
 public abstract class ScriptLibraryWatcher extends AbstractWatchService {
 
     public ScriptLibraryWatcher(final String libraryPath) {
@@ -37,7 +40,7 @@ public abstract class ScriptLibraryWatcher extends AbstractWatchService {
     }
 
     @Override
-    protected WatchEvent.Kind<?>[] getWatchEventKinds(Path path) {
+    protected WatchEvent.Kind<?> @Nullable [] getWatchEventKinds(Path path) {
         return new WatchEvent.Kind<?>[] { ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY };
     }
 

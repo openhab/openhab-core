@@ -14,12 +14,14 @@ package org.openhab.core.automation.module.script.rulesupport.shared.simple;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Action;
 
 /**
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 public class SimpleRuleActionHandlerDelegate extends SimpleActionHandler {
 
     private SimpleRuleActionHandler handler;

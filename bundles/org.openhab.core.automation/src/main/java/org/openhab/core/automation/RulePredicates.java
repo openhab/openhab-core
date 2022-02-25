@@ -19,11 +19,15 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This class add support for prefixes for {@link Rule} UIDs and provide default predicates for prefixes and tags.
  *
  * @author Victor Toni - Initial contribution
  */
+@NonNullByDefault
 public class RulePredicates {
 
     /**
@@ -48,7 +52,7 @@ public class RulePredicates {
      *
      * @return prefix of this {@link Rule}, or {@code null} if no prefix or an empty prefix is found.
      */
-    public static String getPrefix(Rule rule) {
+    public static @Nullable String getPrefix(@Nullable Rule rule) {
         if (null != rule) {
             final String uid = rule.getUID();
             final int index = uid.indexOf(PREFIX_SEPARATOR);
@@ -66,7 +70,7 @@ public class RulePredicates {
      * @param prefix to search for.
      * @return created {@link Predicate}.
      */
-    public static Predicate<Rule> hasPrefix(final String prefix) {
+    public static Predicate<Rule> hasPrefix(final @Nullable String prefix) {
         if (null == prefix) {
             return r -> null == getPrefix(r);
         } else {
@@ -121,7 +125,7 @@ public class RulePredicates {
      * @param tags to search for.
      * @return created {@link Predicate}.
      */
-    public static Predicate<Rule> hasAllTags(final Collection<String> tags) {
+    public static Predicate<Rule> hasAllTags(final @Nullable Collection<String> tags) {
         if (tags == null || tags.isEmpty()) {
             return (Predicate<Rule>) r -> true;
         } else {
@@ -140,7 +144,7 @@ public class RulePredicates {
      * @param tags to search for.
      * @return created {@link Predicate}.
      */
-    public static Predicate<Rule> hasAllTags(final String... tags) {
+    public static Predicate<Rule> hasAllTags(final String @Nullable... tags) {
         return hasAllTags(tags == null ? null : Arrays.asList(tags));
     }
 
@@ -151,7 +155,7 @@ public class RulePredicates {
      * @param tags to search for.
      * @return created {@link Predicate}.
      */
-    public static Predicate<Rule> hasAnyOfTags(final Collection<String> tags) {
+    public static Predicate<Rule> hasAnyOfTags(final @Nullable Collection<String> tags) {
         if (null == tags || tags.isEmpty()) {
             // everything without a tag is matching
             return hasNoTags();
@@ -171,7 +175,7 @@ public class RulePredicates {
      * @param tags to search for.
      * @return created {@link Predicate}.
      */
-    public static Predicate<Rule> hasAnyOfTags(final String... tags) {
+    public static Predicate<Rule> hasAnyOfTags(final String @Nullable... tags) {
         if (null == tags || 0 == tags.length) {
             // everything without a tag is matching
             return hasNoTags();

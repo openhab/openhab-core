@@ -14,6 +14,8 @@ package org.openhab.core.automation.internal.module.handler;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.openhab.core.events.EventPublisher;
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - refactored and simplified customized module handling
  * @author Stefan Triller - use command from input first and if not set, use command from configuration
  */
+@NonNullByDefault
 public class ItemCommandActionHandler extends BaseActionModuleHandler {
 
     public static final String ITEM_COMMAND_ACTION = "core.ItemCommandAction";
@@ -42,8 +45,8 @@ public class ItemCommandActionHandler extends BaseActionModuleHandler {
 
     private final Logger logger = LoggerFactory.getLogger(ItemCommandActionHandler.class);
 
-    private ItemRegistry itemRegistry;
-    private EventPublisher eventPublisher;
+    private final EventPublisher eventPublisher;
+    private final ItemRegistry itemRegistry;
 
     /**
      * constructs a new ItemCommandActionHandler
@@ -51,58 +54,18 @@ public class ItemCommandActionHandler extends BaseActionModuleHandler {
      * @param module
      * @param moduleTypes
      */
-    public ItemCommandActionHandler(Action module) {
+    public ItemCommandActionHandler(Action module, EventPublisher eventPublisher, ItemRegistry itemRegistry) {
         super(module);
-    }
-
-    /**
-     * setter for itemRegistry, used by DS
-     *
-     * @param itemRegistry
-     */
-    public void setItemRegistry(ItemRegistry itemRegistry) {
+        this.eventPublisher = eventPublisher;
         this.itemRegistry = itemRegistry;
     }
 
-    /**
-     * unsetter for itemRegistry, used by DS
-     *
-     * @param itemRegistry
-     */
-    public void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    /**
-     * setter for eventPublisher used by DS
-     *
-     * @param eventPublisher
-     */
-    public void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    /**
-     * unsetter for eventPublisher used by DS
-     *
-     * @param eventPublisher
-     */
-    public void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
     @Override
-    public void dispose() {
-        this.eventPublisher = null;
-        this.itemRegistry = null;
-    }
-
-    @Override
-    public Map<String, Object> execute(Map<String, Object> inputs) {
+    public @Nullable Map<String, Object> execute(Map<String, Object> inputs) {
         String itemName = (String) module.getConfiguration().get(ITEM_NAME);
         String command = (String) module.getConfiguration().get(COMMAND);
 
-        if (itemName != null && eventPublisher != null && itemRegistry != null) {
+        if (itemName != null) {
             try {
                 Item item = itemRegistry.getItem(itemName);
 

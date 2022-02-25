@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Bidirectional bag of unique elements. A map allowing multiple, unique values to be stored against a single key.
  * Provides optimized lookup of values for a key, as well as keys referencing a value.
@@ -26,6 +28,7 @@ import java.util.Set;
  * @param <K> Type of Key
  * @param <V> Type of Value
  */
+@NonNullByDefault
 public class BidiSetBag<K, V> {
     private Map<K, Set<V>> keyToValues = new HashMap<>();
     private Map<V, Set<K>> valueToKeys = new HashMap<>();

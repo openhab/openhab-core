@@ -16,6 +16,8 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Rule;
 
 /**
@@ -31,17 +33,18 @@ import org.openhab.core.automation.Rule;
  * @author Kai Kreuzer - fixed feedback when deleting non-existent rule
  * @author Marin Mitev - removed prefixes in the output
  */
+@NonNullByDefault
 public class AutomationCommandRemove extends AutomationCommand {
 
     /**
      * This field keeps the UID of the {@link Rule} if command is {@link AutomationCommands#REMOVE_RULE}
      */
-    private String id;
+    private @Nullable String id;
 
     /**
      * This field keeps URL of the source of automation objects that has to be removed.
      */
-    private URL url;
+    private @Nullable URL url;
 
     /**
      * @see AutomationCommand#AutomationCommand(String, String[], int, AutomationCommandsPluggable)
@@ -62,7 +65,9 @@ public class AutomationCommandRemove extends AutomationCommand {
      */
     @Override
     public String execute() {
-        if (parsingResult != SUCCESS) {
+        String id = this.id;
+        URL url = this.url;
+        if (!SUCCESS.equals(parsingResult) || id == null || url == null) {
             return parsingResult;
         }
         switch (providerType) {
@@ -89,7 +94,7 @@ public class AutomationCommandRemove extends AutomationCommand {
      * @return an {@link URL} object created from the string that is passed as parameter of the command or <b>null</b>
      *         if either no legal protocol could be found in the specified string or the string could not be parsed.
      */
-    private URL initURL(String parameterValue) {
+    private @Nullable URL initURL(String parameterValue) {
         try {
             return new URL(parameterValue);
         } catch (MalformedURLException mue) {

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.dto;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Module;
 
 /**
@@ -19,6 +20,7 @@ import org.openhab.core.automation.Module;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class ModuleDTOMapper {
 
     protected static void fillProperties(final Module from, final ModuleDTO to) {
