@@ -49,6 +49,20 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         this(bigDecimal(value));
     }
 
+    // TODO: Remove these constructors. They are still in place to maintain binary compatibility and will be removed
+    // once another change breaking binary compatibility is merged
+    public DecimalType(BigDecimal value) {
+        this.value = value;
+    }
+
+    public DecimalType(long value) {
+        this(bigDecimal(value));
+    }
+
+    public DecimalType(double value) {
+        this(bigDecimal(value));
+    }
+
     private static BigDecimal bigDecimal(Number value) {
         if (value instanceof QuantityType) {
             return ((QuantityType<?>) value).toBigDecimal();
@@ -59,10 +73,6 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         }
 
         return new BigDecimal(value.toString());
-    }
-
-    public DecimalType(BigDecimal value) {
-        this.value = value;
     }
 
     /**
