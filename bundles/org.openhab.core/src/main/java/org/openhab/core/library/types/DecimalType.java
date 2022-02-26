@@ -49,6 +49,21 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         this(bigDecimal(value));
     }
 
+    @Deprecated
+    public DecimalType(BigDecimal value) {
+        this.value = value;
+    }
+
+    @Deprecated
+    public DecimalType(long value) {
+        this(bigDecimal(value));
+    }
+
+    @Deprecated
+    public DecimalType(double value) {
+        this(bigDecimal(value));
+    }
+
     private static BigDecimal bigDecimal(Number value) {
         if (value instanceof QuantityType) {
             return ((QuantityType<?>) value).toBigDecimal();
@@ -59,10 +74,6 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         }
 
         return new BigDecimal(value.toString());
-    }
-
-    public DecimalType(BigDecimal value) {
-        this.value = value;
     }
 
     /**
