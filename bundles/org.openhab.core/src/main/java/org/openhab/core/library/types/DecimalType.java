@@ -49,17 +49,16 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         this(bigDecimal(value));
     }
 
-    @Deprecated
+    // TODO: Remove this constructors. They are still in place to maintain binary compatibility and will be removed once
+    // another change breaking binary compatibility is merged
     public DecimalType(BigDecimal value) {
         this.value = value;
     }
 
-    @Deprecated
     public DecimalType(long value) {
         this(bigDecimal(value));
     }
 
-    @Deprecated
     public DecimalType(double value) {
         this(bigDecimal(value));
     }
