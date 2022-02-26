@@ -54,9 +54,9 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(service = ScriptEngineManager.class)
 public class ScriptEngineManagerImpl implements ScriptEngineManager {
-    private static final String THREAD_POOL_NAME = "OH-scriptenginemanager";
 
-    private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(THREAD_POOL_NAME);
+    private final ScheduledExecutorService scheduler = ThreadPoolManager
+            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineManagerImpl.class);
     private final Map<String, ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
