@@ -162,6 +162,7 @@ public class JsonAddonService extends AbstractRemoteAddonService {
                 .withDetailedDescription(addonEntry.description).withContentType(addonEntry.contentType)
                 .withAuthor(addonEntry.author).withVersion(addonEntry.version).withLabel(addonEntry.title)
                 .withMaturity(addonEntry.maturity).withProperties(properties).withLink(addonEntry.link)
-                .withImageLink(addonEntry.imageUrl).withConfigDescriptionURI(addonEntry.configDescriptionURI).build();
+                .withImageLink(addonEntry.imageUrl).withConfigDescriptionURI(addonEntry.configDescriptionURI)
+                .withLoggerPackages(addonEntry.loggerPackages).build();
     }
 }

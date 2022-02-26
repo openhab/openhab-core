@@ -15,7 +15,6 @@ package org.openhab.core.automation.internal.module.handler;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.items.Item;
@@ -49,33 +48,11 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler {
 
     public static final String ITEM_STATE_CONDITION = "core.ItemStateCondition";
 
-    private @Nullable ItemRegistry itemRegistry;
+    private final ItemRegistry itemRegistry;
 
-    public ItemStateConditionHandler(Condition condition) {
+    public ItemStateConditionHandler(Condition condition, ItemRegistry itemRegistry) {
         super(condition);
-    }
-
-    /**
-     * setter for itemRegistry, used by DS
-     *
-     * @param itemRegistry
-     */
-    public void setItemRegistry(ItemRegistry itemRegistry) {
         this.itemRegistry = itemRegistry;
-    }
-
-    /**
-     * unsetter for itemRegistry used by DS
-     *
-     * @param itemRegistry
-     */
-    public void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Override
-    public void dispose() {
-        itemRegistry = null;
     }
 
     @Override
@@ -86,10 +63,6 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler {
         if (operator == null || state == null || itemName == null) {
             logger.error("Module is not well configured: itemName={}  operator={}  state = {}", itemName, operator,
                     state);
-            return false;
-        }
-        if (itemRegistry == null) {
-            logger.error("The ItemRegistry is not available to evaluate the condition.");
             return false;
         }
         try {
@@ -174,7 +147,6 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler {
         return false;
     }
 
-    @SuppressWarnings("null")
     private boolean equalsToItemState(String itemName, String state) throws ItemNotFoundException {
         Item item = itemRegistry.getItem(itemName);
         State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);

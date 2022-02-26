@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.internal.commands;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleStatus;
 
 /**
@@ -19,6 +21,7 @@ import org.openhab.core.automation.RuleStatus;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public class AutomationCommandEnableRule extends AutomationCommand {
 
     /**
@@ -34,7 +37,7 @@ public class AutomationCommandEnableRule extends AutomationCommand {
     /**
      * This field keeps the specified rule UID.
      */
-    private String uid;
+    private @Nullable String uid;
 
     public AutomationCommandEnableRule(String command, String[] parameterValues, int providerType,
             AutomationCommandsPluggable autoCommands) {
@@ -43,9 +46,11 @@ public class AutomationCommandEnableRule extends AutomationCommand {
 
     @Override
     public String execute() {
-        if (parsingResult != SUCCESS) {
+        String uid = this.uid;
+        if (!SUCCESS.equals(parsingResult) || uid == null) {
             return parsingResult;
         }
+
         if (hasEnable) {
             autoCommands.setEnabled(uid, enable);
             return SUCCESS;

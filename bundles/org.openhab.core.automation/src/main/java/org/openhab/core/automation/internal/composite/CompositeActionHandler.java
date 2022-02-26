@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.ActionHandler;
 import org.openhab.core.automation.type.CompositeActionType;
@@ -34,6 +36,7 @@ import org.openhab.core.automation.util.ReferenceResolver;
  *
  * @author Yordan Mihaylov - Initial contribution
  */
+@NonNullByDefault
 public class CompositeActionHandler extends AbstractCompositeModuleHandler<Action, CompositeActionType, ActionHandler>
         implements ActionHandler {
 
@@ -50,7 +53,7 @@ public class CompositeActionHandler extends AbstractCompositeModuleHandler<Actio
      * @param ruleUID UID of rule where the parent action is part of.
      */
     public CompositeActionHandler(Action action, CompositeActionType mt,
-            LinkedHashMap<Action, ActionHandler> mapModuleToHandler, String ruleUID) {
+            LinkedHashMap<Action, @Nullable ActionHandler> mapModuleToHandler, String ruleUID) {
         super(action, mt, mapModuleToHandler);
         compositeOutputs = getCompositeOutputMap(moduleType.getOutputs());
     }
@@ -61,14 +64,14 @@ public class CompositeActionHandler extends AbstractCompositeModuleHandler<Actio
      * @see org.openhab.core.automation.handler.ActionHandler#execute(java.util.Map)
      */
     @Override
-    public Map<String, Object> execute(Map<String, Object> context) {
+    public @Nullable Map<String, Object> execute(Map<String, Object> context) {
         final Map<String, Object> result = new HashMap<>();
         final List<Action> children = getChildren();
         final Map<String, Object> compositeContext = getCompositeContext(context);
         for (Action child : children) {
             ActionHandler childHandler = moduleHandlerMap.get(child);
             Map<String, Object> childContext = Collections.unmodifiableMap(getChildContext(child, compositeContext));
-            Map<String, Object> childResults = childHandler.execute(childContext);
+            Map<String, Object> childResults = childHandler == null ? null : childHandler.execute(childContext);
             if (childResults != null) {
                 for (Entry<String, Object> childResult : childResults.entrySet()) {
                     String childOuputName = child.getId() + "." + childResult.getKey();
@@ -91,7 +94,7 @@ public class CompositeActionHandler extends AbstractCompositeModuleHandler<Actio
     }
 
     /**
-     * Create a map of links between child outputs and parent outputs. These links are base on the refecences defined in
+     * Create a map of links between child outputs and parent outputs. These links are base on the references defined in
      * the outputs of parent action.
      *
      * @param outputs outputs of the parent action. The action of {@link CompositeActionType}
@@ -99,23 +102,21 @@ public class CompositeActionHandler extends AbstractCompositeModuleHandler<Actio
      */
     protected Map<String, Output> getCompositeOutputMap(List<Output> outputs) {
         Map<String, Output> result = new HashMap<>(11);
-        if (outputs != null) {
-            for (Output output : outputs) {
-                String refs = output.getReference();
-                if (refs != null) {
-                    String ref;
-                    StringTokenizer st = new StringTokenizer(refs, ",");
-                    while (st.hasMoreTokens()) {
-                        ref = st.nextToken().trim();
-                        int i = ref.indexOf('.');
-                        if (i != -1) {
-                            int j = ReferenceResolver.getNextRefToken(ref, i + 1);
-                            if (j != -1) {
-                                ref = ref.substring(0, j);
-                            }
+        for (Output output : outputs) {
+            String refs = output.getReference();
+            if (refs != null) {
+                String ref;
+                StringTokenizer st = new StringTokenizer(refs, ",");
+                while (st.hasMoreTokens()) {
+                    ref = st.nextToken().trim();
+                    int i = ref.indexOf('.');
+                    if (i != -1) {
+                        int j = ReferenceResolver.getNextRefToken(ref, i + 1);
+                        if (j != -1) {
+                            ref = ref.substring(0, j);
                         }
-                        result.put(ref, output);
                     }
+                    result.put(ref, output);
                 }
             }
         }

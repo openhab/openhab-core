@@ -18,6 +18,7 @@ import static org.mockito.Mockito.*;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.measure.quantity.Temperature;
 
@@ -40,6 +41,7 @@ import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
@@ -129,6 +131,58 @@ class ExpireManagerTest {
     }
 
     @Test
+    void testIgnoreStateUpdateExtendsExpiryOnStateChange() throws InterruptedException, ItemNotFoundException {
+        Item testItem = new NumberItem(ITEMNAME);
+        when(itemRegistryMock.getItem(ITEMNAME)).thenReturn(testItem);
+        when(metadataRegistryMock.get(METADATA_KEY))
+                .thenReturn(config("2s", Map.of(ExpireConfig.CONFIG_IGNORE_STATE_UPDATES, true)));
+
+        Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
+        expireManager.receive(event);
+        Thread.sleep(1500L);
+        event = ItemEventFactory.createStateChangedEvent(ITEMNAME, new DecimalType(2), new DecimalType(1));
+        expireManager.receive(event);
+        Thread.sleep(1500L);
+        verify(eventPublisherMock, never()).post(any());
+        Thread.sleep(2000L);
+        verify(eventPublisherMock, times(1)).post(any());
+    }
+
+    @Test
+    void testIgnoreStateUpdateExtendsExpiryOnCommand() throws InterruptedException, ItemNotFoundException {
+        Item testItem = new NumberItem(ITEMNAME);
+        when(itemRegistryMock.getItem(ITEMNAME)).thenReturn(testItem);
+        when(metadataRegistryMock.get(METADATA_KEY))
+                .thenReturn(config("2s", Map.of(ExpireConfig.CONFIG_IGNORE_STATE_UPDATES, true)));
+
+        Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
+        expireManager.receive(event);
+        Thread.sleep(1500L);
+        event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
+        expireManager.receive(event);
+        Thread.sleep(1500L);
+        verify(eventPublisherMock, never()).post(any());
+        Thread.sleep(2000L);
+        verify(eventPublisherMock, times(1)).post(any());
+    }
+
+    @Test
+    void testIgnoreStateUpdateDoesNotExtendExpiryOnStateUpdate() throws InterruptedException, ItemNotFoundException {
+        Item testItem = new NumberItem(ITEMNAME);
+        when(itemRegistryMock.getItem(ITEMNAME)).thenReturn(testItem);
+        when(metadataRegistryMock.get(METADATA_KEY))
+                .thenReturn(config("2s", Map.of(ExpireConfig.CONFIG_IGNORE_STATE_UPDATES, true)));
+
+        Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
+        expireManager.receive(event);
+        Thread.sleep(1500L);
+        event = ItemEventFactory.createStateEvent(ITEMNAME, new DecimalType(1));
+        expireManager.receive(event);
+        Thread.sleep(1500L);
+        verify(eventPublisherMock, times(1)).post(any());
+    }
+
+    @Test
     void testMetadataChange() throws InterruptedException, ItemNotFoundException {
         Metadata md = new Metadata(METADATA_KEY, "1s", null);
         when(metadataRegistryMock.get(METADATA_KEY)).thenReturn(md);
@@ -155,69 +209,92 @@ class ExpireManagerTest {
     @Test
     void testExpireConfig() {
         Item testItem = new SwitchItem(ITEMNAME);
-        ExpireConfig cfg = new ExpireManager.ExpireConfig(testItem, "1s");
+        ExpireConfig cfg = new ExpireManager.ExpireConfig(testItem, "1s", Map.of());
         assertEquals(Duration.ofSeconds(1), cfg.duration);
         assertEquals(UnDefType.UNDEF, cfg.expireState);
-        assertEquals(null, cfg.expireCommand);
+        assertNull(cfg.expireCommand);
+        assertFalse(cfg.ignoreStateUpdates);
 
-        cfg = new ExpireManager.ExpireConfig(testItem, "5h 3m 2s");
+        cfg = new ExpireManager.ExpireConfig(testItem, "5h 3m 2s", Map.of());
         assertEquals(Duration.ofHours(5).plusMinutes(3).plusSeconds(2), cfg.duration);
         assertEquals(UnDefType.UNDEF, cfg.expireState);
-        assertEquals(null, cfg.expireCommand);
+        assertNull(cfg.expireCommand);
+        assertFalse(cfg.ignoreStateUpdates);
 
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,OFF");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,OFF", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(OnOffType.OFF, cfg.expireState);
-        assertEquals(null, cfg.expireCommand);
+        assertNull(cfg.expireCommand);
+        assertFalse(cfg.ignoreStateUpdates);
 
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,state=OFF");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,state=OFF", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(OnOffType.OFF, cfg.expireState);
-        assertEquals(null, cfg.expireCommand);
+        assertNull(cfg.expireCommand);
+        assertFalse(cfg.ignoreStateUpdates);
 
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=OFF");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=OFF", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
-        assertEquals(null, cfg.expireState);
+        assertNull(cfg.expireState);
         assertEquals(OnOffType.OFF, cfg.expireCommand);
+        assertFalse(cfg.ignoreStateUpdates);
+
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=OFF",
+                Map.of(ExpireConfig.CONFIG_IGNORE_STATE_UPDATES, true));
+        assertEquals(Duration.ofHours(1), cfg.duration);
+        assertNull(cfg.expireState);
+        assertEquals(OnOffType.OFF, cfg.expireCommand);
+        assertTrue(cfg.ignoreStateUpdates);
+
+        cfg = new ExpireManager.ExpireConfig(testItem, "5h 3m 2s",
+                Map.of(ExpireConfig.CONFIG_IGNORE_STATE_UPDATES, "true"));
+        assertEquals(Duration.ofHours(5).plusMinutes(3).plusSeconds(2), cfg.duration);
+        assertEquals(UnDefType.UNDEF, cfg.expireState);
+        assertNull(cfg.expireCommand);
+        assertTrue(cfg.ignoreStateUpdates);
 
         try {
-            cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=OPEN");
+            cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=OPEN", Map.of());
             fail();
         } catch (IllegalArgumentException e) {
             // expected as command is invalid
         }
 
         try {
-            cfg = new ExpireManager.ExpireConfig(testItem, "1h,OPEN");
+            cfg = new ExpireManager.ExpireConfig(testItem, "1h,OPEN", Map.of());
             fail();
         } catch (IllegalArgumentException e) {
             // expected as state is invalid
         }
 
         testItem = new NumberItem("Number:Temperature", ITEMNAME);
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,15 °C");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,15 °C", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(new QuantityType<Temperature>("15 °C"), cfg.expireState);
         assertEquals(null, cfg.expireCommand);
 
         testItem = new StringItem(ITEMNAME);
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,NULL");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,NULL", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(UnDefType.NULL, cfg.expireState);
         assertEquals(null, cfg.expireCommand);
 
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,'NULL'");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,'NULL'", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(new StringType("NULL"), cfg.expireState);
         assertEquals(null, cfg.expireCommand);
 
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,'UNDEF'");
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,'UNDEF'", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(new StringType("UNDEF"), cfg.expireState);
         assertEquals(null, cfg.expireCommand);
     }
 
-    private Metadata config(String cfg) {
-        return new Metadata(METADATA_KEY, cfg, null);
+    private Metadata config(String metadata) {
+        return new Metadata(METADATA_KEY, metadata, null);
+    }
+
+    private Metadata config(String metadata, Map<String, Object> configuration) {
+        return new Metadata(METADATA_KEY, metadata, configuration);
     }
 }

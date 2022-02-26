@@ -18,6 +18,9 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
@@ -38,6 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
     public static final String MODULE_TYPE_ID = "core.ItemCommandTrigger";
@@ -48,13 +52,13 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
     private final Logger logger = LoggerFactory.getLogger(ItemCommandTriggerHandler.class);
 
     private final String itemName;
-    private final String command;
+    private final @Nullable String command;
     private final String topic;
 
     private final Set<String> types;
     private final BundleContext bundleContext;
 
-    private ServiceRegistration<?> eventSubscriberRegistration;
+    private @Nullable ServiceRegistration<?> eventSubscriberRegistration;
 
     public ItemCommandTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
@@ -75,20 +79,22 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
     }
 
     @Override
-    public EventFilter getEventFilter() {
+    public @Nullable EventFilter getEventFilter() {
         return this;
     }
 
     @Override
     public void receive(Event event) {
+        ModuleHandlerCallback callback = this.callback;
         if (callback != null) {
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
             Map<String, Object> values = new HashMap<>();
             if (event instanceof ItemCommandEvent) {
-                Command command = ((ItemCommandEvent) event).getItemCommand();
-                if (this.command == null || this.command.equals(command.toFullString())) {
-                    values.put("command", command);
+                String command = this.command;
+                Command itemCommand = ((ItemCommandEvent) event).getItemCommand();
+                if (command == null || command.equals(itemCommand.toFullString())) {
+                    values.put("command", itemCommand);
                     values.put("event", event);
                     ((TriggerHandlerCallback) callback).triggered(this.module, values);
                 }

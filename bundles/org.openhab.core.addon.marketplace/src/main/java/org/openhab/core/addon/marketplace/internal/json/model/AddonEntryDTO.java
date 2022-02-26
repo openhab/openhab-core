@@ -12,6 +12,8 @@
  */
 package org.openhab.core.addon.marketplace.internal.json.model;
 
+import java.util.List;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -34,4 +36,6 @@ public class AddonEntryDTO {
     @SerializedName("image_url")
     public String imageUrl;
     public String url = "";
+    @SerializedName("logger_packages")
+    public List<String> loggerPackages = List.of();
 }

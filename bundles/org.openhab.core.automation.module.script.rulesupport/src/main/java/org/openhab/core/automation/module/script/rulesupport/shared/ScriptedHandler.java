@@ -12,11 +12,14 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.shared;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Empty interface to identify scripted handlers
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 public interface ScriptedHandler {
 
 }

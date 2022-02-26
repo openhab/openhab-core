@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -146,9 +147,18 @@ public class KarafAddonService implements AddonService {
                 break;
         }
 
+        // for openHAB add-on bundles the package is the same as the bundle name
+        List<String> packages = feature.getBundles().stream().filter(bundle -> !bundle.isDependency()).map(bundle -> {
+            String location = bundle.getLocation();
+            location = location.substring(0, location.lastIndexOf("/")); // strip version
+            location = location.substring(location.lastIndexOf("/") + 1); // strip groupId and protocol
+            return location;
+        }).collect(Collectors.toList());
+
         return Addon.create(type + "-" + name).withType(type).withLabel(feature.getDescription())
                 .withVersion(feature.getVersion()).withContentType(ADDONS_CONTENTTYPE).withLink(link)
-                .withAuthor(ADDONS_AUTHOR, true).withInstalled(featuresService.isInstalled(feature)).build();
+                .withLoggerPackages(packages).withAuthor(ADDONS_AUTHOR, true)
+                .withInstalled(featuresService.isInstalled(feature)).build();
     }
 
     @Override

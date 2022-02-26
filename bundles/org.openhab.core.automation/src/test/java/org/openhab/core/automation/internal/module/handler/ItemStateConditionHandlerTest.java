@@ -238,8 +238,6 @@ public class ItemStateConditionHandlerTest {
                 .withId("conditionId") //
                 .withTypeUID(ItemStateConditionHandler.ITEM_STATE_CONDITION) //
                 .withConfiguration(configuration);
-        ItemStateConditionHandler handler = new ItemStateConditionHandler(builder.build());
-        handler.setItemRegistry(mockItemRegistry);
-        return handler;
+        return new ItemStateConditionHandler(builder.build(), mockItemRegistry);
     }
 }

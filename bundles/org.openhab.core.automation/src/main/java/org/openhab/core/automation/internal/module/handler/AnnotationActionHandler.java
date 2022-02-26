@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public class AnnotationActionHandler extends BaseActionModuleHandler {
 
     private static final String MODULE_RESULT = "result";
@@ -54,11 +57,11 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
     }
 
     @Override
-    public Map<String, Object> execute(Map<String, Object> context) {
+    public @Nullable Map<String, Object> execute(Map<String, Object> context) {
         Map<String, Object> output = new HashMap<>();
 
         Annotation[][] annotations = method.getParameterAnnotations();
-        List<Object> args = new ArrayList<>();
+        List<@Nullable Object> args = new ArrayList<>();
 
         for (int i = 0; i < annotations.length; i++) {
             Annotation[] annotationsOnParam = annotations[i];
@@ -90,6 +93,7 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
         if (result != null) {
             if (result instanceof Map<?, ?>) {
                 try {
+                    @SuppressWarnings("unchecked")
                     Map<String, Object> resultMap = (Map<String, Object>) result;
                     for (Entry<String, Object> entry : resultMap.entrySet()) {
                         if (hasOutput(moduleType, entry.getKey())) {

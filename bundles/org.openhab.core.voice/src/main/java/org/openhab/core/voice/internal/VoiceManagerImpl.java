@@ -231,7 +231,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 throw new TTSException("Unable to find the audio sink " + sinkId);
             }
 
-            AudioFormat sttAudioFormat = AudioFormat.getBestMatch(sink.getSupportedFormats(), sttAudioFormats);
+            AudioFormat sttAudioFormat = getBestMatch(sink.getSupportedFormats(), sttAudioFormats);
             if (sttAudioFormat == null) {
                 throw new TTSException("No compatible audio format found for TTS '" + tts.getId() + "' and sink '"
                         + sink.getId() + "'");
@@ -423,6 +423,22 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         }
 
         // Return null indicating failure
+        return null;
+    }
+
+    public static @Nullable AudioFormat getBestMatch(Set<AudioFormat> inputs, Set<AudioFormat> outputs) {
+        AudioFormat preferredFormat = getPreferredFormat(inputs);
+        for (AudioFormat output : outputs) {
+            if (output.isCompatible(preferredFormat)) {
+                return preferredFormat;
+            } else {
+                for (AudioFormat input : inputs) {
+                    if (output.isCompatible(input)) {
+                        return input;
+                    }
+                }
+            }
+        }
         return null;
     }
 

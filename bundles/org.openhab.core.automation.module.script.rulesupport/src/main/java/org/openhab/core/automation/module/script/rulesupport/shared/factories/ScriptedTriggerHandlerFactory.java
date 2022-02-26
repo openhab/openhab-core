@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.shared.factories;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.TriggerHandler;
 import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedHandler;
@@ -20,6 +22,7 @@ import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedHand
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 public interface ScriptedTriggerHandlerFactory extends ScriptedHandler {
-    public TriggerHandler get(Trigger module);
+    public @Nullable TriggerHandler get(Trigger module);
 }

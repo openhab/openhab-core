@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.type.CompositeTriggerType;
 import org.openhab.core.automation.type.TriggerType;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
@@ -26,6 +28,7 @@ import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
  * @author Markus Rathgeb - Initial contribution
  * @author Ana Dimova - extends Trigger Module type DTOs with composites
  */
+@NonNullByDefault
 public class TriggerTypeDTOMapper extends ModuleTypeDTOMapper {
 
     public static TriggerTypeDTO map(final TriggerType triggerType) {
@@ -51,9 +54,9 @@ public class TriggerTypeDTOMapper extends ModuleTypeDTOMapper {
         }
     }
 
-    public static List<TriggerTypeDTO> map(final Collection<TriggerType> types) {
+    public static List<TriggerTypeDTO> map(final @Nullable Collection<TriggerType> types) {
         if (types == null) {
-            return null;
+            return List.of();
         }
         final List<TriggerTypeDTO> dtos = new ArrayList<>(types.size());
         for (final TriggerType type : types) {

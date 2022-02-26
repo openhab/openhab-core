@@ -15,6 +15,8 @@ package org.openhab.core.automation.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.config.core.Configuration;
@@ -25,6 +27,7 @@ import org.openhab.core.config.core.Configuration;
  * @author Markus Rathgeb - Initial contribution
  * @author Kai Kreuzer - Changed to using ModuleBuilder
  */
+@NonNullByDefault
 public class ConditionDTOMapper extends ModuleDTOMapper {
 
     public static ConditionDTO map(final Condition condition) {
@@ -40,9 +43,9 @@ public class ConditionDTOMapper extends ModuleDTOMapper {
                 .withLabel(conditionDto.label).withDescription(conditionDto.description).build();
     }
 
-    public static List<ConditionDTO> map(final List<? extends Condition> conditions) {
+    public static List<ConditionDTO> map(final @Nullable List<? extends Condition> conditions) {
         if (conditions == null) {
-            return null;
+            return List.of();
         }
         final List<ConditionDTO> dtos = new ArrayList<>(conditions.size());
         for (final Condition action : conditions) {
@@ -51,9 +54,9 @@ public class ConditionDTOMapper extends ModuleDTOMapper {
         return dtos;
     }
 
-    public static List<Condition> mapDto(final List<ConditionDTO> dtos) {
+    public static List<Condition> mapDto(final @Nullable List<ConditionDTO> dtos) {
         if (dtos == null) {
-            return null;
+            return List.of();
         }
         final List<Condition> conditions = new ArrayList<>(dtos.size());
         for (final ConditionDTO dto : dtos) {

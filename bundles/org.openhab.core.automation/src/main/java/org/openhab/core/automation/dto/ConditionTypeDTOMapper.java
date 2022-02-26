@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.type.CompositeConditionType;
 import org.openhab.core.automation.type.ConditionType;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
@@ -26,6 +28,7 @@ import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
  * @author Markus Rathgeb - Initial contribution
  * @author Ana Dimova - extends Condition Module type DTOs with composites
  */
+@NonNullByDefault
 public class ConditionTypeDTOMapper extends ModuleTypeDTOMapper {
 
     public static ConditionTypeDTO map(final ConditionType conditionType) {
@@ -52,9 +55,9 @@ public class ConditionTypeDTOMapper extends ModuleTypeDTOMapper {
         }
     }
 
-    public static List<ConditionTypeDTO> map(final Collection<ConditionType> types) {
+    public static List<ConditionTypeDTO> map(final @Nullable Collection<ConditionType> types) {
         if (types == null) {
-            return null;
+            return List.of();
         }
         final List<ConditionTypeDTO> dtos = new ArrayList<>(types.size());
         for (final ConditionType type : types) {

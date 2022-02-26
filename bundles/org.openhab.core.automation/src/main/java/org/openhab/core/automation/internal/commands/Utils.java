@@ -18,11 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This class contains methods for facilitating sorting and filtering lists stored in {@link Hashtable}s.
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public class Utils {
 
     /**

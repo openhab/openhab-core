@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.thing.Bridge;
@@ -99,6 +100,24 @@ public interface ThingHandlerCallback {
      *             their declarations in the configuration description
      */
     void validateConfigurationParameters(Channel channel, Map<String, Object> configurationParameters);
+
+    /**
+     * Get the {@link ConfigDescription} for a {@link ChannelTypeUID}
+     *
+     * @param channelTypeUID the channel type UID
+     * @return the corresponding configuration description (or null if not found)
+     */
+    @Nullable
+    ConfigDescription getConfigDescription(ChannelTypeUID channelTypeUID);
+
+    /**
+     * Get the {@link ConfigDescription} for a {@link ThingTypeUID}
+     *
+     * @param thingTypeUID the thing type UID
+     * @return the corresponding configuration description (or null if not found)
+     */
+    @Nullable
+    ConfigDescription getConfigDescription(ThingTypeUID thingTypeUID);
 
     /**
      * Informs about an updated configuration of a thing.

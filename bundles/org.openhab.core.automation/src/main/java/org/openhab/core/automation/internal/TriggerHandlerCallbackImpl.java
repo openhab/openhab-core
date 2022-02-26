@@ -54,7 +54,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     }
 
     @Override
-    public void triggered(Trigger trigger, @Nullable Map<String, ?> context) {
+    public void triggered(Trigger trigger, Map<String, ?> context) {
         synchronized (this) {
             future = executor.submit(new TriggerData(trigger, context));
         }

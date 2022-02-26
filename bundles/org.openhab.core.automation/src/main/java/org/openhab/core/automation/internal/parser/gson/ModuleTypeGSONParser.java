@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.dto.ActionTypeDTOMapper;
 import org.openhab.core.automation.dto.CompositeActionTypeDTO;
 import org.openhab.core.automation.dto.CompositeConditionTypeDTO;
@@ -42,6 +44,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, service = Parser.class, property = { "parser.type=parser.module.type", "format=json" })
 public class ModuleTypeGSONParser extends AbstractGSONParser<ModuleType> {
 
@@ -68,7 +71,7 @@ public class ModuleTypeGSONParser extends AbstractGSONParser<ModuleType> {
         gson.toJson(map, writer);
     }
 
-    private void addAll(Set<ModuleType> result, List<? extends ModuleTypeDTO> moduleTypes) {
+    private void addAll(Set<ModuleType> result, @Nullable List<? extends ModuleTypeDTO> moduleTypes) {
         if (moduleTypes != null) {
             for (ModuleTypeDTO mt : moduleTypes) {
                 if (mt instanceof CompositeTriggerTypeDTO) {

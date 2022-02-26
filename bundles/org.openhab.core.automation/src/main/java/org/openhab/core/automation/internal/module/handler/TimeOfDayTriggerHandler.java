@@ -14,6 +14,8 @@ package org.openhab.core.automation.internal.module.handler;
 
 import java.text.MessageFormat;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
@@ -32,6 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
         implements SchedulerRunnable, TimeBasedTriggerHandler {
 
@@ -44,7 +47,7 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
 
     private final CronScheduler scheduler;
     private final String expression;
-    private ScheduledCompletableFuture<?> schedule;
+    private @Nullable ScheduledCompletableFuture<?> schedule;
 
     public TimeOfDayTriggerHandler(Trigger module, CronScheduler scheduler) {
         super(module);
@@ -80,7 +83,7 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
     @Override
     public void run() {
         if (callback != null) {
-            ((TriggerHandlerCallback) callback).triggered(module, null);
+            ((TriggerHandlerCallback) callback).triggered(module);
         } else {
             logger.debug("Tried to trigger, but callback isn't available!");
         }

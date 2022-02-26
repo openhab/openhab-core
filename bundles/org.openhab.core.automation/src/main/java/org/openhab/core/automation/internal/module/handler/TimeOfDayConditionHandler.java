@@ -17,6 +17,8 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.automation.handler.TimeBasedConditionHandler;
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Dominik Schlierf - Initial contribution
  */
+@NonNullByDefault
 public class TimeOfDayConditionHandler extends BaseConditionModuleHandler implements TimeBasedConditionHandler {
 
     public static final String MODULE_TYPE_ID = "core.TimeOfDayCondition";
@@ -45,11 +48,11 @@ public class TimeOfDayConditionHandler extends BaseConditionModuleHandler implem
     /**
      * The start time of the user configured time span.
      */
-    private final LocalTime startTime;
+    private final @Nullable LocalTime startTime;
     /**
      * The end time of the user configured time span.
      */
-    private final LocalTime endTime;
+    private final @Nullable LocalTime endTime;
 
     public TimeOfDayConditionHandler(Condition condition) {
         super(condition);
@@ -67,6 +70,8 @@ public class TimeOfDayConditionHandler extends BaseConditionModuleHandler implem
 
     @Override
     public boolean isSatisfiedAt(ZonedDateTime time) {
+        LocalTime startTime = this.startTime;
+        LocalTime endTime = this.endTime;
         if (startTime == null || endTime == null) {
             logger.warn("Time condition with id {} is not well configured: startTime={}  endTime = {}", module.getId(),
                     startTime, endTime);
