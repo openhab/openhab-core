@@ -87,7 +87,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = ThingActionsResource.PATH_THINGS)
 @NonNullByDefault
 public class ThingActionsResource implements RESTResource {
-    public static final String PATH_THINGS = "things";
+    public static final String PATH_THINGS = "actions";
 
     private final Logger logger = LoggerFactory.getLogger(ThingActionsResource.class);
     private final ModuleTypeRegistry moduleTypeRegistry;
@@ -128,7 +128,6 @@ public class ThingActionsResource implements RESTResource {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addModuleHandlerFactory(ModuleHandlerFactory moduleHandlerFactory) {
         moduleHandlerFactories.add(moduleHandlerFactory);
-        logger.error("{} - {}", moduleHandlerFactory.getClass(), moduleHandlerFactory.getTypes());
     }
 
     protected void removeModuleHandlerFactory(ModuleHandlerFactory moduleHandlerFactory) {
@@ -137,7 +136,7 @@ public class ThingActionsResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{thingUID}/actions")
+    @Path("/{thingUID}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getAvailableActionsForThing", summary = "Get all available actions for provided thing UID", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ThingActionDTO.class), uniqueItems = true))),
@@ -184,7 +183,7 @@ public class ThingActionsResource implements RESTResource {
 
     @POST
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{thingUID}/actions/{actionUid: [a-zA-Z0-9]+\\.[a-zA-Z0-9]+}")
+    @Path("/{thingUID}/{actionUid: [a-zA-Z0-9]+\\.[a-zA-Z0-9]+}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "executeThingAction", summary = "Executes a thing action.", responses = {
@@ -218,8 +217,12 @@ public class ThingActionsResource implements RESTResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
-        Map<String, Object> returnValue = Objects.requireNonNullElse(handler.execute(actionInputs), Map.of());
-
+        Map<String, Object> returnValue;
+        try {
+            returnValue = Objects.requireNonNullElse(handler.execute(actionInputs), Map.of());
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
+        }
         moduleHandlerFactory.ungetHandler(action, ruleUID, handler);
 
         return Response.ok(returnValue).build();
