@@ -142,7 +142,6 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         ScriptContext executionContext = engine.getContext();
 
         for (Entry<String, ?> entry : context.entrySet()) {
-            Object value = entry.getValue();
             String key = entry.getKey();
             int dotIndex = key.indexOf('.');
             if (dotIndex != -1) {
