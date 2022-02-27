@@ -42,10 +42,14 @@ public class BundleVersionTest {
                 Arguments.of("3.1.0", "3.0.2", Result.NEWER), // minor version is more important than micro
                 Arguments.of("3.7.0", "4.0.1.202105311711", Result.OLDER), // major version is more important than minor
                 Arguments.of("3.9.1.M1", "3.9.0.M5", Result.NEWER), // micro version is more important than qualifier
-                Arguments.of("3.0.0.202105311025", "3.0.0.202106011145", Result.EQUAL), // all snapshots equal
+                Arguments.of("3.0.0.202105311032", "3.0.0.202106011144", Result.OLDER), // snapshots
                 Arguments.of("3.1.0.M3", "3.1.0.M1", Result.NEWER), // milestones are compared numerically
-                Arguments.of("3.1.0.M1", "3.1.0.197705310000", Result.OLDER), // snapshot is newer than milestone
-                Arguments.of("3.3.0", "3.3.0.20220630211555", Result.NEWER) // release is newer than snapshot
+                Arguments.of("3.1.0.M1", "3.1.0.197705310021", Result.OLDER), // snapshot is newer than milestone
+                Arguments.of("3.3.0", "3.3.0.202206302115", Result.NEWER), // release is newer than snapshot
+                Arguments.of("3.3.0", "3.3.0.RC1", Result.NEWER), // releases are newer than release candidates
+                Arguments.of("3.3.0.M5", "3.3.0.RC1", Result.OLDER), // milestones are older than release candidates
+                Arguments.of("3.3.0.RC2", "3.3.0.202305201715", Result.OLDER) // snapshots are newer than release
+                                                                              // candidates
         );
     }
 

@@ -26,12 +26,12 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class BundleVersion {
-    private static final Pattern VERSION_PATTERN = Pattern
-            .compile("(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<micro>\\d+)(\\.((?<snapshot>\\d+)|M(?<milestone>\\d)))?");
+    private static final Pattern VERSION_PATTERN = Pattern.compile(
+            "(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<micro>\\d+)(\\.((?<rc>RC)|(?<milestone>M))?(?<qualifier>\\d+))?");
     private final int major;
     private final int minor;
     private final int micro;
-    private final @Nullable String qualifier;
+    private final @Nullable Long qualifier;
 
     public BundleVersion(String version) {
         Matcher matcher = VERSION_PATTERN.matcher(version);
@@ -39,8 +39,21 @@ public class BundleVersion {
             this.major = Integer.parseInt(matcher.group("major"));
             this.minor = Integer.parseInt(matcher.group("minor"));
             this.micro = Integer.parseInt(matcher.group("micro"));
-            String milestone = matcher.group("milestone");
-            qualifier = milestone != null ? milestone : matcher.group("snapshot") != null ? "SNAPSHOT" : null;
+            String qualifier = matcher.group("qualifier");
+            if (qualifier != null) {
+                long intQualifier = Long.parseLong(qualifier);
+                if (matcher.group("rc") != null) {
+                    // we can safely assume that there are less than Integer.MAX_VALUE milestones
+                    // so RCs are always newer than milestones
+                    // since snapshot qualifiers are larger than 10*Integer.MAX_VALUE they are
+                    // still considered newer
+                    this.qualifier = intQualifier + Integer.MAX_VALUE;
+                } else {
+                    this.qualifier = intQualifier;
+                }
+            } else {
+                this.qualifier = null;
+            }
         } else {
             throw new IllegalArgumentException("Input does not match pattern");
         }
@@ -97,16 +110,7 @@ public class BundleVersion {
             return -1;
         }
 
-        // we assume a snapshot is always latest, so newer than a milestone
-        if ("SNAPSHOT".equals(qualifier)) { // we are the snapshot
-            return 1;
-        }
-        if ("SNAPSHOT".equals(other.qualifier)) { // the other is the snapshot
-            return -1;
-        }
-
         // both versions are milestones, we can compare them
-        return Integer.compare(Integer.parseInt(Objects.requireNonNull(qualifier)),
-                Integer.parseInt(Objects.requireNonNull(other.qualifier)));
+        return Long.compare(qualifier, other.qualifier);
     }
 }
