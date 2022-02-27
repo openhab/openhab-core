@@ -225,19 +225,19 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 throw new TTSException(
                         "Unable to find a voice for language " + localeProvider.getLocale().getLanguage());
             }
-            Set<AudioFormat> ttsAudioFormats = tts.getSupportedFormats();
+            Set<AudioFormat> ttsSupportedFormats = tts.getSupportedFormats();
             AudioSink sink = audioManager.getSink(sinkId);
             if (sink == null) {
                 throw new TTSException("Unable to find the audio sink " + sinkId);
             }
 
-            AudioFormat sttAudioFormat = getBestMatch(ttsAudioFormats, sink.getSupportedFormats());
-            if (sttAudioFormat == null) {
+            AudioFormat ttsAudioFormat = getBestMatch(ttsSupportedFormats, sink.getSupportedFormats());
+            if (ttsAudioFormat == null) {
                 throw new TTSException("No compatible audio format found for TTS '" + tts.getId() + "' and sink '"
                         + sink.getId() + "'");
             }
 
-            AudioStream audioStream = tts.synthesize(text, voice, sttAudioFormat);
+            AudioStream audioStream = tts.synthesize(text, voice, ttsAudioFormat);
             if (!sink.getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(audioStream))) {
                 throw new TTSException(
                         "Failed playing audio stream '" + audioStream + "' as audio sink doesn't support it");
