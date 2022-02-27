@@ -225,13 +225,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 throw new TTSException(
                         "Unable to find a voice for language " + localeProvider.getLocale().getLanguage());
             }
-            Set<AudioFormat> sttAudioFormats = tts.getSupportedFormats();
+            Set<AudioFormat> ttsAudioFormats = tts.getSupportedFormats();
             AudioSink sink = audioManager.getSink(sinkId);
             if (sink == null) {
                 throw new TTSException("Unable to find the audio sink " + sinkId);
             }
 
-            AudioFormat sttAudioFormat = getBestMatch(sttAudioFormats, sink.getSupportedFormats());
+            AudioFormat sttAudioFormat = getBestMatch(ttsAudioFormats, sink.getSupportedFormats());
             if (sttAudioFormat == null) {
                 throw new TTSException("No compatible audio format found for TTS '" + tts.getId() + "' and sink '"
                         + sink.getId() + "'");
