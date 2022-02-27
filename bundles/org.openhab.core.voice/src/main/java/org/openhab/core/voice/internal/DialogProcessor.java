@@ -212,9 +212,6 @@ public class DialogProcessor implements KSListener, STTListener {
             if (ksEvent instanceof KSpottedEvent) {
                 abortSTT();
                 closeStreamSTT();
-                // stop ks while stt is running
-                abortKS();
-                closeStreamKS();
                 isSTTServerAborting = false;
                 AudioFormat fmt = sttFormat;
                 if (fmt != null) {
@@ -224,8 +221,6 @@ public class DialogProcessor implements KSListener, STTListener {
                         sttServiceHandle = stt.recognize(this, stream, locale, new HashSet<>());
                     } catch (AudioException e) {
                         logger.warn("Error creating the audio stream: {}", e.getMessage());
-                        // start ks
-                        start();
                     } catch (STTException e) {
                         closeStreamSTT();
                         String msg = e.getMessage();
@@ -235,8 +230,6 @@ public class DialogProcessor implements KSListener, STTListener {
                         } else if (text != null) {
                             say(text.replace("{0}", ""));
                         }
-                        // start ks
-                        start();
                     }
                 } else {
                     logger.warn("No compatible audio format found for stt '{}' and source '{}'", stt.getId(),
@@ -266,8 +259,6 @@ public class DialogProcessor implements KSListener, STTListener {
                     }
                 }
                 abortSTT();
-                // start ks
-                start();
             }
         } else if (sttEvent instanceof RecognitionStartEvent) {
             toggleProcessing(true);
@@ -280,8 +271,6 @@ public class DialogProcessor implements KSListener, STTListener {
                 SpeechRecognitionErrorEvent sre = (SpeechRecognitionErrorEvent) sttEvent;
                 String text = i18nProvider.getText(bundle, "error.stt-error", null, locale);
                 say(text == null ? sre.getMessage() : text.replace("{0}", sre.getMessage()));
-                // start ks
-                start();
             }
         }
     }
