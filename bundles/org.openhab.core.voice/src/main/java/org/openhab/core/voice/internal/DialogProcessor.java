@@ -121,7 +121,7 @@ public class DialogProcessor implements KSListener, STTListener {
         this.bundle = bundle;
         this.ksFormat = VoiceManagerImpl.getBestMatch(source.getSupportedFormats(), ks.getSupportedFormats());
         this.sttFormat = VoiceManagerImpl.getBestMatch(source.getSupportedFormats(), stt.getSupportedFormats());
-        this.ttsFormat = VoiceManagerImpl.getBestMatch(sink.getSupportedFormats(), tts.getSupportedFormats());
+        this.ttsFormat = VoiceManagerImpl.getBestMatch(tts.getSupportedFormats(), sink.getSupportedFormats());
     }
 
     public DialogProcessor(STTService stt, TTSService tts, HumanLanguageInterpreter hli, AudioSource source,

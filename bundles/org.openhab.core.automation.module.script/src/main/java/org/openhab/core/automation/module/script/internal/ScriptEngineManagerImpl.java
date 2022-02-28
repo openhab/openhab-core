@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.script.Invocable;
 import javax.script.ScriptContext;
@@ -34,6 +36,7 @@ import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.automation.module.script.ScriptExtensionManagerWrapper;
+import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -51,6 +54,9 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(service = ScriptEngineManager.class)
 public class ScriptEngineManagerImpl implements ScriptEngineManager {
+
+    private final ScheduledExecutorService scheduler = ThreadPoolManager
+            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineManagerImpl.class);
     private final Map<String, ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
@@ -216,12 +222,17 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             }
 
             if (scriptEngine instanceof AutoCloseable) {
-                AutoCloseable closeable = (AutoCloseable) scriptEngine;
-                try {
-                    closeable.close();
-                } catch (Exception e) {
-                    logger.error("Error while closing script engine", e);
-                }
+                // we cannot not use ScheduledExecutorService.execute here as it might execute the task in the calling
+                // thread (calling ScriptEngine.close in the same thread may result in a deadlock if the ScriptEngine
+                // tries to Thread.join)
+                scheduler.schedule(() -> {
+                    AutoCloseable closeable = (AutoCloseable) scriptEngine;
+                    try {
+                        closeable.close();
+                    } catch (Exception e) {
+                        logger.error("Error while closing script engine", e);
+                    }
+                }, 0, TimeUnit.SECONDS);
             } else {
                 logger.trace("ScriptEngine does not support AutoCloseable interface");
             }

@@ -136,7 +136,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
             resp.getWriter().append(getResultPageBody(params, resultMessage));
             resp.getWriter().close();
         } catch (AuthenticationException e) {
-            processFailedLogin(resp, params, e.getMessage());
+            processFailedLogin(resp, req.getRemoteAddr(), params, e.getMessage());
         }
     }
 

@@ -20,6 +20,7 @@
 
 		<feature>scr</feature>
 		<feature>eventadmin</feature>
+		<feature>log</feature>
 
 		<!-- Apache Commons -->
 		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.12.0</bundle>
