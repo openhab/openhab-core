@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon.test;
+package org.openhab.core.addon.marketplace;
 
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -18,9 +18,11 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * The {@link BundleVersion} wraps a bundle version
+ * The {@link BundleVersion} wraps a bundle version and provides a method to compare them
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -28,6 +30,11 @@ import org.eclipse.jdt.annotation.Nullable;
 public class BundleVersion {
     private static final Pattern VERSION_PATTERN = Pattern.compile(
             "(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<micro>\\d+)(\\.((?<rc>RC)|(?<milestone>M))?(?<qualifier>\\d+))?");
+    private static final Pattern RANGE_PATTERN = Pattern.compile(
+            "\\[(?<start>\\d+\\.\\d+(?<startmicro>\\.\\d+(\\.\\w+)?)?);(?<end>\\d+\\.\\d+(?<endmicro>\\.\\d+(\\.\\w+)?)?)(?<endtype>[)\\]])");
+
+    private final Logger logger = LoggerFactory.getLogger(BundleVersion.class);
+
     private final int major;
     private final int minor;
     private final int micro;
@@ -57,6 +64,26 @@ public class BundleVersion {
         } else {
             throw new IllegalArgumentException("Input does not match pattern");
         }
+    }
+
+    public boolean inRange(String range) {
+        Matcher matcher = RANGE_PATTERN.matcher(range);
+        if (!matcher.matches()) {
+            logger.warn("Argument {} does not define a valid version range.", range);
+            return false;
+        }
+        String startString = matcher.group("startmicro") != null ? matcher.group("start")
+                : matcher.group("start") + ".0";
+        BundleVersion startVersion = new BundleVersion(startString);
+        if (this.compareTo(startVersion) < 0) {
+            return false;
+        }
+
+        String endString = matcher.group("endmicro") != null ? matcher.group("end") : matcher.group("stop") + ".0";
+        boolean inclusive = "]".equals(matcher.group("endtype"));
+        BundleVersion endVersion = new BundleVersion(endString);
+        int comparison = this.compareTo(endVersion);
+        return (inclusive && comparison == 0) || comparison < 0;
     }
 
     @Override

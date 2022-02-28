@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.addon.marketplace.BundleVersion;
 
 /**
  * The {@link BundleVersionTest} contains tests for the {@link BundleVersion} class
@@ -69,6 +70,22 @@ public class BundleVersionTest {
                 assertEquals(0, version1.compareTo(version2));
                 break;
         }
+    }
+
+    private static Stream<Arguments> provideInRangeArguments() {
+        return Stream.of(Arguments.of("[3.1.0;3.2.1)", true), // in range
+                Arguments.of("[3.1.0;3.2.0)", false), // at end of range, non-inclusive
+                Arguments.of("[3.1.0;3.2.0]", true), // at end of range, inclusive
+                Arguments.of("[3.1.0;3.1.5)", false), // above range
+                Arguments.of("[3.3.0;3.4.0)", false) // below range
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInRangeArguments")
+    public void inRangeTest(String range, boolean result) {
+        BundleVersion frameworkVersion = new BundleVersion("3.2.0");
+        assertEquals(result, frameworkVersion.inRange(range));
     }
 
     private enum Result {
