@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonEventFactory;
 import org.openhab.core.addon.AddonService;
@@ -37,6 +38,7 @@ import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -60,6 +62,9 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             "transformation", new AddonType("transformation", "Transformations"), //
             "ui", new AddonType("ui", "User Interfaces"), //
             "voice", new AddonType("voice", "Voice"));
+
+    protected static final BundleVersion CORE_VERSION = new BundleVersion(
+            FrameworkUtil.getBundle(OpenHAB.class).getVersion().toString());
 
     protected final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
     protected final Set<MarketplaceAddonHandler> addonHandlers = new HashSet<>();

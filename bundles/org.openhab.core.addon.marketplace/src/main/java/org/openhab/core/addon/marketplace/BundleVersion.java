@@ -66,11 +66,15 @@ public class BundleVersion {
         }
     }
 
-    public boolean inRange(String range) {
+    public boolean inRange(@Nullable String range) {
+        if (range == null || range.isBlank()) {
+            // if no range is given, we assume the range covers everything
+            return true;
+        }
         Matcher matcher = RANGE_PATTERN.matcher(range);
         if (!matcher.matches()) {
-            logger.warn("Argument {} does not define a valid version range.", range);
-            return false;
+            logger.warn("Argument {} does not define a valid version range. Assuming inRange", range);
+            return true;
         }
         String startString = matcher.group("startmicro") != null ? matcher.group("start")
                 : matcher.group("start") + ".0";

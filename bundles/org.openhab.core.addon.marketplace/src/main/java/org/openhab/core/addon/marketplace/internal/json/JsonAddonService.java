@@ -72,9 +72,6 @@ public class JsonAddonService extends AbstractRemoteAddonService {
     private static final String CONFIG_URLS = "urls";
     private static final String CONFIG_SHOW_UNSTABLE = "showUnstable";
 
-    private static final BundleVersion CORE_VERSION = new BundleVersion(
-            FrameworkUtil.getBundle(OpenHAB.class).getVersion().toString());
-
     private List<String> addonServiceUrls = List.of();
     private boolean showUnstable = false;
 
@@ -132,18 +129,8 @@ public class JsonAddonService extends AbstractRemoteAddonService {
             } catch (IOException e) {
                 return List.of();
             }
-        }).flatMap(List::stream).filter(Objects::nonNull).map(e -> (AddonEntryDTO) e).filter(this::showAddon)
+        }).flatMap(List::stream).filter(Objects::nonNull).map(e -> (AddonEntryDTO) e).filter(e -> showUnstable || "stable".equals(e.maturity))
                 .map(this::fromAddonEntry).collect(Collectors.toList());
-    }
-
-    private boolean showAddon(AddonEntryDTO e) {
-        if (showUnstable) {
-            // ignore all restrictions on maturity or compatibility
-            return true;
-        }
-        String compatibleVersions = e.compatibleVersions;
-        return "stable".equals(e.maturity) && (compatibleVersions == null || compatibleVersions.isBlank()
-                || CORE_VERSION.inRange(compatibleVersions));
     }
 
     @Override
@@ -176,6 +163,7 @@ public class JsonAddonService extends AbstractRemoteAddonService {
         return Addon.create(fullId).withType(addonEntry.type).withInstalled(installed)
                 .withDetailedDescription(addonEntry.description).withContentType(addonEntry.contentType)
                 .withAuthor(addonEntry.author).withVersion(addonEntry.version).withLabel(addonEntry.title)
+                .withCompatible(CORE_VERSION.inRange(addonEntry.compatibleVersions))
                 .withMaturity(addonEntry.maturity).withProperties(properties).withLink(addonEntry.link)
                 .withImageLink(addonEntry.imageUrl).withConfigDescriptionURI(addonEntry.configDescriptionURI)
                 .withLoggerPackages(addonEntry.loggerPackages).build();
