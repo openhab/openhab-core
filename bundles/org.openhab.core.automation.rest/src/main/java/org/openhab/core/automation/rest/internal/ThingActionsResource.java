@@ -189,11 +189,11 @@ public class ThingActionsResource implements RESTResource {
     @Operation(operationId = "executeThingAction", summary = "Executes a thing action.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Map.class))),
             @ApiResponse(responseCode = "404", description = "Action not found"),
-            @ApiResponse(responseCode = "500", description = "Creation of action handler failed") })
+            @ApiResponse(responseCode = "500", description = "Creation of action handler or execution failed") })
     public Response executeThingAction(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @PathParam("actionUid") @Parameter(description = "action type UID (including scope, separated by '.')") String actionTypeUid,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @Parameter(description = "action inputs as map") Map<String, Object> actionInputs) {
+            @Parameter(description = "action inputs as map (parameter name as key / argument as value)") Map<String, Object> actionInputs) {
         ActionType actionType = (ActionType) moduleTypeRegistry.get(actionTypeUid);
         if (actionType == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -217,15 +217,14 @@ public class ThingActionsResource implements RESTResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
-        Map<String, Object> returnValue;
         try {
-            returnValue = Objects.requireNonNullElse(handler.execute(actionInputs), Map.of());
+            Map<String, Object> returnValue = Objects.requireNonNullElse(handler.execute(actionInputs), Map.of());
+            moduleHandlerFactory.ungetHandler(action, ruleUID, handler);
+            return Response.ok(returnValue).build();
         } catch (Exception e) {
+            moduleHandlerFactory.ungetHandler(action, ruleUID, handler);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
-        moduleHandlerFactory.ungetHandler(action, ruleUID, handler);
-
-        return Response.ok(returnValue).build();
     }
 
     private @Nullable String getScope(ThingActions actions) {
