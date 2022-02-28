@@ -28,6 +28,8 @@ public class AddonEntryDTO {
     public String title = "";
     public String link = "";
     public String version = "";
+    @SerializedName("compatible_versions")
+    public String compatibleVersions = "";
     public String author = "";
     public String configDescriptionURI = "";
     public String maturity = "unstable";
