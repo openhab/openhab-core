@@ -78,8 +78,8 @@ public class Addon {
      * @param properties a {@link Map} containing addition information
      * @param loggerPackages a {@link List} containing the package names belonging to this add-on
      */
-    private Addon(String id, String type, String label, String version, @Nullable String maturity, boolean compatible, String contentType,
-            @Nullable String link, String author, boolean verifiedAuthor, boolean installed,
+    private Addon(String id, String type, String label, String version, @Nullable String maturity, boolean compatible,
+            String contentType, @Nullable String link, String author, boolean verifiedAuthor, boolean installed,
             @Nullable String description, @Nullable String detailedDescription, String configDescriptionURI,
             String keywords, String countries, @Nullable String license, String connection,
             @Nullable String backgroundColor, @Nullable String imageLink, @Nullable Map<String, Object> properties,
@@ -406,9 +406,9 @@ public class Addon {
         }
 
         public Addon build() {
-            return new Addon(id, type, label, version, maturity, compatible, contentType, link, author, verifiedAuthor, installed,
-                    description, detailedDescription, configDescriptionURI, keywords, countries, license, connection,
-                    backgroundColor, imageLink, properties.isEmpty() ? null : properties, loggerPackages);
+            return new Addon(id, type, label, version, maturity, compatible, contentType, link, author, verifiedAuthor,
+                    installed, description, detailedDescription, configDescriptionURI, keywords, countries, license,
+                    connection, backgroundColor, imageLink, properties.isEmpty() ? null : properties, loggerPackages);
         }
     }
 }

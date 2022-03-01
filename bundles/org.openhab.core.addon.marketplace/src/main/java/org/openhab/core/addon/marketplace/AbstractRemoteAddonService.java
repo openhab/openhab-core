@@ -63,8 +63,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             "ui", new AddonType("ui", "User Interfaces"), //
             "voice", new AddonType("voice", "Voice"));
 
-    protected static final BundleVersion CORE_VERSION = new BundleVersion(
-            FrameworkUtil.getBundle(OpenHAB.class).getVersion().toString());
+    protected final BundleVersion coreVersion;
 
     protected final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
     protected final Set<MarketplaceAddonHandler> addonHandlers = new HashSet<>();
@@ -83,6 +82,11 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         this.eventPublisher = eventPublisher;
         this.configurationAdmin = configurationAdmin;
         this.installedAddonStorage = storageService.getStorage(servicePid);
+        this.coreVersion = getCoreVersion();
+    }
+
+    protected BundleVersion getCoreVersion() {
+        return new BundleVersion(FrameworkUtil.getBundle(OpenHAB.class).getVersion().toString());
     }
 
     @Override

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,6 +37,7 @@ import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
+import org.openhab.core.addon.marketplace.BundleVersion;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO;
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO.DiscoursePosterInfo;
@@ -276,7 +278,23 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         String type = (addonType != null) ? addonType.getId() : "";
         String contentType = getContentType(topic.categoryId, tags);
 
-        String title = topic.title;
+        String title;
+        boolean compatible = true;
+
+        int compatibilityStart = topic.title.lastIndexOf("["); // version range always starts with [
+        if (compatibilityStart == -1) {
+            title = topic.title;
+        } else {
+            String potentialRange = topic.title.substring(compatibilityStart + 1);
+            Matcher matcher = BundleVersion.RANGE_PATTERN.matcher(potentialRange);
+            if (matcher.matches()) {
+                compatible = coreVersion.inRange(potentialRange);
+                title = topic.title.substring(0, compatibilityStart);
+            } else {
+                title = topic.title;
+            }
+        }
+
         String link = COMMUNITY_TOPIC_URL + topic.id.toString();
         int likeCount = topic.likeCount;
         int views = topic.views;
@@ -303,7 +321,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
         return Addon.create(id).withType(type).withContentType(contentType).withImageLink(topic.imageUrl)
                 .withAuthor(author).withProperties(properties).withLabel(title).withInstalled(installed)
-                .withMaturity(maturity).withLink(link).build();
+                .withMaturity(maturity).withCompatible(compatible).withLink(link).build();
     }
 
     /**

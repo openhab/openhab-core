@@ -29,18 +29,15 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
-import org.openhab.core.addon.marketplace.BundleVersion;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.internal.json.model.AddonEntryDTO;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.StorageService;
 import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -129,8 +126,9 @@ public class JsonAddonService extends AbstractRemoteAddonService {
             } catch (IOException e) {
                 return List.of();
             }
-        }).flatMap(List::stream).filter(Objects::nonNull).map(e -> (AddonEntryDTO) e).filter(e -> showUnstable || "stable".equals(e.maturity))
-                .map(this::fromAddonEntry).collect(Collectors.toList());
+        }).flatMap(List::stream).filter(Objects::nonNull).map(e -> (AddonEntryDTO) e)
+                .filter(e -> showUnstable || "stable".equals(e.maturity)).map(this::fromAddonEntry)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -163,9 +161,9 @@ public class JsonAddonService extends AbstractRemoteAddonService {
         return Addon.create(fullId).withType(addonEntry.type).withInstalled(installed)
                 .withDetailedDescription(addonEntry.description).withContentType(addonEntry.contentType)
                 .withAuthor(addonEntry.author).withVersion(addonEntry.version).withLabel(addonEntry.title)
-                .withCompatible(CORE_VERSION.inRange(addonEntry.compatibleVersions))
-                .withMaturity(addonEntry.maturity).withProperties(properties).withLink(addonEntry.link)
-                .withImageLink(addonEntry.imageUrl).withConfigDescriptionURI(addonEntry.configDescriptionURI)
-                .withLoggerPackages(addonEntry.loggerPackages).build();
+                .withCompatible(coreVersion.inRange(addonEntry.compatibleVersions)).withMaturity(addonEntry.maturity)
+                .withProperties(properties).withLink(addonEntry.link).withImageLink(addonEntry.imageUrl)
+                .withConfigDescriptionURI(addonEntry.configDescriptionURI).withLoggerPackages(addonEntry.loggerPackages)
+                .build();
     }
 }

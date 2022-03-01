@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class BundleVersion {
     private static final Pattern VERSION_PATTERN = Pattern.compile(
             "(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<micro>\\d+)(\\.((?<rc>RC)|(?<milestone>M))?(?<qualifier>\\d+))?");
-    private static final Pattern RANGE_PATTERN = Pattern.compile(
+    public static final Pattern RANGE_PATTERN = Pattern.compile(
             "\\[(?<start>\\d+\\.\\d+(?<startmicro>\\.\\d+(\\.\\w+)?)?);(?<end>\\d+\\.\\d+(?<endmicro>\\.\\d+(\\.\\w+)?)?)(?<endtype>[)\\]])");
 
     private final Logger logger = LoggerFactory.getLogger(BundleVersion.class);

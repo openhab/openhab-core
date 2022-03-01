@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
+import org.openhab.core.addon.marketplace.BundleVersion;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
 import org.openhab.core.events.EventPublisher;
@@ -48,6 +49,11 @@ public class TestAddonService extends AbstractRemoteAddonService {
     public TestAddonService(EventPublisher eventPublisher, ConfigurationAdmin configurationAdmin,
             StorageService storageService) {
         super(eventPublisher, configurationAdmin, storageService, SERVICE_PID);
+    }
+
+    @Override
+    protected BundleVersion getCoreVersion() {
+        return new BundleVersion("3.2.0");
     }
 
     public void addAddonHandler(MarketplaceAddonHandler handler) {
