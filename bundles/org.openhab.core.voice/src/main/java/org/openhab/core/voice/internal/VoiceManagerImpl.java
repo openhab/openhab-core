@@ -549,9 +549,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         dialogProcessors.clear();
     }
 
-    private boolean checkLocales(@Nullable Set<Locale> supportedLocales, Locale locale) {
-        if (supportedLocales == null) {
-            // rule interpreter returns null so allowing it
+    private boolean checkLocales(Set<Locale> supportedLocales, Locale locale) {
+        if (supportedLocales.isEmpty()) {
             return true;
         }
         return supportedLocales.stream().anyMatch(sLocale -> {
