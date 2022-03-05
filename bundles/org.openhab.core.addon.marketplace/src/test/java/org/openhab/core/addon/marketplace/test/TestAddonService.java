@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon.test;
+package org.openhab.core.addon.marketplace.test;
 
 import java.net.URI;
 import java.util.List;
@@ -44,6 +44,9 @@ public class TestAddonService extends AbstractRemoteAddonService {
     public static final String SERVICE_PID = "testAddonService";
     public static final Set<String> REMOTE_ADDONS = Set.of(TEST_ADDON, INSTALL_EXCEPTION_ADDON,
             UNINSTALL_EXCEPTION_ADDON, INCOMPATIBLE_VERSION);
+
+    public static final int COMPATIBLE_ADDON_COUNT = REMOTE_ADDONS.size() - 1;
+    public static final int ALL_ADDON_COUNT = REMOTE_ADDONS.size();
 
     private int remoteCalls = 0;
 

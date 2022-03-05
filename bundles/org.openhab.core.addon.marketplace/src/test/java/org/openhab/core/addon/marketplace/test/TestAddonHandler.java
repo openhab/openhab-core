@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon.test;
+package org.openhab.core.addon.marketplace.test;
 
-import static org.openhab.core.addon.test.TestAddonService.INSTALL_EXCEPTION_ADDON;
-import static org.openhab.core.addon.test.TestAddonService.UNINSTALL_EXCEPTION_ADDON;
+import static org.openhab.core.addon.marketplace.test.TestAddonService.INSTALL_EXCEPTION_ADDON;
+import static org.openhab.core.addon.marketplace.test.TestAddonService.UNINSTALL_EXCEPTION_ADDON;
 
 import java.util.HashSet;
 import java.util.Set;

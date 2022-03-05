@@ -10,14 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon.test;
+package org.openhab.core.addon.marketplace;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.openhab.core.addon.test.TestAddonService.INSTALL_EXCEPTION_ADDON;
-import static org.openhab.core.addon.test.TestAddonService.REMOTE_ADDONS;
-import static org.openhab.core.addon.test.TestAddonService.SERVICE_PID;
-import static org.openhab.core.addon.test.TestAddonService.TEST_ADDON;
-import static org.openhab.core.addon.test.TestAddonService.UNINSTALL_EXCEPTION_ADDON;
+import static org.openhab.core.addon.marketplace.AbstractRemoteAddonService.CONFIG_REMOTE_ENABLED;
+import static org.openhab.core.addon.marketplace.test.TestAddonService.ALL_ADDON_COUNT;
+import static org.openhab.core.addon.marketplace.test.TestAddonService.COMPATIBLE_ADDON_COUNT;
+import static org.openhab.core.addon.marketplace.test.TestAddonService.INSTALL_EXCEPTION_ADDON;
+import static org.openhab.core.addon.marketplace.test.TestAddonService.SERVICE_PID;
+import static org.openhab.core.addon.marketplace.test.TestAddonService.TEST_ADDON;
+import static org.openhab.core.addon.marketplace.test.TestAddonService.UNINSTALL_EXCEPTION_ADDON;
 
 import java.io.IOException;
 import java.util.Dictionary;
@@ -37,6 +39,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.marketplace.test.TestAddonHandler;
+import org.openhab.core.addon.marketplace.test.TestAddonService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.Storage;
@@ -103,9 +107,9 @@ public class AbstractRemoteAddonServiceTest {
     @Test
     public void testAddonResultsAreCached() {
         List<Addon> addons = addonService.getAddons(null);
-        assertEquals(TestAddonService.REMOTE_ADDONS.size() - 1, addons.size());
+        assertEquals(COMPATIBLE_ADDON_COUNT, addons.size());
         addons = addonService.getAddons(null);
-        assertEquals(TestAddonService.REMOTE_ADDONS.size() - 1, addons.size());
+        assertEquals(COMPATIBLE_ADDON_COUNT, addons.size());
         assertEquals(1, addonService.getRemoteCalls());
     }
 
@@ -126,10 +130,10 @@ public class AbstractRemoteAddonServiceTest {
 
         // check all addons are present
         List<Addon> addons = addonService.getAddons(null);
-        assertEquals(TestAddonService.REMOTE_ADDONS.size() - 1, addons.size());
+        assertEquals(COMPATIBLE_ADDON_COUNT, addons.size());
 
         // disable remote repo
-        properties.put("remote", false);
+        properties.put(CONFIG_REMOTE_ENABLED, false);
 
         // check only the installed addon is present
         addons = addonService.getAddons(null);
@@ -139,13 +143,13 @@ public class AbstractRemoteAddonServiceTest {
 
     @Test
     public void testIncompatibleAddonsNotIncludedByDefault() {
-        assertEquals(REMOTE_ADDONS.size() - 1, addonService.getAddons(null).size());
+        assertEquals(COMPATIBLE_ADDON_COUNT, addonService.getAddons(null).size());
     }
 
     @Test
     public void testIncompatibleAddonsAreIncludedIfRequested() {
         properties.put("includeIncompatible", true);
-        assertEquals(REMOTE_ADDONS.size(), addonService.getAddons(null).size());
+        assertEquals(ALL_ADDON_COUNT, addonService.getAddons(null).size());
     }
 
     // installation tests
