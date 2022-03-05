@@ -67,6 +67,7 @@
     <module>org.openhab.core.io.rest.sitemap</module>
     <module>org.openhab.core.io.rest.sse</module>
     <module>org.openhab.core.io.rest.swagger</module>
+    <module>org.openhab.core.io.rest.transform</module>
     <module>org.openhab.core.io.rest.ui</module>
     <module>org.openhab.core.io.rest.voice</module>
     <module>org.openhab.core.io.transport.mdns</module>
