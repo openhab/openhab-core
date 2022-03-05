@@ -165,6 +165,13 @@ public class Addon {
     }
 
     /**
+     * The (expected) compatibility of this add-on
+     */
+    public boolean getCompatible() {
+        return compatible;
+    }
+
+    /**
      * The content type of the add-on
      */
     public String getContentType() {

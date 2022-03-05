@@ -29,9 +29,9 @@
 				thus harm your system.</description>
 		</parameter>
 		<parameter name="showUnstable" type="boolean">
-			<label>Show Non-Stable Bundles</label>
+			<label>Show Non-Stable Add-Ons</label>
 			<default>false</default>
-			<description>Include entries which have not been tagged as "stable". These bundles should be used for testing
+			<description>Include entries which have not been tagged as "stable". These add-ons should be used for testing
 				purposes only and are not considered production-system ready.</description>
 		</parameter>
 	</config-description>

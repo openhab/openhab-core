@@ -39,10 +39,11 @@ public class TestAddonService extends AbstractRemoteAddonService {
     public static final String TEST_ADDON = "testAddon";
     public static final String INSTALL_EXCEPTION_ADDON = "installException";
     public static final String UNINSTALL_EXCEPTION_ADDON = "uninstallException";
+    public static final String INCOMPATIBLE_VERSION = "incompatibleVersion";
 
     public static final String SERVICE_PID = "testAddonService";
     public static final Set<String> REMOTE_ADDONS = Set.of(TEST_ADDON, INSTALL_EXCEPTION_ADDON,
-            UNINSTALL_EXCEPTION_ADDON);
+            UNINSTALL_EXCEPTION_ADDON, INCOMPATIBLE_VERSION);
 
     private int remoteCalls = 0;
 
@@ -69,7 +70,8 @@ public class TestAddonService extends AbstractRemoteAddonService {
         remoteCalls++;
         return REMOTE_ADDONS.stream()
                 .map(id -> Addon.create(SERVICE_PID + ":" + id).withType("binding")
-                        .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE).build())
+                        .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE)
+                        .withCompatible(!id.equals(INCOMPATIBLE_VERSION)).build())
                 .collect(Collectors.toList());
     }
 

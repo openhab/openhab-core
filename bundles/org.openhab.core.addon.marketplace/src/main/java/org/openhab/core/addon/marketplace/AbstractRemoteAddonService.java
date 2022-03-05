@@ -111,6 +111,10 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         // check real installation status based on handlers
         addons.forEach(addon -> addon.setInstalled(addonHandlers.stream().anyMatch(h -> h.isInstalled(addon.getId()))));
 
+        // remove incompatible add-ons if not enabled
+        boolean showIncompatible = showIncompatible();
+        addons.removeIf(addon -> !addon.getCompatible() && !showIncompatible);
+
         cachedAddons = addons;
         this.installedAddons = installedAddons;
     }
@@ -228,6 +232,20 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             return ConfigParser.valueAsOrElse(properties.get("remote"), Boolean.class, true);
         } catch (IOException e) {
             return true;
+        }
+    }
+
+    protected boolean showIncompatible() {
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration("org.openhab.addons", null);
+            Dictionary<String, Object> properties = configuration.getProperties();
+            if (properties == null) {
+                // if we can't determine a set property, we use false (default is show compatible only)
+                return true;
+            }
+            return ConfigParser.valueAsOrElse(properties.get("includeIncompatible"), Boolean.class, false);
+        } catch (IOException e) {
+            return false;
         }
     }
 
