@@ -28,4 +28,4 @@ Require-Bundle: org.antlr.runtime,\
  org.eclipse.xtext,\
  org.eclipse.xtext.generator;resolution:=optional,\
  org.eclipse.xtext.util,\
- org.eclipse.xtext.xbase.lib;bundle-version="2.23.0"
+ org.eclipse.xtext.xbase.lib;bundle-version="2.26.0"
