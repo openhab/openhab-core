@@ -13,7 +13,8 @@
 		</parameter>
 		<parameter name="includeIncompatible" type="boolean">
 			<label>Include (Potentially) Incompatible Add-ons</label>
-			<description>Some add-on services may provide add-ons where compatibility with the currently running system is not expected. Enabling this option will include these entries in the list of available add-ons.</description>
+			<description>Some add-on services may provide add-ons where compatibility with the currently running system is not
+				expected. Enabling this option will include these entries in the list of available add-ons.</description>
 			<default>false</default>
 		</parameter>
 	</config-description>
