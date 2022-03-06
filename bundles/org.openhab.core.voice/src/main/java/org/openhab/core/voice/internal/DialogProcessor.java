@@ -145,15 +145,16 @@ public class DialogProcessor implements KSListener, STTListener {
     }
 
     public void start() {
-        AudioFormat fmt = ksFormat;
-        if (fmt == null) {
-            logger.warn("No compatible audio format found for ks '{}' and source '{}'", ks.getId(), source.getId());
-            return;
-        }
         KSService ksService = ks;
         if (ksService != null) {
             abortKS();
             closeStreamKS();
+            AudioFormat fmt = ksFormat;
+            if (fmt == null) {
+                logger.warn("No compatible audio format found for ks '{}' and source '{}'", ksService.getId(),
+                        source.getId());
+                return;
+            }
             try {
                 AudioStream stream = source.getInputStream(fmt);
                 streamKS = stream;
