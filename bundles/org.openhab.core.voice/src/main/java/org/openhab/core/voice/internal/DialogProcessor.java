@@ -263,8 +263,10 @@ public class DialogProcessor implements KSListener, STTListener {
         if (!processing) {
             isSTTServerAborting = false;
             if (ksEvent instanceof KSpottedEvent) {
+                logger.debug("KSpottedEvent event received");
                 executeSimpleDialog();
             } else if (ksEvent instanceof KSErrorEvent) {
+                logger.debug("KSErrorEvent event received");
                 KSErrorEvent kse = (KSErrorEvent) ksEvent;
                 String text = i18nProvider.getText(bundle, "error.ks-error", null, locale);
                 say(text == null ? kse.getMessage() : text.replace("{0}", kse.getMessage()));
@@ -275,22 +277,30 @@ public class DialogProcessor implements KSListener, STTListener {
     @Override
     public synchronized void sttEventReceived(STTEvent sttEvent) {
         if (sttEvent instanceof SpeechRecognitionEvent) {
+            logger.debug("SpeechRecognitionEvent event received");
             if (!isSTTServerAborting) {
                 SpeechRecognitionEvent sre = (SpeechRecognitionEvent) sttEvent;
                 String question = sre.getTranscript();
+                logger.debug("Text recognized: {}", question);
                 try {
                     toggleProcessing(false);
-                    say(hli.interpret(locale, question));
+                    String answer = hli.interpret(locale, question);
+                    logger.debug("Interpretation result: {}", answer);
+                    say(answer);
                 } catch (InterpretationException e) {
+                    logger.debug("Interpretation exception: {}", e.getMessage());
                     say(e.getMessage());
                 }
                 abortSTT();
             }
         } else if (sttEvent instanceof RecognitionStartEvent) {
+            logger.debug("RecognitionStartEvent event received");
             toggleProcessing(true);
         } else if (sttEvent instanceof RecognitionStopEvent) {
+            logger.debug("RecognitionStopEvent event received");
             toggleProcessing(false);
         } else if (sttEvent instanceof SpeechRecognitionErrorEvent) {
+            logger.debug("SpeechRecognitionErrorEvent event received");
             if (!isSTTServerAborting) {
                 abortSTT();
                 toggleProcessing(false);
