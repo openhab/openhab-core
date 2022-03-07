@@ -12,7 +12,10 @@
  */
 package org.openhab.core.voice.internal;
 
+import static java.util.Comparator.comparing;
+
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -30,6 +33,8 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemNotUniqueException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.voice.KSService;
+import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
@@ -55,6 +60,10 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private static final String SUBCMD_VOICES = "voices";
     private static final String SUBCMD_START_DIALOG = "startdialog";
     private static final String SUBCMD_STOP_DIALOG = "stopdialog";
+    private static final String SUBCMD_INTERPRETERS = "interpreters";
+    private static final String SUBCMD_KEYWORD_SPOTTERS = "keywordspotters";
+    private static final String SUBCMD_STT_SERVICES = "sttservices";
+    private static final String SUBCMD_TTS_SERVICES = "ttsservices";
 
     private final ItemRegistry itemRegistry;
     private final VoiceManager voiceManager;
@@ -80,7 +89,11 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 buildCommandUsage(SUBCMD_START_DIALOG + " [<source> [<interpreter> [<sink> [<keyword>]]]]",
                         "start a new dialog processing using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_STOP_DIALOG + " [<source>]",
-                        "stop the dialog processing for the default audio source or the audio source identified with provided argument"));
+                        "stop the dialog processing for the default audio source or the audio source identified with provided argument"),
+                buildCommandUsage(SUBCMD_INTERPRETERS, "lists the interpreters"),
+                buildCommandUsage(SUBCMD_KEYWORD_SPOTTERS, "lists the keyword spotters"),
+                buildCommandUsage(SUBCMD_STT_SERVICES, "lists the Speech-to-Text services"),
+                buildCommandUsage(SUBCMD_TTS_SERVICES, "lists the Text-to-Speech services"));
     }
 
     @Override
@@ -134,6 +147,18 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                                 "An error occurred while stopping the dialog"));
                     }
                     break;
+                case SUBCMD_INTERPRETERS:
+                    listInterpreters(console);
+                    return;
+                case SUBCMD_KEYWORD_SPOTTERS:
+                    listKeywordSpotters(console);
+                    return;
+                case SUBCMD_STT_SERVICES:
+                    listSTTs(console);
+                    return;
+                case SUBCMD_TTS_SERVICES:
+                    listTTSs(console);
+                    return;
                 default:
                     break;
             }
@@ -193,5 +218,61 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             msg.append(" ");
         }
         voiceManager.say(msg.toString());
+    }
+
+    private void listInterpreters(Console console) {
+        Collection<HumanLanguageInterpreter> interpreters = voiceManager.getHLIs();
+        if (!interpreters.isEmpty()) {
+            HumanLanguageInterpreter defaultHLI = voiceManager.getHLI();
+            Locale locale = localeProvider.getLocale();
+            interpreters.stream().sorted(comparing(s -> s.getLabel(locale))).forEach(hli -> {
+                console.println(String.format("%s %s (%s)", hli.equals(defaultHLI) ? "*" : " ", hli.getLabel(locale),
+                        hli.getId()));
+            });
+        } else {
+            console.println("No interpreters found.");
+        }
+    }
+
+    private void listKeywordSpotters(Console console) {
+        Collection<KSService> spotters = voiceManager.getKSs();
+        if (!spotters.isEmpty()) {
+            KSService defaultKS = voiceManager.getKS();
+            Locale locale = localeProvider.getLocale();
+            spotters.stream().sorted(comparing(s -> s.getLabel(locale))).forEach(ks -> {
+                console.println(
+                        String.format("%s %s (%s)", ks.equals(defaultKS) ? "*" : " ", ks.getLabel(locale), ks.getId()));
+            });
+        } else {
+            console.println("No keyword spotters found.");
+        }
+    }
+
+    private void listSTTs(Console console) {
+        Collection<STTService> services = voiceManager.getSTTs();
+        if (!services.isEmpty()) {
+            STTService defaultSTT = voiceManager.getSTT();
+            Locale locale = localeProvider.getLocale();
+            services.stream().sorted(comparing(s -> s.getLabel(locale))).forEach(stt -> {
+                console.println(String.format("%s %s (%s)", stt.equals(defaultSTT) ? "*" : " ", stt.getLabel(locale),
+                        stt.getId()));
+            });
+        } else {
+            console.println("No Speech-to-Text services found.");
+        }
+    }
+
+    private void listTTSs(Console console) {
+        Collection<TTSService> services = voiceManager.getTTSs();
+        if (!services.isEmpty()) {
+            TTSService defaultTTS = voiceManager.getTTS();
+            Locale locale = localeProvider.getLocale();
+            services.stream().sorted(comparing(s -> s.getLabel(locale))).forEach(tts -> {
+                console.println(String.format("%s %s (%s)", tts.equals(defaultTTS) ? "*" : " ", tts.getLabel(locale),
+                        tts.getId()));
+            });
+        } else {
+            console.println("No Text-to-Speech services found.");
+        }
     }
 }
