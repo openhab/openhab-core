@@ -45,7 +45,7 @@ Require-Bundle: org.antlr.runtime,\
  org.eclipse.xtext.common.types,\
  org.eclipse.xtext.generator;resolution:=optional,\
  org.eclipse.xtext.util,\
- org.eclipse.xtext.xbase.lib;bundle-version="2.23.0",\
+ org.eclipse.xtext.xbase.lib;bundle-version="2.26.0",\
  org.eclipse.xtext.xbase;resolution:=optional;visibility:=reexport,\
  org.eclipse.xtext;visibility:=reexport,\
- org.objectweb.asm;bundle-version="[8.0.0,9.0.0)";resolution:=optional
+ org.objectweb.asm;bundle-version="[9.0.0,10.0.0)";resolution:=optional

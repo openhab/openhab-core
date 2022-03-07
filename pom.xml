@@ -76,7 +76,7 @@
     <karaf.tooling.version>4.3.6</karaf.tooling.version>
     <sat.version>0.12.0</sat.version>
     <slf4j.version>1.7.32</slf4j.version>
-    <xtext.version>2.25.0</xtext.version>
+    <xtext.version>2.26.0</xtext.version>
     <spotless.version>2.0.3</spotless.version>
   </properties>
 
@@ -715,7 +715,7 @@ Import-Package: \\
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>[11.0,12.0)</version>
+                  <version>[11.0,18.0)</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
