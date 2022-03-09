@@ -105,8 +105,9 @@ import org.slf4j.LoggerFactory;
  * {@link ThingManagerImpl} tracks all things in the {@link ThingRegistry} and mediates the communication between the
  * {@link Thing} and the {@link ThingHandler} from the binding. Therefore it tracks {@link ThingHandlerFactory}s and
  * calls {@link ThingHandlerFactory#registerHandler(Thing)} for each thing, that was added to the {@link ThingRegistry}.
- * In addition the {@link ThingManagerImpl} acts as an {@link EventHandler} and subscribes to update and command events.
- * Finally the {@link ThingManagerImpl} implement the {@link ThingTypeMigrationService} to offer a way to change the
+ * In addition the {@link ThingManagerImpl} acts as an {@link org.openhab.core.internal.events.EventHandler}
+ * and subscribes to update and command events.
+ * Finally the {@link ThingManagerImpl} implements the {@link ThingTypeMigrationService} to offer a way to change the
  * thing type of a {@link Thing}.
  *
  * @author Dennis Nobel - Initial contribution
@@ -115,7 +116,7 @@ import org.slf4j.LoggerFactory;
  *         refactorings due to thing/bridge life cycle
  * @author Simon Kaufmann - Added remove handling, type conversion
  * @author Kai Kreuzer - Removed usage of itemRegistry and thingLinkRegistry, fixed vetoing mechanism
- * @author Andre Fuechsel - Added the {@link ThingTypeMigrationService} 
+ * @author Andre Fuechsel - Added the {@link ThingTypeMigrationService}
  * @author Thomas Höfer - Added localization of thing status info
  * @author Christoph Weitkamp - Moved OSGI ServiceTracker from BaseThingHandler to ThingHandlerCallback
  * @author Henning Sudbrock - Consider thing type properties when migrating to new thing type
@@ -193,6 +194,12 @@ public class ThingManagerImpl
 
             if (ThingStatus.REMOVING.equals(oldStatusInfo.getStatus())
                     && !ThingStatus.REMOVED.equals(statusInfo.getStatus())) {
+                // if we go to ONLINE and are still in REMOVING, notify handler about required removal
+                if (ThingStatus.ONLINE.equals(statusInfo.getStatus())) {
+                    logger.debug(
+                            "Handler is initialized now and we try to remove it, because it is in REMOVING state.");
+                    notifyThingHandlerAboutRemoval(thing);
+                }
                 // only allow REMOVING -> REMOVED transition, all others are ignored because they are illegal
                 logger.debug(
                         "Ignoring illegal status transition for thing {} from REMOVING to {}, only REMOVED would have been allowed.",
@@ -795,7 +802,14 @@ public class ThingManagerImpl
             }
 
             if (isInitializable(thing, thingType)) {
-                setThingStatus(thing, buildStatusInfo(ThingStatus.INITIALIZING, ThingStatusDetail.NONE));
+                if (ThingStatus.REMOVING.equals(thing.getStatus())) {
+                    // preserve REMOVING state so the callback can later device to remove the thing after it has been
+                    // initialized
+                    logger.debug("Not setting status to INITIALIZING because thing '{}' is in REMOVING status.",
+                            thing.getUID());
+                } else {
+                    setThingStatus(thing, buildStatusInfo(ThingStatus.INITIALIZING, ThingStatusDetail.NONE));
+                }
                 doInitializeHandler(handler);
             } else {
                 logger.debug(
