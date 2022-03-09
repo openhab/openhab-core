@@ -177,6 +177,8 @@ public class StartLevelService {
         startlevels = parseConfig(configuration);
         startlevels.keySet()
                 .forEach(sl -> slmarker.put(sl, new ReadyMarker(STARTLEVEL_MARKER_TYPE, Integer.toString(sl))));
+        slmarker.put(STARTLEVEL_COMPLETE,
+                new ReadyMarker(STARTLEVEL_MARKER_TYPE, Integer.toString(STARTLEVEL_COMPLETE)));
         startlevels.values().stream().forEach(ms -> ms.forEach(e -> registerTracker(e)));
     }
 
