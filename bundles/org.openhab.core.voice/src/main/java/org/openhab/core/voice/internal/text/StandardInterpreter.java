@@ -187,8 +187,8 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
         /****************************** FRENCH ******************************/
 
-        Expression allumer = alt("allumer", "démarrer", "activer");
-        Expression eteindre = alt("éteindre", "stopper", "désactiver", "couper");
+        Expression allume = alt("allume", "démarre", "active");
+        Expression eteins = alt("éteins", "stoppe", "désactive", "coupe");
         Expression lela = opt(alt("le", "la", "les", "l"));
         Expression poursurdude = opt(alt("pour", "sur", "du", "de"));
         Expression couleur = alt(cmd("blanc", HSBType.WHITE), cmd("rose", HSBType.fromRGB(255, 96, 208)),
@@ -200,13 +200,13 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
                 /* OnOffType */
 
-                itemRule(seq(cmd(allumer, OnOffType.ON), lela) /* item */),
-                itemRule(seq(cmd(eteindre, OnOffType.OFF), lela) /* item */),
+                itemRule(seq(cmd(allume, OnOffType.ON), lela) /* item */),
+                itemRule(seq(cmd(eteins, OnOffType.OFF), lela) /* item */),
 
                 /* IncreaseDecreaseType */
 
-                itemRule(seq(cmd("augmenter", IncreaseDecreaseType.INCREASE), lela) /* item */),
-                itemRule(seq(cmd("diminuer", IncreaseDecreaseType.DECREASE), lela) /* item */),
+                itemRule(seq(cmd("augmente", IncreaseDecreaseType.INCREASE), lela) /* item */),
+                itemRule(seq(cmd("diminue", IncreaseDecreaseType.DECREASE), lela) /* item */),
 
                 itemRule(seq(cmd("plus", IncreaseDecreaseType.INCREASE), "de") /* item */),
                 itemRule(seq(cmd("moins", IncreaseDecreaseType.DECREASE), "de") /* item */),
@@ -230,17 +230,17 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
                 /* UpDownType */
 
-                itemRule(seq(cmd("monter", UpDownType.UP), lela) /* item */),
-                itemRule(seq(cmd("descendre", UpDownType.DOWN), lela) /* item */),
+                itemRule(seq(cmd("monte", UpDownType.UP), lela) /* item */),
+                itemRule(seq(cmd("descends", UpDownType.DOWN), lela) /* item */),
 
                 /* StopMoveType */
 
-                itemRule(seq(cmd("arrêter", StopMoveType.STOP), lela) /* item */),
-                itemRule(seq(cmd(alt("bouger", "déplacer"), StopMoveType.MOVE), lela) /* item */),
+                itemRule(seq(cmd("arrête", StopMoveType.STOP), lela) /* item */),
+                itemRule(seq(cmd(alt("bouge", "déplace"), StopMoveType.MOVE), lela) /* item */),
 
                 /* RefreshType */
 
-                itemRule(seq(cmd("rafraîchir", RefreshType.REFRESH), lela) /* item */)
+                itemRule(seq(cmd("rafraîchis", RefreshType.REFRESH), lela) /* item */)
 
         );
 
@@ -261,7 +261,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
                 /* OnOffType */
 
-                itemRule(seq(encenderApagar, articulo), /* item */ onOff),
+                itemRule(seq(encenderApagar, articulo)/* item */),
 
                 /* IncreaseDecreaseType */
 
