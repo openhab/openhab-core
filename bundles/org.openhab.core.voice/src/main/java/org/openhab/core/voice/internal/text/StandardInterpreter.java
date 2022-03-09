@@ -261,7 +261,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
                 /* OnOffType */
 
-                itemRule(seq(encenderApagar, articulo), /* item */ onOff),
+                itemRule(seq(encenderApagar, articulo)/* item */),
 
                 /* IncreaseDecreaseType */
 
