@@ -97,14 +97,31 @@ public class PersistentInboxTest {
                 .createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_OTHER_UID), any()))
                         .then(invocation -> ThingBuilder.create(THING_TYPE_UID, THING_OTHER_ID)
                                 .withConfiguration((Configuration) invocation.getArguments()[1]).build());
-
         inbox = new PersistentInbox(storageServiceMock, mock(DiscoveryServiceRegistry.class), thingRegistryMock,
                 thingProviderMock, thingTypeRegistryMock, configDescriptionRegistryMock);
         inbox.addThingHandlerFactory(thingHandlerFactoryMock);
     }
 
     @Test
-    public void testConfigUpdateNormalizationGuessType() {
+    public void testConfigUpdateNormalizationGuessTypeManagedThing() {
+        Configuration config = new Configuration(Map.of("foo", 1));
+        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
+
+        when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
+        when(thingProviderMock.get(eq(THING_UID))).thenReturn(thing);
+
+        assertTrue(thing.getConfiguration().get("foo") instanceof BigDecimal);
+
+        inbox.activate();
+        inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build());
+
+        assertTrue(thing.getConfiguration().get("foo") instanceof BigDecimal);
+        // thing updated if managed
+        assertEquals(new BigDecimal(3), thing.getConfiguration().get("foo"));
+    }
+
+    @Test
+    public void testConfigUpdateNormalizationGuessTypeUnmanagedThing() {
         Configuration config = new Configuration(Map.of("foo", 1));
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
 
@@ -116,11 +133,30 @@ public class PersistentInboxTest {
         inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build());
 
         assertTrue(thing.getConfiguration().get("foo") instanceof BigDecimal);
-        assertEquals(new BigDecimal(3), thing.getConfiguration().get("foo"));
+        // thing not updated if unmanaged
+        assertEquals(new BigDecimal(1), thing.getConfiguration().get("foo"));
     }
 
     @Test
-    public void testConfigUpdateNormalizationWithConfigDescription() {
+    public void testConfigUpdateNormalizationWithConfigDescriptionManagedThing() {
+        Configuration config = new Configuration(Map.of("foo", "1"));
+        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
+        configureConfigDescriptionRegistryMock("foo", Type.TEXT);
+        when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
+        when(thingProviderMock.get(eq(THING_UID))).thenReturn(thing);
+
+        assertTrue(thing.getConfiguration().get("foo") instanceof String);
+
+        inbox.activate();
+        inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build());
+
+        assertTrue(thing.getConfiguration().get("foo") instanceof String);
+        // thing updated if managed
+        assertEquals("3", thing.getConfiguration().get("foo"));
+    }
+
+    @Test
+    public void testConfigUpdateNormalizationWithConfigDescriptionUnanagedThing() {
         Configuration config = new Configuration(Map.of("foo", "1"));
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
@@ -132,7 +168,8 @@ public class PersistentInboxTest {
         inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build());
 
         assertTrue(thing.getConfiguration().get("foo") instanceof String);
-        assertEquals("3", thing.getConfiguration().get("foo"));
+        // thing not updated if unmanaged
+        assertEquals("1", thing.getConfiguration().get("foo"));
     }
 
     @Test

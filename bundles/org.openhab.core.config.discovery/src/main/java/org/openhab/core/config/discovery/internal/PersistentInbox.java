@@ -250,7 +250,8 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
                             inboxResult.getClass().getName());
                 }
             }
-        } else {
+        } else if (managedThingProvider.get(thingUID) != null) {
+            // only try to update properties if thing is managed
             logger.debug(
                     "Discovery result with thing '{}' not added as inbox entry. It is already present as thing in the ThingRegistry.",
                     thingUID);
