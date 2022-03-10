@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.xml;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroupBuilder;
 import org.openhab.core.config.xml.util.ConverterValueMap;
@@ -27,6 +29,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *
  * @author Chris Jackson - Initial contribution
  */
+@NonNullByDefault
 public class ConfigDescriptionParameterGroupConverter extends GenericUnmarshaller<ConfigDescriptionParameterGroup> {
 
     public ConfigDescriptionParameterGroupConverter() {
@@ -34,7 +37,7 @@ public class ConfigDescriptionParameterGroupConverter extends GenericUnmarshalle
     }
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext marshallingContext) {
+    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext marshallingContext) {
         String name = reader.getAttribute("name");
 
         // Read values

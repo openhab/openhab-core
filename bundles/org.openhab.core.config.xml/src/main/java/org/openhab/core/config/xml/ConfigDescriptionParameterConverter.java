@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
@@ -45,6 +47,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *         parameters.
  * @author Thomas Höfer - Added unit
  */
+@NonNullByDefault
 public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<ConfigDescriptionParameter> {
 
     private ConverterAttributeMapValidator attributeMapValidator;
@@ -58,7 +61,7 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
                         { "multiple", "false" }, { "groupName", "false" }, { "unit", "false" } });
     }
 
-    private Type toType(String xmlType) {
+    private @Nullable Type toType(@Nullable String xmlType) {
         if (xmlType != null) {
             return Type.valueOf(xmlType.toUpperCase());
         }
@@ -66,7 +69,7 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
         return null;
     }
 
-    private BigDecimal toNumber(String value) {
+    private @Nullable BigDecimal toNumber(@Nullable String value) {
         try {
             if (value != null) {
                 return new BigDecimal(value);
@@ -77,19 +80,19 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
         return null;
     }
 
-    private Boolean toBoolean(String val) {
+    private @Nullable Boolean toBoolean(@Nullable String val) {
         if (val == null) {
             return null;
         }
         return Boolean.valueOf(val);
     }
 
-    private Boolean falseIfNull(Boolean b) {
-        return (b != null) ? b : false;
+    private Boolean falseIfNull(@Nullable Boolean b) {
+        return b != null ? b : false;
     }
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         ConfigDescriptionParameter configDescriptionParam = null;
 
         // read attributes
@@ -142,7 +145,7 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
         return configDescriptionParam;
     }
 
-    private List<ParameterOption> readParameterOptions(Object rawNodeValueList) {
+    private @Nullable List<ParameterOption> readParameterOptions(@Nullable Object rawNodeValueList) {
         if (rawNodeValueList instanceof List<?>) {
             List<?> list = (List<?>) rawNodeValueList;
             List<ParameterOption> result = new ArrayList<>();

@@ -14,6 +14,9 @@ package org.openhab.core.config.xml.util;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The {@link NodeAttributes} class contains all attributes for an XML tag.
  * <p>
@@ -26,10 +29,11 @@ import java.util.Map;
  *
  * @author Michael Grammling - Initial contribution
  */
+@NonNullByDefault
 public class NodeAttributes implements NodeName {
 
-    private String nodeName;
-    private Map<String, String> attributes;
+    private final String nodeName;
+    private final @Nullable Map<String, String> attributes;
 
     /**
      * Creates a new instance of this class with the specified parameters.
@@ -37,11 +41,11 @@ public class NodeAttributes implements NodeName {
      * @param nodeName the name of the node this object belongs to (must neither be null, nor empty)
      * @param attributes the map of all attributes of the node this object belongs to
      *            by key-value pairs (could be null or empty)
-     * @throws IllegalArgumentException if the name of the node is null or empty
+     * @throws IllegalArgumentException if the name of the node is empty
      */
-    public NodeAttributes(String nodeName, Map<String, String> attributes) throws IllegalArgumentException {
-        if ((nodeName == null) || (nodeName.isEmpty())) {
-            throw new IllegalArgumentException("The name of the node must neither be null nor empty!");
+    public NodeAttributes(String nodeName, @Nullable Map<String, String> attributes) throws IllegalArgumentException {
+        if (nodeName.isEmpty()) {
+            throw new IllegalArgumentException("The name of the node must not be empty!");
         }
 
         this.nodeName = nodeName;
@@ -57,11 +61,11 @@ public class NodeAttributes implements NodeName {
      * Returns the value of the specified attribute.
      *
      * @param name the name of the attribute whose value should be returned (could be null or empty)
-     * @return the value of the specified attribute (could be null or empty)
+     * @return the value of the specified attribute (could be empty)
      */
-    public String getAttribute(String name) {
-        if (this.attributes != null) {
-            return this.attributes.get(name);
+    public @Nullable String getAttribute(String name) {
+        if (attributes != null) {
+            return attributes.get(name);
         }
 
         return null;
@@ -70,9 +74,9 @@ public class NodeAttributes implements NodeName {
     /**
      * Returns the map of all attributes of a node by key-value pairs.
      *
-     * @return the map of all attributes of a node (could be null or empty)
+     * @return the map of all attributes of a node
      */
-    public Map<String, String> getAttributes() {
+    public @Nullable Map<String, String> getAttributes() {
         return this.attributes;
     }
 

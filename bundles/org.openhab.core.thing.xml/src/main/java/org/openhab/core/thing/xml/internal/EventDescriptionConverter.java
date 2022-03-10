@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.xml.util.NodeIterator;
 import org.openhab.core.config.xml.util.NodeList;
@@ -36,6 +38,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *
  * @author Moritz Kammerer - Initial contribution
  */
+@NonNullByDefault
 public class EventDescriptionConverter extends GenericUnmarshaller<EventDescription> {
 
     public EventDescriptionConverter() {
@@ -77,7 +80,7 @@ public class EventDescriptionConverter extends GenericUnmarshaller<EventDescript
     }
 
     @Override
-    public final Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public final @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         List<EventOption> eventOptions = null;
 
         NodeList nodes = (NodeList) context.convertAnother(context, NodeList.class);
@@ -90,8 +93,6 @@ public class EventDescriptionConverter extends GenericUnmarshaller<EventDescript
 
         nodeIterator.assertEndOfType();
 
-        EventDescription eventDescription = new EventDescription(eventOptions);
-
-        return eventDescription;
+        return new EventDescription(eventOptions);
     }
 }

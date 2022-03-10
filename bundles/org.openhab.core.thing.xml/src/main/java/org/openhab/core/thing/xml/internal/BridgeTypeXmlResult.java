@@ -14,6 +14,8 @@ package org.openhab.core.thing.xml.internal;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.xml.util.NodeValue;
@@ -32,12 +34,14 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Andre Fuechsel - Added representationProperty
  */
+@NonNullByDefault
 public class BridgeTypeXmlResult extends ThingTypeXmlResult {
 
-    public BridgeTypeXmlResult(ThingTypeUID bridgeTypeUID, List<String> supportedBridgeTypeUIDs, String label,
-            String description, String category, boolean listed, List<String> extensibleChannelTypeIds,
-            List<ChannelXmlResult>[] channelTypeReferenceObjects, List<NodeValue> properties,
-            String representationProperty, Object[] configDescriptionObjects) {
+    public BridgeTypeXmlResult(ThingTypeUID bridgeTypeUID, @Nullable List<String> supportedBridgeTypeUIDs, String label,
+            @Nullable String description, @Nullable String category, boolean listed,
+            @Nullable List<String> extensibleChannelTypeIds,
+            @Nullable List<ChannelXmlResult>[] channelTypeReferenceObjects, @Nullable List<NodeValue> properties,
+            @Nullable String representationProperty, Object[] configDescriptionObjects) {
         super(bridgeTypeUID, supportedBridgeTypeUIDs, label, description, category, listed, extensibleChannelTypeIds,
                 channelTypeReferenceObjects, properties, representationProperty, configDescriptionObjects);
     }

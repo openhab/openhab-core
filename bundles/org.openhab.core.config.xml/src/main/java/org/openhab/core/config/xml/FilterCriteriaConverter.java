@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.xml;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.FilterCriteria;
 import org.openhab.core.config.xml.util.GenericUnmarshaller;
 
@@ -24,6 +26,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *
  * @author Alex Tugarev - Initial contribution
  */
+@NonNullByDefault
 public class FilterCriteriaConverter extends GenericUnmarshaller<FilterCriteria> {
 
     public FilterCriteriaConverter() {
@@ -31,7 +34,7 @@ public class FilterCriteriaConverter extends GenericUnmarshaller<FilterCriteria>
     }
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         String name = reader.getAttribute("name");
         String criteria = reader.getValue();
         return new FilterCriteria(name, criteria);

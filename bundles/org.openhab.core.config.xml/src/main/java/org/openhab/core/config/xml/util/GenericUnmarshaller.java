@@ -12,6 +12,10 @@
  */
 package org.openhab.core.config.xml.util;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
+import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
@@ -27,6 +31,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  *
  * @param <T> the result type of the conversion
  */
+@NonNullByDefault
 public abstract class GenericUnmarshaller<T> implements Converter {
 
     private Class<T> clazz;
@@ -51,12 +56,44 @@ public abstract class GenericUnmarshaller<T> implements Converter {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public final boolean canConvert(Class paramClass) {
+    public final boolean canConvert(@Nullable Class paramClass) {
         return (clazz.equals(paramClass));
     }
 
     @Override
-    public final void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
+    public final void marshal(@Nullable Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Checks that the specified object is not {@code null} and throws a customized {@link ConversionException} if it
+     * is.
+     *
+     * @param object the object to check for nullity
+     * @param message detail message to be used in the event that a {@code ConversionException} is thrown
+     * @return {@code object} if not {@code null}
+     * @throws ConversionException if {@code object} is {@code null}
+     */
+    protected static Object requireNonNull(@Nullable Object object, String message) {
+        if (object == null) {
+            throw new ConversionException(message);
+        }
+        return object;
+    }
+
+    /**
+     * Checks that the specified string is not {@code null} and not empty and throws a customized
+     * {@link ConversionException} if it is.
+     *
+     * @param string the string to check for nullity and emptiness
+     * @param message detail message to be used in the event that a {@code ConversionException} is thrown
+     * @return {@code string} if not {@code null} and not empty
+     * @throws ConversionException if {@code string} is {@code null} or empty
+     */
+    protected static String requireNonEmpty(@Nullable String string, String message) {
+        if (string == null || string.isEmpty()) {
+            throw new ConversionException(message);
+        }
+        return string;
     }
 }

@@ -16,6 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -30,6 +33,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * @author Michael Grammling - Initial contribution
  * @author Alex Tugarev - Extended for options and filter criteria
  */
+@NonNullByDefault
 public class ConverterValueMap {
 
     private HierarchicalStreamReader reader;
@@ -39,7 +43,7 @@ public class ConverterValueMap {
     /**
      * Creates a new instance of this class with the specified parameter.
      *
-     * @param reader the reader to be used to read-in all children (must not be null)
+     * @param reader the reader to be used to read-in all children
      * @param context
      */
     public ConverterValueMap(HierarchicalStreamReader reader, UnmarshallingContext context) {
@@ -64,16 +68,16 @@ public class ConverterValueMap {
     /**
      * Returns the key-value map containing all read-in children.
      *
-     * @return the key-value map containing all read-in children (not null, could be empty)
+     * @return the key-value map containing all read-in children (could be empty)
      */
     public Map<String, Object> getValueMap() {
-        return this.valueMap;
+        return valueMap;
     }
 
     /**
      * Reads-in {@code N} children in a key-value map and returns it.
      *
-     * @param reader the reader to be used to read-in the children (must not be null)
+     * @param reader the reader to be used to read-in the children
      * @param numberOfValues the number of children to be read in (< 0 = until end of section)
      * @param context
      * @return the key-value map containing the read-in children (not null, could be empty)
@@ -106,21 +110,21 @@ public class ConverterValueMap {
     /**
      * Returns the object associated with the specified name of the child's node.
      *
-     * @param nodeName the name of the child's node (must not be null)
-     * @return the object associated with the specified name of the child's node (could be null)
+     * @param nodeName the name of the child's node
+     * @return the object associated with the specified name of the child's node
      */
-    public Object getObject(String nodeName) {
-        return this.valueMap.get(nodeName);
+    public @Nullable Object getObject(String nodeName) {
+        return valueMap.get(nodeName);
     }
 
     /**
      * Returns the object associated with the specified name of the child's node.
      *
-     * @param nodeName the name of the child's node (must not be null)
-     * @param defaultValue the value to be returned if the node could not be found (could be null)
-     * @return the object associated with the specified name of the child's node (could be null)
+     * @param nodeName the name of the child's node
+     * @param defaultValue the value to be returned if the node could not be found
+     * @return the object associated with the specified name of the child's node
      */
-    public Object getObject(String nodeName, Object defaultValue) {
+    public @Nullable Object getObject(String nodeName, @Nullable Object defaultValue) {
         Object value = this.valueMap.get(nodeName);
 
         if (value != null) {
@@ -133,21 +137,21 @@ public class ConverterValueMap {
     /**
      * Returns the text associated with the specified name of the child's node.
      *
-     * @param nodeName the name of the child's node (must not be null)
-     * @return the text associated with the specified name of the child's node (could be null)
+     * @param nodeName the name of the child's node
+     * @return the text associated with the specified name of the child's node
      */
-    public String getString(String nodeName) {
+    public @Nullable String getString(String nodeName) {
         return getString(nodeName, null);
     }
 
     /**
      * Returns the text associated with the specified name of the child's node.
      *
-     * @param nodeName the name of the child's node (must not be null)
-     * @param defaultValue the text to be returned if the node could not be found (could be null)
-     * @return the text associated with the specified name of the child's node (could be null)
+     * @param nodeName the name of the child's node
+     * @param defaultValue the text to be returned if the node could not be found
+     * @return the text associated with the specified name of the child's node
      */
-    public String getString(String nodeName, String defaultValue) {
+    public @Nullable String getString(String nodeName, @Nullable String defaultValue) {
         Object value = this.valueMap.get(nodeName);
 
         if (value instanceof String) {
@@ -161,21 +165,21 @@ public class ConverterValueMap {
     /**
      * Returns the boolean associated with the specified name of the child's node.
      *
-     * @param nodeName the name of the child's node (must not be null)
-     * @return the boolean associated with the specified name of the child's node (could be null)
+     * @param nodeName the name of the child's node
+     * @return the boolean associated with the specified name of the child's node
      */
-    public Boolean getBoolean(String nodeName) {
+    public @Nullable Boolean getBoolean(String nodeName) {
         return getBoolean(nodeName, null);
     }
 
     /**
      * Returns the boolean associated with the specified name of the child's node.
      *
-     * @param nodeName the name of the child's node (must not be null)
-     * @param defaultValue the boolean to be returned if the node could not be found (could be null)
-     * @return the boolean associated with the specified name of the child's node (could be null)
+     * @param nodeName the name of the child's node
+     * @param defaultValue the boolean to be returned if the node could not be found
+     * @return the boolean associated with the specified name of the child's node
      */
-    public Boolean getBoolean(String nodeName, Boolean defaultValue) {
+    public @Nullable Boolean getBoolean(String nodeName, @Nullable Boolean defaultValue) {
         Object value = this.valueMap.get(nodeName);
 
         if (value != null) {
@@ -188,26 +192,23 @@ public class ConverterValueMap {
     /**
      * Returns the numeric value associated with the specified name of the child's node.
      *
-     * @param nodeName the name of the child's node (must not be null)
+     * @param nodeName the name of the child's node
      * @return the numeric value associated with the specified name of the child's node
-     *         (could be null)
      * @throws ConversionException if the value could not be converted to a numeric value
      */
-    public Integer getInteger(String nodeName) throws ConversionException {
+    public @Nullable Integer getInteger(String nodeName) throws ConversionException {
         return getInteger(nodeName, null);
     }
 
     /**
      * Returns the numeric value associated with the specified name of the child's node.
      *
-     * @param nodeName the name of the child's node (must not be null)
+     * @param nodeName the name of the child's node
      * @param defaultValue the numeric value to be returned if the node could not be found
-     *            (could be null)
      * @return the numeric value associated with the specified name of the child's node
-     *         (could be null)
      * @throws ConversionException if the value could not be converted to a numeric value
      */
-    public Integer getInteger(String nodeName, Integer defaultValue) throws ConversionException {
+    public @Nullable Integer getInteger(String nodeName, @Nullable Integer defaultValue) throws ConversionException {
         Object value = this.valueMap.get(nodeName);
 
         if (value != null) {

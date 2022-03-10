@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.xml.util.NodeValue;
@@ -44,26 +46,28 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * @author Andre Fuechsel - Added representationProperty field
  * @author Stefan Triller - Added category field
  */
+@NonNullByDefault
 public class ThingTypeXmlResult {
 
     protected ThingTypeUID thingTypeUID;
-    protected List<String> supportedBridgeTypeUIDs;
+    protected @Nullable List<String> supportedBridgeTypeUIDs;
     protected String label;
-    protected String description;
-    protected String category;
+    protected @Nullable String description;
+    protected @Nullable String category;
     protected boolean listed;
-    protected List<String> extensibleChannelTypeIds;
-    protected String representationProperty;
-    protected List<ChannelXmlResult> channelTypeReferences;
-    protected List<ChannelXmlResult> channelGroupTypeReferences;
-    protected List<NodeValue> properties;
+    protected @Nullable List<String> extensibleChannelTypeIds;
+    protected @Nullable String representationProperty;
+    protected @Nullable List<ChannelXmlResult> channelTypeReferences;
+    protected @Nullable List<ChannelXmlResult> channelGroupTypeReferences;
+    protected @Nullable List<NodeValue> properties;
     protected URI configDescriptionURI;
     protected ConfigDescription configDescription;
 
-    public ThingTypeXmlResult(ThingTypeUID thingTypeUID, List<String> supportedBridgeTypeUIDs, String label,
-            String description, String category, boolean listed, List<String> extensibleChannelTypeIds,
-            List<ChannelXmlResult>[] channelTypeReferenceObjects, List<NodeValue> properties,
-            String representationProperty, Object[] configDescriptionObjects) {
+    public ThingTypeXmlResult(ThingTypeUID thingTypeUID, @Nullable List<String> supportedBridgeTypeUIDs, String label,
+            @Nullable String description, @Nullable String category, boolean listed,
+            @Nullable List<String> extensibleChannelTypeIds,
+            @Nullable List<ChannelXmlResult>[] channelTypeReferenceObjects, @Nullable List<NodeValue> properties,
+            @Nullable String representationProperty, Object[] configDescriptionObjects) {
         this.thingTypeUID = thingTypeUID;
         this.supportedBridgeTypeUIDs = supportedBridgeTypeUIDs;
         this.label = label;
@@ -87,8 +91,8 @@ public class ThingTypeXmlResult {
         return configDescription;
     }
 
-    protected List<ChannelDefinition> toChannelDefinitions(List<ChannelXmlResult> channelTypeReferences)
-            throws ConversionException {
+    protected @Nullable List<ChannelDefinition> toChannelDefinitions(
+            @Nullable List<ChannelXmlResult> channelTypeReferences) throws ConversionException {
         List<ChannelDefinition> channelTypeDefinitions = null;
 
         if (channelTypeReferences != null && !channelTypeReferences.isEmpty()) {
@@ -102,8 +106,8 @@ public class ThingTypeXmlResult {
         return channelTypeDefinitions;
     }
 
-    protected List<ChannelGroupDefinition> toChannelGroupDefinitions(List<ChannelXmlResult> channelGroupTypeReferences)
-            throws ConversionException {
+    protected @Nullable List<ChannelGroupDefinition> toChannelGroupDefinitions(
+            @Nullable List<ChannelXmlResult> channelGroupTypeReferences) throws ConversionException {
         List<ChannelGroupDefinition> channelGroupTypeDefinitions = null;
 
         if (channelGroupTypeReferences != null && !channelGroupTypeReferences.isEmpty()) {
@@ -126,30 +130,74 @@ public class ThingTypeXmlResult {
         return channelGroupTypeDefinitions;
     }
 
-    protected Map<String, String> toPropertiesMap() {
+    protected @Nullable Map<String, String> toPropertiesMap() {
+        List<NodeValue> properties = this.properties;
         if (properties == null) {
             return null;
         }
 
         Map<String, String> propertiesMap = new HashMap<>();
         for (NodeValue property : properties) {
-            propertiesMap.put(property.getAttributes().get("name"), (String) property.getValue());
+            Map<String, String> attributes = property.getAttributes();
+            if (attributes != null) {
+                String name = attributes.get("name");
+                if (name != null) {
+                    String value = (String) property.getValue();
+                    if (value != null) {
+                        propertiesMap.put(name, value);
+                    }
+                }
+            }
         }
         return propertiesMap;
     }
 
     ThingTypeBuilder getBuilder() {
-        return ThingTypeBuilder.instance(thingTypeUID, label) //
-                .withSupportedBridgeTypeUIDs(supportedBridgeTypeUIDs) //
-                .withDescription(description) //
-                .withCategory(category) //
+        ThingTypeBuilder builder = ThingTypeBuilder.instance(thingTypeUID, label) //
                 .isListed(listed) //
-                .withRepresentationProperty(representationProperty) //
-                .withChannelDefinitions(toChannelDefinitions(channelTypeReferences)) //
-                .withChannelGroupDefinitions(toChannelGroupDefinitions(channelGroupTypeReferences)) //
-                .withProperties(toPropertiesMap()) //
-                .withConfigDescriptionURI(configDescriptionURI) //
-                .withExtensibleChannelTypeIds(extensibleChannelTypeIds); //
+                .withConfigDescriptionURI(configDescriptionURI);
+
+        List<String> supportedBridgeTypeUIDs = this.supportedBridgeTypeUIDs;
+        if (supportedBridgeTypeUIDs != null) {
+            builder.withSupportedBridgeTypeUIDs(supportedBridgeTypeUIDs);
+        }
+
+        String description = this.description;
+        if (description != null) {
+            builder.withDescription(description);
+        }
+
+        String category = this.category;
+        if (category != null) {
+            builder.withCategory(category);
+        }
+
+        String representationProperty = this.representationProperty;
+        if (representationProperty != null) {
+            builder.withRepresentationProperty(representationProperty);
+        }
+
+        List<ChannelDefinition> channelDefinitions = toChannelDefinitions(channelTypeReferences);
+        if (channelDefinitions != null) {
+            builder.withChannelDefinitions(channelDefinitions);
+        }
+
+        List<ChannelGroupDefinition> channelGroupDefinitions = toChannelGroupDefinitions(channelGroupTypeReferences);
+        if (channelGroupDefinitions != null) {
+            builder.withChannelGroupDefinitions(channelGroupDefinitions);
+        }
+
+        Map<String, String> properties = toPropertiesMap();
+        if (properties != null) {
+            builder.withProperties(properties);
+        }
+
+        List<String> extensibleChannelTypeIds = this.extensibleChannelTypeIds;
+        if (extensibleChannelTypeIds != null) {
+            builder.withExtensibleChannelTypeIds(extensibleChannelTypeIds);
+        }
+
+        return builder;
     }
 
     public ThingType toThingType() throws ConversionException {

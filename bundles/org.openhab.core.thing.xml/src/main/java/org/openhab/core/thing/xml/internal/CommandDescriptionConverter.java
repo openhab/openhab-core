@@ -12,6 +12,8 @@
  */
 package org.openhab.core.thing.xml.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.xml.util.NodeIterator;
 import org.openhab.core.config.xml.util.NodeList;
@@ -33,6 +35,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class CommandDescriptionConverter extends GenericUnmarshaller<CommandDescription> {
 
     public CommandDescriptionConverter() {
@@ -40,7 +43,7 @@ public class CommandDescriptionConverter extends GenericUnmarshaller<CommandDesc
     }
 
     @Override
-    public final CommandDescription unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public final @Nullable CommandDescription unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         NodeList nodes = (NodeList) context.convertAnother(context, NodeList.class);
         NodeIterator nodeIterator = new NodeIterator(nodes.getList());
 

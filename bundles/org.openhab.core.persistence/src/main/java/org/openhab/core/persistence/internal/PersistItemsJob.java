@@ -15,6 +15,7 @@ package org.openhab.core.persistence.internal;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.items.Item;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.PersistenceService;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Separation of persistence core and model, drop Quartz usage.
  */
+@NonNullByDefault
 public class PersistItemsJob implements SchedulerRunnable {
 
     private final Logger logger = LoggerFactory.getLogger(PersistItemsJob.class);

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.xml.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.thing.type.ChannelType;
@@ -21,10 +22,11 @@ import org.openhab.core.thing.type.ChannelType;
  * contains a {@link ChannelType} object.
  * <p>
  * If a {@link ConfigDescription} object exists, it must be added to the according {@link ConfigDescriptionProvider}.
- * 
+ *
  * @author Michael Grammling - Initial contribution
  * @author Ivan Iliev - Added support for system wide channel types
  */
+@NonNullByDefault
 public class ChannelTypeXmlResult {
 
     private ChannelType channelType;
@@ -42,11 +44,11 @@ public class ChannelTypeXmlResult {
     }
 
     public ChannelType toChannelType() {
-        return this.channelType;
+        return channelType;
     }
 
     public ConfigDescription getConfigDescription() {
-        return this.configDescription;
+        return configDescription;
     }
 
     public boolean isSystem() {

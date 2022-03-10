@@ -14,6 +14,8 @@ package org.openhab.core.thing.xml.internal;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.xml.util.NodeIterator;
 import org.openhab.core.thing.ThingTypeUID;
 
@@ -34,6 +36,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Andre Fuechsel - Added representationProperty
  */
+@NonNullByDefault
 public class BridgeTypeConverter extends ThingTypeConverter {
 
     public BridgeTypeConverter() {
@@ -41,15 +44,13 @@ public class BridgeTypeConverter extends ThingTypeConverter {
     }
 
     @Override
-    protected BridgeTypeXmlResult unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
+    protected @Nullable BridgeTypeXmlResult unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
-        BridgeTypeXmlResult bridgeTypeXmlResult = new BridgeTypeXmlResult(new ThingTypeUID(getUID(attributes, context)),
+        return new BridgeTypeXmlResult(new ThingTypeUID(getUID(attributes, context)),
                 readSupportedBridgeTypeUIDs(nodeIterator, context), readLabel(nodeIterator),
                 readDescription(nodeIterator), readCategory(nodeIterator), getListed(attributes),
                 getExtensibleChannelTypeIds(attributes), getChannelTypeReferenceObjects(nodeIterator),
                 getProperties(nodeIterator), getRepresentationProperty(nodeIterator),
                 getConfigDescriptionObjects(nodeIterator));
-
-        return bridgeTypeXmlResult;
     }
 }

@@ -19,6 +19,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -32,6 +35,7 @@ import com.google.gson.JsonParseException;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class StorageEntryMapDeserializer implements JsonDeserializer<Map<String, StorageEntry>> {
 
     /**
@@ -65,8 +69,8 @@ public class StorageEntryMapDeserializer implements JsonDeserializer<Map<String,
     }
 
     @Override
-    public Map<String, StorageEntry> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-            throws JsonParseException {
+    public @Nullable Map<String, StorageEntry> deserialize(JsonElement json, Type typeOfT,
+            JsonDeserializationContext context) throws JsonParseException {
         JsonObject obj = json.getAsJsonObject();
         if (!isOuterMap(obj)) {
             throw new IllegalArgumentException("Object {} is not an outer map: " + obj);

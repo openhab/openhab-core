@@ -14,6 +14,7 @@ package org.openhab.core.thing.binding.firmware;
 
 import java.util.function.Function;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.firmware.FirmwareProvider;
 
@@ -27,23 +28,24 @@ import org.openhab.core.thing.firmware.FirmwareProvider;
  * has firmware version 1 installed;
  * <li>the firmware with version 4 can only be installed if the device currently has firmware version 3 installed.
  * </ul>
- * 
+ *
  * In such case the restrictions function can be defined as follows in the {@link FirmwareProvider}:
- * 
+ *
  * <pre>
  * {
  *     &#64;code
  *     Firmware firmwareV5 = FirmwareBuilder.create(thingTypeUID, "5").withCustomRestrictions(
  *             // Hardware version A
  *             thing -> "1".equals(thing.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION))).build();
- * 
+ *
  *     Firmware firmwareV4 = FirmwareBuilder.create(thingTypeUID, "4").withCustomRestrictions(
  *             // Hardware version B
  *             thing -> "3".equals(thing.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION))).build();
  * }
  * </pre>
- * 
+ *
  * @author Dimitar Ivanov - Initial contribution
  */
+@NonNullByDefault
 public interface FirmwareRestriction extends Function<Thing, Boolean> {
 }

@@ -18,11 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
-import org.openhab.core.config.xml.util.ConverterAssertion;
 import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.xml.util.NodeIterator;
@@ -42,6 +43,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * @author Michael Grammling - Initial contribution
  * @author Chris Jackson - Added configuration groups
  */
+@NonNullByDefault
 public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescription> {
 
     private ConverterAttributeMapValidator attributeMapValidator;
@@ -53,7 +55,7 @@ public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescri
     }
 
     @Override
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         // read attributes
         Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);
         String uriText = attributes.get("uri");
@@ -95,7 +97,9 @@ public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescri
             }
         }
 
-        ConverterAssertion.assertEndOfType(reader);
+        if (reader.hasMoreChildren()) {
+            throw new ConversionException("The document is invalid, it contains unsupported data!");
+        }
 
         return ConfigDescriptionBuilder.create(uri).withParameters(configDescriptionParams)
                 .withParameterGroups(configDescriptionGroups).build();
