@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,6 +34,7 @@ import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.util.UIDUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -58,13 +60,15 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     private static final String KAR_EXTENSION = ".kar";
 
     private final Logger logger = LoggerFactory.getLogger(CommunityKarafAddonHandler.class);
-
+    private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     private final KarService karService;
+
+    private boolean isReady = false;
 
     @Activate
     public CommunityKarafAddonHandler(@Reference KarService karService) {
         this.karService = karService;
-        ensureCachedKarsAreInstalled();
+        scheduler.execute(this::ensureCachedKarsAreInstalled);
     }
 
     @Override
@@ -182,6 +186,7 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
         } catch (IOException e) {
             logger.warn("Failed to re-install KARs: {}", e.getMessage());
         }
+        isReady = true;
     }
 
     private String addonIdFromPath(Path path) {
@@ -193,5 +198,10 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
         String dir = addonId.startsWith("marketplace:") ? addonId.replace("marketplace:", "")
                 : UIDUtils.encode(addonId);
         return KAR_CACHE_PATH.resolve(dir);
+    }
+
+    @Override
+    public boolean isReady() {
+        return isReady;
     }
 }
