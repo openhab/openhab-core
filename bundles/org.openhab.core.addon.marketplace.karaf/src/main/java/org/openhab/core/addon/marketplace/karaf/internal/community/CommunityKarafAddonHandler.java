@@ -60,7 +60,8 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     private static final String KAR_EXTENSION = ".kar";
 
     private final Logger logger = LoggerFactory.getLogger(CommunityKarafAddonHandler.class);
-    private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
+    private final ScheduledExecutorService scheduler = ThreadPoolManager
+            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     private final KarService karService;
 
     private boolean isReady = false;
