@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -65,6 +66,7 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
     private final BundleContext bundleContext;
 
     private final ServiceRegistration<?> eventSubscriberRegistration;
+    private final Pattern eventTopicFilter;
 
     public ThingStatusTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
@@ -77,6 +79,9 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
             this.types = Set.of(ThingStatusInfoChangedEvent.TYPE);
         }
         this.bundleContext = bundleContext;
+
+        this.eventTopicFilter = Pattern.compile("^openhab/things/" + thingUID.replace("*", ".*?") + "/.*$");
+
         Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("event.topics", "openhab/things/" + thingUID + "/*");
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
@@ -143,6 +148,6 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
     @Override
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}: {}", event.getTopic(), thingUID);
-        return event.getTopic().contains("openhab/things/" + thingUID + "/");
+        return eventTopicFilter.matcher(event.getTopic()).matches();
     }
 }
