@@ -25,9 +25,10 @@
 			It is also possible to dim values and switch the
 			light on and off.
 		</description>
+		<category>ColorLight</category>
 		<tags>
-			<tag>Hue</tag>
-			<tag>ColorLamp</tag>
+			<tag>Control</tag>
+			<tag>Light</tag>
 		</tags>
 
 		<config-description>
@@ -43,9 +44,10 @@
 			It is also possible to switch the
 			light on and off.
 		</description>
+		<category>Light</category>
 		<tags>
-			<tag>Hue</tag>
-			<tag>DimmableLamp</tag>
+			<tag>Control</tag>
+			<tag>Light</tag>
 		</tags>
 
 		<config-description>
@@ -60,8 +62,8 @@
 		<description>The color temperature channel allows to set the color
 			temperature of a light from 0 (cold) to 100 (warm).</description>
 		<tags>
-			<tag>Hue</tag>
-			<tag>AmbientLamp</tag>
+			<tag>Control</tag>
+			<tag>ColorTemperature</tag>
 		</tags>
 	</channel-type>
 
@@ -70,11 +72,6 @@
 		<item-type>Number</item-type>
 		<label>Alarm System</label>
 		<description>The light blinks if alarm is set.</description>
-		<category>ALARM</category>
-		<tags>
-			<tag>Hue</tag>
-			<tag>AlarmSystem</tag>
-		</tags>
 		<state min="0" max="100.0" step="10.0" pattern="%d Peek">
 			<options>
 				<option value="SOUND">My great sound.</option>
@@ -85,13 +82,13 @@
 
 	<!-- Motion Channel -->
 	<channel-type id="motion" advanced="true">
-		<item-type>Number</item-type>
+		<kind>trigger</kind>
 		<label>Motion Sensor</label>
 		<description>The sensor detecting motion.</description>
-		<category>MOTION</category>
+		<category>Motion</category>
 		<tags>
-			<tag>Hue</tag>
-			<tag>AlarmSystem</tag>
+			<tag>Status</tag>
+			<tag>Presence</tag>
 		</tags>
 	</channel-type>
 

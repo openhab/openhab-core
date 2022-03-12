@@ -73,9 +73,8 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         return defaultValue;
     }
 
-    private String readItemType(NodeIterator nodeIterator) throws ConversionException {
-        return requireNonEmpty((String) nodeIterator.nextValue("item-type", false),
-                "ChannelType 'itemType' must not be null or empty.");
+    private @Nullable String readItemType(NodeIterator nodeIterator) throws ConversionException {
+        return (String) nodeIterator.nextValue("item-type", false);
     }
 
     private @Nullable String readKind(NodeIterator nodeIterator) throws ConversionException {
@@ -200,6 +199,7 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         URI configDescriptionURI = (URI) configDescriptionObjects[0];
         final ChannelTypeBuilder<?> builder;
         if (cKind == ChannelKind.STATE) {
+            itemType = requireNonEmpty(itemType, "ChannelType 'itemType' must not be null or empty.");
             builder = ChannelTypeBuilder.state(channelTypeUID, label, itemType).isAdvanced(advanced)
                     .withConfigDescriptionURI(configDescriptionURI)
                     .withStateDescriptionFragment(stateDescriptionFragment).withAutoUpdatePolicy(autoUpdatePolicy)
