@@ -170,7 +170,7 @@ public class PersistenceExtensionsTest {
     @Test
     public void testHistoricSwitchState() {
         ZonedDateTime now = ZonedDateTime.now().truncatedTo(ChronoUnit.HOURS);
-        HistoricItem historicItem = PersistenceExtensions.historicState(switchItem, now.minusHours(15),
+        HistoricItem historicItem = PersistenceExtensions.historicState(switchItem, now.minusHours(15).minusMinutes(1),
                 TestPersistenceService.ID);
         assertNull(historicItem);
 
