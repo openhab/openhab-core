@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.module.timer.internal;
 
-import static org.eclipse.jdt.annotation.Checks.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -87,7 +87,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         }, 3000, 100);
 
         // start rule engine
-        RuleEngineImpl ruleEngine = requireNonNull((RuleEngineImpl) getService(RuleManager.class));
+        RuleEngineImpl ruleEngine = Objects.requireNonNull((RuleEngineImpl) getService(RuleManager.class));
         ruleEngine.onReadyMarkerAdded(new ReadyMarker("", ""));
         waitForAssert(() -> assertTrue(ruleEngine.isStarted()));
     }

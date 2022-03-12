@@ -12,12 +12,12 @@
  */
 package org.openhab.core.binding.xml.test;
 
-import static org.eclipse.jdt.annotation.Checks.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -88,7 +88,7 @@ public class BindingInfoTest extends JavaOSGiTest {
             Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos();
             BindingInfo bindingInfo = bindingInfos.iterator().next();
 
-            URI configDescriptionURI = requireNonNull(bindingInfo.getConfigDescriptionURI());
+            URI configDescriptionURI = Objects.requireNonNull(bindingInfo.getConfigDescriptionURI());
             ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
             List<ConfigDescriptionParameter> parameters = configDescription.getParameters();
             assertThat(parameters.size(), is(2));
