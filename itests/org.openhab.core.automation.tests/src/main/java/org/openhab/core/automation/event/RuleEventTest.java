@@ -13,7 +13,6 @@
 package org.openhab.core.automation.event;
 
 import static java.util.Map.entry;
-import static org.eclipse.jdt.annotation.Checks.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -102,7 +102,7 @@ public class RuleEventTest extends JavaOSGiTest {
         registerVolatileStorageService();
 
         // start rule engine
-        RuleEngineImpl ruleEngine = requireNonNull((RuleEngineImpl) getService(RuleManager.class));
+        RuleEngineImpl ruleEngine = Objects.requireNonNull((RuleEngineImpl) getService(RuleManager.class));
         ruleEngine.onReadyMarkerAdded(new ReadyMarker("", ""));
         waitForAssert(() -> assertTrue(ruleEngine.isStarted()));
     }
