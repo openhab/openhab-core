@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.io.jetty.certificate.internal;
+package org.openhab.core.io.jetty.certificate.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
