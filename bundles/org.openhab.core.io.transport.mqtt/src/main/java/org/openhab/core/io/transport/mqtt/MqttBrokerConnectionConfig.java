@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Contains configuration for a MqttBrokerConnection. Necessary to add a new broker connection the {@link MqttService}.
+ * Contains configuration for a MqttBrokerConnection.
  *
  * @author David Graeff - Initial contribution
  * @author Mark Herwege - Added flag for hostname validation
@@ -53,7 +53,7 @@ public class MqttBrokerConnectionConfig {
         if (name != null && name.length() > 0) {
             return name;
         } else {
-            StringBuffer b = new StringBuffer();
+            StringBuilder b = new StringBuilder();
             if (host != null) {
                 b.append(host);
             }
@@ -74,7 +74,7 @@ public class MqttBrokerConnectionConfig {
      */
     @Override
     public String toString() {
-        StringBuffer b = new StringBuffer();
+        StringBuilder b = new StringBuilder();
         if (name != null) {
             b.append(name);
             b.append(", ");
