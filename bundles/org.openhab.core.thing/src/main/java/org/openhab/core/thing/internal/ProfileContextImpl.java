@@ -38,9 +38,7 @@ public class ProfileContextImpl implements ProfileContext {
     private final List<Class<? extends Command>> acceptedCommandTypes;
 
     public ProfileContextImpl(Configuration configuration) {
-        this.configuration = configuration;
-        this.acceptedDataTypes = List.of();
-        this.acceptedCommandTypes = List.of();
+        this(configuration, List.of(), List.of());
     }
 
     public ProfileContextImpl(Configuration configuration, List<Class<? extends State>> acceptedDataTypes,
