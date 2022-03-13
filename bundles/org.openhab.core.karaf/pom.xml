@@ -66,8 +66,7 @@
       <artifactId>org.openhab.core.io.rest</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
-    </dependency>>
-
+    </dependency>
   </dependencies>
 
 </project>
