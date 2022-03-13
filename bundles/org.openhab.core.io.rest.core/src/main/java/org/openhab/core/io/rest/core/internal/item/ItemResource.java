@@ -13,14 +13,17 @@
 package org.openhab.core.io.rest.core.internal.item;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -75,6 +78,7 @@ import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.RollershutterItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.RawType;
 import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
@@ -276,6 +280,47 @@ public class ItemResource implements RESTResource {
             return Response.ok(item.getState().toFullString()).build();
         } else {
             return getItemNotFoundResponse(itemname);
+        }
+    }
+
+    /**
+     *
+     * @param itemname
+     * @return
+     */
+    @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
+    @Path("/{itemname: [a-zA-Z_0-9]+}/state")
+    @Operation(operationId = "getItemState", summary = "Gets the state of an item.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "Item state is not RawType"),
+            @ApiResponse(responseCode = "404", description = "Item not found"),
+            @ApiResponse(responseCode = "415", description = "MediaType not supported by item state") })
+    public Response getBinaryItemState(@HeaderParam("Accept") @Nullable String mediaType,
+            @PathParam("itemname") @Parameter(description = "item name") String itemname) {
+        List<String> acceptedMediaTypes = Arrays.stream(Objects.requireNonNullElse(mediaType, "").split(","))
+                .peek(String::trim).collect(Collectors.toList());
+        // get item
+        Item item = getItem(itemname);
+
+        // if it exists
+        if (item != null) {
+            State state = item.getState();
+            if (state instanceof RawType) {
+                String mimeType = ((RawType) state).getMimeType();
+                byte[] data = ((RawType) state).getBytes();
+                if ((acceptedMediaTypes.contains("image/*") && mimeType.startsWith("image/"))
+                        || acceptedMediaTypes.contains(mimeType)) {
+                    return Response.ok(data).type(mimeType).build();
+                } else if (acceptedMediaTypes.contains(MediaType.APPLICATION_OCTET_STREAM)) {
+                    return Response.ok(data).type(MediaType.APPLICATION_OCTET_STREAM).build();
+                } else {
+                    return Response.status(Status.UNSUPPORTED_MEDIA_TYPE).build();
+                }
+            }
+            return Response.status(Status.BAD_REQUEST).build();
+        } else {
+            return Response.status(Status.NOT_FOUND).build();
         }
     }
 
