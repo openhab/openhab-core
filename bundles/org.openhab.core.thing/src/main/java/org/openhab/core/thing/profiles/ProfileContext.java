@@ -12,10 +12,13 @@
  */
 package org.openhab.core.thing.profiles;
 
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 /**
  * The profile's context
@@ -23,6 +26,7 @@ import org.openhab.core.config.core.Configuration;
  * It gives access to related information like the profile's configuration or a scheduler.
  *
  * @author Simon Kaufmann - Initial contribution
+ * @author Jan N. Klug - Add accepted type methods
  */
 @NonNullByDefault
 public interface ProfileContext {
@@ -40,4 +44,26 @@ public interface ProfileContext {
      * @return the scheduler
      */
     ScheduledExecutorService getExecutorService();
+
+    /**
+     * Get the list of accepted data types for state updates to the linked item
+     *
+     * This is an optional method and will return an empty list if not implemented.
+     *
+     * @return A list of all accepted data types
+     */
+    default List<Class<? extends State>> getAcceptedDataTypes() {
+        return List.of();
+    }
+
+    /**
+     * Get the list of accepted command types for commands send to the linked item
+     *
+     * This is an optional method and will return an empty list if not implemented.
+     *
+     * @return A list of all accepted command types
+     */
+    default List<Class<? extends Command>> getAcceptedCommandTypes() {
+        return List.of();
+    }
 }

@@ -12,17 +12,21 @@
  */
 package org.openhab.core.thing.internal;
 
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.profiles.ProfileContext;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 /**
  * {@link ProfileContext} implementation.
  *
  * @author Simon Kaufmann - Initial contribution
+ * @author Jan N. Klug - Add accepted type methods
  */
 @NonNullByDefault
 public class ProfileContextImpl implements ProfileContext {
@@ -30,8 +34,18 @@ public class ProfileContextImpl implements ProfileContext {
     private static final String THREAD_POOL_NAME = "profiles";
     private final Configuration configuration;
 
+    private final List<Class<? extends State>> acceptedDataTypes;
+    private final List<Class<? extends Command>> acceptedCommandTypes;
+
     public ProfileContextImpl(Configuration configuration) {
+        this(configuration, List.of(), List.of());
+    }
+
+    public ProfileContextImpl(Configuration configuration, List<Class<? extends State>> acceptedDataTypes,
+            List<Class<? extends Command>> acceptedCommandTypes) {
         this.configuration = configuration;
+        this.acceptedDataTypes = acceptedDataTypes;
+        this.acceptedCommandTypes = acceptedCommandTypes;
     }
 
     @Override
@@ -42,5 +56,15 @@ public class ProfileContextImpl implements ProfileContext {
     @Override
     public ScheduledExecutorService getExecutorService() {
         return ThreadPoolManager.getScheduledPool(THREAD_POOL_NAME);
+    }
+
+    @Override
+    public List<Class<? extends State>> getAcceptedDataTypes() {
+        return acceptedDataTypes;
+    }
+
+    @Override
+    public List<Class<? extends Command>> getAcceptedCommandTypes() {
+        return acceptedCommandTypes;
     }
 }
