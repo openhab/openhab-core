@@ -1020,6 +1020,9 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         state.callback.statusUpdated(thing, onlineNone);
 
         assertThat(thing.getStatusInfo(), is(removingNone));
+
+        // handleRemoval is called when thing is fully initialized and shall be removed
+        verify(thingHandler).handleRemoval();
     }
 
     private void expectException(Runnable runnable, Class<? extends Exception> exceptionType) {
@@ -1061,6 +1064,30 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         final ThingStatusInfo uninitializedHandlerMissing = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_MISSING_ERROR).build();
         waitForAssert(() -> assertThat(thing.getStatusInfo(), is(uninitializedHandlerMissing)));
+    }
+
+    @Test
+    public void thingManagerHandlesThingStatusUpdatesRemovingAndInitializingCorrectly() {
+        registerThingTypeProvider();
+
+        ThingHandler thingHandler = mock(ThingHandler.class);
+        when(thingHandler.getThing()).thenReturn(thing);
+
+        ThingHandlerFactory thingHandlerFactory = mock(ThingHandlerFactory.class);
+        when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
+        when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
+
+        registerService(thingHandlerFactory);
+
+        final ThingStatusInfo removingNone = ThingStatusInfoBuilder.create(ThingStatus.REMOVING, ThingStatusDetail.NONE)
+                .build();
+        thing.setStatusInfo(removingNone);
+
+        managedThingProvider.add(thing);
+
+        // verify thing handler initialize is called but thing state stays in REMOVING
+        verify(thingHandler).initialize();
+        assertThat(thing.getStatusInfo(), is(removingNone));
     }
 
     @Test
