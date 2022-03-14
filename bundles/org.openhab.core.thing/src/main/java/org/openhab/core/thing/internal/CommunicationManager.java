@@ -298,14 +298,15 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             Channel channel = thing.getChannel(link.getLinkedUID());
             if (channel != null) {
                 context = new ProfileContextImpl(link.getConfiguration(), item.getAcceptedDataTypes(),
-                        item.getAcceptedCommandTypes(),
-                        acceptedCommandTypeMap.getOrDefault(channel.getAcceptedItemType(), List.of()));
+                        item.getAcceptedCommandTypes(), acceptedCommandTypeMap.getOrDefault(
+                                Objects.requireNonNullElse(channel.getAcceptedItemType(), ""), List.of()));
             }
         }
 
         if (context == null) {
-            logger.debug("Could not create channel context, item or channel missing in registry.");
+            logger.debug("Could not create full channel context, item or channel missing in registry.");
             return null;
+            // context = new ProfileContextImpl(link.getConfiguration());
         }
 
         if (supportsProfileTypeUID(defaultProfileFactory, profileTypeUID)) {
