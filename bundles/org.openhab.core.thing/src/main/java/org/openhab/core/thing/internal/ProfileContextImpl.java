@@ -36,16 +36,19 @@ public class ProfileContextImpl implements ProfileContext {
 
     private final List<Class<? extends State>> acceptedDataTypes;
     private final List<Class<? extends Command>> acceptedCommandTypes;
+    private final List<Class<? extends Command>> handlerAcceptedCommandTypes;
 
     public ProfileContextImpl(Configuration configuration) {
-        this(configuration, List.of(), List.of());
+        this(configuration, List.of(), List.of(), List.of());
     }
 
     public ProfileContextImpl(Configuration configuration, List<Class<? extends State>> acceptedDataTypes,
-            List<Class<? extends Command>> acceptedCommandTypes) {
+            List<Class<? extends Command>> acceptedCommandTypes,
+            List<Class<? extends Command>> handlerAcceptedCommandTypes) {
         this.configuration = configuration;
         this.acceptedDataTypes = acceptedDataTypes;
         this.acceptedCommandTypes = acceptedCommandTypes;
+        this.handlerAcceptedCommandTypes = handlerAcceptedCommandTypes;
     }
 
     @Override
@@ -66,5 +69,10 @@ public class ProfileContextImpl implements ProfileContext {
     @Override
     public List<Class<? extends Command>> getAcceptedCommandTypes() {
         return acceptedCommandTypes;
+    }
+
+    @Override
+    public List<Class<? extends Command>> getHandlerAcceptedCommandTypes() {
+        return handlerAcceptedCommandTypes;
     }
 }

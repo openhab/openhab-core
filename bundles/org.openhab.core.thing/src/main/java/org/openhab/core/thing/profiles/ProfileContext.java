@@ -66,4 +66,15 @@ public interface ProfileContext {
     default List<Class<? extends Command>> getAcceptedCommandTypes() {
         return List.of();
     }
+
+    /**
+     * Get the list of accepted command types for commands send to the handler
+     *
+     * This is an optional method and will return an empty list if not implemented.
+     *
+     * @return A list of all accepted command types
+     */
+    default List<Class<? extends Command>> getHandlerAcceptedCommandTypes() {
+        return List.of();
+    }
 }
