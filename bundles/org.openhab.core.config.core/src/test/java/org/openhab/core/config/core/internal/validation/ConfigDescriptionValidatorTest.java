@@ -90,12 +90,18 @@ public class ConfigDescriptionValidatorTest {
 
     private static final String DECIMAL_PARAM_NAME = "decimal-param";
     private static final String DECIMAL_REQUIRED_PARAM_NAME = "decimal-required-param";
+    private static final String DECIMAL_WITH_LIMITED_OPTIONS_NAME = "decimal-with-limited-options-param";
     private static final String DECIMAL_MIN_PARAM_NAME = "decimal-min-name";
     private static final String DECIMAL_MAX_PARAM_NAME = "decimal-max-name";
 
-    private static final List<ParameterOption> PARAMETER_OPTIONS = List.of( //
+    private static final List<ParameterOption> TEXT_PARAMETER_OPTIONS = List.of( //
             new ParameterOption("http", "HTTP"), //
             new ParameterOption("https", "HTTPS") //
+    );
+
+    private static final List<ParameterOption> DECIMAL_PARAMETER_OPTIONS = List.of( //
+            new ParameterOption("2", "Double"), //
+            new ParameterOption("0.5", "Half") //
     );
 
     private static final ConfigDescriptionParameter BOOL_PARAM = ConfigDescriptionParameterBuilder
@@ -118,10 +124,10 @@ public class ConfigDescriptionValidatorTest {
             .withPattern(PATTERN).build();
     private static final ConfigDescriptionParameter TXT_PARAM_WITH_LIMITED_OPTIONS = ConfigDescriptionParameterBuilder
             .create(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, ConfigDescriptionParameter.Type.TEXT)
-            .withOptions(PARAMETER_OPTIONS).build();
+            .withOptions(TEXT_PARAMETER_OPTIONS).build();
     private static final ConfigDescriptionParameter TXT_PARAM_WITH_UNLIMITED_OPTIONS = ConfigDescriptionParameterBuilder
             .create(TXT_PARAM_WITH_UNLIMITED_OPTIONS_NAME, ConfigDescriptionParameter.Type.TEXT)
-            .withOptions(PARAMETER_OPTIONS).withLimitToOptions(false).build();
+            .withOptions(TEXT_PARAMETER_OPTIONS).withLimitToOptions(false).build();
     private static final ConfigDescriptionParameter TXT_MULTIPLE_LIMIT_PARAM = ConfigDescriptionParameterBuilder
             .create(TXT_MULTIPLE_LIMIT_PARAM_NAME, Type.TEXT).withMultiple(true).withMultipleLimit(2).build();
 
@@ -138,6 +144,8 @@ public class ConfigDescriptionValidatorTest {
             .create(DECIMAL_PARAM_NAME, ConfigDescriptionParameter.Type.DECIMAL).build();
     private static final ConfigDescriptionParameter DECIMAL_REQUIRED_PARAM = ConfigDescriptionParameterBuilder
             .create(DECIMAL_REQUIRED_PARAM_NAME, ConfigDescriptionParameter.Type.DECIMAL).withRequired(true).build();
+    private static final ConfigDescriptionParameter DECIMAL_WITH_LIMITED_OPTIONS_PARAM_OPTIONS = ConfigDescriptionParameterBuilder
+            .create(DECIMAL_WITH_LIMITED_OPTIONS_NAME, Type.DECIMAL).withOptions(DECIMAL_PARAMETER_OPTIONS).build();
     private static final ConfigDescriptionParameter DECIMAL_MIN_PARAM = ConfigDescriptionParameterBuilder
             .create(DECIMAL_MIN_PARAM_NAME, ConfigDescriptionParameter.Type.DECIMAL).withMinimum(DECIMAL_MIN).build();
     private static final ConfigDescriptionParameter DECIMAL_MAX_PARAM = ConfigDescriptionParameterBuilder
@@ -149,8 +157,8 @@ public class ConfigDescriptionValidatorTest {
             .withParameters(List.of(BOOL_PARAM, BOOL_REQUIRED_PARAM, TXT_PARAM, TXT_REQUIRED_PARAM, TXT_MIN_PARAM,
                     TXT_MAX_PARAM, TXT_PATTERN_PARAM, TXT_MAX_PATTERN_PARAM, TXT_PARAM_WITH_LIMITED_OPTIONS,
                     TXT_PARAM_WITH_UNLIMITED_OPTIONS, TXT_MULTIPLE_LIMIT_PARAM, INT_PARAM, INT_REQUIRED_PARAM,
-                    INT_MIN_PARAM, INT_MAX_PARAM, DECIMAL_PARAM, DECIMAL_REQUIRED_PARAM, DECIMAL_MIN_PARAM,
-                    DECIMAL_MAX_PARAM))
+                    INT_MIN_PARAM, INT_MAX_PARAM, DECIMAL_PARAM, DECIMAL_REQUIRED_PARAM,
+                    DECIMAL_WITH_LIMITED_OPTIONS_PARAM_OPTIONS, DECIMAL_MIN_PARAM, DECIMAL_MAX_PARAM))
             .build();
 
     private @NonNullByDefault({}) Map<String, Object> params;
@@ -188,6 +196,7 @@ public class ConfigDescriptionValidatorTest {
         params.put(INT_MAX_PARAM_NAME, MAX);
         params.put(DECIMAL_PARAM_NAME, null);
         params.put(DECIMAL_REQUIRED_PARAM_NAME, 0f);
+        params.put(DECIMAL_WITH_LIMITED_OPTIONS_NAME, new BigDecimal("2.0"));
         params.put(DECIMAL_MIN_PARAM_NAME, DECIMAL_MIN);
         params.put(DECIMAL_MAX_PARAM_NAME, DECIMAL_MAX);
     }
@@ -427,7 +436,7 @@ public class ConfigDescriptionValidatorTest {
         String parameterValue = "ftp";
         List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(
                 TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, MessageKey.OPTIONS_VIOLATED.defaultMessage,
-                MessageKey.OPTIONS_VIOLATED.key, parameterValue, PARAMETER_OPTIONS));
+                MessageKey.OPTIONS_VIOLATED.key, parameterValue, TEXT_PARAMETER_OPTIONS));
         params.put(TXT_PARAM_WITH_LIMITED_OPTIONS_NAME, parameterValue);
         ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
                 () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
@@ -438,6 +447,24 @@ public class ConfigDescriptionValidatorTest {
     public void assertValidationThrowsNoExceptionForAllowedUnlimitedParameterOption() {
         params.put(TXT_PARAM_WITH_UNLIMITED_OPTIONS_NAME, "ftp");
         Assertions.assertDoesNotThrow(() -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+    }
+
+    @Test
+    public void assertValidationThrowsNoExceptionForAllowedDecimalParameterOption() {
+        params.put(DECIMAL_WITH_LIMITED_OPTIONS_NAME, new BigDecimal("0.5"));
+        Assertions.assertDoesNotThrow(() -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+    }
+
+    @Test
+    public void assertValidationThrowsExceptionForNotAllowedDecimalParameterOption() {
+        BigDecimal parameterValue = new BigDecimal("0.1");
+        params.put(DECIMAL_WITH_LIMITED_OPTIONS_NAME, parameterValue);
+        List<ConfigValidationMessage> expected = List.of(new ConfigValidationMessage(DECIMAL_WITH_LIMITED_OPTIONS_NAME,
+                MessageKey.OPTIONS_VIOLATED.defaultMessage, MessageKey.OPTIONS_VIOLATED.key,
+                String.valueOf(parameterValue), DECIMAL_PARAMETER_OPTIONS));
+        ConfigValidationException exception = Assertions.assertThrows(ConfigValidationException.class,
+                () -> configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI));
+        assertThat(getConfigValidationMessages(exception), is(expected));
     }
 
     // ===========================================================================

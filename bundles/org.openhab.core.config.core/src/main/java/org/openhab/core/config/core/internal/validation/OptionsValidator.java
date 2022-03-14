@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.core.internal.validation;
 
+import java.math.BigDecimal;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
@@ -21,6 +23,7 @@ import org.openhab.core.config.core.validation.ConfigValidationMessage;
  * The {@link ConfigDescriptionParameterValidator} for the options of a {@link ConfigDescriptionParameter}.
  *
  * @author Christoph Weitkamp - Initial contribution
+ * @author Jan N. Klug - Extend for decimal types
  */
 @NonNullByDefault
 final class OptionsValidator implements ConfigDescriptionParameterValidator {
@@ -31,12 +34,22 @@ final class OptionsValidator implements ConfigDescriptionParameterValidator {
             return null;
         }
 
-        // Option values are a string, so we can do a simple compare
-        if (param.getOptions().stream().map(o -> o.getValue()).noneMatch(v -> v.equals(value.toString()))) {
+        boolean invalid;
+
+        if (param.getType() == ConfigDescriptionParameter.Type.DECIMAL) {
+            BigDecimal bdValue = new BigDecimal(value.toString());
+            invalid = param.getOptions().stream().map(o -> new BigDecimal(o.getValue()))
+                    .noneMatch(v -> v.compareTo(bdValue) == 0);
+        } else {
+            invalid = param.getOptions().stream().map(o -> o.getValue()).noneMatch(v -> v.equals(value.toString()));
+        }
+
+        if (invalid) {
             MessageKey messageKey = MessageKey.OPTIONS_VIOLATED;
             return new ConfigValidationMessage(param.getName(), messageKey.defaultMessage, messageKey.key,
                     String.valueOf(value), param.getOptions());
         }
+
         return null;
     }
 }
