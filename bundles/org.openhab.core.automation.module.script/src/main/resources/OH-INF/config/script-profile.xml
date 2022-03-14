@@ -5,12 +5,12 @@
 	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="profile:system:script">
-		<parameter name="inboundScript" type="text">
-			<label>Inbound Script</label>
+		<parameter name="toItem" type="text">
+			<label>To Item Script</label>
 			<description>she Script for transforming states and commands from handler to item.</description>
 		</parameter>
-		<parameter name="outboundScript" type="text">
-			<label>Outbound Script</label>
+		<parameter name="toHandler" type="text">
+			<label>To Handler Script</label>
 			<description>The Script for transforming states and commands from item to handler.</description>
 		</parameter>
 		<parameter name="scriptType" type="text" required="true">

@@ -17,9 +17,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_INBOUND_SCRIPT;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_OUTBOUND_SCRIPT;
 import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_SCRIPT_TYPE;
+import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_HANDLER_SCRIPT;
+import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_ITEM_SCRIPT;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +47,8 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 /**
  * The {@link ScriptProfileTest} contains tests for the {@link ScriptProfile}
@@ -81,8 +83,8 @@ public class ScriptProfileTest {
 
     @Test
     public void testScriptNotExecutedAndNoValueForwardedToCallbackIfScriptTypeMissing() {
-        ProfileContext profileContext = ProfileContextBuilder.create().withInboundScript("inScript")
-                .withOutboundScript("outScript").build();
+        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
+                .withToHandlerScript("outScript").build();
 
         ScriptProfile scriptProfile = new ScriptProfile(profileCallback, profileContext, scriptEngineManager);
 
@@ -115,7 +117,7 @@ public class ScriptProfileTest {
     @Test
     public void testScriptNotExecutedAndNoValueForwardedToCallbackIfUnsupportedScriptTypeDefined() {
         ProfileContext profileContext = ProfileContextBuilder.create().withScriptType(UNSUPPORTED_SCRIPT_TYPE)
-                .withInboundScript("inScript").withOutboundScript("outScript").build();
+                .withToItemScript("inScript").withToHandlerScript("outScript").build();
 
         ScriptProfile scriptProfile = new ScriptProfile(profileCallback, profileContext, scriptEngineManager);
 
@@ -132,7 +134,7 @@ public class ScriptProfileTest {
     @Test
     public void scriptExecutionErrorForwardsNoValueToCallback() throws ScriptException {
         ProfileContext profileContext = ProfileContextBuilder.create().withScriptType(SUPPORTED_SCRIPT_TYPE)
-                .withInboundScript("inScript").withOutboundScript("outScript").build();
+                .withToItemScript("inScript").withToHandlerScript("outScript").build();
 
         when(scriptEngine.eval((String) any())).thenThrow(new ScriptException("intentional failure"));
 
@@ -152,7 +154,7 @@ public class ScriptProfileTest {
     @Test
     public void scriptExecutionResultNullForwardsNoValueToCallback() throws ScriptException {
         ProfileContext profileContext = ProfileContextBuilder.create().withScriptType(SUPPORTED_SCRIPT_TYPE)
-                .withInboundScript("inScript").withOutboundScript("outScript").build();
+                .withToItemScript("inScript").withToHandlerScript("outScript").build();
 
         when(scriptEngine.eval((String) any())).thenReturn(null);
 
@@ -172,11 +174,9 @@ public class ScriptProfileTest {
     @Test
     public void scriptExecutionResultForwardsTransformedValueToCallback() throws ScriptException {
         ProfileContext profileContext = ProfileContextBuilder.create().withScriptType(SUPPORTED_SCRIPT_TYPE)
-                .withInboundScript("inScript").withOutboundScript("outScript").build();
-
-        when(profileCallback.getAcceptedCommandTypes()).thenReturn(List.of(OnOffType.class));
-        when(profileCallback.getAcceptedDataTypes()).thenReturn(List.of(OnOffType.class));
-        when(profileCallback.getHandlerAcceptedCommandTypes()).thenReturn(List.of(OnOffType.class));
+                .withToItemScript("inScript").withToHandlerScript("outScript")
+                .withAcceptedCommandTypes(List.of(OnOffType.class)).withAcceptedDataTypes(List.of(OnOffType.class))
+                .withHandlerAcceptedCommandTypes(List.of(OnOffType.class)).build();
 
         when(scriptEngine.eval((String) any())).thenReturn(OnOffType.OFF.toString());
 
@@ -194,13 +194,11 @@ public class ScriptProfileTest {
     }
 
     @Test
-    public void onlyInboundScriptDoesNotForwardOutboundCommands() throws ScriptException {
+    public void onlyToItemScriptDoesNotForwardOutboundCommands() throws ScriptException {
         ProfileContext profileContext = ProfileContextBuilder.create().withScriptType(SUPPORTED_SCRIPT_TYPE)
-                .withInboundScript("inScript").build();
-
-        when(profileCallback.getAcceptedCommandTypes()).thenReturn(List.of(OnOffType.class));
-        when(profileCallback.getAcceptedDataTypes()).thenReturn(List.of(OnOffType.class));
-        when(profileCallback.getHandlerAcceptedCommandTypes()).thenReturn(List.of(DecimalType.class));
+                .withToItemScript("inScript").withAcceptedCommandTypes(List.of(OnOffType.class))
+                .withAcceptedDataTypes(List.of(OnOffType.class))
+                .withHandlerAcceptedCommandTypes(List.of(DecimalType.class)).build();
 
         when(scriptEngine.eval((String) any())).thenReturn(OnOffType.OFF.toString());
 
@@ -218,13 +216,11 @@ public class ScriptProfileTest {
     }
 
     @Test
-    public void onlyOutboundScriptDoesNotForwardInboundCommands() throws ScriptException {
+    public void onlyToHandlerScriptDoesNotForwardInboundCommands() throws ScriptException {
         ProfileContext profileContext = ProfileContextBuilder.create().withScriptType(SUPPORTED_SCRIPT_TYPE)
-                .withOutboundScript("outScript").build();
-
-        when(profileCallback.getAcceptedCommandTypes()).thenReturn(List.of(DecimalType.class));
-        when(profileCallback.getAcceptedDataTypes()).thenReturn(List.of(DecimalType.class));
-        when(profileCallback.getHandlerAcceptedCommandTypes()).thenReturn(List.of(OnOffType.class));
+                .withToHandlerScript("outScript").withAcceptedCommandTypes(List.of(DecimalType.class))
+                .withAcceptedDataTypes(List.of(DecimalType.class))
+                .withHandlerAcceptedCommandTypes(List.of(OnOffType.class)).build();
 
         when(scriptEngine.eval((String) any())).thenReturn(OnOffType.OFF.toString());
 
@@ -244,11 +240,9 @@ public class ScriptProfileTest {
     @Test
     public void incompatibleStateOrCommandNotForwardedToCallback() throws ScriptException {
         ProfileContext profileContext = ProfileContextBuilder.create().withScriptType(SUPPORTED_SCRIPT_TYPE)
-                .withInboundScript("inScript").withOutboundScript("outScript").build();
-
-        when(profileCallback.getAcceptedCommandTypes()).thenReturn(List.of(DecimalType.class));
-        when(profileCallback.getAcceptedDataTypes()).thenReturn(List.of(PercentType.class));
-        when(profileCallback.getHandlerAcceptedCommandTypes()).thenReturn(List.of(HSBType.class));
+                .withToItemScript("inScript").withToHandlerScript("outScript")
+                .withAcceptedCommandTypes(List.of(DecimalType.class)).withAcceptedDataTypes(List.of(PercentType.class))
+                .withHandlerAcceptedCommandTypes(List.of(HSBType.class)).build();
 
         when(scriptEngine.eval((String) any())).thenReturn(OnOffType.OFF.toString());
 
@@ -267,23 +261,42 @@ public class ScriptProfileTest {
 
     private static class ProfileContextBuilder {
         private final Map<String, Object> configuration = new HashMap<>();
+        private List<Class<? extends State>> acceptedDataTypes = List.of();
+        private List<Class<? extends Command>> acceptedCommandTypes = List.of();
+        private List<Class<? extends Command>> handlerAcceptedCommandTypes = List.of();
 
         public static ProfileContextBuilder create() {
             return new ProfileContextBuilder();
         }
 
-        public ProfileContextBuilder withInboundScript(String inboundScript) {
-            configuration.put(CONFIG_INBOUND_SCRIPT, inboundScript);
+        public ProfileContextBuilder withToItemScript(String toItem) {
+            configuration.put(CONFIG_TO_ITEM_SCRIPT, toItem);
             return this;
         }
 
-        public ProfileContextBuilder withOutboundScript(String outboundScript) {
-            configuration.put(CONFIG_OUTBOUND_SCRIPT, outboundScript);
+        public ProfileContextBuilder withToHandlerScript(String toHandlerScript) {
+            configuration.put(CONFIG_TO_HANDLER_SCRIPT, toHandlerScript);
             return this;
         }
 
         public ProfileContextBuilder withScriptType(String scriptType) {
             configuration.put(CONFIG_SCRIPT_TYPE, scriptType);
+            return this;
+        }
+
+        public ProfileContextBuilder withAcceptedDataTypes(List<Class<? extends State>> acceptedDataTypes) {
+            this.acceptedDataTypes = acceptedDataTypes;
+            return this;
+        }
+
+        public ProfileContextBuilder withAcceptedCommandTypes(List<Class<? extends Command>> acceptedCommandTypes) {
+            this.acceptedCommandTypes = acceptedCommandTypes;
+            return this;
+        }
+
+        public ProfileContextBuilder withHandlerAcceptedCommandTypes(
+                List<Class<? extends Command>> handlerAcceptedCommandTypes) {
+            this.handlerAcceptedCommandTypes = handlerAcceptedCommandTypes;
             return this;
         }
 
@@ -297,6 +310,21 @@ public class ScriptProfileTest {
                 @Override
                 public ScheduledExecutorService getExecutorService() {
                     throw new IllegalStateException();
+                }
+
+                @Override
+                public List<Class<? extends State>> getAcceptedDataTypes() {
+                    return acceptedDataTypes;
+                }
+
+                @Override
+                public List<Class<? extends Command>> getAcceptedCommandTypes() {
+                    return acceptedCommandTypes;
+                }
+
+                @Override
+                public List<Class<? extends Command>> getHandlerAcceptedCommandTypes() {
+                    return handlerAcceptedCommandTypes;
                 }
             };
         }
