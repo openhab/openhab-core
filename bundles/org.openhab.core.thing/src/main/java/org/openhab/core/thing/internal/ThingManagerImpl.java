@@ -803,7 +803,7 @@ public class ThingManagerImpl
 
             if (isInitializable(thing, thingType)) {
                 if (ThingStatus.REMOVING.equals(thing.getStatus())) {
-                    // preserve REMOVING state so the callback can later device to remove the thing after it has been
+                    // preserve REMOVING state so the callback can later decide to remove the thing after it has been
                     // initialized
                     logger.debug("Not setting status to INITIALIZING because thing '{}' is in REMOVING status.",
                             thing.getUID());
