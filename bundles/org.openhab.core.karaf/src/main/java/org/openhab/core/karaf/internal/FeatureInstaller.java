@@ -218,14 +218,17 @@ public class FeatureInstaller implements ConfigurationListener {
     private boolean allKarsInstalled() {
         try {
             List<String> karRepos = karService.list();
-            Dictionary<String, Object> felixProperties = configurationAdmin
-                    .getConfiguration("org.apache.felix.fileinstall~deploy").getProperties();
-            String addonsDirectory = (String) felixProperties.get("felix.fileinstall.dir");
-            if (addonsDirectory != null) {
-                return Files.list(Path.of(addonsDirectory)).map(Path::getFileName).map(Path::toString)
-                        .filter(file -> file.endsWith(".kar"))
-                        .map(karFileName -> karFileName.substring(0, karFileName.lastIndexOf(".")))
-                        .allMatch(karRepos::contains);
+            Configuration[] configurations = configurationAdmin
+                    .listConfigurations("(service.factoryPid=org.apache.felix.fileinstall)");
+            if (configurations.length > 0) {
+                Dictionary<String, Object> felixProperties = configurations[0].getProperties();
+                String addonsDirectory = (String) felixProperties.get("felix.fileinstall.dir");
+                if (addonsDirectory != null) {
+                    return Files.list(Path.of(addonsDirectory)).map(Path::getFileName).map(Path::toString)
+                            .filter(file -> file.endsWith(".kar"))
+                            .map(karFileName -> karFileName.substring(0, karFileName.lastIndexOf(".")))
+                            .allMatch(karRepos::contains);
+                }
             }
         } catch (Exception ignored) {
         }
