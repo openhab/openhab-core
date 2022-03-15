@@ -36,7 +36,7 @@ final class OptionsValidator implements ConfigDescriptionParameterValidator {
 
         boolean invalid;
 
-        if (param.getType() == ConfigDescriptionParameter.Type.DECIMAL) {
+        if (param.getType() == ConfigDescriptionParameter.Type.DECIMAL || param.getType() == ConfigDescriptionParameter.Type.INTEGER) {
             BigDecimal bdValue = new BigDecimal(value.toString());
             invalid = param.getOptions().stream().map(o -> new BigDecimal(o.getValue()))
                     .noneMatch(v -> v.compareTo(bdValue) == 0);
