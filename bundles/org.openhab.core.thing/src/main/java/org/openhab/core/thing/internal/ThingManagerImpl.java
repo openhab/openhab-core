@@ -631,7 +631,7 @@ public class ThingManagerImpl
                                 setThingStatus(thing,
                                         buildStatusInfo(ThingStatus.UNINITIALIZED,
                                                 ThingStatusDetail.HANDLER_CONFIGURATION_PENDING,
-                                                e.getValidationMessages().toString()));
+                                                e.getValidationMessages(null).toString()));
                             }
                         }
                     } else {
@@ -812,10 +812,10 @@ public class ThingManagerImpl
                 } else {
                     setThingStatus(thing, buildStatusInfo(ThingStatus.INITIALIZING, ThingStatusDetail.NONE));
                 }
->               doInitializeHandler(handler);
+                doInitializeHandler(handler);
             } catch (ConfigValidationException e) {
                 setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED,
-                        ThingStatusDetail.HANDLER_CONFIGURATION_PENDING, e.getValidationMessages().toString()));
+                        ThingStatusDetail.HANDLER_CONFIGURATION_PENDING, e.getValidationMessages(null).toString()));
             }
         } finally {
             lock.unlock();
