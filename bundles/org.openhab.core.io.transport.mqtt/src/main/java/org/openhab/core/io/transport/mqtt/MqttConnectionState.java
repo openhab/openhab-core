@@ -12,11 +12,14 @@
  */
 package org.openhab.core.io.transport.mqtt;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The connection state of a {@link MqttBrokerConnection}.
  *
  * @author David Graeff - Initial contribution
  */
+@NonNullByDefault
 public enum MqttConnectionState {
     DISCONNECTED,
     CONNECTING,
