@@ -74,7 +74,7 @@ public class ScriptImpl implements Script {
                 interpreter = provider.get(IExpressionInterpreter.class);
             }
             if (interpreter == null) {
-                throw new ScriptExecutionException("Script interpreter couldn't be obtain");
+                throw new ScriptExecutionException("Script interpreter couldn't be obtained");
             }
             try {
                 IEvaluationResult result = interpreter.evaluate(xExpression, evaluationContext,
