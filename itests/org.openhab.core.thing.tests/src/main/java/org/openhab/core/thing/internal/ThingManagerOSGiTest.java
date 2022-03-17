@@ -1563,7 +1563,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         // ThingHandler.initialize() not called, thing status is UNINITIALIZED.HANDLER_CONFIGURATION_PENDING
         ThingStatusInfo uninitializedPending = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_CONFIGURATION_PENDING)
-                .withDescription("@text/missing-or-invalid-configuration").build();
+                .withDescription("{parameter=The parameter is required.}").build();
         verify(thingHandler, never()).initialize();
         assertThat(thing.getStatusInfo(), is(uninitializedPending));
 

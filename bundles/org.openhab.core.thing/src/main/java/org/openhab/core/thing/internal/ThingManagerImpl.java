@@ -617,9 +617,10 @@ public class ThingManagerImpl
                         }
                         thing.setHandler(thingHandler);
 
-                        if (isInitializable(thing, getThingType(thing))) {
+                        try {
+                            validate(thing, getThingType(thing));
                             safeCaller.create(thingHandler, ThingHandler.class).build().thingUpdated(thing);
-                        } else {
+                        } catch (ConfigValidationException e) {
                             final ThingHandlerFactory thingHandlerFactory = findThingHandlerFactory(
                                     thing.getThingTypeUID());
                             if (thingHandlerFactory != null) {
@@ -630,7 +631,7 @@ public class ThingManagerImpl
                                 setThingStatus(thing,
                                         buildStatusInfo(ThingStatus.UNINITIALIZED,
                                                 ThingStatusDetail.HANDLER_CONFIGURATION_PENDING,
-                                                "@text/missing-or-invalid-configuration"));
+                                                e.getValidationMessages(null).toString()));
                             }
                         }
                     } else {
@@ -801,7 +802,8 @@ public class ThingManagerImpl
                         configDescriptionRegistry);
             }
 
-            if (isInitializable(thing, thingType)) {
+            try {
+                validate(thing, thingType);
                 if (ThingStatus.REMOVING.equals(thing.getStatus())) {
                     // preserve REMOVING state so the callback can later decide to remove the thing after it has been
                     // initialized
@@ -811,32 +813,22 @@ public class ThingManagerImpl
                     setThingStatus(thing, buildStatusInfo(ThingStatus.INITIALIZING, ThingStatusDetail.NONE));
                 }
                 doInitializeHandler(handler);
-            } else {
-                logger.debug(
-                        "Thing '{}' not initializable, check if required configuration parameters are present and set values are valid.",
-                        thing.getUID());
+            } catch (ConfigValidationException e) {
                 setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED,
-                        ThingStatusDetail.HANDLER_CONFIGURATION_PENDING, "@text/missing-or-invalid-configuration"));
+                        ThingStatusDetail.HANDLER_CONFIGURATION_PENDING, e.getValidationMessages(null).toString()));
             }
         } finally {
             lock.unlock();
         }
     }
 
-    private boolean isInitializable(Thing thing, @Nullable ThingType thingType) {
-        if (!isComplete(thingType, thing.getUID(), ThingType::getConfigDescriptionURI, thing.getConfiguration())) {
-            return false;
-        }
+    private void validate(Thing thing, @Nullable ThingType thingType) throws ConfigValidationException {
+        validate(thingType, thing.getUID(), ThingType::getConfigDescriptionURI, thing.getConfiguration());
 
         for (Channel channel : thing.getChannels()) {
             ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
-            if (!isComplete(channelType, channel.getUID(), ChannelType::getConfigDescriptionURI,
-                    channel.getConfiguration())) {
-                return false;
-            }
+            validate(channelType, channel.getUID(), ChannelType::getConfigDescriptionURI, channel.getConfiguration());
         }
-
-        return true;
     }
 
     /**
@@ -847,31 +839,24 @@ public class ThingManagerImpl
      * @param configDescriptionURIFunction a function to determine the the config description UID for the given
      *            prototype
      * @param configuration the current configuration
-     * @return true if all required configuration parameters are given, false otherwise
+     * @throws ConfigValidationException if validation failed
      */
-    private <T extends Identifiable<?>> boolean isComplete(@Nullable T prototype, UID targetUID,
-            Function<T, @Nullable URI> configDescriptionURIFunction, Configuration configuration) {
+    private <T extends Identifiable<?>> void validate(@Nullable T prototype, UID targetUID,
+            Function<T, @Nullable URI> configDescriptionURIFunction, Configuration configuration)
+            throws ConfigValidationException {
         if (prototype == null) {
             logger.debug("Prototype for '{}' is not known, assuming it is initializable", targetUID);
-            return true;
+            return;
         }
 
         URI configDescriptionURI = configDescriptionURIFunction.apply(prototype);
         if (configDescriptionURI == null) {
             logger.debug("Config description URI for '{}' not found, assuming '{}' is initializable",
                     prototype.getUID(), targetUID);
-            return true;
+            return;
         }
 
-        try {
-            configDescriptionValidator.validate(configuration.getProperties(), configDescriptionURI);
-        } catch (ConfigValidationException e) {
-            logger.trace("Failed to validate config for '{}' with URI '{}': {}", targetUID, configDescriptionURI,
-                    e.getValidationMessages());
-            return false;
-        }
-
-        return true;
+        configDescriptionValidator.validate(configuration.getProperties(), configDescriptionURI);
     }
 
     private void doInitializeHandler(final ThingHandler thingHandler) {
