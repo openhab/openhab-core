@@ -306,7 +306,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         if (context == null) {
             logger.debug("Could not create full channel context, item or channel missing in registry.");
             return null;
-            // context = new ProfileContextImpl(link.getConfiguration());
         }
 
         if (supportsProfileTypeUID(defaultProfileFactory, profileTypeUID)) {
