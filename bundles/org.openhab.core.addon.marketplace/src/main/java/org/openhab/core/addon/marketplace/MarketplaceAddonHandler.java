@@ -60,10 +60,22 @@ public interface MarketplaceAddonHandler {
 
     /**
      * Uninstalls a given add-on.
-     * Note: This method is only called, if the hander claimed support for the add-on before.
+     * Note: This method is only called, if the handler claimed support for the add-on before.
      *
      * @param addon the add-on to uninstall
      * @throws MarketplaceHandlerException if the uninstallation failed for some reason
      */
     void uninstall(Addon addon) throws MarketplaceHandlerException;
+
+    /**
+     * Add-on handler can implement this method if they are nor ready to accept requests after instantiation.
+     * This may be needed if completing the initialization takes some time (e.g. for installing cached addons).
+     * This cannot be done in the constructor because the OSGi framework does not wait for the constructor to finish
+     * before the service is injected in other services, leading to ServiceExceptions..
+     *
+     * @return true if the initialization finished
+     */
+    default boolean isReady() {
+        return true;
+    }
 }

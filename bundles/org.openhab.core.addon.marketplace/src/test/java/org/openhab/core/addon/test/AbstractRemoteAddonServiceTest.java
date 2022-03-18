@@ -79,6 +79,18 @@ public class AbstractRemoteAddonServiceTest {
     // general tests
 
     @Test
+    public void testSourceNotRefreshedIfAddonHandlerNotReady() {
+        addonHandler = new TestAddonHandler();
+        addonHandler.setReady(false);
+
+        addonService = new TestAddonService(eventPublisher, configurationAdmin, storageService);
+        addonService.addAddonHandler(addonHandler);
+
+        List<Addon> addons = addonService.getAddons(null);
+        Assertions.assertEquals(0, addons.size());
+    }
+
+    @Test
     public void testRemoteDisabledBlocksRemoteCalls() {
         properties.put("remote", false);
         List<Addon> addons = addonService.getAddons(null);

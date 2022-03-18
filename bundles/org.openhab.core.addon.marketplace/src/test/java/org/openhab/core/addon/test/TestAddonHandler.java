@@ -35,6 +35,17 @@ public class TestAddonHandler implements MarketplaceAddonHandler {
 
     private final Set<String> installedAddons = new HashSet<>();
 
+    private boolean isReady = true;
+
+    public void setReady(boolean ready) {
+        isReady = ready;
+    }
+
+    @Override
+    public boolean isReady() {
+        return isReady;
+    }
+
     @Override
     public boolean supports(String type, String contentType) {
         return SUPPORTED_ADDON_TYPES.contains(type) && TEST_ADDON_CONTENT_TYPE.equals(contentType);
@@ -42,6 +53,11 @@ public class TestAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public boolean isInstalled(String id) {
+        if (!isReady) {
+            // this is to catch illegal calls to the service in tests
+            throw new IllegalStateException();
+        }
+
         return installedAddons.contains(id);
     }
 

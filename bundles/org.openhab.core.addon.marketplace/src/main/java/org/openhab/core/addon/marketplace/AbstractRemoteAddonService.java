@@ -39,6 +39,8 @@ import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -69,6 +71,8 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     protected List<Addon> cachedAddons = List.of();
     protected List<String> installedAddons = List.of();
 
+    private final Logger logger = LoggerFactory.getLogger(AbstractRemoteAddonService.class);
+
     public AbstractRemoteAddonService(EventPublisher eventPublisher, ConfigurationAdmin configurationAdmin,
             StorageService storageService, String servicePid) {
         this.eventPublisher = eventPublisher;
@@ -78,6 +82,11 @@ public abstract class AbstractRemoteAddonService implements AddonService {
 
     @Override
     public void refreshSource() {
+        if (!addonHandlers.stream().allMatch(MarketplaceAddonHandler::isReady)) {
+            logger.debug("Add-on service '{}' tried to refresh source before add-on handlers ready. Exiting.",
+                    getClass());
+            return;
+        }
         List<Addon> addons = new ArrayList<>();
         installedAddonStorage.stream().map(e -> Objects.requireNonNull(gson.fromJson(e.getValue(), Addon.class)))
                 .forEach(addons::add);
