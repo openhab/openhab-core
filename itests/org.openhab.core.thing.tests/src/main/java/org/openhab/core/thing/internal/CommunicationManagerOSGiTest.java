@@ -519,6 +519,54 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
+    public void testProfileIsNotReusedOnItemChange() {
+        for (int i = 0; i < 3; i++) {
+            manager.receive(ThingEventFactory.createTriggerEvent(EVENT, TRIGGER_CHANNEL_UID_2));
+        }
+        verify(profileFactoryMock, times(2)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+                isA(ProfileContext.class));
+
+        manager.receive(ItemEventFactory.createUpdateEvent(ITEM_2, ITEM_2));
+
+        for (int i = 0; i < 3; i++) {
+            manager.receive(ThingEventFactory.createTriggerEvent(EVENT, TRIGGER_CHANNEL_UID_2));
+        }
+
+        waitForAssert(() -> {
+            verify(profileFactoryMock, times(3)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+                    isA(ProfileContext.class));
+            verify(profileFactoryMock, atLeast(0)).getSupportedProfileTypeUIDs();
+            verify(profileAdvisorMock, atLeast(0)).getSuggestedProfileTypeUID(any(Channel.class), any());
+        });
+        verifyNoMoreInteractions(profileFactoryMock);
+        verifyNoMoreInteractions(profileAdvisorMock);
+    }
+
+    @Test
+    public void testProfileIsNotReusedOnThingChange() {
+        for (int i = 0; i < 3; i++) {
+            manager.receive(ThingEventFactory.createTriggerEvent(EVENT, TRIGGER_CHANNEL_UID_2));
+        }
+        verify(profileFactoryMock, times(2)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+                isA(ProfileContext.class));
+
+        manager.receive(ThingEventFactory.createUpdateEvent(THING, THING));
+
+        for (int i = 0; i < 3; i++) {
+            manager.receive(ThingEventFactory.createTriggerEvent(EVENT, TRIGGER_CHANNEL_UID_2));
+        }
+
+        waitForAssert(() -> {
+            verify(profileFactoryMock, times(4)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+                    isA(ProfileContext.class));
+            verify(profileFactoryMock, atLeast(0)).getSupportedProfileTypeUIDs();
+            verify(profileAdvisorMock, atLeast(0)).getSuggestedProfileTypeUID(any(Channel.class), any());
+        });
+        verifyNoMoreInteractions(profileFactoryMock);
+        verifyNoMoreInteractions(profileAdvisorMock);
+    }
+
+    @Test
     public void testItemCommandEventTypeDowncast() {
         Thing thing = ThingBuilder
                 .create(THING_TYPE_UID, THING_UID).withChannels(ChannelBuilder
