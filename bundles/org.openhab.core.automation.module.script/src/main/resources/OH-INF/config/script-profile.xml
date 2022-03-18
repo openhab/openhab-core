@@ -5,11 +5,11 @@
 	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="profile:system:script">
-		<parameter name="toItem" type="text">
+		<parameter name="toItemScript" type="text">
 			<label>To Item Script</label>
 			<description>she Script for transforming states and commands from handler to item.</description>
 		</parameter>
-		<parameter name="toHandler" type="text">
+		<parameter name="toHandlerScript" type="text">
 			<label>To Handler Script</label>
 			<description>The Script for transforming states and commands from item to handler.</description>
 		</parameter>
