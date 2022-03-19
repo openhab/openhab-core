@@ -57,7 +57,7 @@ public class PeriodicSchedulerImplTest {
         long offset = times.poll();
         long[] expectedResults = { 200, 500, 800, 1100, 1400 };
         for (long expectedResult : expectedResults) {
-            assertEquals((offset + expectedResult) / 100.0, times.poll().longValue() / 100.0, 0.1,
+            assertEquals((offset + expectedResult) / 100.0, times.poll().longValue() / 100.0, 0.3,
                     "Expected periodic time");
         }
         assertFalse(semaphore.tryAcquire(1, TimeUnit.SECONDS), "No more jobs should have been scheduled");
