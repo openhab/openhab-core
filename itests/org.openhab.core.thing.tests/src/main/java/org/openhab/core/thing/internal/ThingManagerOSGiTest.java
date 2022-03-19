@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.ArrayList;
@@ -133,7 +134,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     @SuppressWarnings("null")
-    public void setUp() {
+    public void setUp() throws IOException {
         thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
                 .withChannels(ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.SWITCH).withKind(ChannelKind.STATE)
                         .withType(CHANNEL_TYPE_UID).build())
@@ -143,6 +144,13 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         configurationAdmin = getService(ConfigurationAdmin.class);
         assertNotNull(configurationAdmin);
+
+        LocaleProvider localeProvider = getService(LocaleProvider.class);
+        assertThat(localeProvider, is(notNullValue()));
+
+        new DefaultLocaleSetter(configurationAdmin).setDefaultLocale(Locale.ENGLISH);
+        waitForAssert(() -> assertThat(localeProvider.getLocale(), is(Locale.ENGLISH)));
+        waitForAssert(() -> assertThat(localeProvider.getLocale(), is(Locale.ENGLISH)));
 
         channelTypeProvider = mock(ChannelTypeProvider.class);
         when(channelTypeProvider.getChannelType(any(ChannelTypeUID.class), nullable(Locale.class)))
@@ -1565,6 +1573,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_CONFIGURATION_PENDING)
                 .withDescription("{parameter=The parameter is required.}").build();
         verify(thingHandler, never()).initialize();
+
         assertThat(thing.getStatusInfo(), is(uninitializedPending));
 
         // set required configuration parameter
