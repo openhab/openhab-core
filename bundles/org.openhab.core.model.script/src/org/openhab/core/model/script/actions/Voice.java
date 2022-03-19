@@ -331,7 +331,7 @@ public class Voice {
     @ActionDoc(text = "executes a simple dialog sequence without keyword spotting for a given audio source")
     public static void listenAndAnswer(@ParamDoc(name = "source") @Nullable String source,
             @ParamDoc(name = "sink") @Nullable String sink) {
-        listenAndAnswer(null, null, null, source, sink, null);
+        listenAndAnswer(null, null, null, source, sink, null, null);
     }
 
     /**
@@ -343,13 +343,15 @@ public class Voice {
      * @param source the name of audio source to use or null to use the default source
      * @param sink the name of audio sink to use or null to use the default sink
      * @param Locale the locale to use or null to use the default locale
+     * @param listeningItem the item to switch ON while listening to a question
      */
     @ActionDoc(text = "executes a simple dialog sequence without keyword spotting for a given audio source")
     public static void listenAndAnswer(@ParamDoc(name = "speech-to-text service") @Nullable String stt,
             @ParamDoc(name = "text-to-speech service") @Nullable String tts,
             @ParamDoc(name = "interpreter") @Nullable String interpreter,
             @ParamDoc(name = "source") @Nullable String source, @ParamDoc(name = "sink") @Nullable String sink,
-            @ParamDoc(name = "locale") @Nullable String locale) {
+            @ParamDoc(name = "locale") @Nullable String locale,
+            @ParamDoc(name = "listening item") @Nullable String listeningItem) {
         AudioSource audioSource = null;
         if (source != null) {
             audioSource = VoiceActionService.audioManager.getSource(source);
@@ -402,7 +404,7 @@ public class Voice {
 
         try {
             VoiceActionService.voiceManager.listenAndAnswer(sttService, ttsService, hliService, audioSource, audioSink,
-                    loc);
+                    loc, listeningItem);
         } catch (IllegalStateException e) {
             logger.warn("Failed executing simple dialog: {}", e.getMessage());
         }

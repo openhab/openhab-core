@@ -191,12 +191,13 @@ public interface VoiceManager {
      * @param source the audio source to use or null to use the default source
      * @param sink the audio sink to use or null to use the default sink
      * @param Locale the locale to use or null to use the default locale
+     * @param listeningItem the item to switch ON while listening to a question
      * @throws IllegalStateException if required services are not all available or the provided locale is not supported
      *             by all these services or a dialog is already started for this audio source
      */
     void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, @Nullable HumanLanguageInterpreter hli,
-            @Nullable AudioSource source, @Nullable AudioSink sink, @Nullable Locale locale)
-            throws IllegalStateException;
+            @Nullable AudioSource source, @Nullable AudioSink sink, @Nullable Locale locale,
+            @Nullable String listeningItem) throws IllegalStateException;
 
     /**
      * Retrieves a TTS service.

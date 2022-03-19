@@ -161,7 +161,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         HumanLanguageInterpreter hli = args.length < 4 ? null : voiceManager.getHLI(args[3]);
                         TTSService tts = args.length < 5 ? null : voiceManager.getTTS(args[4]);
                         STTService stt = args.length < 6 ? null : voiceManager.getSTT(args[5]);
-                        voiceManager.listenAndAnswer(stt, tts, hli, source, sink, null);
+                        voiceManager.listenAndAnswer(stt, tts, hli, source, sink, null, null);
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while executing the simple dialog sequence"));

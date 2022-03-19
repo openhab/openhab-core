@@ -125,8 +125,8 @@ public class DialogProcessor implements KSListener, STTListener {
     }
 
     public DialogProcessor(STTService stt, TTSService tts, HumanLanguageInterpreter hli, AudioSource source,
-            AudioSink sink, Locale locale, EventPublisher eventPublisher, TranslationProvider i18nProvider,
-            Bundle bundle) {
+            AudioSink sink, Locale locale, @Nullable String listeningItem, EventPublisher eventPublisher,
+            TranslationProvider i18nProvider, Bundle bundle) {
         this.locale = locale;
         this.ks = null;
         this.hli = hli;
@@ -135,7 +135,7 @@ public class DialogProcessor implements KSListener, STTListener {
         this.source = source;
         this.sink = sink;
         this.keyword = "";
-        this.listeningItem = null;
+        this.listeningItem = listeningItem;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
         this.bundle = bundle;

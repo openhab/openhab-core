@@ -326,7 +326,8 @@ public class VoiceResource implements RESTResource {
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
             @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
             @QueryParam("hliId") @Parameter(description = "interpreter ID") @Nullable String hliId,
-            @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId) {
+            @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
+            @QueryParam("listeningItem") @Parameter(description = "listening item") @Nullable String listeningItem) {
         AudioSource source = null;
         if (sourceId != null) {
             source = audioManager.getSource(sourceId);
@@ -365,7 +366,7 @@ public class VoiceResource implements RESTResource {
         final Locale locale = localeService.getLocale(language);
 
         try {
-            voiceManager.listenAndAnswer(stt, tts, hli, source, sink, locale);
+            voiceManager.listenAndAnswer(stt, tts, hli, source, sink, locale, listeningItem);
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());

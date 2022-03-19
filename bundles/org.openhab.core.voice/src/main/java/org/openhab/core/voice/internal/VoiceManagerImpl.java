@@ -551,13 +551,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public void listenAndAnswer() throws IllegalStateException {
-        listenAndAnswer(null, null, null, null, null, null);
+        listenAndAnswer(null, null, null, null, null, null, null);
     }
 
     @Override
     public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts,
             @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
-            @Nullable Locale locale) throws IllegalStateException {
+            @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException {
         // use defaults, if null
         STTService sttService = (stt == null) ? getSTT() : stt;
         TTSService ttsService = (tts == null) ? getTTS() : tts;
@@ -565,6 +565,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         AudioSource audioSource = (source == null) ? audioManager.getSource() : source;
         AudioSink audioSink = (sink == null) ? audioManager.getSink() : sink;
         Locale loc = (locale == null) ? localeProvider.getLocale() : locale;
+        String item = (listeningItem == null) ? this.listeningItem : listeningItem;
         Bundle b = bundle;
 
         if (sttService == null || ttsService == null || interpreter == null || audioSource == null || audioSink == null
@@ -579,7 +580,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             if (processor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
-                processor = new DialogProcessor(sttService, ttsService, interpreter, audioSource, audioSink, loc,
+                processor = new DialogProcessor(sttService, ttsService, interpreter, audioSource, audioSink, loc, item,
                         this.eventPublisher, this.i18nProvider, b);
                 processor.start();
             } else {
