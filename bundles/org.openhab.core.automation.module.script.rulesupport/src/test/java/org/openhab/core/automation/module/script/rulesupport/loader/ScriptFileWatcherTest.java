@@ -107,7 +107,7 @@ class ScriptFileWatcherTest {
 
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
 
-        verify(scriptEngineManager).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(1000)).createScriptEngine("js", p.toFile().toURI().toString());
     }
 
     @Test
@@ -236,7 +236,7 @@ class ScriptFileWatcherTest {
         scheduledTask.getValue().run();
 
         // verify script has now been processed
-        verify(scriptEngineManager, times(1)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(1000).times(1)).createScriptEngine("js", p.toFile().toURI().toString());
     }
 
     @Test
@@ -281,7 +281,7 @@ class ScriptFileWatcherTest {
 
         scriptFileWatcher.onDependencyChange(p.toFile().toURI().toString());
 
-        verify(scriptEngineManager, times(2)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(1000).times(2)).createScriptEngine("js", p.toFile().toURI().toString());
     }
 
     @Test
@@ -344,6 +344,6 @@ class ScriptFileWatcherTest {
         scriptFileWatcher.processWatchEvent(null, ENTRY_MODIFY, p);
 
         verify(scriptEngineManager).removeEngine(p.toFile().toURI().toString());
-        verify(scriptEngineManager, times(2)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(1000).times(2)).createScriptEngine("js", p.toFile().toURI().toString());
     }
 }
