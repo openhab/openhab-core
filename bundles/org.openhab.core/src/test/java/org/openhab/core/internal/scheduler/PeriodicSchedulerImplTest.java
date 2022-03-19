@@ -47,7 +47,7 @@ public class PeriodicSchedulerImplTest {
         final long now = System.currentTimeMillis();
 
         ScheduledCompletableFuture<Object> future = periodicScheduler.schedule(() -> {
-            times.add((System.currentTimeMillis() - now) / 100);
+            times.add(System.currentTimeMillis() - now);
             semaphore.release();
         }, delays);
         semaphore.acquire(6);
@@ -55,9 +55,12 @@ public class PeriodicSchedulerImplTest {
         // Because starting scheduler takes some time and we don't know how long
         // the first time set is the offset on which we check the next values.
         long offset = times.poll();
-        long[] expectedResults = { 2, 5, 8, 11, 14 };
+        long[] expectedResults = { 200, 300, 300, 300, 300 };
         for (long expectedResult : expectedResults) {
-            assertEquals(offset + expectedResult, times.poll().longValue(), "Expected periodic time");
+            long actualValue = times.poll().longValue();
+            assertEquals((offset + expectedResult) / 100.0, actualValue / 100.0, 0.3,
+                    "Expected periodic time, total: " + actualValue);
+            offset = actualValue;
         }
         assertFalse(semaphore.tryAcquire(1, TimeUnit.SECONDS), "No more jobs should have been scheduled");
     }
