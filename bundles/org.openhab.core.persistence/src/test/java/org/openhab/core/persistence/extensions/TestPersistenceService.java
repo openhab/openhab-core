@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.measure.Unit;
@@ -97,7 +98,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
 
                         @Override
                         public String getName() {
-                            return filter.getItemName();
+                            return Objects.requireNonNull(filter.getItemName());
                         }
                     });
                 }
@@ -139,7 +140,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
 
                     @Override
                     public String getName() {
-                        return filter.getItemName();
+                        return Objects.requireNonNull(filter.getItemName());
                     }
                 });
             }

@@ -10,39 +10,50 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.persistence.strategy;
+package org.openhab.core.persistence.filter;
 
-import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.items.Item;
 
 /**
- * This class holds a strategy to persist items.
+ *
  *
  * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
-public class PersistenceStrategy {
-    public static class Globals {
-        public static final PersistenceStrategy UPDATE = new PersistenceStrategy("everyUpdate");
-        public static final PersistenceStrategy CHANGE = new PersistenceStrategy("everyChange");
-        public static final PersistenceStrategy RESTORE = new PersistenceStrategy("restoreOnStartup");
-
-        public static final Map<String, PersistenceStrategy> STRATEGIES = Map.of(UPDATE.name, UPDATE, CHANGE.name,
-                CHANGE, RESTORE.name, RESTORE);
-    }
-
+public abstract class PersistenceFilter {
     private final String name;
 
-    public PersistenceStrategy(final String name) {
+    public PersistenceFilter(final String name) {
         this.name = name;
     }
 
+    /**
+     * Get the name of this filter
+     *
+     * @return a unique name
+     */
     public String getName() {
         return name;
     }
+
+    /**
+     * Apply this filter to an item
+     *
+     * @param item the item to check
+     * @return true if the filter allows persisting this value
+     */
+    public abstract boolean apply(Item item);
+
+    /**
+     * Notify filter that item was persisted
+     *
+     * @param item the persisted item
+     */
+    public abstract void persisted(Item item);
 
     @Override
     public int hashCode() {
@@ -60,9 +71,10 @@ public class PersistenceStrategy {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof final PersistenceStrategy other)) {
+        if (!(obj instanceof PersistenceFilter)) {
             return false;
         }
+        final PersistenceFilter other = (PersistenceFilter) obj;
         return Objects.equals(name, other.name);
     }
 
