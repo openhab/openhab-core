@@ -18,8 +18,6 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link BundleVersion} wraps a bundle version and provides a method to compare them
@@ -32,8 +30,6 @@ public class BundleVersion {
             "(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<micro>\\d+)(\\.((?<rc>RC)|(?<milestone>M))?(?<qualifier>\\d+))?");
     public static final Pattern RANGE_PATTERN = Pattern.compile(
             "\\[(?<start>\\d+\\.\\d+(?<startmicro>\\.\\d+(\\.\\w+)?)?);(?<end>\\d+\\.\\d+(?<endmicro>\\.\\d+(\\.\\w+)?)?)(?<endtype>[)\\]])");
-
-    private final Logger logger = LoggerFactory.getLogger(BundleVersion.class);
 
     private final int major;
     private final int minor;
@@ -98,10 +94,12 @@ public class BundleVersion {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
         BundleVersion version = (BundleVersion) o;
         return major == version.major && minor == version.minor && micro == version.micro
                 && Objects.equals(qualifier, version.qualifier);
