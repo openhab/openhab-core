@@ -45,6 +45,8 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -68,6 +70,8 @@ public class JsonAddonService extends AbstractRemoteAddonService {
 
     private static final String CONFIG_URLS = "urls";
     private static final String CONFIG_SHOW_UNSTABLE = "showUnstable";
+
+    private final Logger logger = LoggerFactory.getLogger(JsonAddonService.class);
 
     private List<String> addonServiceUrls = List.of();
     private boolean showUnstable = false;
@@ -158,11 +162,19 @@ public class JsonAddonService extends AbstractRemoteAddonService {
             properties.put("yaml_download_url", addonEntry.url);
         }
 
+        boolean compatible = true;
+        try {
+            compatible = coreVersion.inRange(addonEntry.compatibleVersions);
+        } catch (IllegalArgumentException e) {
+            logger.debug("Failed to determine compatibility for addon {}: {}", addonEntry.id, e.getMessage());
+        }
+
         return Addon.create(fullId).withType(addonEntry.type).withInstalled(installed)
                 .withDetailedDescription(addonEntry.description).withContentType(addonEntry.contentType)
                 .withAuthor(addonEntry.author).withVersion(addonEntry.version).withLabel(addonEntry.title)
-                .withMaturity(addonEntry.maturity).withProperties(properties).withLink(addonEntry.link)
-                .withImageLink(addonEntry.imageUrl).withConfigDescriptionURI(addonEntry.configDescriptionURI)
-                .withLoggerPackages(addonEntry.loggerPackages).build();
+                .withCompatible(compatible).withMaturity(addonEntry.maturity).withProperties(properties)
+                .withLink(addonEntry.link).withImageLink(addonEntry.imageUrl)
+                .withConfigDescriptionURI(addonEntry.configDescriptionURI).withLoggerPackages(addonEntry.loggerPackages)
+                .build();
     }
 }

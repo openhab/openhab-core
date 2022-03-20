@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon.test;
+package org.openhab.core.addon.marketplace.test;
 
 import java.net.URI;
 import java.util.List;
@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
+import org.openhab.core.addon.marketplace.BundleVersion;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
 import org.openhab.core.events.EventPublisher;
@@ -38,16 +39,25 @@ public class TestAddonService extends AbstractRemoteAddonService {
     public static final String TEST_ADDON = "testAddon";
     public static final String INSTALL_EXCEPTION_ADDON = "installException";
     public static final String UNINSTALL_EXCEPTION_ADDON = "uninstallException";
+    public static final String INCOMPATIBLE_VERSION = "incompatibleVersion";
 
     public static final String SERVICE_PID = "testAddonService";
     public static final Set<String> REMOTE_ADDONS = Set.of(TEST_ADDON, INSTALL_EXCEPTION_ADDON,
-            UNINSTALL_EXCEPTION_ADDON);
+            UNINSTALL_EXCEPTION_ADDON, INCOMPATIBLE_VERSION);
+
+    public static final int COMPATIBLE_ADDON_COUNT = REMOTE_ADDONS.size() - 1;
+    public static final int ALL_ADDON_COUNT = REMOTE_ADDONS.size();
 
     private int remoteCalls = 0;
 
     public TestAddonService(EventPublisher eventPublisher, ConfigurationAdmin configurationAdmin,
             StorageService storageService) {
         super(eventPublisher, configurationAdmin, storageService, SERVICE_PID);
+    }
+
+    @Override
+    protected BundleVersion getCoreVersion() {
+        return new BundleVersion("3.2.0");
     }
 
     public void addAddonHandler(MarketplaceAddonHandler handler) {
@@ -63,7 +73,8 @@ public class TestAddonService extends AbstractRemoteAddonService {
         remoteCalls++;
         return REMOTE_ADDONS.stream()
                 .map(id -> Addon.create(SERVICE_PID + ":" + id).withType("binding")
-                        .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE).build())
+                        .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE)
+                        .withCompatible(!id.equals(INCOMPATIBLE_VERSION)).build())
                 .collect(Collectors.toList());
     }
 

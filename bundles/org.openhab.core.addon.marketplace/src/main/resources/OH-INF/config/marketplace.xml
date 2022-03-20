@@ -6,6 +6,12 @@
 		https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="system:marketplace">
+		<parameter name="enable" type="boolean">
+			<label>Enable Community Marketplace</label>
+			<default>true</default>
+			<description>If set to false no add-ons from the community marketplace will be shown. Already installed add-ons will
+				still be available.</description>
+		</parameter>
 		<parameter name="showUnpublished" type="boolean">
 			<label>Show Unpublished Entries</label>
 			<default>false</default>
@@ -29,9 +35,9 @@
 				thus harm your system.</description>
 		</parameter>
 		<parameter name="showUnstable" type="boolean">
-			<label>Show Non-Stable Bundles</label>
+			<label>Show Non-Stable Add-ons</label>
 			<default>false</default>
-			<description>Include entries which have not been tagged as "stable". These bundles should be used for testing
+			<description>Include entries which have not been tagged as "stable". These add-ons should be used for testing
 				purposes only and are not considered production-system ready.</description>
 		</parameter>
 	</config-description>

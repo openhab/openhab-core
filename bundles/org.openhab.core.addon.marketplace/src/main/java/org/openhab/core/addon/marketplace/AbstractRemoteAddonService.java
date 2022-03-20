@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonEventFactory;
 import org.openhab.core.addon.AddonService;
@@ -37,6 +38,7 @@ import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -52,6 +54,9 @@ import com.google.gson.GsonBuilder;
  */
 @NonNullByDefault
 public abstract class AbstractRemoteAddonService implements AddonService {
+    static final String CONFIG_REMOTE_ENABLED = "remote";
+    static final String CONFIG_INCLUDE_INCOMPATIBLE = "includeIncompatible";
+
     protected static final Map<String, AddonType> TAG_ADDON_TYPE_MAP = Map.of( //
             "automation", new AddonType("automation", "Automation"), //
             "binding", new AddonType("binding", "Bindings"), //
@@ -60,6 +65,8 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             "transformation", new AddonType("transformation", "Transformations"), //
             "ui", new AddonType("ui", "User Interfaces"), //
             "voice", new AddonType("voice", "Voice"));
+
+    protected final BundleVersion coreVersion;
 
     protected final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
     protected final Set<MarketplaceAddonHandler> addonHandlers = new HashSet<>();
@@ -78,6 +85,11 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         this.eventPublisher = eventPublisher;
         this.configurationAdmin = configurationAdmin;
         this.installedAddonStorage = storageService.getStorage(servicePid);
+        this.coreVersion = getCoreVersion();
+    }
+
+    protected BundleVersion getCoreVersion() {
+        return new BundleVersion(FrameworkUtil.getBundle(OpenHAB.class).getVersion().toString());
     }
 
     @Override
@@ -101,6 +113,10 @@ public abstract class AbstractRemoteAddonService implements AddonService {
 
         // check real installation status based on handlers
         addons.forEach(addon -> addon.setInstalled(addonHandlers.stream().anyMatch(h -> h.isInstalled(addon.getId()))));
+
+        // remove incompatible add-ons if not enabled
+        boolean showIncompatible = includeIncompatible();
+        addons.removeIf(addon -> !addon.getCompatible() && !showIncompatible);
 
         cachedAddons = addons;
         this.installedAddons = installedAddons;
@@ -216,9 +232,23 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                 // if we can't determine a set property, we use true (default is remote enabled)
                 return true;
             }
-            return ConfigParser.valueAsOrElse(properties.get("remote"), Boolean.class, true);
+            return ConfigParser.valueAsOrElse(properties.get(CONFIG_REMOTE_ENABLED), Boolean.class, true);
         } catch (IOException e) {
             return true;
+        }
+    }
+
+    protected boolean includeIncompatible() {
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration("org.openhab.addons", null);
+            Dictionary<String, Object> properties = configuration.getProperties();
+            if (properties == null) {
+                // if we can't determine a set property, we use false (default is show compatible only)
+                return true;
+            }
+            return ConfigParser.valueAsOrElse(properties.get(CONFIG_INCLUDE_INCOMPATIBLE), Boolean.class, false);
+        } catch (IOException e) {
+            return false;
         }
     }
 
