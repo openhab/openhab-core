@@ -45,6 +45,7 @@ import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCate
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO.DiscourseUser;
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponseDTO;
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponseDTO.DiscoursePostLink;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.StorageService;
@@ -82,6 +83,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     static final String CONFIG_URI = "system:marketplace";
     static final String CONFIG_API_KEY = "apiKey";
     static final String CONFIG_SHOW_UNPUBLISHED_ENTRIES_KEY = "showUnpublished";
+    static final String CONFIG_ENABLED_KEY = "enabled";
 
     private static final String COMMUNITY_BASE_URL = "https://community.openhab.org";
     private static final String COMMUNITY_MARKETPLACE_URL = COMMUNITY_BASE_URL + "/c/marketplace/69/l/latest";
@@ -105,6 +107,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
     private @Nullable String apiKey = null;
     private boolean showUnpublished = false;
+    private boolean enabled = true;
 
     @Activate
     public CommunityMarketplaceAddonService(final @Reference EventPublisher eventPublisher,
@@ -118,9 +121,9 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     public void modified(@Nullable Map<String, Object> config) {
         if (config != null) {
             this.apiKey = (String) config.get(CONFIG_API_KEY);
-            Object showUnpublishedConfigValue = config.get(CONFIG_SHOW_UNPUBLISHED_ENTRIES_KEY);
-            this.showUnpublished = showUnpublishedConfigValue != null
-                    && "true".equals(showUnpublishedConfigValue.toString());
+            this.showUnpublished = ConfigParser.valueAsOrElse(config.get(CONFIG_SHOW_UNPUBLISHED_ENTRIES_KEY),
+                    Boolean.class, false);
+            this.enabled = ConfigParser.valueAsOrElse(config.get(CONFIG_ENABLED_KEY), Boolean.class, true);
             cachedRemoteAddons.invalidateValue();
             refreshSource();
         }
@@ -149,6 +152,10 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
     @Override
     protected List<Addon> getRemoteAddons() {
+        if (!enabled) {
+            return List.of();
+        }
+
         List<Addon> addons = new ArrayList<>();
         try {
             List<DiscourseCategoryResponseDTO> pages = new ArrayList<>();
