@@ -35,7 +35,7 @@
 				thus harm your system.</description>
 		</parameter>
 		<parameter name="showUnstable" type="boolean">
-			<label>Show Non-Stable Add-Ons</label>
+			<label>Show Non-Stable Add-ons</label>
 			<default>false</default>
 			<description>Include entries which have not been tagged as "stable". These add-ons should be used for testing
 				purposes only and are not considered production-system ready.</description>

@@ -12,7 +12,12 @@
  */
 package org.openhab.core.addon.marketplace;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.openhab.core.addon.marketplace.AbstractRemoteAddonService.CONFIG_REMOTE_ENABLED;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.ALL_ADDON_COUNT;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.COMPATIBLE_ADDON_COUNT;
@@ -25,10 +30,8 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -93,24 +96,24 @@ public class AbstractRemoteAddonServiceTest {
         addonService.addAddonHandler(addonHandler);
 
         List<Addon> addons = addonService.getAddons(null);
-        Assertions.assertEquals(0, addons.size());
+        assertThat(addons, empty());
     }
 
     @Test
     public void testRemoteDisabledBlocksRemoteCalls() {
         properties.put("remote", false);
         List<Addon> addons = addonService.getAddons(null);
-        assertEquals(0, addons.size());
-        assertEquals(0, addonService.getRemoteCalls());
+        assertThat(addons, empty());
+        assertThat(addonService.getRemoteCalls(), is(0));
     }
 
     @Test
     public void testAddonResultsAreCached() {
         List<Addon> addons = addonService.getAddons(null);
-        assertEquals(COMPATIBLE_ADDON_COUNT, addons.size());
+        assertThat(addons, hasSize(COMPATIBLE_ADDON_COUNT));
         addons = addonService.getAddons(null);
-        assertEquals(COMPATIBLE_ADDON_COUNT, addons.size());
-        assertEquals(1, addonService.getRemoteCalls());
+        assertThat(addons, hasSize(COMPATIBLE_ADDON_COUNT));
+        assertThat(addonService.getRemoteCalls(), is(1));
     }
 
     @Test
@@ -119,8 +122,8 @@ public class AbstractRemoteAddonServiceTest {
         List<Addon> addons = addonService.getAddons(null);
         Addon addon = addons.stream().filter(a -> getFullAddonId(TEST_ADDON).equals(a.getId())).findAny().orElse(null);
 
-        Objects.requireNonNull(addon);
-        Assertions.assertTrue(addon.isInstalled());
+        assertThat(addon, notNullValue());
+        assertThat(addon.isInstalled(), is(true));
     }
 
     @Test
@@ -130,26 +133,26 @@ public class AbstractRemoteAddonServiceTest {
 
         // check all addons are present
         List<Addon> addons = addonService.getAddons(null);
-        assertEquals(COMPATIBLE_ADDON_COUNT, addons.size());
+        assertThat(addons, hasSize(COMPATIBLE_ADDON_COUNT));
 
         // disable remote repo
         properties.put(CONFIG_REMOTE_ENABLED, false);
 
         // check only the installed addon is present
         addons = addonService.getAddons(null);
-        assertEquals(1, addons.size());
-        assertEquals(getFullAddonId(TEST_ADDON), addons.get(0).getId());
+        assertThat(addons, hasSize(1));
+        assertThat(addons.get(0).getId(), is(getFullAddonId(TEST_ADDON)));
     }
 
     @Test
     public void testIncompatibleAddonsNotIncludedByDefault() {
-        assertEquals(COMPATIBLE_ADDON_COUNT, addonService.getAddons(null).size());
+        assertThat(addonService.getAddons(null), hasSize(COMPATIBLE_ADDON_COUNT));
     }
 
     @Test
     public void testIncompatibleAddonsAreIncludedIfRequested() {
         properties.put("includeIncompatible", true);
-        assertEquals(ALL_ADDON_COUNT, addonService.getAddons(null).size());
+        assertThat(addonService.getAddons(null), hasSize(ALL_ADDON_COUNT));
     }
 
     // installation tests
@@ -259,22 +262,21 @@ public class AbstractRemoteAddonServiceTest {
         Event event = eventCaptor.getValue();
         String topic = "openhab/addons/" + expectedEventTopic;
 
-        assertEquals(topic, event.getTopic());
+        assertThat(event.getTopic(), is(topic));
 
         // assert addon handler was called (by checking it's installed status)
-        assertEquals(installStatus, addonHandler.isInstalled(getFullAddonId(id)));
+        assertThat(addonHandler.isInstalled(getFullAddonId(id)), is(installStatus));
 
         // assert is present in storage if installed or missing if uninstalled
-        assertEquals(installStatus, storage.containsKey(id));
+        assertThat(storage.containsKey(id), is(installStatus));
 
         // assert correct installation status is reported for addon
         Addon addon = addonService.getAddon(id, null);
         if (present) {
-            Assertions.assertNotNull(addon);
-            Objects.requireNonNull(addon);
-            assertEquals(installStatus, addon.isInstalled());
+            assertThat(addon, notNullValue());
+            assertThat(addon.isInstalled(), is(installStatus));
         } else {
-            Assertions.assertNull(addon);
+            assertThat(addon, nullValue());
         }
     }
 

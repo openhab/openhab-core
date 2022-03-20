@@ -285,20 +285,21 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         String type = (addonType != null) ? addonType.getId() : "";
         String contentType = getContentType(topic.categoryId, tags);
 
-        String title;
+        String title = topic.title;
         boolean compatible = true;
 
         int compatibilityStart = topic.title.lastIndexOf("["); // version range always starts with [
-        if (compatibilityStart == -1) {
-            title = topic.title;
-        } else {
+        if (topic.title.lastIndexOf(" ") < compatibilityStart) { // check includes [ not present
             String potentialRange = topic.title.substring(compatibilityStart + 1);
             Matcher matcher = BundleVersion.RANGE_PATTERN.matcher(potentialRange);
             if (matcher.matches()) {
-                compatible = coreVersion.inRange(potentialRange);
-                title = topic.title.substring(0, compatibilityStart);
-            } else {
-                title = topic.title;
+                try {
+                    compatible = coreVersion.inRange(potentialRange);
+                    title = topic.title.substring(0, compatibilityStart).trim();
+                } catch (IllegalArgumentException e) {
+                    logger.debug("Failed to determine compatibility for addon {}: {}", topic.title, e.getMessage());
+                    compatible = true;
+                }
             }
         }
 

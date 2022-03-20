@@ -66,15 +66,21 @@ public class BundleVersion {
         }
     }
 
-    public boolean inRange(@Nullable String range) {
+    /**
+     * Test if this version is within the provided range
+     *
+     * @param range a Maven like version range
+     * @return {@code true} if this version is inside range, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code range} does not represent a valid range
+     */
+    public boolean inRange(@Nullable String range) throws IllegalArgumentException {
         if (range == null || range.isBlank()) {
             // if no range is given, we assume the range covers everything
             return true;
         }
         Matcher matcher = RANGE_PATTERN.matcher(range);
         if (!matcher.matches()) {
-            logger.warn("Argument {} does not define a valid version range. Assuming inRange", range);
-            return true;
+            throw new IllegalArgumentException(range + "is not a valid version range");
         }
         String startString = matcher.group("startmicro") != null ? matcher.group("start")
                 : matcher.group("start") + ".0";

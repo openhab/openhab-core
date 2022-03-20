@@ -12,12 +12,17 @@
  */
 package org.openhab.core.addon.marketplace;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -53,20 +58,26 @@ public class BundleVersionTest {
         );
     }
 
+    @Test
+    public void testIllegalRangeThrowsException() {
+        BundleVersion bundleVersion = new BundleVersion("3.1.0");
+        assertThrows(IllegalArgumentException.class, () -> bundleVersion.inRange("illegal"));
+    }
+
     @ParameterizedTest
     @MethodSource("provideCompareVersionsArguments")
-    public void compareVersionsTest(String v1, String v2, Result result) {
+    public void testCompareVersions(String v1, String v2, Result result) {
         BundleVersion version1 = new BundleVersion(v1);
         BundleVersion version2 = new BundleVersion(v2);
         switch (result) {
             case OLDER:
-                assertTrue(version1.compareTo(version2) < 0);
+                assertThat(version1.compareTo(version2), lessThan(0));
                 break;
             case NEWER:
-                assertTrue(version1.compareTo(version2) > 0);
+                assertThat(version1.compareTo(version2), greaterThan(0));
                 break;
             case EQUAL:
-                assertEquals(0, version1.compareTo(version2));
+                assertThat(version1.compareTo(version2), is(0));
                 break;
         }
     }
@@ -76,15 +87,16 @@ public class BundleVersionTest {
                 Arguments.of("[3.1.0;3.2.0)", false), // at end of range, non-inclusive
                 Arguments.of("[3.1.0;3.2.0]", true), // at end of range, inclusive
                 Arguments.of("[3.1.0;3.1.5)", false), // above range
-                Arguments.of("[3.3.0;3.4.0)", false) // below range
-        );
+                Arguments.of("[3.3.0;3.4.0)", false), // below range
+                Arguments.of("", true), // empty range assumes in range
+                Arguments.of(null, true));
     }
 
     @ParameterizedTest
     @MethodSource("provideInRangeArguments")
-    public void inRangeTest(String range, boolean result) {
+    public void inRangeTest(@Nullable String range, boolean result) {
         BundleVersion frameworkVersion = new BundleVersion("3.2.0");
-        assertEquals(result, frameworkVersion.inRange(range));
+        assertThat(frameworkVersion.inRange(range), is(result));
     }
 
     private enum Result {
