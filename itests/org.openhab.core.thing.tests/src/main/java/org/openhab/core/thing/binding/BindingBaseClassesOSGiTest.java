@@ -121,7 +121,6 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
         new DefaultLocaleSetter(configurationAdmin).setDefaultLocale(Locale.ENGLISH);
         waitForAssert(() -> assertThat(localeProvider.getLocale(), is(Locale.ENGLISH)));
-        waitForAssert(() -> assertThat(localeProvider.getLocale(), is(Locale.ENGLISH)));
 
         registerVolatileStorageService();
         managedThingProvider = getService(ManagedThingProvider.class);

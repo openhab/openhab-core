@@ -150,7 +150,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         new DefaultLocaleSetter(configurationAdmin).setDefaultLocale(Locale.ENGLISH);
         waitForAssert(() -> assertThat(localeProvider.getLocale(), is(Locale.ENGLISH)));
-        waitForAssert(() -> assertThat(localeProvider.getLocale(), is(Locale.ENGLISH)));
 
         channelTypeProvider = mock(ChannelTypeProvider.class);
         when(channelTypeProvider.getChannelType(any(ChannelTypeUID.class), nullable(Locale.class)))
