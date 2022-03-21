@@ -83,7 +83,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     static final String CONFIG_URI = "system:marketplace";
     static final String CONFIG_API_KEY = "apiKey";
     static final String CONFIG_SHOW_UNPUBLISHED_ENTRIES_KEY = "showUnpublished";
-    static final String CONFIG_ENABLED_KEY = "enabled";
+    static final String CONFIG_ENABLED_KEY = "enable";
 
     private static final String COMMUNITY_BASE_URL = "https://community.openhab.org";
     private static final String COMMUNITY_MARKETPLACE_URL = COMMUNITY_BASE_URL + "/c/marketplace/69/l/latest";
