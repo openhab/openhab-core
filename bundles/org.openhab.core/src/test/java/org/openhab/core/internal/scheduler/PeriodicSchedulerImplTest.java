@@ -58,7 +58,7 @@ public class PeriodicSchedulerImplTest {
         long[] expectedResults = { 200, 300, 300, 300, 300 };
         for (long expectedResult : expectedResults) {
             long actualValue = times.poll().longValue();
-            assertEquals((offset + expectedResult) / 100.0, actualValue / 100.0, 0.3,
+            assertEquals((offset + expectedResult) / 100.0, actualValue / 100.0, 0.9,
                     "Expected periodic time, total: " + actualValue);
             offset = actualValue;
         }
