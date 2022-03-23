@@ -36,7 +36,7 @@ import org.openhab.core.types.StateOption;
 @NonNullByDefault
 public class SystemWideChannelTypesTest extends JavaOSGiTest {
 
-    private static final int NUMBER_OF_SYSTEM_WIDE_CHANNEL_TYPES = 24;
+    private static final int NUMBER_OF_SYSTEM_WIDE_CHANNEL_TYPES = 25;
 
     private @NonNullByDefault({}) ChannelTypeProvider systemChannelTypeProvider;
 
