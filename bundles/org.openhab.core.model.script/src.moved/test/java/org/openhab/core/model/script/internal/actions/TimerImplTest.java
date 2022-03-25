@@ -71,7 +71,7 @@ public class TimerImplTest {
         assertThat(subject.hasTerminated(), is(false));
         assertThat(subject.isCancelled(), is(false));
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 1));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 3));
         assertThat(subject.isActive(), is(false));
         assertThat(subject.hasTerminated(), is(true));
         assertThat(subject.isCancelled(), is(false));
@@ -79,17 +79,17 @@ public class TimerImplTest {
 
     @Test
     public void testTimerHasTerminatedAndReschedule() throws InterruptedException {
-        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 1));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 3));
         assertThat(subject.isActive(), is(false));
         assertThat(subject.hasTerminated(), is(true));
         assertThat(subject.isCancelled(), is(false));
-     
+
         subject.reschedule(ZonedDateTime.now().plusSeconds(DEFAULT_TIMEOUT_SECONDS));
         assertThat(subject.isActive(), is(true));
         assertThat(subject.hasTerminated(), is(false));
         assertThat(subject.isCancelled(), is(false));
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 1));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS + DEFAULT_RUNTIME_SECONDS + 3));
         assertThat(subject.isActive(), is(false));
         assertThat(subject.hasTerminated(), is(true));
         assertThat(subject.isCancelled(), is(false));
@@ -106,7 +106,7 @@ public class TimerImplTest {
         assertThat(subject.hasTerminated(), is(false));
         assertThat(subject.isCancelled(), is(false));
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_RUNTIME_SECONDS + 1));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_RUNTIME_SECONDS + 3));
         assertThat(subject.isRunning(), is(false));
         assertThat(subject.hasTerminated(), is(true));
         assertThat(subject.isCancelled(), is(false));

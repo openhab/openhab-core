@@ -63,18 +63,20 @@ public class BundleInfoReader {
 
     private void readBindingInfo(Path ohinfPath, BundleInfo bundleInfo) throws IOException {
         BindingInfoReader reader = new BindingInfoReader();
-        xmlPathStream(ohinfPath, "binding").forEach(path -> {
-            log.info("Reading: " + path);
-            try {
-                BindingInfoXmlResult bindingInfoXml = reader.readFromXML(path.toUri().toURL());
-                if (bindingInfoXml != null) {
-                    bundleInfo.setBindingId(bindingInfoXml.getBindingInfo().getUID());
-                    bundleInfo.setBindingInfoXml(bindingInfoXml);
+        try (Stream<Path> xmlPathStream = xmlPathStream(ohinfPath, "binding")) {
+            xmlPathStream.forEach(path -> {
+                log.info("Reading: " + path);
+                try {
+                    BindingInfoXmlResult bindingInfoXml = reader.readFromXML(path.toUri().toURL());
+                    if (bindingInfoXml != null) {
+                        bundleInfo.setBindingId(bindingInfoXml.getBindingInfo().getUID());
+                        bundleInfo.setBindingInfoXml(bindingInfoXml);
+                    }
+                } catch (ConversionException | MalformedURLException e) {
+                    log.warn("Exception while reading binding info from: " + path, e);
                 }
-            } catch (ConversionException | MalformedURLException e) {
-                log.warn("Exception while reading binding info from: " + path, e);
-            }
-        });
+            });
+        }
     }
 
     private void readConfigInfo(Path ohinfPath, BundleInfo bundleInfo) throws IOException {

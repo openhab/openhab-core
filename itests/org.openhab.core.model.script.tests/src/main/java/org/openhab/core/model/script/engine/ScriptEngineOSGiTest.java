@@ -72,7 +72,6 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         assertNotNull(itemRegistry);
 
         itemProvider = new ItemProvider() {
-
             @Override
             public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
@@ -89,6 +88,8 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         };
 
         registerService(itemProvider);
+
+        waitForAssert(() -> assertThat(itemRegistry.getAll().size(), is(itemProvider.getAll().size())));
 
         ScriptServiceUtil scriptServiceUtil = getService(ScriptServiceUtil.class);
         assertNotNull(scriptServiceUtil);

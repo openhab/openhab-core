@@ -39,11 +39,11 @@ public class PeriodicSchedulerImplTest {
     private final PeriodicSchedulerImpl periodicScheduler = new PeriodicSchedulerImpl(new SchedulerImpl());
 
     @Test
-    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testSchedule() throws InterruptedException, IOException {
         Queue<Long> times = new ArrayDeque<>();
         Semaphore semaphore = new Semaphore(0);
-        Duration[] delays = { Duration.ofMillis(100), Duration.ofMillis(200), Duration.ofMillis(300) };
+        Duration[] delays = { Duration.ofMillis(100), Duration.ofMillis(200), Duration.ofMillis(400) };
         final long now = System.currentTimeMillis();
 
         ScheduledCompletableFuture<Object> future = periodicScheduler.schedule(() -> {
@@ -54,11 +54,11 @@ public class PeriodicSchedulerImplTest {
         future.cancel(true);
         // Because starting scheduler takes some time and we don't know how long
         // the first time set is the offset on which we check the next values.
-        long offset = times.poll();
-        long[] expectedResults = { 200, 300, 300, 300, 300 };
+        long offset = times.poll().longValue();
+        long[] expectedResults = { 200, 400, 400, 400, 400 };
         for (long expectedResult : expectedResults) {
             long actualValue = times.poll().longValue();
-            assertEquals((offset + expectedResult) / 100.0, actualValue / 100.0, 0.9,
+            assertEquals((offset + expectedResult) / 100.0, actualValue / 100.0, 1.5,
                     "Expected periodic time, total: " + actualValue);
             offset = actualValue;
         }

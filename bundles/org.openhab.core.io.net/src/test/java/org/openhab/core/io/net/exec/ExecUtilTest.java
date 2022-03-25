@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Test;
 @NonNullByDefault
 public class ExecUtilTest {
 
+    private static final Duration TIMEOUT = Duration.ofSeconds(10);
+
     @Test
     public void testBasicExecuteCommandLine() {
         if (isWindowsSystem()) {
@@ -40,9 +42,9 @@ public class ExecUtilTest {
     public void testBasicExecuteCommandLineAndWaitResponse() {
         final String result;
         if (isWindowsSystem()) {
-            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "cmd", "/c", "dir");
+            result = ExecUtil.executeCommandLineAndWaitResponse(TIMEOUT, "cmd", "/c", "dir");
         } else {
-            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "ls");
+            result = ExecUtil.executeCommandLineAndWaitResponse(TIMEOUT, "ls");
         }
         assertNotNull(result);
         assertNotEquals("", result);
@@ -52,9 +54,9 @@ public class ExecUtilTest {
     public void testExecuteCommandLineAndWaitResponseWithArguments() {
         final String result;
         if (isWindowsSystem()) {
-            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "cmd", "/c", "echo", "test");
+            result = ExecUtil.executeCommandLineAndWaitResponse(TIMEOUT, "cmd", "/c", "echo", "test");
         } else {
-            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "echo", "'test'");
+            result = ExecUtil.executeCommandLineAndWaitResponse(TIMEOUT, "echo", "'test'");
         }
         assertNotNull(result);
         assertNotEquals("test", result);
@@ -69,10 +71,9 @@ public class ExecUtilTest {
     public void testExecuteCommandLineAndWaitStdErrRedirection() {
         final String result;
         if (isWindowsSystem()) {
-            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "cmd", "/c", "dir", "xxx.xxx",
-                    "1>", "nul");
+            result = ExecUtil.executeCommandLineAndWaitResponse(TIMEOUT, "cmd", "/c", "dir", "xxx.xxx", "1>", "nul");
         } else {
-            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "ls", "xxx.xxx");
+            result = ExecUtil.executeCommandLineAndWaitResponse(TIMEOUT, "ls", "xxx.xxx");
         }
         assertNotNull(result);
         assertNotEquals("", result);

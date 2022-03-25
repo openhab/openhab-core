@@ -111,7 +111,7 @@ public class AudioServletTest extends AbstractAudioServletTest {
 
     @Test
     public void requestToMultitimeStreamCannotBeDoneAfterTheTimeoutOfTheStreamHasExipred() throws Exception {
-        final int streamTimeout = 1;
+        final int streamTimeout = 3;
 
         AudioStream audioStream = getByteArrayAudioStream(testByteArray, AudioFormat.CONTAINER_NONE,
                 AudioFormat.CODEC_MP3);

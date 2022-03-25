@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -208,13 +209,8 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
 
         registerService(new TestDynamicCommandDescriptionProvider(), DynamicCommandDescriptionProvider.class.getName());
 
-        Thing thing = thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"), new ThingUID("hue:lamp:lamp1"),
-                null, "test thing", new Configuration());
-
-        assertNotNull(thing);
-        if (thing == null) {
-            throw new IllegalStateException("thing is null");
-        }
+        Thing thing = Objects.requireNonNull(thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"),
+                new ThingUID("hue:lamp:lamp1"), null, "test thing", new Configuration()));
 
         managedThingProvider.add(thing);
         ItemChannelLink link = new ItemChannelLink("TestItem1", getChannel(thing, "1").getUID());
@@ -230,9 +226,10 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         Item item = itemRegistry.getItem("TestItem1");
         assertEquals(CoreItemFactory.NUMBER, item.getType());
 
-        CommandDescription command = item.getCommandDescription();
-        assertNotNull(command);
+        final Item finalItem = item;
+        waitForAssert(() -> assertNotNull(finalItem.getCommandDescription()));
 
+        CommandDescription command = Objects.requireNonNull(item.getCommandDescription());
         List<CommandOption> opts = command.getCommandOptions();
         assertNotNull(opts);
         assertEquals(1, opts.size());
@@ -280,12 +277,8 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
                 DynamicCommandDescriptionProvider.class.getName());
         registerService(new TestDynamicCommandDescriptionProvider(), DynamicCommandDescriptionProvider.class.getName());
 
-        Thing thing = thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"), new ThingUID("hue:lamp:lamp1"),
-                null, "test thing", new Configuration());
-        assertNotNull(thing);
-        if (thing == null) {
-            throw new IllegalStateException("thing is null");
-        }
+        Thing thing = Objects.requireNonNull(thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"),
+                new ThingUID("hue:lamp:lamp1"), null, "test thing", new Configuration()));
 
         managedThingProvider.add(thing);
         ItemChannelLink link = new ItemChannelLink("TestItem7_2", getChannel(thing, "7_2").getUID());
@@ -294,11 +287,10 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         final Collection<Item> items = itemRegistry.getItems();
         assertFalse(items.isEmpty());
 
-        Item item = itemRegistry.getItem("TestItem7_2");
+        final Item item = itemRegistry.getItem("TestItem7_2");
+        waitForAssert(() -> assertNotNull(item.getCommandDescription()));
 
-        CommandDescription command = item.getCommandDescription();
-        assertNotNull(command);
-
+        CommandDescription command = Objects.requireNonNull(item.getCommandDescription());
         List<CommandOption> opts = command.getCommandOptions();
         assertNotNull(opts);
         assertEquals(1, opts.size());
@@ -310,7 +302,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
     /*
      * Helper
      */
-    class TestDynamicCommandDescriptionProvider extends BaseDynamicCommandDescriptionProvider {
+    static class TestDynamicCommandDescriptionProvider extends BaseDynamicCommandDescriptionProvider {
         final CommandDescription newCommand = CommandDescriptionBuilder.create()
                 .withCommandOption(new CommandOption("NEW COMMAND", "My new command.")).build();
 
@@ -326,7 +318,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class MalfunctioningDynamicCommandDescriptionProvider extends BaseDynamicCommandDescriptionProvider {
+    static class MalfunctioningDynamicCommandDescriptionProvider extends BaseDynamicCommandDescriptionProvider {
         @Override
         public @Nullable CommandDescription getCommandDescription(Channel channel,
                 @Nullable CommandDescription originalCommandDescription, @Nullable Locale locale) {
@@ -362,7 +354,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class TestItemProvider implements ItemProvider {
+    static class TestItemProvider implements ItemProvider {
         private final Collection<Item> items;
 
         TestItemProvider(Collection<Item> items) {
@@ -383,7 +375,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         }
     }
 
-    private abstract class AbstractThingHandler extends BaseThingHandler {
+    private abstract static class AbstractThingHandler extends BaseThingHandler {
         public AbstractThingHandler(Thing thing) {
             super(thing);
         }

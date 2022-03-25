@@ -22,12 +22,30 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
             <!-- This bundle has many tests so run them in forks to reduce the build time -->
-            <forkCount>4</forkCount>
+            <forkCount>${cpu.count}</forkCount>
             <reuseForks>false</reuseForks>
           </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>get-cpu-count</id>
+            <goals>
+              <goal>cpu-count</goal>
+            </goals>
+            <configuration>
+              <cpuCount>cpu.count</cpuCount>
+              <factor>0.5</factor>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 
 </project>

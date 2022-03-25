@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -237,13 +238,8 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
 
         registerService(new TestDynamicStateDescriptionProvider(), DynamicStateDescriptionProvider.class.getName());
 
-        Thing thing = thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"), new ThingUID("hue:lamp:lamp1"),
-                null, "test thing", new Configuration());
-
-        assertNotNull(thing);
-        if (thing == null) {
-            throw new IllegalStateException("thing is null");
-        }
+        Thing thing = Objects.requireNonNull(thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"),
+                new ThingUID("hue:lamp:lamp1"), null, "test thing", new Configuration()));
 
         managedThingProvider.add(thing);
         ItemChannelLink link = new ItemChannelLink("TestItem", getChannel(thing, "1").getUID());
@@ -269,9 +265,10 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         Item item = itemRegistry.getItem("TestItem");
         assertEquals(CoreItemFactory.NUMBER, item.getType());
 
-        StateDescription state = item.getStateDescription();
-        assertNotNull(state);
+        final Item finalItem = item;
+        waitForAssert(() -> assertNotNull(finalItem.getStateDescription()));
 
+        StateDescription state = Objects.requireNonNull(item.getStateDescription());
         assertEquals(BigDecimal.ZERO, state.getMinimum());
         assertEquals(BigDecimal.valueOf(100), state.getMaximum());
         assertEquals(BigDecimal.TEN, state.getStep());
@@ -384,13 +381,8 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
                 DynamicStateDescriptionProvider.class.getName());
         registerService(new TestDynamicStateDescriptionProvider(), DynamicStateDescriptionProvider.class.getName());
 
-        Thing thing = thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"), new ThingUID("hue:lamp:lamp1"),
-                null, "test thing", new Configuration());
-
-        assertNotNull(thing);
-        if (thing == null) {
-            throw new IllegalStateException("thing is null");
-        }
+        Thing thing = Objects.requireNonNull(thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"),
+                new ThingUID("hue:lamp:lamp1"), null, "test thing", new Configuration()));
 
         managedThingProvider.add(thing);
         ItemChannelLink link = new ItemChannelLink("TestItem7_2", getChannel(thing, "7_2").getUID());
@@ -401,9 +393,10 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
 
         Item item = itemRegistry.getItem("TestItem7_2");
 
-        StateDescription state = item.getStateDescription();
-        assertNotNull(state);
+        final Item finalItem = item;
+        waitForAssert(() -> assertNotNull(finalItem.getStateDescription()));
 
+        StateDescription state = Objects.requireNonNull(item.getStateDescription());
         assertEquals(BigDecimal.valueOf(1), state.getMinimum());
         assertEquals(BigDecimal.valueOf(101), state.getMaximum());
         assertEquals(BigDecimal.valueOf(20), state.getStep());
@@ -421,7 +414,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
     /*
      * Helper
      */
-    class TestDynamicStateDescriptionProvider extends BaseDynamicStateDescriptionProvider {
+    static class TestDynamicStateDescriptionProvider extends BaseDynamicStateDescriptionProvider {
         final @Nullable StateDescription newState = StateDescriptionFragmentBuilder.create()
                 .withMinimum(BigDecimal.valueOf(10)).withMaximum(BigDecimal.valueOf(100))
                 .withStep(BigDecimal.valueOf(5)).withPattern("VALUE %d").withReadOnly(false)
@@ -450,7 +443,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class TestMalfunctioningDynamicStateDescriptionProvider extends BaseDynamicStateDescriptionProvider {
+    static class TestMalfunctioningDynamicStateDescriptionProvider extends BaseDynamicStateDescriptionProvider {
         @Override
         public @Nullable StateDescription getStateDescription(Channel channel, @Nullable StateDescription original,
                 @Nullable Locale locale) {
@@ -486,7 +479,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class TestItemProvider implements ItemProvider {
+    static class TestItemProvider implements ItemProvider {
         private final Collection<Item> items;
 
         TestItemProvider(Collection<Item> items) {
@@ -507,7 +500,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         }
     }
 
-    private abstract class AbstractThingHandler extends BaseThingHandler {
+    private abstract static class AbstractThingHandler extends BaseThingHandler {
         public AbstractThingHandler(Thing thing) {
             super(thing);
         }
