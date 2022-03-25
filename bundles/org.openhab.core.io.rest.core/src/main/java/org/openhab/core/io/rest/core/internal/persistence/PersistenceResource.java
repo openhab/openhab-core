@@ -179,7 +179,7 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "deleteItemFromPersistenceService", summary = "Delete item data from a specific persistence service.", security = {
+    @Operation(operationId = "deleteItemFromPersistenceService", summary = "Deletes item persistence data from a specific persistence service in a given time range.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))),
                     @ApiResponse(responseCode = "400", description = "Invalid filter parameters"),
@@ -187,9 +187,10 @@ public class PersistenceResource implements RESTResource {
     public Response httpDeletePersistenceServiceItem(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.", required = true) @QueryParam("serviceId") String serviceId,
             @Parameter(description = "The item name.") @PathParam("itemname") String itemName,
-            @Parameter(description = "Start time of the data to return. [" + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
+            @Parameter(description = "Start of the time range to be deleted. ["
+                    + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
                     + "]", required = true) @QueryParam("starttime") String startTime,
-            @Parameter(description = "End time of the data to return. [" + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
+            @Parameter(description = "End of the time range to be deleted. [" + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
                     + "]", required = true) @QueryParam("endtime") String endTime) {
         return deletePersistenceItemData(serviceId, itemName, startTime, endTime);
     }
