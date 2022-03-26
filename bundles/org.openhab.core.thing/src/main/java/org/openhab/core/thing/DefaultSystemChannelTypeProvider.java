@@ -91,6 +91,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             "wind-speed");
     public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_OUTDOOR_TEMPERATURE = new ChannelTypeUID(BINDING_ID,
             "outdoor-temperature");
+    public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_INDOOR_TEMPERATURE = new ChannelTypeUID(BINDING_ID,
+            "indoor-temperature");
     public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_ATMOSPHERIC_HUMIDITY = new ChannelTypeUID(BINDING_ID,
             "atmospheric-humidity");
     public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_BAROMETRIC_PRESSURE = new ChannelTypeUID(BINDING_ID,
@@ -314,6 +316,16 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withTags(List.of("Measurement", "Temperature")).build();
 
     /**
+     * Indoor-temperature: system wide {@link ChannelType} which shows the indoor temperature
+     */
+    public static final ChannelType SYSTEM_INDOOR_TEMPERATURE = ChannelTypeBuilder
+            .state(SYSTEM_CHANNEL_TYPE_UID_INDOOR_TEMPERATURE, "Indoor Temperature", "Number:Temperature")
+            .withDescription("Current indoor temperature").withCategory("Temperature")
+            .withStateDescriptionFragment(
+                    StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
+            .withTags(List.of("Measurement", "Temperature")).build();
+
+    /**
      * Atmospheric-humidity: system wide {@link ChannelType} which shows the atmospheric humidity
      */
     public static final ChannelType SYSTEM_ATMOSPHERIC_HUMIDITY = ChannelTypeBuilder
@@ -338,7 +350,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             SYSTEM_RAWROCKER, SYSTEM_POWER, SYSTEM_LOCATION, SYSTEM_MOTION, SYSTEM_BRIGHTNESS, SYSTEM_COLOR,
             SYSTEM_COLOR_TEMPERATURE, SYSTEM_COLOR_TEMPERATURE_ABS, SYSTEM_VOLUME, SYSTEM_MUTE, SYSTEM_MEDIA_CONTROL,
             SYSTEM_MEDIA_TITLE, SYSTEM_MEDIA_ARTIST, SYSTEM_WIND_DIRECTION, SYSTEM_WIND_SPEED,
-            SYSTEM_OUTDOOR_TEMPERATURE, SYSTEM_ATMOSPHERIC_HUMIDITY, SYSTEM_BAROMETRIC_PRESSURE);
+            SYSTEM_OUTDOOR_TEMPERATURE, SYSTEM_INDOOR_TEMPERATURE, SYSTEM_ATMOSPHERIC_HUMIDITY,
+            SYSTEM_BAROMETRIC_PRESSURE);
 
     private final Map<LocalizedKey, ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
 
@@ -387,11 +400,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
 
         ChannelType localizedChannelType = channelTypeI18nLocalizationService.createLocalizedChannelType(bundle,
                 channelType, locale);
-        if (localizedChannelType != null) {
-            localizedChannelTypeCache.put(localizedKey, localizedChannelType);
-            return localizedChannelType;
-        } else {
-            return channelType;
-        }
+        localizedChannelTypeCache.put(localizedKey, localizedChannelType);
+        return localizedChannelType;
     }
 }
