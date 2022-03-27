@@ -143,7 +143,7 @@ public class EventWebSocket {
                     default:
                         throw new EventProcessingException("Unknown event type '" + eventDTO.type + "'");
                 }
-            } catch (EventProcessingException e) {
+            } catch (EventProcessingException | JsonParseException e) {
                 logger.warn("Failed to process deserialized event '{}': {}", message, e.getMessage());
                 responseEvent = new EventDTO(WEB_SOCKET_EVENT, "/response/failed",
                         "Processing error: " + e.getMessage(), null, eventDTO != null ? eventDTO.eventId : "");
