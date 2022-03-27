@@ -12,8 +12,8 @@
  */
 package org.openhab.core.persistence;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -30,15 +30,15 @@ public class PersistenceItemConfiguration {
 
     private final List<PersistenceConfig> items;
     private final @Nullable String alias;
-    private final @Nullable List<PersistenceStrategy> strategies;
-    private final @Nullable List<PersistenceFilter> filters;
+    private final List<PersistenceStrategy> strategies;
+    private final List<PersistenceFilter> filters;
 
     public PersistenceItemConfiguration(final List<PersistenceConfig> items, @Nullable final String alias,
             @Nullable final List<PersistenceStrategy> strategies, @Nullable final List<PersistenceFilter> filters) {
         this.items = items;
         this.alias = alias;
-        this.strategies = strategies;
-        this.filters = filters;
+        this.strategies = Objects.requireNonNullElse(strategies, List.of());
+        this.filters = Objects.requireNonNullElse(filters, List.of());
     }
 
     public List<PersistenceConfig> getItems() {
@@ -49,18 +49,17 @@ public class PersistenceItemConfiguration {
         return alias;
     }
 
-    public @Nullable List<PersistenceStrategy> getStrategies() {
+    public List<PersistenceStrategy> getStrategies() {
         return strategies;
     }
 
-    public @Nullable List<PersistenceFilter> getFilters() {
+    public List<PersistenceFilter> getFilters() {
         return filters;
     }
 
     @Override
     public String toString() {
-        return String.format("%s [items=%s, alias=%s, strategies=%s, filters=%s]", getClass().getSimpleName(),
-                Arrays.toString(items.toArray()), alias, Arrays.toString(strategies.toArray()),
-                Arrays.toString(filters.toArray()));
+        return String.format("%s [items=%s, alias=%s, strategies=%s, filters=%s]", getClass().getSimpleName(), items,
+                alias, strategies, filters);
     }
 }
