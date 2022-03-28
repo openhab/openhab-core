@@ -143,6 +143,11 @@ public class EventWebSocket {
                     default:
                         throw new EventProcessingException("Unknown event type '" + eventDTO.type + "'");
                 }
+                if (responseEvent.eventId == null) {
+                    // skip only for successful processing, always send response if processing failed
+                    logger.trace("Not sending response event {}, because no eventId present.", responseEvent);
+                    return;
+                }
             } catch (EventProcessingException | JsonParseException e) {
                 logger.warn("Failed to process deserialized event '{}': {}", message, e.getMessage());
                 responseEvent = new EventDTO(WEB_SOCKET_EVENT, "/response/failed",

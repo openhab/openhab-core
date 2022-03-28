@@ -13,6 +13,8 @@
 package org.openhab.core.io.websocket;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,6 +41,7 @@ import com.google.gson.JsonParseException;
  */
 @NonNullByDefault
 public class ItemEventUtility {
+    private static final Pattern TOPIC_PATTERN = Pattern.compile("openhab/items/(?<entity>\\w+)/(?<action>\\w+)");
     private static final String TYPE_POSTFIX = "Type";
 
     private final Gson gson;
@@ -50,7 +53,8 @@ public class ItemEventUtility {
     }
 
     public Event createCommandEvent(EventDTO eventDTO) throws EventProcessingException {
-        Item item = getItem(eventDTO.topic);
+        Matcher matcher = getTopicMatcher(eventDTO.topic, "command");
+        Item item = getItem(matcher.group("entity"));
         Type command = parseType(eventDTO.payload);
         if (command instanceof Command) {
             List<Class<? extends Command>> acceptedItemCommandTypes = item.getAcceptedCommandTypes();
@@ -62,7 +66,8 @@ public class ItemEventUtility {
     }
 
     public Event createStateEvent(EventDTO eventDTO) throws EventProcessingException {
-        Item item = getItem(eventDTO.topic);
+        Matcher matcher = getTopicMatcher(eventDTO.topic, "state");
+        Item item = getItem(matcher.group("entity"));
         Type state = parseType(eventDTO.payload);
         if (state instanceof State) {
             List<Class<? extends State>> acceptedItemStateTypes = item.getAcceptedDataTypes();
@@ -73,15 +78,23 @@ public class ItemEventUtility {
         throw new EventProcessingException("Incompatible datatype, rejected.");
     }
 
-    private Item getItem(@Nullable String topic) throws EventProcessingException {
+    private Matcher getTopicMatcher(@Nullable String topic, String action) throws EventProcessingException {
         if (topic == null) {
-            throw new EventProcessingException("Event topic must not be null.");
+            throw new EventProcessingException("Topic must not be null");
         }
-        String[] topicParts = topic.split("/");
-        if (topicParts.length < 4 || topicParts[2].isBlank()) {
-            throw new EventProcessingException("Could not determine item name from topic " + topic);
+        Matcher matcher = TOPIC_PATTERN.matcher(topic);
+        if (!matcher.matches()) {
+            throw new EventProcessingException(
+                    "Topic must follow the format {namespace}/{entityType}/{entity}/{action}.");
         }
-        String itemName = topicParts[2];
+
+        if (!action.equals(matcher.group("action"))) {
+            throw new EventProcessingException("Topic does not match event type.");
+        }
+        return matcher;
+    }
+
+    private Item getItem(String itemName) throws EventProcessingException {
         try {
             return itemRegistry.getItem(itemName);
         } catch (ItemNotFoundException e) {
@@ -96,7 +109,7 @@ public class ItemEventUtility {
         } catch (JsonParseException ignored) {
         }
         if (bean == null) {
-            throw new EventProcessingException("Failed to deserialize payload '" + payload + "'");
+            throw new EventProcessingException("Failed to deserialize payload '" + payload + "'.");
         }
 
         String simpleClassName = bean.type + TYPE_POSTFIX;
