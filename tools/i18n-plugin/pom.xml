@@ -14,7 +14,7 @@
 
   <packaging>maven-plugin</packaging>
 
-  <name>Internationalization Maven Plugin</name>
+  <name>openHAB Core :: Tools :: Internationalization Maven Plugin</name>
   <description>Generates translations files</description>
 
   <properties>
