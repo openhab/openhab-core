@@ -17,7 +17,7 @@
 
   <properties>
     <cxf.version>3.4.5</cxf.version>
-    <jackson.version>2.12.5</jackson.version>
+    <jackson.version>2.12.6.1</jackson.version>
     <jetty.version>9.4.43.v20210629</jetty.version>
     <pax.logging.version>2.0.14</pax.logging.version>
     <pax.web.version>7.3.23</pax.web.version>
