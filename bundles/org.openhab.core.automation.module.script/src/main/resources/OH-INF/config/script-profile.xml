@@ -7,7 +7,7 @@
 	<config-description uri="profile:system:script">
 		<parameter name="toItemScript" type="text">
 			<label>To Item Script</label>
-			<description>she Script for transforming states and commands from handler to item.</description>
+			<description>The Script for transforming states and commands from handler to item.</description>
 		</parameter>
 		<parameter name="toHandlerScript" type="text">
 			<label>To Handler Script</label>
@@ -15,7 +15,6 @@
 		</parameter>
 		<parameter name="scriptType" type="text" required="true">
 			<label>ScriptType</label>
-			<description>Script type</description>
 		</parameter>
 	</config-description>
 
