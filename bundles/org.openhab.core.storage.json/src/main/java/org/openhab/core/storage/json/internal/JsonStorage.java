@@ -161,7 +161,7 @@ public class JsonStorage<T> implements Storage<T> {
         if (previousValue == null) {
             return null;
         }
-        return deserialize(previousValue);
+        return deserialize(previousValue, null);
     }
 
     @Override
@@ -171,7 +171,7 @@ public class JsonStorage<T> implements Storage<T> {
         if (removedElement == null) {
             return null;
         }
-        return deserialize(removedElement);
+        return deserialize(removedElement, null);
     }
 
     @Override
@@ -185,7 +185,7 @@ public class JsonStorage<T> implements Storage<T> {
         if (value == null) {
             return null;
         }
-        return deserialize(value);
+        return deserialize(value, key);
     }
 
     @Override
@@ -206,9 +206,16 @@ public class JsonStorage<T> implements Storage<T> {
      * Deserializes and instantiates an object of type {@code T} out of the given
      * JSON String. A special classloader (other than the one of the JSON bundle) is
      * used in order to load the classes in the context of the calling bundle.
+     *
+     * The {@code key} must only be specified if the requested object stays in storage (i.e. only when called from
+     * {@link #get(String)} action). If specified on other actions, the old or removed value will be persisted.
+     *
+     * @param entry the entry that needs deserialization
+     * @param key the key for this element if storage after type migration is requested
+     * @return the deserialized type
      */
-    @SuppressWarnings("unchecked")
-    private @Nullable T deserialize(@Nullable StorageEntry entry) {
+    @SuppressWarnings({ "unchecked", "null" })
+    private @Nullable T deserialize(@Nullable StorageEntry entry, @Nullable String key) {
         if (entry == null) {
             // nothing to deserialize
             return null;
@@ -222,6 +229,10 @@ public class JsonStorage<T> implements Storage<T> {
             if (migrator != null) {
                 entityClassName = migrator.getNewType();
                 entityValue = migrator.migrate(entityValue);
+                if (key != null) {
+                    map.put(key, new StorageEntry(entityClassName, entityValue));
+                    deferredCommit();
+                }
             }
 
             // load required class within the given bundle context
@@ -246,7 +257,7 @@ public class JsonStorage<T> implements Storage<T> {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     private @Nullable Map<String, StorageEntry> readDatabase(File inputFile) {
         if (inputFile.length() == 0) {
             logger.warn("Json storage file at '{}' is empty - ignoring corrupt file.", inputFile.getAbsolutePath());
@@ -323,9 +334,10 @@ public class JsonStorage<T> implements Storage<T> {
      */
     public synchronized void flush() {
         // Stop any existing timer
+        TimerTask commitTimerTask = this.commitTimerTask;
         if (commitTimerTask != null) {
             commitTimerTask.cancel();
-            commitTimerTask = null;
+            this.commitTimerTask = null;
         }
 
         if (dirty) {
@@ -376,9 +388,10 @@ public class JsonStorage<T> implements Storage<T> {
         dirty = true;
 
         // Stop any existing timer
+        TimerTask commitTimerTask = this.commitTimerTask;
         if (commitTimerTask != null) {
             commitTimerTask.cancel();
-            commitTimerTask = null;
+            this.commitTimerTask = null;
         }
 
         // Handle a maximum time for deferring the commit.

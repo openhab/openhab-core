@@ -12,8 +12,12 @@
  */
 package org.openhab.core.storage.json.internal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,27 +60,50 @@ public class MigrationTest {
     }
 
     @Test
-    public void testRenameClassMigration() {
+    public void testRenameClassMigration() throws TypeMigrationException {
+        TypeMigrator typeMigrator = spy(
+                new RenamingTypeMigrator(OldNameClass.class.getName(), NewNameClass.class.getName()));
+
         // read new class
         JsonStorage<NewNameClass> storage1 = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0,
-                List.of(new RenamingTypeMigrator(OldNameClass.class.getName(), NewNameClass.class.getName())));
+                List.of(typeMigrator));
+
         NewNameClass newNameInstance = storage1.get(OBJECT_KEY);
-        assertNotNull(newNameInstance);
+
+        verify(typeMigrator).getOldType();
+        verify(typeMigrator).getNewType();
+        verify(typeMigrator).migrate(any());
 
         Objects.requireNonNull(newNameInstance);
-        assertEquals(OBJECT_VALUE, newNameInstance.value);
+
+        assertThat(OBJECT_VALUE, is(newNameInstance.value));
+
+        // ensure type migrations are stored
+        storage1.flush();
+        newNameInstance = storage1.get(OBJECT_KEY);
+        verifyNoMoreInteractions(typeMigrator);
     }
 
     @Test
-    public void testRenameFieldMigration() {
+    public void testRenameFieldMigration() throws TypeMigrationException {
+        TypeMigrator typeMigrator = spy(new OldToNewFieldMigrator());
         // read new class
         JsonStorage<NewFieldClass> storage1 = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0,
-                List.of(new OldToNewFieldMigrator()));
+                List.of(typeMigrator));
         NewFieldClass newNameInstance = storage1.get(OBJECT_KEY);
-        assertNotNull(newNameInstance);
+
+        verify(typeMigrator).getOldType();
+        verify(typeMigrator).getNewType();
+        verify(typeMigrator).migrate(any());
 
         Objects.requireNonNull(newNameInstance);
-        assertEquals(OBJECT_VALUE, newNameInstance.val);
+
+        assertThat(OBJECT_VALUE, is(newNameInstance.val));
+
+        // ensure type migrations are stored
+        storage1.flush();
+        newNameInstance = storage1.get(OBJECT_KEY);
+        verifyNoMoreInteractions(typeMigrator);
     }
 
     @SuppressWarnings("unused")
