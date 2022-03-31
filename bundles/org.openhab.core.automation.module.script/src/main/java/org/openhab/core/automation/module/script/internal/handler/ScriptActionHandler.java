@@ -41,15 +41,11 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
     /**
      * constructs a new ScriptActionHandler
      *
-     * @param module
-     * @param ruleUid the UID of the rule this handler is used for
+     * @param module the module
+     * @param ruleUID the UID of the rule this handler is used for
      */
     public ScriptActionHandler(Action module, String ruleUID, ScriptEngineManager scriptEngineManager) {
         super(module, ruleUID, scriptEngineManager);
-    }
-
-    @Override
-    public void dispose() {
     }
 
     @Override
