@@ -1,0 +1,206 @@
+/**
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.core.automation.module.script.rulesupport.internal;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.module.script.ScriptExtensionProvider;
+import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache;
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * The {@link CacheScriptExtension} extends scripts to use a cache shared between rules
+ *
+ * @author Jan N. Klug - Initial contribution
+ */
+@Component(immediate = true)
+@NonNullByDefault
+public class CacheScriptExtension implements ScriptExtensionProvider {
+    static final String PRESET_NAME = "cache";
+    static final String SHARED_CACHE_NAME = "sharedCache";
+    static final String PRIVATE_CACHE_NAME = "privateCache";
+
+    private final Logger logger = LoggerFactory.getLogger(CacheScriptExtension.class);
+
+    private final Lock cacheLock = new ReentrantLock();
+    private final Map<String, Object> sharedCache = new HashMap<>();
+    private final Map<String, Set<String>> sharedCacheKeyAccessors = new HashMap<>();
+
+    private final Map<String, ValueCacheImpl> privateCaches = new HashMap<>();
+
+    public CacheScriptExtension() {
+    }
+
+    @Override
+    public Collection<String> getDefaultPresets() {
+        return Set.of();
+    }
+
+    @Override
+    public Collection<String> getPresets() {
+        return Set.of(PRESET_NAME);
+    }
+
+    @Override
+    public Collection<String> getTypes() {
+        return Set.of(PRIVATE_CACHE_NAME, SHARED_CACHE_NAME);
+    }
+
+    @Override
+    public @Nullable Object get(String scriptIdentifier, String type) throws IllegalArgumentException {
+        if (SHARED_CACHE_NAME.equals(type)) {
+            return new TrackingValueCacheImpl(scriptIdentifier);
+        } else if (PRIVATE_CACHE_NAME.equals(type)) {
+            return privateCaches.computeIfAbsent(scriptIdentifier, ValueCacheImpl::new);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> importPreset(String scriptIdentifier, String preset) {
+        if (PRESET_NAME.equals(preset)) {
+            Object privateCache = Objects
+                    .requireNonNull(privateCaches.computeIfAbsent(scriptIdentifier, ValueCacheImpl::new));
+            return Map.of(SHARED_CACHE_NAME, new TrackingValueCacheImpl(scriptIdentifier), PRIVATE_CACHE_NAME,
+                    privateCache);
+        }
+
+        return Map.of();
+    }
+
+    @Override
+    public void unload(String scriptIdentifier) {
+        cacheLock.lock();
+        try {
+            // remove the scriptIdentifier from cache-key access list
+            sharedCacheKeyAccessors.values().forEach(cacheKey -> cacheKey.remove(scriptIdentifier));
+            // remove the key from access list and cache if no accessor left
+            sharedCacheKeyAccessors.values().removeIf(Set::isEmpty);
+            sharedCache.keySet().removeIf(key -> !sharedCacheKeyAccessors.containsKey(key));
+        } finally {
+            cacheLock.unlock();
+        }
+
+        // remove private cache
+        privateCaches.remove(scriptIdentifier);
+    }
+
+    private static class ValueCacheImpl implements ValueCache {
+        private final Map<String, Object> cache = new HashMap<>();
+
+        public ValueCacheImpl(String scriptIdentifier) {
+        }
+
+        @Override
+        public @Nullable Object put(String key, Object value) {
+            return cache.put(key, value);
+        }
+
+        @Override
+        public @Nullable Object remove(String key) {
+            return cache.remove(key);
+        }
+
+        @Override
+        public @Nullable Object get(String key) {
+            return cache.get(key);
+        }
+
+        @Override
+        public Object get(String key, Supplier<Object> supplier) {
+            return Objects.requireNonNull(cache.computeIfAbsent(key, k -> supplier.get()));
+        }
+    }
+
+    private class TrackingValueCacheImpl implements ValueCache {
+        private final String scriptIdentifier;
+
+        public TrackingValueCacheImpl(String scriptIdentifier) {
+            this.scriptIdentifier = scriptIdentifier;
+        }
+
+        @Override
+        public @Nullable Object put(String key, Object value) {
+            cacheLock.lock();
+            try {
+                rememberAccessToKey(key);
+                Object oldValue = sharedCache.put(key, value);
+                logger.trace("PUT to cache from '{}': '{}' -> '{}' (was: '{}')", scriptIdentifier, key, value,
+                        oldValue);
+                return oldValue;
+            } finally {
+                cacheLock.unlock();
+            }
+        }
+
+        @Override
+        public @Nullable Object remove(String key) {
+            cacheLock.lock();
+            try {
+                sharedCacheKeyAccessors.remove(key);
+                Object oldValue = sharedCache.remove(key);
+
+                logger.trace("REMOVE from cache from '{}': '{}' -> '{}'", scriptIdentifier, key, oldValue);
+                return oldValue;
+            } finally {
+                cacheLock.unlock();
+            }
+        }
+
+        @Override
+        public @Nullable Object get(String key) {
+            cacheLock.lock();
+            try {
+                rememberAccessToKey(key);
+                Object value = sharedCache.get(key);
+
+                logger.trace("GET to cache from '{}': '{}' -> '{}'", scriptIdentifier, key, value);
+                return value;
+            } finally {
+                cacheLock.unlock();
+            }
+        }
+
+        @Override
+        public Object get(String key, Supplier<Object> supplier) {
+            cacheLock.lock();
+            try {
+                rememberAccessToKey(key);
+                Object value = Objects.requireNonNull(sharedCache.computeIfAbsent(key, k -> supplier.get()));
+
+                logger.trace("GET with supplier to cache from '{}': '{}' -> '{}'", scriptIdentifier, key, value);
+                return value;
+            } finally {
+                cacheLock.unlock();
+            }
+        }
+
+        private void rememberAccessToKey(String key) {
+            Objects.requireNonNull(sharedCacheKeyAccessors.computeIfAbsent(key, k -> new HashSet<>()))
+                    .add(scriptIdentifier);
+        }
+    }
+}
