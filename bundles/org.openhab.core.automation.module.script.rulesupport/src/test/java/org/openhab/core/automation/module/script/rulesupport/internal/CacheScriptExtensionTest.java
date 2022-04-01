@@ -17,8 +17,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.Objects;
+import java.util.Timer;
+import java.util.concurrent.ScheduledFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -142,6 +147,38 @@ public class CacheScriptExtensionTest {
         cache1.put(KEY1, VALUE1);
         assertThat(cache1.get(KEY1), is(VALUE1));
         assertThat(cache2.get(KEY1), nullValue());
+    }
+
+    @Test
+    public void jobsInSharedCacheAreCancelledOnUnload() {
+        testJobCancellation(CacheScriptExtension.SHARED_CACHE_NAME);
+    }
+
+    @Test
+    public void jobsInPrivateCacheAreCancelledOnUnload() {
+        testJobCancellation(CacheScriptExtension.PRIVATE_CACHE_NAME);
+    }
+
+    public void testJobCancellation(String cacheType) {
+        CacheScriptExtension se = new CacheScriptExtension();
+        ValueCache cache = getCache(se, SCRIPT1, cacheType);
+
+        Timer timerMock = mock(Timer.class);
+        ScheduledFuture<?> futureMock = mock(ScheduledFuture.class);
+
+        cache.put(KEY1, timerMock);
+        cache.put(KEY2, futureMock);
+
+        // ensure jobs are not cancelled on removal
+        cache.remove(KEY1);
+        cache.remove(KEY2);
+        verifyNoMoreInteractions(timerMock, futureMock);
+
+        cache.put(KEY1, timerMock);
+        cache.put(KEY2, futureMock);
+        se.unload(SCRIPT1);
+        verify(timerMock).cancel();
+        verify(futureMock).cancel(true);
     }
 
     public void testCacheBasicFunctions(ValueCache cache) {

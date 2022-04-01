@@ -15,9 +15,14 @@ package org.openhab.core.automation.module.script.rulesupport.internal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Timer;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
@@ -26,12 +31,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
 import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache;
+import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link CacheScriptExtension} extends scripts to use a cache shared between rules
+ * The {@link CacheScriptExtension} extends scripts to use a cache shared between rules or subsequent runs of the same
+ * rule
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -43,6 +50,8 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
     static final String PRIVATE_CACHE_NAME = "privateCache";
 
     private final Logger logger = LoggerFactory.getLogger(CacheScriptExtension.class);
+    private final ScheduledExecutorService scheduler = ThreadPoolManager
+            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
     private final Lock cacheLock = new ReentrantLock();
     private final Map<String, Object> sharedCache = new HashMap<>();
@@ -98,14 +107,40 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
             // remove the scriptIdentifier from cache-key access list
             sharedCacheKeyAccessors.values().forEach(cacheKey -> cacheKey.remove(scriptIdentifier));
             // remove the key from access list and cache if no accessor left
-            sharedCacheKeyAccessors.values().removeIf(Set::isEmpty);
-            sharedCache.keySet().removeIf(key -> !sharedCacheKeyAccessors.containsKey(key));
+            Iterator<Map.Entry<String, Set<String>>> it = sharedCacheKeyAccessors.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, Set<String>> element = it.next();
+                if (element.getValue().isEmpty()) {
+                    // accessor list is empty
+                    it.remove();
+                    // remove from cache and cancel ScheduledFutures or Timer tasks
+                    asyncCancelJob(sharedCache.remove(element.getKey()));
+                }
+            }
         } finally {
             cacheLock.unlock();
         }
 
         // remove private cache
-        privateCaches.remove(scriptIdentifier);
+        ValueCacheImpl privateCache = privateCaches.remove(scriptIdentifier);
+        if (privateCache != null) {
+            // cancel ScheduledFutures or Timer tasks
+            privateCache.values().forEach(this::asyncCancelJob);
+        }
+    }
+
+    /**
+     * Check if object is {@link ScheduledFuture} or {@link Timer} and schedule cancellation of those jobs
+     *
+     * @param o the {@link Object} to check
+     */
+    private void asyncCancelJob(@Nullable Object o) {
+        if (o instanceof ScheduledFuture) {
+            scheduler.execute(() -> ((ScheduledFuture<?>) o).cancel(true));
+        } else if (o instanceof Timer) {
+            // not using execute so ensure this operates in another thread and we don't block here
+            scheduler.schedule(() -> ((Timer) o).cancel(), 0, TimeUnit.SECONDS);
+        }
     }
 
     private static class ValueCacheImpl implements ValueCache {
@@ -132,6 +167,10 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         @Override
         public Object get(String key, Supplier<Object> supplier) {
             return Objects.requireNonNull(cache.computeIfAbsent(key, k -> supplier.get()));
+        }
+
+        private Collection<Object> values() {
+            return cache.values();
         }
     }
 
