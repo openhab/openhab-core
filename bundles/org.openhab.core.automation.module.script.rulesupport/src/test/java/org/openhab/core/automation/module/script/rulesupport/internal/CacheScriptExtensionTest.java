@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -177,8 +178,8 @@ public class CacheScriptExtensionTest {
         cache.put(KEY1, timerMock);
         cache.put(KEY2, futureMock);
         se.unload(SCRIPT1);
-        verify(timerMock).cancel();
-        verify(futureMock).cancel(true);
+        verify(timerMock, timeout(1000)).cancel();
+        verify(futureMock, timeout(1000)).cancel(true);
     }
 
     public void testCacheBasicFunctions(ValueCache cache) {
