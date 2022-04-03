@@ -63,6 +63,7 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.monitor/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.net/${project.version}</bundle>
 		<feature dependency="true">pax-http-whiteboard</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.jetty.certificate/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.core/${project.version}</bundle>
