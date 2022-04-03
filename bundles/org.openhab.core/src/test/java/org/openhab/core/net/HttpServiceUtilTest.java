@@ -36,7 +36,7 @@ import org.osgi.framework.ServiceReference;
  * @author Henning Treu - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class HttpServiceUtilTest {
 

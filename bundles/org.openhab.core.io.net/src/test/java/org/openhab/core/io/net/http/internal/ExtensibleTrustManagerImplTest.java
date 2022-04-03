@@ -45,7 +45,7 @@ import org.openhab.core.io.net.http.TlsTrustManagerProvider;
  * @author Martin van Wingerden - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class ExtensibleTrustManagerImplTest {
 

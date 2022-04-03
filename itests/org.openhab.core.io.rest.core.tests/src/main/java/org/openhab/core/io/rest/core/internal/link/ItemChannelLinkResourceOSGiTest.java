@@ -55,7 +55,7 @@ import com.jayway.jsonpath.JsonPath;
  * @author Christoph Weitkamp - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class ItemChannelLinkResourceOSGiTest extends JavaOSGiTest {
 

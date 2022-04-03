@@ -37,7 +37,7 @@ import org.mockito.quality.Strictness;
  * @author Markus Rathgeb - Base test classes without tests needs to be abstract
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public abstract class BaseHttpUtilTest {
 

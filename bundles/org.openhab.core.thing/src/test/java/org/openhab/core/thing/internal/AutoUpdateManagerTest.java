@@ -61,7 +61,7 @@ import org.openhab.core.thing.type.ChannelTypeRegistry;
  * @author Kai Kreuzer - added tests with multiple links
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class AutoUpdateManagerTest {
 

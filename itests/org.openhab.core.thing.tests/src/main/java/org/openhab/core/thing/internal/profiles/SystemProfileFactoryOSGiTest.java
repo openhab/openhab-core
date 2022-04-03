@@ -49,7 +49,7 @@ import org.openhab.core.thing.type.ChannelType;
  * @author Simon Kaufmann - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
 

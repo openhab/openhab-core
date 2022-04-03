@@ -45,7 +45,7 @@ import org.openhab.core.types.util.UnitUtils;
  * @author Stefan Triller - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class NumberItemTest {
 

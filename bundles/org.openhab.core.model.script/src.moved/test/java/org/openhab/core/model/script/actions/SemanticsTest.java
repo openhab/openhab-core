@@ -40,7 +40,7 @@ import org.openhab.core.semantics.model.location.Indoor;
  * @author Christoph Weitkamp - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class SemanticsTest {
 
     private @Mock ItemRegistry mockedItemRegistry;

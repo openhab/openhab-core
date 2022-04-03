@@ -59,7 +59,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author Jan N. Klug - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class AbstractRemoteAddonServiceTest {
     private @Mock @NonNullByDefault({}) StorageService storageService;

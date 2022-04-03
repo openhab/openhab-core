@@ -84,7 +84,7 @@ import org.osgi.framework.Bundle;
  *         thing UID and firmware version
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class FirmwareUpdateServiceTest extends JavaOSGiTest {
 

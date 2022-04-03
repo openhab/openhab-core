@@ -63,7 +63,7 @@ import org.openhab.core.thing.type.ThingTypeRegistry;
  * @author Henning Sudbrock - Added tests for auto-approving inbox entries
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class AutomaticInboxProcessorTest {
 

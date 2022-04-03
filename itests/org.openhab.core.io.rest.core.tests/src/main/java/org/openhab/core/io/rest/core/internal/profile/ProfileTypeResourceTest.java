@@ -49,7 +49,7 @@ import org.openhab.core.thing.type.ChannelTypeUID;
  * @author Stefan Triller - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class ProfileTypeResourceTest extends JavaTest {
 
