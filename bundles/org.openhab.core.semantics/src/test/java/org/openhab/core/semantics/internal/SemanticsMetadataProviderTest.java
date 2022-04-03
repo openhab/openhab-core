@@ -42,7 +42,7 @@ import org.openhab.core.library.items.SwitchItem;
  */
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class SemanticsMetadataProviderTest {
 
     private static final String ITEM_NAME = "switchItem";

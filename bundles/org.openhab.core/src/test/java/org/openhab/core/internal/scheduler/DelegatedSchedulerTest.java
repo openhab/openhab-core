@@ -39,7 +39,7 @@ import org.openhab.core.scheduler.ScheduledCompletableFuture;
  * @author Hilbrand Bouwkamp - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class DelegatedSchedulerTest {
 

@@ -54,7 +54,7 @@ import org.openhab.core.persistence.PersistenceServiceRegistry;
  * @author Jan N. Klug - Fix averageSince calculation
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class PersistenceExtensionsTest {
 

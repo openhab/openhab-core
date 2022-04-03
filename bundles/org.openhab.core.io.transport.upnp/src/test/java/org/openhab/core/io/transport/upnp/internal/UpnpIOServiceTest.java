@@ -44,7 +44,7 @@ import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
  * @author Andre Fuechsel - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class UpnpIOServiceTest {
 

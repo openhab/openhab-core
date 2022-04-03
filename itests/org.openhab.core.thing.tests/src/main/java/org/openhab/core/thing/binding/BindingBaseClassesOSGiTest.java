@@ -95,7 +95,7 @@ import org.osgi.service.component.ComponentContext;
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @SuppressWarnings("null")
 @NonNullByDefault
 public class BindingBaseClassesOSGiTest extends JavaOSGiTest {

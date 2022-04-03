@@ -38,7 +38,7 @@ import org.mockito.quality.Strictness;
  */
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class BundleVersionTest {
 
     private static Stream<Arguments> provideCompareVersionsArguments() {

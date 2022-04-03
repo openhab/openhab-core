@@ -64,7 +64,7 @@ import org.openhab.core.ui.items.ItemUIRegistry;
  * @author Henning Treu - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class SitemapResourceTest extends JavaTest {
 

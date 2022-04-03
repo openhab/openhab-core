@@ -43,7 +43,7 @@ import org.openhab.core.test.java.JavaTest;
  * @author Simon Kaufmann - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
 

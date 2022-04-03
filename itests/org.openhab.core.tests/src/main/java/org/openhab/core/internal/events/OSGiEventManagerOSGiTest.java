@@ -46,7 +46,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author Simon Kaufmann - migrated from Groovy to Java
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
 

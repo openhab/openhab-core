@@ -64,7 +64,7 @@ import org.openhab.core.thing.type.ThingTypeRegistry;
  * @author Laurent Garnier - Added tests testApproveWithThingId and testApproveWithInvalidThingId
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class PersistentInboxTest {
 

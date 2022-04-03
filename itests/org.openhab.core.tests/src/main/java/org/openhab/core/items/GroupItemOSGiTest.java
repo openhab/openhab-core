@@ -75,7 +75,7 @@ import tech.units.indriya.unit.Units;
  * @author Stefan Triller - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class GroupItemOSGiTest extends JavaOSGiTest {
 
