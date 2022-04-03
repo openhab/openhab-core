@@ -124,6 +124,12 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
                 notifyListenersAboutRemovedElement(removedMd);
             }
         }
+
+        if (item instanceof GroupItem) {
+            for (Item memberItem : ((GroupItem) item).getMembers()) {
+                processItem(memberItem);
+            }
+        }
     }
 
     /**
@@ -251,6 +257,12 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         Metadata removedMd = semantics.remove(item.getName());
         if (removedMd != null) {
             notifyListenersAboutRemovedElement(removedMd);
+
+            if (item instanceof GroupItem) {
+                for (Item memberItem : ((GroupItem) item).getMembers()) {
+                    processItem(memberItem);
+                }
+            }
         }
     }
 
