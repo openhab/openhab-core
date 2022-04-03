@@ -78,7 +78,7 @@ public class JavaSoundAudioSource implements AudioSource {
     private final ConcurrentLinkedQueue<PipedOutputStream> openStreamRefs = new ConcurrentLinkedQueue<>();
 
     /**
-     * Task for writing microphone data to the each of the open sources on Windows OS
+     * Task for writing microphone data to each of the open sources on Windows OS
      */
     private @Nullable Future<?> pipeWriteTask;
 
