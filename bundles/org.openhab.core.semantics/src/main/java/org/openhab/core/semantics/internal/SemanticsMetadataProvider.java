@@ -82,10 +82,10 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     @Activate
     protected void activate() {
         initRelations();
-        itemRegistry.addRegistryChangeListener(this);
         for (Item item : itemRegistry.getAll()) {
             processItem(item);
         }
+        itemRegistry.addRegistryChangeListener(this);
     }
 
     @Deactivate
