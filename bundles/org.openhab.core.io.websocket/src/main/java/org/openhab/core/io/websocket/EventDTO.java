@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.websocket;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 
@@ -44,5 +46,28 @@ public class EventDTO {
         topic = event.getTopic();
         source = event.getSource();
         payload = event.getPayload();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        EventDTO eventDTO = (EventDTO) o;
+        return Objects.equals(type, eventDTO.type) && Objects.equals(topic, eventDTO.topic)
+                && Objects.equals(payload, eventDTO.payload) && Objects.equals(source, eventDTO.source)
+                && Objects.equals(eventId, eventDTO.eventId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, topic, payload, source, eventId);
+    }
+
+    @Override
+    public String toString() {
+        return "EventDTO{type='" + type + "', topic='" + topic + "', payload='" + payload + "', source='" + source
+                + "', eventId='" + eventId + "'}";
     }
 }

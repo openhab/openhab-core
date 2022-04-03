@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
@@ -44,8 +45,9 @@ import com.google.gson.reflect.TypeToken;
 @NonNullByDefault
 @SuppressWarnings("unused")
 public class EventWebSocket {
+    public static final String WEBSOCKET_EVENT_TYPE = "WebSocketEvent";
+
     private static final Type STRING_LIST_TYPE = TypeToken.getParameterized(List.class, String.class).getType();
-    private static final String WEB_SOCKET_EVENT = "WebSocketEvent";
 
     private final Logger logger = LoggerFactory.getLogger(EventWebSocket.class);
 
@@ -111,30 +113,32 @@ public class EventWebSocket {
                     case "ItemCommandEvent":
                         Event itemCommandEvent = itemEventUtility.createCommandEvent(eventDTO);
                         eventPublisher.post(itemCommandEvent);
-                        responseEvent = new EventDTO(WEB_SOCKET_EVENT, "/response/success", "", null, eventDTO.eventId);
+                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/success", "", null,
+                                eventDTO.eventId);
                         break;
                     case "ItemStateEvent":
                         Event itemStateEvent = itemEventUtility.createStateEvent(eventDTO);
                         eventPublisher.post(itemStateEvent);
-                        responseEvent = new EventDTO(WEB_SOCKET_EVENT, "/response/success", "", null, eventDTO.eventId);
+                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/success", "", null,
+                                eventDTO.eventId);
                         break;
-                    case WEB_SOCKET_EVENT:
+                    case WEBSOCKET_EVENT_TYPE:
                         if ("/heartbeat".equals(eventDTO.topic) && "PING".equals(eventDTO.payload)) {
-                            responseEvent = new EventDTO(WEB_SOCKET_EVENT, "/heartbeat", "PONG", null,
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/heartbeat", "PONG", null,
                                     eventDTO.eventId);
                         } else if ("/filter/type".equals(eventDTO.topic)) {
                             typeFilter = Objects.requireNonNullElse(gson.fromJson(eventDTO.payload, STRING_LIST_TYPE),
                                     List.of());
                             logger.debug("Setting type filter for connection to {}: {}",
                                     remoteEndpoint.getInetSocketAddress(), typeFilter);
-                            responseEvent = new EventDTO(WEB_SOCKET_EVENT, "/filter/type", eventDTO.payload, null,
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/filter/type", eventDTO.payload, null,
                                     eventDTO.eventId);
                         } else if ("/filter/source".equals(eventDTO.topic)) {
                             sourceFilter = Objects.requireNonNullElse(gson.fromJson(eventDTO.payload, STRING_LIST_TYPE),
                                     List.of());
                             logger.debug("Setting source filter for connection to {}: {}",
                                     remoteEndpoint.getInetSocketAddress(), typeFilter);
-                            responseEvent = new EventDTO(WEB_SOCKET_EVENT, "/filter/source", eventDTO.payload, null,
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/filter/source", eventDTO.payload, null,
                                     eventDTO.eventId);
                         } else {
                             throw new EventProcessingException("Invalid topic or payload in WebSocketEvent");
@@ -143,20 +147,20 @@ public class EventWebSocket {
                     default:
                         throw new EventProcessingException("Unknown event type '" + eventDTO.type + "'");
                 }
-                if (responseEvent.eventId == null) {
-                    // skip only for successful processing, always send response if processing failed
+                if (!WEBSOCKET_EVENT_TYPE.equals(type) && responseEvent.eventId == null) {
+                    // skip only for successful processing of state/command, always send response if processing failed
                     logger.trace("Not sending response event {}, because no eventId present.", responseEvent);
                     return;
                 }
             } catch (EventProcessingException | JsonParseException e) {
                 logger.warn("Failed to process deserialized event '{}': {}", message, e.getMessage());
-                responseEvent = new EventDTO(WEB_SOCKET_EVENT, "/response/failed",
+                responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/failed",
                         "Processing error: " + e.getMessage(), null, eventDTO != null ? eventDTO.eventId : "");
 
             }
         } catch (JsonParseException e) {
             logger.warn("Could not deserialize '{}'", message);
-            responseEvent = new EventDTO(WEB_SOCKET_EVENT, "/response/failed",
+            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/failed",
                     "Deserialization error: " + e.getMessage(), null, null);
         }
 
@@ -170,7 +174,12 @@ public class EventWebSocket {
 
     @OnWebSocketError
     public void onError(Session session, Throwable error) {
-        logger.warn("{}", error.getMessage());
+        if (session != null) {
+            session.close();
+        }
+        String message = error == null ? "<null>" : error.getMessage();
+        logger.info("Web Socket error: {}", message);
+        onClose(StatusCode.NO_CODE, message);
     }
 
     public void processEvent(Event event) {

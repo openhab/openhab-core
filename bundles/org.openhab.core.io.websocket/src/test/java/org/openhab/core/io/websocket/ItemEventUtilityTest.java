@@ -39,13 +39,13 @@ import org.openhab.core.library.types.StringType;
 import com.google.gson.Gson;
 
 /**
- * The {@link ItemEventUtilityTest} is a
+ * The {@link ItemEventUtilityTest} contains tests for the {@link ItemEventUtility} class.
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class ItemEventUtilityTest {
     private static final String EXISTING_ITEM_NAME = "existingItem";
     private static final String NON_EXISTING_ITEM_NAME = "nonExistingItem";
