@@ -110,6 +110,7 @@ public class UnitUtils {
      * @return The Dimension string or null if the unit can not be found in any of the SystemOfUnits.
      */
     public static @Nullable String getDimensionName(Unit<?> unit) {
+        String compatibleDimension = null;
         for (Class<? extends SystemOfUnits> system : ALL_SYSTEM_OF_UNITS) {
             for (Field field : system.getDeclaredFields()) {
                 if (field.getType().isAssignableFrom(Unit.class) && Modifier.isStatic(field.getModifiers())) {
@@ -117,13 +118,14 @@ public class UnitUtils {
                     if (genericType instanceof ParameterizedType) {
                         String dimension = ((Class<?>) ((ParameterizedType) genericType).getActualTypeArguments()[0])
                                 .getSimpleName();
-                        Unit<?> systemUnit;
                         try {
-                            systemUnit = (Unit<?>) field.get(null);
+                            Unit<?> systemUnit = (Unit<?>) field.get(null);
                             if (systemUnit == null) {
                                 LOGGER.warn("Unit field points to a null value: {}", field);
-                            } else if (systemUnit.isCompatible(unit)) {
+                            } else if (systemUnit.equals(unit)) {
                                 return dimension;
+                            } else if (compatibleDimension == null && systemUnit.isCompatible(unit)) {
+                                compatibleDimension = dimension;
                             }
                         } catch (IllegalArgumentException | IllegalAccessException e) {
                             LOGGER.error("The unit field '{}' seems to be not accessible", field, e);
@@ -135,7 +137,7 @@ public class UnitUtils {
                 }
             }
         }
-        return null;
+        return compatibleDimension == null ? null : compatibleDimension;
     }
 
     /**
