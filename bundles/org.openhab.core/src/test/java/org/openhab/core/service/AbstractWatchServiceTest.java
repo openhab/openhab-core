@@ -15,6 +15,8 @@ package org.openhab.core.service;
 import static java.nio.file.StandardWatchEventKinds.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -175,6 +177,18 @@ public class AbstractWatchServiceTest extends JavaTest {
         assertNoEventsAreProcessed();
     }
 
+    @Test
+    public void testChangeDirectory() {
+        WatchQueueReader watchQueueReaderMock = mock(WatchQueueReader.class);
+        watchService = new RelativeWatchService("foo", false);
+        watchService.setWatchQueueReader(watchQueueReaderMock);
+        watchService.activate();
+        verify(watchQueueReaderMock).customizeWatchQueueReader(watchService, Path.of("foo"), false);
+        watchService.changeWatchDirectory("bar");
+        verify(watchQueueReaderMock).stopWatchService(watchService);
+        verify(watchQueueReaderMock).customizeWatchQueueReader(watchService, Path.of("bar"), false);
+    }
+
     private void assertNoEventsAreProcessed() throws Exception {
         // Wait for a possible event for the maximum timeout
         Thread.sleep(noEventTimeoutInSeconds * 1000);
@@ -279,6 +293,15 @@ public class AbstractWatchServiceTest extends JavaTest {
         RelativeWatchService(String rootPath, boolean watchSubDirectories) {
             super(rootPath);
             watchSubDirs = watchSubDirectories;
+        }
+
+        /**
+         * Inject a mocked WatchQueueReader
+         *
+         * @param watchQueueReader the mock
+         */
+        public void setWatchQueueReader(WatchQueueReader watchQueueReader) {
+            this.watchQueueReader = watchQueueReader;
         }
 
         @Override
