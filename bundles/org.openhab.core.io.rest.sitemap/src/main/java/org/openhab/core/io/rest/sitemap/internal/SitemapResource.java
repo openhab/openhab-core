@@ -598,6 +598,7 @@ public class SitemapResource
             bean.service = chartWidget.getService();
             bean.period = chartWidget.getPeriod();
             bean.legend = chartWidget.getLegend();
+            bean.forceAsItem = chartWidget.getForceAsItem();
             if (chartWidget.getRefresh() > 0) {
                 bean.refresh = chartWidget.getRefresh();
             }

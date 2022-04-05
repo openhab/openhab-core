@@ -189,6 +189,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 setWidgetPropertyFromComponentConfig(widget, component, "refresh", SitemapPackage.CHART__REFRESH);
                 setWidgetPropertyFromComponentConfig(widget, component, "period", SitemapPackage.CHART__PERIOD);
                 setWidgetPropertyFromComponentConfig(widget, component, "legend", SitemapPackage.CHART__LEGEND);
+                setWidgetPropertyFromComponentConfig(widget, component, "forceAsItem",
+                        SitemapPackage.CHART__FORCE_AS_ITEM);
                 break;
             case "Webview":
                 WebviewImpl webviewWidget = (WebviewImpl) SitemapFactory.eINSTANCE.createWebview();
