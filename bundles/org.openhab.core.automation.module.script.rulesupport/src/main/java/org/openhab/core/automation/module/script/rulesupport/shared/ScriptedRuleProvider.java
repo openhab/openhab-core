@@ -67,6 +67,7 @@ public class ScriptedRuleProvider implements RuleProvider {
     }
 
     public void removeRule(Rule rule) {
+        rules.remove(rule.getUID());
         for (ProviderChangeListener<Rule> providerChangeListener : listeners) {
             providerChangeListener.removed(this, rule);
         }
