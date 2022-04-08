@@ -512,7 +512,7 @@
     <dependency>
       <groupId>com.neuronrobotics</groupId>
       <artifactId>nrjavaserial</artifactId>
-      <version>5.2.1</version>
+      <version>5.2.1.OH1</version>
       <scope>compile</scope>
     </dependency>
 
