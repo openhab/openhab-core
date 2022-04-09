@@ -190,7 +190,7 @@ public interface VoiceManager {
      * @param hli the human language text interpreter to use or null to use the default service
      * @param source the audio source to use or null to use the default source
      * @param sink the audio sink to use or null to use the default sink
-     * @param Locale the locale to use or null to use the default locale
+     * @param locale the locale to use or null to use the default locale
      * @param listeningItem the item to switch ON while listening to a question
      * @throws IllegalStateException if required services are not all available or the provided locale is not supported
      *             by all these services or a dialog is already started for this audio source
