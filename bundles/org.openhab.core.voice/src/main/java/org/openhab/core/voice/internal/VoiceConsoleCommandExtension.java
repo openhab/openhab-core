@@ -60,6 +60,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private static final String SUBCMD_VOICES = "voices";
     private static final String SUBCMD_START_DIALOG = "startdialog";
     private static final String SUBCMD_STOP_DIALOG = "stopdialog";
+    private static final String SUBCMD_LISTEN_ANSWER = "listenandanswer";
     private static final String SUBCMD_INTERPRETERS = "interpreters";
     private static final String SUBCMD_KEYWORD_SPOTTERS = "keywordspotters";
     private static final String SUBCMD_STT_SERVICES = "sttservices";
@@ -91,6 +92,8 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         "start a new dialog processing using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_STOP_DIALOG + " [<source>]",
                         "stop the dialog processing for the default audio source or the audio source identified with provided argument"),
+                buildCommandUsage(SUBCMD_LISTEN_ANSWER + " [<source> [<sink> [<interpreter> [<tts> [<stt>]]]]]",
+                        "Execute a simple dialog sequence without keyword spotting using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_INTERPRETERS, "lists the interpreters"),
                 buildCommandUsage(SUBCMD_KEYWORD_SPOTTERS, "lists the keyword spotters"),
                 buildCommandUsage(SUBCMD_STT_SERVICES, "lists the Speech-to-Text services"),
@@ -149,6 +152,19 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while stopping the dialog"));
+                    }
+                    break;
+                case SUBCMD_LISTEN_ANSWER:
+                    try {
+                        AudioSource source = args.length < 2 ? null : audioManager.getSource(args[1]);
+                        AudioSink sink = args.length < 3 ? null : audioManager.getSink(args[2]);
+                        HumanLanguageInterpreter hli = args.length < 4 ? null : voiceManager.getHLI(args[3]);
+                        TTSService tts = args.length < 5 ? null : voiceManager.getTTS(args[4]);
+                        STTService stt = args.length < 6 ? null : voiceManager.getSTT(args[5]);
+                        voiceManager.listenAndAnswer(stt, tts, hli, source, sink, null, null);
+                    } catch (IllegalStateException e) {
+                        console.println(Objects.requireNonNullElse(e.getMessage(),
+                                "An error occurred while executing the simple dialog sequence"));
                     }
                     break;
                 case SUBCMD_INTERPRETERS:

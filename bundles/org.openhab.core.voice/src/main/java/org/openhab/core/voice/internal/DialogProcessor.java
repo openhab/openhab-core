@@ -71,7 +71,7 @@ public class DialogProcessor implements KSListener, STTListener {
 
     private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
 
-    private final KSService ks;
+    private final @Nullable KSService ks;
     private final STTService stt;
     private final TTSService tts;
     private final HumanLanguageInterpreter hli;
@@ -124,23 +124,76 @@ public class DialogProcessor implements KSListener, STTListener {
         this.ttsFormat = VoiceManagerImpl.getBestMatch(tts.getSupportedFormats(), sink.getSupportedFormats());
     }
 
+    public DialogProcessor(STTService stt, TTSService tts, HumanLanguageInterpreter hli, AudioSource source,
+            AudioSink sink, Locale locale, @Nullable String listeningItem, EventPublisher eventPublisher,
+            TranslationProvider i18nProvider, Bundle bundle) {
+        this.locale = locale;
+        this.ks = null;
+        this.hli = hli;
+        this.stt = stt;
+        this.tts = tts;
+        this.source = source;
+        this.sink = sink;
+        this.keyword = "";
+        this.listeningItem = listeningItem;
+        this.eventPublisher = eventPublisher;
+        this.i18nProvider = i18nProvider;
+        this.bundle = bundle;
+        this.ksFormat = null;
+        this.sttFormat = VoiceManagerImpl.getBestMatch(source.getSupportedFormats(), stt.getSupportedFormats());
+        this.ttsFormat = VoiceManagerImpl.getBestMatch(tts.getSupportedFormats(), sink.getSupportedFormats());
+    }
+
     public void start() {
-        AudioFormat fmt = ksFormat;
+        KSService ksService = ks;
+        if (ksService != null) {
+            abortKS();
+            closeStreamKS();
+            AudioFormat fmt = ksFormat;
+            if (fmt == null) {
+                logger.warn("No compatible audio format found for ks '{}' and source '{}'", ksService.getId(),
+                        source.getId());
+                return;
+            }
+            try {
+                AudioStream stream = source.getInputStream(fmt);
+                streamKS = stream;
+                ksServiceHandle = ksService.spot(this, stream, locale, keyword);
+            } catch (AudioException e) {
+                logger.warn("Encountered audio error: {}", e.getMessage());
+            } catch (KSException e) {
+                logger.warn("Encountered error calling spot: {}", e.getMessage());
+                closeStreamKS();
+            }
+        } else {
+            executeSimpleDialog();
+        }
+    }
+
+    private void executeSimpleDialog() {
+        abortSTT();
+        closeStreamSTT();
+        isSTTServerAborting = false;
+        AudioFormat fmt = sttFormat;
         if (fmt == null) {
-            logger.warn("No compatible audio format found for ks '{}' and source '{}'", ks.getId(), source.getId());
+            logger.warn("No compatible audio format found for stt '{}' and source '{}'", stt.getId(), source.getId());
             return;
         }
-        abortKS();
-        closeStreamKS();
         try {
             AudioStream stream = source.getInputStream(fmt);
-            streamKS = stream;
-            ksServiceHandle = ks.spot(this, stream, locale, keyword);
+            streamSTT = stream;
+            sttServiceHandle = stt.recognize(this, stream, locale, new HashSet<>());
         } catch (AudioException e) {
-            logger.warn("Encountered audio error: {}", e.getMessage());
-        } catch (KSException e) {
-            logger.warn("Encountered error calling spot: {}", e.getMessage());
-            closeStreamKS();
+            logger.warn("Error creating the audio stream: {}", e.getMessage());
+        } catch (STTException e) {
+            closeStreamSTT();
+            String msg = e.getMessage();
+            String text = i18nProvider.getText(bundle, "error.stt-exception", null, locale);
+            if (msg != null) {
+                say(text == null ? msg : text.replace("{0}", msg));
+            } else if (text != null) {
+                say(text.replace("{0}", ""));
+            }
         }
     }
 
@@ -210,32 +263,10 @@ public class DialogProcessor implements KSListener, STTListener {
         if (!processing) {
             isSTTServerAborting = false;
             if (ksEvent instanceof KSpottedEvent) {
-                abortSTT();
-                closeStreamSTT();
-                isSTTServerAborting = false;
-                AudioFormat fmt = sttFormat;
-                if (fmt != null) {
-                    try {
-                        AudioStream stream = source.getInputStream(fmt);
-                        streamSTT = stream;
-                        sttServiceHandle = stt.recognize(this, stream, locale, new HashSet<>());
-                    } catch (AudioException e) {
-                        logger.warn("Error creating the audio stream: {}", e.getMessage());
-                    } catch (STTException e) {
-                        closeStreamSTT();
-                        String msg = e.getMessage();
-                        String text = i18nProvider.getText(bundle, "error.stt-exception", null, locale);
-                        if (msg != null) {
-                            say(text == null ? msg : text.replace("{0}", msg));
-                        } else if (text != null) {
-                            say(text.replace("{0}", ""));
-                        }
-                    }
-                } else {
-                    logger.warn("No compatible audio format found for stt '{}' and source '{}'", stt.getId(),
-                            source.getId());
-                }
+                logger.debug("KSpottedEvent event received");
+                executeSimpleDialog();
             } else if (ksEvent instanceof KSErrorEvent) {
+                logger.debug("KSErrorEvent event received");
                 KSErrorEvent kse = (KSErrorEvent) ksEvent;
                 String text = i18nProvider.getText(bundle, "error.ks-error", null, locale);
                 say(text == null ? kse.getMessage() : text.replace("{0}", kse.getMessage()));
@@ -246,25 +277,30 @@ public class DialogProcessor implements KSListener, STTListener {
     @Override
     public synchronized void sttEventReceived(STTEvent sttEvent) {
         if (sttEvent instanceof SpeechRecognitionEvent) {
+            logger.debug("SpeechRecognitionEvent event received");
             if (!isSTTServerAborting) {
                 SpeechRecognitionEvent sre = (SpeechRecognitionEvent) sttEvent;
                 String question = sre.getTranscript();
+                logger.debug("Text recognized: {}", question);
                 try {
                     toggleProcessing(false);
-                    say(hli.interpret(locale, question));
+                    String answer = hli.interpret(locale, question);
+                    logger.debug("Interpretation result: {}", answer);
+                    say(answer);
                 } catch (InterpretationException e) {
-                    String msg = e.getMessage();
-                    if (msg != null) {
-                        say(msg);
-                    }
+                    logger.debug("Interpretation exception: {}", e.getMessage());
+                    say(e.getMessage());
                 }
                 abortSTT();
             }
         } else if (sttEvent instanceof RecognitionStartEvent) {
+            logger.debug("RecognitionStartEvent event received");
             toggleProcessing(true);
         } else if (sttEvent instanceof RecognitionStopEvent) {
+            logger.debug("RecognitionStopEvent event received");
             toggleProcessing(false);
         } else if (sttEvent instanceof SpeechRecognitionErrorEvent) {
+            logger.debug("SpeechRecognitionErrorEvent event received");
             if (!isSTTServerAborting) {
                 abortSTT();
                 toggleProcessing(false);

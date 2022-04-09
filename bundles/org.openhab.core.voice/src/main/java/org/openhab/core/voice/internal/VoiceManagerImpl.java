@@ -549,6 +549,48 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         dialogProcessors.clear();
     }
 
+    @Override
+    public void listenAndAnswer() throws IllegalStateException {
+        listenAndAnswer(null, null, null, null, null, null, null);
+    }
+
+    @Override
+    public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts,
+            @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException {
+        // use defaults, if null
+        STTService sttService = (stt == null) ? getSTT() : stt;
+        TTSService ttsService = (tts == null) ? getTTS() : tts;
+        HumanLanguageInterpreter interpreter = (hli == null) ? getHLI() : hli;
+        AudioSource audioSource = (source == null) ? audioManager.getSource() : source;
+        AudioSink audioSink = (sink == null) ? audioManager.getSink() : sink;
+        Locale loc = (locale == null) ? localeProvider.getLocale() : locale;
+        String item = (listeningItem == null) ? this.listeningItem : listeningItem;
+        Bundle b = bundle;
+
+        if (sttService == null || ttsService == null || interpreter == null || audioSource == null || audioSink == null
+                || b == null) {
+            throw new IllegalStateException("Cannot execute a simple dialog as services are missing.");
+        } else if (!checkLocales(sttService.getSupportedLocales(), loc)
+                || !checkLocales(interpreter.getSupportedLocales(), loc)) {
+            throw new IllegalStateException(
+                    "Cannot execute a simple dialog as provided locale is not supported by all services.");
+        } else {
+            DialogProcessor processor = dialogProcessors.get(audioSource.getId());
+            if (processor == null) {
+                logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
+                        audioSource.getId());
+                processor = new DialogProcessor(sttService, ttsService, interpreter, audioSource, audioSink, loc, item,
+                        this.eventPublisher, this.i18nProvider, b);
+                processor.start();
+            } else {
+                throw new IllegalStateException(String.format(
+                        "Cannot execute a simple dialog as a dialog is already started for audio source '%s'.",
+                        audioSource.getLabel(null)));
+            }
+        }
+    }
+
     private boolean checkLocales(Set<Locale> supportedLocales, Locale locale) {
         if (supportedLocales.isEmpty()) {
             return true;
