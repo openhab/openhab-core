@@ -55,13 +55,13 @@ public class JsonStorageTest extends JavaTest {
     public void setUp() throws IOException {
         tmpFile = File.createTempFile("storage-debug", ".json");
         tmpFile.deleteOnExit();
-        objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0);
+        objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0, List.of());
     }
 
     private void persistAndReadAgain() {
         objectStorage.flush();
         waitForAssert(() -> {
-            objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0);
+            objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0, List.of());
             DummyObject dummy = objectStorage.get("DummyObject");
             assertNotNull(dummy);
             assertNotNull(dummy.configuration);
@@ -137,7 +137,7 @@ public class JsonStorageTest extends JavaTest {
         persistAndReadAgain();
         String storageString1 = Files.readString(tmpFile.toPath());
 
-        objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0);
+        objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0, List.of());
         objectStorage.flush();
         String storageString2 = Files.readString(tmpFile.toPath());
 
@@ -166,7 +166,7 @@ public class JsonStorageTest extends JavaTest {
         assertEquals(storageStringAB, storageStringBA);
 
         {
-            objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0);
+            objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0, List.of());
             objectStorage.flush();
         }
         String storageStringReserialized = Files.readString(tmpFile.toPath());

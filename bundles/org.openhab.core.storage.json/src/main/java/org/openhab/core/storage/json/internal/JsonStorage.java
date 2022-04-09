@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -34,6 +35,8 @@ import org.openhab.core.config.core.ConfigurationDeserializer;
 import org.openhab.core.config.core.OrderingMapSerializer;
 import org.openhab.core.config.core.OrderingSetSerializer;
 import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.json.internal.migration.TypeMigrationException;
+import org.openhab.core.storage.json.internal.migration.TypeMigrator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,19 +83,21 @@ public class JsonStorage<T> implements Storage<T> {
     private final File file;
     private final @Nullable ClassLoader classLoader;
     private final Map<String, StorageEntry> map = new ConcurrentHashMap<>();
+    private final Map<String, TypeMigrator> typeMigrators;
 
-    private transient Gson internalMapper;
-    private transient Gson entityMapper;
+    private final transient Gson internalMapper;
+    private final transient Gson entityMapper;
 
     private boolean dirty;
 
     public JsonStorage(File file, @Nullable ClassLoader classLoader, int maxBackupFiles, int writeDelay,
-            int maxDeferredPeriod) {
+            int maxDeferredPeriod, List<TypeMigrator> typeMigrators) {
         this.file = file;
         this.classLoader = classLoader;
         this.maxBackupFiles = maxBackupFiles;
         this.writeDelay = writeDelay;
         this.maxDeferredPeriod = maxDeferredPeriod;
+        this.typeMigrators = typeMigrators.stream().collect(Collectors.toMap(e -> e.getOldType(), e -> e));
 
         this.internalMapper = new GsonBuilder() //
                 .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//
@@ -156,7 +161,7 @@ public class JsonStorage<T> implements Storage<T> {
         if (previousValue == null) {
             return null;
         }
-        return deserialize(previousValue);
+        return deserialize(previousValue, null);
     }
 
     @Override
@@ -166,7 +171,7 @@ public class JsonStorage<T> implements Storage<T> {
         if (removedElement == null) {
             return null;
         }
-        return deserialize(removedElement);
+        return deserialize(removedElement, null);
     }
 
     @Override
@@ -180,7 +185,7 @@ public class JsonStorage<T> implements Storage<T> {
         if (value == null) {
             return null;
         }
-        return deserialize(value);
+        return deserialize(value, key);
     }
 
     @Override
@@ -201,33 +206,58 @@ public class JsonStorage<T> implements Storage<T> {
      * Deserializes and instantiates an object of type {@code T} out of the given
      * JSON String. A special classloader (other than the one of the JSON bundle) is
      * used in order to load the classes in the context of the calling bundle.
+     *
+     * The {@code key} must only be specified if the requested object stays in storage (i.e. only when called from
+     * {@link #get(String)} action). If specified on other actions, the old or removed value will be persisted.
+     *
+     * @param entry the entry that needs deserialization
+     * @param key the key for this element if storage after type migration is requested
+     * @return the deserialized type
      */
-    @SuppressWarnings("unchecked")
-    private @Nullable T deserialize(@Nullable StorageEntry entry) {
+    @SuppressWarnings({ "unchecked", "null" })
+    private @Nullable T deserialize(@Nullable StorageEntry entry, @Nullable String key) {
         if (entry == null) {
             // nothing to deserialize
             return null;
         }
 
         try {
-            // load required class within the given bundle context
-            Class<T> loadedValueType;
-            if (classLoader != null) {
-                loadedValueType = (Class<T>) classLoader.loadClass(entry.getEntityClassName());
-            } else {
-                loadedValueType = (Class<T>) Class.forName(entry.getEntityClassName());
+            String entityClassName = entry.getEntityClassName();
+            JsonElement entityValue = (JsonElement) entry.getValue();
+
+            TypeMigrator migrator = typeMigrators.get(entityClassName);
+            if (migrator != null) {
+                entityClassName = migrator.getNewType();
+                entityValue = migrator.migrate(entityValue);
+                if (key != null) {
+                    map.put(key, new StorageEntry(entityClassName, entityValue));
+                    deferredCommit();
+                }
             }
 
-            T value = entityMapper.fromJson((JsonElement) entry.getValue(), loadedValueType);
+            // load required class within the given bundle context
+            Class<T> loadedValueType;
+
+            if (classLoader != null) {
+                loadedValueType = (Class<T>) classLoader.loadClass(entityClassName);
+            } else {
+                loadedValueType = (Class<T>) Class.forName(entityClassName);
+            }
+
+            T value = entityMapper.fromJson(entityValue, loadedValueType);
             logger.trace("deserialized value '{}' from Json", value);
             return value;
         } catch (JsonSyntaxException | JsonIOException | ClassNotFoundException e) {
             logger.error("Couldn't deserialize value '{}'. Root cause is: {}", entry, e.getMessage());
             return null;
+        } catch (TypeMigrationException e) {
+            logger.error("Type '{}' needs migration but migration failed: '{}'", entry.getEntityClassName(),
+                    e.getMessage());
+            return null;
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     private @Nullable Map<String, StorageEntry> readDatabase(File inputFile) {
         if (inputFile.length() == 0) {
             logger.warn("Json storage file at '{}' is empty - ignoring corrupt file.", inputFile.getAbsolutePath());
@@ -304,9 +334,10 @@ public class JsonStorage<T> implements Storage<T> {
      */
     public synchronized void flush() {
         // Stop any existing timer
+        TimerTask commitTimerTask = this.commitTimerTask;
         if (commitTimerTask != null) {
             commitTimerTask.cancel();
-            commitTimerTask = null;
+            this.commitTimerTask = null;
         }
 
         if (dirty) {
@@ -357,9 +388,10 @@ public class JsonStorage<T> implements Storage<T> {
         dirty = true;
 
         // Stop any existing timer
+        TimerTask commitTimerTask = this.commitTimerTask;
         if (commitTimerTask != null) {
             commitTimerTask.cancel();
-            commitTimerTask = null;
+            this.commitTimerTask = null;
         }
 
         // Handle a maximum time for deferring the commit.
