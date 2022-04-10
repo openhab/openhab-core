@@ -576,7 +576,6 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
     override onReadyMarkerAdded(ReadyMarker readyMarker) {
         val type = readyMarker.type
         if (StartLevelService.STARTLEVEL_MARKER_TYPE.equals(type)) {
-            logger.error("StartLevel {}", readyMarker.identifier)
             modelLoaded = Integer.parseInt(readyMarker.identifier) >= StartLevelService.STARTLEVEL_MODEL;
         } else if (XML_THING_TYPE.equals(type)) {
             val bsn = readyMarker.identifier
