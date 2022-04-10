@@ -12,7 +12,8 @@
  */
 package org.openhab.core.transform;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -35,12 +36,11 @@ import org.openhab.core.test.storage.VolatileStorageService;
  * @author Jan N. Klug - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class ManagedTransformationConfigurationProviderTest {
 
-    @Mock
-    private @NonNullByDefault({}) ProviderChangeListener<@NonNull TransformationConfiguration> listener;
+    private @Mock @NonNullByDefault({}) ProviderChangeListener<@NonNull TransformationConfiguration> listenerMock;
 
     private @NonNullByDefault({}) ManagedTransformationConfigurationProvider provider;
 
@@ -48,7 +48,7 @@ public class ManagedTransformationConfigurationProviderTest {
     public void setup() {
         VolatileStorageService storageService = new VolatileStorageService();
         provider = new ManagedTransformationConfigurationProvider(storageService);
-        provider.addProviderChangeListener(listener);
+        provider.addProviderChangeListener(listenerMock);
     }
 
     @Test
@@ -61,8 +61,8 @@ public class ManagedTransformationConfigurationProviderTest {
                 "foo", "de", "content");
         provider.add(withLanguage);
 
-        Mockito.verify(listener).added(provider, withoutLanguage);
-        Mockito.verify(listener).added(provider, withLanguage);
+        Mockito.verify(listenerMock).added(provider, withoutLanguage);
+        Mockito.verify(listenerMock).added(provider, withLanguage);
     }
 
     @Test
@@ -75,8 +75,8 @@ public class ManagedTransformationConfigurationProviderTest {
         provider.add(configuration);
         provider.update(updatedConfiguration);
 
-        Mockito.verify(listener).added(provider, configuration);
-        Mockito.verify(listener).updated(provider, configuration, updatedConfiguration);
+        Mockito.verify(listenerMock).added(provider, configuration);
+        Mockito.verify(listenerMock).updated(provider, configuration, updatedConfiguration);
     }
 
     @Test
@@ -121,6 +121,6 @@ public class ManagedTransformationConfigurationProviderTest {
 
         TransformationConfiguration configuration1 = provider.get("config:foo:identifier");
 
-        assertEquals(configuration, configuration1);
+        assertThat(configuration, is(configuration1));
     }
 }

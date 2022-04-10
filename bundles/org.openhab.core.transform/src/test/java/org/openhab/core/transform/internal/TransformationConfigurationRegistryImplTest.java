@@ -12,7 +12,8 @@
  */
 package org.openhab.core.transform.internal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 import java.util.Locale;
 
@@ -31,13 +32,13 @@ import org.openhab.core.transform.TransformationConfiguration;
 
 /**
  * The {@link TransformationConfigurationRegistryImplTest} includes tests for the
- * * {@link TransformationConfigurationRegistryImpl}
+ * {@link TransformationConfigurationRegistryImpl}
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class TransformationConfigurationRegistryImplTest {
     private static final String SERVICE = "foo";
 
@@ -52,64 +53,62 @@ public class TransformationConfigurationRegistryImplTest {
     private static final TransformationConfiguration MANAGED_WITH_DE_LANGUAGE = new TransformationConfiguration(
             MANAGED_WITH_DE_LANGUAGE_UID, "", SERVICE, "de", MANAGED_WITH_DE_LANGUAGE_UID);
 
-    private static final String LEGACY_WITHOUT_LANGUAGE_UID = "foo/legacy." + SERVICE;
-    private static final String LEGACY_WITH_EN_LANGUAGE_UID = "foo/legacy_en." + SERVICE;
-    private static final String LEGACY_WITH_DE_LANGUAGE_UID = "foo/legacy_de." + SERVICE;
+    private static final String FILE_WITHOUT_LANGUAGE_UID = "foo/FILE." + SERVICE;
+    private static final String FILE_WITH_EN_LANGUAGE_UID = "foo/FILE_en." + SERVICE;
+    private static final String FILE_WITH_DE_LANGUAGE_UID = "foo/FILE_de." + SERVICE;
 
-    private static final TransformationConfiguration LEGACY_WITHOUT_LANGUAGE = new TransformationConfiguration(
-            LEGACY_WITHOUT_LANGUAGE_UID, "", SERVICE, null, LEGACY_WITHOUT_LANGUAGE_UID);
-    private static final TransformationConfiguration LEGACY_WITH_EN_LANGUAGE = new TransformationConfiguration(
-            LEGACY_WITH_EN_LANGUAGE_UID, "", SERVICE, "en", LEGACY_WITH_EN_LANGUAGE_UID);
-    private static final TransformationConfiguration LEGACY_WITH_DE_LANGUAGE = new TransformationConfiguration(
-            LEGACY_WITH_DE_LANGUAGE_UID, "", SERVICE, "de", LEGACY_WITH_DE_LANGUAGE_UID);
+    private static final TransformationConfiguration FILE_WITHOUT_LANGUAGE = new TransformationConfiguration(
+            FILE_WITHOUT_LANGUAGE_UID, "", SERVICE, null, FILE_WITHOUT_LANGUAGE_UID);
+    private static final TransformationConfiguration FILE_WITH_EN_LANGUAGE = new TransformationConfiguration(
+            FILE_WITH_EN_LANGUAGE_UID, "", SERVICE, "en", FILE_WITH_EN_LANGUAGE_UID);
+    private static final TransformationConfiguration FILE_WITH_DE_LANGUAGE = new TransformationConfiguration(
+            FILE_WITH_DE_LANGUAGE_UID, "", SERVICE, "de", FILE_WITH_DE_LANGUAGE_UID);
 
-    @Mock
-    private @NonNullByDefault({}) LocaleProvider localeProvider;
+    private @Mock @NonNullByDefault({}) LocaleProvider localeProviderMock;
 
-    @Mock
-    private @NonNullByDefault({}) ManagedTransformationConfigurationProvider provider;
+    private @Mock @NonNullByDefault({}) ManagedTransformationConfigurationProvider providerMock;
 
     private @NonNullByDefault({}) TransformationConfigurationRegistryImpl registry;
 
     @BeforeEach
     public void setup() {
-        Mockito.when(localeProvider.getLocale()).thenReturn(Locale.US);
+        Mockito.when(localeProviderMock.getLocale()).thenReturn(Locale.US);
 
-        registry = new TransformationConfigurationRegistryImpl(localeProvider);
-        registry.addProvider(provider);
-        registry.added(provider, MANAGED_WITHOUT_LANGUAGE);
-        registry.added(provider, MANAGED_WITH_EN_LANGUAGE);
-        registry.added(provider, MANAGED_WITH_DE_LANGUAGE);
-        registry.added(provider, LEGACY_WITHOUT_LANGUAGE);
-        registry.added(provider, LEGACY_WITH_EN_LANGUAGE);
-        registry.added(provider, LEGACY_WITH_DE_LANGUAGE);
+        registry = new TransformationConfigurationRegistryImpl(localeProviderMock);
+        registry.addProvider(providerMock);
+        registry.added(providerMock, MANAGED_WITHOUT_LANGUAGE);
+        registry.added(providerMock, MANAGED_WITH_EN_LANGUAGE);
+        registry.added(providerMock, MANAGED_WITH_DE_LANGUAGE);
+        registry.added(providerMock, FILE_WITHOUT_LANGUAGE);
+        registry.added(providerMock, FILE_WITH_EN_LANGUAGE);
+        registry.added(providerMock, FILE_WITH_DE_LANGUAGE);
     }
 
     @Test
     public void testManagedReturnsCorrectLanguage() {
         // language contained in uid, default requested (explicit uid takes precedence)
-        assertEquals(MANAGED_WITH_DE_LANGUAGE, registry.get(MANAGED_WITH_DE_LANGUAGE_UID, null));
+        assertThat(registry.get(MANAGED_WITH_DE_LANGUAGE_UID, null), is(MANAGED_WITH_DE_LANGUAGE));
         // language contained in uid, other requested (explicit uid takes precedence)
-        assertEquals(MANAGED_WITH_DE_LANGUAGE, registry.get(MANAGED_WITH_DE_LANGUAGE_UID, Locale.FRANCE));
+        assertThat(registry.get(MANAGED_WITH_DE_LANGUAGE_UID, Locale.FRANCE), is(MANAGED_WITH_DE_LANGUAGE));
         // no language in uid, default requested
-        assertEquals(MANAGED_WITH_EN_LANGUAGE, registry.get(MANAGED_WITHOUT_LANGUAGE_UID, null));
+        assertThat(registry.get(MANAGED_WITHOUT_LANGUAGE_UID, null), is(MANAGED_WITH_EN_LANGUAGE));
         // no language in uid, other requested
-        assertEquals(MANAGED_WITH_DE_LANGUAGE, registry.get(MANAGED_WITHOUT_LANGUAGE_UID, Locale.GERMANY));
+        assertThat(registry.get(MANAGED_WITHOUT_LANGUAGE_UID, Locale.GERMANY), is(MANAGED_WITH_DE_LANGUAGE));
         // no language in uid, unknown requested
-        assertEquals(MANAGED_WITHOUT_LANGUAGE, registry.get(MANAGED_WITHOUT_LANGUAGE_UID, Locale.FRANCE));
+        assertThat(registry.get(MANAGED_WITHOUT_LANGUAGE_UID, Locale.FRANCE), is(MANAGED_WITHOUT_LANGUAGE));
     }
 
     @Test
-    public void testLegacyReturnsCorrectLanguage() {
+    public void testFileReturnsCorrectLanguage() {
         // language contained in uid, default requested (explicit uid takes precedence)
-        assertEquals(LEGACY_WITH_DE_LANGUAGE, registry.get(LEGACY_WITH_DE_LANGUAGE_UID, null));
+        assertThat(registry.get(FILE_WITH_DE_LANGUAGE_UID, null), is(FILE_WITH_DE_LANGUAGE));
         // language contained in uid, other requested (explicit uid takes precedence)
-        assertEquals(LEGACY_WITH_DE_LANGUAGE, registry.get(LEGACY_WITH_DE_LANGUAGE_UID, Locale.FRANCE));
+        assertThat(registry.get(FILE_WITH_DE_LANGUAGE_UID, Locale.FRANCE), is(FILE_WITH_DE_LANGUAGE));
         // no language in uid, default requested
-        assertEquals(LEGACY_WITH_EN_LANGUAGE, registry.get(LEGACY_WITHOUT_LANGUAGE_UID, null));
+        assertThat(registry.get(FILE_WITHOUT_LANGUAGE_UID, null), is(FILE_WITH_EN_LANGUAGE));
         // no language in uid, other requested
-        assertEquals(LEGACY_WITH_DE_LANGUAGE, registry.get(LEGACY_WITHOUT_LANGUAGE_UID, Locale.GERMANY));
+        assertThat(registry.get(FILE_WITHOUT_LANGUAGE_UID, Locale.GERMANY), is(FILE_WITH_DE_LANGUAGE));
         // no language in uid, unknown requested
-        assertEquals(LEGACY_WITHOUT_LANGUAGE, registry.get(LEGACY_WITHOUT_LANGUAGE_UID, Locale.FRANCE));
+        assertThat(registry.get(FILE_WITHOUT_LANGUAGE_UID, Locale.FRANCE), is(FILE_WITHOUT_LANGUAGE));
     }
 }

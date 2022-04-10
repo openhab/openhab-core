@@ -34,14 +34,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link LegacyTransformationConfigurationProvider} implements a {@link TransformationConfigurationProvider} for
+ * The {@link FileTransformationConfigurationProvider} implements a {@link TransformationConfigurationProvider} for
  * supporting configurations stored in configuration files
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
 @Component(service = TransformationConfigurationProvider.class, immediate = true)
-public class LegacyTransformationConfigurationProvider extends AbstractWatchService
+public class FileTransformationConfigurationProvider extends AbstractWatchService
         implements TransformationConfigurationProvider {
     private static final WatchEvent.Kind<?>[] WATCH_EVENTS = { StandardWatchEventKinds.ENTRY_CREATE,
             StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY };
@@ -51,18 +51,18 @@ public class LegacyTransformationConfigurationProvider extends AbstractWatchServ
     private static final Path TRANSFORMATION_PATH = Path.of(OpenHAB.getConfigFolder(),
             TransformationService.TRANSFORM_FOLDER_NAME);
 
-    private final Logger logger = LoggerFactory.getLogger(LegacyTransformationConfigurationProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(FileTransformationConfigurationProvider.class);
 
     private final Set<ProviderChangeListener<TransformationConfiguration>> listeners = ConcurrentHashMap.newKeySet();
     private final Map<Path, TransformationConfiguration> transformationConfigurations = new ConcurrentHashMap<>();
     private final Path transformationPath;
 
-    public LegacyTransformationConfigurationProvider() {
+    public FileTransformationConfigurationProvider() {
         this(TRANSFORMATION_PATH);
     }
 
     // constructor package private used for testing
-    LegacyTransformationConfigurationProvider(Path transformationPath) {
+    FileTransformationConfigurationProvider(Path transformationPath) {
         super(transformationPath.toString());
         this.transformationPath = transformationPath;
 

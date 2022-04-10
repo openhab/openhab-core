@@ -12,7 +12,9 @@
  */
 package org.openhab.core.transform.actions;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -27,15 +29,13 @@ public class TransformationTest {
     @Test
     public void testTransform() {
         String result = Transformation.transform("UnknownTransformation", "function", "test");
-        assertEquals("test", result);
+        assertThat(result, is("test"));
     }
 
     @Test
     public void testTransformRaw() {
-        try {
-            Transformation.transformRaw("UnknownTransformation", "function", "test");
-        } catch (TransformationException e) {
-            assertEquals("No transformation service 'UnknownTransformation' could be found.", e.getMessage());
-        }
+        TransformationException e = assertThrows(TransformationException.class,
+                () -> Transformation.transformRaw("UnknownTransformation", "function", "test"));
+        assertThat(e.getMessage(), is("No transformation service 'UnknownTransformation' could be found."));
     }
 }

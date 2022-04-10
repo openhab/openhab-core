@@ -12,8 +12,10 @@
  */
 package org.openhab.core.transform;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 
@@ -40,15 +42,15 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.common.registry.ProviderChangeListener;
 
 /**
- * The {@link LegacyTransformationConfigurationProviderTest} includes tests for the
- * {@link LegacyTransformationConfigurationProvider}
+ * The {@link FileTransformationConfigurationProviderTest} includes tests for the
+ * {@link FileTransformationConfigurationProvider}
  *
  * @author Jan N. Klug - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
-public class LegacyTransformationConfigurationProviderTest {
+public class FileTransformationConfigurationProviderTest {
     private static final String FOO_TYPE = "foo";
     private static final String INITIAL_CONTENT = "initial";
     private static final String INITIAL_FILENAME = INITIAL_CONTENT + "." + FOO_TYPE;
@@ -57,31 +59,35 @@ public class LegacyTransformationConfigurationProviderTest {
     private static final String ADDED_CONTENT = "added";
     private static final String ADDED_FILENAME = ADDED_CONTENT + "." + FOO_TYPE;
 
-    @Mock
-    private @NonNullByDefault({}) WatchEvent<String> watchEvent;
+    private @Mock @NonNullByDefault({}) WatchEvent<String> watchEventMock;
+    private @Mock @NonNullByDefault({}) ProviderChangeListener<@NonNull TransformationConfiguration> listenerMock;
 
-    @Mock
-    private @NonNullByDefault({}) ProviderChangeListener<@NonNull TransformationConfiguration> listener;
-
-    private @NonNullByDefault({}) LegacyTransformationConfigurationProvider provider;
-
+    private @NonNullByDefault({}) FileTransformationConfigurationProvider provider;
     private @NonNullByDefault({}) Path targetPath;
 
     @BeforeEach
     public void setup() throws IOException {
         // create directory
-        targetPath = Files.createTempDirectory("legacyTest");
+        targetPath = Files.createTempDirectory("fileTest");
         // set initial content
         Files.write(targetPath.resolve(INITIAL_FILENAME), INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
 
-        provider = new LegacyTransformationConfigurationProvider(targetPath);
-        provider.addProviderChangeListener(listener);
+        provider = new FileTransformationConfigurationProvider(targetPath);
+        provider.addProviderChangeListener(listenerMock);
+    }
+
+    @AfterEach
+    public void tearDown() throws IOException {
+        try (Stream<Path> walk = Files.walk(targetPath)) {
+            walk.map(Path::toFile).forEach(File::delete);
+        }
+        Files.deleteIfExists(targetPath);
     }
 
     @Test
     public void testInitialConfigurationIsPresent() {
         // assert that initial configuration is present
-        assertTrue(provider.getAll().contains(INITIAL_CONFIGURATION));
+        assertThat(provider.getAll(), contains(INITIAL_CONFIGURATION));
     }
 
     @Test
@@ -92,11 +98,11 @@ public class LegacyTransformationConfigurationProviderTest {
         TransformationConfiguration addedConfiguration = new TransformationConfiguration(ADDED_FILENAME, ADDED_FILENAME,
                 FOO_TYPE, null, ADDED_CONTENT);
 
-        provider.processWatchEvent(watchEvent, StandardWatchEventKinds.ENTRY_CREATE, path);
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
 
         // assert registry is notified and internal cache updated
-        Mockito.verify(listener).added(provider, addedConfiguration);
-        assertTrue(provider.getAll().contains(addedConfiguration));
+        Mockito.verify(listenerMock).added(provider, addedConfiguration);
+        assertThat(provider.getAll(), hasItem(addedConfiguration));
     }
 
     @Test
@@ -106,21 +112,21 @@ public class LegacyTransformationConfigurationProviderTest {
         TransformationConfiguration updatedConfiguration = new TransformationConfiguration(INITIAL_FILENAME,
                 INITIAL_FILENAME, FOO_TYPE, null, "updated");
 
-        provider.processWatchEvent(watchEvent, StandardWatchEventKinds.ENTRY_MODIFY, path);
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_MODIFY, path);
 
-        Mockito.verify(listener).updated(provider, INITIAL_CONFIGURATION, updatedConfiguration);
-        assertTrue(provider.getAll().contains(updatedConfiguration));
-        assertFalse(provider.getAll().contains(INITIAL_CONFIGURATION));
+        Mockito.verify(listenerMock).updated(provider, INITIAL_CONFIGURATION, updatedConfiguration);
+        assertThat(provider.getAll(), contains(updatedConfiguration));
+        assertThat(provider.getAll(), not(contains(INITIAL_CONFIGURATION)));
     }
 
     @Test
     public void testDeletingConfigurationIsPropagated() {
         Path path = targetPath.resolve(INITIAL_FILENAME);
 
-        provider.processWatchEvent(watchEvent, StandardWatchEventKinds.ENTRY_DELETE, path);
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_DELETE, path);
 
-        Mockito.verify(listener).removed(provider, INITIAL_CONFIGURATION);
-        assertFalse(provider.getAll().contains(INITIAL_CONFIGURATION));
+        Mockito.verify(listenerMock).removed(provider, INITIAL_CONFIGURATION);
+        assertThat(provider.getAll(), not(contains(INITIAL_CONFIGURATION)));
     }
 
     @Test
@@ -133,37 +139,29 @@ public class LegacyTransformationConfigurationProviderTest {
         TransformationConfiguration expected = new TransformationConfiguration(fileName, fileName, FOO_TYPE, "de",
                 INITIAL_CONTENT);
 
-        provider.processWatchEvent(watchEvent, StandardWatchEventKinds.ENTRY_CREATE, path);
-        assertTrue(provider.getAll().contains(expected));
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
+        assertThat(provider.getAll(), hasItem(expected));
     }
 
     @Test
     public void testMissingExtensionIsIgnored() throws IOException {
         Path path = targetPath.resolve("extensionMissing");
         Files.write(path, INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
-        provider.processWatchEvent(watchEvent, StandardWatchEventKinds.ENTRY_CREATE, path);
-        provider.processWatchEvent(watchEvent, StandardWatchEventKinds.ENTRY_MODIFY, path);
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_MODIFY, path);
 
-        Mockito.verify(listener, never()).added(any(), any());
-        Mockito.verify(listener, never()).updated(any(), any(), any());
+        Mockito.verify(listenerMock, never()).added(any(), any());
+        Mockito.verify(listenerMock, never()).updated(any(), any(), any());
     }
 
     @Test
     public void testIgnoredExtensionIsIgnored() throws IOException {
         Path path = targetPath.resolve("extensionIgnore.txt");
         Files.write(path, INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
-        provider.processWatchEvent(watchEvent, StandardWatchEventKinds.ENTRY_CREATE, path);
-        provider.processWatchEvent(watchEvent, StandardWatchEventKinds.ENTRY_MODIFY, path);
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_MODIFY, path);
 
-        Mockito.verify(listener, never()).added(any(), any());
-        Mockito.verify(listener, never()).updated(any(), any(), any());
-    }
-
-    @AfterEach
-    public void tearDown() throws IOException {
-        try (Stream<Path> walk = Files.walk(targetPath)) {
-            walk.map(Path::toFile).forEach(File::delete);
-        }
-        Files.deleteIfExists(targetPath);
+        Mockito.verify(listenerMock, never()).added(any(), any());
+        Mockito.verify(listenerMock, never()).updated(any(), any(), any());
     }
 }

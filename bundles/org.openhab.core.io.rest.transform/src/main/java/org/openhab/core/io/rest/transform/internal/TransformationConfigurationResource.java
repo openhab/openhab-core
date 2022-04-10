@@ -65,16 +65,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  */
 @Component(immediate = true)
 @JaxrsResource
-@JaxrsName(TransformationConfigurationResource.PATH_TRANSFORM)
+@JaxrsName(TransformationConfigurationResource.PATH_TRANSFORMATIONS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path(TransformationConfigurationResource.PATH_TRANSFORM)
+@Path(TransformationConfigurationResource.PATH_TRANSFORMATIONS)
 @RolesAllowed({ Role.ADMIN })
 @SecurityRequirement(name = "oauth2", scopes = { "admin" })
-@Tag(name = TransformationConfigurationResource.PATH_TRANSFORM)
+@Tag(name = TransformationConfigurationResource.PATH_TRANSFORMATIONS)
 @NonNullByDefault
 public class TransformationConfigurationResource implements RESTResource {
-    public static final String PATH_TRANSFORM = "transform";
+    public static final String PATH_TRANSFORMATIONS = "transformations";
 
     private final Logger logger = LoggerFactory.getLogger(TransformationConfigurationResource.class);
     private final TransformationConfigurationRegistry transformationConfigurationRegistry;
@@ -90,7 +90,7 @@ public class TransformationConfigurationResource implements RESTResource {
     }
 
     @GET
-    @Path("configuration")
+    @Path("configurations")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getTransformationConfigurations", summary = "Get a list of all transformation configurations", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TransformationConfigurationDTO.class)))) })
@@ -102,7 +102,7 @@ public class TransformationConfigurationResource implements RESTResource {
     }
 
     @GET
-    @Path("configuration/{uid: .*}")
+    @Path("configurations/{uid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getTransformationConfiguration", summary = "Get a single transformation configuration", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TransformationConfiguration.class))),
@@ -119,13 +119,13 @@ public class TransformationConfigurationResource implements RESTResource {
     }
 
     @PUT
-    @Path("configuration/{uid: .*}")
+    @Path("configurations/{uid}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "putTransformationConfiguration", summary = "Get a single transformation configuration", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "405", description = "Configuration not editable"),
-            @ApiResponse(responseCode = "400", description = "Bad Request (content missing or invalid)") })
+            @ApiResponse(responseCode = "400", description = "Bad Request (content missing or invalid)"),
+            @ApiResponse(responseCode = "405", description = "Configuration not editable")})
     public Response putTransformationConfiguration(
             @PathParam("uid") @Parameter(description = "Configuration UID") String uid,
             @Parameter(description = "configuration", required = true) @Nullable TransformationConfigurationDTO newConfiguration) {
@@ -162,12 +162,12 @@ public class TransformationConfigurationResource implements RESTResource {
     }
 
     @DELETE
-    @Path("configuration/{uid: .*}")
+    @Path("configurations/{uid}")
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "deleteTransformationConfiguration", summary = "Get a single transformation configuration", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "405", description = "Configuration not editable"),
-            @ApiResponse(responseCode = "404", description = "UID not fond") })
+            @ApiResponse(responseCode = "404", description = "UID not found"),
+            @ApiResponse(responseCode = "405", description = "Configuration not editable") })
     public Response deleteTransformationConfiguration(
             @PathParam("uid") @Parameter(description = "Configuration UID") String uid) {
         logger.debug("Received HTTP DELETE request at '{}'", uriInfo.getPath());

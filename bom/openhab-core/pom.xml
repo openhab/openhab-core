@@ -228,12 +228,6 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.io.rest.transform</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.io.rest.sse</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
@@ -241,6 +235,12 @@
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.io.rest.swagger</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.io.rest.transform</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
