@@ -125,7 +125,7 @@ public class TransformationConfigurationResource implements RESTResource {
     @Operation(operationId = "putTransformationConfiguration", summary = "Get a single transformation configuration", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Bad Request (content missing or invalid)"),
-            @ApiResponse(responseCode = "405", description = "Configuration not editable")})
+            @ApiResponse(responseCode = "405", description = "Configuration not editable") })
     public Response putTransformationConfiguration(
             @PathParam("uid") @Parameter(description = "Configuration UID") String uid,
             @Parameter(description = "configuration", required = true) @Nullable TransformationConfigurationDTO newConfiguration) {
