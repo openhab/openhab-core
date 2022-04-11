@@ -42,6 +42,12 @@ import org.openhab.core.JavaTest;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.openhab.core.scheduler.SchedulerRunnable;
 import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 /**
  * Test class for {@link SchedulerImpl}.
@@ -222,24 +228,41 @@ public class SchedulerImplTest extends JavaTest {
     @Test
     @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testScheduleException() throws InterruptedException {
+        // add logging interceptor
+        Logger logger = (Logger) LoggerFactory.getLogger(SchedulerImpl.class);
+        logger.setLevel(Level.DEBUG);
+        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        listAppender.start();
+        logger.addAppender(listAppender);
+
         Semaphore s = new Semaphore(0);
         TestSchedulerWithCounter temporalAdjuster = new TestSchedulerWithCounter();
         SchedulerRunnable runnable = () -> {
-            // Pass a exception not very likely thrown by the scheduler it self to avoid missing real exceptions.
+            // Pass an exception not very likely thrown by the scheduler itself to avoid missing real exceptions.
             throw new FileNotFoundException("testBeforeTimeoutException");
         };
 
-        ScheduledCompletableFuture<@Nullable Void> schedule = scheduler.schedule(runnable, temporalAdjuster);
+        ScheduledCompletableFuture<@Nullable Void> schedule = scheduler.schedule(runnable, "myScheduledJob",
+                temporalAdjuster);
         schedule.getPromise().exceptionally(e -> {
             if (e instanceof FileNotFoundException) {
                 s.release();
             }
             return null;
         });
+
         s.acquire(1);
-        Thread.sleep(1000); // wait a little longer to see if not more are scheduled.
+        Thread.sleep(300); // wait a little longer to see if not more are scheduled.
+
+        logger.detachAppender(listAppender);
+
         assertEquals(0, s.availablePermits(), "Scheduler should not have released more after cancel");
         assertEquals(0, temporalAdjuster.getCount(), "Scheduler should have run 0 time");
+
+        assertEquals(1, listAppender.list.size());
+        ILoggingEvent loggingEvent = listAppender.list.get(0);
+        assertEquals(Level.WARN, loggingEvent.getLevel());
+        assertEquals("Scheduled job 'myScheduledJob' failed and stopped", loggingEvent.getFormattedMessage());
     }
 
     @Test

@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.openhab.core.scheduler.Scheduler;
 import org.openhab.core.scheduler.SchedulerRunnable;
@@ -94,6 +95,12 @@ public class DelegatedSchedulerImpl implements Scheduler {
     @Override
     public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable, TemporalAdjuster temporalAdjuster) {
         return add(delegate.schedule(runnable, temporalAdjuster));
+    }
+
+    @Override
+    public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable, @Nullable String identifier,
+            TemporalAdjuster temporalAdjuster) {
+        return add(delegate.schedule(runnable, identifier, temporalAdjuster));
     }
 
     private <T> ScheduledCompletableFuture<T> add(ScheduledCompletableFuture<T> t) {

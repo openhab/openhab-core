@@ -114,4 +114,17 @@ public interface Scheduler {
      * @return A {@link ScheduledCompletableFuture}
      */
     <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable callable, TemporalAdjuster temporalAdjuster);
+
+    /**
+     * Schedules the callable once or repeating using the temporalAdjuster to determine the
+     * time the callable should run. Runs until the job is cancelled or if the temporalAdjuster
+     * method {@link SchedulerTemporalAdjuster#isDone()) returns true.
+     *
+     * @param callable Provides the result
+     * @param an optional identifier for this job
+     * @param temporalAdjuster the temperalAdjuster to return the time the callable should run
+     * @return A {@link ScheduledCompletableFuture}
+     */
+    <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable callable, @Nullable String identifier,
+            TemporalAdjuster temporalAdjuster);
 }
