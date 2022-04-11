@@ -12,6 +12,8 @@
  */
 package org.openhab.core.transform.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -23,17 +25,18 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public final class TransformationActivator implements BundleActivator {
 
     private final Logger logger = LoggerFactory.getLogger(TransformationActivator.class);
 
-    private static BundleContext context;
+    private static @Nullable BundleContext context;
 
     /**
      * Called whenever the OSGi framework starts our bundle
      */
     @Override
-    public void start(BundleContext bc) throws Exception {
+    public void start(@Nullable BundleContext bc) throws Exception {
         context = bc;
         logger.debug("Transformation Service has been started.");
     }
@@ -42,7 +45,7 @@ public final class TransformationActivator implements BundleActivator {
      * Called whenever the OSGi framework stops our bundle
      */
     @Override
-    public void stop(BundleContext bc) throws Exception {
+    public void stop(@Nullable BundleContext bc) throws Exception {
         context = null;
         logger.debug("Transformation Service has been stopped.");
     }
@@ -52,7 +55,7 @@ public final class TransformationActivator implements BundleActivator {
      * 
      * @return the bundle context
      */
-    public static BundleContext getContext() {
+    public static @Nullable BundleContext getContext() {
         return context;
     }
 }

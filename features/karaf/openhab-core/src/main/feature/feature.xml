@@ -157,6 +157,11 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.audio/${project.version}</bundle>
 	</feature>
 
+	<feature name="openhab-core-io-rest-transform" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.transform/${project.version}</bundle>
+	</feature>
+
 	<feature name="openhab-core-io-rest-voice" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.voice/${project.version}</bundle>
@@ -379,12 +384,13 @@
 		<feature>openhab-core-automation-module-media</feature>
 		<feature>openhab-core-io-console-karaf</feature>
 		<feature>openhab-core-io-http-auth</feature>
-		<feature>openhab-core-io-rest-auth</feature>
-		<feature>openhab-core-io-rest-sitemap</feature>
 		<feature>openhab-core-io-rest-audio</feature>
-		<feature>openhab-core-io-rest-voice</feature>
-		<feature>openhab-core-io-rest-swagger</feature>
+		<feature>openhab-core-io-rest-auth</feature>
 		<feature>openhab-core-io-rest-mdns</feature>
+		<feature>openhab-core-io-rest-sitemap</feature>
+		<feature>openhab-core-io-rest-swagger</feature>
+		<feature>openhab-core-io-rest-transform</feature>
+		<feature>openhab-core-io-rest-voice</feature>
 		<feature>openhab-core-model-lsp</feature>
 		<feature>openhab-core-model-item</feature>
 		<feature>openhab-core-model-persistence</feature>

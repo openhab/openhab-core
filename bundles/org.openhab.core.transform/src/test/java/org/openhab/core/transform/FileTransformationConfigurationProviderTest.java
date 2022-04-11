@@ -1,0 +1,167 @@
+/**
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.core.transform;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.util.stream.Stream;
+
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.openhab.core.common.registry.ProviderChangeListener;
+
+/**
+ * The {@link FileTransformationConfigurationProviderTest} includes tests for the
+ * {@link FileTransformationConfigurationProvider}
+ *
+ * @author Jan N. Klug - Initial contribution
+ */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+@NonNullByDefault
+public class FileTransformationConfigurationProviderTest {
+    private static final String FOO_TYPE = "foo";
+    private static final String INITIAL_CONTENT = "initial";
+    private static final String INITIAL_FILENAME = INITIAL_CONTENT + "." + FOO_TYPE;
+    private static final TransformationConfiguration INITIAL_CONFIGURATION = new TransformationConfiguration(
+            INITIAL_FILENAME, INITIAL_FILENAME, FOO_TYPE, null, INITIAL_CONTENT);
+    private static final String ADDED_CONTENT = "added";
+    private static final String ADDED_FILENAME = ADDED_CONTENT + "." + FOO_TYPE;
+
+    private @Mock @NonNullByDefault({}) WatchEvent<String> watchEventMock;
+    private @Mock @NonNullByDefault({}) ProviderChangeListener<@NonNull TransformationConfiguration> listenerMock;
+
+    private @NonNullByDefault({}) FileTransformationConfigurationProvider provider;
+    private @NonNullByDefault({}) Path targetPath;
+
+    @BeforeEach
+    public void setup() throws IOException {
+        // create directory
+        targetPath = Files.createTempDirectory("fileTest");
+        // set initial content
+        Files.write(targetPath.resolve(INITIAL_FILENAME), INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
+
+        provider = new FileTransformationConfigurationProvider(targetPath);
+        provider.addProviderChangeListener(listenerMock);
+    }
+
+    @AfterEach
+    public void tearDown() throws IOException {
+        try (Stream<Path> walk = Files.walk(targetPath)) {
+            walk.map(Path::toFile).forEach(File::delete);
+        }
+        Files.deleteIfExists(targetPath);
+    }
+
+    @Test
+    public void testInitialConfigurationIsPresent() {
+        // assert that initial configuration is present
+        assertThat(provider.getAll(), contains(INITIAL_CONFIGURATION));
+    }
+
+    @Test
+    public void testAddingConfigurationIsPropagated() throws IOException {
+        Path path = targetPath.resolve(ADDED_FILENAME);
+
+        Files.write(path, ADDED_CONTENT.getBytes(StandardCharsets.UTF_8));
+        TransformationConfiguration addedConfiguration = new TransformationConfiguration(ADDED_FILENAME, ADDED_FILENAME,
+                FOO_TYPE, null, ADDED_CONTENT);
+
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
+
+        // assert registry is notified and internal cache updated
+        Mockito.verify(listenerMock).added(provider, addedConfiguration);
+        assertThat(provider.getAll(), hasItem(addedConfiguration));
+    }
+
+    @Test
+    public void testUpdatingConfigurationIsPropagated() throws IOException {
+        Path path = targetPath.resolve(INITIAL_FILENAME);
+        Files.write(path, "updated".getBytes(StandardCharsets.UTF_8));
+        TransformationConfiguration updatedConfiguration = new TransformationConfiguration(INITIAL_FILENAME,
+                INITIAL_FILENAME, FOO_TYPE, null, "updated");
+
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_MODIFY, path);
+
+        Mockito.verify(listenerMock).updated(provider, INITIAL_CONFIGURATION, updatedConfiguration);
+        assertThat(provider.getAll(), contains(updatedConfiguration));
+        assertThat(provider.getAll(), not(contains(INITIAL_CONFIGURATION)));
+    }
+
+    @Test
+    public void testDeletingConfigurationIsPropagated() {
+        Path path = targetPath.resolve(INITIAL_FILENAME);
+
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_DELETE, path);
+
+        Mockito.verify(listenerMock).removed(provider, INITIAL_CONFIGURATION);
+        assertThat(provider.getAll(), not(contains(INITIAL_CONFIGURATION)));
+    }
+
+    @Test
+    public void testLanguageIsProperlyParsed() throws IOException {
+        String fileName = "test_de." + FOO_TYPE;
+        Path path = targetPath.resolve(fileName);
+
+        Files.write(path, INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
+
+        TransformationConfiguration expected = new TransformationConfiguration(fileName, fileName, FOO_TYPE, "de",
+                INITIAL_CONTENT);
+
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
+        assertThat(provider.getAll(), hasItem(expected));
+    }
+
+    @Test
+    public void testMissingExtensionIsIgnored() throws IOException {
+        Path path = targetPath.resolve("extensionMissing");
+        Files.write(path, INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_MODIFY, path);
+
+        Mockito.verify(listenerMock, never()).added(any(), any());
+        Mockito.verify(listenerMock, never()).updated(any(), any(), any());
+    }
+
+    @Test
+    public void testIgnoredExtensionIsIgnored() throws IOException {
+        Path path = targetPath.resolve("extensionIgnore.txt");
+        Files.write(path, INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
+        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_MODIFY, path);
+
+        Mockito.verify(listenerMock, never()).added(any(), any());
+        Mockito.verify(listenerMock, never()).updated(any(), any(), any());
+    }
+}

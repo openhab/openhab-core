@@ -49,6 +49,8 @@ import org.slf4j.LoggerFactory;
  * under the 'transform' folder within the configuration path. To organize the various
  * transformations one might use subfolders.
  *
+ * @deprecated use the {@link TransformationConfigurationRegistry} instead
+ * 
  * @author Gaël L'hopital - Initial contribution
  * @author Kai Kreuzer - File caching mechanism
  * @author Markus Rathgeb - Add locale provider support
