@@ -107,5 +107,5 @@ Fragment-Host: org.openhab.core.model.rule.runtime
 	org.eclipse.xtext.xbase.lib;version='[2.26.0,2.26.1)',\
 	org.objectweb.asm;version='[9.2.0,9.2.1)',\
 	biz.aQute.tester.junit-platform;version='[6.2.0,6.2.1)',\
-	org.openhab.core.model.thing.runtime;version='[3.3.0,3.3.1)'
+	org.openhab.core.model.sitemap.runtime;version='[3.3.0,3.3.1)'
 -runblacklist: bnd.identity;id='jakarta.activation-api'
