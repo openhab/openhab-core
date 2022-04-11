@@ -1,0 +1,70 @@
+{
+  "deconz:deconz:00313E041ED0": {
+    "class": "org.openhab.core.thing.internal.ThingStorageEntity",
+    "value": {
+      "label": "Phoscon (192.168.1.100:80)",
+      "channels": [],
+      "properties": {
+        "UDN": "56071c34-1111-4b08-bba8-d3f29e6d43d8"
+      },
+      "UID": "deconz:deconz:00313E041ED0",
+      "thingTypeUID": "deconz:deconz",
+      "configuration": {
+        "host": "192.168.1.100",
+        "httpPort": 80,
+        "timeout": 2000,
+        "websocketTimeout": 120
+      },
+      "isBridge": true
+    }
+  },
+  "http:url:0a500ec3d8": {
+    "class": "org.openhab.core.thing.internal.ThingStorageEntity",
+    "value": {
+      "label": "HTTP URL Thing",
+      "channels": [
+        {
+          "kind": "STATE",
+          "label": "Last Failure",
+          "configuration": {
+            "stateTransformation": "abcd"
+          },
+          "properties": {},
+          "defaultTags": [],
+          "autoUpdatePolicy": "DEFAULT",
+          "itemType": "DateTime",
+          "uid": "http:url:0a500ec3d8:lastFailure",
+          "channelTypeUID": "http:requestDateTime"
+        },
+        {
+          "kind": "STATE",
+          "label": "Last Success",
+          "configuration": {},
+          "properties": {},
+          "defaultTags": [],
+          "autoUpdatePolicy": "DEFAULT",
+          "itemType": "DateTime",
+          "uid": "http:url:0a500ec3d8:lastSuccess",
+          "channelTypeUID": "http:requestDateTime"
+        }
+      ],
+      "configuration": {
+          "authMode": "BASIC",
+          "baseURL": "https://localhost:8443",
+          "bufferSize": 2048,
+          "commandMethod": "GET",
+          "delay": 0,
+          "ignoreSSLErrors": true,
+          "refresh": 30,
+          "stateMethod": "GET",
+          "timeout": 3000
+      },
+      "properties": {
+        "thingTypeVersion": "1"
+      },
+      "UID": "http:url:0a500ec3d8",
+      "thingTypeUID": "http:url",
+      "isBridge": false
+    }
+  }
+}

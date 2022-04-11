@@ -13,8 +13,12 @@
 package org.openhab.core.thing;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.common.registry.DefaultAbstractManagedProvider;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.AbstractManagedProvider;
 import org.openhab.core.storage.StorageService;
+import org.openhab.core.thing.dto.ThingDTOMapper;
+import org.openhab.core.thing.internal.BridgeImpl;
+import org.openhab.core.thing.internal.ThingStorageEntity;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -31,7 +35,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ThingProvider.class, ManagedThingProvider.class })
-public class ManagedThingProvider extends DefaultAbstractManagedProvider<Thing, ThingUID> implements ThingProvider {
+public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUID, ThingStorageEntity>
+        implements ThingProvider {
 
     @Activate
     public ManagedThingProvider(final @Reference StorageService storageService) {
@@ -46,5 +51,15 @@ public class ManagedThingProvider extends DefaultAbstractManagedProvider<Thing, 
     @Override
     protected String keyToString(ThingUID key) {
         return key.toString();
+    }
+
+    @Override
+    protected @Nullable Thing toElement(String key, ThingStorageEntity persistableElement) {
+        return ThingDTOMapper.map(persistableElement, persistableElement.isBridge);
+    }
+
+    @Override
+    protected ThingStorageEntity toPersistableElement(Thing element) {
+        return new ThingStorageEntity(ThingDTOMapper.map(element), element instanceof BridgeImpl);
     }
 }
