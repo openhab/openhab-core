@@ -30,6 +30,7 @@ import org.openhab.core.i18n.LocaleProvider
 import org.openhab.core.service.ReadyMarker
 import org.openhab.core.service.ReadyMarkerFilter
 import org.openhab.core.service.ReadyService
+import org.openhab.core.service.StartLevelService
 import org.openhab.core.thing.Channel
 import org.openhab.core.thing.ChannelUID
 import org.openhab.core.thing.Thing
@@ -100,6 +101,8 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
 
     private val Set<String> loadedXmlThingTypes = new CopyOnWriteArraySet
 
+    private var modelLoaded = false
+
     def void activate() {
         modelRepository.getAllModelNamesOfType("things").forEach [
             createThingsFromModel
@@ -132,11 +135,16 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                     // ignore the Thing because its definition is broken
                     return null
                 }
-                return thingHandlerFactories.findFirst [
+                val factory = thingHandlerFactories.findFirst [
                     supportsThingType(thingTypeUID)
                 ]
+                if (factory == null && modelLoaded) {
+                    logger.info("No ThingHandlerFactory found for thing {} (thing-type is {}). Deferring initialization.",
+                        thingUID, thingTypeUID)
+                }
+                return factory
             ]?.filter [
-                // Drop it if there is no ThingHandlerFactory yet which can handle it 
+                // Drop it if there is no ThingHandlerFactory yet which can handle it
                 it !== null
             ]?.toSet?.forEach [
                 // Execute for each unique ThingHandlerFactory
@@ -558,7 +566,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
 
     @Reference
     def void setReadyService(ReadyService readyService) {
-        readyService.registerTracker(this, new ReadyMarkerFilter().withType(XML_THING_TYPE));
+        readyService.registerTracker(this);
     }
 
     def void unsetReadyService(ReadyService readyService) {
@@ -566,9 +574,14 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
     }
 
     override onReadyMarkerAdded(ReadyMarker readyMarker) {
-        val bsn = readyMarker.identifier
-        loadedXmlThingTypes.add(bsn)
-        bsn.handleXmlThingTypesLoaded
+        val type = readyMarker.type
+        if (StartLevelService.STARTLEVEL_MARKER_TYPE.equals(type)) {
+            modelLoaded = Integer.parseInt(readyMarker.identifier) >= StartLevelService.STARTLEVEL_MODEL;
+        } else if (XML_THING_TYPE.equals(type)) {
+            val bsn = readyMarker.identifier
+            loadedXmlThingTypes.add(bsn)
+            bsn.handleXmlThingTypesLoaded
+        }
     }
 
     def private getBundleName(ThingHandlerFactory thingHandlerFactory) {
