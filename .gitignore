@@ -8,6 +8,7 @@ bin/
 .DS_Store
 *.iml
 .idea/
+.gradle/
 **/.settings/org.eclipse.*
 
 dependency-reduced-pom.xml
