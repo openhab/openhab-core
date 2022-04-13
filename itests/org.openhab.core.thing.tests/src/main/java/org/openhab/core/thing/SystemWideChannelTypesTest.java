@@ -88,7 +88,7 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
                 .getChannelType(SYSTEM_CHANNEL_TYPE_UID_SIGNAL_STRENGTH, Locale.GERMAN);
         assertNotNull(signalStrengthChannelType);
         assertEquals("Signalstärke", signalStrengthChannelType.getLabel());
-        assertNull(signalStrengthChannelType.getDescription());
+        assertNotNull(signalStrengthChannelType.getDescription());
 
         StateDescription stateDescription = signalStrengthChannelType.getState();
         if (stateDescription != null) {
@@ -121,13 +121,13 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
                 .getChannelType(SYSTEM_CHANNEL_TYPE_UID_LOW_BATTERY, Locale.GERMAN);
         assertNotNull(lowBatteryChannelType);
         assertEquals("Niedriger Batteriestatus", lowBatteryChannelType.getLabel());
-        assertNull(lowBatteryChannelType.getDescription());
+        assertNotNull(lowBatteryChannelType.getDescription());
 
         ChannelType batteryLevelChannelType = systemChannelTypeProvider
                 .getChannelType(SYSTEM_CHANNEL_TYPE_UID_BATTERY_LEVEL, Locale.GERMAN);
         assertNotNull(batteryLevelChannelType);
         assertEquals("Batterieladung", batteryLevelChannelType.getLabel());
-        assertNull(batteryLevelChannelType.getDescription());
+        assertNotNull(batteryLevelChannelType.getDescription());
 
         ChannelType powerChannelType = systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_POWER,
                 Locale.GERMAN);
