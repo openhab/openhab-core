@@ -55,12 +55,8 @@ public class ChannelDefinition {
     ChannelDefinition(String id, ChannelTypeUID channelTypeUID, @Nullable String label, @Nullable String description,
             @Nullable Map<String, String> properties, @Nullable AutoUpdatePolicy autoUpdatePolicy)
             throws IllegalArgumentException {
-        if (id == null || id.isEmpty()) {
+        if (id.isEmpty()) {
             throw new IllegalArgumentException("The ID must neither be null nor empty!");
-        }
-
-        if (channelTypeUID == null) {
-            throw new IllegalArgumentException("The channel type must not be null");
         }
 
         if (properties != null) {

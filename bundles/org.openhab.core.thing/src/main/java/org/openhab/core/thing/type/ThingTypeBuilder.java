@@ -108,13 +108,13 @@ public class ThingTypeBuilder {
      * @throws IllegalStateException if one of {@code bindingId}, {@code thingTypeId} or {@code label} are not given.
      */
     public ThingType build() {
-        if (bindingId == null || bindingId.isBlank()) {
+        if (bindingId.isBlank()) {
             throw new IllegalArgumentException("The bindingId must neither be null nor empty.");
         }
-        if (thingTypeId == null || thingTypeId.isBlank()) {
+        if (thingTypeId.isBlank()) {
             throw new IllegalArgumentException("The thingTypeId must neither be null nor empty.");
         }
-        if (label == null || label.isBlank()) {
+        if (label.isBlank()) {
             throw new IllegalArgumentException("The label must neither be null nor empty.");
         }
 
@@ -130,13 +130,13 @@ public class ThingTypeBuilder {
      * @throws IllegalStateException if one of {@code bindingId}, {@code thingTypeId} or {@code label} are not given.
      */
     public BridgeType buildBridge() {
-        if (bindingId == null || bindingId.isBlank()) {
+        if (bindingId.isBlank()) {
             throw new IllegalArgumentException("The bindingId must neither be null nor empty.");
         }
-        if (thingTypeId == null || thingTypeId.isBlank()) {
+        if (thingTypeId.isBlank()) {
             throw new IllegalArgumentException("The thingTypeId must neither be null nor empty.");
         }
-        if (label == null || label.isBlank()) {
+        if (label.isBlank()) {
             throw new IllegalArgumentException("The label must neither be null nor empty.");
         }
 
