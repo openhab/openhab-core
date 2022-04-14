@@ -75,6 +75,9 @@ public abstract class AbstractUID {
             String segment = segments.get(i);
             validateSegment(segment, i, numberOfSegments);
         }
+        if (segments.get(numberOfSegments - 1).isBlank()) {
+            throw new IllegalArgumentException("Last segment must not be blank.");
+        }
         this.segments = List.copyOf(segments);
     }
 
