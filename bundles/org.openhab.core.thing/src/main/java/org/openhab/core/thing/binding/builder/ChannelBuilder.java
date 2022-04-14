@@ -181,6 +181,9 @@ public class ChannelBuilder {
      * @return channel builder
      */
     public ChannelBuilder withKind(ChannelKind kind) {
+        if (kind == null) {
+            throw new IllegalArgumentException("'ChannelKind' must not be null");
+        }
         this.kind = kind;
         return this;
     }
