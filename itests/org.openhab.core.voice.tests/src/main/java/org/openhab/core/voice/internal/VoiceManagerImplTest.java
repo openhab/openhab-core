@@ -159,8 +159,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     }
 
     @Test
-    public void interpretSomethingWhenTheDefaultHliIsSetAndItIsARegisteredService()
-            throws IOException, InterpretationException {
+    public void interpretSomethingWhenTheDefaultHliIsSetAndItIsARegisteredService() throws Exception {
         hliStub = new HumanLanguageInterpreterStub();
         registerService(hliStub);
 
@@ -171,10 +170,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         configuration.update(voiceConfig);
 
         // Wait some time to be sure that the configuration will be updated
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
+        Thread.sleep(2000);
 
         String result = voiceManager.interpret("something", null);
         assertThat(result, is("Interpreted text"));
@@ -368,7 +364,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     }
 
     @Test
-    public void startDialogWithoutPassingAnyParameters() throws IOException, InterruptedException {
+    public void startDialogWithoutPassingAnyParameters() throws Exception {
         sttService = new STTServiceStub();
         ksService = new KSServiceStub();
         hliStub = new HumanLanguageInterpreterStub();
@@ -390,10 +386,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         configuration.update(config);
 
         // Wait some time to be sure that the configuration will be updated
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
+        Thread.sleep(2000);
 
         voiceManager.startDialog();
 

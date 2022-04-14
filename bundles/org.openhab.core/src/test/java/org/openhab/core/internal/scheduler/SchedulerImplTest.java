@@ -35,8 +35,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.openhab.core.JavaTest;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.openhab.core.scheduler.SchedulerRunnable;
 import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
@@ -50,11 +52,16 @@ import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
  * @author Hilbrand Bouwkamp - moved cron and periodic scheduling to it's their own interfaces
  */
 @NonNullByDefault
-public class SchedulerImplTest {
-    private SchedulerImpl scheduler = new SchedulerImpl();
+public class SchedulerImplTest extends JavaTest {
+    private @NonNullByDefault({}) SchedulerImpl scheduler;
+
+    @BeforeEach
+    public void beforeEach() {
+        scheduler = new SchedulerImpl();
+    }
 
     @Test
-    @Timeout(value = 500, unit = TimeUnit.MILLISECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testAfterCancelled() throws InterruptedException, InvocationTargetException, ExecutionException {
         AtomicBoolean check = new AtomicBoolean();
         Callable<Boolean> callable = () -> check.getAndSet(true);
@@ -68,7 +75,7 @@ public class SchedulerImplTest {
     }
 
     @Test
-    @Timeout(value = 300, unit = TimeUnit.MILLISECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testAfterResolved() throws InterruptedException, ExecutionException {
         AtomicInteger check = new AtomicInteger();
         Callable<Integer> callable = () -> {
@@ -76,21 +83,21 @@ public class SchedulerImplTest {
             return 5;
         };
         ScheduledCompletableFuture<Integer> after = scheduler.after(callable, Duration.ofMillis(100));
-        Thread.sleep(200);
+        Thread.sleep(500);
         assertTrue(after.isDone(), "Scheduled job should finish done");
         assertEquals(10, check.get(), "After CompletableFuture should return correct value");
         assertEquals(5, after.get().intValue(), "After CompletableFuture should return correct value");
     }
 
     @Test
-    @Timeout(value = 300, unit = TimeUnit.MILLISECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testAfterResolvedWithException() throws InterruptedException {
         Callable<Void> callable = () -> {
             // Pass a exception not very likely thrown by the scheduler it self to avoid missing real exceptions.
             throw new FileNotFoundException("testBeforeTimeoutException");
         };
         ScheduledCompletableFuture<Void> after = scheduler.after(callable, Duration.ofMillis(100));
-        Thread.sleep(200);
+        Thread.sleep(500);
         assertTrue(after.isDone(), "Scheduled job should be done");
         assertTrue(after.getPromise().isCompletedExceptionally(),
                 "After CompletableFuture should have completed with an exception");
@@ -105,11 +112,11 @@ public class SchedulerImplTest {
     }
 
     @Test
-    @Timeout(value = 300, unit = TimeUnit.MILLISECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testBeforeTimeoutException() throws InterruptedException, ExecutionException {
         CompletableFuture<Integer> d = new CompletableFuture<>();
         ScheduledCompletableFuture<Integer> before = scheduler.before(d, Duration.ofMillis(100));
-        Thread.sleep(200);
+        Thread.sleep(500);
         d.complete(3);
         d.get();
         assertTrue(before.isDone(), "Scheduled job should be done");
@@ -125,7 +132,7 @@ public class SchedulerImplTest {
     }
 
     @Test
-    @Timeout(value = 300, unit = TimeUnit.MILLISECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testBeforeCancelled() throws InterruptedException, InvocationTargetException, ExecutionException {
         CompletableFuture<Integer> d = new CompletableFuture<>();
         ScheduledCompletableFuture<Integer> before = scheduler.before(d, Duration.ofMillis(100));
@@ -137,7 +144,7 @@ public class SchedulerImplTest {
     }
 
     @Test
-    @Timeout(value = 300, unit = TimeUnit.MILLISECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testBeforeResolved() throws InterruptedException, ExecutionException {
         CompletableFuture<Boolean> d = new CompletableFuture<>();
         ScheduledCompletableFuture<Boolean> before = scheduler.before(d, Duration.ofMillis(100));
@@ -147,7 +154,7 @@ public class SchedulerImplTest {
     }
 
     @Test
-    @Timeout(value = 300, unit = TimeUnit.MILLISECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testBeforeResolvedWithException() throws InterruptedException {
         CompletableFuture<Integer> d = new CompletableFuture<>();
         ScheduledCompletableFuture<Integer> before = scheduler.before(d, Duration.ofMillis(100));
@@ -166,11 +173,11 @@ public class SchedulerImplTest {
     }
 
     @Test
-    @Timeout(value = 300, unit = TimeUnit.MILLISECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testAfterTimeoutException() throws InterruptedException, ExecutionException {
         CompletableFuture<Integer> d = new CompletableFuture<>();
         ScheduledCompletableFuture<Integer> before = scheduler.before(d, Duration.ofMillis(100));
-        Thread.sleep(200);
+        Thread.sleep(500);
         d.complete(3);
         d.get();
         assertTrue(before.isDone(), "Scheduled job should be done");
@@ -186,34 +193,33 @@ public class SchedulerImplTest {
     }
 
     @Test
-    @Timeout(value = 1, unit = TimeUnit.SECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testSchedule() throws InterruptedException {
         Semaphore s = new Semaphore(0);
         TestSchedulerWithCounter temporalAdjuster = new TestSchedulerWithCounter();
         scheduler.schedule(s::release, temporalAdjuster);
         s.acquire(3);
-        Thread.sleep(300); // wait a little longer to see if not more are scheduled.
+        Thread.sleep(1000); // wait a little longer to see if not more are scheduled.
 
         assertEquals(0, s.availablePermits(), "Scheduler should not have released more after done");
         assertEquals(3, temporalAdjuster.getCount(), "Scheduler should have run 3 times");
     }
 
     @Test
-    @Timeout(value = 1, unit = TimeUnit.SECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testScheduleCancel() throws InterruptedException {
         Semaphore s = new Semaphore(0);
         TestSchedulerWithCounter temporalAdjuster = new TestSchedulerWithCounter();
         ScheduledCompletableFuture<Void> schedule = scheduler.schedule(s::release, temporalAdjuster);
         s.acquire(1);
-        Thread.sleep(50);
         schedule.cancel(true);
-        Thread.sleep(300); // wait a little longer to see if not more are scheduled.
+        waitForAssert(() -> assertEquals(1, temporalAdjuster.getCount(), "Scheduler should have run 1 time"));
+        Thread.sleep(1000); // wait a little longer to see if not more are scheduled.
         assertEquals(0, s.availablePermits(), "Scheduler should not have released more after cancel");
-        assertEquals(1, temporalAdjuster.getCount(), "Scheduler should have run 1 time");
     }
 
     @Test
-    @Timeout(value = 1, unit = TimeUnit.SECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testScheduleException() throws InterruptedException {
         Semaphore s = new Semaphore(0);
         TestSchedulerWithCounter temporalAdjuster = new TestSchedulerWithCounter();
@@ -230,25 +236,25 @@ public class SchedulerImplTest {
             return null;
         });
         s.acquire(1);
-        Thread.sleep(300); // wait a little longer to see if not more are scheduled.
+        Thread.sleep(1000); // wait a little longer to see if not more are scheduled.
         assertEquals(0, s.availablePermits(), "Scheduler should not have released more after cancel");
         assertEquals(0, temporalAdjuster.getCount(), "Scheduler should have run 0 time");
     }
 
     @Test
-    @Timeout(value = 300, unit = TimeUnit.MILLISECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testNegative() throws InterruptedException {
         Semaphore s = new Semaphore(0);
         scheduler.after(() -> {
             s.release(1);
             return null;
         }, Duration.ofMillis(-1000));
-        Thread.sleep(200);
-        assertEquals(1, s.availablePermits(), "Negative value should mean after finished right away");
+        waitForAssert(
+                () -> assertEquals(1, s.availablePermits(), "Negative value should mean after finished right away"));
     }
 
     @Test
-    @Timeout(value = 1, unit = TimeUnit.SECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testDelay() throws InterruptedException {
         long duration = 5000;
         ScheduledCompletableFuture<Instant> future = scheduler.after(Duration.ofMillis(duration));
@@ -260,7 +266,7 @@ public class SchedulerImplTest {
     }
 
     @Test
-    @Timeout(value = 1, unit = TimeUnit.SECONDS)
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testCompareTo() throws InterruptedException {
         long duration = 5000;
         ScheduledCompletableFuture<Instant> future1 = scheduler.after(Duration.ofMillis(duration));
@@ -305,7 +311,7 @@ public class SchedulerImplTest {
 
         @Override
         public Temporal adjustInto(@NonNullByDefault({}) Temporal arg0) {
-            return arg0.plus(100, ChronoUnit.MILLIS);
+            return arg0.plus(600, ChronoUnit.MILLIS);
         }
 
         @Override

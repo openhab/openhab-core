@@ -804,6 +804,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         String itemName = "name";
         managedThingProvider.add(thing);
         managedItemChannelLinkProvider.add(new ItemChannelLink(itemName, CHANNEL_UID));
+        waitForAssert(() -> assertThat(itemChannelLinkRegistry.getLinks(itemName).size(), is(1)));
 
         registerService(thingHandlerFactory);
         Item item = new StringItem(itemName);
@@ -870,12 +871,12 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         managedThingProvider.add(thing);
         managedItemChannelLinkProvider.add(new ItemChannelLink(itemName, CHANNEL_UID));
+        waitForAssert(() -> assertThat(itemChannelLinkRegistry.getLinks(itemName).size(), is(1)));
 
         state.callback.statusUpdated(thing, ThingStatusInfoBuilder.create(ThingStatus.ONLINE).build());
 
         final List<Event> receivedEvents = new ArrayList<>();
 
-        @NonNullByDefault
         EventSubscriber itemUpdateEventSubscriber = new EventSubscriber() {
             @Override
             public void receive(Event event) {
@@ -990,7 +991,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void thingManagerIgnoresRestoringOfThingStatusFromRemoving() {
+    public void thingManagerIgnoresRestoringOfThingStatusFromRemoving() throws Exception {
         class ThingHandlerState {
             @Nullable
             ThingHandlerCallback callback;
@@ -1028,7 +1029,8 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         assertThat(thing.getStatusInfo(), is(removingNone));
 
-        // handleRemoval is called when thing is fully initialized and shall be removed
+        // handleRemoval is called asynchronously when thing is fully initialized and shall be removed
+        Thread.sleep(500);
         verify(thingHandler).handleRemoval();
     }
 
@@ -1125,6 +1127,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         managedThingProvider.add(thing);
         managedItemChannelLinkProvider.add(new ItemChannelLink(itemName, CHANNEL_UID));
+        waitForAssert(() -> assertThat(itemChannelLinkRegistry.getLinks(itemName).size(), is(1)));
 
         class ThingHandlerState {
             @Nullable
@@ -1218,7 +1221,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         final List<Event> receivedEvents = new ArrayList<>();
 
-        @NonNullByDefault
         EventSubscriber thingStatusEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
@@ -1315,7 +1317,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         final List<ThingStatusInfoChangedEvent> infoChangedEvents = new ArrayList<>();
 
-        @NonNullByDefault
         EventSubscriber thingStatusEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
@@ -1398,7 +1399,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         thingStatusInfoI18nLocalizationService.setBundleResolver(bundleResolver);
 
         final List<ThingStatusInfoEvent> infoEvents = new ArrayList<>();
-        @NonNullByDefault
+
         EventSubscriber thingStatusInfoEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
@@ -1418,7 +1419,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         registerService(thingStatusInfoEventSubscriber);
 
         final List<ThingStatusInfoChangedEvent> infoChangedEvents = new ArrayList<>();
-        @NonNullByDefault
+
         EventSubscriber thingStatusInfoChangedEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {

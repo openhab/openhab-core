@@ -69,7 +69,7 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
         }
     };
 
-    private final int testTimeout = 1;
+    private final int testTimeout = 5;
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -100,7 +100,7 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
     public void audioConsolePlaysFile() throws AudioException, IOException {
         AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
 
-        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_PLAY, fileHandler.wavFileName() };
+        String[] args = { AudioConsoleCommandExtension.SUBCMD_PLAY, fileHandler.wavFileName() };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
         assertThat(audioSink.audioFormat.isCompatible(audioStream.getFormat()), is(true));
@@ -111,8 +111,7 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
     public void audioConsolePlaysFileForASpecifiedSink() throws AudioException, IOException {
         AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
 
-        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_PLAY, audioSink.getId(),
-                fileHandler.wavFileName() };
+        String[] args = { AudioConsoleCommandExtension.SUBCMD_PLAY, audioSink.getId(), fileHandler.wavFileName() };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
         assertThat(audioSink.audioFormat.isCompatible(audioStream.getFormat()), is(true));
@@ -123,8 +122,8 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
     public void audioConsolePlaysFileForASpecifiedSinkWithASpecifiedVolume() throws AudioException, IOException {
         AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
 
-        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_PLAY, audioSink.getId(),
-                fileHandler.wavFileName(), "25" };
+        String[] args = { AudioConsoleCommandExtension.SUBCMD_PLAY, audioSink.getId(), fileHandler.wavFileName(),
+                "25" };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
         assertThat(audioSink.audioFormat.isCompatible(audioStream.getFormat()), is(true));
@@ -133,8 +132,8 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
 
     @Test
     public void audioConsolePlaysFileForASpecifiedSinkWithAnInvalidVolume() {
-        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_PLAY, audioSink.getId(),
-                fileHandler.wavFileName(), "invalid" };
+        String[] args = { AudioConsoleCommandExtension.SUBCMD_PLAY, audioSink.getId(), fileHandler.wavFileName(),
+                "invalid" };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
         waitForAssert(() -> assertThat("The given volume was invalid", consoleOutput,
@@ -148,7 +147,7 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
 
         String url = serveStream(audioStream, testTimeout);
 
-        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_STREAM, url };
+        String[] args = { AudioConsoleCommandExtension.SUBCMD_STREAM, url };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
         assertThat("The streamed URL was not as expected", ((URLAudioStream) audioSink.audioStream).getURL(), is(url));
@@ -161,7 +160,7 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
 
         String url = serveStream(audioStream, testTimeout);
 
-        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_STREAM, audioSink.getId(), url };
+        String[] args = { AudioConsoleCommandExtension.SUBCMD_STREAM, audioSink.getId(), url };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
         assertThat("The streamed URL was not as expected", ((URLAudioStream) audioSink.audioStream).getURL(), is(url));
@@ -169,7 +168,7 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
 
     @Test
     public void audioConsoleListsSinks() {
-        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_SINKS };
+        String[] args = { AudioConsoleCommandExtension.SUBCMD_SINKS };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
         waitForAssert(() -> assertThat("The listed sink was not as expected", consoleOutput,
@@ -182,7 +181,7 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
         when(audioSource.getId()).thenReturn("sourceId");
         audioManager.addAudioSource(audioSource);
 
-        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_SOURCES };
+        String[] args = { AudioConsoleCommandExtension.SUBCMD_SOURCES };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
         waitForAssert(() -> assertThat("The listed source was not as expected", consoleOutput,

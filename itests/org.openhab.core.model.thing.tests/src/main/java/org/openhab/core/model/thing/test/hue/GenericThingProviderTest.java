@@ -495,7 +495,11 @@ public class GenericThingProviderTest extends JavaOSGiTest {
 
             @Override
             public void receive(Event event) {
-                receivedEvents.add((AbstractThingRegistryEvent) event);
+                AbstractThingRegistryEvent registryEvent = (AbstractThingRegistryEvent) event;
+                if (List.of("hue:bridge:my1234Bridge", "hue:LCT001:my1234Bridge:myKitchenBulb1")
+                        .contains(registryEvent.getThing().UID)) {
+                    receivedEvents.add(registryEvent);
+                }
             }
         };
 
@@ -503,8 +507,8 @@ public class GenericThingProviderTest extends JavaOSGiTest {
 
         assertThat(thingRegistry.getAll().size(), is(0));
 
-        String model = "Bridge hue:bridge:myBridge [ ip = \"1.2.3.4\", username = \"123\" ] {" + //
-                "    LCT001 bulb1 [ lightId = \"1\" ] { Switch : notification }" + //
+        String model = "Bridge hue:bridge:my1234Bridge [ ip = \"1.2.3.4\", username = \"123\" ] {" + //
+                "    LCT001 myKitchenBulb1 [ lightId = \"1\" ] { Switch : notification }" + //
                 "}";
 
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
@@ -515,8 +519,8 @@ public class GenericThingProviderTest extends JavaOSGiTest {
         });
         receivedEvents.clear();
 
-        String newModel = "Bridge hue:bridge:myBridge [ ip = \"1.2.3.4\", username = \"123\" ]  {" + //
-                "    LCT001 bulb1 [ lightId = \"2\" ] { Switch : notification }" + //
+        String newModel = "Bridge hue:bridge:my1234Bridge [ ip = \"1.2.3.4\", username = \"123\" ]  {" + //
+                "    LCT001 myKitchenBulb1 [ lightId = \"2\" ] { Switch : notification }" + //
                 "}";
 
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(newModel.getBytes()));
@@ -527,7 +531,7 @@ public class GenericThingProviderTest extends JavaOSGiTest {
             Event event = receivedEvents.get(0);
             assertEquals(ThingUpdatedEvent.class, event.getClass());
             ThingUpdatedEvent thingUpdatedEvent = (ThingUpdatedEvent) event;
-            assertEquals("hue:LCT001:myBridge:bulb1", thingUpdatedEvent.getThing().UID.toString());
+            assertEquals("hue:LCT001:my1234Bridge:myKitchenBulb1", thingUpdatedEvent.getThing().UID);
         });
     }
 

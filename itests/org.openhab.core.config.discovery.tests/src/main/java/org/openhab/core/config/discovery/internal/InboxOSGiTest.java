@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -79,7 +80,7 @@ import org.osgi.service.component.ComponentContext;
 @NonNullByDefault
 public class InboxOSGiTest extends JavaOSGiTest {
 
-    class DiscoveryService1 extends AbstractDiscoveryService {
+    static class DiscoveryService1 extends AbstractDiscoveryService {
         public DiscoveryService1() {
             super(5);
         }
@@ -89,7 +90,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class DiscoveryService2 extends AbstractDiscoveryService {
+    static class DiscoveryService2 extends AbstractDiscoveryService {
         public DiscoveryService2() {
             super(5);
         }
@@ -195,12 +196,44 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
     @AfterEach
     public void cleanUp() {
-        discoveryResults.forEach((thingUID, discoveryResult) -> inbox.remove(thingUID));
-        inboxListeners.forEach(listener -> inbox.removeInboxListener(listener));
-        discoveryResults.clear();
-        inboxListeners.clear();
+        Set<String> inboxThingUIDsToRemove = inbox.getAll().stream().map(DiscoveryResult::getThingUID)
+                .map(ThingUID::toString).collect(Collectors.toSet());
+        Set<String> removedInboxThingUIDs = new HashSet<>();
+
+        EventSubscriber inboxEventSubscriber = new EventSubscriber() {
+            @Override
+            public void receive(Event event) {
+                if (event instanceof InboxRemovedEvent) {
+                    removedInboxThingUIDs.add(((InboxRemovedEvent) event).getDiscoveryResult().thingUID);
+                }
+            }
+
+            @Override
+            public Set<String> getSubscribedEventTypes() {
+                return Set.of(InboxRemovedEvent.TYPE);
+            }
+
+            @Override
+            public @Nullable EventFilter getEventFilter() {
+                return null;
+            }
+        };
+
+        registerService(inboxEventSubscriber);
+
         registry.remove(BRIDGE_THING_UID);
         managedThingProvider.getAll().forEach(thing -> managedThingProvider.remove(thing.getUID()));
+
+        inboxListeners.forEach(listener -> inbox.removeInboxListener(listener));
+        inbox.getAll().stream().forEach(discoveryResult -> inbox.remove(discoveryResult.getThingUID()));
+
+        discoveryResults.clear();
+        inboxListeners.clear();
+
+        // wait for the resulting events to be handled so they do not cause the next test to fail
+        waitForAssert(() -> assertTrue(removedInboxThingUIDs.containsAll(inboxThingUIDsToRemove)));
+
+        unregisterService(inboxEventSubscriber);
     }
 
     private boolean addDiscoveryResult(DiscoveryResult discoveryResult) {
@@ -963,7 +996,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
             assertTrue(thingProperty.equals(descResultParam));
         }
 
-        services.forEach(obj -> unregisterService(obj));
+        services.forEach(this::unregisterService);
     }
 
     @Test

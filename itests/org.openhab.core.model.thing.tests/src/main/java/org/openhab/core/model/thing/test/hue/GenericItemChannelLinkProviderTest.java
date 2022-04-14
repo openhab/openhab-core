@@ -24,7 +24,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -85,27 +84,25 @@ public class GenericItemChannelLinkProviderTest extends JavaOSGiTest {
                 "}";
 
         modelRepository.addOrRefreshModel(THINGS_TESTMODEL_NAME, new ByteArrayInputStream(thingsModel.getBytes()));
-        Collection<Thing> actualThings = thingRegistry.getAll();
 
-        assertThat(actualThings.size(), is(3));
-
-        Collection<Item> items = itemRegistry.getItems();
-        assertThat(items.size(), is(0));
-
-        Collection<ItemChannelLink> itemChannelLinks = itemChannelLinkRegistry.getAll();
-        assertThat(itemChannelLinks.size(), is(0));
+        waitForAssert(() -> {
+            assertThat(thingRegistry.getAll().size(), is(3));
+            assertThat(itemRegistry.getItems().size(), is(0));
+            assertThat(itemChannelLinkRegistry.getAll().size(), is(0));
+        });
 
         String itemsModel = "Color Light3Color \"Light3 Color\" { channel=\"hue:LCT001:huebridge:bulb3:color\" }";
 
         modelRepository.addOrRefreshModel(ITEMS_TESTMODEL_NAME, new ByteArrayInputStream(itemsModel.getBytes()));
-        Collection<Item> actualItems = itemRegistry.getItems();
 
-        assertThat(actualItems.size(), is(1));
+        waitForAssert(() -> {
+            assertThat(itemRegistry.getItems().size(), is(1));
 
-        List<ItemChannelLink> actualItemChannelLinks = new ArrayList<>(itemChannelLinkRegistry.getAll());
-        assertThat(actualItemChannelLinks.size(), is(1));
-        assertThat(actualItemChannelLinks.get(0).toString(),
-                is(equalTo("Light3Color -> hue:LCT001:huebridge:bulb3:color")));
+            List<ItemChannelLink> actualItemChannelLinks = new ArrayList<>(itemChannelLinkRegistry.getAll());
+            assertThat(actualItemChannelLinks.size(), is(1));
+            assertThat(actualItemChannelLinks.get(0).toString(),
+                    is(equalTo("Light3Color -> hue:LCT001:huebridge:bulb3:color")));
+        });
     }
 
     @Test
@@ -120,28 +117,26 @@ public class GenericItemChannelLinkProviderTest extends JavaOSGiTest {
                 "}";
 
         modelRepository.addOrRefreshModel(THINGS_TESTMODEL_NAME, new ByteArrayInputStream(thingsModel.getBytes()));
-        Collection<Thing> actualThings = thingRegistry.getAll();
 
-        assertThat(actualThings.size(), is(3));
-
-        Collection<Item> items = itemRegistry.getItems();
-        assertThat(items.size(), is(0));
-
-        Collection<ItemChannelLink> itemChannelLinks = itemChannelLinkRegistry.getAll();
-        assertThat(itemChannelLinks.size(), is(0));
+        waitForAssert(() -> {
+            assertThat(thingRegistry.getAll().size(), is(3));
+            assertThat(itemRegistry.getItems().size(), is(0));
+            assertThat(itemChannelLinkRegistry.getAll().size(), is(0));
+        });
 
         String itemsModel = "Color Light3Color \"Light3 Color\" { channel=\"hue:LCT001:huebridge:bulb3:color, hue:LCT001:huebridge:bulb4:color\" }";
 
         modelRepository.addOrRefreshModel(ITEMS_TESTMODEL_NAME, new ByteArrayInputStream(itemsModel.getBytes()));
-        Collection<Item> actualItems = itemRegistry.getItems();
 
-        assertThat(actualItems.size(), is(1));
+        waitForAssert(() -> {
+            assertThat(itemRegistry.getItems().size(), is(1));
 
-        List<ItemChannelLink> actualItemChannelLinks = new ArrayList<>(itemChannelLinkRegistry.getAll());
-        assertThat(actualItemChannelLinks.size(), is(2));
-        assertThat(actualItemChannelLinks.get(0).toString(),
-                is(equalTo("Light3Color -> hue:LCT001:huebridge:bulb3:color")));
-        assertThat(actualItemChannelLinks.get(1).toString(),
-                is(equalTo("Light3Color -> hue:LCT001:huebridge:bulb4:color")));
+            List<ItemChannelLink> actualItemChannelLinks = new ArrayList<>(itemChannelLinkRegistry.getAll());
+            assertThat(actualItemChannelLinks.size(), is(2));
+            assertThat(actualItemChannelLinks.get(0).toString(),
+                    is(equalTo("Light3Color -> hue:LCT001:huebridge:bulb3:color")));
+            assertThat(actualItemChannelLinks.get(1).toString(),
+                    is(equalTo("Light3Color -> hue:LCT001:huebridge:bulb4:color")));
+        });
     }
 }

@@ -16,6 +16,7 @@ import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
@@ -41,6 +42,7 @@ import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemProvider;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
@@ -107,9 +109,9 @@ public class GenericItemProviderTest extends JavaOSGiTest {
      */
     @AfterEach
     public void tearDown() {
-        Collection<Item> itemsToRemove = itemRegistry.getAll();
-        List<String> modelNamesToRemove = TESTMODEL_NAMES.stream()
-                .filter(name -> modelRepository.getModel(name) != null).collect(Collectors.toList());
+        Set<String> itemNamesToRemove = itemRegistry.getAll().stream().map(Item::getName).collect(Collectors.toSet());
+        Set<String> modelNamesToRemove = TESTMODEL_NAMES.stream().filter(name -> modelRepository.getModel(name) != null)
+                .collect(Collectors.toSet());
 
         if (!modelNamesToRemove.isEmpty()) {
             Set<String> removedModelNames = new HashSet<>();
@@ -123,18 +125,18 @@ public class GenericItemProviderTest extends JavaOSGiTest {
                 }
             };
 
-            List<AbstractItemRegistryEvent> removedItemEvents = new ArrayList<>();
+            List<String> removedItemNames = new ArrayList<>();
 
             EventSubscriber itemEventSubscriber = new EventSubscriber() {
                 @Override
                 public void receive(Event event) {
                     logger.debug("Received event: {}", event);
-                    removedItemEvents.add((AbstractItemRegistryEvent) event);
+                    removedItemNames.add(((AbstractItemRegistryEvent) event).getItem().name);
                 }
 
                 @Override
                 public Set<String> getSubscribedEventTypes() {
-                    return Stream.of(ItemRemovedEvent.TYPE).collect(toSet());
+                    return Set.of(ItemRemovedEvent.TYPE);
                 }
 
                 @Override
@@ -149,7 +151,8 @@ public class GenericItemProviderTest extends JavaOSGiTest {
             modelNamesToRemove.forEach(modelRepository::removeModel);
 
             waitForAssert(() -> {
-                assertThat(removedItemEvents, hasSize(itemsToRemove.size()));
+                // removedItemNames can have more item names due to queued events generated in the test
+                assertTrue(removedItemNames.containsAll(itemNamesToRemove));
                 assertThat(removedModelNames, hasSize(modelNamesToRemove.size()));
             });
 
@@ -240,22 +243,17 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         String model = "String test1 \"Test Item [%s]\" { channel=\"test:test:test:test\" }\n"
                 + "String test2 \"Test Item [%s]\" { channel=\"test:test:test:test\" }";
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
-
-        assertThat(itemRegistry.getAll(), hasSize(2));
+        waitForAssert(() -> assertThat(itemRegistry.getAll(), hasSize(2)));
 
         model = "String test1 \"Test Item [%s]\" { channel=\"test:test:test:test\" }\n"
                 + "String {something is wrong} test \"Test Item [%s]\" { channel=\"test:test:test:test\" }";
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
-
-        waitForAssert(() -> {
-            assertThat(itemRegistry.getAll(), hasSize(0));
-        });
+        waitForAssert(() -> assertThat(itemRegistry.getAll(), hasSize(0)));
 
         model = "String test1 \"Test Item [%s]\" { channel=\"test:test:test:test\" }\n"
                 + "String test2 \"Test Item [%s]\" { channel=\"test:test:test:test\" }";
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
-
-        assertThat(itemRegistry.getAll(), hasSize(2));
+        waitForAssert(() -> assertThat(itemRegistry.getAll(), hasSize(2)));
     }
 
     @Test
@@ -392,23 +390,34 @@ public class GenericItemProviderTest extends JavaOSGiTest {
                 + "String test2 \"Test Item [%s]\" { channel=\"test:test:test:test\" }\n"
                 + "String test3 \"Test Item [%s]\" { channel=\"test:test:test:test\" }";
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
-        assertThat(itemRegistry.getAll(), hasSize(3));
+        waitForAssert(() -> assertThat(itemRegistry.getAll(), hasSize(3)));
+
         Item unchangedItem = itemRegistry.getItem("test1");
 
         model = "String test1 \"Test Item [%s]\" { channel=\"test:test:test:test\" }\n"
                 + "String test2 \"Test Item Changed [%s]\" { channel=\"test:test:test:test\" }";
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
-        assertThat(itemRegistry.getAll(), hasSize(2));
-        assertThat(itemRegistry.getItem("test1"), is(unchangedItem));
+        waitForAssert(() -> {
+            assertThat(itemRegistry.getAll(), hasSize(2));
+            try {
+                assertThat(itemRegistry.getItem("test1"), is(unchangedItem));
+            } catch (ItemNotFoundException e) {
+            }
+        });
 
         model = "";
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
-        assertThat(itemRegistry.getAll(), hasSize(0));
+        waitForAssert(() -> assertThat(itemRegistry.getAll(), hasSize(0)));
 
         model = "String test1 \"Test Item [%s]\" { channel=\"test:test:test:test\" }";
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
-        assertThat(itemRegistry.getAll(), hasSize(1));
-        assertThat(itemRegistry.getItem("test1"), is(unchangedItem));
+        waitForAssert(() -> {
+            assertThat(itemRegistry.getAll(), hasSize(1));
+            try {
+                assertThat(itemRegistry.getItem("test1"), is(unchangedItem));
+            } catch (ItemNotFoundException e) {
+            }
+        });
     }
 
     @Test

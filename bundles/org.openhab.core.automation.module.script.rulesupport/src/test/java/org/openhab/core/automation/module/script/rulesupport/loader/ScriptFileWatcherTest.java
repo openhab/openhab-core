@@ -107,7 +107,7 @@ class ScriptFileWatcherTest {
 
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
 
-        verify(scriptEngineManager, timeout(1000)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(10000)).createScriptEngine("js", p.toFile().toURI().toString());
     }
 
     @Test
@@ -125,7 +125,7 @@ class ScriptFileWatcherTest {
 
         // verify is called when the start level increases
         updateStartLevel(100);
-        verify(scriptEngineManager, timeout(1000).times(1)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p.toFile().toURI().toString());
     }
 
     @Test
@@ -145,7 +145,7 @@ class ScriptFileWatcherTest {
 
         // verify is called when the start level increases
         updateStartLevel(100);
-        verify(scriptEngineManager, timeout(1000).times(1)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p.toFile().toURI().toString());
     }
 
     @Test
@@ -170,12 +170,12 @@ class ScriptFileWatcherTest {
 
         updateStartLevel(60);
 
-        verify(scriptEngineManager, timeout(1000).times(1)).createScriptEngine("js", p2.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p2.toFile().toURI().toString());
         verify(scriptEngineManager, never()).createScriptEngine(anyString(), eq(p1.toFile().toURI().toString()));
 
         updateStartLevel(80);
 
-        verify(scriptEngineManager, timeout(1000).times(1)).createScriptEngine("js", p1.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p1.toFile().toURI().toString());
     }
 
     @Test
@@ -200,12 +200,12 @@ class ScriptFileWatcherTest {
 
         updateStartLevel(60);
 
-        verify(scriptEngineManager, timeout(1000).times(1)).createScriptEngine("js", p2.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p2.toFile().toURI().toString());
         verify(scriptEngineManager, never()).createScriptEngine(anyString(), eq(p1.toFile().toURI().toString()));
 
         updateStartLevel(80);
 
-        verify(scriptEngineManager, timeout(1000).times(1)).createScriptEngine("js", p1.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p1.toFile().toURI().toString());
     }
 
     @Test
@@ -236,7 +236,7 @@ class ScriptFileWatcherTest {
         scheduledTask.getValue().run();
 
         // verify script has now been processed
-        verify(scriptEngineManager, timeout(1000).times(1)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p.toFile().toURI().toString());
     }
 
     @Test
@@ -258,11 +258,11 @@ class ScriptFileWatcherTest {
 
         InOrder inOrder = inOrder(scriptEngineManager);
 
-        inOrder.verify(scriptEngineManager, timeout(1000).times(1)).createScriptEngine("js",
+        inOrder.verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js",
                 p64.toFile().toURI().toString());
-        inOrder.verify(scriptEngineManager, timeout(1000).times(1)).createScriptEngine("js",
+        inOrder.verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js",
                 p65.toFile().toURI().toString());
-        inOrder.verify(scriptEngineManager, timeout(1000).times(1)).createScriptEngine("js",
+        inOrder.verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js",
                 p66.toFile().toURI().toString());
     }
 
@@ -281,7 +281,7 @@ class ScriptFileWatcherTest {
 
         scriptFileWatcher.onDependencyChange(p.toFile().toURI().toString());
 
-        verify(scriptEngineManager, timeout(1000).times(2)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(10000).times(2)).createScriptEngine("js", p.toFile().toURI().toString());
     }
 
     @Test
@@ -344,6 +344,6 @@ class ScriptFileWatcherTest {
         scriptFileWatcher.processWatchEvent(null, ENTRY_MODIFY, p);
 
         verify(scriptEngineManager).removeEngine(p.toFile().toURI().toString());
-        verify(scriptEngineManager, timeout(1000).times(2)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManager, timeout(10000).times(2)).createScriptEngine("js", p.toFile().toURI().toString());
     }
 }

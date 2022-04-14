@@ -17,19 +17,22 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.openhab.core.tools.i18n.plugin.DefaultTranslationsGenerationMode.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Tests {@link GenerateDefaultTranslationsMojo}.
@@ -39,7 +42,6 @@ import org.junit.jupiter.api.io.TempDir;
 @NonNullByDefault
 public class GenerateDefaultTranslationsMojoTest {
 
-    @TempDir
     public @NonNullByDefault({}) Path tempPath;
     public @NonNullByDefault({}) Path tempI18nPath;
 
@@ -92,7 +94,8 @@ public class GenerateDefaultTranslationsMojoTest {
     }
 
     @BeforeEach
-    public void before() {
+    public void before() throws IOException {
+        tempPath = Files.createTempDirectory("i18n-");
         tempI18nPath = tempPath.resolve("OH-INF/i18n");
 
         mojo = new GenerateDefaultTranslationsMojo();
@@ -101,9 +104,21 @@ public class GenerateDefaultTranslationsMojoTest {
         mojo.setTargetDirectory(tempI18nPath.toFile());
     }
 
+    @AfterEach
+    public void afterEach() {
+        try {
+            Files.walk(tempPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+        } catch (IOException e) {
+            // XStream does not close the HierarchicalStreamReader created in XStream.fromXML(URL)
+            // which causes issues when deleting the temporary path on Windows.
+            // See: https://github.com/x-stream/xstream/pull/287
+            tempPath.toFile().deleteOnExit();
+        }
+    }
+
     private void assertSameProperties(Path expectedPath, Path actualPath) throws IOException {
-        String expected = Files.readString(expectedPath);
-        String actual = Files.readString(actualPath);
+        String expected = Files.readAllLines(expectedPath).stream().collect(Collectors.joining(System.lineSeparator()));
+        String actual = Files.readAllLines(actualPath).stream().collect(Collectors.joining(System.lineSeparator()));
         assertThat(expected, equalTo(actual));
     }
 
