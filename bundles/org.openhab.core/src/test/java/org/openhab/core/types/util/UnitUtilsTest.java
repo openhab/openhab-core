@@ -19,8 +19,12 @@ import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.library.unit.MetricPrefix.*;
 
+import java.util.Objects;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
+import javax.measure.quantity.Angle;
+import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Energy;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Power;
@@ -103,22 +107,26 @@ public class UnitUtilsTest {
     }
 
     @Test
-    public void testGetDimensionName() {
+    public void testGetDimensionNameWithDimension() {
         assertThat(UnitUtils.getDimensionName(SIUnits.CELSIUS), is(Temperature.class.getSimpleName()));
+        assertThat(UnitUtils.getDimensionName(Units.DEGREE_ANGLE), is(Angle.class.getSimpleName()));
         assertThat(UnitUtils.getDimensionName(Units.KILOWATT_HOUR), is(Energy.class.getSimpleName()));
         assertThat(UnitUtils.getDimensionName(Units.WATT), is(Power.class.getSimpleName()));
         assertThat(UnitUtils.getDimensionName(MetricPrefix.MEGA(Units.KILOWATT_HOUR)),
                 is(Energy.class.getSimpleName()));
 
-        Unit<?> unit = UnitUtils.parseUnit("°F");
-        assertNotNull(unit);
-        if (unit != null) {
-            assertThat(UnitUtils.getDimensionName(unit), is(Temperature.class.getSimpleName()));
-        }
-        unit = UnitUtils.parseUnit("m");
-        assertNotNull(unit);
-        if (unit != null) {
-            assertThat(UnitUtils.getDimensionName(unit), is(Length.class.getSimpleName()));
-        }
+        Unit<?> unit = Objects.requireNonNull(UnitUtils.parseUnit("°F"));
+        assertThat(UnitUtils.getDimensionName(unit), is(Temperature.class.getSimpleName()));
+
+        unit = Objects.requireNonNull(UnitUtils.parseUnit("m"));
+        assertThat(UnitUtils.getDimensionName(unit), is(Length.class.getSimpleName()));
+    }
+
+    @Test
+    public void testGetDimensionNameWithoutDimension() {
+        assertThat(UnitUtils.getDimensionName(Units.DECIBEL), is(Dimensionless.class.getSimpleName()));
+        assertThat(UnitUtils.getDimensionName(Units.ONE), is(Dimensionless.class.getSimpleName()));
+        assertThat(UnitUtils.getDimensionName(Units.PARTS_PER_MILLION), is(Dimensionless.class.getSimpleName()));
+        assertThat(UnitUtils.getDimensionName(Units.PERCENT), is(Dimensionless.class.getSimpleName()));
     }
 }
