@@ -68,7 +68,7 @@ public interface ProfileContext {
     }
 
     /**
-     * Get the list of accepted command types for commands send to the handler
+     * Get the list of accepted command types for commands sent to the handler
      *
      * This is an optional method and will return an empty list if not implemented.
      *
