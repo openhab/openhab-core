@@ -17,17 +17,43 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.test.java.JavaTest;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 /**
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public class EnrichedItemDTOMapperTest extends JavaTest {
+
+    private @NonNullByDefault({}) ListAppender<ILoggingEvent> listAppender;
+
+    @BeforeEach
+    public void setup() {
+        // add logging interceptor
+        Logger logger = (Logger) LoggerFactory.getLogger(EnrichedItemDTOMapper.class);
+        logger.setLevel(Level.ERROR);
+        listAppender = new ListAppender<>();
+        listAppender.start();
+        logger.addAppender(listAppender);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        listAppender.stop();
+    }
 
     @Test
     public void testFiltering() {
@@ -84,6 +110,12 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
         groupItem2.addMember(groupItem1);
 
         assertDoesNotThrow(() -> EnrichedItemDTOMapper.map(groupItem1, true, null, null, null));
+
+        assertThat(listAppender.list.size(), is(1));
+        ILoggingEvent loggingEvent = listAppender.list.get(0);
+        assertThat(loggingEvent.getLevel(), is(Level.ERROR));
+        assertThat(loggingEvent.getFormattedMessage(), is(
+                "Recursive group membership found: group1 is both, a direct or indirect parent and a child of group2."));
     }
 
     @Test
@@ -97,5 +129,26 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
         groupItem3.addMember(groupItem1);
 
         assertDoesNotThrow(() -> EnrichedItemDTOMapper.map(groupItem1, true, null, null, null));
+
+        assertThat(listAppender.list.size(), is(1));
+        ILoggingEvent loggingEvent = listAppender.list.get(0);
+        assertThat(loggingEvent.getLevel(), is(Level.ERROR));
+        assertThat(loggingEvent.getFormattedMessage(), is(
+                "Recursive group membership found: group1 is both, a direct or indirect parent and a child of group3."));
+    }
+
+    @Test
+    public void testDuplicateMembershipOfPlainItemsDoesNotTriggerWarning() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+        NumberItem numberItem = new NumberItem("number");
+
+        groupItem1.addMember(groupItem2);
+        groupItem1.addMember(numberItem);
+        groupItem2.addMember(numberItem);
+
+        EnrichedItemDTOMapper.map(groupItem1, true, null, null, null);
+
+        assertThat(listAppender.list.size(), is(0));
     }
 }
