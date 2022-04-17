@@ -29,14 +29,14 @@ public final class MetadataKey extends AbstractUID {
      * !!! DO NOT REMOVE - Gson needs it !!!
      */
     MetadataKey() {
-        super("", "");
+        super();
     }
 
     /**
      * Creates a new instance.
      *
-     * @param namespace
-     * @param itemName
+     * @param namespace the namespace of this metadata key
+     * @param itemName the item name that is associated with this metadata key
      */
     public MetadataKey(String namespace, String itemName) {
         super(namespace, itemName);
