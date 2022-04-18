@@ -40,7 +40,7 @@ public final class Metadata implements Identifiable<MetadataKey> {
      * !!! DO NOT REMOVE - Gson needs it !!!
      */
     Metadata() {
-        key = new MetadataKey("", "");
+        key = new MetadataKey();
         value = "";
         configuration = Collections.emptyMap();
     }

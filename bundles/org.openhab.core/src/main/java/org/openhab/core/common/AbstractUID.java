@@ -84,7 +84,7 @@ public abstract class AbstractUID {
     /**
      * Specifies how many segments the UID has to have at least.
      *
-     * @return
+     * @return the number of segments
      */
     protected abstract int getMinimalNumberOfSegments();
 
@@ -140,9 +140,6 @@ public abstract class AbstractUID {
             return false;
         }
         AbstractUID other = (AbstractUID) obj;
-        if (!segments.equals(other.segments)) {
-            return false;
-        }
-        return true;
+        return segments.equals(other.segments);
     }
 }
