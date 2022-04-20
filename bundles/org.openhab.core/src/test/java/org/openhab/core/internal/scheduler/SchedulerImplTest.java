@@ -212,6 +212,7 @@ public class SchedulerImplTest extends JavaTest {
         TestSchedulerWithCounter temporalAdjuster = new TestSchedulerWithCounter();
         ScheduledCompletableFuture<Void> schedule = scheduler.schedule(s::release, temporalAdjuster);
         s.acquire(1);
+        Thread.sleep(50);
         schedule.cancel(true);
         waitForAssert(() -> assertEquals(1, temporalAdjuster.getCount(), "Scheduler should have run 1 time"));
         Thread.sleep(1000); // wait a little longer to see if not more are scheduled.
