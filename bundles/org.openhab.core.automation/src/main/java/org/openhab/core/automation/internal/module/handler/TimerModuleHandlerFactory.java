@@ -23,7 +23,9 @@ import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseModuleHandlerFactory;
 import org.openhab.core.automation.handler.ModuleHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
+import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.scheduler.CronScheduler;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -45,15 +47,20 @@ public class TimerModuleHandlerFactory extends BaseModuleHandlerFactory {
     private final Logger logger = LoggerFactory.getLogger(TimerModuleHandlerFactory.class);
 
     public static final String THREADPOOLNAME = "ruletimer";
-    private static final Collection<String> TYPES = Arrays
-            .asList(new String[] { GenericCronTriggerHandler.MODULE_TYPE_ID, TimeOfDayTriggerHandler.MODULE_TYPE_ID,
-                    TimeOfDayConditionHandler.MODULE_TYPE_ID, DayOfWeekConditionHandler.MODULE_TYPE_ID });
+    private static final Collection<String> TYPES = Arrays.asList(GenericCronTriggerHandler.MODULE_TYPE_ID,
+            TimeOfDayTriggerHandler.MODULE_TYPE_ID, TimeOfDayConditionHandler.MODULE_TYPE_ID,
+            DayOfWeekConditionHandler.MODULE_TYPE_ID, DateTimeTriggerHandler.MODULE_TYPE_ID);
 
     private final CronScheduler scheduler;
+    private final ItemRegistry itemRegistry;
+    private final BundleContext bundleContext;
 
     @Activate
-    public TimerModuleHandlerFactory(final @Reference CronScheduler scheduler) {
+    public TimerModuleHandlerFactory(final @Reference CronScheduler scheduler,
+            final @Reference ItemRegistry itemRegistry, final BundleContext bundleContext) {
         this.scheduler = scheduler;
+        this.itemRegistry = itemRegistry;
+        this.bundleContext = bundleContext;
     }
 
     @Override
@@ -75,6 +82,8 @@ public class TimerModuleHandlerFactory extends BaseModuleHandlerFactory {
             return new GenericCronTriggerHandler((Trigger) module, scheduler);
         } else if (TimeOfDayTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Trigger) {
             return new TimeOfDayTriggerHandler((Trigger) module, scheduler);
+        } else if (DateTimeTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Trigger) {
+            return new DateTimeTriggerHandler((Trigger) module, scheduler, itemRegistry, bundleContext);
         } else if (TimeOfDayConditionHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Condition) {
             return new TimeOfDayConditionHandler((Condition) module);
         } else if (DayOfWeekConditionHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Condition) {

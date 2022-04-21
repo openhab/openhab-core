@@ -1,0 +1,20 @@
+{
+	"triggers": [
+		{
+			"uid": "timer.DateTimeTrigger",
+			"label": "it is a date and time specified in an item",
+			"description": "Triggers at a time specified in an item",
+			"visibility": "PUBLIC",
+			"configDescriptions": [
+				{
+					"name": "itemName",
+					"type": "TEXT",
+					"context": "item",
+					"label": "Item",
+					"description": "the name of the item",
+					"required": true
+				}
+			]
+		}
+	]
+}
