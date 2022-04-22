@@ -292,6 +292,15 @@ public class ModbusSlaveConnectionFactoryImpl
                             obj.getObject(), endpoint);
                 }
                 connection.connect();
+
+                logger.trace("Waiting {}ms for connection to warm up...", config.getAfterConnectionDelayMillis());
+                if (config != null && config.getAfterConnectionDelayMillis() > 0) {
+                    try {
+                        Thread.sleep(config.getAfterConnectionDelayMillis());
+                    } catch (InterruptedException e) {
+                        // sleep interrupted, continue with the method execution (only fast operations)
+                    }
+                }
                 long curTime = System.currentTimeMillis();
                 ((PooledConnection) obj).setLastConnected(endpoint, curTime);
                 lastConnectMillis.put(endpoint, curTime);
