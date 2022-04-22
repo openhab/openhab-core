@@ -294,7 +294,7 @@ public class ModbusSlaveConnectionFactoryImpl
                 connection.connect();
 
                 logger.trace("Waiting {}ms for connection to warm up...", config.getAfterConnectionDelayMillis());
-                if (config != null && config.getAfterConnectionDelayMillis() > 0) {
+                if (config.getAfterConnectionDelayMillis() > 0) {
                     try {
                         Thread.sleep(config.getAfterConnectionDelayMillis());
                     } catch (InterruptedException e) {
