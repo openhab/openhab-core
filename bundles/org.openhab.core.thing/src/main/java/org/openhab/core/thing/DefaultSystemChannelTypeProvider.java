@@ -104,6 +104,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_CHANNEL_SIGNAL_STRENGTH = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_SIGNAL_STRENGTH, "Signal Strength", CoreItemFactory.NUMBER)
+            .withDescription("Signal strength as with values 0 (worst), 1, 2, 3 or 4 (best)")
             .withCategory("QualityOfService")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(4)).withStep(BigDecimal.ONE).withReadOnly(Boolean.TRUE)
@@ -119,6 +120,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_CHANNEL_LOW_BATTERY = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_LOW_BATTERY, "Low Battery", CoreItemFactory.SWITCH)
+            .withDescription("Low battery warning with possible values on (low battery) and off (battery ok)")
             .withCategory("LowBattery")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build())
             .withTags(List.of("LowBattery", "Energy")).build();
@@ -128,7 +130,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_CHANNEL_BATTERY_LEVEL = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_BATTERY_LEVEL, "Battery Level", CoreItemFactory.NUMBER)
-            .withCategory("Battery")
+            .withDescription("Battery level as a percentage (0-100%)").withCategory("Battery")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withReadOnly(true).withPattern("%.0f %%")
                     .build())

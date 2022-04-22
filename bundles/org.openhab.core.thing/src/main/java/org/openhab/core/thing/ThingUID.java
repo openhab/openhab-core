@@ -91,7 +91,7 @@ public class ThingUID extends UID {
     }
 
     private static String[] getArray(String bindingId, String thingTypeId, String id, @Nullable String... bridgeIds) {
-        if (bridgeIds == null || bridgeIds.length == 0) {
+        if (bridgeIds.length == 0) {
             return new String[] { bindingId, thingTypeId, id };
         }
 

@@ -54,7 +54,7 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
     public StateChannelTypeBuilderImpl(ChannelTypeUID channelTypeUID, String label, String itemType) {
         super(channelTypeUID, label);
 
-        if (itemType == null || itemType.isBlank()) {
+        if (itemType.isBlank()) {
             throw new IllegalArgumentException("Supported itemType for a ChannelType must not be empty.");
         }
 

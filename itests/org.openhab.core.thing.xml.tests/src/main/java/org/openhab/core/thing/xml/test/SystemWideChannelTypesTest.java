@@ -157,7 +157,7 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
             assertEquals("Meine spezial Beschreibung für Signalstärke", sigStr.getDescription());
 
             assertEquals("Niedriger Batteriestatus", lowBatType.getLabel());
-            assertNull(lowBatType.getDescription());
+            assertNotNull(lowBatType.getDescription());
         }
     }
 }
