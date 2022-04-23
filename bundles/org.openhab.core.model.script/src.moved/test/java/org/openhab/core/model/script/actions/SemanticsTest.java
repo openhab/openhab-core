@@ -13,6 +13,7 @@
 package org.openhab.core.model.script.actions;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
@@ -104,7 +105,8 @@ public class SemanticsTest {
 
     @Test
     public void testGetLocation() {
-        assertNull(Semantics.getLocation(indoorLocationItem));
+        assertThat(Semantics.getLocation(indoorLocationItem), is(nullValue()));
+
         assertThat(Semantics.getLocation(bathroomLocationItem), is(indoorLocationItem));
 
         assertThat(Semantics.getLocation(equipmentItem), is(bathroomLocationItem));
@@ -117,6 +119,7 @@ public class SemanticsTest {
     @Test
     public void testGetLocationType() {
         assertThat(Semantics.getLocationType(indoorLocationItem), is(Indoor.class));
+
         assertThat(Semantics.getLocationType(bathroomLocationItem), is(Bathroom.class));
 
         assertNull(Semantics.getLocationType(humidityPointItem));
@@ -124,7 +127,8 @@ public class SemanticsTest {
 
     @Test
     public void testGetEquipment() {
-        assertNull(Semantics.getEquipment(equipmentItem));
+        assertThat(Semantics.getEquipment(equipmentItem), is(nullValue()));
+
         assertThat(Semantics.getEquipment(subEquipmentItem), is(equipmentItem));
 
         assertThat(Semantics.getEquipment(temperaturePointItem), is(equipmentItem));
