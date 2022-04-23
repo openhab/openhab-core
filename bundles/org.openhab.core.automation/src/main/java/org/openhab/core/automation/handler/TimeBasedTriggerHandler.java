@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
 
 /**
- * Marker Interface for an {@link TriggerHandler} that contains a time based execution.
+ * Marker Interface for a {@link TriggerHandler} that contains a time based execution.
  *
  * @author Sönke Küper - Initial contribution
  */

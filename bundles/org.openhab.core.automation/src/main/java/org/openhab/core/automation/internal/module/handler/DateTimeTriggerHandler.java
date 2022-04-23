@@ -64,7 +64,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
 
     private final CronScheduler scheduler;
     private final String itemName;
-    private String cronExpression = "@reboot";
+    private String cronExpression = CronAdjuster.REBOOT;
 
     private @Nullable ScheduledCompletableFuture<?> schedule;
     private @Nullable ServiceRegistration<?> eventSubscriberRegistration;
@@ -152,7 +152,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
 
     private synchronized void startScheduler() {
         cancelScheduler();
-        if (!"@reboot".equals(cronExpression)) {
+        if (!CronAdjuster.REBOOT.equals(cronExpression)) {
             schedule = scheduler.schedule(this, cronExpression);
             logger.debug("Scheduled cron job '{}' for trigger '{}'.", module.getConfiguration().get(CONFIG_ITEM_NAME),
                     module.getId());
@@ -171,7 +171,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
     private void process(Type value) {
         cancelScheduler();
         if (value instanceof UnDefType) {
-            cronExpression = "@reboot";
+            cronExpression = CronAdjuster.REBOOT;
         } else if (value instanceof DateTimeType) {
             cronExpression = ((DateTimeType) value).getZonedDateTime().format(CRON_FORMATTER);
             startScheduler();
