@@ -14,6 +14,8 @@ package org.openhab.core.automation.module.script;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +27,7 @@ import javax.script.ScriptException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.transform.TransformationConfiguration;
 import org.openhab.core.transform.TransformationConfigurationRegistry;
@@ -54,6 +57,9 @@ public class ScriptTransformationService
 
     private final Logger logger = LoggerFactory.getLogger(ScriptTransformationService.class);
 
+    private final ScheduledExecutorService scheduler = ThreadPoolManager
+            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
+
     private final Map<String, ScriptEngineContainer> scriptEngineContainers = new HashMap<>();
     private final Map<String, CompiledScript> compiledScripts = new HashMap<>();
     private final Map<String, String> scriptCache = new HashMap<>();
@@ -73,6 +79,11 @@ public class ScriptTransformationService
     @Deactivate
     public void deactivate() {
         transformationConfigurationRegistry.removeRegistryChangeListener(this);
+
+        // cleanup script engines
+        scriptEngineContainers.values().stream().map(ScriptEngineContainer::getScriptEngine)
+                .forEach(this::disposeScriptEngine);
+        compiledScripts.values().stream().map(CompiledScript::getEngine).forEach(this::disposeScriptEngine);
     }
 
     @Override
@@ -165,8 +176,32 @@ public class ScriptTransformationService
     }
 
     private void clearCache(String uid) {
-        compiledScripts.remove(uid);
-        scriptEngineContainers.remove(uid);
+        CompiledScript compiledScript = compiledScripts.remove(uid);
+        if (compiledScript != null) {
+            disposeScriptEngine(compiledScript.getEngine());
+        }
+        ScriptEngineContainer container = scriptEngineContainers.remove(uid);
+        if (container != null) {
+            disposeScriptEngine(container.getScriptEngine());
+        }
         scriptCache.remove(uid);
+    }
+
+    private void disposeScriptEngine(ScriptEngine scriptEngine) {
+        if (scriptEngine instanceof AutoCloseable) {
+            // we cannot not use ScheduledExecutorService.execute here as it might execute the task in the calling
+            // thread (calling ScriptEngine.close in the same thread may result in a deadlock if the ScriptEngine
+            // tries to Thread.join)
+            scheduler.schedule(() -> {
+                AutoCloseable closeable = (AutoCloseable) scriptEngine;
+                try {
+                    closeable.close();
+                } catch (Exception e) {
+                    logger.error("Error while closing script engine", e);
+                }
+            }, 0, TimeUnit.SECONDS);
+        } else {
+            logger.trace("ScriptEngine does not support AutoCloseable interface");
+        }
     }
 }
