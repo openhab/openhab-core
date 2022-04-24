@@ -53,6 +53,7 @@ import org.openhab.core.persistence.PersistenceServiceRegistry;
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Initial contribution
  * @author Jan N. Klug - Fix averageSince calculation
+ * @author Jan N. Klug - Interval method tests and refactoring
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -412,8 +413,6 @@ public class PersistenceExtensionsTest {
     public void testVarianceBetween() {
         ZonedDateTime startStored = ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         ZonedDateTime endStored = ZonedDateTime.of(2011, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-        long storedInterval = endStored.toInstant().toEpochMilli() - startStored.toInstant().toEpochMilli();
-        long recentInterval = Instant.now().toEpochMilli() - endStored.toInstant().toEpochMilli();
         DecimalType variance = PersistenceExtensions.varianceBetween(numberItem, startStored, endStored,
                 TestPersistenceService.ID);
         assertThat(variance, is(notNullValue()));
@@ -579,30 +578,31 @@ public class PersistenceExtensionsTest {
         ZonedDateTime now = ZonedDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         DecimalType average = PersistenceExtensions.averageSince(switchItem, now.minusHours(15),
                 TestPersistenceService.ID);
-        assertNotNull(average);
-        assertEquals(0.625, average.doubleValue(), 0.04);
+        assertThat(average, is(notNullValue()));
+        assertThat(average.doubleValue(), is(closeTo(0.625, 0.04)));
 
         average = PersistenceExtensions.averageSince(switchItem, now.minusHours(7), TestPersistenceService.ID);
-        assertNotNull(average);
-        assertEquals(0.714, average.doubleValue(), 0.1);
+        assertThat(average, is(notNullValue()));
+        assertThat(average.doubleValue(), is(closeTo(0.714, 0.1)));
 
         average = PersistenceExtensions.averageSince(switchItem, now.minusHours(6), TestPersistenceService.ID);
-        assertNotNull(average);
-        assertEquals(0.833, average.doubleValue(), 0.2);
+        assertThat(average, is(notNullValue()));
+        assertThat(average.doubleValue(), is(closeTo(0.833, 0.2)));
 
         average = PersistenceExtensions.averageSince(switchItem, now.minusHours(5), TestPersistenceService.ID);
-        assertNotNull(average);
-        assertEquals(1d, average.doubleValue(), 0.2);
+        assertThat(average, is(notNullValue()));
+        assertThat(average.doubleValue(), is(closeTo(1d, 0.2)));
 
         average = PersistenceExtensions.averageSince(switchItem, now.minusHours(1), TestPersistenceService.ID);
-        assertNotNull(average);
-        assertEquals(1d, average.doubleValue(), 0.001);
+        assertThat(average, is(notNullValue()));
+        assertThat(average.doubleValue(), is(closeTo(1d, 0.001)));
 
         average = PersistenceExtensions.averageSince(switchItem, now, TestPersistenceService.ID);
-        assertEquals(1d, average.doubleValue(), 0.001);
+        assertThat(average, is(notNullValue()));
+        assertThat(average.doubleValue(), is(closeTo(1d, 0.001)));
 
         average = PersistenceExtensions.averageSince(switchItem, now.plusHours(1), TestPersistenceService.ID);
-        assertNull(average);
+        assertThat(average, is(nullValue()));
     }
 
     @Test

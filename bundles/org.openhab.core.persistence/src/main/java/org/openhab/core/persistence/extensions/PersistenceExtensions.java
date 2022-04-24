@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Gaël L'hopital - Add deltaSince, lastUpdate, evolutionRate
  * @author Jan N. Klug - Added sumSince
  * @author John Cocula - Added sumSince
+ * @author Jan N. Klug - Added interval methods and refactoring
  */
 @Component(immediate = true)
 public class PersistenceExtensions {
