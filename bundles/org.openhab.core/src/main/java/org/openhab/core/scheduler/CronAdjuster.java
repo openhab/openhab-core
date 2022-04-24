@@ -43,6 +43,14 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class CronAdjuster implements SchedulerTemporalAdjuster {
 
+    public static final String ANNUALLY = "@annually";
+    public static final String YEARLY = "@yearly";
+    public static final String MONTHLY = "@monthly";
+    public static final String WEEKLY = "@weekly";
+    public static final String DAILY = "@daily";
+    public static final String HOURLY = "@hourly";
+    public static final String REBOOT = "@reboot";
+
     /**
      * A function interface that we use to check a Temporal to see if it matches a part of the specification. These
      * checkers are combined in and and or expressions.
@@ -167,23 +175,23 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
      */
     private String preDeclared(final String expression) {
         switch (expression) {
-            case "@annually":
-            case "@yearly":
+            case ANNUALLY:
+            case YEARLY:
                 return "0 0 0 1 1 *";
 
-            case "@monthly":
+            case MONTHLY:
                 return "0 0 0 1 * *";
 
-            case "@weekly":
+            case WEEKLY:
                 return "0 0 0 ? * MON";
 
-            case "@daily":
+            case DAILY:
                 return "0 0 0 * * ?";
 
-            case "@hourly":
+            case HOURLY:
                 return "0 0 * * * ?";
 
-            case "@reboot":
+            case REBOOT:
                 return "0 0 0 1 1 ? 1900";
             default:
                 throw new IllegalArgumentException(String.format("Unrecognized @ expression: '%s'", expression));
