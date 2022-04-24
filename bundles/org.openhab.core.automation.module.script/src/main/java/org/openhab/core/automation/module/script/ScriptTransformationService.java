@@ -14,6 +14,8 @@ package org.openhab.core.automation.module.script;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -30,7 +32,10 @@ import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link ScriptTransformationService} implements a {@link TransformationService} using any available script
@@ -43,6 +48,11 @@ import org.osgi.service.component.annotations.Reference;
 public class ScriptTransformationService
         implements TransformationService, RegistryChangeListener<TransformationConfiguration> {
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
+
+    private static final Pattern SCRIPT_CONFIG_PATTERN = Pattern
+            .compile("(?<scriptType>.*?):(?<scriptUid>.*?)(\\?(?<params>.*?))?");
+
+    private final Logger logger = LoggerFactory.getLogger(ScriptTransformationService.class);
 
     private final Map<String, ScriptEngineContainer> scriptEngineContainers = new HashMap<>();
     private final Map<String, CompiledScript> compiledScripts = new HashMap<>();
@@ -57,16 +67,22 @@ public class ScriptTransformationService
             @Reference ScriptEngineManager scriptEngineManager) {
         this.transformationConfigurationRegistry = transformationConfigurationRegistry;
         this.scriptEngineManager = scriptEngineManager;
+        transformationConfigurationRegistry.addRegistryChangeListener(this);
+    }
+
+    @Deactivate
+    public void deactivate() {
+        transformationConfigurationRegistry.removeRegistryChangeListener(this);
     }
 
     @Override
     public @Nullable String transform(String function, String source) throws TransformationException {
-        int splitPoint = function.indexOf(":");
-        if (splitPoint < 1) {
+        Matcher configMatcher = SCRIPT_CONFIG_PATTERN.matcher(function);
+        if (!configMatcher.matches()) {
             throw new TransformationException("Script Type must be prepended to transformation UID.");
         }
-        String scriptType = function.substring(0, splitPoint);
-        String scriptUid = function.substring(splitPoint + 1);
+        String scriptType = configMatcher.group("scriptType");
+        String scriptUid = configMatcher.group("scriptUid");
 
         String script = scriptCache.get(scriptUid);
         if (script == null) {
@@ -98,29 +114,39 @@ public class ScriptTransformationService
         if (scriptEngineContainer == null) {
             throw new TransformationException("Failed to create script engine container for '" + function + "'.");
         }
-        if (scriptEngineContainer != null) {
-            try {
-                CompiledScript compiledScript = this.compiledScripts.get(scriptUid);
+        try {
+            CompiledScript compiledScript = this.compiledScripts.get(scriptUid);
 
-                if (compiledScript == null && scriptEngineContainer.getScriptEngine() instanceof Compilable) {
-                    // no compiled script available but compiling is supported
-                    compiledScript = ((Compilable) scriptEngineContainer.getScriptEngine()).compile(script);
-                    this.compiledScripts.put(scriptUid, compiledScript);
-                }
-
-                ScriptEngine engine = compiledScript != null ? compiledScript.getEngine()
-                        : scriptEngineContainer.getScriptEngine();
-                ScriptContext executionContext = engine.getContext();
-                executionContext.setAttribute("inputString", source, ScriptContext.ENGINE_SCOPE);
-
-                Object result = compiledScript != null ? compiledScript.eval() : engine.eval(script);
-                return result == null ? null : result.toString();
-            } catch (ScriptException e) {
-                throw new TransformationException("Failed to execute script.", e);
+            if (compiledScript == null && scriptEngineContainer.getScriptEngine() instanceof Compilable) {
+                // no compiled script available but compiling is supported
+                compiledScript = ((Compilable) scriptEngineContainer.getScriptEngine()).compile(script);
+                this.compiledScripts.put(scriptUid, compiledScript);
             }
-        }
 
-        return null;
+            ScriptEngine engine = compiledScript != null ? compiledScript.getEngine()
+                    : scriptEngineContainer.getScriptEngine();
+            ScriptContext executionContext = engine.getContext();
+            executionContext.setAttribute("inputString", source, ScriptContext.ENGINE_SCOPE);
+
+            String params = configMatcher.group("params");
+            if (params != null) {
+                for (String param : params.split("&")) {
+                    String[] splitString = param.split("=");
+                    if (splitString.length != 2) {
+                        logger.warn("Parameter '{}' does not consist of two parts for configuration UID {}, skipping.",
+                                param, scriptUid);
+
+                    } else {
+                        executionContext.setAttribute(splitString[0], splitString[1], ScriptContext.ENGINE_SCOPE);
+                    }
+                }
+            }
+
+            Object result = compiledScript != null ? compiledScript.eval() : engine.eval(script);
+            return result == null ? null : result.toString();
+        } catch (ScriptException e) {
+            throw new TransformationException("Failed to execute script.", e);
+        }
     }
 
     @Override
@@ -130,7 +156,6 @@ public class ScriptTransformationService
 
     @Override
     public void removed(TransformationConfiguration element) {
-
         clearCache(element.getUID());
     }
 

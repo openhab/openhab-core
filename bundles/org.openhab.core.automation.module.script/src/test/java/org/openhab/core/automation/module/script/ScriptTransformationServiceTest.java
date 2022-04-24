@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import javax.script.ScriptContext;
@@ -46,7 +47,7 @@ import org.openhab.core.transform.TransformationException;
  */
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.WARN)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class ScriptTransformationServiceTest {
     private static final String COMPILABLE_SCRIPT_TYPE = "compilableScript";
     private static final String SCRIPT_TYPE = "script";
@@ -84,6 +85,25 @@ public class ScriptTransformationServiceTest {
         String returnValue = service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID, "input");
 
         assertThat(returnValue, is(SCRIPT_OUTPUT));
+    }
+
+    @Test
+    public void scriptExecutionParametersAreInjectedIntoEngineContext() throws TransformationException {
+        service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID + "?param1=value1&param2=value2", "input");
+
+        verify(scriptContext).setAttribute(eq("inputString"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
+        verify(scriptContext).setAttribute(eq("param1"), eq("value1"), eq(ScriptContext.ENGINE_SCOPE));
+        verify(scriptContext).setAttribute(eq("param2"), eq("value2"), eq(ScriptContext.ENGINE_SCOPE));
+        verifyNoMoreInteractions(scriptContext);
+    }
+
+    @Test
+    public void invalidScriptExecutionParametersAreDiscarded() throws TransformationException {
+        service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID + "?param1=value1&invalid", "input");
+
+        verify(scriptContext).setAttribute(eq("inputString"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
+        verify(scriptContext).setAttribute(eq("param1"), eq("value1"), eq(ScriptContext.ENGINE_SCOPE));
+        verifyNoMoreInteractions(scriptContext);
     }
 
     @Test
