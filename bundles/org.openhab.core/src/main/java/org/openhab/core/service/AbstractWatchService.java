@@ -37,14 +37,25 @@ import org.eclipse.jdt.annotation.Nullable;
 public abstract class AbstractWatchService {
     protected @Nullable String pathToWatch;
 
+    /**
+     * The queue reader
+     */
+    protected WatchQueueReader watchQueueReader = WatchQueueReader.getInstance();
+
     protected AbstractWatchService(String pathToWatch) {
         this.pathToWatch = pathToWatch;
     }
 
     /**
-     * The queue reader
+     * Change the watch directory for this WatchService
+     *
+     * @param pathToWatch the new path
      */
-    protected WatchQueueReader watchQueueReader = WatchQueueReader.getInstance();
+    protected void changeWatchDirectory(String pathToWatch) {
+        deactivate();
+        this.pathToWatch = pathToWatch;
+        activate();
+    }
 
     /**
      * Method to call on service activation
@@ -61,7 +72,6 @@ public abstract class AbstractWatchService {
      */
     @SuppressWarnings("unused")
     public void deactivate() {
-        WatchQueueReader watchQueueReader = this.watchQueueReader;
         watchQueueReader.stopWatchService(this);
     }
 
