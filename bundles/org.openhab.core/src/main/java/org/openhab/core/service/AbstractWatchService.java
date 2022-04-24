@@ -52,7 +52,7 @@ public abstract class AbstractWatchService {
      * @param pathToWatch the new path
      */
     protected void changeWatchDirectory(String pathToWatch) {
-        watchQueueReader.stopWatchService(this);
+        deactivate();
         this.pathToWatch = pathToWatch;
         activate();
     }
