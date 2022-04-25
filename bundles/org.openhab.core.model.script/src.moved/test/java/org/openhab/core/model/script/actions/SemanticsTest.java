@@ -13,6 +13,7 @@
 package org.openhab.core.model.script.actions;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
@@ -31,6 +32,7 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.script.internal.engine.action.SemanticsActionService;
 import org.openhab.core.semantics.model.equipment.CleaningRobot;
+import org.openhab.core.semantics.model.equipment.Battery;
 import org.openhab.core.semantics.model.location.Bathroom;
 import org.openhab.core.semantics.model.location.Indoor;
 
@@ -50,6 +52,7 @@ public class SemanticsTest {
     private GroupItem equipmentItem;
     private GenericItem temperaturePointItem;
     private GenericItem humidityPointItem;
+    private GenericItem subEquipmentItem;
 
     @BeforeEach
     public void setup() throws ItemNotFoundException {
@@ -84,6 +87,13 @@ public class SemanticsTest {
         humidityPointItem.addTag("Measurement");
         humidityPointItem.addTag("Humidity");
 
+        subEquipmentItem = itemFactory.createItem(CoreItemFactory.NUMBER, "TestBattery");
+        subEquipmentItem.addTag("Battery");
+
+        // Equipment (TestBattery) is a part of Equipment (Cleaning Robot)
+        equipmentItem.addMember(subEquipmentItem);
+        subEquipmentItem.addGroupName(equipmentItem.getName());
+
         when(mockedItemRegistry.getItem("TestHouse")).thenReturn(indoorLocationItem);
         when(mockedItemRegistry.getItem("TestBathRoom")).thenReturn(bathroomLocationItem);
         when(mockedItemRegistry.getItem("Test08")).thenReturn(equipmentItem);
@@ -95,8 +105,9 @@ public class SemanticsTest {
 
     @Test
     public void testGetLocation() {
-        assertThat(Semantics.getLocation(indoorLocationItem), is(indoorLocationItem));
-        assertThat(Semantics.getLocation(bathroomLocationItem), is(bathroomLocationItem));
+        assertThat(Semantics.getLocation(indoorLocationItem), is(nullValue()));
+
+        assertThat(Semantics.getLocation(bathroomLocationItem), is(indoorLocationItem));
 
         assertThat(Semantics.getLocation(equipmentItem), is(bathroomLocationItem));
 
@@ -108,6 +119,7 @@ public class SemanticsTest {
     @Test
     public void testGetLocationType() {
         assertThat(Semantics.getLocationType(indoorLocationItem), is(Indoor.class));
+
         assertThat(Semantics.getLocationType(bathroomLocationItem), is(Bathroom.class));
 
         assertNull(Semantics.getLocationType(humidityPointItem));
@@ -115,7 +127,9 @@ public class SemanticsTest {
 
     @Test
     public void testGetEquipment() {
-        assertThat(Semantics.getEquipment(equipmentItem), is(equipmentItem));
+        assertThat(Semantics.getEquipment(equipmentItem), is(nullValue()));
+
+        assertThat(Semantics.getEquipment(subEquipmentItem), is(equipmentItem));
 
         assertThat(Semantics.getEquipment(temperaturePointItem), is(equipmentItem));
 
@@ -127,6 +141,8 @@ public class SemanticsTest {
         assertThat(Semantics.getEquipmentType(equipmentItem), is(CleaningRobot.class));
 
         assertThat(Semantics.getEquipmentType(temperaturePointItem), is(CleaningRobot.class));
+
+        assertThat(Semantics.getEquipmentType(subEquipmentItem), is(Battery.class));
 
         assertNull(Semantics.getEquipmentType(humidityPointItem));
     }
