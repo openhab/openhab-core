@@ -10,7 +10,7 @@
 					"type": "TEXT",
 					"context": "thing",
 					"label": "Thing",
-					"description": "The UID of the thing.",
+					"description": "The UID of the thing. You can use '*' as wildcard to match multiple things.",
 					"required": true
 				},
 				{
