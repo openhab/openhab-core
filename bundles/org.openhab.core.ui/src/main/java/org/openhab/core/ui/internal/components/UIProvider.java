@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,7 @@ import org.openhab.core.ui.components.RootUIComponent;
 /**
  * Provides components (pages, widgets, etc.) at runtime.
  *
- * @author Łukasz Dywicki - initial controbution.
+ * @author Łukasz Dywicki - Initial contribution
  */
 @NonNullByDefault
 public interface UIProvider extends Provider<RootUIComponent> {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,7 +23,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * A managed page provider which uses storage layer to keep defined pages.
  *
- * @author Łukasz Dywicki - initial contribution.
+ * @author Łukasz Dywicki - Initial contribution
  */
 @NonNullByDefault
 @Component(service = { Provider.class, ManagedProvider.class, UIProvider.class })

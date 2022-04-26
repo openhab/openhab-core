@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
@@ -34,6 +34,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Łukasz Dywicki - Removed explicit dependency on storage providers.
  * @author Jonathan Gilbert - Made providers' collections immutable.
  */
+@NonNullByDefault
 @Component(service = UIComponentRegistryFactory.class, immediate = true)
 public class UIComponentRegistryFactoryImpl implements UIComponentRegistryFactory {
     Map<String, UIComponentRegistryImpl> registries = new ConcurrentHashMap<>();
@@ -44,11 +45,11 @@ public class UIComponentRegistryFactoryImpl implements UIComponentRegistryFactor
         UIComponentRegistryImpl registry = registries.get(namespace);
         if (registry == null) {
             Set<UIProvider> namespaceProviders = this.providers.get(namespace);
-            ManagedProvider<@NonNull RootUIComponent, @NonNull String> managedProvider = null;
+            ManagedProvider<RootUIComponent, String> managedProvider = null;
             if (namespaceProviders != null) {
                 for (UIProvider provider : namespaceProviders) {
                     if (provider instanceof ManagedProvider) {
-                        managedProvider = (ManagedProvider<@NonNull RootUIComponent, @NonNull String>) provider;
+                        managedProvider = (ManagedProvider<RootUIComponent, String>) provider;
                         break;
                     }
                 }
@@ -61,15 +62,17 @@ public class UIComponentRegistryFactoryImpl implements UIComponentRegistryFactor
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     void addProvider(UIProvider provider) {
-        if (registries.containsKey(provider.getNamespace())) {
-            registries.get(provider.getNamespace()).addProvider(provider);
+        UIComponentRegistryImpl registry = registries.get(provider.getNamespace());
+        if (registry != null) {
+            registry.addProvider(provider);
         }
         registerProvider(provider);
     }
 
     void removeProvider(UIProvider provider) {
-        if (registries.containsKey(provider.getNamespace())) {
-            registries.get(provider.getNamespace()).removeProvider(provider);
+        UIComponentRegistryImpl registry = registries.get(provider.getNamespace());
+        if (registry != null) {
+            registry.removeProvider(provider);
         }
         deregisterProvider(provider);
     }

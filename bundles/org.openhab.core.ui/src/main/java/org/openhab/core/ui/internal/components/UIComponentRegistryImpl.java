@@ -27,13 +27,11 @@ import org.openhab.core.ui.components.UIComponentRegistry;
  * It is instantiated by the {@link UIComponentRegistryFactoryImpl}.
  *
  * @author Yannick Schaus - Initial contribution
- * @author Łukasz Dywicki - Support for dynamic registartion of providers.
+ * @author Łukasz Dywicki - Support for dynamic registration of providers
  */
 @NonNullByDefault
 public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, String, UIComponentProvider>
         implements UIComponentRegistry {
-
-    private final String namespace;
 
     /**
      * Constructs a UI component registry for the specified namespace.
@@ -43,8 +41,6 @@ public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, S
     public UIComponentRegistryImpl(String namespace, @Nullable ManagedProvider<RootUIComponent, String> managedProvider,
             @Nullable Set<UIProvider> providers) {
         super(null);
-        this.namespace = namespace;
-
         if (managedProvider != null) {
             setManagedProvider(managedProvider);
         }
@@ -55,10 +51,12 @@ public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, S
         }
     }
 
+    @Override
     public void addProvider(Provider<RootUIComponent> provider) {
         super.addProvider(provider);
     }
 
+    @Override
     public void removeProvider(Provider<RootUIComponent> provider) {
         super.removeProvider(provider);
     }
