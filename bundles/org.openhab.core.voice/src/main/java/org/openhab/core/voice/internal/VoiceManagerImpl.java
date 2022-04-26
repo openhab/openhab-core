@@ -288,20 +288,38 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     }
 
     @Override
-    public String interpret(String text, @Nullable String hliId) throws InterpretationException {
-        HumanLanguageInterpreter interpreter;
-        if (hliId == null) {
-            interpreter = getHLI();
+    public String interpret(String text, @Nullable String hliIdList) throws InterpretationException {
+        Collection<HumanLanguageInterpreter> interpreters;
+        if (hliIdList == null) {
+            var interpreter = getHLI();
             if (interpreter == null) {
                 throw new InterpretationException("No human language interpreter available!");
             }
+            interpreters = List.of(interpreter);
         } else {
-            interpreter = getHLI(hliId);
-            if (interpreter == null) {
-                throw new InterpretationException("No human language interpreter can be found for " + hliId);
+            interpreters = getHLIsByIds(hliIdList);
+            if (interpreters == null) {
+                throw new InterpretationException("No human language interpreter can be found for " + hliIdList);
             }
         }
-        return interpreter.interpret(localeProvider.getLocale(), text);
+        String answer = null;
+        InterpretationException error = null;
+        Locale locale = localeProvider.getLocale();
+        for (var interpreter : interpreters) {
+            try {
+                answer = interpreter.interpret(locale, text);
+                logger.debug("Interpretation result: {}", answer);
+                error = null;
+                break;
+            } catch (InterpretationException e) {
+                logger.debug("Interpretation exception: {}", e.getMessage());
+                error = e;
+            }
+        }
+        if (error != null) {
+            throw error;
+        }
+        return answer;
     }
 
     private @Nullable Voice getVoice(String id) {
@@ -485,14 +503,20 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable Collection<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
             throws IllegalStateException {
         // use defaults, if null
         KSService ksService = (ks == null) ? getKS() : ks;
         STTService sttService = (stt == null) ? getSTT() : stt;
         TTSService ttsService = (tts == null) ? getTTS() : tts;
-        HumanLanguageInterpreter interpreter = (hli == null) ? getHLI() : hli;
+        Collection<HumanLanguageInterpreter> interpreters = hlis;
+        if (hlis == null) {
+            HumanLanguageInterpreter hli = getHLI();
+            if (hli != null) {
+                interpreters = List.of(hli);
+            }
+        }
         AudioSource audioSource = (source == null) ? audioManager.getSource() : source;
         AudioSink audioSink = (sink == null) ? audioManager.getSink() : sink;
         Locale loc = (locale == null) ? localeProvider.getLocale() : locale;
@@ -500,19 +524,19 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         String item = (listeningItem == null) ? this.listeningItem : listeningItem;
         Bundle b = bundle;
 
-        if (ksService == null || sttService == null || ttsService == null || interpreter == null || audioSource == null
+        if (ksService == null || sttService == null || ttsService == null || interpreters == null || audioSource == null
                 || audioSink == null || b == null) {
             throw new IllegalStateException("Cannot start dialog as services are missing.");
         } else if (!checkLocales(ksService.getSupportedLocales(), loc)
-                || !checkLocales(sttService.getSupportedLocales(), loc)
-                || !checkLocales(interpreter.getSupportedLocales(), loc)) {
+                || !checkLocales(sttService.getSupportedLocales(), loc) || !interpreters.stream()
+                        .allMatch(interpreter -> checkLocales(interpreter.getSupportedLocales(), loc))) {
             throw new IllegalStateException("Cannot start dialog as provided locale is not supported by all services.");
         } else {
             DialogProcessor processor = dialogProcessors.get(audioSource.getId());
             if (processor == null) {
                 logger.debug("Starting a new dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
-                processor = new DialogProcessor(ksService, sttService, ttsService, interpreter, audioSource, audioSink,
+                processor = new DialogProcessor(ksService, sttService, ttsService, interpreters, audioSource, audioSink,
                         loc, kw, item, this.eventPublisher, this.i18nProvider, b);
                 dialogProcessors.put(audioSource.getId(), processor);
                 processor.start();
@@ -556,23 +580,29 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable Collection<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException {
         // use defaults, if null
         STTService sttService = (stt == null) ? getSTT() : stt;
         TTSService ttsService = (tts == null) ? getTTS() : tts;
-        HumanLanguageInterpreter interpreter = (hli == null) ? getHLI() : hli;
+        Collection<HumanLanguageInterpreter> interpreters = hlis;
+        if (hlis == null) {
+            HumanLanguageInterpreter hli = getHLI();
+            if (hli != null) {
+                interpreters = List.of(hli);
+            }
+        }
         AudioSource audioSource = (source == null) ? audioManager.getSource() : source;
         AudioSink audioSink = (sink == null) ? audioManager.getSink() : sink;
         Locale loc = (locale == null) ? localeProvider.getLocale() : locale;
         String item = (listeningItem == null) ? this.listeningItem : listeningItem;
         Bundle b = bundle;
 
-        if (sttService == null || ttsService == null || interpreter == null || audioSource == null || audioSink == null
+        if (sttService == null || ttsService == null || interpreters == null || audioSource == null || audioSink == null
                 || b == null) {
             throw new IllegalStateException("Cannot execute a simple dialog as services are missing.");
-        } else if (!checkLocales(sttService.getSupportedLocales(), loc)
-                || !checkLocales(interpreter.getSupportedLocales(), loc)) {
+        } else if (!checkLocales(sttService.getSupportedLocales(), loc) || !interpreters.stream()
+                .allMatch(interpreter -> checkLocales(interpreter.getSupportedLocales(), loc))) {
             throw new IllegalStateException(
                     "Cannot execute a simple dialog as provided locale is not supported by all services.");
         } else {
@@ -580,7 +610,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             if (processor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
-                processor = new DialogProcessor(sttService, ttsService, interpreter, audioSource, audioSink, loc, item,
+                processor = new DialogProcessor(sttService, ttsService, interpreters, audioSource, audioSink, loc, item,
                         this.eventPublisher, this.i18nProvider, b);
                 processor.start();
             } else {
@@ -739,6 +769,23 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     @Override
     public @Nullable HumanLanguageInterpreter getHLI(String id) {
         return humanLanguageInterpreters.get(id);
+    }
+
+    @Override
+    public @Nullable Collection<HumanLanguageInterpreter> getHLIsByIds(String idList) {
+        List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
+        for (var id : idList.split(",")) {
+            var hli = humanLanguageInterpreters.get(id);
+            if (hli == null) {
+                logger.warn("HumanLanguageInterpreter '{}' not available!", id);
+            } else {
+                interpreters.add(hli);
+            }
+        }
+        if (interpreters.isEmpty()) {
+            return null;
+        }
+        return interpreters;
     }
 
     @Override

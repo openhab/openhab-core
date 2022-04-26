@@ -106,11 +106,11 @@ public interface VoiceManager {
      * Interprets the passed string using a particular HLI service and the default locale.
      *
      * @param text The text to interpret
-     * @param hliId The id of the HLI service to use or null
+     * @param hliIdList Comma separated list of HLI service ids to use or null
      * @throws InterpretationException
      * @return a human language response
      */
-    String interpret(String text, @Nullable String hliId) throws InterpretationException;
+    String interpret(String text, @Nullable String hliIdList) throws InterpretationException;
 
     /**
      * Determines the preferred voice for the currently set locale
@@ -144,17 +144,17 @@ public interface VoiceManager {
      * @param ks the keyword spotting service to use or null to use the default service
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
-     * @param hli the human language text interpreter to use or null to use the default service
+     * @param hlis collection of human language text interpreters to use or null to use the default service
      * @param source the audio source to use or null to use the default source
      * @param sink the audio sink to use or null to use the default sink
-     * @param Locale the locale to use or null to use the default locale
+     * @param locale the locale to use or null to use the default locale
      * @param keyword the keyword to use during keyword spotting or null to use the default keyword
      * @param listeningItem the item to switch ON while listening to a question
      * @throws IllegalStateException if required services are not all available or the provided locale is not supported
      *             by all these services or a dialog is already started for this audio source
      */
     void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable Collection<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
             throws IllegalStateException;
 
@@ -187,7 +187,7 @@ public interface VoiceManager {
      *
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
-     * @param hli the human language text interpreter to use or null to use the default service
+     * @param hlis collection of human language text interpreters to use or null to use the default service
      * @param source the audio source to use or null to use the default source
      * @param sink the audio sink to use or null to use the default sink
      * @param locale the locale to use or null to use the default locale
@@ -195,9 +195,9 @@ public interface VoiceManager {
      * @throws IllegalStateException if required services are not all available or the provided locale is not supported
      *             by all these services or a dialog is already started for this audio source
      */
-    void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, @Nullable HumanLanguageInterpreter hli,
-            @Nullable AudioSource source, @Nullable AudioSink sink, @Nullable Locale locale,
-            @Nullable String listeningItem) throws IllegalStateException;
+    void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts,
+            @Nullable Collection<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException;
 
     /**
      * Retrieves a TTS service.
@@ -279,6 +279,18 @@ public interface VoiceManager {
      * @return a collection of KS services
      */
     Collection<KSService> getKSs();
+
+    /**
+     * Retrieves a HumanLanguageInterpreter collection.
+     * If no services are available returns null.
+     * 
+     * @param idList Comma separated list of HLI service ids to use or null
+     * @return a Collection<HumanLanguageInterpreter> or null, if no services are available or if some defaults are
+     *         configured, but no
+     *         according services are found
+     */
+    @Nullable
+    Collection<HumanLanguageInterpreter> getHLIsByIds(String idList);
 
     /**
      * Retrieves a HumanLanguageInterpreter.

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.voice.internal;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -55,6 +56,8 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -86,6 +89,7 @@ public class VoiceResource implements RESTResource {
     /** The URI path to this resource */
     public static final String PATH_VOICE = "voice";
 
+    private final Logger logger = LoggerFactory.getLogger(VoiceResource.class);
     private final LocaleService localeService;
     private final AudioManager audioManager;
     private final VoiceManager voiceManager;
@@ -133,7 +137,7 @@ public class VoiceResource implements RESTResource {
     }
 
     @POST
-    @Path("/interpreters/{id: [a-zA-Z_0-9]+}")
+    @Path("/interpreters/{ids: [a-zA-Z_0-9,]+}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Operation(operationId = "interpretText", summary = "Sends a text to a given human language interpreter.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -142,19 +146,34 @@ public class VoiceResource implements RESTResource {
     public Response interpret(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @Parameter(description = "text to interpret", required = true) String text,
-            @PathParam("id") @Parameter(description = "interpreter id") String id) {
+            @PathParam("ids") @Parameter(description = "comma separated list of interpreter ids") String ids) {
         final Locale locale = localeService.getLocale(language);
-        HumanLanguageInterpreter hli = voiceManager.getHLI(id);
-        if (hli == null) {
+        Collection<HumanLanguageInterpreter> hlis = voiceManager.getHLIsByIds(ids);
+        if (hlis == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
         }
-
-        try {
-            hli.interpret(locale, text);
-            return Response.ok(null, MediaType.TEXT_PLAIN).build();
-        } catch (InterpretationException e) {
-            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
+        String answer = null;
+        String error = null;
+        for (var interpreter : hlis) {
+            try {
+                answer = interpreter.interpret(locale, text);
+                logger.debug("Interpretation result: {}", answer);
+                error = null;
+                break;
+            } catch (InterpretationException e) {
+                logger.debug("Interpretation exception: {}", e.getMessage());
+                var msg = e.getMessage();
+                if (msg != null) {
+                    error = msg;
+                }
+            }
         }
+        if (answer != null) {
+            return Response.ok(answer, MediaType.TEXT_PLAIN).build();
+        } else if (error != null) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, error);
+        }
+        return Response.ok("", MediaType.TEXT_PLAIN).build();
     }
 
     @POST
@@ -232,7 +251,7 @@ public class VoiceResource implements RESTResource {
             @QueryParam("ksId") @Parameter(description = "keywork spotter ID") @Nullable String ksId,
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
             @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
-            @QueryParam("hliId") @Parameter(description = "interpreter ID") @Nullable String hliId,
+            @QueryParam("hliIds") @Parameter(description = "comma separated list of interpreter IDs") @Nullable String hliIds,
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("keyword") @Parameter(description = "keyword") @Nullable String keyword,
             @QueryParam("listeningItem") @Parameter(description = "listening item") @Nullable String listeningItem) {
@@ -264,10 +283,10 @@ public class VoiceResource implements RESTResource {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Text-to-Speech not found");
             }
         }
-        HumanLanguageInterpreter hli = null;
-        if (hliId != null) {
-            hli = voiceManager.getHLI(hliId);
-            if (hli == null) {
+        Collection<HumanLanguageInterpreter> interpreters = null;
+        if (hliIds != null) {
+            interpreters = voiceManager.getHLIsByIds(hliIds);
+            if (interpreters == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
             }
         }
@@ -281,7 +300,7 @@ public class VoiceResource implements RESTResource {
         final Locale locale = localeService.getLocale(language);
 
         try {
-            voiceManager.startDialog(ks, stt, tts, hli, source, sink, locale, keyword, listeningItem);
+            voiceManager.startDialog(ks, stt, tts, interpreters, source, sink, locale, keyword, listeningItem);
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
@@ -325,7 +344,7 @@ public class VoiceResource implements RESTResource {
             @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId,
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
             @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
-            @QueryParam("hliId") @Parameter(description = "interpreter ID") @Nullable String hliId,
+            @QueryParam("hliIds") @Parameter(description = "interpreter ID") @Nullable String hliIds,
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("listeningItem") @Parameter(description = "listening item") @Nullable String listeningItem) {
         AudioSource source = null;
@@ -349,10 +368,10 @@ public class VoiceResource implements RESTResource {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Text-to-Speech not found");
             }
         }
-        HumanLanguageInterpreter hli = null;
-        if (hliId != null) {
-            hli = voiceManager.getHLI(hliId);
-            if (hli == null) {
+        Collection<HumanLanguageInterpreter> interpreters = null;
+        if (hliIds != null) {
+            interpreters = voiceManager.getHLIsByIds(hliIds);
+            if (interpreters == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
             }
         }
@@ -366,7 +385,7 @@ public class VoiceResource implements RESTResource {
         final Locale locale = localeService.getLocale(language);
 
         try {
-            voiceManager.listenAndAnswer(stt, tts, hli, source, sink, locale, listeningItem);
+            voiceManager.listenAndAnswer(stt, tts, interpreters, source, sink, locale, listeningItem);
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());

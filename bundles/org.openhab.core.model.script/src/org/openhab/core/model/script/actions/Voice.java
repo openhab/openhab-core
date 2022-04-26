@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.script.actions;
 
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -157,14 +158,14 @@ public class Voice {
      * In case of interpretation error, the error message is played using the default audio sink.
      *
      * @param text The text to interpret
-     * @param interpreter The Human Language Interpreter to be used
+     * @param interpreters Comma separated list of human language text interpreters to use
      */
     @ActionDoc(text = "interprets a given text by a given human language interpreter", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
-            @ParamDoc(name = "interpreter") @Nullable String interpreter) {
+            @ParamDoc(name = "interpreters") @Nullable String interpreters) {
         String response;
         try {
-            response = VoiceActionService.voiceManager.interpret(text.toString(), interpreter);
+            response = VoiceActionService.voiceManager.interpret(text.toString(), interpreters);
         } catch (InterpretationException e) {
             String message = Objects.requireNonNullElse(e.getMessage(), "");
             say(message);
@@ -180,15 +181,15 @@ public class Voice {
      * If sink parameter is null, the error message is simply not played.
      *
      * @param text The text to interpret
-     * @param interpreter The Human Language Interpreter to be used
+     * @param interpreters Comma separated list of human language text interpreters to use
      * @param sink The name of audio sink to be used to play the error message
      */
     @ActionDoc(text = "interprets a given text by a given human language interpreter", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
-            @ParamDoc(name = "interpreter") String interpreter, @ParamDoc(name = "sink") @Nullable String sink) {
+            @ParamDoc(name = "interpreters") String interpreters, @ParamDoc(name = "sink") @Nullable String sink) {
         String response;
         try {
-            response = VoiceActionService.voiceManager.interpret(text.toString(), interpreter);
+            response = VoiceActionService.voiceManager.interpret(text.toString(), interpreters);
         } catch (InterpretationException e) {
             String message = Objects.requireNonNullElse(e.getMessage(), "");
             if (sink != null) {
@@ -218,10 +219,10 @@ public class Voice {
      * @param ks the keyword spotting service to use or null to use the default service
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
-     * @param interpreter the human language text interpreter to use or null to use the default service
+     * @param interpreters comma separated list of human language text interpreters to use or null to use the default service
      * @param source the name of audio source to use or null to use the default source
      * @param sink the name of audio sink to use or null to use the default sink
-     * @param Locale the locale to use or null to use the default locale
+     * @param locale the locale to use or null to use the default locale
      * @param keyword the keyword to use during keyword spotting or null to use the default keyword
      * @param listeningItem the item to switch ON while listening to a question
      */
@@ -229,7 +230,7 @@ public class Voice {
     public static void startDialog(@ParamDoc(name = "keyword spotting service") @Nullable String ks,
             @ParamDoc(name = "speech-to-text service") @Nullable String stt,
             @ParamDoc(name = "text-to-speech service") @Nullable String tts,
-            @ParamDoc(name = "interpreter") @Nullable String interpreter,
+            @ParamDoc(name = "interpreters") @Nullable String interpreters,
             @ParamDoc(name = "source") @Nullable String source, @ParamDoc(name = "sink") @Nullable String sink,
             @ParamDoc(name = "locale") @Nullable String locale, @ParamDoc(name = "keyword") @Nullable String keyword,
             @ParamDoc(name = "listening item") @Nullable String listeningItem) {
@@ -265,11 +266,11 @@ public class Voice {
                 return;
             }
         }
-        HumanLanguageInterpreter hliService = null;
-        if (interpreter != null) {
-            hliService = VoiceActionService.voiceManager.getHLI(interpreter);
-            if (hliService == null) {
-                logger.warn("Failed starting dialog processing: interpreter '{}' not found", interpreter);
+        Collection<HumanLanguageInterpreter> hliServices = null;
+        if (interpreters != null) {
+            hliServices = VoiceActionService.voiceManager.getHLIsByIds(interpreters);
+            if (hliServices == null) {
+                logger.warn("Failed starting dialog processing: interpreters '{}' not found", interpreters);
                 return;
             }
         }
@@ -292,7 +293,7 @@ public class Voice {
         }
 
         try {
-            VoiceActionService.voiceManager.startDialog(ksService, sttService, ttsService, hliService, audioSource,
+            VoiceActionService.voiceManager.startDialog(ksService, sttService, ttsService, hliServices, audioSource,
                     audioSink, loc, keyword, listeningItem);
         } catch (IllegalStateException e) {
             logger.warn("Failed starting dialog processing: {}", e.getMessage());
@@ -339,16 +340,16 @@ public class Voice {
      *
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
-     * @param interpreter the human language text interpreter to use or null to use the default service
+     * @param interpreters  comma separated list of human language text interpreters to use or null to use the default service
      * @param source the name of audio source to use or null to use the default source
      * @param sink the name of audio sink to use or null to use the default sink
-     * @param Locale the locale to use or null to use the default locale
+     * @param locale the locale to use or null to use the default locale
      * @param listeningItem the item to switch ON while listening to a question
      */
     @ActionDoc(text = "executes a simple dialog sequence without keyword spotting for a given audio source")
     public static void listenAndAnswer(@ParamDoc(name = "speech-to-text service") @Nullable String stt,
             @ParamDoc(name = "text-to-speech service") @Nullable String tts,
-            @ParamDoc(name = "interpreter") @Nullable String interpreter,
+            @ParamDoc(name = "interpreters") @Nullable String interpreters,
             @ParamDoc(name = "source") @Nullable String source, @ParamDoc(name = "sink") @Nullable String sink,
             @ParamDoc(name = "locale") @Nullable String locale,
             @ParamDoc(name = "listening item") @Nullable String listeningItem) {
@@ -376,11 +377,11 @@ public class Voice {
                 return;
             }
         }
-        HumanLanguageInterpreter hliService = null;
-        if (interpreter != null) {
-            hliService = VoiceActionService.voiceManager.getHLI(interpreter);
-            if (hliService == null) {
-                logger.warn("Failed executing simple dialog: interpreter '{}' not found", interpreter);
+        Collection<HumanLanguageInterpreter> hliServices = null;
+        if (interpreters != null) {
+            hliServices = VoiceActionService.voiceManager.getHLIsByIds(interpreters);
+            if (hliServices == null) {
+                logger.warn("Failed executing simple dialog: interpreters '{}' not found", interpreters);
                 return;
             }
         }
@@ -403,7 +404,7 @@ public class Voice {
         }
 
         try {
-            VoiceActionService.voiceManager.listenAndAnswer(sttService, ttsService, hliService, audioSource, audioSink,
+            VoiceActionService.voiceManager.listenAndAnswer(sttService, ttsService, hliServices, audioSource, audioSink,
                     loc, listeningItem);
         } catch (IllegalStateException e) {
             logger.warn("Failed executing simple dialog: {}", e.getMessage());
