@@ -146,7 +146,6 @@ public class JavaSoundAudioSource implements AudioSource {
             this.pipeWriteTask = executor.submit(() -> {
                 int lengthRead;
                 byte[] buffer = new byte[1024];
-                int readRetries = 3;
                 while (!openStreamRefs.isEmpty()) {
                     TargetDataLine stream = this.microphone;
                     if (stream != null) {
@@ -188,6 +187,7 @@ public class JavaSoundAudioSource implements AudioSource {
             } catch (InterruptedException ignored) {
             }
             if (openStreamRefs.isEmpty()) {
+                Future<?> pipeWriteTask = this.pipeWriteTask;
                 if (pipeWriteTask != null) {
                     pipeWriteTask.cancel(true);
                     this.pipeWriteTask = null;
