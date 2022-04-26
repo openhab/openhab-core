@@ -15,6 +15,7 @@ package org.openhab.core.model.rule.runtime;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
@@ -28,6 +29,8 @@ import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.internal.module.handler.ChannelEventTriggerHandler;
@@ -47,13 +50,16 @@ import org.openhab.core.model.rule.runtime.internal.DSLRuleProvider;
 import org.openhab.core.model.script.runtime.internal.engine.DSLScriptEngine;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.test.java.JavaOSGiTest;
+import org.osgi.framework.BundleContext;
 
 /**
  *
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
+@ExtendWith(MockitoExtension.class)
 public class DSLRuleProviderTest extends JavaOSGiTest {
 
     private static final String TESTMODEL_NAME = "dslruletest.rules";
@@ -61,6 +67,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ModelRepository modelRepository;
     private @NonNullByDefault({}) DSLRuleProvider dslRuleProvider;
     private @NonNullByDefault({}) ReadyService readyService;
+    private @NonNullByDefault({}) StartLevelService startLevelService;
 
     @BeforeEach
     public void setup() {
@@ -71,6 +78,19 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         registerService(eventPublisher);
 
+        readyService = getService(ReadyService.class);
+        assertThat(readyService, is(notNullValue()));
+
+        startLevelService = new StartLevelService(mock(BundleContext.class), readyService, eventPublisher) {
+
+            @Override
+            public int getStartLevel() {
+                return StartLevelService.STARTLEVEL_COMPLETE;
+            }
+        };
+
+        registerService(startLevelService, StartLevelService.class.getName());
+
         dslRuleProvider = getService(RuleProvider.class, DSLRuleProvider.class);
         assertNotNull(dslRuleProvider);
 
@@ -78,8 +98,6 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(modelRepository, is(notNullValue()));
         modelRepository.removeModel(TESTMODEL_NAME);
 
-        readyService = getService(ReadyService.class);
-        assertThat(readyService, is(notNullValue()));
         readyService.markReady(new ReadyMarker("rules", RulesRefresher.RULES_REFRESH));
     }
 

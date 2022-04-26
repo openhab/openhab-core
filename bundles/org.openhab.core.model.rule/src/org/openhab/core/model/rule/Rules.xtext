@@ -9,7 +9,8 @@ generate rules "https://openhab.org/model/Rules"
 RuleModel:
 	importSection = XImportSection?
 	(variables+=VariableDeclaration)*
-	(rules += Rule)*;
+	(rules += Rule)*
+;
 	
 //Import:
 //	'import' importedNamespace=QualifiedNameWithWildcard
@@ -21,7 +22,7 @@ VariableDeclaration:
 
 Rule:
 	'rule' name=(STRING|ID)
-	'when' eventtrigger+=EventTrigger ('or' eventtrigger+=EventTrigger)*
+	('when' eventtrigger+=EventTrigger ('or' eventtrigger+=EventTrigger)*)?
 	'then' script=Script
 	'end'
 ;

@@ -94,7 +94,7 @@ public class SitemapProviderImpl implements SitemapProvider, ModelRepositoryChan
         if (modelName.endsWith(SITEMAP_FILEEXT)) {
             if (type == EventType.REMOVED) {
                 sitemapModelCache.remove(modelName);
-            } else {
+            } else if (type == EventType.ADDED || type == EventType.MODIFIED){
                 EObject sitemap = modelRepo.getModel(modelName);
                 // if the sitemap file is empty it will not be in the repo and thus there is no need to cache it here
                 if (sitemap instanceof Sitemap) {

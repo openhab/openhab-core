@@ -18,9 +18,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -32,6 +34,8 @@ import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.Trigger;
+import org.openhab.core.automation.module.script.ScriptEngineContainer;
+import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.automation.util.ActionBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.automation.util.TriggerBuilder;
@@ -62,12 +66,15 @@ import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.ReadyService.ReadyTracker;
+import org.openhab.core.service.StartLevelService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.script.ScriptException;
 
 /**
  * This RuleProvider provides rules that are defined in DSL rule files.
@@ -77,33 +84,45 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = { DSLRuleProvider.class, RuleProvider.class, DSLScriptContextProvider.class })
+@Component(immediate = true, service = { DSLRuleProvider.class, RuleProvider.class,
+        DSLScriptContextProvider.class })
 public class DSLRuleProvider
         implements RuleProvider, ModelRepositoryChangeListener, DSLScriptContextProvider, ReadyTracker {
 
+    public static final String SCRIPT_LOADED_RULE_NAME = "scriptLoaded";
+    public static final String SCRIPT_UNLOADED_RULE_NAME = "scriptUnloaded";
     static final String MIMETYPE_OPENHAB_DSL_RULE = "application/vnd.openhab.dsl.rule";
 
     private final Logger logger = LoggerFactory.getLogger(DSLRuleProvider.class);
     private final Collection<ProviderChangeListener<Rule>> listeners = new ArrayList<>();
     private final Map<String, Rule> rules = new ConcurrentHashMap<>();
+
+    private final Map<String, String> loadScripts = new ConcurrentHashMap<>();
+    private final Map<String, String> unloadScripts = new ConcurrentHashMap<>();
     private final Map<String, IEvaluationContext> contexts = new ConcurrentHashMap<>();
     private final Map<String, XExpression> xExpressions = new ConcurrentHashMap<>();
-    private final ReadyMarker marker = new ReadyMarker("rules", "dslprovider");
+    private static final ReadyMarker PROVIDER_READY_MARKER = new ReadyMarker("rules", "dslprovider");
+    private static final ReadyMarker REFRESH_READY_MARKER = new ReadyMarker(RulesRefresher.RULES_REFRESH_MARKER_TYPE, RulesRefresher.RULES_REFRESH);
+   private static final ReadyMarker SHUTDOWN_READY_MARKER = new ReadyMarker("openhab.xmlConfig", "org.eclipse.osgi");
+    private final ScriptEngineManager scriptEngineManager;
+    private final StartLevelService startLevelService;
     private int triggerId = 0;
 
     private final ModelRepository modelRepository;
     private final ReadyService readyService;
 
     @Activate
-    public DSLRuleProvider(@Reference ModelRepository modelRepository, @Reference ReadyService readyService) {
+    public DSLRuleProvider(@Reference ModelRepository modelRepository, @Reference ReadyService readyService,
+            @Reference ScriptEngineManager scriptEngineManager, @Reference StartLevelService startLevelService) {
         this.modelRepository = modelRepository;
         this.readyService = readyService;
+        this.scriptEngineManager = scriptEngineManager;
+        this.startLevelService = startLevelService;
     }
 
     @Activate
     protected void activate() {
-        readyService.registerTracker(this, new ReadyMarkerFilter().withType(RulesRefresher.RULES_REFRESH_MARKER_TYPE)
-                .withIdentifier(RulesRefresher.RULES_REFRESH));
+        readyService.registerTracker(this);
     }
 
     @Deactivate
@@ -137,38 +156,73 @@ public class DSLRuleProvider
             switch (type) {
                 case ADDED:
                     EObject model = modelRepository.getModel(modelFileName);
-                    if (model instanceof RuleModel) {
-                        RuleModel ruleModel = (RuleModel) model;
-                        int index = 1;
-                        for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                            addRule(toRule(ruleModelName, rule, index));
-                            xExpressions.put(ruleModelName + "-" + index, rule.getScript());
-                            index++;
-                        }
-                        handleVarDeclarations(ruleModelName, ruleModel);
-                    }
+                    addRulesFromModel(ruleModelName, model);
                     break;
                 case MODIFIED:
                     removeRuleModel(ruleModelName);
                     EObject modifiedModel = modelRepository.getModel(modelFileName);
-                    if (modifiedModel instanceof RuleModel) {
-                        RuleModel ruleModel = (RuleModel) modifiedModel;
-                        int index = 1;
-                        for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                            Rule newRule = toRule(ruleModelName, rule, index);
-                            Rule oldRule = rules.get(ruleModelName);
-                            updateRule(oldRule, newRule);
-                            xExpressions.put(ruleModelName + "-" + index, rule.getScript());
-                            index++;
-                        }
-                        handleVarDeclarations(ruleModelName, ruleModel);
-                    }
+                    addRulesFromModel(ruleModelName, modifiedModel);
+                    break;
+                case REMOVING:
+                    String unloadScript = unloadScripts.remove(ruleModelName);
+                    executeGlobalScript(unloadScript, ruleModelName, SCRIPT_UNLOADED_RULE_NAME);
                     break;
                 case REMOVED:
                     removeRuleModel(ruleModelName);
                     break;
                 default:
                     logger.debug("Unknown event type.");
+            }
+        }
+    }
+
+    private void addRulesFromModel(String ruleModelName, @Nullable EObject model) {
+        if (model instanceof RuleModel) {
+            RuleModel ruleModel = (RuleModel) model;
+            int index = 1;
+            String scriptLoadedScript = null;
+            for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
+                if (SCRIPT_LOADED_RULE_NAME.equals(rule.getName())) {
+                    scriptLoadedScript = createGlobalScript(rule.getScript(), ruleModelName,
+                            SCRIPT_LOADED_RULE_NAME);
+                } else if (SCRIPT_UNLOADED_RULE_NAME.equals(rule.getName())) {
+                    unloadScripts.put(ruleModelName,
+                            createGlobalScript(rule.getScript(), ruleModelName, SCRIPT_UNLOADED_RULE_NAME));
+                } else {
+                    addRule(toRule(ruleModelName, rule, index));
+                    xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                    index++;
+                }
+            }
+            handleVarDeclarations(ruleModelName, ruleModel);
+            if (startLevelService.getStartLevel() >= StartLevelService.STARTLEVEL_RULES) {
+                executeGlobalScript(scriptLoadedScript, ruleModelName, SCRIPT_LOADED_RULE_NAME);
+            } else if (scriptLoadedScript != null) {
+                loadScripts.put(ruleModelName, scriptLoadedScript);
+            }
+        }
+    }
+
+    private String createGlobalScript(XBlockExpression script, String ruleModelName, String name) {
+        String context = DSLScriptContextProvider.CONTEXT_IDENTIFIER + ruleModelName + "-" + name + "\n";
+        String scriptString = NodeModelUtils.findActualNodeFor(script).getText();
+        xExpressions.put(ruleModelName + "-" + name, script);
+        return removeIndentation(context + scriptString);
+    }
+
+    private void executeGlobalScript(@Nullable String script, String ruleModelName, String name) {
+        if (script != null) {
+            ScriptEngineContainer container = scriptEngineManager.createScriptEngine(MIMETYPE_OPENHAB_DSL_RULE,
+                    UUID.randomUUID().toString());
+            if (container != null) {
+                try {
+                    container.getScriptEngine().eval(script);
+                } catch (ScriptException e) {
+                    logger.warn("Could not execute '{}' for model '{}'", name, ruleModelName, e);
+                }
+            } else {
+                logger.warn("Could not create script engine when trying to execute '{}' for model '{}'", name,
+                        ruleModelName);
             }
         }
     }
@@ -188,44 +242,23 @@ public class DSLRuleProvider
         contexts.put(modelName, context);
     }
 
-    private void addRule(Rule rule) {
-        rules.put(rule.getUID(), rule);
-
-        for (ProviderChangeListener<Rule> providerChangeListener : listeners) {
-            providerChangeListener.added(this, rule);
-        }
-    }
-
-    private void updateRule(@Nullable Rule oldRule, Rule newRule) {
-        if (oldRule != null) {
-            rules.remove(oldRule.getUID());
-            for (ProviderChangeListener<Rule> providerChangeListener : listeners) {
-                providerChangeListener.updated(this, oldRule, newRule);
-            }
-        } else {
+    private void addRule(Rule newRule) {
+            rules.put(newRule.getUID(), newRule);
             for (ProviderChangeListener<Rule> providerChangeListener : listeners) {
                 providerChangeListener.added(this, newRule);
             }
         }
-        rules.put(newRule.getUID(), newRule);
-    }
 
     private void removeRuleModel(String modelName) {
         Iterator<Entry<String, Rule>> it = rules.entrySet().iterator();
         while (it.hasNext()) {
             Entry<String, Rule> entry = it.next();
             if (belongsToModel(entry.getKey(), modelName)) {
-                removeRule(entry.getValue());
+                listeners.forEach(listener -> listener.removed(this, entry.getValue()));
                 it.remove();
             }
         }
-        Iterator<Entry<String, XExpression>> it2 = xExpressions.entrySet().iterator();
-        while (it2.hasNext()) {
-            Entry<String, XExpression> entry = it2.next();
-            if (belongsToModel(entry.getKey(), modelName)) {
-                it2.remove();
-            }
-        }
+        xExpressions.entrySet().removeIf(entry -> belongsToModel(entry.getKey(), modelName));
         contexts.remove(modelName);
     }
 
@@ -238,12 +271,6 @@ public class DSLRuleProvider
         return false;
     }
 
-    private void removeRule(Rule rule) {
-        for (ProviderChangeListener<Rule> providerChangeListener : listeners) {
-            providerChangeListener.removed(this, rule);
-        }
-    }
-
     private Rule toRule(String modelName, org.openhab.core.model.rule.rules.Rule rule, int index) {
         String name = rule.getName();
         String uid = modelName + "-" + index;
@@ -251,10 +278,15 @@ public class DSLRuleProvider
         // Create Triggers
         triggerId = 0;
         List<Trigger> triggers = new ArrayList<>();
-        for (EventTrigger t : rule.getEventtrigger()) {
-            Trigger trigger = mapTrigger(t);
-            if (trigger != null) {
-                triggers.add(trigger);
+        EList<EventTrigger> triggerList = rule.getEventtrigger();
+        if   (triggerList.isEmpty()) {
+            logger.warn("Rule '{}' in model '{}' has no triggers!", name, modelName);
+        } else {
+            for (EventTrigger t : triggerList) {
+                Trigger trigger = mapTrigger(t);
+                if (trigger != null) {
+                    triggers.add(trigger);
+                }
             }
         }
 
@@ -265,8 +297,9 @@ public class DSLRuleProvider
         Configuration cfg = new Configuration();
         cfg.put("script", context + removeIndentation(script));
         cfg.put("type", MIMETYPE_OPENHAB_DSL_RULE);
-        List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID("script.ScriptAction")
-                .withConfiguration(cfg).build());
+        List<Action> actions = List.of(
+                ActionBuilder.create().withId("script").withTypeUID("script.ScriptAction").withConfiguration(cfg)
+                        .build());
 
         return RuleBuilder.create(uid).withName(name).withTriggers(triggers).withActions(actions).build();
     }
@@ -285,9 +318,8 @@ public class DSLRuleProvider
         }
         String firstLine = s.lines().findFirst().orElse("");
         String indentation = firstLine.substring(0, firstLine.length() - firstLine.stripLeading().length());
-        return s.lines().map(line -> {
-            return line.startsWith(indentation) ? line.substring(indentation.length()) : line;
-        }).collect(Collectors.joining("\n"));
+        return s.lines().map(line -> line.startsWith(indentation) ? line.substring(indentation.length()) : line)
+                .collect(Collectors.joining("\n"));
     }
 
     private @Nullable Trigger mapTrigger(EventTrigger t) {
@@ -371,7 +403,7 @@ public class DSLRuleProvider
             String id;
             if (tt.getCron() != null) {
                 id = tt.getCron();
-                cfg.put("cronExpression", tt.getCron());
+                cfg.put("cronExpression", id);
             } else {
                 id = tt.getTime();
                 if (id.equals("noon")) {
@@ -424,26 +456,34 @@ public class DSLRuleProvider
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-        for (String ruleFileName : modelRepository.getAllModelNamesOfType("rules")) {
-            EObject model = modelRepository.getModel(ruleFileName);
-            String ruleModelName = ruleFileName.substring(0, ruleFileName.indexOf("."));
-            if (model instanceof RuleModel) {
-                RuleModel ruleModel = (RuleModel) model;
-                int index = 1;
-                for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                    addRule(toRule(ruleModelName, rule, index));
-                    xExpressions.put(ruleModelName + "-" + index, rule.getScript());
-                    index++;
-                }
-                handleVarDeclarations(ruleModelName, ruleModel);
+        if (REFRESH_READY_MARKER.equals(readyMarker)) {
+            for (String ruleFileName : modelRepository.getAllModelNamesOfType("rules")) {
+                EObject model = modelRepository.getModel(ruleFileName);
+                String ruleModelName = ruleFileName.substring(0, ruleFileName.indexOf("."));
+                String unloadScript = unloadScripts.remove(ruleModelName);
+                executeGlobalScript(unloadScript, ruleModelName, SCRIPT_UNLOADED_RULE_NAME);
+                removeRuleModel(ruleModelName);
+                addRulesFromModel(ruleModelName, model);
+            }
+            modelRepository.addModelRepositoryChangeListener(this);
+            readyService.markReady(PROVIDER_READY_MARKER);
+        } else if (StartLevelService.STARTLEVEL_MARKER_TYPE.equals(readyMarker.getType()) && startLevelService.getStartLevel() == 40) {
+            for (String ruleModelName : loadScripts.keySet()) {
+                String loadScript = loadScripts.remove(ruleModelName);
+                executeGlobalScript(loadScript, ruleModelName, SCRIPT_LOADED_RULE_NAME);
             }
         }
-        modelRepository.addModelRepositoryChangeListener(this);
-        readyService.markReady(marker);
     }
 
     @Override
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
-        readyService.unmarkReady(marker);
+        if (SHUTDOWN_READY_MARKER.equals(readyMarker)) {
+            for (String ruleModelName : unloadScripts.keySet()) {
+                String unloadScript = unloadScripts.remove(ruleModelName);
+                executeGlobalScript(unloadScript, ruleModelName, SCRIPT_UNLOADED_RULE_NAME);
+            }
+            } else if (REFRESH_READY_MARKER.equals(readyMarker)) {
+            readyService.unmarkReady(PROVIDER_READY_MARKER);
+        }
     }
 }

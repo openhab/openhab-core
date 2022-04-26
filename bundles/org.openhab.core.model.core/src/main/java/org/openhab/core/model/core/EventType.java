@@ -23,5 +23,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public enum EventType {
     ADDED,
     REMOVED,
-    MODIFIED
+    MODIFIED,
+    REMOVING
 }

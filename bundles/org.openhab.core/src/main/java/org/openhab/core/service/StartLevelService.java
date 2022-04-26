@@ -73,6 +73,7 @@ public class StartLevelService {
 
     public static final String STARTLEVEL_MARKER_TYPE = "startlevel";
 
+    public static final int STARTLEVEL_SHUTDOWN = 0;
     public static final int STARTLEVEL_OSGI = 10;
     public static final int STARTLEVEL_MODEL = 20;
     public static final int STARTLEVEL_STATES = 30;
@@ -115,7 +116,7 @@ public class StartLevelService {
         job = scheduler.scheduleWithFixedDelay(() -> {
             handleOSGiStartlevel();
 
-            if (openHABStartLevel >= 10) {
+            if (openHABStartLevel >= STARTLEVEL_OSGI) {
                 for (Integer level : new TreeSet<>(startlevels.keySet())) {
                     if (openHABStartLevel >= level) {
                         continue;
@@ -128,8 +129,8 @@ public class StartLevelService {
                         }
                     }
                 }
-                if (openHABStartLevel < 100) {
-                    setStartLevel(100);
+                if (openHABStartLevel < STARTLEVEL_COMPLETE) {
+                    setStartLevel(STARTLEVEL_COMPLETE);
                 }
             }
         }, 0, 5, TimeUnit.SECONDS);
@@ -160,10 +161,10 @@ public class StartLevelService {
         FrameworkStartLevel sl = this.bundleContext.getBundle(0).adapt(FrameworkStartLevel.class);
         int defaultStartLevel = sl.getInitialBundleStartLevel();
         int startLevel = sl.getStartLevel();
-        if (startLevel >= defaultStartLevel && openHABStartLevel < 10) {
-            setStartLevel(10);
-        } else if (startLevel < defaultStartLevel && openHABStartLevel >= 10) {
-            setStartLevel(0);
+        if (startLevel >= defaultStartLevel && openHABStartLevel < STARTLEVEL_OSGI) {
+            setStartLevel(STARTLEVEL_OSGI);
+        } else if (startLevel < defaultStartLevel && openHABStartLevel >= STARTLEVEL_OSGI) {
+            setStartLevel(STARTLEVEL_SHUTDOWN);
         }
     }
 
@@ -177,9 +178,11 @@ public class StartLevelService {
         startlevels = parseConfig(configuration);
         startlevels.keySet()
                 .forEach(sl -> slmarker.put(sl, new ReadyMarker(STARTLEVEL_MARKER_TYPE, Integer.toString(sl))));
+        slmarker.put(STARTLEVEL_SHUTDOWN,
+                new ReadyMarker(STARTLEVEL_MARKER_TYPE, Integer.toString(STARTLEVEL_SHUTDOWN)));
         slmarker.put(STARTLEVEL_COMPLETE,
                 new ReadyMarker(STARTLEVEL_MARKER_TYPE, Integer.toString(STARTLEVEL_COMPLETE)));
-        startlevels.values().stream().forEach(ms -> ms.forEach(e -> registerTracker(e)));
+        startlevels.values().forEach(ms -> ms.forEach(this::registerTracker));
     }
 
     private void registerTracker(ReadyMarker e) {
@@ -245,11 +248,11 @@ public class StartLevelService {
     }
 
     private void setStartLevel(int level) {
+        openHABStartLevel = level;
         ReadyMarker marker = slmarker.get(level);
         if (marker != null) {
             readyService.markReady(marker);
         }
-        openHABStartLevel = level;
         scheduler.submit(() -> {
             StartlevelEvent startlevelEvent = SystemEventFactory.createStartlevelEvent(level);
             eventPublisher.post(startlevelEvent);

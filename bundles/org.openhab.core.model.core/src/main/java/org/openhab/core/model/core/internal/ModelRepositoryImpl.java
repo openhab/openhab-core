@@ -134,6 +134,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                 }
             } else {
                 synchronized (resourceSet) {
+                    notifyListeners(name, EventType.REMOVING);
                     resource.unload();
                     resource.load(inputStream, resourceOptions);
                     notifyListeners(name, EventType.MODIFIED);
@@ -151,6 +152,7 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean removeModel(String name) {
+        notifyListeners(name, EventType.REMOVING);
         Resource resource = getResource(name);
         if (resource != null) {
             synchronized (resourceSet) {
