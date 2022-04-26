@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 @Component(service = AudioSource.class, immediate = true)
 public class JavaSoundAudioSource implements AudioSource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JavaSoundAudioSource.class);
+    private final Logger logger = LoggerFactory.getLogger(JavaSoundAudioSource.class);
 
     /**
      * Java Sound audio format
@@ -102,41 +102,41 @@ public class JavaSoundAudioSource implements AudioSource {
     }
 
     @Override
-    public synchronized AudioStream getInputStream(AudioFormat expectedFormat) throws AudioException {
+    public AudioStream getInputStream(AudioFormat expectedFormat) throws AudioException {
         if (!expectedFormat.isCompatible(audioFormat)) {
             throw new AudioException("Cannot produce streams in format " + expectedFormat);
         }
         // on OSs other than windows we can open multiple lines for the microphone
         if (!windowsOS) {
-            var microphone = initMicrophone(format);
-            var inputStream = new JavaSoundInputStream((InputStream) initMicrophone(format), audioFormat);
+            TargetDataLine microphone = initMicrophone(format);
+            var inputStream = new JavaSoundInputStream((InputStream) microphone, audioFormat);
             microphone.start();
             return inputStream;
         }
         // on Windows OS we share the microphone line
         synchronized (openStreamRefs) {
-            TargetDataLine microphoneDataLine = this.microphone;
-            if (microphoneDataLine == null) {
-                microphoneDataLine = initMicrophone(format);
-                this.microphone = microphoneDataLine;
+            TargetDataLine microphone = this.microphone;
+            if (microphone == null) {
+                microphone = initMicrophone(format);
+                this.microphone = microphone;
             }
-            var pipeOutput = new PipedOutputStream();
-            PipedInputStream pipeInput;
+            var pipedOutputStream = new PipedOutputStream();
+            PipedInputStream pipedInputStream;
             try {
-                pipeInput = new PipedInputStream(pipeOutput, 1024 * 10) {
+                pipedInputStream = new PipedInputStream(pipedOutputStream, 1024 * 10) {
                     @Override
                     public void close() throws IOException {
-                        unregisterPipe(pipeOutput);
+                        unregisterPipe(pipedOutputStream);
                         super.close();
                     }
                 };
             } catch (IOException ie) {
                 throw new AudioException("Cannot open stream pipe: " + ie.getMessage());
             }
-            openStreamRefs.add(pipeOutput);
+            openStreamRefs.add(pipedOutputStream);
+            var inputStream = new JavaSoundInputStream(pipedInputStream, audioFormat);
+            microphone.start();
             startPipeWrite();
-            var inputStream = new JavaSoundInputStream(pipeInput, audioFormat);
-            microphoneDataLine.start();
             return inputStream;
         }
     }
@@ -148,11 +148,11 @@ public class JavaSoundAudioSource implements AudioSource {
                 byte[] buffer = new byte[1024];
                 int readRetries = 3;
                 while (!openStreamRefs.isEmpty()) {
-                    var stream = this.microphone;
+                    TargetDataLine stream = this.microphone;
                     if (stream != null) {
                         try {
                             lengthRead = stream.read(buffer, 0, buffer.length);
-                            for (var output : openStreamRefs) {
+                            for (PipedOutputStream output : openStreamRefs) {
                                 try {
                                     output.write(buffer, 0, lengthRead);
                                     if (openStreamRefs.contains(output)) {
@@ -163,16 +163,16 @@ public class JavaSoundAudioSource implements AudioSource {
                                         // task has been ended while writing
                                         return;
                                     }
-                                    LOGGER.warn("IOException while writing to source pipe: {}", e.getMessage());
+                                    logger.warn("IOException while writing to source pipe: {}", e.getMessage());
                                 } catch (RuntimeException e) {
-                                    LOGGER.warn("RuntimeException while writing to source pipe: {}", e.getMessage());
+                                    logger.warn("RuntimeException while writing to source pipe: {}", e.getMessage());
                                 }
                             }
                         } catch (RuntimeException e) {
-                            LOGGER.warn("RuntimeException while reading from pulse source: {}", e.getMessage());
+                            logger.warn("RuntimeException while reading from JavaSound source: {}", e.getMessage());
                         }
                     } else {
-                        LOGGER.warn("Unable access to microphone stream");
+                        logger.warn("Unable access to microphone stream");
                     }
                 }
                 this.pipeWriteTask = null;
@@ -180,33 +180,27 @@ public class JavaSoundAudioSource implements AudioSource {
         }
     }
 
-    private void unregisterPipe(PipedOutputStream pipeOutput) {
+    private void unregisterPipe(PipedOutputStream pipedOutputStream) {
         synchronized (openStreamRefs) {
-            openStreamRefs.remove(pipeOutput);
+            openStreamRefs.remove(pipedOutputStream);
             try {
                 Thread.sleep(0);
             } catch (InterruptedException ignored) {
             }
-            stopPipeWriteTask();
-            try {
-                pipeOutput.close();
-            } catch (IOException ignored) {
-            }
-        }
-    }
-
-    private void stopPipeWriteTask() {
-        synchronized (openStreamRefs) {
-            var microphone = this.microphone;
             if (openStreamRefs.isEmpty()) {
                 if (pipeWriteTask != null) {
                     pipeWriteTask.cancel(true);
                     this.pipeWriteTask = null;
                 }
+                TargetDataLine microphone = this.microphone;
                 if (microphone != null) {
                     microphone.close();
                     this.microphone = null;
                 }
+            }
+            try {
+                pipedOutputStream.close();
+            } catch (IOException ignored) {
             }
         }
     }
