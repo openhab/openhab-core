@@ -13,8 +13,7 @@
 package org.openhab.core.audio.internal.javasound;
 
 import java.io.IOException;
-
-import javax.sound.sampled.TargetDataLine;
+import java.io.InputStream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -31,32 +30,19 @@ import org.openhab.core.audio.AudioStream;
 public class JavaSoundInputStream extends AudioStream {
 
     /**
-     * TargetDataLine for the input
+     * InputStream for the input
      */
-    private final TargetDataLine input;
+    private final InputStream input;
     private final AudioFormat format;
-    private final @Nullable JavaSoundInputStreamCloseHandler closeHandler;
-
-    /**
-     * Constructs a JavaSoundInputStream with the passed input
-     *
-     * @param input The mic which data is pulled from
-     */
-    public JavaSoundInputStream(TargetDataLine input, AudioFormat format) {
-        this(input, format, null);
-    }
 
     /**
      * Constructs a JavaSoundInputStream with the passed input and a close handler.
      *
      * @param input The mic which data is pulled from
      */
-    public JavaSoundInputStream(TargetDataLine input, AudioFormat format,
-            @Nullable JavaSoundInputStreamCloseHandler closeHandler) {
+    public JavaSoundInputStream(InputStream input, AudioFormat format) {
         this.format = format;
-        this.closeHandler = closeHandler;
         this.input = input;
-        this.input.start();
     }
 
     @Override
@@ -86,20 +72,11 @@ public class JavaSoundInputStream extends AudioStream {
 
     @Override
     public void close() throws IOException {
-        var closeHandler = this.closeHandler;
-        if (closeHandler != null) {
-            closeHandler.onStreamClosed();
-        } else {
-            input.close();
-        }
+        input.close();
     }
 
     @Override
     public AudioFormat getFormat() {
         return format;
-    }
-
-    public interface JavaSoundInputStreamCloseHandler {
-        void onStreamClosed();
     }
 }
