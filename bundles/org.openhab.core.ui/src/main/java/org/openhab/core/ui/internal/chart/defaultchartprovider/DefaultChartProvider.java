@@ -21,7 +21,6 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,6 +32,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.XYSeries;
+import org.knowm.xchart.style.Styler;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.XYStyler;
 import org.knowm.xchart.style.markers.None;
@@ -67,6 +67,7 @@ import org.slf4j.LoggerFactory;
  * @author Chris Jackson - Initial contribution
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  * @author Christoph Weitkamp - Consider default persistence service
+ * @author Jan N. Klug - Add y-axis label formatter
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -117,8 +118,7 @@ public class DefaultChartProvider implements ChartProvider {
         this.persistenceServiceRegistry = persistenceServiceRegistry;
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Available themes for default chart provider: {}",
-                    CHART_THEMES.keySet().stream().collect(Collectors.joining(", ")));
+            logger.debug("Available themes for default chart provider: {}", String.join(", ", CHART_THEMES.keySet()));
         }
     }
 
@@ -132,9 +132,18 @@ public class DefaultChartProvider implements ChartProvider {
             ZonedDateTime endTime, int height, int width, @Nullable String items, @Nullable String groups,
             @Nullable Integer dpiValue, @Nullable Boolean legend)
             throws ItemNotFoundException, IllegalArgumentException {
+        return createChart(serviceId, theme, startTime, endTime, height, width, items, groups, dpiValue, null, legend);
+    }
+
+    @Override
+    public BufferedImage createChart(@Nullable String serviceId, @Nullable String theme, ZonedDateTime startTime,
+            ZonedDateTime endTime, int height, int width, @Nullable String items, @Nullable String groups,
+            @Nullable Integer dpiValue, @Nullable String yAxisDecimalPattern, @Nullable Boolean legend)
+            throws ItemNotFoundException, IllegalArgumentException {
         logger.debug(
-                "Rendering chart: service: '{}', theme: '{}', startTime: '{}', endTime: '{}', width: '{}', height: '{}', items: '{}', groups: '{}', dpi: '{}', legend: '{}'",
-                serviceId, theme, startTime, endTime, width, height, items, groups, dpiValue, legend);
+                "Rendering chart: service: '{}', theme: '{}', startTime: '{}', endTime: '{}', width: '{}', height: '{}', items: '{}', groups: '{}', dpi: '{}', yAxisDecimalPattern: '{}', legend: '{}'",
+                serviceId, theme, startTime, endTime, width, height, items, groups, dpiValue, yAxisDecimalPattern,
+                legend);
 
         // If a persistence service is specified, find the provider, or use the default provider
         PersistenceService service = (serviceId == null) ? persistenceServiceRegistry.getDefault()
@@ -163,7 +172,7 @@ public class DefaultChartProvider implements ChartProvider {
 
         // Define the time axis - the defaults are not very nice
         Duration period = Duration.between(startTime, endTime);
-        String pattern = "HH:mm";
+        String pattern;
 
         if (period.compareTo(TEN_MINUTES) <= 0) {
             pattern = "mm:ss";
@@ -180,10 +189,14 @@ public class DefaultChartProvider implements ChartProvider {
         // axis
         styler.setAxisTickLabelsFont(chartTheme.getAxisTickLabelsFont(dpi));
         styler.setAxisTickLabelsColor(chartTheme.getAxisTickLabelsColor());
-        styler.setXAxisMin(Double.valueOf(startTime.toInstant().toEpochMilli()));
-        styler.setXAxisMax(Double.valueOf(endTime.toInstant().toEpochMilli()));
+        styler.setXAxisMin((double) startTime.toInstant().toEpochMilli());
+        styler.setXAxisMax((double) endTime.toInstant().toEpochMilli());
         int yAxisSpacing = Math.max(height / 10, chartTheme.getAxisTickLabelsFont(dpi).getSize());
+        if (yAxisDecimalPattern != null) {
+            styler.setYAxisDecimalPattern(yAxisDecimalPattern);
+        }
         styler.setYAxisTickMarkSpacingHint(yAxisSpacing);
+        styler.setYAxisLabelAlignment(Styler.TextAlignment.Right);
         // chart
         styler.setChartBackgroundColor(chartTheme.getChartBackgroundColor());
         styler.setChartFontColor(chartTheme.getChartFontColor());
@@ -342,12 +355,9 @@ public class DefaultChartProvider implements ChartProvider {
 
         // Get the data from the persistence store
         result = service.query(filter);
-        Iterator<HistoricItem> it = result.iterator();
 
         // Iterate through the data
-        while (it.hasNext()) {
-            HistoricItem historicItem = it.next();
-
+        for (HistoricItem historicItem : result) {
             // For 'binary' states, we need to replicate the data
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {

@@ -62,7 +62,8 @@ Chart:
     ('legend=' legend=BOOLEAN_OBJECT)? & ('forceasitem=' forceAsItem=BOOLEAN_OBJECT)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)* ']'))? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
-    ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)* ']'))?);
+    ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)* ']'))? &
+    ('yAxisDecimalPattern=' yAxisDecimalPattern=(STRING))?);
 
 Webview:
     'Webview' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? & ('icon=' icon=Icon)? &

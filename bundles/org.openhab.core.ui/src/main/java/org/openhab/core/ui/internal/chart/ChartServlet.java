@@ -300,6 +300,8 @@ public class ChartServlet extends OpenHABServlet {
             }
         }
 
+        String yAxisDecimalPattern = req.getParameter("yAxisDecimalPattern");
+
         // Read out parameter 'legend'
         String legendParam = req.getParameter("legend");
         Boolean legend = null;
@@ -318,7 +320,8 @@ public class ChartServlet extends OpenHABServlet {
         logger.debug("chart building with width {} height {} dpi {}", width, height, dpi);
         try {
             BufferedImage chart = provider.createChart(serviceName, req.getParameter("theme"), timeBegin, timeEnd,
-                    height, width, req.getParameter("items"), req.getParameter("groups"), dpi, legend);
+                    height, width, req.getParameter("items"), req.getParameter("groups"), dpi, yAxisDecimalPattern,
+                    legend);
             // Set the content type to that provided by the chart provider
             res.setContentType("image/" + provider.getChartType());
             try (ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(res.getOutputStream())) {
