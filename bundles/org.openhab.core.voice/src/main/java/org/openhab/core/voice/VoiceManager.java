@@ -288,9 +288,7 @@ public interface VoiceManager {
      * If no services are available returns null.
      * 
      * @param ids Comma separated list of HLI service ids to use
-     * @return a List<HumanLanguageInterpreter> or null, if no services are available or if some defaults are
-     *         configured, but no
-     *         according services are found
+     * @return a List<HumanLanguageInterpreter> or null, if none of the services is available
      */
     @Nullable
     List<HumanLanguageInterpreter> getHLIsByIds(String ids);
@@ -300,9 +298,7 @@ public interface VoiceManager {
      * If no services are available returns null.
      *
      * @param ids List of HLI service ids to use or null
-     * @return a List<HumanLanguageInterpreter> or null, if no services are available or if some defaults are
-     *         configured, but no
-     *         according services are found
+     * @return a List<HumanLanguageInterpreter> or null, if none of the services is available
      */
     @Nullable
     List<HumanLanguageInterpreter> getHLIsByIds(List<String> ids);
