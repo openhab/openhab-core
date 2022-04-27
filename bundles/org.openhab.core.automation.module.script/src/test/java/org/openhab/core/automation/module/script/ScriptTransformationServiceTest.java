@@ -49,7 +49,6 @@ import org.openhab.core.transform.TransformationException;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class ScriptTransformationServiceTest {
-    private static final String COMPILABLE_SCRIPT_TYPE = "compilableScript";
     private static final String SCRIPT_TYPE = "script";
     private static final String SCRIPT_UID = "scriptUid";
     private static final String SCRIPT = "script";

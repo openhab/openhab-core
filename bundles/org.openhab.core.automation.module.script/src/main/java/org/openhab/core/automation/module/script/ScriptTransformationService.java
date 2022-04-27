@@ -146,7 +146,6 @@ public class ScriptTransformationService
                     if (splitString.length != 2) {
                         logger.warn("Parameter '{}' does not consist of two parts for configuration UID {}, skipping.",
                                 param, scriptUid);
-
                     } else {
                         executionContext.setAttribute(splitString[0], splitString[1], ScriptContext.ENGINE_SCOPE);
                     }
