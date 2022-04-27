@@ -157,11 +157,14 @@ public class JavaSoundAudioSource implements AudioSource {
                                     if (openStreamRefs.contains(output)) {
                                         output.flush();
                                     }
-                                } catch (IOException e) {
-                                    if (e instanceof InterruptedIOException && openStreamRefs.isEmpty()) {
+                                } catch (InterruptedIOException e) {
+                                    if (openStreamRefs.isEmpty()) {
                                         // task has been ended while writing
                                         return;
                                     }
+                                    logger.warn("InterruptedIOException while writing to source pipe: {}",
+                                            e.getMessage());
+                                } catch (IOException e) {
                                     logger.warn("IOException while writing to source pipe: {}", e.getMessage());
                                 } catch (RuntimeException e) {
                                     logger.warn("RuntimeException while writing to source pipe: {}", e.getMessage());
