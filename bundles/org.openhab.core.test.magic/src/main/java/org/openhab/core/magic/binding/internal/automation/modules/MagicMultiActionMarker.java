@@ -25,7 +25,7 @@ import org.osgi.service.component.annotations.Component;
 @NonNullByDefault
 @Component(immediate = true, service = MagicMultiActionMarker.class, //
         property = Constants.SERVICE_PID + "=org.openhab.MagicMultiAction")
-@ConfigurableService(category = "RuleActions", label = "MagicMultiActionsService", description_uri = "automationAction:magicMultiAction", factory = true)
+@ConfigurableService(category = "RuleActions", label = "Magic Multi Actions Service", description_uri = "automationAction:magicMultiAction", factory = true)
 public class MagicMultiActionMarker {
 
 }
