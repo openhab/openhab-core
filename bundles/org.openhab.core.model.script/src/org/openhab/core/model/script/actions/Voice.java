@@ -13,6 +13,7 @@
 package org.openhab.core.model.script.actions;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -160,7 +161,7 @@ public class Voice {
      * @param text The text to interpret
      * @param interpreters Comma separated list of human language text interpreters to use
      */
-    @ActionDoc(text = "interprets a given text by a given human language interpreter", returns = "human language response")
+    @ActionDoc(text = "interprets a given text by a given human language interpreter(s)", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
             @ParamDoc(name = "interpreters") @Nullable String interpreters) {
         String response;
@@ -184,7 +185,7 @@ public class Voice {
      * @param interpreters Comma separated list of human language text interpreters to use
      * @param sink The name of audio sink to be used to play the error message
      */
-    @ActionDoc(text = "interprets a given text by a given human language interpreter", returns = "human language response")
+    @ActionDoc(text = "interprets a given text by a given human language interpreter(s)", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
             @ParamDoc(name = "interpreters") String interpreters, @ParamDoc(name = "sink") @Nullable String sink) {
         String response;
@@ -266,7 +267,7 @@ public class Voice {
                 return;
             }
         }
-        Collection<HumanLanguageInterpreter> hliServices = null;
+        List<HumanLanguageInterpreter> hliServices = null;
         if (interpreters != null) {
             hliServices = VoiceActionService.voiceManager.getHLIsByIds(interpreters);
             if (hliServices == null) {
@@ -340,7 +341,7 @@ public class Voice {
      *
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
-     * @param interpreters  comma separated list of human language text interpreters to use or null to use the default service
+     * @param interpreters comma separated list of human language text interpreters to use or null to use the default service
      * @param source the name of audio source to use or null to use the default source
      * @param sink the name of audio sink to use or null to use the default sink
      * @param locale the locale to use or null to use the default locale
@@ -377,7 +378,7 @@ public class Voice {
                 return;
             }
         }
-        Collection<HumanLanguageInterpreter> hliServices = null;
+        List<HumanLanguageInterpreter> hliServices = null;
         if (interpreters != null) {
             hliServices = VoiceActionService.voiceManager.getHLIsByIds(interpreters);
             if (hliServices == null) {

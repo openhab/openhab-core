@@ -12,9 +12,9 @@
  */
 package org.openhab.core.io.rest.voice.internal;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
@@ -139,20 +139,20 @@ public class VoiceResource implements RESTResource {
     @POST
     @Path("/interpreters/{ids: [a-zA-Z_0-9,]+}")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "interpretText", summary = "Sends a text to a given human language interpreter.", responses = {
+    @Operation(operationId = "interpretText", summary = "Sends a text to a given human language interpreter(s).", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "No human language interpreter was found."),
             @ApiResponse(responseCode = "400", description = "interpretation exception occurs") })
     public Response interpret(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @Parameter(description = "text to interpret", required = true) String text,
-            @PathParam("ids") @Parameter(description = "comma separated list of interpreter ids") String ids) {
+            @PathParam("ids") @Parameter(description = "comma separated list of interpreter ids") List<String> ids) {
         final Locale locale = localeService.getLocale(language);
-        Collection<HumanLanguageInterpreter> hlis = voiceManager.getHLIsByIds(ids);
+        List<HumanLanguageInterpreter> hlis = voiceManager.getHLIsByIds(ids);
         if (hlis == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
         }
-        String answer = null;
+        String answer = "";
         String error = null;
         for (var interpreter : hlis) {
             try {
@@ -163,17 +163,14 @@ public class VoiceResource implements RESTResource {
             } catch (InterpretationException e) {
                 logger.debug("Interpretation exception: {}", e.getMessage());
                 var msg = e.getMessage();
-                if (msg != null) {
-                    error = msg;
-                }
+                error = Objects.requireNonNullElse(msg, "Unexpected error");
             }
         }
-        if (answer != null) {
-            return Response.ok(answer, MediaType.TEXT_PLAIN).build();
-        } else if (error != null) {
+        if (error != null) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, error);
+        } else {
+            return Response.ok(answer, MediaType.TEXT_PLAIN).build();
         }
-        return Response.ok("", MediaType.TEXT_PLAIN).build();
     }
 
     @POST
@@ -251,6 +248,7 @@ public class VoiceResource implements RESTResource {
             @QueryParam("ksId") @Parameter(description = "keywork spotter ID") @Nullable String ksId,
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
             @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
+            @Deprecated @QueryParam("hliId") @Parameter(description = "interpreter ID") @Nullable String hliId,
             @QueryParam("hliIds") @Parameter(description = "comma separated list of interpreter IDs") @Nullable String hliIds,
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("keyword") @Parameter(description = "keyword") @Nullable String keyword,
@@ -283,12 +281,18 @@ public class VoiceResource implements RESTResource {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Text-to-Speech not found");
             }
         }
-        Collection<HumanLanguageInterpreter> interpreters = null;
+        List<HumanLanguageInterpreter> interpreters = null;
         if (hliIds != null) {
             interpreters = voiceManager.getHLIsByIds(hliIds);
             if (interpreters == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
             }
+        } else if (hliId != null) {
+            HumanLanguageInterpreter interpreter = voiceManager.getHLI(hliId);
+            if (interpreter == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
+            }
+            interpreters = List.of(interpreter);
         }
         AudioSink sink = null;
         if (sinkId != null) {
@@ -344,7 +348,8 @@ public class VoiceResource implements RESTResource {
             @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId,
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
             @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
-            @QueryParam("hliIds") @Parameter(description = "interpreter ID") @Nullable String hliIds,
+            @Deprecated @QueryParam("hliId") @Parameter(description = "interpreter ID") @Nullable String hliId,
+            @QueryParam("hliIds") @Parameter(description = "interpreter IDs") @Nullable List<String> hliIds,
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("listeningItem") @Parameter(description = "listening item") @Nullable String listeningItem) {
         AudioSource source = null;
@@ -368,12 +373,18 @@ public class VoiceResource implements RESTResource {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Text-to-Speech not found");
             }
         }
-        Collection<HumanLanguageInterpreter> interpreters = null;
+        List<HumanLanguageInterpreter> interpreters = null;
         if (hliIds != null) {
             interpreters = voiceManager.getHLIsByIds(hliIds);
             if (interpreters == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
             }
+        } else if (hliId != null) {
+            HumanLanguageInterpreter interpreter = voiceManager.getHLI(hliId);
+            if (interpreter == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
+            }
+            interpreters = List.of(interpreter);
         }
         AudioSink sink = null;
         if (sinkId != null) {

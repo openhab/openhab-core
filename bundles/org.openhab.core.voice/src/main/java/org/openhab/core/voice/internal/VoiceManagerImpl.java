@@ -15,6 +15,7 @@ package org.openhab.core.voice.internal;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -289,7 +290,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public String interpret(String text, @Nullable String hliIdList) throws InterpretationException {
-        Collection<HumanLanguageInterpreter> interpreters;
+        List<HumanLanguageInterpreter> interpreters;
         if (hliIdList == null) {
             var interpreter = getHLI();
             if (interpreter == null) {
@@ -503,14 +504,14 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable Collection<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
             throws IllegalStateException {
         // use defaults, if null
         KSService ksService = (ks == null) ? getKS() : ks;
         STTService sttService = (stt == null) ? getSTT() : stt;
         TTSService ttsService = (tts == null) ? getTTS() : tts;
-        Collection<HumanLanguageInterpreter> interpreters = hlis;
+        List<HumanLanguageInterpreter> interpreters = hlis;
         if (hlis == null) {
             HumanLanguageInterpreter hli = getHLI();
             if (hli != null) {
@@ -580,12 +581,12 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable Collection<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException {
         // use defaults, if null
         STTService sttService = (stt == null) ? getSTT() : stt;
         TTSService ttsService = (tts == null) ? getTTS() : tts;
-        Collection<HumanLanguageInterpreter> interpreters = hlis;
+        List<HumanLanguageInterpreter> interpreters = hlis;
         if (hlis == null) {
             HumanLanguageInterpreter hli = getHLI();
             if (hli != null) {
@@ -772,9 +773,14 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     }
 
     @Override
-    public @Nullable Collection<HumanLanguageInterpreter> getHLIsByIds(String idList) {
+    public @Nullable List<HumanLanguageInterpreter> getHLIsByIds(String ids) {
+        return getHLIsByIds(Arrays.asList(ids.split(",")));
+    }
+
+    @Override
+    public @Nullable List<HumanLanguageInterpreter> getHLIsByIds(List<String> ids) {
         List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
-        for (var id : idList.split(",")) {
+        for (var id : ids) {
             var hli = humanLanguageInterpreters.get(id);
             if (hli == null) {
                 logger.warn("HumanLanguageInterpreter '{}' not available!", id);

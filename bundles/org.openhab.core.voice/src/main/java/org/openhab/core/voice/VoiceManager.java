@@ -13,6 +13,7 @@
 package org.openhab.core.voice;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -144,7 +145,8 @@ public interface VoiceManager {
      * @param ks the keyword spotting service to use or null to use the default service
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
-     * @param hlis collection of human language text interpreters to use or null to use the default service
+     * @param hlis list of human language text interpreters to use, they are executed in order until the first
+     *            successful response, or null to use the default service
      * @param source the audio source to use or null to use the default source
      * @param sink the audio sink to use or null to use the default sink
      * @param locale the locale to use or null to use the default locale
@@ -154,7 +156,7 @@ public interface VoiceManager {
      *             by all these services or a dialog is already started for this audio source
      */
     void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable Collection<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
             throws IllegalStateException;
 
@@ -187,7 +189,8 @@ public interface VoiceManager {
      *
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
-     * @param hlis collection of human language text interpreters to use or null to use the default service
+     * @param hlis list of human language text interpreters to use, they are executed in order until the first
+     *            successful response, or null to use the default service
      * @param source the audio source to use or null to use the default source
      * @param sink the audio sink to use or null to use the default sink
      * @param locale the locale to use or null to use the default locale
@@ -196,7 +199,7 @@ public interface VoiceManager {
      *             by all these services or a dialog is already started for this audio source
      */
     void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable Collection<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException;
 
     /**
@@ -284,13 +287,25 @@ public interface VoiceManager {
      * Retrieves a HumanLanguageInterpreter collection.
      * If no services are available returns null.
      * 
-     * @param idList Comma separated list of HLI service ids to use or null
-     * @return a Collection<HumanLanguageInterpreter> or null, if no services are available or if some defaults are
+     * @param ids Comma separated list of HLI service ids to use
+     * @return a List<HumanLanguageInterpreter> or null, if no services are available or if some defaults are
      *         configured, but no
      *         according services are found
      */
     @Nullable
-    Collection<HumanLanguageInterpreter> getHLIsByIds(String idList);
+    List<HumanLanguageInterpreter> getHLIsByIds(String ids);
+
+    /**
+     * Retrieves a HumanLanguageInterpreter collection.
+     * If no services are available returns null.
+     *
+     * @param ids List of HLI service ids to use or null
+     * @return a List<HumanLanguageInterpreter> or null, if no services are available or if some defaults are
+     *         configured, but no
+     *         according services are found
+     */
+    @Nullable
+    List<HumanLanguageInterpreter> getHLIsByIds(List<String> ids);
 
     /**
      * Retrieves a HumanLanguageInterpreter.
