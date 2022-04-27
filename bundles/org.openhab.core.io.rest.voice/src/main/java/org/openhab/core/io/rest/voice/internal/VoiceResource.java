@@ -248,7 +248,7 @@ public class VoiceResource implements RESTResource {
             @QueryParam("ksId") @Parameter(description = "keywork spotter ID") @Nullable String ksId,
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
             @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
-            @Deprecated @QueryParam("hliId") @Parameter(description = "interpreter ID") @Nullable String hliId,
+            @QueryParam("hliId") @Parameter(description = "interpreter ID", deprecated = true) @Nullable String hliId,
             @QueryParam("hliIds") @Parameter(description = "comma separated list of interpreter IDs") @Nullable String hliIds,
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("keyword") @Parameter(description = "keyword") @Nullable String keyword,
@@ -348,7 +348,7 @@ public class VoiceResource implements RESTResource {
             @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId,
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
             @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
-            @Deprecated @QueryParam("hliId") @Parameter(description = "interpreter ID") @Nullable String hliId,
+            @QueryParam("hliId") @Parameter(description = "interpreter ID", deprecated = true) @Nullable String hliId,
             @QueryParam("hliIds") @Parameter(description = "interpreter IDs") @Nullable List<String> hliIds,
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("listeningItem") @Parameter(description = "listening item") @Nullable String listeningItem) {
