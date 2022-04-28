@@ -19,9 +19,9 @@
     <cxf.version>3.4.5</cxf.version>
     <!-- revert version of jackson-databind to ${jackson.version} when versions are in-line again -->
     <jackson.version>2.12.6</jackson.version>
-    <jetty.version>9.4.43.v20210629</jetty.version>
-    <pax.logging.version>2.0.14</pax.logging.version>
-    <pax.web.version>7.3.23</pax.web.version>
+    <jetty.version>9.4.46.v20220331</jetty.version>
+    <pax.logging.version>2.0.16</pax.logging.version>
+    <pax.web.version>7.3.25</pax.web.version>
     <swagger.version>2.1.9</swagger.version>
   </properties>
 
@@ -72,7 +72,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.configadmin</artifactId>
-      <version>1.9.22</version>
+      <version>1.9.24</version>
       <scope>compile</scope>
     </dependency>
 
@@ -325,7 +325,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.webconsole</artifactId>
-      <version>4.7.0</version>
+      <version>4.7.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -347,7 +347,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.gogo.runtime</artifactId>
-      <version>1.1.4</version>
+      <version>1.1.6</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -731,13 +731,13 @@
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.20</version>
+      <version>4.21</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.20</version>
+      <version>4.21</version>
       <scope>compile</scope>
     </dependency>
 
