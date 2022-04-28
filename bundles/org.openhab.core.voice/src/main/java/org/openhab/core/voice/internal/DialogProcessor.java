@@ -287,7 +287,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 toggleProcessing(false);
                 String answer = "";
                 String error = null;
-                for (var interpreter : hlis) {
+                for (HumanLanguageInterpreter interpreter : hlis) {
                     try {
                         answer = interpreter.interpret(locale, question);
                         logger.debug("Interpretation result: {}", answer);
@@ -295,10 +295,7 @@ public class DialogProcessor implements KSListener, STTListener {
                         break;
                     } catch (InterpretationException e) {
                         logger.debug("Interpretation exception: {}", e.getMessage());
-                        var msg = e.getMessage();
-                        if (msg != null) {
-                            error = Objects.requireNonNullElse(msg, "Unexpected error");
-                        }
+                        error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
                     }
                 }
                 say(error != null ? error : answer);

@@ -292,14 +292,14 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     public String interpret(String text, @Nullable String hliIdList) throws InterpretationException {
         List<HumanLanguageInterpreter> interpreters;
         if (hliIdList == null) {
-            var interpreter = getHLI();
+            HumanLanguageInterpreter interpreter = getHLI();
             if (interpreter == null) {
                 throw new InterpretationException("No human language interpreter available!");
             }
             interpreters = List.of(interpreter);
         } else {
             interpreters = getHLIsByIds(hliIdList);
-            if (interpreters == null) {
+            if (interpreters.isEmpty()) {
                 throw new InterpretationException("No human language interpreter can be found for " + hliIdList);
             }
         }
@@ -499,12 +499,12 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public void startDialog() throws IllegalStateException {
-        startDialog(null, null, null, null, null, null, null, this.keyword, this.listeningItem);
+        startDialog(null, null, null, List.of(), null, null, null, this.keyword, this.listeningItem);
     }
 
     @Override
     public void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
+            List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
             throws IllegalStateException {
         // use defaults, if null
@@ -512,7 +512,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         STTService sttService = (stt == null) ? getSTT() : stt;
         TTSService ttsService = (tts == null) ? getTTS() : tts;
         List<HumanLanguageInterpreter> interpreters = hlis;
-        if (hlis == null) {
+        if (interpreters.isEmpty()) {
             HumanLanguageInterpreter hli = getHLI();
             if (hli != null) {
                 interpreters = List.of(hli);
@@ -525,8 +525,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         String item = (listeningItem == null) ? this.listeningItem : listeningItem;
         Bundle b = bundle;
 
-        if (ksService == null || sttService == null || ttsService == null || interpreters == null || audioSource == null
-                || audioSink == null || b == null) {
+        if (ksService == null || sttService == null || ttsService == null || interpreters.isEmpty()
+                || audioSource == null || audioSink == null || b == null) {
             throw new IllegalStateException("Cannot start dialog as services are missing.");
         } else if (!checkLocales(ksService.getSupportedLocales(), loc)
                 || !checkLocales(sttService.getSupportedLocales(), loc) || !interpreters.stream()
@@ -576,18 +576,18 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public void listenAndAnswer() throws IllegalStateException {
-        listenAndAnswer(null, null, null, null, null, null, null);
+        listenAndAnswer(null, null, List.of(), null, null, null, null);
     }
 
     @Override
-    public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
-            @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException {
+    public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, List<HumanLanguageInterpreter> hlis,
+            @Nullable AudioSource source, @Nullable AudioSink sink, @Nullable Locale locale,
+            @Nullable String listeningItem) throws IllegalStateException {
         // use defaults, if null
         STTService sttService = (stt == null) ? getSTT() : stt;
         TTSService ttsService = (tts == null) ? getTTS() : tts;
         List<HumanLanguageInterpreter> interpreters = hlis;
-        if (hlis == null) {
+        if (interpreters.isEmpty()) {
             HumanLanguageInterpreter hli = getHLI();
             if (hli != null) {
                 interpreters = List.of(hli);
@@ -599,8 +599,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         String item = (listeningItem == null) ? this.listeningItem : listeningItem;
         Bundle b = bundle;
 
-        if (sttService == null || ttsService == null || interpreters == null || audioSource == null || audioSink == null
-                || b == null) {
+        if (sttService == null || ttsService == null || interpreters.isEmpty() || audioSource == null
+                || audioSink == null || b == null) {
             throw new IllegalStateException("Cannot execute a simple dialog as services are missing.");
         } else if (!checkLocales(sttService.getSupportedLocales(), loc) || !interpreters.stream()
                 .allMatch(interpreter -> checkLocales(interpreter.getSupportedLocales(), loc))) {
@@ -773,23 +773,20 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     }
 
     @Override
-    public @Nullable List<HumanLanguageInterpreter> getHLIsByIds(String ids) {
+    public List<HumanLanguageInterpreter> getHLIsByIds(String ids) {
         return getHLIsByIds(Arrays.asList(ids.split(",")));
     }
 
     @Override
-    public @Nullable List<HumanLanguageInterpreter> getHLIsByIds(List<String> ids) {
+    public List<HumanLanguageInterpreter> getHLIsByIds(List<String> ids) {
         List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
-        for (var id : ids) {
-            var hli = humanLanguageInterpreters.get(id);
+        for (String id : ids) {
+            HumanLanguageInterpreter hli = humanLanguageInterpreters.get(id);
             if (hli == null) {
                 logger.warn("HumanLanguageInterpreter '{}' not available!", id);
             } else {
                 interpreters.add(hli);
             }
-        }
-        if (interpreters.isEmpty()) {
-            return null;
         }
         return interpreters;
     }

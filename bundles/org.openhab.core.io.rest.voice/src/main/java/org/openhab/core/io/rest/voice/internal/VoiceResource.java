@@ -149,12 +149,12 @@ public class VoiceResource implements RESTResource {
             @PathParam("ids") @Parameter(description = "comma separated list of interpreter ids") List<String> ids) {
         final Locale locale = localeService.getLocale(language);
         List<HumanLanguageInterpreter> hlis = voiceManager.getHLIsByIds(ids);
-        if (hlis == null) {
+        if (hlis.isEmpty()) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
         }
         String answer = "";
         String error = null;
-        for (var interpreter : hlis) {
+        for (HumanLanguageInterpreter interpreter : hlis) {
             try {
                 answer = interpreter.interpret(locale, text);
                 logger.debug("Interpretation result: {}", answer);
@@ -162,8 +162,7 @@ public class VoiceResource implements RESTResource {
                 break;
             } catch (InterpretationException e) {
                 logger.debug("Interpretation exception: {}", e.getMessage());
-                var msg = e.getMessage();
-                error = Objects.requireNonNullElse(msg, "Unexpected error");
+                error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
             }
         }
         if (error != null) {
@@ -281,10 +280,10 @@ public class VoiceResource implements RESTResource {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Text-to-Speech not found");
             }
         }
-        List<HumanLanguageInterpreter> interpreters = null;
+        List<HumanLanguageInterpreter> interpreters = List.of();
         if (hliIds != null) {
             interpreters = voiceManager.getHLIsByIds(hliIds);
-            if (interpreters == null) {
+            if (interpreters.isEmpty()) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
             }
         } else if (hliId != null) {
@@ -373,10 +372,10 @@ public class VoiceResource implements RESTResource {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Text-to-Speech not found");
             }
         }
-        List<HumanLanguageInterpreter> interpreters = null;
+        List<HumanLanguageInterpreter> interpreters = List.of();
         if (hliIds != null) {
             interpreters = voiceManager.getHLIsByIds(hliIds);
-            if (interpreters == null) {
+            if (interpreters.isEmpty()) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
             }
         } else if (hliId != null) {

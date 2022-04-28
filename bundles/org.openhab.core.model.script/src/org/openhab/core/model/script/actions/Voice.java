@@ -267,10 +267,10 @@ public class Voice {
                 return;
             }
         }
-        List<HumanLanguageInterpreter> hliServices = null;
+        List<HumanLanguageInterpreter> hliServices = List.of();
         if (interpreters != null) {
             hliServices = VoiceActionService.voiceManager.getHLIsByIds(interpreters);
-            if (hliServices == null) {
+            if (hliServices.isEmpty()) {
                 logger.warn("Failed starting dialog processing: interpreters '{}' not found", interpreters);
                 return;
             }
@@ -378,10 +378,10 @@ public class Voice {
                 return;
             }
         }
-        List<HumanLanguageInterpreter> hliServices = null;
+        List<HumanLanguageInterpreter> hliServices = List.of();
         if (interpreters != null) {
             hliServices = VoiceActionService.voiceManager.getHLIsByIds(interpreters);
-            if (hliServices == null) {
+            if (hliServices.isEmpty()) {
                 logger.warn("Failed executing simple dialog: interpreters '{}' not found", interpreters);
                 return;
             }

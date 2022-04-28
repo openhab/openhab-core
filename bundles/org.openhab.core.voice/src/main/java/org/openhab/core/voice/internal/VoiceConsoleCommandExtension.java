@@ -135,7 +135,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     try {
                         AudioSource source = args.length < 2 ? null : audioManager.getSource(args[1]);
                         AudioSink sink = args.length < 3 ? null : audioManager.getSink(args[2]);
-                        List<HumanLanguageInterpreter> hlis = args.length < 4 ? null
+                        List<HumanLanguageInterpreter> hlis = args.length < 4 ? List.of()
                                 : voiceManager.getHLIsByIds(args[3]);
                         TTSService tts = args.length < 5 ? null : voiceManager.getTTS(args[4]);
                         STTService stt = args.length < 6 ? null : voiceManager.getSTT(args[5]);
@@ -159,7 +159,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     try {
                         AudioSource source = args.length < 2 ? null : audioManager.getSource(args[1]);
                         AudioSink sink = args.length < 3 ? null : audioManager.getSink(args[2]);
-                        List<HumanLanguageInterpreter> hlis = args.length < 4 ? null
+                        List<HumanLanguageInterpreter> hlis = args.length < 4 ? List.of()
                                 : voiceManager.getHLIsByIds(args[3]);
                         TTSService tts = args.length < 5 ? null : voiceManager.getTTS(args[4]);
                         STTService stt = args.length < 6 ? null : voiceManager.getSTT(args[5]);
