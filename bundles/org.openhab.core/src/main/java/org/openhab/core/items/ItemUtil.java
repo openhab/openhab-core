@@ -54,7 +54,7 @@ public class ItemUtil {
      * @return true if the specified name is a valid item name, otherwise false
      */
     public static boolean isValidItemName(final @Nullable String itemName) {
-        return itemName != null && !itemName.isEmpty() && itemName.matches("[a-zA-Z0-9_]*");
+        return itemName != null && !itemName.isEmpty() && itemName.matches("[a-zA-Z][a-zA-Z0-9_]*");
     }
 
     /**
