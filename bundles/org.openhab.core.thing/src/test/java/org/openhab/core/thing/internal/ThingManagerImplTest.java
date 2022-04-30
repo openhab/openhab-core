@@ -31,6 +31,7 @@ import org.openhab.core.events.EventPublisher;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
+import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
@@ -49,7 +50,7 @@ import org.osgi.framework.Bundle;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
-public class ThingManagerImplTest {
+public class ThingManagerImplTest extends JavaTest {
 
     private @Mock @NonNullByDefault({}) Bundle bundleMock;
     private @Mock @NonNullByDefault({}) BundleResolver bundleResolverMock;
@@ -146,5 +147,55 @@ public class ThingManagerImplTest {
         when(storageServiceMock.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(storageMock);
 
         assertFalse(thingManager.isEnabled(unknownUID));
+    }
+
+    @Test
+    public void removingNonExistingThingLogsError() {
+        setupInterceptedLogger(ThingManagerImpl.class, LogLevel.DEBUG);
+
+        ThingManagerImpl thingManager = createThingManager();
+
+        thingManager.thingRemoved(thingMock, ThingTrackerEvent.THING_REMOVED);
+
+        stopInterceptedLogger(ThingManagerImpl.class);
+        assertLogMessage(ThingManagerImpl.class, LogLevel.ERROR,
+                "Trying to remove thing 'test::thing', but is not tracked by ThingManager. This is a bug.");
+    }
+
+    @Test
+    public void addingExistingThingLogsError() {
+        when(storageServiceMock.getStorage(any(), any())).thenReturn(storageMock);
+        when(storageMock.get(any())).thenReturn(null);
+
+        setupInterceptedLogger(ThingManagerImpl.class, LogLevel.DEBUG);
+
+        ThingManagerImpl thingManager = createThingManager();
+
+        thingManager.thingAdded(thingMock, ThingTrackerEvent.THING_ADDED);
+        thingManager.thingAdded(thingMock, ThingTrackerEvent.THING_ADDED);
+
+        stopInterceptedLogger(ThingManagerImpl.class);
+        assertLogMessage(ThingManagerImpl.class, LogLevel.ERROR,
+                "A thing with UID 'test::thing' is already tracked by ThingManager. This is a bug.");
+    }
+
+    @Test
+    public void replacingThingWithWrongUIDLogsError() {
+        when(storageServiceMock.getStorage(any(), any())).thenReturn(storageMock);
+        when(storageMock.get(any())).thenReturn(null);
+
+        Thing thingMock2 = mock(Thing.class);
+
+        when(thingMock2.getUID()).thenReturn(new ThingUID("test", "thing2"));
+        setupInterceptedLogger(ThingManagerImpl.class, LogLevel.DEBUG);
+
+        ThingManagerImpl thingManager = createThingManager();
+
+        thingManager.thingAdded(thingMock, ThingTrackerEvent.THING_ADDED);
+        thingManager.thingUpdated(thingMock2, thingMock, ThingTrackerEvent.THING_ADDED);
+
+        stopInterceptedLogger(ThingManagerImpl.class);
+        assertLogMessage(ThingManagerImpl.class, LogLevel.ERROR,
+                "Thing 'test::thing2' is different from thing tracked by ThingManager. This is a bug.");
     }
 }
