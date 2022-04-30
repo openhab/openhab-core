@@ -54,6 +54,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.11</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.openhab.core.bom</groupId>
       <artifactId>org.openhab.core.bom.openhab-core</artifactId>
       <version>${project.version}</version>

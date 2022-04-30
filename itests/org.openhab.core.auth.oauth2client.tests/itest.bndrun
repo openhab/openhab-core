@@ -60,4 +60,6 @@ Fragment-Host: org.openhab.core.auth.oauth2client
 	org.eclipse.jetty.websocket.api;version='[9.4.46,9.4.47)',\
 	org.eclipse.jetty.websocket.client;version='[9.4.46,9.4.47)',\
 	org.eclipse.jetty.websocket.common;version='[9.4.46,9.4.47)',\
-	org.ops4j.pax.logging.pax-logging-api;version='[2.0.16,2.0.17)'
+	org.ops4j.pax.logging.pax-logging-api;version='[2.0.16,2.0.17)',\
+	ch.qos.logback.classic;version='[1.2.11,1.2.12)',\
+	ch.qos.logback.core;version='[1.2.11,1.2.12)'
