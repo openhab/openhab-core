@@ -99,8 +99,7 @@ public class JavaTest {
             Assertions.fail("Logger for class '" + clazz + "' not found.");
         }
         if (appender.list.size() != 0) {
-            Assertions
-                    .fail("Expected no log message for class '"+clazz+"', but found '" + appender.list + "'.");
+            Assertions.fail("Expected no log message for class '" + clazz + "', but found '" + appender.list + "'.");
         }
     }
 
@@ -119,11 +118,10 @@ public class JavaTest {
         boolean isPresent = appender.list.stream()
                 .anyMatch(e -> logLevel.getLevel().equals(e.getLevel()) && message.equals(e.getFormattedMessage()));
         if (!isPresent) {
-            Assertions
-                    .fail("Expected '" + message + "' at level '" + logLevel + "' for class '" + clazz+ "', but found '" + appender.list + "'.");
+            Assertions.fail("Expected '" + message + "' at level '" + logLevel + "' for class '" + clazz
+                    + "', but found '" + appender.list + "'.");
         }
     }
-
 
     /**
      * Wait until the condition is fulfilled or the timeout is reached.
