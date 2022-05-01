@@ -12,10 +12,10 @@
  */
 package org.openhab.core.ui.icon.internal;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
@@ -46,19 +46,19 @@ public class CustomIconProvider extends AbstractResourceIconProvider {
         super(i18nProvider);
     }
 
-    private @Nullable File getIconFile(String filename, String iconSetId) {
-        File folder = new File(OpenHAB.getConfigFolder() + File.separator + "icons" + File.separator + iconSetId);
-        File file = new File(folder, filename);
-        return file.exists() ? file : null;
+    private @Nullable Path getIconFile(String filename, String iconSetId) {
+        Path folder = Path.of(OpenHAB.getConfigFolder(), "icons", iconSetId);
+        Path file = folder.resolve(filename);
+        return Files.exists(file) ? file : null;
     }
 
     @Override
     protected @Nullable InputStream getResource(String iconSetId, String resourceName) {
-        File file = getIconFile(resourceName, iconSetId);
+        Path file = getIconFile(resourceName, iconSetId);
         if (file != null) {
             try {
-                return new FileInputStream(file);
-            } catch (FileNotFoundException e) {
+                return Files.newInputStream(file);
+            } catch (IOException e) {
                 return null;
             }
         }

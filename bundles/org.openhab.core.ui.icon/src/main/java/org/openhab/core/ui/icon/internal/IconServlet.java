@@ -12,6 +12,7 @@
  */
 package org.openhab.core.ui.icon.internal;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
@@ -108,6 +109,12 @@ public class IconServlet extends OpenHABServlet {
         }
 
         String category = getCategory(req);
+        if (category.isEmpty()) {
+            logger.debug("URI must start with '{}' but is '{}'", SERVLET_NAME, req.getRequestURI());
+            resp.sendError(400);
+            return;
+        }
+
         String state = getState(req);
         String iconSetId = getIconSetId(req);
 
@@ -174,7 +181,15 @@ public class IconServlet extends OpenHABServlet {
     }
 
     private String getCategory(HttpServletRequest req) {
-        String category = substringAfterLast(req.getRequestURI(), "/");
+        String reqURI = req.getRequestURI();
+        if (reqURI.length() < SERVLET_NAME.length() + 1) {
+            return "";
+        }
+        String category = req.getRequestURI().substring(SERVLET_NAME.length() + 1);
+        if (category.startsWith(File.separator) || category.contains("..")) {
+            logger.warn("Absolute path and directory traversal not permitted but '{}' provided", category);
+            return "";
+        }
         category = substringBeforeLast(category, ".");
         return substringBeforeLast(category, "-");
     }
