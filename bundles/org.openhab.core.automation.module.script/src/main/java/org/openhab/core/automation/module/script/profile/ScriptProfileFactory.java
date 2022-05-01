@@ -39,6 +39,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = { ScriptProfileFactory.class, ProfileFactory.class, ProfileTypeProvider.class })
 @NonNullByDefault
 public class ScriptProfileFactory implements ProfileFactory, ProfileTypeProvider {
+
     public static final ProfileTypeUID SCRIPT_PROFILE_UID = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "script");
 
     private static final ProfileType PROFILE_TYPE_SCRIPT = ProfileTypeBuilder.newState(SCRIPT_PROFILE_UID, "Script")

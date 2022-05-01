@@ -14,6 +14,8 @@ package org.openhab.core.automation.module.script.profile;
 
 import java.util.List;
 
+import javax.script.ScriptException;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigParser;
@@ -38,9 +40,8 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class ScriptProfile implements StateProfile {
-    protected static final String CONFIG_TO_ITEM_SCRIPT = "toItemScript";
-    protected static final String CONFIG_TO_HANDLER_SCRIPT = "toHandlerScript";
-    protected static final String CONFIG_SCRIPT_TYPE = "scriptType";
+    public static final String CONFIG_TO_ITEM_SCRIPT = "toItemScript";
+    public static final String CONFIG_TO_HANDLER_SCRIPT = "toHandlerScript";
 
     private final Logger logger = LoggerFactory.getLogger(ScriptProfile.class);
 
@@ -139,7 +140,11 @@ public class ScriptProfile implements StateProfile {
             try {
                 return transformationService.transform(script, input.toFullString());
             } catch (TransformationException e) {
-                logger.warn("Failed to process script '{}': {}", script, e.getMessage());
+                if (e.getCause() instanceof ScriptException) {
+                    logger.warn("Failed to process script '{}': {}", script, e.getCause().getMessage());
+                } else {
+                    logger.warn("Failed to process script '{}': {}", script, e.getMessage());
+                }
             }
         }
 
