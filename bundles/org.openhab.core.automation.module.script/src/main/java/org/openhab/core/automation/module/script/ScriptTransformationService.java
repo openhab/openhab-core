@@ -46,7 +46,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jan N. Klug - Initial contribution
  */
-@Component(service = TransformationService.class, property = { "openhab.transform=SCRIPT" })
+@Component(service = { TransformationService.class, ScriptTransformationService.class }, property = {
+        "openhab.transform=SCRIPT" })
 @NonNullByDefault
 public class ScriptTransformationService
         implements TransformationService, RegistryChangeListener<TransformationConfiguration> {

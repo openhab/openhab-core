@@ -18,7 +18,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.module.script.ScriptEngineManager;
+import org.openhab.core.automation.module.script.ScriptTransformationService;
 import org.openhab.core.thing.profiles.Profile;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
@@ -44,18 +44,18 @@ public class ScriptProfileFactory implements ProfileFactory, ProfileTypeProvider
     private static final ProfileType PROFILE_TYPE_SCRIPT = ProfileTypeBuilder.newState(SCRIPT_PROFILE_UID, "Script")
             .build();
 
-    private final ScriptEngineManager scriptEngineManager;
+    private final ScriptTransformationService transformationService;
 
     @Activate
-    public ScriptProfileFactory(final @Reference ScriptEngineManager scriptEngineManager) {
-        this.scriptEngineManager = scriptEngineManager;
+    public ScriptProfileFactory(final @Reference ScriptTransformationService transformationService) {
+        this.transformationService = transformationService;
     }
 
     @Override
     public @Nullable Profile createProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback,
             ProfileContext profileContext) {
         if (SCRIPT_PROFILE_UID.equals(profileTypeUID)) {
-            return new ScriptProfile(callback, profileContext, scriptEngineManager);
+            return new ScriptProfile(callback, profileContext, transformationService);
         }
         return null;
     }
