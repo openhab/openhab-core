@@ -13,9 +13,6 @@
 			<label>To Handler Script</label>
 			<description>The Script for transforming states and commands from item to handler.</description>
 		</parameter>
-		<parameter name="scriptType" type="text" required="true">
-			<label>ScriptType</label>
-		</parameter>
 	</config-description>
 
 </config-description:config-descriptions>
