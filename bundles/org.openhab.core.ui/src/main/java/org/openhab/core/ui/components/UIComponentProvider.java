@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.ui.internal.components;
+package org.openhab.core.ui.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,7 +22,6 @@ import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
-import org.openhab.core.ui.components.RootUIComponent;
 
 /**
  * A namespace-specific {@link ManagedProvider} for UI components.

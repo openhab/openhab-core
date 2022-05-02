@@ -20,7 +20,9 @@ import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.ui.components.RootUIComponent;
+import org.openhab.core.ui.components.UIComponentProvider;
 import org.openhab.core.ui.components.UIComponentRegistry;
+import org.openhab.core.ui.components.UIProvider;
 
 /**
  * Implementation of a {@link UIComponentRegistry} using a {@link UIComponentProvider}.
