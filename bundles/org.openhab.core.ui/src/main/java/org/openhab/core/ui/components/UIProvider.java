@@ -10,11 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.ui.internal.components;
+package org.openhab.core.ui.components;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Provider;
-import org.openhab.core.ui.components.RootUIComponent;
 
 /**
  * Provides components (pages, widgets, etc.) at runtime.
@@ -23,5 +22,7 @@ import org.openhab.core.ui.components.RootUIComponent;
  */
 @NonNullByDefault
 public interface UIProvider extends Provider<RootUIComponent> {
+    String CONFIG_NAMESPACE = "ui.namespace";
+
     String getNamespace();
 }
