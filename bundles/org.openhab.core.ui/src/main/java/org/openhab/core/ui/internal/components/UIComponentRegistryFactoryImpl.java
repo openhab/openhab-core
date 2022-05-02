@@ -19,8 +19,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.common.registry.ManagedProvider;
-import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponentProvider;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
 import org.openhab.core.ui.components.UIProvider;
@@ -47,16 +45,7 @@ public class UIComponentRegistryFactoryImpl implements UIComponentRegistryFactor
         UIComponentRegistryImpl registry = registries.get(namespace);
         if (registry == null) {
             Set<UIProvider> namespaceProviders = this.providers.get(namespace);
-            ManagedProvider<RootUIComponent, String> managedProvider = null;
-            if (namespaceProviders != null) {
-                for (UIProvider provider : namespaceProviders) {
-                    if (provider instanceof ManagedProvider) {
-                        managedProvider = (ManagedProvider<RootUIComponent, String>) provider;
-                        break;
-                    }
-                }
-            }
-            registry = new UIComponentRegistryImpl(namespace, managedProvider, namespaceProviders);
+            registry = new UIComponentRegistryImpl(namespace, namespaceProviders);
             registries.put(namespace, registry);
         }
         return registry;

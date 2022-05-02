@@ -40,12 +40,8 @@ public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, S
      *
      * @param namespace UI components namespace of this registry
      */
-    public UIComponentRegistryImpl(String namespace, @Nullable ManagedProvider<RootUIComponent, String> managedProvider,
-            @Nullable Set<UIProvider> providers) {
+    public UIComponentRegistryImpl(String namespace, @Nullable Set<UIProvider> providers) {
         super(null);
-        if (managedProvider != null) {
-            setManagedProvider(managedProvider);
-        }
         if (providers != null && !providers.isEmpty()) {
             for (Provider<RootUIComponent> provider : providers) {
                 addProvider(provider);
@@ -56,10 +52,16 @@ public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, S
     @Override
     public void addProvider(Provider<RootUIComponent> provider) {
         super.addProvider(provider);
+        if (getManagedProvider().isEmpty() && provider instanceof ManagedProvider) {
+            setManagedProvider((ManagedProvider<RootUIComponent, String>) provider);
+        }
     }
 
     @Override
     public void removeProvider(Provider<RootUIComponent> provider) {
+        if (getManagedProvider().isPresent() && provider instanceof ManagedProvider) {
+            unsetManagedProvider((ManagedProvider<RootUIComponent, String>) provider);
+        }
         super.removeProvider(provider);
     }
 }
