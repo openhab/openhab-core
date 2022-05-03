@@ -75,8 +75,6 @@ public class UIComponentRegistryFactoryImpl implements UIComponentRegistryFactor
                 properties.put(UIProvider.CONFIG_NAMESPACE, namespace);
                 ComponentInstance<UIComponentProvider> instance = this.providerFactory.newInstance(properties);
                 createdProviders.add(instance);
-                // UIComponentProvider provider = instance.getInstance();
-                // addProvider(provider);
             }
             Set<UIProvider> namespaceProviders = this.providers.get(namespace);
             registry = new UIComponentRegistryImpl(namespace, namespaceProviders);
