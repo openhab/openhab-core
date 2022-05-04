@@ -20,18 +20,18 @@ import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.ui.components.RootUIComponent;
+import org.openhab.core.ui.components.UIComponentProvider;
 import org.openhab.core.ui.components.UIComponentRegistry;
-import org.openhab.core.ui.components.UIProvider;
 
 /**
- * Implementation of a {@link UIComponentRegistry} using a {@link UIComponentProvider}.
+ * Implementation of a {@link UIComponentRegistry} using a {@link ManagedUIComponentProvider}.
  * It is instantiated by the {@link UIComponentRegistryFactoryImpl}.
  *
  * @author Yannick Schaus - Initial contribution
  * @author Łukasz Dywicki - Support for dynamic registration of providers
  */
 @NonNullByDefault
-public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, String, UIComponentProvider>
+public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, String, ManagedUIComponentProvider>
         implements UIComponentRegistry {
 
     /**
@@ -39,7 +39,7 @@ public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, S
      *
      * @param namespace UI components namespace of this registry
      */
-    public UIComponentRegistryImpl(String namespace, @Nullable Set<UIProvider> providers) {
+    public UIComponentRegistryImpl(String namespace, @Nullable Set<UIComponentProvider> providers) {
         super(null);
         if (providers != null && !providers.isEmpty()) {
             for (Provider<RootUIComponent> provider : providers) {

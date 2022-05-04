@@ -21,7 +21,7 @@ import org.openhab.core.common.registry.Provider;
  * @author Łukasz Dywicki - Initial contribution
  */
 @NonNullByDefault
-public interface UIProvider extends Provider<RootUIComponent> {
+public interface UIComponentProvider extends Provider<RootUIComponent> {
     String CONFIG_NAMESPACE = "ui.namespace";
 
     String getNamespace();

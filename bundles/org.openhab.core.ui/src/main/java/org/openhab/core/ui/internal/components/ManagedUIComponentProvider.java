@@ -25,7 +25,7 @@ import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.ui.components.RootUIComponent;
-import org.openhab.core.ui.components.UIProvider;
+import org.openhab.core.ui.components.UIComponentProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -38,14 +38,14 @@ import org.osgi.service.component.annotations.Reference;
  */
 @NonNullByDefault
 @Component(factory = "org.openhab.core.ui.component.provider.factory")
-public class UIComponentProvider extends AbstractProvider<RootUIComponent>
-        implements ManagedProvider<RootUIComponent, String>, UIProvider {
+public class ManagedUIComponentProvider extends AbstractProvider<RootUIComponent>
+        implements ManagedProvider<RootUIComponent, String>, UIComponentProvider {
 
     private final String namespace;
     private final Storage<RootUIComponent> storage;
 
     @Activate
-    public UIComponentProvider(@Reference StorageService storageService, Map<String, Object> config) {
+    public ManagedUIComponentProvider(@Reference StorageService storageService, Map<String, Object> config) {
         String namespace = ConfigParser.valueAs(config.get(CONFIG_NAMESPACE), String.class);
         if (namespace == null) {
             throw new IllegalStateException("'ui.namespace' must not be null in service configuration");

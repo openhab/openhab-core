@@ -76,7 +76,7 @@ public class UIComponent {
     /**
      * Sets the type of the component.
      *
-     * @return the component type
+     * @param component the component type
      */
     public void setComponent(String component) {
         this.component = component;
