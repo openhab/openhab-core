@@ -504,6 +504,14 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
+            @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
+            throws IllegalStateException {
+        startDialog(ks, stt, tts, hli == null ? List.of() : List.of(hli), source, sink, locale, keyword, listeningItem);
+    }
+
+    @Override
+    public void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
             List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
             throws IllegalStateException {
@@ -577,6 +585,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     @Override
     public void listenAndAnswer() throws IllegalStateException {
         listenAndAnswer(null, null, List.of(), null, null, null, null);
+    }
+
+    @Override
+    public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts,
+            @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException {
+        listenAndAnswer(stt, tts, hli == null ? List.of() : List.of(hli), source, sink, locale, listeningItem);
     }
 
     @Override
