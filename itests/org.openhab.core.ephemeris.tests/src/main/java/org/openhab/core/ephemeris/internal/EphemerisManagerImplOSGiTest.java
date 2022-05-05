@@ -68,6 +68,21 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
     }
 
     @Test
+    public void testEphemerisManagerFixesIllegalCharacters() {
+        ephemerisManager.modified(Map.ofEntries(entry(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, "\"( \"MONDAY\"")));
+
+        assertTrue(ephemerisManager.daysets.containsKey(CONFIG_DAYSET_WEEKEND));
+    }
+
+    @Test
+    public void testEphemerisManagerDoesNotCrashOnIllegalName() {
+        ephemerisManager.modified(Map.ofEntries(entry(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, "Mondax")));
+
+        // assertion only to check if no exception occurs
+        assertFalse(ephemerisManager.daysets.isEmpty());
+    }
+
+    @Test
     public void testEphemerisManagerLoadedProperly() {
         assertTrue(ephemerisManager.daysets.containsKey(CONFIG_DAYSET_WEEKEND));
         assertEquals(Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY), ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
@@ -77,20 +92,14 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testConfigurtationDaysetWeekendFailed() {
-        assertThrows(IllegalArgumentException.class,
-                () -> ephemerisManager.modified(Map.of(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, "Foo,Bar")));
-    }
-
-    @Test
-    public void testConfigurtationDaysetWeekendIterable() {
+    public void testConfigurationDaysetWeekendIterable() {
         ephemerisManager.modified(Map.of(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, List.of("Saturday", "Sunday")));
         assertTrue(ephemerisManager.daysets.containsKey(CONFIG_DAYSET_WEEKEND));
         assertEquals(Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY), ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
     }
 
     @Test
-    public void testConfigurtationDaysetWeekendListAsString() {
+    public void testConfigurationDaysetWeekendListAsString() {
         ephemerisManager.modified(Map.of(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, List.of("Saturday", "Sunday")));
         assertTrue(ephemerisManager.daysets.containsKey(CONFIG_DAYSET_WEEKEND));
         assertEquals(Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY), ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
