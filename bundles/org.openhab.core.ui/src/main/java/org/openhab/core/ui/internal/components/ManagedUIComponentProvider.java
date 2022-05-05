@@ -15,34 +15,41 @@ package org.openhab.core.ui.internal.components;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.common.registry.ManagedProvider;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.ui.components.RootUIComponent;
+import org.openhab.core.ui.components.UIComponentProvider;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * A namespace-specific {@link ManagedProvider} for UI components.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Jan N. Klug - Refactored to component factory
  */
 @NonNullByDefault
-public class UIComponentProvider extends AbstractProvider<RootUIComponent>
-        implements ManagedProvider<RootUIComponent, String>, UIProvider {
+@Component(factory = "org.openhab.core.ui.component.provider.factory")
+public class ManagedUIComponentProvider extends AbstractProvider<RootUIComponent>
+        implements ManagedProvider<RootUIComponent, String>, UIComponentProvider {
 
-    private String namespace;
-    private volatile Storage<RootUIComponent> storage;
+    private final String namespace;
+    private final Storage<RootUIComponent> storage;
 
-    /**
-     * Constructs a UI component provider for the specified namespace
-     *
-     * @param namespace UI components namespace of this provider
-     * @param storageService supporting storage service
-     */
-    public UIComponentProvider(String namespace, StorageService storageService) {
+    @Activate
+    public ManagedUIComponentProvider(@Reference StorageService storageService, Map<String, Object> config) {
+        String namespace = ConfigParser.valueAs(config.get(CONFIG_NAMESPACE), String.class);
+        if (namespace == null) {
+            throw new IllegalStateException("'ui.namespace' must not be null in service configuration");
+        }
         this.namespace = namespace;
         this.storage = storageService.getStorage("uicomponents_" + namespace.replace(':', '_'),
                 this.getClass().getClassLoader());
