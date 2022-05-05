@@ -107,18 +107,14 @@ public class FileTransformationConfigurationProvider extends AbstractWatchServic
     }
 
     private void processPath(WatchEvent.Kind<?> kind, Path path) {
-        if (!Files.isRegularFile(path)) {
-            logger.trace("Skipping {} event for '{}' - not a regular file", kind, path);
-            return;
-        }
         if (StandardWatchEventKinds.ENTRY_DELETE.equals(kind)) {
             TransformationConfiguration oldElement = transformationConfigurations.remove(path);
             if (oldElement != null) {
                 logger.trace("Removed configuration from file '{}", path);
                 listeners.forEach(listener -> listener.removed(this, oldElement));
             }
-        } else if (StandardWatchEventKinds.ENTRY_CREATE.equals(kind)
-                || StandardWatchEventKinds.ENTRY_MODIFY.equals(kind)) {
+        } else if (Files.isRegularFile(path) && (StandardWatchEventKinds.ENTRY_CREATE.equals(kind)
+                || StandardWatchEventKinds.ENTRY_MODIFY.equals(kind))) {
             try {
                 String fileName = path.getFileName().toString();
                 Matcher m = FILENAME_PATTERN.matcher(fileName);
@@ -151,6 +147,8 @@ public class FileTransformationConfigurationProvider extends AbstractWatchServic
             } catch (IOException e) {
                 logger.warn("Skipping {} event for '{}' - failed to read content: {}", kind, path, e.getMessage());
             }
+        } else {
+            logger.trace("Skipping {} event for '{}' - not a regular file", kind, path);
         }
     }
 }
