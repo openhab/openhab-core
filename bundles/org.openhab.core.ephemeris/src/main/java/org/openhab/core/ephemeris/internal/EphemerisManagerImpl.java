@@ -27,7 +27,6 @@ import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -124,8 +123,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     }
 
     private void sortByLabel(List<ParameterOption> parameterOptions) {
-        Collections.sort(parameterOptions,
-                (ParameterOption po1, ParameterOption po2) -> po1.getLabel().compareTo(po2.getLabel()));
+        parameterOptions.sort(Comparator.comparing(ParameterOption::getLabel));
     }
 
     @Activate
@@ -136,29 +134,33 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     @Modified
     protected void modified(Map<String, Object> config) {
         config.entrySet().stream().filter(e -> e.getKey().startsWith(CONFIG_DAYSET_PREFIX)).forEach(e -> {
-            String[] setNameParts = e.getKey().split("-");
-            if (setNameParts.length > 1) {
-                String setName = setNameParts[1];
-                Object entry = e.getValue();
-                if (entry instanceof String) {
-                    String value = entry.toString();
-                    while (value.startsWith("[")) {
-                        value = value.substring(1);
+            try {
+                String[] setNameParts = e.getKey().split("-");
+                if (setNameParts.length > 1) {
+                    String setName = setNameParts[1];
+                    Object entry = e.getValue();
+                    if (entry instanceof String) {
+                        String value = entry.toString();
+                        while (value.startsWith("[")) {
+                            value = value.substring(1);
+                        }
+                        while (value.endsWith("]")) {
+                            value = value.substring(0, value.length() - 1);
+                        }
+                        String[] setDefinition = value.split(",");
+                        if (setDefinition.length > 0) {
+                            addDayset(setName, List.of(setDefinition));
+                        } else {
+                            logger.warn("Erroneous day set definition {} : {}", e.getKey(), entry);
+                        }
+                    } else if (entry instanceof Iterable) {
+                        addDayset(setName, (Iterable<?>) entry);
                     }
-                    while (value.endsWith("]")) {
-                        value = value.substring(0, value.length() - 1);
-                    }
-                    String[] setDefinition = value.split(",");
-                    if (setDefinition.length > 0) {
-                        addDayset(setName, List.of(setDefinition));
-                    } else {
-                        logger.warn("Erroneous dayset definition {} : {}", e.getKey(), entry);
-                    }
-                } else if (entry instanceof Iterable) {
-                    addDayset(setName, (Iterable<?>) entry);
+                } else {
+                    logger.warn("Erroneous day set definition {}", e.getKey());
                 }
-            } else {
-                logger.warn("Erroneous dayset definition {}", e.getKey());
+            } catch (IllegalArgumentException ex) {
+                logger.warn("Erroneous day set definition {}: {}", e.getKey(), ex.getMessage());
             }
         });
 
@@ -243,25 +245,17 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         LocalDate toDate = from.plusDays(span).toLocalDate();
 
         Set<Holiday> days = holidayManager.getHolidays(fromDate, toDate, countryParameters.toArray(new String[0]));
-        List<Holiday> sortedHolidays = days.stream().sorted(Comparator.comparing(Holiday::getDate))
-                .collect(Collectors.toList());
-        return sortedHolidays;
+        return days.stream().sorted(Comparator.comparing(Holiday::getDate)).collect(Collectors.toList());
     }
 
     @Override
     public long getDaysUntil(ZonedDateTime from, String searchedHoliday) {
-        List<Holiday> sortedHolidays = getHolidays(from, 366, getHolidayManager(country));
-        Optional<Holiday> result = sortedHolidays.stream()
-                .filter(holiday -> searchedHoliday.equalsIgnoreCase(holiday.getPropertiesKey())).findFirst();
-        return result.isPresent() ? from.toLocalDate().until(result.get().getDate(), ChronoUnit.DAYS) : -1;
+        return getDaysUntil(from, searchedHoliday, getHolidayManager(country));
     }
 
     @Override
     public long getDaysUntil(ZonedDateTime from, String searchedHoliday, URL resource) {
-        List<Holiday> sortedHolidays = getHolidays(from, 366, getHolidayManager(resource));
-        Optional<Holiday> result = sortedHolidays.stream()
-                .filter(holiday -> searchedHoliday.equalsIgnoreCase(holiday.getPropertiesKey())).findFirst();
-        return result.isPresent() ? from.toLocalDate().until(result.get().getDate(), ChronoUnit.DAYS) : -1;
+        return getDaysUntil(from, searchedHoliday, getHolidayManager(resource));
     }
 
     @Override
@@ -269,9 +263,16 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         return getDaysUntil(from, searchedHoliday, getUrl(filename));
     }
 
+    private long getDaysUntil(ZonedDateTime from, String searchedHoliday, HolidayManager holidayManager) {
+        List<Holiday> sortedHolidays = getHolidays(from, 366, holidayManager);
+        Optional<Holiday> result = sortedHolidays.stream()
+                .filter(holiday -> searchedHoliday.equalsIgnoreCase(holiday.getPropertiesKey())).findFirst();
+        return result.map(holiday -> from.toLocalDate().until(holiday.getDate(), ChronoUnit.DAYS)).orElse(-1L);
+    }
+
     private @Nullable String getFirstBankHolidayKey(ZonedDateTime from, int span, HolidayManager holidayManager) {
         Optional<Holiday> holiday = getHolidays(from, span, holidayManager).stream().findFirst();
-        return holiday.map(p -> p.getPropertiesKey()).orElse(null);
+        return holiday.map(Holiday::getPropertiesKey).orElse(null);
     }
 
     @Override
@@ -338,7 +339,9 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private void addDayset(String setName, Iterable<?> values) {
         Set<DayOfWeek> dayset = new HashSet<>();
         for (Object day : values) {
-            dayset.add(DayOfWeek.valueOf(day.toString().trim().toUpperCase()));
+            // fix illegal entries by stripping all non A-Z characters
+            String dayString = day.toString().toUpperCase().replaceAll("[^A-Z]", "");
+            dayset.add(DayOfWeek.valueOf(dayString));
         }
         daysets.put(setName, dayset);
     }
@@ -346,7 +349,8 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     /**
      * Parses each entry of a properties list loaded from 'jolliday/descriptions/country_descriptions.properties'. The
      * file has been copied from
-     * https://github.com/svendiedrichsen/jollyday/blob/master/src/main/resources/descriptions/country_descriptions.properties
+     * <a href=
+     * "https://github.com/svendiedrichsen/jollyday/blob/master/src/main/resources/descriptions/country_descriptions.properties">https://github.com/svendiedrichsen/jollyday/blob/master/src/main/resources/descriptions/country_descriptions.properties</a>
      * and contains values in the following format - some examples:
      *
      * country.description.at = Austria
@@ -358,7 +362,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
      *
      * "at" and "au" are keys of countries
      * "sa" and "tas" are keys of regions inside the country "au"
-     * "ho" and "nh" are kess of cities or areas inside the region "tas"
+     * "ho" and "nh" are keys of cities or areas inside the region "tas"
      *
      * @param key key of the property will be parsed
      * @param value value of the property will be used as name
