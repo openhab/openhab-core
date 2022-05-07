@@ -145,7 +145,7 @@ public interface VoiceManager {
      * @param ks the keyword spotting service to use or null to use the default service
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
-     * @param hli the human language text interpreters to use or null to use the default service
+     * @param hli the human language text interpreter to use or null to use the default service
      * @param source the audio source to use or null to use the default source
      * @param sink the audio sink to use or null to use the default sink
      * @param locale the locale to use or null to use the default locale
@@ -214,7 +214,7 @@ public interface VoiceManager {
      *
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
-     * @param hli the human language text interpreters to use or null to use the default service
+     * @param hli the human language text interpreter to use or null to use the default service
      * @param source the audio source to use or null to use the default source
      * @param sink the audio sink to use or null to use the default sink
      * @param locale the locale to use or null to use the default locale
@@ -332,7 +332,7 @@ public interface VoiceManager {
 
     /**
      * Retrieves a HumanLanguageInterpreter collection.
-     * If no services are available returns null.
+     * If no services are available returns an empty list.
      * 
      * @param ids Comma separated list of HLI service ids to use
      * @return a List<HumanLanguageInterpreter> or empty, if none of the services is available
@@ -341,7 +341,7 @@ public interface VoiceManager {
 
     /**
      * Retrieves a HumanLanguageInterpreter collection.
-     * If no services are available returns null.
+     * If no services are available returns an empty list.
      *
      * @param ids List of HLI service ids to use or null
      * @return a List<HumanLanguageInterpreter> or empty, if none of the services is available
