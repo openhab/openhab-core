@@ -116,6 +116,7 @@
 	<feature name="openhab-core-io-console-karaf" description="Karaf Console support for SmartHome stuff" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<feature>shell</feature>
+		<feature>service-wrapper</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.console.karaf/${project.version}</bundle>
 	</feature>
 
