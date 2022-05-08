@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -48,8 +49,12 @@ public class CustomIconProvider extends AbstractResourceIconProvider {
 
     private @Nullable Path getIconFile(String filename, String iconSetId) {
         Path folder = Path.of(OpenHAB.getConfigFolder(), "icons", iconSetId);
-        Path file = folder.resolve(filename);
-        return Files.exists(file) ? file : null;
+        try (Stream<Path> stream = Files.walk(folder)) {
+            return stream.filter(file -> !Files.isDirectory(file) && filename.equals(file.getFileName().toString()))
+                    .findAny().orElse(null);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     @Override

@@ -309,31 +309,4 @@ public class IconServletTest {
         verify(provider1Mock, atLeastOnce()).hasIcon("z", "test", Format.PNG);
         verify(provider1Mock, atLeastOnce()).hasIcon("z", "test", Format.SVG);
     }
-
-    @Test
-    public void testServletURIMissing() throws ServletException, IOException {
-        when(requestMock.getRequestURI()).thenReturn("/z");
-
-        servlet.doGet(requestMock, responseMock);
-
-        verify(responseMock).sendError(400);
-    }
-
-    @Test
-    public void testAbsolutePathRejected() throws ServletException, IOException {
-        when(requestMock.getRequestURI()).thenReturn("/icon//z");
-
-        servlet.doGet(requestMock, responseMock);
-
-        verify(responseMock).sendError(400);
-    }
-
-    @Test
-    public void testDirectoryTraversalRejected() throws ServletException, IOException {
-        when(requestMock.getRequestURI()).thenReturn("/icon/../../z");
-
-        servlet.doGet(requestMock, responseMock);
-
-        verify(responseMock).sendError(400);
-    }
 }
