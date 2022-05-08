@@ -14,7 +14,6 @@ package org.openhab.core.io.console.karaf.internal;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -66,7 +65,7 @@ public class CommandWrapper implements Command, Action {
 
     @Override
     public Object execute(Session session, List<Object> argList) throws Exception {
-        String[] args = argList.stream().map(a -> a.toString()).collect(Collectors.toList()).toArray(new String[0]);
+        String[] args = argList.stream().map(Object::toString).toArray(String[]::new);
 
         final Console console = new OSGiConsole(getScope());
 

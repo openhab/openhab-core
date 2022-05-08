@@ -1,2 +1,0 @@
-Bundle-SymbolicName: ${project.artifactId}
-Karaf-Commands: org.openhab.core.karaf.internal.command
