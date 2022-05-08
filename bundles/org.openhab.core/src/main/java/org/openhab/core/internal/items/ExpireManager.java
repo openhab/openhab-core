@@ -141,11 +141,13 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         itemExpireMap.clear();
     }
 
-    private void processEvent(String itemName, Type type, boolean isStateUpdate) {
-        logger.trace("Received '{}' for item {}, state update = {}", type, itemName, isStateUpdate);
+    private void processEvent(String itemName, Type type, EventType eventType) {
+        logger.trace("Received '{}' for item {}, event type= {}", type, itemName, eventType);
         ExpireConfig expireConfig = getExpireConfig(itemName);
         if (expireConfig != null) {
-            if (isStateUpdate && expireConfig.ignoreStateUpdates) {
+            if (eventType == EventType.StateUpdate && expireConfig.ignoreStateUpdates) {
+                return;
+            } else if (eventType == EventType.Command && expireConfig.ignoreCommands) {
                 return;
             }
             Command expireCommand = expireConfig.expireCommand;
@@ -244,13 +246,13 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         }
         if (event instanceof ItemStateEvent) {
             ItemStateEvent isEvent = (ItemStateEvent) event;
-            processEvent(isEvent.getItemName(), isEvent.getItemState(), true);
+            processEvent(isEvent.getItemName(), isEvent.getItemState(), EventType.StateUpdate);
         } else if (event instanceof ItemCommandEvent) {
             ItemCommandEvent icEvent = (ItemCommandEvent) event;
-            processEvent(icEvent.getItemName(), icEvent.getItemCommand(), false);
+            processEvent(icEvent.getItemName(), icEvent.getItemCommand(), EventType.Command);
         } else if (event instanceof ItemStateChangedEvent) {
             ItemStateChangedEvent icEvent = (ItemStateChangedEvent) event;
-            processEvent(icEvent.getItemName(), icEvent.getItemState(), false);
+            processEvent(icEvent.getItemName(), icEvent.getItemState(), EventType.StateChanged);
         }
     }
 
@@ -289,6 +291,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
 
     static class ExpireConfig {
         static final String CONFIG_IGNORE_STATE_UPDATES = "ignoreStateUpdates";
+        static final String CONFIG_IGNORE_COMMANDS = "ignoreCommands";
 
         private static final StringType STRING_TYPE_NULL_HYPHEN = new StringType("'NULL'");
         private static final StringType STRING_TYPE_NULL = new StringType("NULL");
@@ -306,13 +309,14 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         final String durationString;
         final Duration duration;
         final boolean ignoreStateUpdates;
+        final boolean ignoreCommands;
 
         /**
          * Construct an ExpireConfig from the config string.
          *
          * Valid syntax:
          *
-         * {@code &lt;duration&gt;[,(state=|command=|)&lt;stateOrCommand&gt;][,ignoreStateUpdates]}<br>
+         * {@code &lt;duration&gt;[,(state=|command=|)&lt;stateOrCommand&gt;][,ignoreStateUpdates][,ignoreCommands]}<br>
          * if neither state= or command= is present, assume state
          *
          * @param item the item to which we are bound
@@ -331,6 +335,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                     : null;
 
             ignoreStateUpdates = getBooleanConfigValue(configuration, CONFIG_IGNORE_STATE_UPDATES);
+            ignoreCommands = getBooleanConfigValue(configuration, CONFIG_IGNORE_COMMANDS);
 
             if ((stateOrCommand != null) && (stateOrCommand.length() > 0)) {
                 if (stateOrCommand.startsWith(COMMAND_PREFIX)) {
@@ -412,7 +417,30 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         @Override
         public String toString() {
             return "duration='" + durationString + "', s=" + duration.toSeconds() + ", state='" + expireState
-                    + "', command='" + expireCommand + "', ignoreStateUpdates=" + ignoreStateUpdates;
+                    + "', command='" + expireCommand + "', ignoreStateUpdates=" + ignoreStateUpdates
+                    + ", ignoreCommands=" + ignoreCommands;
         }
+    }
+
+    /**
+     * Type of event received
+     *
+     * @author Sami Salonen - Initial contribution
+     *
+     */
+    static enum EventType {
+        /**
+         * State updated (but not changed)
+         */
+        StateUpdate,
+        /**
+         * State changed
+         */
+        StateChanged,
+        /**
+         * Command
+         */
+        Command
+
     }
 }
