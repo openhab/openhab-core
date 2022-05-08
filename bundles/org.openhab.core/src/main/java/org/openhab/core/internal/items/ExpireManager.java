@@ -330,14 +330,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                     ? configString.substring(commaPos + 1).trim()
                     : null;
 
-            Object ignoreStateUpdatesConfigObject = configuration.get(CONFIG_IGNORE_STATE_UPDATES);
-            if (ignoreStateUpdatesConfigObject instanceof String) {
-                ignoreStateUpdates = Boolean.parseBoolean((String) ignoreStateUpdatesConfigObject);
-            } else if (ignoreStateUpdatesConfigObject instanceof Boolean) {
-                ignoreStateUpdates = (Boolean) ignoreStateUpdatesConfigObject;
-            } else {
-                ignoreStateUpdates = false;
-            }
+            ignoreStateUpdates = getBooleanConfigValue(configuration, CONFIG_IGNORE_STATE_UPDATES);
 
             if ((stateOrCommand != null) && (stateOrCommand.length() > 0)) {
                 if (stateOrCommand.startsWith(COMMAND_PREFIX)) {
@@ -373,6 +366,27 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                 expireCommand = null;
                 expireState = UnDefType.UNDEF;
             }
+        }
+
+        /**
+         * Parse configuration value as primitive boolean. Supports parsing of String and Boolean values.
+         *
+         * @param configuration map of configuration keys and values
+         * @param configKey configuration key to lookup configuration map
+         * @return configuration value parsed as boolean. Defaults to false when configKey is not present in
+         *         configuration
+         */
+        private boolean getBooleanConfigValue(Map<String, Object> configuration, String configKey) {
+            boolean configValue;
+            Object configValueObject = configuration.get(configKey);
+            if (configValueObject instanceof String) {
+                configValue = Boolean.parseBoolean((String) configValueObject);
+            } else if (configValueObject instanceof Boolean) {
+                configValue = (Boolean) configValueObject;
+            } else {
+                configValue = false;
+            }
+            return configValue;
         }
 
         private Duration parseDuration(String durationString) throws IllegalArgumentException {
