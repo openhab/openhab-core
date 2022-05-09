@@ -85,7 +85,7 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
     }
 
     /**
-     * Removes all meta-data for a given namespace
+     * Removes all meta-data for a given item
      *
      * @param itemName the item name
      */public void removeMetadataByItemName(String itemName) {

@@ -151,7 +151,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
             dispatchBindingsPerType(reader, new String[] { reader.getBindingType() });
         } else {
             logger.warn("Attempted to register a second BindingConfigReader of type '{}'."
-                    + " The primarily reader will remain active!", reader.getBindingType());
+                    + " The previous reader will remain active!", reader.getBindingType());
         }
     }
 
