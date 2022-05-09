@@ -68,11 +68,27 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
     }
 
     /**
-     * Removes all meta-data for a given item name
+     * Removes all meta-data for a given namespace
      *
-     * @param itemName
+     * @param namespace the namespace
      */
-    public void removeMetadata(String itemName) {
+    public void removeMetadataByNamespace(String namespace) {
+        Set<Metadata> toBeRemoved;
+        try {
+            lock.writeLock().lock();
+            toBeRemoved = metadata.stream().filter(MetadataPredicates.hasNamespace(namespace)).collect(toSet());
+            metadata.removeAll(toBeRemoved);
+        } finally {
+            lock.writeLock().unlock();
+        }
+        toBeRemoved.forEach(this::notifyListenersAboutRemovedElement);
+    }
+
+    /**
+     * Removes all meta-data for a given namespace
+     *
+     * @param itemName the item name
+     */public void removeMetadataByItemName(String itemName) {
         Set<Metadata> toBeRemoved;
         try {
             lock.writeLock().lock();
@@ -85,7 +101,6 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
             notifyListenersAboutRemovedElement(m);
         }
     }
-
     @Override
     public Collection<Metadata> getAll() {
         try {
