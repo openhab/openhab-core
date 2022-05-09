@@ -40,6 +40,7 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.GroupItemStateChangedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.items.events.ItemStateEvent;
@@ -141,31 +142,23 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         itemExpireMap.clear();
     }
 
-    private void processEvent(String itemName, Type type, EventType eventType) {
-        logger.trace("Received '{}' for item {}, event type= {}", type, itemName, eventType);
-        ExpireConfig expireConfig = getExpireConfig(itemName);
-        if (expireConfig != null) {
-            if (eventType == EventType.StateUpdate && expireConfig.ignoreStateUpdates) {
-                return;
-            } else if (eventType == EventType.Command && expireConfig.ignoreCommands) {
-                return;
-            }
-            Command expireCommand = expireConfig.expireCommand;
-            State expireState = expireConfig.expireState;
+    private void processEvent(String itemName, Type stateOrCommand, ExpireConfig expireConfig, Class<?> eventClz) {
+        logger.trace("Received '{}' for item {}, event type= {}", stateOrCommand, itemName, eventClz.getSimpleName());
+        Command expireCommand = expireConfig.expireCommand;
+        State expireState = expireConfig.expireState;
 
-            if ((expireCommand != null && expireCommand.equals(type))
-                    || (expireState != null && expireState.equals(type))) {
-                // New event is expired command or state -> no further action needed
-                itemExpireMap.remove(itemName); // remove expire trigger until next update or command
-                logger.debug("Item {} received '{}'; stopping any future expiration.", itemName, type);
-            } else {
-                // New event is not the expired command or state, so add the trigger to the map
-                Duration duration = expireConfig.duration;
-                itemExpireMap.put(itemName, Instant.now().plus(duration));
-                logger.debug("Item {} will expire (with '{}' {}) in {} ms", itemName,
-                        expireCommand == null ? expireState : expireCommand,
-                        expireCommand == null ? "state" : "command", duration);
-            }
+        if ((expireCommand != null && expireCommand.equals(stateOrCommand))
+                || (expireState != null && expireState.equals(stateOrCommand))) {
+            // New event is expired command or state -> no further action needed
+            itemExpireMap.remove(itemName); // remove expire trigger until next update or command
+            logger.debug("Item {} received '{}'; stopping any future expiration.", itemName, stateOrCommand);
+        } else {
+            // New event is not the expired command or state, so add the trigger to the map
+            Duration duration = expireConfig.duration;
+            itemExpireMap.put(itemName, Instant.now().plus(duration));
+            logger.debug("Item {} will expire (with '{}' {}) in {} ms", itemName,
+                    expireCommand == null ? expireState : expireCommand, expireCommand == null ? "state" : "command",
+                    duration);
         }
     }
 
@@ -244,15 +237,29 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         if (!enabled) {
             return;
         }
+        if (!(event instanceof ItemEvent)) {
+            return;
+        }
+
+        ItemEvent itemEvent = (ItemEvent) event;
+        String itemName = itemEvent.getItemName();
+        ExpireConfig expireConfig = getExpireConfig(itemName);
+
         if (event instanceof ItemStateEvent) {
             ItemStateEvent isEvent = (ItemStateEvent) event;
-            processEvent(isEvent.getItemName(), isEvent.getItemState(), EventType.StateUpdate);
+            if (expireConfig != null && !expireConfig.ignoreStateUpdates) {
+                processEvent(itemName, isEvent.getItemState(), expireConfig, event.getClass());
+            }
         } else if (event instanceof ItemCommandEvent) {
             ItemCommandEvent icEvent = (ItemCommandEvent) event;
-            processEvent(icEvent.getItemName(), icEvent.getItemCommand(), EventType.Command);
+            if (expireConfig != null && !expireConfig.ignoreCommands) {
+                processEvent(itemName, icEvent.getItemCommand(), expireConfig, event.getClass());
+            }
         } else if (event instanceof ItemStateChangedEvent) {
             ItemStateChangedEvent icEvent = (ItemStateChangedEvent) event;
-            processEvent(icEvent.getItemName(), icEvent.getItemState(), EventType.StateChanged);
+            if (expireConfig != null) {
+                processEvent(itemName, icEvent.getItemState(), expireConfig, event.getClass());
+            }
         }
     }
 
@@ -422,25 +429,4 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         }
     }
 
-    /**
-     * Type of event received
-     *
-     * @author Sami Salonen - Initial contribution
-     *
-     */
-    static enum EventType {
-        /**
-         * State updated (but not changed)
-         */
-        StateUpdate,
-        /**
-         * State changed
-         */
-        StateChanged,
-        /**
-         * Command
-         */
-        Command
-
-    }
 }
