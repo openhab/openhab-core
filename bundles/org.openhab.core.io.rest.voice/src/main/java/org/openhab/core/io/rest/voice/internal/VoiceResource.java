@@ -247,7 +247,6 @@ public class VoiceResource implements RESTResource {
             @QueryParam("ksId") @Parameter(description = "keywork spotter ID") @Nullable String ksId,
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
             @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
-            @QueryParam("hliId") @Parameter(description = "interpreter ID", deprecated = true) @Nullable String hliId,
             @QueryParam("hliIds") @Parameter(description = "comma separated list of interpreter IDs") @Nullable String hliIds,
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("keyword") @Parameter(description = "keyword") @Nullable String keyword,
@@ -286,12 +285,6 @@ public class VoiceResource implements RESTResource {
             if (interpreters.isEmpty()) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
             }
-        } else if (hliId != null) {
-            HumanLanguageInterpreter interpreter = voiceManager.getHLI(hliId);
-            if (interpreter == null) {
-                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
-            }
-            interpreters = List.of(interpreter);
         }
         AudioSink sink = null;
         if (sinkId != null) {
@@ -347,7 +340,6 @@ public class VoiceResource implements RESTResource {
             @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId,
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
             @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
-            @QueryParam("hliId") @Parameter(description = "interpreter ID", deprecated = true) @Nullable String hliId,
             @QueryParam("hliIds") @Parameter(description = "interpreter IDs") @Nullable List<String> hliIds,
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("listeningItem") @Parameter(description = "listening item") @Nullable String listeningItem) {
@@ -378,12 +370,6 @@ public class VoiceResource implements RESTResource {
             if (interpreters.isEmpty()) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
             }
-        } else if (hliId != null) {
-            HumanLanguageInterpreter interpreter = voiceManager.getHLI(hliId);
-            if (interpreter == null) {
-                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
-            }
-            interpreters = List.of(interpreter);
         }
         AudioSink sink = null;
         if (sinkId != null) {

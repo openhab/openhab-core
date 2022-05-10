@@ -214,28 +214,6 @@ public interface VoiceManager {
      *
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
-     * @param hli the human language text interpreter to use or null to use the default service
-     * @param source the audio source to use or null to use the default source
-     * @param sink the audio sink to use or null to use the default sink
-     * @param locale the locale to use or null to use the default locale
-     * @param listeningItem the item to switch ON while listening to a question
-     * @throws IllegalStateException if required services are not all available or the provided locale is not supported
-     *             by all these services or a dialog is already started for this audio source
-     */
-    @Deprecated
-    void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, @Nullable HumanLanguageInterpreter hli,
-            @Nullable AudioSource source, @Nullable AudioSink sink, @Nullable Locale locale,
-            @Nullable String listeningItem) throws IllegalStateException;
-
-    /**
-     * Executes a simple dialog sequence without keyword spotting: audio source listening to retrieve a question or a
-     * command (Speech to Text service), interpretation and handling of the command, and finally playback of the
-     * answer on the audio sink (Text to Speech service).
-     *
-     * Only possible if no dialog processor is already started for the audio source.
-     *
-     * @param stt the speech-to-text service to use or null to use the default service
-     * @param tts the text-to-speech service to use or null to use the default service
      * @param hlis list of human language text interpreters to use, they are executed in order until the first
      *            successful response, or empty to use the default service
      * @param source the audio source to use or null to use the default source

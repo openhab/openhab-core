@@ -588,13 +588,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     }
 
     @Override
-    public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
-            @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException {
-        listenAndAnswer(stt, tts, hli == null ? List.of() : List.of(hli), source, sink, locale, listeningItem);
-    }
-
-    @Override
     public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, List<HumanLanguageInterpreter> hlis,
             @Nullable AudioSource source, @Nullable AudioSink sink, @Nullable Locale locale,
             @Nullable String listeningItem) throws IllegalStateException {
