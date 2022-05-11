@@ -40,6 +40,7 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.GroupItemStateChangedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.items.events.ItemStateEvent;
@@ -141,29 +142,23 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         itemExpireMap.clear();
     }
 
-    private void processEvent(String itemName, Type type, boolean isStateUpdate) {
-        logger.trace("Received '{}' for item {}, state update = {}", type, itemName, isStateUpdate);
-        ExpireConfig expireConfig = getExpireConfig(itemName);
-        if (expireConfig != null) {
-            if (isStateUpdate && expireConfig.ignoreStateUpdates) {
-                return;
-            }
-            Command expireCommand = expireConfig.expireCommand;
-            State expireState = expireConfig.expireState;
+    private void processEvent(String itemName, Type stateOrCommand, ExpireConfig expireConfig, Class<?> eventClz) {
+        logger.trace("Received '{}' for item {}, event type= {}", stateOrCommand, itemName, eventClz.getSimpleName());
+        Command expireCommand = expireConfig.expireCommand;
+        State expireState = expireConfig.expireState;
 
-            if ((expireCommand != null && expireCommand.equals(type))
-                    || (expireState != null && expireState.equals(type))) {
-                // New event is expired command or state -> no further action needed
-                itemExpireMap.remove(itemName); // remove expire trigger until next update or command
-                logger.debug("Item {} received '{}'; stopping any future expiration.", itemName, type);
-            } else {
-                // New event is not the expired command or state, so add the trigger to the map
-                Duration duration = expireConfig.duration;
-                itemExpireMap.put(itemName, Instant.now().plus(duration));
-                logger.debug("Item {} will expire (with '{}' {}) in {} ms", itemName,
-                        expireCommand == null ? expireState : expireCommand,
-                        expireCommand == null ? "state" : "command", duration);
-            }
+        if ((expireCommand != null && expireCommand.equals(stateOrCommand))
+                || (expireState != null && expireState.equals(stateOrCommand))) {
+            // New event is expired command or state -> no further action needed
+            itemExpireMap.remove(itemName); // remove expire trigger until next update or command
+            logger.debug("Item {} received '{}'; stopping any future expiration.", itemName, stateOrCommand);
+        } else {
+            // New event is not the expired command or state, so add the trigger to the map
+            Duration duration = expireConfig.duration;
+            itemExpireMap.put(itemName, Instant.now().plus(duration));
+            logger.debug("Item {} will expire (with '{}' {}) in {} ms", itemName,
+                    expireCommand == null ? expireState : expireCommand, expireCommand == null ? "state" : "command",
+                    duration);
         }
     }
 
@@ -242,15 +237,30 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         if (!enabled) {
             return;
         }
+        if (!(event instanceof ItemEvent)) {
+            return;
+        }
+
+        ItemEvent itemEvent = (ItemEvent) event;
+        String itemName = itemEvent.getItemName();
+        ExpireConfig expireConfig = getExpireConfig(itemName);
+        if (expireConfig == null) {
+            return;
+        }
+
         if (event instanceof ItemStateEvent) {
             ItemStateEvent isEvent = (ItemStateEvent) event;
-            processEvent(isEvent.getItemName(), isEvent.getItemState(), true);
+            if (!expireConfig.ignoreStateUpdates) {
+                processEvent(itemName, isEvent.getItemState(), expireConfig, event.getClass());
+            }
         } else if (event instanceof ItemCommandEvent) {
             ItemCommandEvent icEvent = (ItemCommandEvent) event;
-            processEvent(icEvent.getItemName(), icEvent.getItemCommand(), false);
+            if (!expireConfig.ignoreCommands) {
+                processEvent(itemName, icEvent.getItemCommand(), expireConfig, event.getClass());
+            }
         } else if (event instanceof ItemStateChangedEvent) {
             ItemStateChangedEvent icEvent = (ItemStateChangedEvent) event;
-            processEvent(icEvent.getItemName(), icEvent.getItemState(), false);
+            processEvent(itemName, icEvent.getItemState(), expireConfig, event.getClass());
         }
     }
 
@@ -289,6 +299,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
 
     static class ExpireConfig {
         static final String CONFIG_IGNORE_STATE_UPDATES = "ignoreStateUpdates";
+        static final String CONFIG_IGNORE_COMMANDS = "ignoreCommands";
 
         private static final StringType STRING_TYPE_NULL_HYPHEN = new StringType("'NULL'");
         private static final StringType STRING_TYPE_NULL = new StringType("NULL");
@@ -306,13 +317,14 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         final String durationString;
         final Duration duration;
         final boolean ignoreStateUpdates;
+        final boolean ignoreCommands;
 
         /**
          * Construct an ExpireConfig from the config string.
          *
          * Valid syntax:
          *
-         * {@code &lt;duration&gt;[,(state=|command=|)&lt;stateOrCommand&gt;][,ignoreStateUpdates]}<br>
+         * {@code &lt;duration&gt;[,(state=|command=|)&lt;stateOrCommand&gt;][,ignoreStateUpdates][,ignoreCommands]}<br>
          * if neither state= or command= is present, assume state
          *
          * @param item the item to which we are bound
@@ -330,14 +342,8 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                     ? configString.substring(commaPos + 1).trim()
                     : null;
 
-            Object ignoreStateUpdatesConfigObject = configuration.get(CONFIG_IGNORE_STATE_UPDATES);
-            if (ignoreStateUpdatesConfigObject instanceof String) {
-                ignoreStateUpdates = Boolean.parseBoolean((String) ignoreStateUpdatesConfigObject);
-            } else if (ignoreStateUpdatesConfigObject instanceof Boolean) {
-                ignoreStateUpdates = (Boolean) ignoreStateUpdatesConfigObject;
-            } else {
-                ignoreStateUpdates = false;
-            }
+            ignoreStateUpdates = getBooleanConfigValue(configuration, CONFIG_IGNORE_STATE_UPDATES);
+            ignoreCommands = getBooleanConfigValue(configuration, CONFIG_IGNORE_COMMANDS);
 
             if ((stateOrCommand != null) && (stateOrCommand.length() > 0)) {
                 if (stateOrCommand.startsWith(COMMAND_PREFIX)) {
@@ -375,6 +381,27 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             }
         }
 
+        /**
+         * Parse configuration value as primitive boolean. Supports parsing of String and Boolean values.
+         *
+         * @param configuration map of configuration keys and values
+         * @param configKey configuration key to lookup configuration map
+         * @return configuration value parsed as boolean. Defaults to false when configKey is not present in
+         *         configuration
+         */
+        private boolean getBooleanConfigValue(Map<String, Object> configuration, String configKey) {
+            boolean configValue;
+            Object configValueObject = configuration.get(configKey);
+            if (configValueObject instanceof String) {
+                configValue = Boolean.parseBoolean((String) configValueObject);
+            } else if (configValueObject instanceof Boolean) {
+                configValue = (Boolean) configValueObject;
+            } else {
+                configValue = false;
+            }
+            return configValue;
+        }
+
         private Duration parseDuration(String durationString) throws IllegalArgumentException {
             Matcher m = DURATION_PATTERN.matcher(durationString);
             if (!m.matches() || (m.group(1) == null && m.group(2) == null && m.group(3) == null)) {
@@ -398,7 +425,8 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         @Override
         public String toString() {
             return "duration='" + durationString + "', s=" + duration.toSeconds() + ", state='" + expireState
-                    + "', command='" + expireCommand + "', ignoreStateUpdates=" + ignoreStateUpdates;
+                    + "', command='" + expireCommand + "', ignoreStateUpdates=" + ignoreStateUpdates
+                    + ", ignoreCommands=" + ignoreCommands;
         }
     }
 }
