@@ -244,22 +244,23 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         ItemEvent itemEvent = (ItemEvent) event;
         String itemName = itemEvent.getItemName();
         ExpireConfig expireConfig = getExpireConfig(itemName);
+        if (expireConfig == null) {
+            return;
+        }
 
         if (event instanceof ItemStateEvent) {
             ItemStateEvent isEvent = (ItemStateEvent) event;
-            if (expireConfig != null && !expireConfig.ignoreStateUpdates) {
+            if (!expireConfig.ignoreStateUpdates) {
                 processEvent(itemName, isEvent.getItemState(), expireConfig, event.getClass());
             }
         } else if (event instanceof ItemCommandEvent) {
             ItemCommandEvent icEvent = (ItemCommandEvent) event;
-            if (expireConfig != null && !expireConfig.ignoreCommands) {
+            if (!expireConfig.ignoreCommands) {
                 processEvent(itemName, icEvent.getItemCommand(), expireConfig, event.getClass());
             }
         } else if (event instanceof ItemStateChangedEvent) {
             ItemStateChangedEvent icEvent = (ItemStateChangedEvent) event;
-            if (expireConfig != null) {
-                processEvent(itemName, icEvent.getItemState(), expireConfig, event.getClass());
-            }
+            processEvent(itemName, icEvent.getItemState(), expireConfig, event.getClass());
         }
     }
 
@@ -428,5 +429,4 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                     + ", ignoreCommands=" + ignoreCommands;
         }
     }
-
 }
