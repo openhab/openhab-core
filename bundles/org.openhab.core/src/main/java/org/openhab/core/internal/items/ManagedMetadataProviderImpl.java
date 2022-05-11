@@ -12,6 +12,11 @@
  */
 package org.openhab.core.internal.items;
 
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractManagedProvider;
@@ -75,5 +80,31 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
     public void removeItemMetadata(String name) {
         logger.debug("Removing all metadata for item {}", name);
         getAll().stream().filter(MetadataPredicates.ofItem(name)).map(Metadata::getUID).forEach(this::remove);
+    }
+
+    @Override
+    public Collection<Metadata> getAll() {
+        return super.getAll().stream().map(this::normalizeMetadata).collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public @Nullable Metadata get(MetadataKey key) {
+        Metadata metadata = super.get(key);
+        if (metadata != null) {
+            return normalizeMetadata(metadata);
+        }
+        return null;
+    }
+
+    private Metadata normalizeMetadata(Metadata metadata) {
+        return new Metadata(metadata.getUID(), metadata.getValue(), metadata.getConfiguration().entrySet().stream()
+                .map(this::normalizeConfigEntry).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+    }
+
+    private Map.Entry<String, Object> normalizeConfigEntry(Map.Entry<String, Object> entry) {
+        if (entry.getValue() instanceof Number) {
+            return Map.entry(entry.getKey(), new BigDecimal(entry.getValue().toString()));
+        }
+        return entry;
     }
 }
