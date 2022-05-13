@@ -97,6 +97,11 @@ public abstract class AbstractAudioServletTest extends JavaTest {
         return getHttpRequest(url).send();
     }
 
+    protected ContentResponse getHttpResponseWithAccept(AudioStream audioStream, String acceptHeader) throws Exception {
+        String url = serveStream(audioStream);
+        return getHttpRequest(url).header("Accept", acceptHeader).send();
+    }
+
     protected String serveStream(AudioStream stream) throws Exception {
         return serveStream(stream, null);
     }

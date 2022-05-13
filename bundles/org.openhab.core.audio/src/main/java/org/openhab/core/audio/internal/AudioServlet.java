@@ -19,9 +19,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +56,8 @@ public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
 
     private static final long serialVersionUID = -3364664035854567854L;
 
+    private static final List<String> WAV_MIME_TYPES = List.of("audio/wav", "audio/x-wav", "audio/vnd.wave");
+
     private static final String SERVLET_NAME = "/audio";
 
     private final Map<String, AudioStream> oneTimeStreams = new ConcurrentHashMap<>();
@@ -75,8 +80,8 @@ public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
         super.deactivate(SERVLET_NAME);
     }
 
-    private @Nullable InputStream prepareInputStream(final String streamId, final HttpServletResponse resp)
-            throws AudioException {
+    private @Nullable InputStream prepareInputStream(final String streamId, final HttpServletResponse resp,
+            List<String> acceptedMimeTypes) throws AudioException {
         final AudioStream stream;
         final boolean multiAccess;
         if (oneTimeStreams.containsKey(streamId)) {
@@ -96,7 +101,7 @@ public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
         if (AudioFormat.CODEC_MP3.equals(stream.getFormat().getCodec())) {
             mimeType = "audio/mpeg";
         } else if (AudioFormat.CONTAINER_WAVE.equals(stream.getFormat().getContainer())) {
-            mimeType = "audio/wav";
+            mimeType = WAV_MIME_TYPES.stream().filter(acceptedMimeTypes::contains).findFirst().orElse("audio/wav");
         } else if (AudioFormat.CONTAINER_OGG.equals(stream.getFormat().getContainer())) {
             mimeType = "audio/ogg";
         } else {
@@ -143,7 +148,10 @@ public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
 
         final String streamId = substringBefore(substringAfterLast(requestURI, "/"), ".");
 
-        try (final InputStream stream = prepareInputStream(streamId, resp)) {
+        List<String> acceptedMimeTypes = Stream.of(Objects.requireNonNullElse(req.getHeader("Accept"), "").split(","))
+                .map(String::trim).collect(Collectors.toList());
+
+        try (final InputStream stream = prepareInputStream(streamId, resp, acceptedMimeTypes)) {
             if (stream == null) {
                 logger.debug("Received request for invalid stream id at {}", requestURI);
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
