@@ -68,7 +68,7 @@ public class CommandWrapper implements Command, Action {
     public Object execute(Session session, List<Object> argList) throws Exception {
         String[] args = argList.stream().map(a -> a.toString()).collect(Collectors.toList()).toArray(new String[0]);
 
-        final Console console = new OSGiConsole(getScope());
+        final Console console = new OSGiConsole(getScope(), session.getConsole());
 
         if (args.length == 1 && "--help".equals(args[0])) {
             for (final String usage : command.getUsages()) {
