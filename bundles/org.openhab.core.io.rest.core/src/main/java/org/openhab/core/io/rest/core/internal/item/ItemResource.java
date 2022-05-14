@@ -569,8 +569,8 @@ public class ItemResource implements RESTResource {
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        Map<String, Object> metadata = metadataRegistry.stream().filter(metadataFilter).map(this::mapMetadata)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Object> metadata = metadataRegistry.stream().filter(metadataFilter)
+                .collect(Collectors.toMap(m -> m.getUID().getNamespace(), this::mapMetadata));
 
         return Response.ok(metadata).build();
     }
@@ -856,7 +856,7 @@ public class ItemResource implements RESTResource {
             MetadataKey key = new MetadataKey(namespace, dto.name);
             Metadata md = metadataRegistry.get(key);
             if (md != null && (filter == null || filter.test(md))) {
-                metadata.put(namespace, mapMetadata(md).getValue());
+                metadata.put(namespace, mapMetadata(md));
             }
         }
         if (dto instanceof EnrichedGroupItemDTO) {
@@ -870,11 +870,11 @@ public class ItemResource implements RESTResource {
         }
     }
 
-    private Map.Entry<String, Object> mapMetadata(Metadata metadata) {
+    private MetadataDTO mapMetadata(Metadata metadata) {
         MetadataDTO mdDto = new MetadataDTO();
         mdDto.value = metadata.getValue();
         mdDto.config = metadata.getConfiguration().isEmpty() ? null : metadata.getConfiguration();
-        return Map.entry(metadata.getUID().getNamespace(), mdDto);
+        return mdDto;
     }
 
     private boolean isEditable(String itemName) {
