@@ -546,6 +546,35 @@ public class ItemResource implements RESTResource {
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 
+    @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
+    @Path("/{itemName: \\w+}/metadata")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getAllMetadataForItem", summary = "Get all metadata for an item.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Map.class))),
+            @ApiResponse(responseCode = "404", description = "Item not found") })
+    public Response getAllMetadata(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @QueryParam("namespace") @Parameter(description = "namespace selector - a comma separated list or a regular expression (return everything if value given)") @Nullable String namespaceSelector,
+            @PathParam("itemName") @Parameter(description = "item name") String itemName) {
+        final Locale locale = localeService.getLocale(language);
+        final Set<String> namespaces = splitAndFilterNamespaces(namespaceSelector, locale);
+
+        Predicate<Metadata> metadataFilter = m -> itemName.equals(m.getUID().getItemName())
+                && (namespaces.isEmpty() || namespaces.contains(m.getUID().getNamespace()));
+
+        Item item = getItem(itemName);
+
+        if (item == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
+        Map<String, Object> metadata = metadataRegistry.stream().filter(metadataFilter).map(this::mapMetadata)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return Response.ok(metadata).build();
+    }
+
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/{namespace}")
@@ -827,10 +856,7 @@ public class ItemResource implements RESTResource {
             MetadataKey key = new MetadataKey(namespace, dto.name);
             Metadata md = metadataRegistry.get(key);
             if (md != null && (filter == null || filter.test(md))) {
-                MetadataDTO mdDto = new MetadataDTO();
-                mdDto.value = md.getValue();
-                mdDto.config = md.getConfiguration().isEmpty() ? null : md.getConfiguration();
-                metadata.put(namespace, mdDto);
+                metadata.put(namespace, mapMetadata(md).getValue());
             }
         }
         if (dto instanceof EnrichedGroupItemDTO) {
@@ -842,6 +868,13 @@ public class ItemResource implements RESTResource {
             // we only set it in the dto if there is really data available
             dto.metadata = metadata;
         }
+    }
+
+    private Map.Entry<String, Object> mapMetadata(Metadata metadata) {
+        MetadataDTO mdDto = new MetadataDTO();
+        mdDto.value = metadata.getValue();
+        mdDto.config = metadata.getConfiguration().isEmpty() ? null : metadata.getConfiguration();
+        return Map.entry(metadata.getUID().getNamespace(), mdDto);
     }
 
     private boolean isEditable(String itemName) {
