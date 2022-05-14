@@ -35,6 +35,7 @@ EventTrigger:
 	GroupMemberChangedEventTrigger |
 	EventEmittedTrigger |
 	TimerTrigger |
+	DateTimeTrigger |
 	SystemTrigger |
 	ThingStateUpdateEventTrigger |
 	ThingStateChangedEventTrigger
@@ -72,6 +73,10 @@ EventEmittedTrigger:
 TimerTrigger:
 	'Time' 'cron' cron=STRING |
 	'Time' 'is' time=('midnight' | 'noon')
+;
+
+DateTimeTrigger:
+    'Time' 'equals' item=ItemName
 ;
 
 SystemTrigger:
