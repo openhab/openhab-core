@@ -17,6 +17,7 @@ import static org.openhab.core.tools.i18n.plugin.Translations.TranslationsGroup.
 
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -39,15 +40,19 @@ import com.google.gson.JsonObject;
 public class JsonToTranslationsConverter {
 
     public Translations convert(BundleInfo bundleInfo) {
-        Builder<TranslationsSection> sectionBuilder = Stream.builder();
-
-        bundleInfo.getModuleTypesJson().stream().flatMap(this::moduleTypeSection).forEach(sectionBuilder::add);
-
-        return new Translations(
-                sectionBuilder.build().sorted(Comparator.comparing(s -> s.header)).collect(Collectors.toList()));
+        return new Translations(Stream.of( //
+                moduleTypeSection(bundleInfo) //
+        ).flatMap(Function.identity()).collect(Collectors.toList()));
     }
 
-    private Stream<Translations.TranslationsSection> moduleTypeSection(JsonObject moduleType) {
+    private Stream<TranslationsSection> moduleTypeSection(BundleInfo bundleInfo) {
+        Builder<TranslationsSection> sectionBuilder = Stream.builder();
+
+        bundleInfo.getModuleTypesJson().stream().flatMap(this::getModuleType).forEach(sectionBuilder::add);
+        return sectionBuilder.build().sorted(Comparator.comparing(s -> s.header));
+    }
+
+    private Stream<TranslationsSection> getModuleType(JsonObject moduleType) {
         String uid = getAsString(moduleType, "uid").orElse("");
         if (uid.isBlank()) {
             return Stream.of();
