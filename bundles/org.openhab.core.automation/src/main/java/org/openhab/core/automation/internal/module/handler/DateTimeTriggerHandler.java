@@ -14,12 +14,16 @@ package org.openhab.core.automation.internal.module.handler;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
+import org.openhab.core.automation.events.AutomationEventFactory;
+import org.openhab.core.automation.events.TimerEvent;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TimeBasedTriggerHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
@@ -115,6 +119,9 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
         ModuleHandlerCallback callback = this.callback;
         if (callback instanceof TriggerHandlerCallback triggerHandlerCallback) {
             triggerHandlerCallback.triggered(module);
+            TimerEvent event = AutomationEventFactory.createTimerEvent(module.getTypeUID(),
+                    Objects.requireNonNullElse(module.getLabel(), module.getId()), Map.of(CONFIG_ITEM_NAME, itemName));
+            triggerHandlerCallback.triggered(module, Map.of("event", event));
         } else {
             logger.debug("Tried to trigger, but callback isn't available!");
         }
