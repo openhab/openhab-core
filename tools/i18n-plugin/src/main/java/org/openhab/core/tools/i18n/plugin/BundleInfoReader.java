@@ -17,7 +17,11 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.maven.plugin.logging.Log;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -30,6 +34,10 @@ import org.openhab.core.thing.xml.internal.ChannelTypeXmlResult;
 import org.openhab.core.thing.xml.internal.ThingDescriptionReader;
 import org.openhab.core.thing.xml.internal.ThingTypeXmlResult;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.thoughtworks.xstream.converters.ConversionException;
 
 /**
@@ -42,6 +50,8 @@ public class BundleInfoReader {
 
     private final Log log;
 
+    private final Predicate<Path> isJsonFile = path -> Files.isRegularFile(path) && path.toString().endsWith(".json");
+
     public BundleInfoReader(Log log) {
         this.log = log;
     }
@@ -51,6 +61,7 @@ public class BundleInfoReader {
         readBindingInfo(ohinfPath, bundleInfo);
         readConfigInfo(ohinfPath, bundleInfo);
         readThingInfo(ohinfPath, bundleInfo);
+        readModuleTypeInfo(ohinfPath, bundleInfo);
         return bundleInfo;
     }
 
@@ -128,5 +139,31 @@ public class BundleInfoReader {
                 log.warn("Exception while reading thing info from: " + path, e);
             }
         });
+    }
+
+    private void readModuleTypeInfo(Path ohinfPath, BundleInfo bundleInfo) throws IOException {
+        Path modulePath = ohinfPath.resolve("automation").resolve("moduletypes");
+        if (Files.exists(modulePath)) {
+            try (Stream<Path> files = Files.walk(modulePath)) {
+                List<JsonObject> moduleTypes = files.filter(isJsonFile).flatMap(this::readJsonElementsFromFile)
+                        .map(JsonElement::getAsJsonObject).collect(Collectors.toList());
+                if (!moduleTypes.isEmpty()) {
+                    bundleInfo.setModuleTypesJson(moduleTypes);
+                }
+            }
+        }
+    }
+
+    private Stream<JsonElement> readJsonElementsFromFile(Path path) {
+        try {
+            JsonElement element = JsonParser.parseString(Files.readString(path));
+            if (element.isJsonObject()) {
+                return element.getAsJsonObject().entrySet().stream().map(Map.Entry::getValue)
+                        .filter(JsonElement::isJsonArray)
+                        .flatMap(a -> StreamSupport.stream(a.getAsJsonArray().spliterator(), false));
+            }
+        } catch (IOException ignored) {
+        }
+        return Stream.of(JsonNull.INSTANCE);
     }
 }

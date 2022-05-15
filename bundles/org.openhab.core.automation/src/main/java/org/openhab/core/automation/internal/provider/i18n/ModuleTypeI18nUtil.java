@@ -116,10 +116,10 @@ public class ModuleTypeI18nUtil {
     }
 
     private String inferInputKey(String moduleTypeUID, String inputName, String lastSegment) {
-        return MODULE_TYPE + ".input." + moduleTypeUID + ".name." + inputName + "." + lastSegment;
+        return MODULE_TYPE + "." + moduleTypeUID + ".input." + inputName + "." + lastSegment;
     }
 
     private String inferOutputKey(String moduleTypeUID, String outputName, String lastSegment) {
-        return MODULE_TYPE + ".output." + moduleTypeUID + ".name." + outputName + "." + lastSegment;
+        return MODULE_TYPE + "." + moduleTypeUID + ".output." + outputName + "." + lastSegment;
     }
 }
