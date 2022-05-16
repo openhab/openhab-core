@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.core.internal.link;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,6 +48,7 @@ import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.link.AbstractLink;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
@@ -139,6 +141,24 @@ public class ItemChannelLinkResource implements RESTResource {
         }
 
         return Response.ok(new Stream2JSONInputStream(linkStream)).build();
+    }
+
+    @DELETE
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{object}")
+    @Operation(operationId = "removeAllLinksForObject", summary = "Delete all links that refer to an item or thing.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK") })
+    public Response removeAllLinksForObject(
+            @PathParam("object") @Parameter(description = "item name or thing UID") String object) {
+        int removedLinks;
+        try {
+            ThingUID thingUID = new ThingUID(object);
+            removedLinks = itemChannelLinkRegistry.removeLinksForThing(thingUID);
+        } catch (IllegalArgumentException e) {
+            removedLinks = itemChannelLinkRegistry.removeLinksForItem(object);
+        }
+        return Response.ok(Map.of("count", removedLinks)).build();
     }
 
     @GET

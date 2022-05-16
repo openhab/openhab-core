@@ -48,12 +48,27 @@ public class ManagedItemChannelLinkProvider extends DefaultAbstractManagedProvid
         return key;
     }
 
-    public void removeLinksForThing(ThingUID thingUID) {
+    public int removeLinksForThing(ThingUID thingUID) {
+        int removedLinks = 0;
         Collection<ItemChannelLink> itemChannelLinks = getAll();
         for (ItemChannelLink itemChannelLink : itemChannelLinks) {
             if (itemChannelLink.getLinkedUID().getThingUID().equals(thingUID)) {
                 this.remove(itemChannelLink.getUID());
+                removedLinks++;
             }
         }
+        return removedLinks;
+    }
+
+    public int removeLinksForItem(String itemName) {
+        int removedLinks = 0;
+        Collection<ItemChannelLink> itemChannelLinks = getAll();
+        for (ItemChannelLink itemChannelLink : itemChannelLinks) {
+            if (itemChannelLink.getItemName().equals(itemName)) {
+                this.remove(itemChannelLink.getUID());
+                removedLinks++;
+            }
+        }
+        return removedLinks;
     }
 }
