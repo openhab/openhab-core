@@ -62,7 +62,7 @@ public class AudioServletTest extends AbstractAudioServletTest {
     }
 
     @Test
-    public void audioServletProcessesStreamFromWavFile() throws Exception {
+    public void audioServletProcessesStreamFromWavFileWithoutAcceptHeader() throws Exception {
         try (BundledSoundFileHandler fileHandler = new BundledSoundFileHandler()) {
             AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
 
@@ -71,6 +71,18 @@ public class AudioServletTest extends AbstractAudioServletTest {
             assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.OK_200));
             assertThat("The response media type was not as expected", response.getMediaType(),
                     is(MEDIA_TYPE_AUDIO_WAV));
+        }
+    }
+
+    @Test
+    public void audioServletProcessesStreamFromWavFileWithAcceptHeader() throws Exception {
+        try (BundledSoundFileHandler fileHandler = new BundledSoundFileHandler()) {
+            AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
+
+            ContentResponse response = getHttpResponseWithAccept(audioStream, "audio/invalid, audio/x-wav");
+
+            assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.OK_200));
+            assertThat("The response media type was not as expected", response.getMediaType(), is("audio/x-wav"));
         }
     }
 
