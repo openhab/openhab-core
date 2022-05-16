@@ -15,13 +15,13 @@ package org.openhab.core.audio.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -71,8 +71,23 @@ public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
     }
 
     @Deactivate
-    protected void deactivate() {
+    protected synchronized void deactivate() {
         super.deactivate(SERVLET_NAME);
+        multiTimeStreams.values().forEach(this::tryClose);
+        multiTimeStreams.clear();
+        streamTimeouts.clear();
+
+        oneTimeStreams.values().forEach(this::tryClose);
+        oneTimeStreams.clear();
+    }
+
+    private void tryClose(@Nullable AudioStream stream) {
+        if (stream != null) {
+            try {
+                stream.close();
+            } catch (IOException ignored) {
+            }
+        }
     }
 
     private @Nullable InputStream prepareInputStream(final String streamId, final HttpServletResponse resp)
@@ -108,8 +123,8 @@ public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
 
         // try to set the content-length, if possible
         if (stream instanceof FixedLengthAudioStream) {
-            final Long size = ((FixedLengthAudioStream) stream).length();
-            resp.setContentLength(size.intValue());
+            final long size = ((FixedLengthAudioStream) stream).length();
+            resp.setContentLength((int) size);
         }
 
         if (multiAccess) {
@@ -158,20 +173,15 @@ public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
 
     private synchronized void removeTimedOutStreams() {
         // Build list of expired streams.
-        final List<String> toRemove = new LinkedList<>();
-        for (Entry<String, Long> entry : streamTimeouts.entrySet()) {
-            if (entry.getValue() < System.nanoTime()) {
-                toRemove.add(entry.getKey());
-            }
-        }
+        long now = System.nanoTime();
+        final List<String> toRemove = streamTimeouts.entrySet().stream().filter(e -> e.getValue() < now)
+                .map(Entry::getKey).collect(Collectors.toList());
+
         toRemove.forEach(streamId -> {
             // the stream has expired, we need to remove it!
             final FixedLengthAudioStream stream = multiTimeStreams.remove(streamId);
             streamTimeouts.remove(streamId);
-            try {
-                stream.close();
-            } catch (IOException e) {
-            }
+            tryClose(stream);
             logger.debug("Removed timed out stream {}", streamId);
         });
     }
@@ -193,6 +203,10 @@ public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
 
     Map<String, FixedLengthAudioStream> getMultiTimeStreams() {
         return Collections.unmodifiableMap(multiTimeStreams);
+    }
+
+    Map<String, AudioStream> getOneTimeStreams() {
+        return Collections.unmodifiableMap(oneTimeStreams);
     }
 
     private String getRelativeURL(String streamId) {
