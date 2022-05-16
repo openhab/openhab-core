@@ -135,12 +135,13 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     try {
                         AudioSource source = args.length < 2 ? null : audioManager.getSource(args[1]);
                         AudioSink sink = args.length < 3 ? null : audioManager.getSink(args[2]);
-                        HumanLanguageInterpreter hli = args.length < 4 ? null : voiceManager.getHLI(args[3]);
+                        List<HumanLanguageInterpreter> hlis = args.length < 4 ? List.of()
+                                : voiceManager.getHLIsByIds(args[3]);
                         TTSService tts = args.length < 5 ? null : voiceManager.getTTS(args[4]);
                         STTService stt = args.length < 6 ? null : voiceManager.getSTT(args[5]);
                         KSService ks = args.length < 7 ? null : voiceManager.getKS(args[6]);
                         String keyword = args.length < 8 ? null : args[7];
-                        voiceManager.startDialog(ks, stt, tts, hli, source, sink, null, keyword, null);
+                        voiceManager.startDialog(ks, stt, tts, hlis, source, sink, null, keyword, null);
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while starting the dialog"));
@@ -158,10 +159,11 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     try {
                         AudioSource source = args.length < 2 ? null : audioManager.getSource(args[1]);
                         AudioSink sink = args.length < 3 ? null : audioManager.getSink(args[2]);
-                        HumanLanguageInterpreter hli = args.length < 4 ? null : voiceManager.getHLI(args[3]);
+                        List<HumanLanguageInterpreter> hlis = args.length < 4 ? List.of()
+                                : voiceManager.getHLIsByIds(args[3]);
                         TTSService tts = args.length < 5 ? null : voiceManager.getTTS(args[4]);
                         STTService stt = args.length < 6 ? null : voiceManager.getSTT(args[5]);
-                        voiceManager.listenAndAnswer(stt, tts, hli, source, sink, null, null);
+                        voiceManager.listenAndAnswer(stt, tts, hlis, source, sink, null, null);
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while executing the simple dialog sequence"));

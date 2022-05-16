@@ -21,6 +21,7 @@ import org.openhab.core.thing.type.DynamicStateDescriptionProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.LoggerFactory;
 
 /**
  * Dynamic provider of state options while leaving other state description fields as original.
@@ -30,7 +31,6 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = { DynamicStateDescriptionProvider.class, MagicDynamicStateDescriptionProvider.class })
 @NonNullByDefault
 public class MagicDynamicStateDescriptionProvider extends BaseDynamicStateDescriptionProvider {
-
     @Activate
     public MagicDynamicStateDescriptionProvider(final @Reference EventPublisher eventPublisher, //
             final @Reference ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService, //
@@ -38,5 +38,11 @@ public class MagicDynamicStateDescriptionProvider extends BaseDynamicStateDescri
         this.eventPublisher = eventPublisher;
         this.channelTypeI18nLocalizationService = channelTypeI18nLocalizationService;
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+
+        LoggerFactory.getLogger(getClass()).error("called activate constructor");
+    }
+
+    public void activate() {
+        LoggerFactory.getLogger(getClass()).error("called activate method");
     }
 }

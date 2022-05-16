@@ -42,7 +42,7 @@ public class XmlToTranslationsConverterTest {
 
         assertThat(translations.hasTranslations(), is(true));
         assertThat(translations.sections.size(), is(7));
-        assertThat(translations.keysStream().count(), is(30L));
+        assertThat(translations.keysStream().count(), is(31L));
 
         String lines = translations.linesStream().collect(Collectors.joining(System.lineSeparator()));
         assertThat(lines, containsString("# binding"));
@@ -53,6 +53,8 @@ public class XmlToTranslationsConverterTest {
                 "channel-group-type.acmeweather.forecast.channel.minTemperature.description = Minimum forecasted temperature in degrees Celsius (metric) or Fahrenheit (imperial)."));
         assertThat(lines, containsString(
                 "channel-type.acmeweather.time-stamp.state.pattern = %1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS"));
+        assertThat(lines,
+                containsString("thing-type.config.acmeweather.weather.language.option.de\\ DE = German (Germany)"));
     }
 
     @Test

@@ -15,7 +15,8 @@
 			<description>Language to be used by the ACME API.</description>
 			<options>
 				<option value="nl">Dutch</option>
-				<option value="de">German</option>
+				<option value="de DE">German (Germany)</option>
+				<option value="de CH">German (Switzerland)</option>
 				<option value="en">English</option>
 				<option value="fr">French</option>
 			</options>

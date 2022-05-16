@@ -14,13 +14,18 @@ package org.openhab.core.voice.internal;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -182,8 +187,8 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         ksService = new KSServiceStub();
         hliStub = new HumanLanguageInterpreterStub();
 
-        assertThrows(IllegalStateException.class, () -> voiceManager.startDialog(ksService, sttService, null, hliStub,
-                source, sink, Locale.ENGLISH, "word", null));
+        assertThrows(IllegalStateException.class, () -> voiceManager.startDialog(ksService, sttService, null,
+                List.of(hliStub), source, sink, Locale.ENGLISH, "word", null));
 
         assertFalse(ksService.isWordSpotted());
         assertFalse(sink.getIsStreamProcessed());
@@ -201,7 +206,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         registerService(hliStub);
 
         assertThrows(IllegalStateException.class, () -> voiceManager.startDialog(ksService, sttService, ttsService,
-                hliStub, source, sink, Locale.FRENCH, "mot", null));
+                List.of(hliStub), source, sink, Locale.FRENCH, "mot", null));
 
         assertFalse(ksService.isWordSpotted());
         assertFalse(sink.getIsStreamProcessed());
@@ -218,8 +223,8 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         registerService(ttsService);
         registerService(hliStub);
 
-        voiceManager.startDialog(ksService, sttService, ttsService, hliStub, source, sink, Locale.ENGLISH, "word",
-                null);
+        voiceManager.startDialog(ksService, sttService, ttsService, List.of(hliStub), source, sink, Locale.ENGLISH,
+                "word", null);
 
         assertTrue(ksService.isWordSpotted());
         assertTrue(sttService.isRecognized());
@@ -246,7 +251,8 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
 
         ksService.setExceptionExpected(true);
 
-        voiceManager.startDialog(ksService, sttService, ttsService, hliStub, source, sink, Locale.ENGLISH, "", null);
+        voiceManager.startDialog(ksService, sttService, ttsService, List.of(hliStub), source, sink, Locale.ENGLISH, "",
+                null);
 
         assertFalse(ksService.isWordSpotted());
         assertFalse(sttService.isRecognized());
@@ -271,8 +277,8 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
 
         ksService.setErrorExpected(true);
 
-        voiceManager.startDialog(ksService, sttService, ttsService, hliStub, source, sink, Locale.ENGLISH, "word",
-                null);
+        voiceManager.startDialog(ksService, sttService, ttsService, List.of(hliStub), source, sink, Locale.ENGLISH,
+                "word", null);
 
         assertFalse(ksService.isWordSpotted());
         assertFalse(sttService.isRecognized());
@@ -298,8 +304,8 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
 
         sttService.setExceptionExpected(true);
 
-        voiceManager.startDialog(ksService, sttService, ttsService, hliStub, source, sink, Locale.ENGLISH, "word",
-                null);
+        voiceManager.startDialog(ksService, sttService, ttsService, List.of(hliStub), source, sink, Locale.ENGLISH,
+                "word", null);
 
         assertTrue(ksService.isWordSpotted());
         assertFalse(sttService.isRecognized());
@@ -324,8 +330,8 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
 
         sttService.setErrorExpected(true);
 
-        voiceManager.startDialog(ksService, sttService, ttsService, hliStub, source, sink, Locale.ENGLISH, "word",
-                null);
+        voiceManager.startDialog(ksService, sttService, ttsService, List.of(hliStub), source, sink, Locale.ENGLISH,
+                "word", null);
 
         assertTrue(ksService.isWordSpotted());
         assertFalse(sttService.isRecognized());
@@ -350,8 +356,8 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
 
         hliStub.setExceptionExpected(true);
 
-        voiceManager.startDialog(ksService, sttService, ttsService, hliStub, source, sink, Locale.ENGLISH, "word",
-                null);
+        voiceManager.startDialog(ksService, sttService, ttsService, List.of(hliStub), source, sink, Locale.ENGLISH,
+                "word", null);
 
         assertTrue(ksService.isWordSpotted());
         assertTrue(sttService.isRecognized());
@@ -413,13 +419,13 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         registerService(ttsService);
         registerService(hliStub);
 
-        voiceManager.startDialog(ksService, sttService, ttsService, hliStub, source, sink, Locale.ENGLISH, "word",
-                null);
+        voiceManager.startDialog(ksService, sttService, ttsService, List.of(hliStub), source, sink, Locale.ENGLISH,
+                "word", null);
 
         assertTrue(ksService.isWordSpotted());
 
         assertThrows(IllegalStateException.class, () -> voiceManager.startDialog(ksService, sttService, ttsService,
-                hliStub, source, sink, Locale.ENGLISH, "word", null));
+                List.of(hliStub), source, sink, Locale.ENGLISH, "word", null));
 
         voiceManager.stopDialog(source);
 

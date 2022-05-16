@@ -14,7 +14,9 @@ package org.openhab.core.voice.internal;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -74,7 +76,7 @@ public class DialogProcessor implements KSListener, STTListener {
     private final @Nullable KSService ks;
     private final STTService stt;
     private final TTSService tts;
-    private final HumanLanguageInterpreter hli;
+    private final List<HumanLanguageInterpreter> hlis;
     private final AudioSource source;
     private final AudioSink sink;
     private final Locale locale;
@@ -104,12 +106,12 @@ public class DialogProcessor implements KSListener, STTListener {
     private @Nullable AudioStream streamKS;
     private @Nullable AudioStream streamSTT;
 
-    public DialogProcessor(KSService ks, STTService stt, TTSService tts, HumanLanguageInterpreter hli,
+    public DialogProcessor(KSService ks, STTService stt, TTSService tts, List<HumanLanguageInterpreter> hlis,
             AudioSource source, AudioSink sink, Locale locale, String keyword, @Nullable String listeningItem,
             EventPublisher eventPublisher, TranslationProvider i18nProvider, Bundle bundle) {
         this.locale = locale;
         this.ks = ks;
-        this.hli = hli;
+        this.hlis = hlis;
         this.stt = stt;
         this.tts = tts;
         this.source = source;
@@ -124,12 +126,12 @@ public class DialogProcessor implements KSListener, STTListener {
         this.ttsFormat = VoiceManagerImpl.getBestMatch(tts.getSupportedFormats(), sink.getSupportedFormats());
     }
 
-    public DialogProcessor(STTService stt, TTSService tts, HumanLanguageInterpreter hli, AudioSource source,
+    public DialogProcessor(STTService stt, TTSService tts, List<HumanLanguageInterpreter> hlis, AudioSource source,
             AudioSink sink, Locale locale, @Nullable String listeningItem, EventPublisher eventPublisher,
             TranslationProvider i18nProvider, Bundle bundle) {
         this.locale = locale;
         this.ks = null;
-        this.hli = hli;
+        this.hlis = hlis;
         this.stt = stt;
         this.tts = tts;
         this.source = source;
@@ -282,15 +284,21 @@ public class DialogProcessor implements KSListener, STTListener {
                 SpeechRecognitionEvent sre = (SpeechRecognitionEvent) sttEvent;
                 String question = sre.getTranscript();
                 logger.debug("Text recognized: {}", question);
-                try {
-                    toggleProcessing(false);
-                    String answer = hli.interpret(locale, question);
-                    logger.debug("Interpretation result: {}", answer);
-                    say(answer);
-                } catch (InterpretationException e) {
-                    logger.debug("Interpretation exception: {}", e.getMessage());
-                    say(e.getMessage());
+                toggleProcessing(false);
+                String answer = "";
+                String error = null;
+                for (HumanLanguageInterpreter interpreter : hlis) {
+                    try {
+                        answer = interpreter.interpret(locale, question);
+                        logger.debug("Interpretation result: {}", answer);
+                        error = null;
+                        break;
+                    } catch (InterpretationException e) {
+                        logger.debug("Interpretation exception: {}", e.getMessage());
+                        error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
+                    }
                 }
+                say(error != null ? error : answer);
                 abortSTT();
             }
         } else if (sttEvent instanceof RecognitionStartEvent) {
