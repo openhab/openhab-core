@@ -108,6 +108,12 @@ public class IconServlet extends OpenHABServlet {
         }
 
         String category = getCategory(req);
+        if (category.isEmpty()) {
+            logger.debug("URI must start with '{}' but is '{}'", SERVLET_NAME, req.getRequestURI());
+            resp.sendError(400);
+            return;
+        }
+
         String state = getState(req);
         String iconSetId = getIconSetId(req);
 
