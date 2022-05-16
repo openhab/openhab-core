@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.karaf.internal.command;
+package org.openhab.core.io.console.karaf.internal;
 
 import static org.apache.karaf.shell.support.ansi.SimpleAnsi.*;
 

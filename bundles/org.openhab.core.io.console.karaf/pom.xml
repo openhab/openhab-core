@@ -26,6 +26,12 @@
       <artifactId>org.openhab.core.io.console</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.karaf.wrapper</groupId>
+      <artifactId>org.apache.karaf.wrapper.core</artifactId>
+      <version>${karaf.compile.version}</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
 </project>
