@@ -42,7 +42,7 @@ public class XmlToTranslationsConverterTest {
 
         assertThat(translations.hasTranslations(), is(true));
         assertThat(translations.sections.size(), is(7));
-        assertThat(translations.keysStream().count(), is(31L));
+        assertThat(translations.keysStream().count(), is(34L));
 
         String lines = translations.linesStream().collect(Collectors.joining(System.lineSeparator()));
         assertThat(lines, containsString("# binding"));
@@ -55,6 +55,9 @@ public class XmlToTranslationsConverterTest {
                 "channel-type.acmeweather.time-stamp.state.pattern = %1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS"));
         assertThat(lines,
                 containsString("thing-type.config.acmeweather.weather.language.option.de\\ DE = German (Germany)"));
+        assertThat(lines, containsString("channel-type.acmeweather.temperature.state.option.VALUE\\ 1 = My label 1"));
+        assertThat(lines, containsString("channel-type.acmeweather.temperature.state.option.VALUE\\ 2 = My label 2"));
+        assertThat(lines, containsString("channel-type.acmeweather.temperature.state.option.VALUE\\ 3 = My label 3"));
     }
 
     @Test

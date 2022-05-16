@@ -29,6 +29,9 @@
 		<state pattern="%d degree Celsius">
 			<options>
 				<option value="VALUE">My label</option>
+				<option value="VALUE 1">My label 1</option>
+				<option value="VALUE:2">My label 2</option>
+				<option value="VALUE=3">My label 3</option>
 			</options>
 		</state>
 	</channel-type>

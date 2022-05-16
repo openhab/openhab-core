@@ -271,7 +271,8 @@ public class XmlToTranslationsConverter {
             if (stateDescription != null) {
                 stateDescription.getOptions().stream()
                         .map(option -> entry(
-                                String.format("%s.%s.state.option.%s", keyPrefix, channelId, option.getValue()),
+                                String.format("%s.%s.state.option.%s", keyPrefix, channelId,
+                                        option.getValue().replaceAll("[ :=]", Matcher.quoteReplacement("\\ "))),
                                 option.getLabel()))
                         .forEach(entriesBuilder::add);
 
@@ -354,7 +355,7 @@ public class XmlToTranslationsConverter {
             parameter.getOptions().stream()
                     .map(option -> entry(
                             String.format("%s.option.%s", parameterKeyPrefix,
-                                    option.getValue().replaceAll(" ", Matcher.quoteReplacement("\\ "))),
+                                    option.getValue().replaceAll("[ :=]", Matcher.quoteReplacement("\\ "))),
                             option.getLabel()))
                     .forEach(entriesBuilder::add);
 
