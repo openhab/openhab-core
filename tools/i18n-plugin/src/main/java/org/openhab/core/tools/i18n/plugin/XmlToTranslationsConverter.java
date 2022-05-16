@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -351,7 +352,9 @@ public class XmlToTranslationsConverter {
             entriesBuilder.add(entry(String.format("%s.description", parameterKeyPrefix), parameter.getDescription()));
 
             parameter.getOptions().stream()
-                    .map(option -> entry(String.format("%s.option.%s", parameterKeyPrefix, option.getValue()),
+                    .map(option -> entry(
+                            String.format("%s.option.%s", parameterKeyPrefix,
+                                    option.getValue().replaceAll(" ", Matcher.quoteReplacement("\\ "))),
                             option.getLabel()))
                     .forEach(entriesBuilder::add);
 
