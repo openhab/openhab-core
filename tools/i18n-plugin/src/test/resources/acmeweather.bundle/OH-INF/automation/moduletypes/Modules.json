@@ -1,0 +1,43 @@
+{
+	"triggers": [
+		{
+			"uid": "acme.WeatherBadTrigger",
+			"label": "Weather Bad Trigger",
+			"description": "Triggers when weather is bad",
+			"configDescriptions": [
+				{
+					"name": "minimumLevel",
+					"type": "INTEGER",
+					"label": "Minimum Level",
+					"description": "The minimum level that results in a trigger",
+					"required": true,
+					"default": "5"
+				}
+			],
+			"outputs": [
+				{
+					"name": "level",
+					"type": "java.lang.Integer",
+					"label": "Level",
+					"description": "The level that triggered this event."
+				}
+			]
+		}
+	],
+	"conditions": [
+		{
+			"uid": "acme.WeatherCondition",
+			"label": "the weather is good",
+			"description": "Compares the weather to a weather level (0 - 10)",
+			"configDescriptions": [
+				{
+					"name": "threshold",
+					"type": "INTEGER",
+					"label": "Threshold",
+					"description": "the maximum weather level that is considered good",
+					"required": true
+				}
+			]
+		}
+	]
+}

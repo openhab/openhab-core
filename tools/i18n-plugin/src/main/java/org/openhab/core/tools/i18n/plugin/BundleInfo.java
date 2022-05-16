@@ -42,6 +42,7 @@ public class BundleInfo {
     private List<ChannelTypeXmlResult> channelTypesXml = new ArrayList<>(5);
     private List<ThingTypeXmlResult> thingTypesXml = new ArrayList<>(5);
     private List<JsonObject> moduleTypesJson = new ArrayList<>(5);
+    private List<JsonObject> ruleTemplateJson = new ArrayList<>(5);
 
     public String getBindingId() {
         return bindingId;
@@ -89,6 +90,14 @@ public class BundleInfo {
 
     public void setModuleTypesJson(List<JsonObject> moduleTypesJson) {
         this.moduleTypesJson = moduleTypesJson;
+    }
+
+    public List<JsonObject> getRuleTemplateJson() {
+        return ruleTemplateJson;
+    }
+
+    public void setRuleTemplateJson(List<JsonObject> ruleTemplateJson) {
+        this.ruleTemplateJson = ruleTemplateJson;
     }
 
     public List<ThingTypeXmlResult> getThingTypesXml() {

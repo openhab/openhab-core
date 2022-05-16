@@ -62,6 +62,7 @@ public class BundleInfoReader {
         readConfigInfo(ohinfPath, bundleInfo);
         readThingInfo(ohinfPath, bundleInfo);
         readModuleTypeInfo(ohinfPath, bundleInfo);
+        readRuleTemplateInfo(ohinfPath, bundleInfo);
         return bundleInfo;
     }
 
@@ -149,6 +150,19 @@ public class BundleInfoReader {
                         .map(JsonElement::getAsJsonObject).collect(Collectors.toList());
                 if (!moduleTypes.isEmpty()) {
                     bundleInfo.setModuleTypesJson(moduleTypes);
+                }
+            }
+        }
+    }
+
+    private void readRuleTemplateInfo(Path ohinfPath, BundleInfo bundleInfo) throws IOException {
+        Path template = ohinfPath.resolve("automation").resolve("templates");
+        if (Files.exists(template)) {
+            try (Stream<Path> files = Files.walk(template)) {
+                List<JsonObject> ruleTemplates = files.filter(isJsonFile).flatMap(this::readJsonElementsFromFile)
+                        .map(JsonElement::getAsJsonObject).collect(Collectors.toList());
+                if (!ruleTemplates.isEmpty()) {
+                    bundleInfo.setRuleTemplateJson(ruleTemplates);
                 }
             }
         }

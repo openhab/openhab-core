@@ -41,7 +41,7 @@ public class JsonToTranslationsConverter {
 
     public Translations convert(BundleInfo bundleInfo) {
         return new Translations(Stream.of( //
-                moduleTypeSection(bundleInfo) //
+                moduleTypeSection(bundleInfo), ruleTemplateSection(bundleInfo)//
         ).flatMap(Function.identity()).collect(Collectors.toList()));
     }
 
@@ -49,6 +49,13 @@ public class JsonToTranslationsConverter {
         Builder<TranslationsSection> sectionBuilder = Stream.builder();
 
         bundleInfo.getModuleTypesJson().stream().flatMap(this::getModuleType).forEach(sectionBuilder::add);
+        return sectionBuilder.build().sorted(Comparator.comparing(s -> s.header));
+    }
+
+    private Stream<TranslationsSection> ruleTemplateSection(BundleInfo bundleInfo) {
+        Builder<TranslationsSection> sectionBuilder = Stream.builder();
+
+        bundleInfo.getRuleTemplateJson().stream().flatMap(this::getRuleTemplate).forEach(sectionBuilder::add);
         return sectionBuilder.build().sorted(Comparator.comparing(s -> s.header));
     }
 
@@ -88,6 +95,25 @@ public class JsonToTranslationsConverter {
             String prefix = globalPrefix + "output.";
             groupBuilder.add(getGroupFromArray(outputsElement, prefix));
         }
+
+        return Stream.of(new TranslationsSection(uid, groupBuilder.build().collect(Collectors.toList())));
+    }
+
+    private Stream<TranslationsSection> getRuleTemplate(JsonObject ruleTemplate) {
+        String uid = getAsString(ruleTemplate, "uid").orElse("");
+        if (uid.isBlank()) {
+            return Stream.of();
+        }
+
+        String globalPrefix = "rule-template." + uid + ".";
+        Builder<TranslationsGroup> groupBuilder = Stream.builder();
+
+        // global entries
+        Builder<TranslationsEntry> entriesBuilder = Stream.builder();
+        getAsString(ruleTemplate, "label").ifPresent(label -> entriesBuilder.add(entry(globalPrefix + "label", label)));
+        getAsString(ruleTemplate, "description")
+                .ifPresent(label -> entriesBuilder.add(entry(globalPrefix + "description", label)));
+        groupBuilder.add(group(entriesBuilder.build()));
 
         return Stream.of(new TranslationsSection(uid, groupBuilder.build().collect(Collectors.toList())));
     }
