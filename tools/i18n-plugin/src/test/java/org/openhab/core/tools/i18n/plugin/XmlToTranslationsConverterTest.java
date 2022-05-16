@@ -56,8 +56,8 @@ public class XmlToTranslationsConverterTest {
         assertThat(lines,
                 containsString("thing-type.config.acmeweather.weather.language.option.de\\ DE = German (Germany)"));
         assertThat(lines, containsString("channel-type.acmeweather.temperature.state.option.VALUE\\ 1 = My label 1"));
-        assertThat(lines, containsString("channel-type.acmeweather.temperature.state.option.VALUE\\ 2 = My label 2"));
-        assertThat(lines, containsString("channel-type.acmeweather.temperature.state.option.VALUE\\ 3 = My label 3"));
+        assertThat(lines, containsString("channel-type.acmeweather.temperature.state.option.VALUE\\:2 = My label 2"));
+        assertThat(lines, containsString("channel-type.acmeweather.temperature.state.option.VALUE\\=3 = My label 3"));
     }
 
     @Test

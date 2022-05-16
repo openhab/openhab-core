@@ -98,7 +98,7 @@ public class PropertiesToTranslationsConverter {
                 int index = line.indexOf("=");
                 if (index == -1) {
                     log.warn("Ignoring invalid translation key/value pair: " + line);
-                } else {
+                } else if (!(index > 0 && line.charAt(index - 1) == '\\')) { // ignore escaped =
                     if (entriesBuilder == null) {
                         entriesBuilder = Stream.builder();
                     }

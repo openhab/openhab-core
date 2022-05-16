@@ -20,7 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -50,6 +50,8 @@ import org.openhab.core.types.StateDescription;
  */
 @NonNullByDefault
 public class XmlToTranslationsConverter {
+
+    private static final Pattern OPTION_ESCAPE_PATTERN = Pattern.compile("([ :=])");
 
     public Translations convert(BundleInfo bundleInfo) {
         String bindingId = bundleInfo.getBindingId();
@@ -272,7 +274,7 @@ public class XmlToTranslationsConverter {
                 stateDescription.getOptions().stream()
                         .map(option -> entry(
                                 String.format("%s.%s.state.option.%s", keyPrefix, channelId,
-                                        option.getValue().replaceAll("[ :=]", Matcher.quoteReplacement("\\ "))),
+                                        OPTION_ESCAPE_PATTERN.matcher(option.getValue()).replaceAll("\\\\$1")),
                                 option.getLabel()))
                         .forEach(entriesBuilder::add);
 
@@ -355,7 +357,7 @@ public class XmlToTranslationsConverter {
             parameter.getOptions().stream()
                     .map(option -> entry(
                             String.format("%s.option.%s", parameterKeyPrefix,
-                                    option.getValue().replaceAll("[ :=]", Matcher.quoteReplacement("\\ "))),
+                                    OPTION_ESCAPE_PATTERN.matcher(option.getValue()).replaceAll("\\\\$1")),
                             option.getLabel()))
                     .forEach(entriesBuilder::add);
 
