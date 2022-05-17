@@ -161,7 +161,7 @@ public class Voice {
      * @param text The text to interpret
      * @param interpreters Comma separated list of human language text interpreters to use
      */
-    @ActionDoc(text = "interprets a given text by a given human language interpreter(s)", returns = "human language response")
+    @ActionDoc(text = "interprets a given text by given human language interpreter(s)", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
             @ParamDoc(name = "interpreters") @Nullable String interpreters) {
         String response;
@@ -185,7 +185,7 @@ public class Voice {
      * @param interpreters Comma separated list of human language text interpreters to use
      * @param sink The name of audio sink to be used to play the error message
      */
-    @ActionDoc(text = "interprets a given text by a given human language interpreter(s)", returns = "human language response")
+    @ActionDoc(text = "interprets a given text by given human language interpreter(s) and using the given sink", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
             @ParamDoc(name = "interpreters") String interpreters, @ParamDoc(name = "sink") @Nullable String sink) {
         String response;
