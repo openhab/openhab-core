@@ -303,11 +303,6 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     }
 
     private @Nullable Voice getVoice(String id) {
-        for (Voice voice : voiceManager.getAllVoices()) {
-            if (voice.getUID().equals(id)) {
-                return voice;
-            }
-        }
-        return null;
+        return voiceManager.getAllVoices().stream().filter(voice -> voice.getUID().equals(id)).findAny().orElse(null);
     }
 }

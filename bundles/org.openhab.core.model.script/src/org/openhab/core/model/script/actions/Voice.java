@@ -428,19 +428,15 @@ public class Voice {
         }
 
         try {
-            VoiceActionService.voiceManager.listenAndAnswer(sttService, ttsService, prefVoice, hliServices,
-                    audioSource, audioSink, loc, listeningItem);
+            VoiceActionService.voiceManager.listenAndAnswer(sttService, ttsService, prefVoice, hliServices, audioSource,
+                    audioSink, loc, listeningItem);
         } catch (IllegalStateException e) {
             logger.warn("Failed executing simple dialog: {}", e.getMessage());
         }
     }
 
     private static org.openhab.core.voice.@Nullable Voice getVoice(String id) {
-        for (org.openhab.core.voice.Voice voice : VoiceActionService.voiceManager.getAllVoices()) {
-            if (voice.getUID().equals(id)) {
-                return voice;
-            }
-        }
-        return null;
+        return VoiceActionService.voiceManager.getAllVoices().stream().filter(voice -> voice.getUID().equals(id))
+                .findAny().orElse(null);
     }
 }
