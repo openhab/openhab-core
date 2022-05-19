@@ -499,7 +499,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public void startDialog() throws IllegalStateException {
-        startDialog(null, null, null, List.of(), null, null, null, this.keyword, this.listeningItem);
+        startDialog(null, null, null, null, List.of(), null, null, null, this.keyword, this.listeningItem);
     }
 
     @Override
@@ -507,18 +507,20 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
             throws IllegalStateException {
-        startDialog(ks, stt, tts, hli == null ? List.of() : List.of(hli), source, sink, locale, keyword, listeningItem);
+        startDialog(ks, stt, tts, null, hli == null ? List.of() : List.of(hli), source, sink, locale, keyword,
+                listeningItem);
     }
 
     @Override
     public void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
-            List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
-            @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
+            @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source,
+            @Nullable AudioSink sink, @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
             throws IllegalStateException {
         // use defaults, if null
         KSService ksService = (ks == null) ? getKS() : ks;
         STTService sttService = (stt == null) ? getSTT() : stt;
         TTSService ttsService = (tts == null) ? getTTS() : tts;
+        Voice prefVoice = voice == null ? getDefaultVoice() : voice;
         List<HumanLanguageInterpreter> interpreters = hlis;
         if (interpreters.isEmpty()) {
             HumanLanguageInterpreter hli = getHLI();
@@ -545,8 +547,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             if (processor == null) {
                 logger.debug("Starting a new dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
-                processor = new DialogProcessor(ksService, sttService, ttsService, interpreters, audioSource, audioSink,
-                        loc, kw, item, this.eventPublisher, this.i18nProvider, b);
+                processor = new DialogProcessor(ksService, sttService, ttsService, prefVoice, interpreters, audioSource,
+                        audioSink, loc, kw, item, this.eventPublisher, this.i18nProvider, b);
                 dialogProcessors.put(audioSource.getId(), processor);
                 processor.start();
             } else {
@@ -584,16 +586,17 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public void listenAndAnswer() throws IllegalStateException {
-        listenAndAnswer(null, null, List.of(), null, null, null, null);
+        listenAndAnswer(null, null, null, List.of(), null, null, null, null);
     }
 
     @Override
-    public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, List<HumanLanguageInterpreter> hlis,
-            @Nullable AudioSource source, @Nullable AudioSink sink, @Nullable Locale locale,
-            @Nullable String listeningItem) throws IllegalStateException {
+    public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, @Nullable Voice voice,
+            List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException {
         // use defaults, if null
         STTService sttService = (stt == null) ? getSTT() : stt;
         TTSService ttsService = (tts == null) ? getTTS() : tts;
+        Voice prefVoice = voice == null ? getDefaultVoice() : voice;
         List<HumanLanguageInterpreter> interpreters = hlis;
         if (interpreters.isEmpty()) {
             HumanLanguageInterpreter hli = getHLI();
@@ -619,8 +622,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             if (processor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
-                processor = new DialogProcessor(sttService, ttsService, interpreters, audioSource, audioSink, loc, item,
-                        this.eventPublisher, this.i18nProvider, b);
+                processor = new DialogProcessor(sttService, ttsService, prefVoice, interpreters, audioSource, audioSink,
+                        loc, item, this.eventPublisher, this.i18nProvider, b);
                 processor.start();
             } else {
                 throw new IllegalStateException(String.format(

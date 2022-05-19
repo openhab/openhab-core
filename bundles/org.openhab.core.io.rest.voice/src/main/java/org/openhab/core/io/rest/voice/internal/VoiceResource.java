@@ -247,6 +247,7 @@ public class VoiceResource implements RESTResource {
             @QueryParam("ksId") @Parameter(description = "keywork spotter ID") @Nullable String ksId,
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
             @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
+            @QueryParam("voiceId") @Parameter(description = "voice ID") @Nullable String voiceId,
             @QueryParam("hliIds") @Parameter(description = "comma separated list of interpreter IDs") @Nullable String hliIds,
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("keyword") @Parameter(description = "keyword") @Nullable String keyword,
@@ -279,6 +280,13 @@ public class VoiceResource implements RESTResource {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Text-to-Speech not found");
             }
         }
+        Voice voice = null;
+        if (voiceId != null) {
+            voice = getVoice(voiceId);
+            if (voice == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Voice not found");
+            }
+        }
         List<HumanLanguageInterpreter> interpreters = List.of();
         if (hliIds != null) {
             interpreters = voiceManager.getHLIsByIds(hliIds);
@@ -296,7 +304,7 @@ public class VoiceResource implements RESTResource {
         final Locale locale = localeService.getLocale(language);
 
         try {
-            voiceManager.startDialog(ks, stt, tts, interpreters, source, sink, locale, keyword, listeningItem);
+            voiceManager.startDialog(ks, stt, tts, voice, interpreters, source, sink, locale, keyword, listeningItem);
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
@@ -340,6 +348,7 @@ public class VoiceResource implements RESTResource {
             @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId,
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
             @QueryParam("ttsId") @Parameter(description = "Text-to-Speech ID") @Nullable String ttsId,
+            @QueryParam("voiceId") @Parameter(description = "voice ID") @Nullable String voiceId,
             @QueryParam("hliIds") @Parameter(description = "interpreter IDs") @Nullable List<String> hliIds,
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("listeningItem") @Parameter(description = "listening item") @Nullable String listeningItem) {
@@ -364,6 +373,13 @@ public class VoiceResource implements RESTResource {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Text-to-Speech not found");
             }
         }
+        Voice voice = null;
+        if (voiceId != null) {
+            voice = getVoice(voiceId);
+            if (voice == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Voice not found");
+            }
+        }
         List<HumanLanguageInterpreter> interpreters = List.of();
         if (hliIds != null) {
             interpreters = voiceManager.getHLIsByIds(hliIds);
@@ -381,10 +397,19 @@ public class VoiceResource implements RESTResource {
         final Locale locale = localeService.getLocale(language);
 
         try {
-            voiceManager.listenAndAnswer(stt, tts, interpreters, source, sink, locale, listeningItem);
+            voiceManager.listenAndAnswer(stt, tts, voice, interpreters, source, sink, locale, listeningItem);
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
         }
+    }
+
+    private @Nullable Voice getVoice(String id) {
+        for (Voice voice : voiceManager.getAllVoices()) {
+            if (voice.getUID().equals(id)) {
+                return voice;
+            }
+        }
+        return null;
     }
 }

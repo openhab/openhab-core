@@ -76,6 +76,7 @@ public class DialogProcessor implements KSListener, STTListener {
     private final @Nullable KSService ks;
     private final STTService stt;
     private final TTSService tts;
+    private final @Nullable Voice prefVoice;
     private final List<HumanLanguageInterpreter> hlis;
     private final AudioSource source;
     private final AudioSink sink;
@@ -106,14 +107,16 @@ public class DialogProcessor implements KSListener, STTListener {
     private @Nullable AudioStream streamKS;
     private @Nullable AudioStream streamSTT;
 
-    public DialogProcessor(KSService ks, STTService stt, TTSService tts, List<HumanLanguageInterpreter> hlis,
-            AudioSource source, AudioSink sink, Locale locale, String keyword, @Nullable String listeningItem,
-            EventPublisher eventPublisher, TranslationProvider i18nProvider, Bundle bundle) {
+    public DialogProcessor(KSService ks, STTService stt, TTSService tts, @Nullable Voice voice,
+            List<HumanLanguageInterpreter> hlis, AudioSource source, AudioSink sink, Locale locale, String keyword,
+            @Nullable String listeningItem, EventPublisher eventPublisher, TranslationProvider i18nProvider,
+            Bundle bundle) {
         this.locale = locale;
         this.ks = ks;
         this.hlis = hlis;
         this.stt = stt;
         this.tts = tts;
+        this.prefVoice = voice;
         this.source = source;
         this.sink = sink;
         this.keyword = keyword;
@@ -126,14 +129,15 @@ public class DialogProcessor implements KSListener, STTListener {
         this.ttsFormat = VoiceManagerImpl.getBestMatch(tts.getSupportedFormats(), sink.getSupportedFormats());
     }
 
-    public DialogProcessor(STTService stt, TTSService tts, List<HumanLanguageInterpreter> hlis, AudioSource source,
-            AudioSink sink, Locale locale, @Nullable String listeningItem, EventPublisher eventPublisher,
-            TranslationProvider i18nProvider, Bundle bundle) {
+    public DialogProcessor(STTService stt, TTSService tts, @Nullable Voice voice, List<HumanLanguageInterpreter> hlis,
+            AudioSource source, AudioSink sink, Locale locale, @Nullable String listeningItem,
+            EventPublisher eventPublisher, TranslationProvider i18nProvider, Bundle bundle) {
         this.locale = locale;
         this.ks = null;
         this.hlis = hlis;
         this.stt = stt;
         this.tts = tts;
+        this.prefVoice = voice;
         this.source = source;
         this.sink = sink;
         this.keyword = "";
@@ -332,9 +336,11 @@ public class DialogProcessor implements KSListener, STTListener {
         try {
             Voice voice = null;
             for (Voice currentVoice : tts.getAvailableVoices()) {
-                if (locale.getLanguage().equals(currentVoice.getLocale().getLanguage())) {
+                if (!locale.getLanguage().equals(currentVoice.getLocale().getLanguage())) {
+                    continue;
+                }
+                if (voice == null || (prefVoice != null && prefVoice.getUID().equals(currentVoice.getUID()))) {
                     voice = currentVoice;
-                    break;
                 }
             }
             if (voice == null) {
