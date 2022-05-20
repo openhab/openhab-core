@@ -140,7 +140,7 @@ public class ModbusSlaveConnectionFactoryImpl
         try {
             return InetAddress.getByName(key.getAddress());
         } catch (UnknownHostException e) {
-            logger.error("KeyedPooledModbusSlaveConnectionFactory: Unknown host: {}. Connection creation failed.",
+            logger.warn("KeyedPooledModbusSlaveConnectionFactory: Unknown host: {}. Connection creation failed.",
                     e.getMessage());
             return null;
         }
@@ -220,7 +220,7 @@ public class ModbusSlaveConnectionFactoryImpl
                 connection.resetConnection();
             }
         } catch (Exception e) {
-            logger.error("Error connecting connection {} for endpoint {}: {}", obj.getObject(), endpoint,
+            logger.warn("Error connecting connection {} for endpoint {}: {}", obj.getObject(), endpoint,
                     e.getMessage());
         }
     }
@@ -240,7 +240,8 @@ public class ModbusSlaveConnectionFactoryImpl
     @Override
     public boolean validateObject(ModbusSlaveEndpoint key, @Nullable PooledObject<ModbusSlaveConnection> p) {
         boolean valid = p != null && p.getObject().isConnected();
-        logger.trace("Validating endpoint {} connection {} -> {}", key, p.getObject(), valid);
+        ModbusSlaveConnection slaveConnection = p != null ? p.getObject() : null;
+        logger.trace("Validating endpoint {} connection {} -> {}", key, slaveConnection, valid);
         return valid;
     }
 
@@ -248,7 +249,7 @@ public class ModbusSlaveConnectionFactoryImpl
      * Configure general connection settings with a given endpoint
      *
      * @param endpoint endpoint to configure
-     * @param configuration configuration for the endpoint. Use null to reset the configuration to default settings.
+     * @param config configuration for the endpoint. Use null to reset the configuration to default settings.
      */
     public void setEndpointPoolConfiguration(ModbusSlaveEndpoint endpoint, @Nullable EndpointPoolConfiguration config) {
         if (config == null) {
@@ -306,15 +307,15 @@ public class ModbusSlaveConnectionFactoryImpl
                 lastConnectMillis.put(endpoint, curTime);
                 break;
             } catch (InterruptedException e) {
-                logger.error("connect try {}/{} error: {}. Aborting since interrupted. Connection {}. Endpoint {}.",
+                logger.info("Connect try {}/{} failed: {}. Aborting since interrupted. Connection {}. Endpoint {}.",
                         tryIndex, maxTries, e.getMessage(), connection, endpoint);
                 throw e;
             } catch (Exception e) {
                 tryIndex++;
-                logger.warn("connect try {}/{} error: {}. Connection {}. Endpoint {}", tryIndex, maxTries,
+                logger.debug("Connect try {}/{} failed: {}. Connection {}. Endpoint {}", tryIndex, maxTries,
                         e.getMessage(), connection, endpoint);
                 if (tryIndex >= maxTries) {
-                    logger.error("re-connect reached max tries {}, throwing last error: {}. Connection {}. Endpoint {}",
+                    logger.warn("Connect reached max tries {}, throwing last error: {}. Connection {}. Endpoint {}",
                             maxTries, e.getMessage(), connection, endpoint);
                     throw e;
                 }
