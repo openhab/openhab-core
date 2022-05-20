@@ -162,10 +162,9 @@ public class MqttBrokerConnection {
 
         public void onDisconnected(Throwable t) {
             cancelTimeoutFuture.run();
-
-            final MqttConnectionState connectionState = connection.connectionState();
             future.complete(false);
-            connection.connectionObservers.forEach(o -> o.connectionStateChanged(connectionState, t));
+
+            connection.connectionObservers.forEach(o -> o.connectionStateChanged(MqttConnectionState.DISCONNECTED, t));
 
             // If we tried to connect via start(), use the reconnect strategy to try it again
             if (connection.isConnecting) {
