@@ -18,7 +18,7 @@ import static org.openhab.core.tools.i18n.plugin.Translations.TranslationsGroup.
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
@@ -38,6 +38,8 @@ import com.google.gson.JsonObject;
  */
 @NonNullByDefault
 public class JsonToTranslationsConverter {
+
+    private static final Pattern OPTION_ESCAPE_PATTERN = Pattern.compile("([ :=])");
 
     public Translations convert(BundleInfo bundleInfo) {
         return new Translations(Stream.of( //
@@ -135,7 +137,7 @@ public class JsonToTranslationsConverter {
                         getAsString(optionObject, "value")
                                 .ifPresent(value -> getAsString(optionObject, "label").ifPresent(label -> {
                                     String optionKey = namePrefix + "option."
-                                            + value.replace(" ", Matcher.quoteReplacement("\\ "));
+                                            + OPTION_ESCAPE_PATTERN.matcher(value).replaceAll("\\\\$1");
                                     entriesBuilder.add(entry(optionKey, label));
                                 }));
                     }
