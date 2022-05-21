@@ -46,18 +46,30 @@ public class GenericMetadataProviderTest {
     @Test
     public void testRemoveMetadataNonExistentItem() {
         GenericMetadataProvider provider = new GenericMetadataProvider();
-        provider.removeMetadata("nonExistentItem");
+        provider.removeMetadataByItemName("nonExistentItem");
     }
 
     @Test
-    public void testRemoveMetadata() {
+    public void testRemoveMetadataByItemName() {
         GenericMetadataProvider provider = new GenericMetadataProvider();
         provider.addMetadata("other", "item", "value", null);
         provider.addMetadata("binding", "item", "value", null);
         provider.addMetadata("binding", "other", "value", null);
         assertEquals(3, provider.getAll().size());
 
-        provider.removeMetadata("item");
+        provider.removeMetadataByItemName("item");
+        assertEquals(1, provider.getAll().size());
+    }
+
+    @Test
+    public void testRemoveMetadataByNamespace() {
+        GenericMetadataProvider provider = new GenericMetadataProvider();
+        provider.addMetadata("other", "item", "value", null);
+        provider.addMetadata("binding", "item", "value", null);
+        provider.addMetadata("binding", "other", "value", null);
+        assertEquals(3, provider.getAll().size());
+
+        provider.removeMetadataByNamespace("binding");
         assertEquals(1, provider.getAll().size());
     }
 }

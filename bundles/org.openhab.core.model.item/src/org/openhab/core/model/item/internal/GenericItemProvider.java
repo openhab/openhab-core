@@ -104,7 +104,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
             rank = 0;
         }
 
-        itemFactorys.forEach(itemFactory -> dispatchBindingsPerItemType(null, itemFactory.getSupportedItemTypes()));
+        itemFactorys.forEach(itemFactory -> dispatchBindingsPerItemType(itemFactory.getSupportedItemTypes()));
 
         // process models which are already parsed by modelRepository:
         for (String modelName : modelRepository.getAllModelNamesOfType("items")) {
@@ -131,7 +131,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
     public void addItemFactory(ItemFactory factory) {
         itemFactorys.add(factory);
-        dispatchBindingsPerItemType(null, factory.getSupportedItemTypes());
+        dispatchBindingsPerItemType(factory.getSupportedItemTypes());
     }
 
     /**
@@ -147,10 +147,11 @@ public class GenericItemProvider extends AbstractProvider<Item>
     public void addBindingConfigReader(BindingConfigReader reader) {
         if (!bindingConfigReaders.containsKey(reader.getBindingType())) {
             bindingConfigReaders.put(reader.getBindingType(), reader);
+            genericMetaDataProvider.removeMetadataByNamespace(reader.getBindingType());
             dispatchBindingsPerType(reader, new String[] { reader.getBindingType() });
         } else {
             logger.warn("Attempted to register a second BindingConfigReader of type '{}'."
-                    + " The primaraly reader will remain active!", reader.getBindingType());
+                    + " The previous reader will remain active!", reader.getBindingType());
         }
     }
 
@@ -206,7 +207,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
         // create items and read new binding configuration
         if (!EventType.REMOVED.equals(type)) {
             for (ModelItem modelItem : model.getItems()) {
-                genericMetaDataProvider.removeMetadata(modelItem.getName());
+                genericMetaDataProvider.removeMetadataByItemName(modelItem.getName());
                 Item item = createItemFromModelItem(modelItem);
                 if (item != null) {
                     internalDispatchBindings(modelName, item, modelItem.getBindings());
@@ -221,7 +222,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
     }
 
     private @Nullable Item createItemFromModelItem(ModelItem modelItem) {
-        Item item = null;
+        Item item;
         if (modelItem instanceof ModelGroupItem) {
             ModelGroupItem modelGroupItem = (ModelGroupItem) modelItem;
             Item baseItem;
@@ -249,7 +250,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
                 return null;
             }
         }
-        if (item != null && item instanceof ActiveItem) {
+        if (item instanceof ActiveItem) {
             String label = modelItem.getLabel();
             String format = extractFormat(label);
             if (format != null) {
@@ -287,14 +288,14 @@ public class GenericItemProvider extends AbstractProvider<Item>
     private GroupItem applyGroupFunction(Item baseItem, ModelGroupItem modelGroupItem, ModelGroupFunction function) {
         GroupFunctionDTO dto = new GroupFunctionDTO();
         dto.name = function.getName();
-        dto.params = modelGroupItem.getArgs().toArray(new String[modelGroupItem.getArgs().size()]);
+        dto.params = modelGroupItem.getArgs().toArray(new String[0]);
 
         GroupFunction groupFunction = ItemDTOMapper.mapFunction(baseItem, dto);
 
         return new GroupItem(modelGroupItem.getName(), baseItem, groupFunction);
     }
 
-    private void dispatchBindingsPerItemType(@Nullable BindingConfigReader reader, String[] itemTypes) {
+    private void dispatchBindingsPerItemType(String[] itemTypes) {
         for (String modelName : modelRepository.getAllModelNamesOfType("items")) {
             ItemModel model = (ItemModel) modelRepository.getModel(modelName);
             if (model != null) {
@@ -304,7 +305,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
                         if (type != null && itemType.equals(ItemUtil.getMainItemType(type))) {
                             Item item = createItemFromModelItem(modelItem);
                             if (item != null) {
-                                internalDispatchBindings(reader, modelName, item, modelItem.getBindings());
+                                internalDispatchBindings(null, modelName, item, modelItem.getBindings());
                             }
                         }
                     }
@@ -426,7 +427,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
     private void notifyAndCleanup(Item oldItem) {
         notifyListenersAboutRemovedElement(oldItem);
         this.stateDescriptionFragments.remove(oldItem.getName());
-        genericMetaDataProvider.removeMetadata(oldItem.getName());
+        genericMetaDataProvider.removeMetadataByItemName(oldItem.getName());
     }
 
     protected boolean hasItemChanged(Item item1, Item item2) {
@@ -455,7 +456,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
             return false;
         }
 
-        if ((gItem1 != null && gItem2 == null) || (gItem1 == null && gItem2 != null)) {
+        if (gItem1 == null || gItem2 == null) {
             return true;
         }
 
