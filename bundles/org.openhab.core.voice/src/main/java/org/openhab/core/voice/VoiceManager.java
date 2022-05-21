@@ -170,6 +170,8 @@ public interface VoiceManager {
      * @param ks the keyword spotting service to use or null to use the default service
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
+     * @param voice the voice to use or null to use the default voice or any voice provided by the text-to-speech
+     *            service matching the locale
      * @param hlis list of human language text interpreters to use, they are executed in order until the first
      *            successful response, or empty to use the default service
      * @param source the audio source to use or null to use the default source
@@ -180,7 +182,7 @@ public interface VoiceManager {
      * @throws IllegalStateException if required services are not all available or the provided locale is not supported
      *             by all these services or a dialog is already started for this audio source
      */
-    void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
+    void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts, @Nullable Voice voice,
             List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
             throws IllegalStateException;
@@ -214,6 +216,8 @@ public interface VoiceManager {
      *
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
+     * @param voice the voice to use or null to use the default voice or any voice provided by the text-to-speech
+     *            service matching the locale
      * @param hlis list of human language text interpreters to use, they are executed in order until the first
      *            successful response, or empty to use the default service
      * @param source the audio source to use or null to use the default source
@@ -223,9 +227,9 @@ public interface VoiceManager {
      * @throws IllegalStateException if required services are not all available or the provided locale is not supported
      *             by all these services or a dialog is already started for this audio source
      */
-    void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, List<HumanLanguageInterpreter> hlis,
-            @Nullable AudioSource source, @Nullable AudioSink sink, @Nullable Locale locale,
-            @Nullable String listeningItem) throws IllegalStateException;
+    void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, @Nullable Voice voice,
+            List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
+            @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException;
 
     /**
      * Retrieves a TTS service.
@@ -311,7 +315,7 @@ public interface VoiceManager {
     /**
      * Retrieves a HumanLanguageInterpreter collection.
      * If no services are available returns an empty list.
-     * 
+     *
      * @param ids Comma separated list of HLI service ids to use
      * @return a List<HumanLanguageInterpreter> or empty, if none of the services is available
      */

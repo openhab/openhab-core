@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.script.actions;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -211,7 +210,7 @@ public class Voice {
     @ActionDoc(text = "starts dialog processing for a given audio source")
     public static void startDialog(@ParamDoc(name = "source") @Nullable String source,
             @ParamDoc(name = "sink") @Nullable String sink) {
-        startDialog(null, null, null, null, source, sink, null, null, null);
+        startDialog(null, null, null, null, null, source, sink, null, null, null);
     }
 
     /**
@@ -220,7 +219,10 @@ public class Voice {
      * @param ks the keyword spotting service to use or null to use the default service
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
-     * @param interpreters comma separated list of human language text interpreters to use or null to use the default service
+     * @param voice the voice to use or null to use the default voice or any voice provided by the text-to-speech
+     *            service matching the locale
+     * @param interpreters comma separated list of human language text interpreters to use or null to use the default
+     *            service
      * @param source the name of audio source to use or null to use the default source
      * @param sink the name of audio sink to use or null to use the default sink
      * @param locale the locale to use or null to use the default locale
@@ -231,6 +233,7 @@ public class Voice {
     public static void startDialog(@ParamDoc(name = "keyword spotting service") @Nullable String ks,
             @ParamDoc(name = "speech-to-text service") @Nullable String stt,
             @ParamDoc(name = "text-to-speech service") @Nullable String tts,
+            @ParamDoc(name = "voice") @Nullable String voice,
             @ParamDoc(name = "interpreters") @Nullable String interpreters,
             @ParamDoc(name = "source") @Nullable String source, @ParamDoc(name = "sink") @Nullable String sink,
             @ParamDoc(name = "locale") @Nullable String locale, @ParamDoc(name = "keyword") @Nullable String keyword,
@@ -267,6 +270,14 @@ public class Voice {
                 return;
             }
         }
+        org.openhab.core.voice.Voice prefVoice = null;
+        if (voice != null) {
+            prefVoice = getVoice(voice);
+            if (prefVoice == null) {
+                logger.warn("Failed starting dialog processing: voice '{}' not found", voice);
+                return;
+            }
+        }
         List<HumanLanguageInterpreter> hliServices = List.of();
         if (interpreters != null) {
             hliServices = VoiceActionService.voiceManager.getHLIsByIds(interpreters);
@@ -294,8 +305,8 @@ public class Voice {
         }
 
         try {
-            VoiceActionService.voiceManager.startDialog(ksService, sttService, ttsService, hliServices, audioSource,
-                    audioSink, loc, keyword, listeningItem);
+            VoiceActionService.voiceManager.startDialog(ksService, sttService, ttsService, prefVoice, hliServices,
+                    audioSource, audioSink, loc, keyword, listeningItem);
         } catch (IllegalStateException e) {
             logger.warn("Failed starting dialog processing: {}", e.getMessage());
         }
@@ -333,7 +344,7 @@ public class Voice {
     @ActionDoc(text = "executes a simple dialog sequence without keyword spotting for a given audio source")
     public static void listenAndAnswer(@ParamDoc(name = "source") @Nullable String source,
             @ParamDoc(name = "sink") @Nullable String sink) {
-        listenAndAnswer(null, null, null, source, sink, null, null);
+        listenAndAnswer(null, null, null, null, source, sink, null, null);
     }
 
     /**
@@ -341,7 +352,10 @@ public class Voice {
      *
      * @param stt the speech-to-text service to use or null to use the default service
      * @param tts the text-to-speech service to use or null to use the default service
-     * @param interpreters comma separated list of human language text interpreters to use or null to use the default service
+     * @param voice the voice to use or null to use the default voice or any voice provided by the text-to-speech
+     *            service matching the locale
+     * @param interpreters comma separated list of human language text interpreters to use or null to use the default
+     *            service
      * @param source the name of audio source to use or null to use the default source
      * @param sink the name of audio sink to use or null to use the default sink
      * @param locale the locale to use or null to use the default locale
@@ -350,6 +364,7 @@ public class Voice {
     @ActionDoc(text = "executes a simple dialog sequence without keyword spotting for a given audio source")
     public static void listenAndAnswer(@ParamDoc(name = "speech-to-text service") @Nullable String stt,
             @ParamDoc(name = "text-to-speech service") @Nullable String tts,
+            @ParamDoc(name = "voice") @Nullable String voice,
             @ParamDoc(name = "interpreters") @Nullable String interpreters,
             @ParamDoc(name = "source") @Nullable String source, @ParamDoc(name = "sink") @Nullable String sink,
             @ParamDoc(name = "locale") @Nullable String locale,
@@ -375,6 +390,14 @@ public class Voice {
             ttsService = VoiceActionService.voiceManager.getTTS(tts);
             if (ttsService == null) {
                 logger.warn("Failed executing simple dialog: text-to-speech service '{}' not found", tts);
+                return;
+            }
+        }
+        org.openhab.core.voice.Voice prefVoice = null;
+        if (voice != null) {
+            prefVoice = getVoice(voice);
+            if (prefVoice == null) {
+                logger.warn("Failed executing simple dialog: voice '{}' not found", voice);
                 return;
             }
         }
@@ -405,10 +428,15 @@ public class Voice {
         }
 
         try {
-            VoiceActionService.voiceManager.listenAndAnswer(sttService, ttsService, hliServices, audioSource, audioSink,
-                    loc, listeningItem);
+            VoiceActionService.voiceManager.listenAndAnswer(sttService, ttsService, prefVoice, hliServices, audioSource,
+                    audioSink, loc, listeningItem);
         } catch (IllegalStateException e) {
             logger.warn("Failed executing simple dialog: {}", e.getMessage());
         }
+    }
+
+    private static org.openhab.core.voice.@Nullable Voice getVoice(String id) {
+        return VoiceActionService.voiceManager.getAllVoices().stream().filter(voice -> voice.getUID().equals(id))
+                .findAny().orElse(null);
     }
 }

@@ -88,11 +88,13 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 buildCommandUsage(SUBCMD_INTERPRET + " <command>", "interprets a human language command"),
                 buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services"),
                 buildCommandUsage(
-                        SUBCMD_START_DIALOG + " [<source> [<sink> [<interpreter> [<tts> [<stt> [<ks> [<keyword>]]]]]]]",
+                        SUBCMD_START_DIALOG
+                                + " [<source> [<sink> [<interpreters> [<tts> [<stt> [<ks> {<voice> [<keyword>]]]]]]]]",
                         "start a new dialog processing using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_STOP_DIALOG + " [<source>]",
                         "stop the dialog processing for the default audio source or the audio source identified with provided argument"),
-                buildCommandUsage(SUBCMD_LISTEN_ANSWER + " [<source> [<sink> [<interpreter> [<tts> [<stt>]]]]]",
+                buildCommandUsage(
+                        SUBCMD_LISTEN_ANSWER + " [<source> [<sink> [<interpreters> [<tts> [<stt> [<voice]]]]]]",
                         "Execute a simple dialog sequence without keyword spotting using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_INTERPRETERS, "lists the interpreters"),
                 buildCommandUsage(SUBCMD_KEYWORD_SPOTTERS, "lists the keyword spotters"),
@@ -140,8 +142,9 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         TTSService tts = args.length < 5 ? null : voiceManager.getTTS(args[4]);
                         STTService stt = args.length < 6 ? null : voiceManager.getSTT(args[5]);
                         KSService ks = args.length < 7 ? null : voiceManager.getKS(args[6]);
-                        String keyword = args.length < 8 ? null : args[7];
-                        voiceManager.startDialog(ks, stt, tts, hlis, source, sink, null, keyword, null);
+                        Voice voice = args.length < 8 ? null : getVoice(args[7]);
+                        String keyword = args.length < 9 ? null : args[8];
+                        voiceManager.startDialog(ks, stt, tts, voice, hlis, source, sink, null, keyword, null);
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while starting the dialog"));
@@ -163,7 +166,8 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                                 : voiceManager.getHLIsByIds(args[3]);
                         TTSService tts = args.length < 5 ? null : voiceManager.getTTS(args[4]);
                         STTService stt = args.length < 6 ? null : voiceManager.getSTT(args[5]);
-                        voiceManager.listenAndAnswer(stt, tts, hlis, source, sink, null, null);
+                        Voice voice = args.length < 7 ? null : getVoice(args[6]);
+                        voiceManager.listenAndAnswer(stt, tts, voice, hlis, source, sink, null, null);
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while executing the simple dialog sequence"));
@@ -296,5 +300,9 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         } else {
             console.println("No Text-to-Speech services found.");
         }
+    }
+
+    private @Nullable Voice getVoice(String id) {
+        return voiceManager.getAllVoices().stream().filter(voice -> voice.getUID().equals(id)).findAny().orElse(null);
     }
 }
