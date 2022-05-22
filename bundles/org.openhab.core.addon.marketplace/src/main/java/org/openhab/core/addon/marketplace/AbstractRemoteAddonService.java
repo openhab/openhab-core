@@ -116,7 +116,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
 
         // remove incompatible add-ons if not enabled
         boolean showIncompatible = includeIncompatible();
-        addons.removeIf(addon -> !addon.getCompatible() && !showIncompatible);
+        addons.removeIf(addon -> !addon.isInstalled() && !addon.getCompatible() && !showIncompatible);
 
         cachedAddons = addons;
         this.installedAddons = installedAddons;
