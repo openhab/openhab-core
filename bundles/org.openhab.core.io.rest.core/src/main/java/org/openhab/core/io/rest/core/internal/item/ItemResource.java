@@ -591,20 +591,24 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "Item not found."),
                     @ApiResponse(responseCode = "405", description = "Meta data not editable.") })
     public Response removeMetadata(@PathParam("itemname") @Parameter(description = "item name") String itemname,
-            @PathParam("namespace") @Parameter(description = "namespace") String namespace) {
+            @Nullable @PathParam("namespace") @Parameter(description = "namespace") String namespace) {
         Item item = getItem(itemname);
 
         if (item == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        MetadataKey key = new MetadataKey(namespace, itemname);
-        if (metadataRegistry.get(key) != null) {
-            if (metadataRegistry.remove(key) == null) {
-                return Response.status(Status.CONFLICT).build();
-            }
+        if (namespace == null) {
+            metadataRegistry.removeItemMetadata(itemname);
         } else {
-            return Response.status(Status.NOT_FOUND).build();
+            MetadataKey key = new MetadataKey(namespace, itemname);
+            if (metadataRegistry.get(key) != null) {
+                if (metadataRegistry.remove(key) == null) {
+                    return Response.status(Status.CONFLICT).build();
+                }
+            } else {
+                return Response.status(Status.NOT_FOUND).build();
+            }
         }
 
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
