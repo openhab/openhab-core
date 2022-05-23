@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.openhab.core.addon.marketplace.AbstractRemoteAddonService.CONFIG_REMOTE_ENABLED;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.ALL_ADDON_COUNT;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.COMPATIBLE_ADDON_COUNT;
+import static org.openhab.core.addon.marketplace.test.TestAddonService.INCOMPATIBLE_VERSION;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.INSTALL_EXCEPTION_ADDON;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.SERVICE_PID;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.TEST_ADDON;
@@ -147,6 +148,12 @@ public class AbstractRemoteAddonServiceTest {
     @Test
     public void testIncompatibleAddonsNotIncludedByDefault() {
         assertThat(addonService.getAddons(null), hasSize(COMPATIBLE_ADDON_COUNT));
+    }
+
+    @Test
+    public void testIncompatibleAddonsAlwaysIncludedIfInstalled() {
+        addonService.setInstalled(INCOMPATIBLE_VERSION);
+        assertThat(addonService.getAddons(null), hasSize(COMPATIBLE_ADDON_COUNT + 1));
     }
 
     @Test
