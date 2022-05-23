@@ -290,37 +290,35 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public String interpret(String text, @Nullable String hliIdList) throws InterpretationException {
-        List<HumanLanguageInterpreter> interpreters;
+        List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
         if (hliIdList == null) {
             HumanLanguageInterpreter interpreter = getHLI();
-            if (interpreter == null) {
-                throw new InterpretationException("No human language interpreter available!");
+            if (interpreter != null) {
+                interpreters.add(interpreter);
             }
-            interpreters = List.of(interpreter);
         } else {
             interpreters = getHLIsByIds(hliIdList);
-            if (interpreters.isEmpty()) {
-                throw new InterpretationException("No human language interpreter can be found for " + hliIdList);
+        }
+
+        if (!interpreters.isEmpty()) {
+            Locale locale = localeProvider.getLocale();
+            for (var interpreter : interpreters) {
+                try {
+                    String answer = interpreter.interpret(locale, text);
+                    logger.debug("Interpretation result: {}", answer);
+                    return answer;
+                } catch (InterpretationException e) {
+                    logger.debug("Interpretation exception: {}", e.getMessage());
+                    throw e;
+                }
             }
         }
-        String answer = null;
-        InterpretationException error = null;
-        Locale locale = localeProvider.getLocale();
-        for (var interpreter : interpreters) {
-            try {
-                answer = interpreter.interpret(locale, text);
-                logger.debug("Interpretation result: {}", answer);
-                error = null;
-                break;
-            } catch (InterpretationException e) {
-                logger.debug("Interpretation exception: {}", e.getMessage());
-                error = e;
-            }
+
+        if (hliIdList == null) {
+            throw new InterpretationException("No human language interpreter available!");
+        } else {
+            throw new InterpretationException("No human language interpreter can be found for " + hliIdList);
         }
-        if (error != null) {
-            throw error;
-        }
-        return answer;
     }
 
     private @Nullable Voice getVoice(String id) {
@@ -354,27 +352,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         // Return the first concrete AudioFormat found
         for (AudioFormat currentAudioFormat : audioFormats) {
             // Check if currentAudioFormat is abstract
-            if (null == currentAudioFormat.getCodec()) {
+            if ((null == currentAudioFormat.getCodec()) || (null == currentAudioFormat.getContainer())
+                    || (null == currentAudioFormat.isBigEndian()) || (null == currentAudioFormat.getBitDepth())) {
                 continue;
             }
-            if (null == currentAudioFormat.getContainer()) {
-                continue;
-            }
-            if (null == currentAudioFormat.isBigEndian()) {
-                continue;
-            }
-            if (null == currentAudioFormat.getBitDepth()) {
-                continue;
-            }
-            if (null == currentAudioFormat.getBitRate()) {
-                continue;
-            }
-            if (null == currentAudioFormat.getFrequency()) {
-                continue;
-            }
-
             // Prefer WAVE container
-            if (!AudioFormat.CONTAINER_WAVE.equals(currentAudioFormat.getContainer())) {
+            if ((null == currentAudioFormat.getBitRate()) || (null == currentAudioFormat.getFrequency())
+                    || !AudioFormat.CONTAINER_WAVE.equals(currentAudioFormat.getContainer())) {
                 continue;
             }
 
@@ -388,15 +372,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             AudioFormat format = currentAudioFormat;
 
             // Not all Codecs and containers can be supported
-            if (null == format.getCodec()) {
-                continue;
-            }
-            if (null == format.getContainer()) {
-                continue;
-            }
-
             // Prefer WAVE container
-            if (!AudioFormat.CONTAINER_WAVE.equals(format.getContainer())) {
+            if ((null == format.getCodec()) || (null == format.getContainer())
+                    || !AudioFormat.CONTAINER_WAVE.equals(format.getContainer())) {
                 continue;
             }
 
@@ -813,7 +791,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     }
 
     private Set<Voice> getAllVoicesSorted(Locale locale) {
-        return ttsServices.values().stream().map(s -> s.getAvailableVoices()).flatMap(Collection::stream)
+        return ttsServices.values().stream().map(TTSService::getAvailableVoices).flatMap(Collection::stream)
                 .sorted(createVoiceComparator(locale)).collect(Collectors
                         .collectingAndThen(Collectors.toCollection(LinkedHashSet::new), Collections::unmodifiableSet));
     }
@@ -836,9 +814,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             return (tts1 == null || tts2 == null) ? 0
                     : tts1.getLabel(locale).compareToIgnoreCase(tts2.getLabel(locale));
         };
-        Comparator<Voice> byVoiceLocale = (Voice v1, Voice v2) -> {
-            return v1.getLocale().getDisplayName(locale).compareToIgnoreCase(v2.getLocale().getDisplayName(locale));
-        };
+        Comparator<Voice> byVoiceLocale = (Voice v1, Voice v2) -> v1.getLocale().getDisplayName(locale)
+                .compareToIgnoreCase(v2.getLocale().getDisplayName(locale));
         return byTTSLabel.thenComparing(byVoiceLocale).thenComparing(Voice::getLabel);
     }
 

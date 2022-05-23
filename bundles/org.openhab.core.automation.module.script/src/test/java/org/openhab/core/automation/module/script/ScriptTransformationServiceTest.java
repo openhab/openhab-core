@@ -13,16 +13,13 @@
 package org.openhab.core.automation.module.script;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+
+import java.util.Objects;
 
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -81,7 +78,7 @@ public class ScriptTransformationServiceTest {
 
     @Test
     public void success() throws TransformationException {
-        String returnValue = service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID, "input");
+        String returnValue = Objects.requireNonNull(service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID, "input"));
 
         assertThat(returnValue, is(SCRIPT_OUTPUT));
     }
