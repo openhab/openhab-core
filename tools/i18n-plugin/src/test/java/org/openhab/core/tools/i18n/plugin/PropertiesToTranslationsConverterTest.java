@@ -39,7 +39,7 @@ public class PropertiesToTranslationsConverterTest {
 
         assertThat(translations.hasTranslations(), is(true));
         assertThat(translations.sections.size(), is(8));
-        assertThat(translations.keysStream().count(), is(41L));
+        assertThat(translations.keysStream().count(), is(44L));
 
         String lines = translations.linesStream().collect(Collectors.joining(System.lineSeparator()));
         assertThat(lines, containsString("# binding"));
