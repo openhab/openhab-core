@@ -29,10 +29,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.config.discovery.inbox.Inbox;
+import org.openhab.core.config.discovery.test.DummyThingTypeProvider;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.type.ThingTypeBuilder;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -56,12 +58,18 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
     private static final String ANY_BINDING_ID_1 = "any2BindingId1";
     private static final String ANY_THING_TYPE_1 = "any2ThingType1";
+    private static final ThingTypeUID ANY_BINDING_ID_1_ANY_THING_TYPE_1_UID = new ThingTypeUID(ANY_BINDING_ID_1,
+            ANY_THING_TYPE_1);
 
     private static final String ANY_BINDING_ID_2 = "any2BindingId2";
     private static final String ANY_THING_TYPE_2 = "any2ThingType2";
+    private static final ThingTypeUID ANY_BINDING_ID_2_ANY_THING_TYPE_2_UID = new ThingTypeUID(ANY_BINDING_ID_2,
+            ANY_THING_TYPE_2);
 
     private static final String ANY_BINDING_ID_3 = "any2BindingId3";
     private static final String ANY_THING_TYPE_3 = "any2ThingType3";
+    private static final ThingTypeUID ANY_BINDING_ID_3_ANY_THING_TYPE_3_UID = new ThingTypeUID(ANY_BINDING_ID_3,
+            ANY_THING_TYPE_3);
 
     private static final ThingUID BRIDGE_UID_1 = new ThingUID(ANY_BINDING_ID_3, "bridge", "1");
     private static final ThingUID BRIDGE_UID_2 = new ThingUID(ANY_BINDING_ID_3, "bridge", "2");
@@ -88,9 +96,21 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
     private @Mock @NonNullByDefault({}) DiscoveryListener discoveryListenerMock;
 
+    private @NonNullByDefault({}) DummyThingTypeProvider dummyThingTypeProvider;
+
     @BeforeEach
     public void beforeEach() {
         registerVolatileStorageService();
+
+        dummyThingTypeProvider = new DummyThingTypeProvider();
+        registerService(dummyThingTypeProvider);
+
+        dummyThingTypeProvider.add(ANY_BINDING_ID_1_ANY_THING_TYPE_1_UID,
+                ThingTypeBuilder.instance(ANY_BINDING_ID_1_ANY_THING_TYPE_1_UID, "label1").build());
+        dummyThingTypeProvider.add(ANY_BINDING_ID_2_ANY_THING_TYPE_2_UID,
+                ThingTypeBuilder.instance(ANY_BINDING_ID_2_ANY_THING_TYPE_2_UID, "label2").build());
+        dummyThingTypeProvider.add(ANY_BINDING_ID_3_ANY_THING_TYPE_3_UID,
+                ThingTypeBuilder.instance(ANY_BINDING_ID_3_ANY_THING_TYPE_3_UID, "label3").build());
 
         thingRegistry = getService(ThingRegistry.class);
         assertNotNull(thingRegistry);
@@ -98,10 +118,8 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         inbox = getService(Inbox.class);
         assertNotNull(inbox);
 
-        discoveryServiceMockForBinding1 = new DiscoveryServiceMock(new ThingTypeUID(ANY_BINDING_ID_1, ANY_THING_TYPE_1),
-                1);
-        discoveryServiceMockForBinding2 = new DiscoveryServiceMock(new ThingTypeUID(ANY_BINDING_ID_2, ANY_THING_TYPE_2),
-                3);
+        discoveryServiceMockForBinding1 = new DiscoveryServiceMock(ANY_BINDING_ID_1_ANY_THING_TYPE_1_UID, 1);
+        discoveryServiceMockForBinding2 = new DiscoveryServiceMock(ANY_BINDING_ID_2_ANY_THING_TYPE_2_UID, 3);
 
         discoveryServiceMockForBinding3Bridge1 = new DiscoveryServiceMockOfBridge(
                 new ThingTypeUID(ANY_BINDING_ID_3, ANY_THING_TYPE_3), 1, BRIDGE_UID_1);
@@ -270,7 +288,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         ScanListener mockScanListener1 = mock(ScanListener.class);
 
         discoveryServiceRegistry.addDiscoveryListener(discoveryListenerMock);
-        discoveryServiceRegistry.startScan(new ThingTypeUID(ANY_BINDING_ID_3, ANY_THING_TYPE_3), mockScanListener1);
+        discoveryServiceRegistry.startScan(ANY_BINDING_ID_3_ANY_THING_TYPE_3_UID, mockScanListener1);
 
         waitForAssert(() -> verify(mockScanListener1, times(1)).onFinished());
         verify(discoveryListenerMock, times(2)).thingDiscovered(any(), any());
