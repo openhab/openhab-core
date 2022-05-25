@@ -55,6 +55,7 @@ import org.openhab.core.model.rule.rules.SystemStartlevelTrigger;
 import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger;
 import org.openhab.core.model.rule.rules.ThingStateUpdateEventTrigger;
 import org.openhab.core.model.rule.rules.TimerTrigger;
+import org.openhab.core.model.rule.rules.DateTimeTrigger;
 import org.openhab.core.model.rule.rules.UpdateEventTrigger;
 import org.openhab.core.model.script.runtime.DSLScriptContextProvider;
 import org.openhab.core.service.ReadyMarker;
@@ -383,6 +384,12 @@ public class DSLRuleProvider
                 }
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("timer.GenericCronTrigger")
+                    .withConfiguration(cfg).build();
+        } else if (t instanceof DateTimeTrigger) {
+            DateTimeTrigger tt = (DateTimeTrigger) t;
+            Configuration cfg = new Configuration();
+            cfg.put("itemName", tt.getItem());
+            return TriggerBuilder.create().withId(Integer.toString((triggerId++))).withTypeUID("timer.DateTimeTrigger")
                     .withConfiguration(cfg).build();
         } else if (t instanceof EventEmittedTrigger) {
             EventEmittedTrigger eeTrigger = (EventEmittedTrigger) t;
