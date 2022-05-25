@@ -16,6 +16,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.11</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.openhab.core.bom</groupId>
       <artifactId>org.openhab.core.bom.compile</artifactId>
       <type>pom</type>
@@ -32,7 +38,6 @@
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
-
   </dependencies>
 
 </project>

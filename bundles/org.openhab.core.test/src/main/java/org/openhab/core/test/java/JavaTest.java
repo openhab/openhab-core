@@ -12,12 +12,20 @@
  */
 package org.openhab.core.test.java;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.Assertions;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 /**
  * {@link JavaTest} is an abstract base class for tests which are not necessarily based on OSGi.
@@ -29,6 +37,91 @@ public class JavaTest {
 
     protected static final int DFL_TIMEOUT = 10000;
     protected static final int DFL_SLEEP_TIME = 50;
+
+    private final Map<Class<?>, Logger> interceptedLoggers = new HashMap<>();
+    private final Map<Class<?>, ListAppender<ILoggingEvent>> interceptedLoggerAppenders = new HashMap<>();
+
+    public enum LogLevel {
+        TRACE(ch.qos.logback.classic.Level.TRACE),
+        DEBUG(ch.qos.logback.classic.Level.DEBUG),
+        INFO(ch.qos.logback.classic.Level.INFO),
+        WARN(ch.qos.logback.classic.Level.WARN),
+        ERROR(ch.qos.logback.classic.Level.ERROR);
+
+        private final ch.qos.logback.classic.Level level;
+
+        LogLevel(ch.qos.logback.classic.Level level) {
+            this.level = level;
+        }
+
+        public ch.qos.logback.classic.Level getLevel() {
+            return level;
+        }
+    }
+
+    /**
+     * Set up an intercepting logger for a class with a log level threshold
+     *
+     * @param clazz The {@link Class} to intercept the logs for
+     * @param minLogLevel The minimum log level that should be recorded
+     */
+    protected void setupInterceptedLogger(Class<?> clazz, LogLevel minLogLevel) {
+        Logger logger = (Logger) LoggerFactory.getLogger(clazz);
+
+        logger.setLevel(minLogLevel.getLevel());
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        interceptedLoggers.put(clazz, logger);
+        interceptedLoggerAppenders.put(clazz, appender);
+    }
+
+    /**
+     * Stop the logging interception
+     *
+     * @param clazz The {@link Class} to stop intercepting logs for
+     */
+    protected void stopInterceptedLogger(Class<?> clazz) {
+        Logger logger = interceptedLoggers.get(clazz);
+        ListAppender<ILoggingEvent> appender = interceptedLoggerAppenders.get(clazz);
+
+        logger.detachAppender(appender);
+    }
+
+    /**
+     * Assert that not message was logged for a class
+     *
+     * @param clazz The {@link Class} to check
+     */
+    protected void assertNoLogMessage(Class<?> clazz) {
+        ListAppender<ILoggingEvent> appender = interceptedLoggerAppenders.get(clazz);
+        if (appender == null) {
+            Assertions.fail("Logger for class '" + clazz + "' not found.");
+        }
+        if (appender.list.size() != 0) {
+            Assertions.fail("Expected no log message for class '" + clazz + "', but found '" + appender.list + "'.");
+        }
+    }
+
+    /**
+     * Assert that a message was logged for a class with a given log level and message
+     *
+     * @param clazz The {@link Class} to check
+     * @param logLevel The expected log level
+     * @param message The expected message
+     */
+    protected void assertLogMessage(Class<?> clazz, LogLevel logLevel, String message) {
+        ListAppender<ILoggingEvent> appender = interceptedLoggerAppenders.get(clazz);
+        if (appender == null) {
+            Assertions.fail("Logger for class '" + clazz + "' not found.");
+        }
+        boolean isPresent = appender.list.stream()
+                .anyMatch(e -> logLevel.getLevel().equals(e.getLevel()) && message.equals(e.getFormattedMessage()));
+        if (!isPresent) {
+            Assertions.fail("Expected '" + message + "' at level '" + logLevel + "' for class '" + clazz
+                    + "', but found '" + appender.list + "'.");
+        }
+    }
 
     /**
      * Wait until the condition is fulfilled or the timeout is reached.
