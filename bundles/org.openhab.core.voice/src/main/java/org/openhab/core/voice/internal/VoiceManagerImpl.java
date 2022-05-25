@@ -302,6 +302,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
         if (!interpreters.isEmpty()) {
             Locale locale = localeProvider.getLocale();
+            InterpretationException exception = null;
             for (var interpreter : interpreters) {
                 try {
                     String answer = interpreter.interpret(locale, text);
@@ -309,9 +310,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                     return answer;
                 } catch (InterpretationException e) {
                     logger.debug("Interpretation exception: {}", e.getMessage());
-                    throw e;
+                    exception = e;
                 }
             }
+            throw exception;
         }
 
         if (hliIdList == null) {
