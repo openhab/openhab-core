@@ -178,6 +178,18 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     }
 
     @Test
+    public void interpretSomethingWithGivenMultipleHliIdsWhenFirstFails() throws InterpretationException {
+        hliStub = new HumanLanguageInterpreterStub();
+        registerService(hliStub);
+        hliStub.setExceptionExpected(true);
+        var anotherHLIStub = new HumanLanguageInterpreterStub();
+        registerService(anotherHLIStub);
+        String result = voiceManager.interpret("something",
+                String.join(",", List.of(hliStub.getId(), anotherHLIStub.getId())));
+        assertThat(result, is("Interpreted text"));
+    }
+
+    @Test
     public void verifyThatADialogIsNotStartedWhenAnyOfTheRequiredServiceIsNull() {
         sttService = new STTServiceStub();
         ksService = new KSServiceStub();
