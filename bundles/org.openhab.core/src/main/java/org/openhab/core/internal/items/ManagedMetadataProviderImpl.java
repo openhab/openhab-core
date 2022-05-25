@@ -102,9 +102,15 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
     }
 
     private Map.Entry<String, Object> normalizeConfigEntry(Map.Entry<String, Object> entry) {
-        if (entry.getValue() instanceof Number) {
-            return Map.entry(entry.getKey(), new BigDecimal(entry.getValue().toString()));
+        Object value = entry.getValue();
+        if (value instanceof Integer) {
+            BigDecimal newValue = new BigDecimal(value.toString());
+            newValue.setScale(0);
+            return Map.entry(entry.getKey(), newValue);
+        } else if (value instanceof Number) {
+            return Map.entry(entry.getKey(), new BigDecimal(value.toString()));
         }
+
         return entry;
     }
 }
