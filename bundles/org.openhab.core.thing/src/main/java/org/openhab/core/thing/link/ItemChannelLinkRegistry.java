@@ -130,18 +130,35 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         super.unsetEventPublisher(eventPublisher);
     }
 
+    /**
+     * Remove all links related to a thing
+     *
+     * @param thingUID the UID of the thing
+     * @return the number of removed links
+     */
     public int removeLinksForThing(final ThingUID thingUID) {
         ManagedItemChannelLinkProvider managedProvider = (ManagedItemChannelLinkProvider) getManagedProvider()
                 .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
         return managedProvider.removeLinksForThing(thingUID);
     }
 
+    /**
+     * Remove all links related to an item
+     *
+     * @param itemName the name of the item
+     * @return the number of removed links
+     */
     public int removeLinksForItem(final String itemName) {
         ManagedItemChannelLinkProvider managedProvider = (ManagedItemChannelLinkProvider) getManagedProvider()
                 .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
         return managedProvider.removeLinksForItem(itemName);
     }
 
+    /**
+     * Remove all orphaned (item or channel missing) links
+     *
+     * @return the number of removed links
+     */
     public int compress() {
         ManagedProvider<ItemChannelLink, String> managedProvider = getManagedProvider()
                 .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
