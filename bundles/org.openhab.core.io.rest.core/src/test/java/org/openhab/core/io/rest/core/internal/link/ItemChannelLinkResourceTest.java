@@ -32,9 +32,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
+import org.openhab.core.thing.profiles.ProfileTypeRegistry;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
 
 /**
  * The {@link ItemChannelLinkResourceTest} tests the {@link ItemChannelLinkResource}
@@ -47,13 +51,19 @@ import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 public class ItemChannelLinkResourceTest {
 
     private static final int EXPECTED_REMOVED_LINKS = 5;
+
+    private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
+    private @Mock @NonNullByDefault({}) ThingRegistry thingRegistryMock;
+    private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistryMock;
+    private @Mock @NonNullByDefault({}) ProfileTypeRegistry profileTypeRegistryMock;
     private @Mock @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistryMock;
     private @Mock @NonNullByDefault({}) ManagedItemChannelLinkProvider managedItemChannelLinkProviderMock;
     private @NonNullByDefault({}) ItemChannelLinkResource itemChannelLinkResource;
 
     @BeforeEach
     public void setup() {
-        itemChannelLinkResource = new ItemChannelLinkResource(itemChannelLinkRegistryMock,
+        itemChannelLinkResource = new ItemChannelLinkResource(itemRegistryMock, thingRegistryMock,
+                channelTypeRegistryMock, profileTypeRegistryMock, itemChannelLinkRegistryMock,
                 managedItemChannelLinkProviderMock);
         when(itemChannelLinkRegistryMock.removeLinksForItem(any())).thenReturn(EXPECTED_REMOVED_LINKS);
         when(itemChannelLinkRegistryMock.removeLinksForThing(any())).thenReturn(EXPECTED_REMOVED_LINKS);
