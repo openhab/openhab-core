@@ -857,6 +857,25 @@ public class PersistenceExtensionsTest {
     }
 
     @Test
+    public void testChangedBetween() {
+        boolean changed = PersistenceExtensions.changedBetween(numberItem,
+                ZonedDateTime.of(2019, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
+                ZonedDateTime.of(2019, 5, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
+        assertFalse(changed);
+
+        changed = PersistenceExtensions.changedBetween(numberItem,
+                ZonedDateTime.of(2006, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
+                ZonedDateTime.of(2008, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
+        assertTrue(changed);
+
+        // default persistence service
+        changed = PersistenceExtensions.changedBetween(numberItem,
+                ZonedDateTime.of(2004, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()));
+        assertFalse(changed);
+    }
+
+    @Test
     public void testUpdatedSince() {
         boolean updated = PersistenceExtensions.updatedSince(numberItem,
                 ZonedDateTime.of(1940, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);

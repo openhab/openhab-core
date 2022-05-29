@@ -258,6 +258,19 @@ public class PersistenceExtensions {
     }
 
     /**
+     * Checks if the state of a given <code>item</code> has changed between two points in time.
+     * The default persistence service is used.
+     *
+     * @param item the item to check for state changes
+     * @return <code>true</code> if item state changed, <code>false</code> if either item has not been changed in
+     *         the given interval or if the default persistence does not refer to a {@link QueryablePersistenceService},
+     *         or <code>null</code> if the default persistence service is not available
+     */
+    public static boolean changedBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
+        return changedBetween(item, begin, end, getDefaultServiceId());
+    }
+
+    /**
      * Checks if the state of a given <code>item</code> has changed since a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
@@ -268,9 +281,30 @@ public class PersistenceExtensions {
      *         provided <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}
      */
     public static boolean changedSince(Item item, ZonedDateTime timestamp, String serviceId) {
-        Iterable<HistoricItem> result = getAllStatesBetween(item, timestamp, null, serviceId);
+        return internalChanged(item, timestamp, null, serviceId);
+    }
+
+    /**
+     * Checks if the state of a given <code>item</code> changed between two points in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the item to check for state changes
+     * @param begin the point in time to start the check
+     * @param end the point in time to stop the check
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return <code>true</code> if item state changed or <code>false</code> if either the item has not changed
+     *         in the given interval or if the given <code>serviceId</code> does not refer to a
+     *         {@link QueryablePersistenceService}
+     */
+    public static boolean changedBetween(Item item, ZonedDateTime begin, ZonedDateTime end, String serviceId) {
+        return internalChanged(item, begin, end, serviceId);
+    }
+
+    private static boolean internalChanged(Item item, ZonedDateTime begin, @Nullable ZonedDateTime end,
+            String serviceId) {
+        Iterable<HistoricItem> result = getAllStatesBetween(item, begin, end, serviceId);
         Iterator<HistoricItem> it = result.iterator();
-        HistoricItem itemThen = historicState(item, timestamp);
+        HistoricItem itemThen = historicState(item, begin);
         if (itemThen == null) {
             // Can't get the state at the start time
             // If we've got results more recent than this, it must have changed
@@ -404,9 +438,8 @@ public class PersistenceExtensions {
      * @param end the point in time to stop the check
      * @param serviceId the name of the {@link PersistenceService} to use
      * @return a {@link HistoricItem} with the maximum state value since the given point in time, or
-     *         <code>null</code>aif no states found or if the given <code>serviceId</code> does not refer to an
-     *         available
-     *         {@link QueryablePersistenceService}
+     *         <code>null</code> no states found or if the given <code>serviceId</code> does not refer to an
+     *         available {@link QueryablePersistenceService}
      */
     public static @Nullable HistoricItem maximumBetween(final Item item, ZonedDateTime begin, ZonedDateTime end,
             String serviceId) {
@@ -486,8 +519,8 @@ public class PersistenceExtensions {
      * @param end the end point in time to
      * @param serviceId the name of the {@link PersistenceService} to use
      * @return the historic item with the minimum state value between the given points in time, or a<code>null</code> if
-     *         not state was found or if
-     *         the given <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}
+     *         not state was found or if the given <code>serviceId</code> does not refer to an available
+     *         {@link QueryablePersistenceService}
      */
     public static @Nullable HistoricItem minimumBetween(final Item item, ZonedDateTime begin, ZonedDateTime end,
             String serviceId) {
@@ -520,7 +553,7 @@ public class PersistenceExtensions {
      * @param item the {@link Item} to get the variance for
      * @param timestamp the point in time from which to compute the variance
      * @return the variance between now and then, or <code>null</code> if there is no default persistence service
-     *         available or it is not a {@link QueryablePersistenceService}, or if there is no persisted state for the
+     *         available, or it is not a {@link QueryablePersistenceService}, or if there is no persisted state for the
      *         given <code>item</code> at the given <code>timestamp</code>
      */
     public static @Nullable DecimalType varianceSince(Item item, ZonedDateTime timestamp) {
@@ -535,7 +568,7 @@ public class PersistenceExtensions {
      * @param begin the point in time from which to compute the variance
      * @param end the end time for the computation
      * @return the variance between both points of time, or <code>null</code> if there is no default persistence service
-     *         available or it is not a {@link QueryablePersistenceService}, or if there is no persisted state for the
+     *         available, or it is not a {@link QueryablePersistenceService}, or if there is no persisted state for the
      *         given <code>item</code> at the given <code>timestamp</code>
      */
     public static @Nullable DecimalType varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
@@ -550,7 +583,7 @@ public class PersistenceExtensions {
      * @param timestamp the point in time from which to compute the variance
      * @param serviceId the name of the {@link PersistenceService} to use
      * @return the variance between now and then, or <code>null</code> if the persistence service given by
-     *         <code>serviceId</code> is not available or it is not a {@link QueryablePersistenceService}, or if there
+     *         <code>serviceId</code> is not available, or it is not a {@link QueryablePersistenceService}, or if there
      *         is no persisted state for the given <code>item</code> at the given <code>timestamp</code>
      */
     public static @Nullable DecimalType varianceSince(Item item, ZonedDateTime timestamp, String serviceId) {
@@ -566,7 +599,7 @@ public class PersistenceExtensions {
      * @param end the end time for the computation
      * @param serviceId the name of the {@link PersistenceService} to use
      * @return the variance between the given points in time, or <code>null</code> if the persistence service given by
-     *         <code>serviceId</code> is not available or it is not a {@link QueryablePersistenceService}, or if there
+     *         <code>serviceId</code> is not available, or it is not a {@link QueryablePersistenceService}, or if there
      *         is no persisted state for the given <code>item</code> at the given <code>timestamp</code>
      */
     public static @Nullable DecimalType varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
@@ -613,7 +646,7 @@ public class PersistenceExtensions {
      * @param item the {@link Item} to get the standard deviation for
      * @param timestamp the point in time from which to compute the standard deviation
      * @return the standard deviation between now and then, or <code>null</code> if there is no default persistence
-     *         service available or it is not a {@link QueryablePersistenceService}, or if there is no persisted state
+     *         service available, or it is not a {@link QueryablePersistenceService}, or if there is no persisted state
      *         for the given <code>item</code> at the given <code>timestamp</code>
      */
     public static @Nullable DecimalType deviationSince(Item item, ZonedDateTime timestamp) {
@@ -631,7 +664,7 @@ public class PersistenceExtensions {
      * @param begin the point in time from which to compute
      * @param end the end time for the computation
      * @return the standard deviation between now and then, or <code>null</code> if there is no default persistence
-     *         service available or it is not a {@link QueryablePersistenceService}, or if there is no persisted state
+     *         service available, or it is not a {@link QueryablePersistenceService}, or if there is no persisted state
      *         for the given <code>item</code> in the given interval
      */
     public static @Nullable DecimalType deviationBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
