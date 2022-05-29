@@ -60,7 +60,7 @@ public class SseUtilTest {
     @Test
     public void testFilterMatchers() {
         List<String> regexes = SseUtil
-                .convertToRegex("openhab/*/test/test/test/test,    openhab/test/*/test/test/test, openhab,qivicon");
+                .convertToRegex("openhab/*/test/test/test/test,    openhab/test/*/test/test/test, openhab/*,qivicon/*");
 
         assertThat("openhab/test/test/test/test/test".matches(regexes.get(0)), is(true));
         assertThat("openhab/asdf/test/test/test/test".matches(regexes.get(0)), is(true));
@@ -81,7 +81,7 @@ public class SseUtilTest {
 
     @Test
     public void testMoreFilterMatchers() {
-        List<String> regexes = SseUtil.convertToRegex(",    *, openhab/items/*/added, openhab/items");
+        List<String> regexes = SseUtil.convertToRegex(",    *, openhab/items/*/added, openhab/items/*/*");
 
         assertThat("openhab/test/test/test/test/test".matches(regexes.get(0)), is(true));
         assertThat("openhab/asdf/test/test/test/test".matches(regexes.get(0)), is(true));
@@ -112,5 +112,9 @@ public class SseUtilTest {
         regexes = SseUtil.convertToRegex("*added");
         assertThat("openhab/items/anyitem/added".matches(regexes.get(0)), is(true));
         assertThat("openhab/items/anyitem/removed".matches(regexes.get(0)), is(false));
+
+        regexes = SseUtil.convertToRegex("openhab/items/*/state");
+        assertThat("openhab/items/anyitem/state".matches(regexes.get(0)), is(true));
+        assertThat("openhab/items/anyitem/statechanged".matches(regexes.get(0)), is(false));
     }
 }
