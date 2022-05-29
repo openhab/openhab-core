@@ -342,6 +342,8 @@ public class PersistenceExtensions {
      * The default persistence service is used.
      *
      * @param item the item to check for state updates
+     * @param begin the point in time to start the check
+     * @param end the point in time to stop the check
      * @return <code>true</code> if item state was updated, <code>false</code> if either item has not been updated in
      *         the given interval or if the default persistence does not refer to a
      *         {@link QueryablePersistenceService}, or <code>null</code> if the default persistence service is not
@@ -487,7 +489,7 @@ public class PersistenceExtensions {
      * @param item the item to get the minimum state value for
      * @param begin the beginning point in time
      * @param end the end point in time to
-     * @return the historic item with the minimum state value between the given points in time, or a<code>null</code> if
+     * @return the historic item with the minimum state value between the given points in time, or <code>null</code> if
      *         not state was found or if
      *         the default persistence service does not refer to an available {@link QueryablePersistenceService}
      */
@@ -518,7 +520,7 @@ public class PersistenceExtensions {
      * @param begin the beginning point in time
      * @param end the end point in time to
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the historic item with the minimum state value between the given points in time, or a<code>null</code> if
+     * @return the historic item with the minimum state value between the given points in time, or <code>null</code> if
      *         not state was found or if the given <code>serviceId</code> does not refer to an available
      *         {@link QueryablePersistenceService}
      */
