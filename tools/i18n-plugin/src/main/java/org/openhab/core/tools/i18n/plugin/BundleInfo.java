@@ -25,6 +25,8 @@ import org.openhab.core.thing.xml.internal.ChannelGroupTypeXmlResult;
 import org.openhab.core.thing.xml.internal.ChannelTypeXmlResult;
 import org.openhab.core.thing.xml.internal.ThingTypeXmlResult;
 
+import com.google.gson.JsonObject;
+
 /**
  * The bundle information provided by the openHAB XML files in the <code>OH-INF</code> directory.
  *
@@ -39,6 +41,8 @@ public class BundleInfo {
     private List<ChannelGroupTypeXmlResult> channelGroupTypesXml = new ArrayList<>(5);
     private List<ChannelTypeXmlResult> channelTypesXml = new ArrayList<>(5);
     private List<ThingTypeXmlResult> thingTypesXml = new ArrayList<>(5);
+    private List<JsonObject> moduleTypesJson = new ArrayList<>(5);
+    private List<JsonObject> ruleTemplateJson = new ArrayList<>(5);
 
     public String getBindingId() {
         return bindingId;
@@ -78,6 +82,22 @@ public class BundleInfo {
 
     public void setChannelTypesXml(List<ChannelTypeXmlResult> channelTypesXml) {
         this.channelTypesXml = channelTypesXml;
+    }
+
+    public List<JsonObject> getModuleTypesJson() {
+        return moduleTypesJson;
+    }
+
+    public void setModuleTypesJson(List<JsonObject> moduleTypesJson) {
+        this.moduleTypesJson = moduleTypesJson;
+    }
+
+    public List<JsonObject> getRuleTemplateJson() {
+        return ruleTemplateJson;
+    }
+
+    public void setRuleTemplateJson(List<JsonObject> ruleTemplateJson) {
+        this.ruleTemplateJson = ruleTemplateJson;
     }
 
     public List<ThingTypeXmlResult> getThingTypesXml() {

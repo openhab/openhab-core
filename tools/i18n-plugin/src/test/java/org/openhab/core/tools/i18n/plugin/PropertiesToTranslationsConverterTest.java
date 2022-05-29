@@ -38,8 +38,8 @@ public class PropertiesToTranslationsConverterTest {
                 .convert(Path.of("src/test/resources/acmeweather.bundle/OH-INF/i18n/acmeweather.properties"));
 
         assertThat(translations.hasTranslations(), is(true));
-        assertThat(translations.sections.size(), is(6));
-        assertThat(translations.keysStream().count(), is(34L));
+        assertThat(translations.sections.size(), is(8));
+        assertThat(translations.keysStream().count(), is(44L));
 
         String lines = translations.linesStream().collect(Collectors.joining(System.lineSeparator()));
         assertThat(lines, containsString("# binding"));

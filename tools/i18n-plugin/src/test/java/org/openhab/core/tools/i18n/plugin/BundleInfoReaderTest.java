@@ -49,6 +49,8 @@ public class BundleInfoReaderTest {
         assertThat(bundleInfo.getChannelTypesXml().size(), is(2));
         assertThat(bundleInfo.getConfigDescriptions().size(), is(1));
         assertThat(bundleInfo.getThingTypesXml().size(), is(2));
+        assertThat(bundleInfo.getModuleTypesJson().size(), is(2));
+        assertThat(bundleInfo.getRuleTemplateJson().size(), is(0));
     }
 
     @Test
@@ -62,6 +64,8 @@ public class BundleInfoReaderTest {
         assertThat(bundleInfo.getChannelTypesXml().size(), is(0));
         assertThat(bundleInfo.getConfigDescriptions().size(), is(1));
         assertThat(bundleInfo.getThingTypesXml().size(), is(0));
+        assertThat(bundleInfo.getModuleTypesJson().size(), is(0));
+        assertThat(bundleInfo.getRuleTemplateJson().size(), is(0));
     }
 
     @Test
@@ -75,5 +79,7 @@ public class BundleInfoReaderTest {
         assertThat(bundleInfo.getChannelTypesXml().size(), is(0));
         assertThat(bundleInfo.getConfigDescriptions().size(), is(0));
         assertThat(bundleInfo.getThingTypesXml().size(), is(0));
+        assertThat(bundleInfo.getModuleTypesJson().size(), is(0));
+        assertThat(bundleInfo.getRuleTemplateJson().size(), is(0));
     }
 }
