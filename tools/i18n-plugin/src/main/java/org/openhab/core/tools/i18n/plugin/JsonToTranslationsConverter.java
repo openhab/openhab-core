@@ -74,7 +74,7 @@ public class JsonToTranslationsConverter {
         Builder<TranslationsEntry> entriesBuilder = Stream.builder();
         getAsString(moduleType, "label").ifPresent(label -> entriesBuilder.add(entry(globalPrefix + "label", label)));
         getAsString(moduleType, "description")
-                .ifPresent(label -> entriesBuilder.add(entry(globalPrefix + "description", label)));
+                .ifPresent(description -> entriesBuilder.add(entry(globalPrefix + "description", description)));
         groupBuilder.add(group(entriesBuilder.build()));
 
         // configDescriptions
@@ -114,7 +114,7 @@ public class JsonToTranslationsConverter {
         Builder<TranslationsEntry> entriesBuilder = Stream.builder();
         getAsString(ruleTemplate, "label").ifPresent(label -> entriesBuilder.add(entry(globalPrefix + "label", label)));
         getAsString(ruleTemplate, "description")
-                .ifPresent(label -> entriesBuilder.add(entry(globalPrefix + "description", label)));
+                .ifPresent(description -> entriesBuilder.add(entry(globalPrefix + "description", description)));
         groupBuilder.add(group(entriesBuilder.build()));
 
         return Stream.of(new TranslationsSection(uid, groupBuilder.build().collect(Collectors.toList())));
@@ -129,7 +129,7 @@ public class JsonToTranslationsConverter {
                 getAsString(jsonObject, "label")
                         .ifPresent(label -> entriesBuilder.add(entry(namePrefix + "label", label)));
                 getAsString(jsonObject, "description")
-                        .ifPresent(label -> entriesBuilder.add(entry(namePrefix + "description", label)));
+                        .ifPresent(description -> entriesBuilder.add(entry(namePrefix + "description", description)));
                 JsonElement optionsElement = jsonObject.get("options");
                 if (optionsElement != null) {
                     for (JsonElement optionElement : optionsElement.getAsJsonArray()) {
