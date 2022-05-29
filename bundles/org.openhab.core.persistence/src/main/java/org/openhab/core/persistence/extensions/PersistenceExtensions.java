@@ -308,8 +308,6 @@ public class PersistenceExtensions {
      * The default persistence service is used.
      *
      * @param item the item to check for state updates
-     *
-     *
      * @return <code>true</code> if item state was updated, <code>false</code> if either item has not been updated in
      *         the given interval or if the default persistence does not refer to a
      *         {@link QueryablePersistenceService}, or <code>null</code> if the default persistence service is not
@@ -373,8 +371,8 @@ public class PersistenceExtensions {
      * @param item the item to get the maximum state value for
      * @param begin the point in time to start the check
      * @param end the point in time to stop the check
-     * @return a {@link HistoricItem} with the maximum state value since the given point in time, or
-     *         <code>null</code>aif no states found or if the default persistence service does not refer to an available
+     * @return a {@link HistoricItem} with the maximum state value since the given point in time, or <code>null</code>
+     *         if no states found or if the default persistence service does not refer to an available
      *         {@link QueryablePersistenceService}
      */
     public static @Nullable HistoricItem maximumBetween(final Item item, ZonedDateTime begin, ZonedDateTime end) {
@@ -826,7 +824,7 @@ public class PersistenceExtensions {
      * The default persistence service is used.
      *
      * @param item the item for which we will sum its persisted state values between <code>begin</code> and
-     *            <code>ewd</code>
+     *            <code>end</code>
      * @param begin the point in time from which to start the summation
      * @param end the point in time to which to start the summation
      * @return the sum of the state values between the given points in time, or {@link DecimalType#ZERO} if no historic
@@ -857,7 +855,7 @@ public class PersistenceExtensions {
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the item for which we will sum its persisted state values between <code>begin</code> and
-     *            <code>ewd</code>
+     *            <code>end</code>
      * @param begin the point in time from which to start the summation
      * @param end the point in time to which to start the summation
      * @param serviceId the name of the {@link PersistenceService} to use
@@ -909,8 +907,7 @@ public class PersistenceExtensions {
      * @param end the end point in time
      * @return the difference between end and begin, or <code>null</code> if the default persistence service does not
      *         refer to an available {@link QueryablePersistenceService}, or if there is no persisted state for the
-     *         given
-     *         <code>item</code> for the given points in time
+     *         given <code>item</code> for the given points in time
      */
     public static @Nullable DecimalType deltaBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
         return deltaBetween(item, begin, end, getDefaultServiceId());
@@ -992,8 +989,7 @@ public class PersistenceExtensions {
      * @return the evolution rate in percent (positive and negative) in the given interval, or <code>null</code> if
      *         there is no default persistence service available, the default persistence service is not a
      *         {@link QueryablePersistenceService}, or if there are no persisted state for the given <code>item</code>
-     *         at
-     *         the given interval, or if there is a state but it is zero (which would cause a
+     *         at the given interval, or if there is a state but it is zero (which would cause a
      *         divide-by-zero error)
      */
     public static DecimalType evolutionRate(Item item, ZonedDateTime begin, ZonedDateTime end) {
@@ -1040,9 +1036,8 @@ public class PersistenceExtensions {
      *         the persistence service given by <code>serviceId</code> is not available or is not a
      *         {@link QueryablePersistenceService}, or if there is no persisted state for the given
      *         <code>item</code> at the given <code>begin</code> and <code>end</code> using the persistence service
-     *         given by
-     *         <code>serviceId</code>, or if there is a state but it is zero (which would cause a divide-by-zero
-     *         error)
+     *         given by <code>serviceId</code>, or if there is a state but it is zero (which would cause a
+     *         divide-by-zero error)
      */
     public static @Nullable DecimalType evolutionRate(Item item, ZonedDateTime begin, ZonedDateTime end,
             String serviceId) {
