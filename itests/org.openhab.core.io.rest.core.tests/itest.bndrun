@@ -98,4 +98,7 @@ Fragment-Host: org.openhab.core.io.rest.core
 	org.openhab.core.persistence;version='[3.4.0,3.4.1)',\
 	org.openhab.core.test;version='[3.4.0,3.4.1)',\
 	org.openhab.core.thing;version='[3.4.0,3.4.1)',\
-	org.openhab.core.transform;version='[3.4.0,3.4.1)'
+	org.openhab.core.transform;version='[3.4.0,3.4.1)',\
+	junit-jupiter-params;version='[5.8.1,5.8.2)',\
+	org.openhab.core.semantics;version='[3.4.0,3.4.1)',\
+	org.osgi.service.cm;version='[1.6.0,1.6.1)'

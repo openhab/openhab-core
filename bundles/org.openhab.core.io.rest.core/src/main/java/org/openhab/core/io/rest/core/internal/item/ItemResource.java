@@ -81,6 +81,8 @@ import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.semantics.SemanticTags;
+import org.openhab.core.semantics.SemanticsPredicates;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
@@ -776,12 +778,54 @@ public class ItemResource implements RESTResource {
         return JSONResponse.createResponse(Status.OK, responseList, null);
     }
 
+    @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
+    @Path("/{itemName: \\w+}/semantic/{semanticClass: \\w+}")
+    @Operation(operationId = "getSemanticItem", summary = "Gets the item which defines the requested semantics of an item.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Item not found") })
+    public Response getSemanticItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("itemName") @Parameter(description = "item name") String itemName,
+            @PathParam("semanticClass") @Parameter(description = "semantic class") String semanticClassName) {
+        Locale locale = localeService.getLocale(language);
+
+        Class<? extends org.openhab.core.semantics.Tag> semanticClass = SemanticTags.getById(semanticClassName);
+        if (semanticClass == null) {
+            return Response.status(Status.NOT_FOUND.getStatusCode()).build();
+        }
+
+        Item foundItem = findParentByTag(getItem(itemName), SemanticsPredicates.isA(semanticClass));
+        if (foundItem == null) {
+            return Response.status(Status.NOT_FOUND.getStatusCode()).build();
+        }
+
+        EnrichedItemDTO dto = EnrichedItemDTOMapper.map(foundItem, false, null, uriBuilder(uriInfo, httpHeaders),
+                locale);
+        dto.editable = isEditable(dto.name);
+        return JSONResponse.createResponse(Status.OK, dto, null);
+    }
+
     private JsonObject buildStatusObject(String itemName, String status, @Nullable String message) {
         JsonObject jo = new JsonObject();
         jo.addProperty("name", itemName);
         jo.addProperty("status", status);
         jo.addProperty("message", message);
         return jo;
+    }
+
+    private @Nullable Item findParentByTag(@Nullable Item item, Predicate<Item> predicate) {
+        if (item == null) {
+            return null;
+        }
+
+        if (predicate.test(item)) {
+            return item;
+        }
+
+        // check parents
+        return item.getGroupNames().stream().map(this::getItem).map(i -> findParentByTag(i, predicate))
+                .filter(Objects::nonNull).findAny().orElse(null);
     }
 
     /**
