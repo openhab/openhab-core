@@ -109,7 +109,22 @@ public class JavaSoundAudioSource implements AudioSource {
         // on OSs other than windows we can open multiple lines for the microphone
         if (!windowsOS) {
             TargetDataLine microphone = initMicrophone(format);
-            var inputStream = new JavaSoundInputStream((InputStream) microphone, audioFormat);
+            var inputStream = new JavaSoundInputStream(new InputStream() {
+                @Override
+                public int read() throws IOException {
+                    return microphone.available();
+                }
+
+                @Override
+                public int read(byte @Nullable [] b, int off, int len) throws IOException {
+                    return microphone.read(b, off, len);
+                }
+
+                @Override
+                public void close() throws IOException {
+                    microphone.close();
+                }
+            }, audioFormat);
             microphone.start();
             return inputStream;
         }
