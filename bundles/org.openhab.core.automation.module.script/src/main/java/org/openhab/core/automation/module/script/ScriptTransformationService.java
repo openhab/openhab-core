@@ -52,8 +52,7 @@ public class ScriptTransformationService
         implements TransformationService, RegistryChangeListener<TransformationConfiguration> {
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
 
-    private static final Pattern SCRIPT_CONFIG_PATTERN = Pattern
-            .compile("(?<scriptType>.*?):(?<scriptUid>.*?)(\\?(?<params>.*?))?");
+    private static final Pattern SCRIPT_CONFIG_PATTERN = Pattern.compile("(?<scriptUid>.*?)(\\?(?<params>.*?))?");
 
     private final Logger logger = LoggerFactory.getLogger(ScriptTransformationService.class);
 
@@ -62,7 +61,7 @@ public class ScriptTransformationService
 
     private final Map<String, ScriptEngineContainer> scriptEngineContainers = new HashMap<>();
     private final Map<String, CompiledScript> compiledScripts = new HashMap<>();
-    private final Map<String, String> scriptCache = new HashMap<>();
+    private final Map<String, TransformationConfiguration> scriptCache = new HashMap<>();
 
     private final TransformationConfigurationRegistry transformationConfigurationRegistry;
     private final ScriptEngineManager scriptEngineManager;
@@ -90,37 +89,29 @@ public class ScriptTransformationService
     public @Nullable String transform(String function, String source) throws TransformationException {
         Matcher configMatcher = SCRIPT_CONFIG_PATTERN.matcher(function);
         if (!configMatcher.matches()) {
-            throw new TransformationException("Script Type must be prepended to transformation UID.");
+            throw new TransformationException("Could not determine script from '" + function + "'");
         }
-        String scriptType = configMatcher.group("scriptType");
+
         String scriptUid = configMatcher.group("scriptUid");
 
-        String script = scriptCache.get(scriptUid);
+        TransformationConfiguration script = scriptCache.computeIfAbsent(scriptUid,
+                s -> transformationConfigurationRegistry.get(s));
         if (script == null) {
-            TransformationConfiguration transformationConfiguration = transformationConfigurationRegistry
-                    .get(scriptUid);
-            if (transformationConfiguration != null) {
-                script = transformationConfiguration.getContent();
-            }
-            if (script == null) {
-                throw new TransformationException("Could not get script for UID '" + scriptUid + "'.");
-            }
-
-            scriptCache.put(scriptUid, script);
+            throw new TransformationException("Could not get script for UID '" + scriptUid + "'.");
         }
 
-        if (!scriptEngineManager.isSupported(scriptType)) {
+        if (!scriptEngineManager.isSupported(script.getType())) {
             // language has been removed, clear container and compiled scripts if found
             if (scriptEngineContainers.containsKey(scriptUid)) {
                 scriptEngineManager.removeEngine(OPENHAB_TRANSFORMATION_SCRIPT + scriptUid);
             }
             clearCache(scriptUid);
             throw new TransformationException(
-                    "Script type '" + scriptType + "' is not supported by any available script engine.");
+                    "Script type '" + script.getType() + "' is not supported by any available script engine.");
         }
 
         ScriptEngineContainer scriptEngineContainer = scriptEngineContainers.computeIfAbsent(scriptUid,
-                k -> scriptEngineManager.createScriptEngine(scriptType, OPENHAB_TRANSFORMATION_SCRIPT + k));
+                k -> scriptEngineManager.createScriptEngine(script.getType(), OPENHAB_TRANSFORMATION_SCRIPT + k));
 
         if (scriptEngineContainer == null) {
             throw new TransformationException("Failed to create script engine container for '" + function + "'.");
@@ -130,7 +121,7 @@ public class ScriptTransformationService
 
             if (compiledScript == null && scriptEngineContainer.getScriptEngine() instanceof Compilable) {
                 // no compiled script available but compiling is supported
-                compiledScript = ((Compilable) scriptEngineContainer.getScriptEngine()).compile(script);
+                compiledScript = ((Compilable) scriptEngineContainer.getScriptEngine()).compile(script.getContent());
                 this.compiledScripts.put(scriptUid, compiledScript);
             }
 
@@ -152,7 +143,7 @@ public class ScriptTransformationService
                 }
             }
 
-            Object result = compiledScript != null ? compiledScript.eval() : engine.eval(script);
+            Object result = compiledScript != null ? compiledScript.eval() : engine.eval(script.getContent());
             return result == null ? null : result.toString();
         } catch (ScriptException e) {
             throw new TransformationException("Failed to execute script.", e);
