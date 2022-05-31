@@ -40,6 +40,9 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
     static private final Logger logger = LoggerFactory.getLogger(ScriptJvmModelInferrer)
 
+    /** Variable name for the input string in a "script transformation" or "script profile" */
+    public static final String VAR_INPUT_STRING = "inputString";
+
     /** Variable name for the item in a "state triggered" or "command triggered" rule */
     public static final String VAR_TRIGGERING_ITEM = "triggeringItem";
 
@@ -121,6 +124,8 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
             members += script.toMethod("_script", null) [
                 static = true
+                val inputStringTypeRef = script.newTypeRef(String)
+                parameters += script.toParameter(VAR_INPUT_STRING, inputStringTypeRef)
                 val itemTypeRef = script.newTypeRef(Item)
                 parameters += script.toParameter(VAR_TRIGGERING_ITEM, itemTypeRef)
                 val itemNameRef = script.newTypeRef(String)

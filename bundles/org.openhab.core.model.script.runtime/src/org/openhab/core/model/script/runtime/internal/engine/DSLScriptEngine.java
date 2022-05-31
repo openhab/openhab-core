@@ -62,7 +62,7 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
     private static final Map<String, String> IMPLICIT_VARS = Map.of("command",
             ScriptJvmModelInferrer.VAR_RECEIVED_COMMAND, "state", ScriptJvmModelInferrer.VAR_NEW_STATE, "newState",
             ScriptJvmModelInferrer.VAR_NEW_STATE, "oldState", ScriptJvmModelInferrer.VAR_PREVIOUS_STATE,
-            "triggeringItem", ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM);
+            "triggeringItem", ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM, "inputString", ScriptJvmModelInferrer.VAR_INPUT_STRING);
 
     private final Logger logger = LoggerFactory.getLogger(DSLScriptEngine.class);
 
