@@ -263,6 +263,6 @@ public class SseResource implements RESTResource, SsePublisher {
     }
 
     private static class ServerAliveEvent {
-        public final String TYPE = "ALIVE";
+        public final String type = "ALIVE";
     }
 }
