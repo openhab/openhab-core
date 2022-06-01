@@ -123,7 +123,7 @@ public class GenerateDefaultTranslationsMojoTest {
     }
 
     @Test
-    public void addMissingBindingTranslationsWithoutI18nPath() throws IOException, MojoFailureException {
+    public void addMissingAddonTranslationsWithoutI18nPath() throws IOException, MojoFailureException {
         copyPath(WEATHER_RESOURCES_PATH, tempPath);
         deleteTempI18nPath();
 
@@ -134,7 +134,7 @@ public class GenerateDefaultTranslationsMojoTest {
     }
 
     @Test
-    public void addMissingBindingTranslationsNoChanges() throws IOException, MojoFailureException {
+    public void addMissingAddonTranslationsNoChanges() throws IOException, MojoFailureException {
         copyPath(WEATHER_RESOURCES_PATH, tempPath);
 
         mojo.setGenerationMode(ADD_MISSING_TRANSLATIONS);

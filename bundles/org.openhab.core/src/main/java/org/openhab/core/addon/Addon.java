@@ -27,12 +27,13 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 public class Addon {
     public static final Set<String> CODE_MATURITY_LEVELS = Set.of("alpha", "beta", "mature", "stable");
+    public static final String ADDON_SEPARATOR = "-";
 
     private final String id;
     private final String label;
     private final String version;
     private final @Nullable String maturity;
-    private boolean compatible;
+    private final boolean compatible;
     private final String contentType;
     private final @Nullable String link;
     private final String author;
@@ -43,7 +44,7 @@ public class Addon {
     private final @Nullable String detailedDescription;
     private final String configDescriptionURI;
     private final String keywords;
-    private final String countries;
+    private final List<String> countries;
     private final @Nullable String license;
     private final String connection;
     private final @Nullable String backgroundColor;
@@ -69,7 +70,7 @@ public class Addon {
      * @param detailedDescription the detailed description of the add-on (may be null)
      * @param configDescriptionURI the URI to the configuration description for this add-on
      * @param keywords the keywords for this add-on
-     * @param countries a comma-separated list of ISO 3166 codes relevant to this add-on
+     * @param countries a list of ISO 3166 codes relevant to this add-on
      * @param license the SPDX license identifier
      * @param connection a string describing the type of connection (local or cloud, push or pull...) this add-on uses,
      *            if applicable.
@@ -81,7 +82,7 @@ public class Addon {
     private Addon(String id, String type, String label, String version, @Nullable String maturity, boolean compatible,
             String contentType, @Nullable String link, String author, boolean verifiedAuthor, boolean installed,
             @Nullable String description, @Nullable String detailedDescription, String configDescriptionURI,
-            String keywords, String countries, @Nullable String license, String connection,
+            String keywords, List<String> countries, @Nullable String license, String connection,
             @Nullable String backgroundColor, @Nullable String imageLink, @Nullable Map<String, Object> properties,
             List<String> loggerPackages) {
         this.id = id;
@@ -120,6 +121,10 @@ public class Addon {
      */
     public String getId() {
         return id;
+    }
+
+    public String getUID() {
+        return type + ADDON_SEPARATOR + id;
     }
 
     /**
@@ -207,9 +212,9 @@ public class Addon {
     }
 
     /**
-     * A comma-separated list of ISO 3166 codes relevant to this add-on
+     * A list of ISO 3166 codes relevant to this add-on
      */
-    public String getCountries() {
+    public List<String> getCountries() {
         return countries;
     }
 
@@ -221,7 +226,7 @@ public class Addon {
     }
 
     /**
-     * A string describing the type of connection (local or cloud, push or pull...) this add-on uses, if applicable.
+     * A string describing the type of connection (local, cloud, cloudDiscovery) this add-on uses, if applicable.
      */
     public String getConnection() {
         return connection;
@@ -289,7 +294,7 @@ public class Addon {
         private @Nullable String detailedDescription;
         private String configDescriptionURI = "";
         private String keywords = "";
-        private String countries = "";
+        private List<String> countries = List.of();
         private @Nullable String license;
         private String connection = "";
         private @Nullable String backgroundColor;
@@ -372,7 +377,7 @@ public class Addon {
             return this;
         }
 
-        public Builder withCountries(String countries) {
+        public Builder withCountries(List<String> countries) {
             this.countries = countries;
             return this;
         }

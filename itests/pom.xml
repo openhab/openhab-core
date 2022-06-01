@@ -24,7 +24,7 @@
     <module>org.openhab.core.automation.module.timer.tests</module>
     <module>org.openhab.core.automation.module.script.tests</module>
     <module>org.openhab.core.automation.integration.tests</module>
-    <module>org.openhab.core.binding.xml.tests</module>
+    <module>org.openhab.core.addon.xml.tests</module>
     <module>org.openhab.core.config.core.tests</module>
     <module>org.openhab.core.config.discovery.mdns.tests</module>
     <module>org.openhab.core.config.discovery.tests</module>
