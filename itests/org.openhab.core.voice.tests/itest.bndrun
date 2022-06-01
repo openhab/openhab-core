@@ -53,7 +53,6 @@ Fragment-Host: org.openhab.core.voice
 	org.openhab.core.voice.tests;version='[3.3.0,3.3.1)',\
 	com.google.gson;version='[2.8.9,2.8.10)',\
 	org.objectweb.asm;version='[9.2.0,9.2.1)',\
-	biz.aQute.tester.junit-platform;version='[6.2.0,6.2.1)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
 	org.apache.xbean.bundleutils;version='[4.21.0,4.21.1)',\
 	org.apache.xbean.finder;version='[4.21.0,4.21.1)',\
@@ -71,4 +70,5 @@ Fragment-Host: org.openhab.core.voice
 	org.ops4j.pax.web.pax-web-runtime;version='[7.3.25,7.3.26)',\
 	org.ops4j.pax.web.pax-web-spi;version='[7.3.25,7.3.26)',\
 	ch.qos.logback.classic;version='[1.2.11,1.2.12)',\
-	ch.qos.logback.core;version='[1.2.11,1.2.12)'
+	ch.qos.logback.core;version='[1.2.11,1.2.12)',\
+	biz.aQute.tester.junit-platform;version='[6.3.0,6.3.1)'
