@@ -27,6 +27,7 @@ import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeBuilder;
 import org.openhab.core.thing.profiles.ProfileTypeProvider;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
+import org.openhab.core.transform.TransformationService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -40,7 +41,8 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class ScriptProfileFactory implements ProfileFactory, ProfileTypeProvider {
 
-    public static final ProfileTypeUID SCRIPT_PROFILE_UID = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "script");
+    public static final ProfileTypeUID SCRIPT_PROFILE_UID = new ProfileTypeUID(
+            TransformationService.TRANSFORM_PROFILE_SCOPE, "SCRIPT");
 
     private static final ProfileType PROFILE_TYPE_SCRIPT = ProfileTypeBuilder.newState(SCRIPT_PROFILE_UID, "Script")
             .build();
