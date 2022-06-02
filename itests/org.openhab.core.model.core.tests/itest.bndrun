@@ -88,7 +88,6 @@ Fragment-Host: org.openhab.core.model.core
 	org.openhab.core.transform;version='[3.3.0,3.3.1)',\
 	org.openhab.core.voice;version='[3.3.0,3.3.1)',\
 	org.threeten.extra;version='[1.5.0,1.5.1)',\
-	biz.aQute.tester.junit-platform;version='[6.2.0,6.2.1)',\
 	org.apache.xbean.bundleutils;version='[4.21.0,4.21.1)',\
 	org.apache.xbean.finder;version='[4.21.0,4.21.1)',\
 	org.eclipse.jetty.client;version='[9.4.46,9.4.47)',\
@@ -103,11 +102,12 @@ Fragment-Host: org.openhab.core.model.core
 	org.eclipse.jetty.websocket.client;version='[9.4.46,9.4.47)',\
 	org.eclipse.jetty.websocket.common;version='[9.4.46,9.4.47)',\
 	org.eclipse.jetty.xml;version='[9.4.46,9.4.47)',\
-	org.openhab.core.model.item.runtime;version='[3.3.0,3.3.1)',\
 	org.ops4j.pax.logging.pax-logging-api;version='[2.0.16,2.0.17)',\
 	org.ops4j.pax.web.pax-web-api;version='[7.3.25,7.3.26)',\
 	org.ops4j.pax.web.pax-web-jetty;version='[7.3.25,7.3.26)',\
 	org.ops4j.pax.web.pax-web-runtime;version='[7.3.25,7.3.26)',\
 	org.ops4j.pax.web.pax-web-spi;version='[7.3.25,7.3.26)',\
 	ch.qos.logback.classic;version='[1.2.11,1.2.12)',\
-	ch.qos.logback.core;version='[1.2.11,1.2.12)'
+	ch.qos.logback.core;version='[1.2.11,1.2.12)',\
+	biz.aQute.tester.junit-platform;version='[6.3.0,6.3.1)',\
+	org.openhab.core.model.thing.runtime;version='[3.3.0,3.3.1)'
