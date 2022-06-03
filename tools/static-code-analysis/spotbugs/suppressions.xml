@@ -35,4 +35,8 @@
   <Match>
     <Bug pattern="SLF4J_SIGN_ONLY_FORMAT"/>
   </Match>
+  <Match>
+    <!-- see https://github.com/spotbugs/spotbugs/issues/1992 -->
+    <Bug pattern="SA_LOCAL_SELF_COMPARISON"/>
+  </Match>
 </FindBugsFilter>
