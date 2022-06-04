@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +34,7 @@ import javax.script.ScriptException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.module.script.internal.ScriptEngineFactoryHelper;
 import org.openhab.core.automation.module.script.profile.ScriptProfile;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
@@ -63,7 +65,7 @@ import org.slf4j.LoggerFactory;
 public class ScriptTransformationService
         implements TransformationService, RegistryChangeListener<TransformationConfiguration>, ConfigOptionProvider {
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
-    private static final String PROFILE_CONFIG_URI = "profile:system:script";
+    private static final String PROFILE_CONFIG_URI = "profile:transform:script";
 
     private static final Pattern SCRIPT_CONFIG_PATTERN = Pattern
             .compile("(?<scriptType>.*?):(?<scriptUid>.*?)(\\?(?<params>.*?))?");
@@ -77,7 +79,7 @@ public class ScriptTransformationService
     private final Map<String, CompiledScript> compiledScripts = new HashMap<>();
     private final Map<String, String> scriptCache = new HashMap<>();
 
-    private final Set<String> supportedScriptTypes = new CopyOnWriteArraySet<>();
+    private final Map<String, String> supportedScriptTypes = new ConcurrentHashMap<>();
 
     private final TransformationConfigurationRegistry transformationConfigurationRegistry;
     private final ScriptEngineManager scriptEngineManager;
@@ -225,9 +227,13 @@ public class ScriptTransformationService
         if (PROFILE_CONFIG_URI.equals(uri.toString())) {
             if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param)
                     || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)) {
-                return transformationConfigurationRegistry.getConfigurations(supportedScriptTypes).stream()
-                        .map(c -> new ParameterOption(c.getType() + ":" + c.getUID(), c.getLabel()))
+                return transformationConfigurationRegistry.getConfigurations(SUPPORTED_CONFIGURATION_TYPE).stream()
+                        .map(c -> new ParameterOption(c.getUID(), c.getLabel()))
                         .collect(Collectors.toList());
+            }
+            if (ScriptProfile.CONFIG_SCRIPT_LANGUAGE.equals(param)) {
+                return supportedScriptTypes.entrySet().stream().map(e -> new ParameterOption(e.getKey(), e.getValue())).collect(
+                        Collectors.toList());
             }
         }
         return null;
@@ -238,10 +244,11 @@ public class ScriptTransformationService
      */
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void setScriptEngineFactory(ScriptEngineFactory engineFactory) {
-        supportedScriptTypes.addAll(engineFactory.getScriptTypes());
+        Map.Entry<String, String> parameterOption = ScriptEngineFactoryHelper.getParameterOption(engineFactory);
+        supportedScriptTypes.put(parameterOption.getKey(), parameterOption.getValue());
     }
 
     public void unsetScriptEngineFactory(ScriptEngineFactory engineFactory) {
-        engineFactory.getScriptTypes().forEach(supportedScriptTypes::remove);
+        supportedScriptTypes.remove(ScriptEngineFactoryHelper.getPreferredMimeType(engineFactory));
     }
 }

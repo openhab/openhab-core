@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
+import org.openhab.core.automation.module.script.internal.ScriptEngineFactoryHelper;
 import org.openhab.core.automation.module.script.internal.handler.AbstractScriptModuleHandler;
 import org.openhab.core.automation.module.script.internal.handler.ScriptActionHandler;
 import org.openhab.core.automation.module.script.internal.handler.ScriptConditionHandler;
@@ -146,21 +147,14 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
      */
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void setScriptEngineFactory(ScriptEngineFactory engineFactory) {
-        List<String> scriptTypes = engineFactory.getScriptTypes();
-        if (!scriptTypes.isEmpty()) {
-            ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
-            if (scriptEngine != null) {
-                boolean notifyListeners = parameterOptions.isEmpty();
-                parameterOptions.put(getPreferredMimeType(engineFactory), getLanguageName(scriptEngine.getFactory()));
-                logger.trace("ParameterOptions: {}", parameterOptions);
-                if (notifyListeners) {
-                    notifyModuleTypesAdded();
-                }
-            } else {
-                logger.trace("setScriptEngineFactory: engine was null");
+        Map.Entry<String, String> parameterOption = ScriptEngineFactoryHelper.getParameterOption(engineFactory);
+        if (parameterOption != null) {
+            boolean notifyListeners = parameterOptions.isEmpty();
+            parameterOptions.put(parameterOption.getKey(), parameterOption.getValue());
+            logger.trace("ParameterOptions: {}", parameterOptions);
+            if (notifyListeners) {
+                notifyModuleTypesAdded();
             }
-        } else {
-            logger.trace("addScriptEngineFactory: scriptTypes was empty");
         }
     }
 
@@ -169,7 +163,7 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
         if (!scriptTypes.isEmpty()) {
             ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
             if (scriptEngine != null) {
-                parameterOptions.remove(getPreferredMimeType(engineFactory));
+                parameterOptions.remove(ScriptEngineFactoryHelper.getPreferredMimeType(engineFactory));
                 logger.trace("ParameterOptions: {}", parameterOptions);
                 if (parameterOptions.isEmpty()) {
                     notifyModuleTypesRemoved();
@@ -180,17 +174,5 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
         } else {
             logger.trace("unsetScriptEngineFactory: scriptTypes was empty");
         }
-    }
-
-    private String getPreferredMimeType(ScriptEngineFactory factory) {
-        List<String> mimeTypes = new ArrayList<>(factory.getScriptTypes());
-        mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || "application/python".equals(mimeType));
-        return mimeTypes.isEmpty() ? factory.getScriptTypes().get(0) : mimeTypes.get(0);
-    }
-
-    private String getLanguageName(javax.script.ScriptEngineFactory factory) {
-        return String.format("%s (%s)",
-                factory.getLanguageName().substring(0, 1).toUpperCase() + factory.getLanguageName().substring(1),
-                factory.getLanguageVersion());
     }
 }

@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class ScriptProfile implements StateProfile {
+
+    public static final String CONFIG_SCRIPT_LANGUAGE = "scriptLanguage";
     public static final String CONFIG_TO_ITEM_SCRIPT = "toItemScript";
     public static final String CONFIG_TO_HANDLER_SCRIPT = "toHandlerScript";
 
@@ -52,6 +54,7 @@ public class ScriptProfile implements StateProfile {
     private final List<Class<? extends Command>> acceptedCommandTypes;
     private final List<Class<? extends Command>> handlerAcceptedCommandTypes;
 
+    private final String scriptLanguage;
     private final String toItemScript;
     private final String toHandlerScript;
 
@@ -66,10 +69,18 @@ public class ScriptProfile implements StateProfile {
         this.acceptedDataTypes = profileContext.getAcceptedDataTypes();
         this.handlerAcceptedCommandTypes = profileContext.getHandlerAcceptedCommandTypes();
 
+        this.scriptLanguage = ConfigParser.valueAsOrElse(profileContext.getConfiguration().get(CONFIG_SCRIPT_LANGUAGE), String.class, "");
         this.toItemScript = ConfigParser.valueAsOrElse(profileContext.getConfiguration().get(CONFIG_TO_ITEM_SCRIPT),
                 String.class, "");
         this.toHandlerScript = ConfigParser
                 .valueAsOrElse(profileContext.getConfiguration().get(CONFIG_TO_HANDLER_SCRIPT), String.class, "");
+
+        if (scriptLanguage.isBlank()) {
+            logger.error(
+                    "Script language is not defined. Profile will discard all states and commands.");
+            isConfigured = false;
+            return;
+        }
 
         if (toItemScript.isBlank() && toHandlerScript.isBlank()) {
             logger.error(
@@ -138,7 +149,7 @@ public class ScriptProfile implements StateProfile {
     private @Nullable String executeScript(String script, Type input) {
         if (!script.isBlank()) {
             try {
-                return transformationService.transform(script, input.toFullString());
+                return transformationService.transform(scriptLanguage + ":" + script, input.toFullString());
             } catch (TransformationException e) {
                 if (e.getCause() instanceof ScriptException) {
                     logger.warn("Failed to process script '{}': {}", script, e.getCause().getMessage());
