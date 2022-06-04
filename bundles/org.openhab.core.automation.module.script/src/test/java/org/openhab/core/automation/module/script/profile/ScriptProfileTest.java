@@ -17,6 +17,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_SCRIPT_LANGUAGE;
 import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_HANDLER_SCRIPT;
 import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_ITEM_SCRIPT;
 
@@ -38,6 +39,7 @@ import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
+import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.transform.TransformationException;
@@ -53,7 +55,7 @@ import org.openhab.core.types.State;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
-public class ScriptProfileTest {
+public class ScriptProfileTest extends JavaTest {
     private @Mock @NonNullByDefault({}) ProfileCallback profileCallback;
 
     private @Mock @NonNullByDefault({}) TransformationService transformationServiceMock;
@@ -65,7 +67,9 @@ public class ScriptProfileTest {
 
     @Test
     public void testScriptNotExecutedAndNoValueForwardedToCallbackIfNoScriptDefined() throws TransformationException {
-        ProfileContext profileContext = ProfileContextBuilder.create().build();
+        ProfileContext profileContext = ProfileContextBuilder.create().withScriptLanguage("customDSL").build();
+
+        setupInterceptedLogger(ScriptProfile.class, LogLevel.ERROR);
 
         ScriptProfile scriptProfile = new ScriptProfile(profileCallback, profileContext, transformationServiceMock);
 
@@ -77,12 +81,40 @@ public class ScriptProfileTest {
         verify(profileCallback, never()).handleCommand(any());
         verify(profileCallback, never()).sendUpdate(any());
         verify(profileCallback, never()).sendCommand(any());
+
+        assertLogMessage(ScriptProfile.class, LogLevel.ERROR,
+                "Neither 'toItem' nor 'toHandler' script defined. Profile will discard all states and commands.");
+    }
+
+    @Test
+    public void testScriptNotExecutedAndNoValueForwardedToCallbackIfNoScriptLanguageDefined()
+            throws TransformationException {
+        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
+                .withToHandlerScript("outScript").withAcceptedCommandTypes(List.of(DecimalType.class))
+                .withAcceptedDataTypes(List.of(PercentType.class))
+                .withHandlerAcceptedCommandTypes(List.of(HSBType.class)).build();
+
+        setupInterceptedLogger(ScriptProfile.class, LogLevel.ERROR);
+
+        ScriptProfile scriptProfile = new ScriptProfile(profileCallback, profileContext, transformationServiceMock);
+
+        scriptProfile.onCommandFromHandler(OnOffType.ON);
+        scriptProfile.onStateUpdateFromHandler(OnOffType.ON);
+        scriptProfile.onCommandFromItem(OnOffType.ON);
+
+        verify(transformationServiceMock, never()).transform(any(), any());
+        verify(profileCallback, never()).handleCommand(any());
+        verify(profileCallback, never()).sendUpdate(any());
+        verify(profileCallback, never()).sendCommand(any());
+
+        assertLogMessage(ScriptProfile.class, LogLevel.ERROR,
+                "Script language is not defined. Profile will discard all states and commands.");
     }
 
     @Test
     public void scriptExecutionErrorForwardsNoValueToCallback() throws TransformationException {
-        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
-                .withToHandlerScript("outScript").build();
+        ProfileContext profileContext = ProfileContextBuilder.create().withScriptLanguage("customDSL")
+                .withToItemScript("inScript").withToHandlerScript("outScript").build();
 
         when(transformationServiceMock.transform(any(), any()))
                 .thenThrow(new TransformationException("intentional failure"));
@@ -101,8 +133,8 @@ public class ScriptProfileTest {
 
     @Test
     public void scriptExecutionResultNullForwardsNoValueToCallback() throws TransformationException {
-        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
-                .withToHandlerScript("outScript").build();
+        ProfileContext profileContext = ProfileContextBuilder.create().withScriptLanguage("customDSL")
+                .withToItemScript("inScript").withToHandlerScript("outScript").build();
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(null);
 
@@ -120,9 +152,9 @@ public class ScriptProfileTest {
 
     @Test
     public void scriptExecutionResultForwardsTransformedValueToCallback() throws TransformationException {
-        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
-                .withToHandlerScript("outScript").withAcceptedCommandTypes(List.of(OnOffType.class))
-                .withAcceptedDataTypes(List.of(OnOffType.class))
+        ProfileContext profileContext = ProfileContextBuilder.create().withScriptLanguage("customDSL")
+                .withToItemScript("inScript").withToHandlerScript("outScript")
+                .withAcceptedCommandTypes(List.of(OnOffType.class)).withAcceptedDataTypes(List.of(OnOffType.class))
                 .withHandlerAcceptedCommandTypes(List.of(OnOffType.class)).build();
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
@@ -141,8 +173,9 @@ public class ScriptProfileTest {
 
     @Test
     public void onlyToItemScriptDoesNotForwardOutboundCommands() throws TransformationException {
-        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
-                .withAcceptedCommandTypes(List.of(OnOffType.class)).withAcceptedDataTypes(List.of(OnOffType.class))
+        ProfileContext profileContext = ProfileContextBuilder.create().withScriptLanguage("customDSL")
+                .withToItemScript("inScript").withAcceptedCommandTypes(List.of(OnOffType.class))
+                .withAcceptedDataTypes(List.of(OnOffType.class))
                 .withHandlerAcceptedCommandTypes(List.of(DecimalType.class)).build();
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
@@ -161,8 +194,9 @@ public class ScriptProfileTest {
 
     @Test
     public void onlyToHandlerScriptDoesNotForwardInboundCommands() throws TransformationException {
-        ProfileContext profileContext = ProfileContextBuilder.create().withToHandlerScript("outScript")
-                .withAcceptedCommandTypes(List.of(DecimalType.class)).withAcceptedDataTypes(List.of(DecimalType.class))
+        ProfileContext profileContext = ProfileContextBuilder.create().withScriptLanguage("customDSL")
+                .withToHandlerScript("outScript").withAcceptedCommandTypes(List.of(DecimalType.class))
+                .withAcceptedDataTypes(List.of(DecimalType.class))
                 .withHandlerAcceptedCommandTypes(List.of(OnOffType.class)).build();
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
@@ -181,9 +215,9 @@ public class ScriptProfileTest {
 
     @Test
     public void incompatibleStateOrCommandNotForwardedToCallback() throws TransformationException {
-        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
-                .withToHandlerScript("outScript").withAcceptedCommandTypes(List.of(DecimalType.class))
-                .withAcceptedDataTypes(List.of(PercentType.class))
+        ProfileContext profileContext = ProfileContextBuilder.create().withScriptLanguage("customDSL")
+                .withToItemScript("inScript").withToHandlerScript("outScript")
+                .withAcceptedCommandTypes(List.of(DecimalType.class)).withAcceptedDataTypes(List.of(PercentType.class))
                 .withHandlerAcceptedCommandTypes(List.of(HSBType.class)).build();
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
@@ -208,6 +242,11 @@ public class ScriptProfileTest {
 
         public static ProfileContextBuilder create() {
             return new ProfileContextBuilder();
+        }
+
+        public ProfileContextBuilder withScriptLanguage(String scriptLanguage) {
+            configuration.put(CONFIG_SCRIPT_LANGUAGE, scriptLanguage);
+            return this;
         }
 
         public ProfileContextBuilder withToItemScript(String toItem) {

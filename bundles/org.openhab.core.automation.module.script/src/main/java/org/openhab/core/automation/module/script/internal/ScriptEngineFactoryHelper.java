@@ -12,16 +12,17 @@
  */
 package org.openhab.core.automation.module.script.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.script.ScriptEngine;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.script.ScriptEngine;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * The {@link ScriptEngineFactoryHelper} contains helper methods for handling script engines
@@ -41,8 +42,10 @@ public class ScriptEngineFactoryHelper {
         if (!scriptTypes.isEmpty()) {
             ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
             if (scriptEngine != null) {
-                Map.Entry<String, String> parameterOption = Map.entry(getPreferredMimeType(engineFactory), getLanguageName(scriptEngine.getFactory()));
+                Map.Entry<String, String> parameterOption = Map.entry(getPreferredMimeType(engineFactory),
+                        getLanguageName(scriptEngine.getFactory()));
                 LOGGER.trace("ParameterOptions: {}", parameterOption);
+                return parameterOption;
             } else {
                 LOGGER.trace("setScriptEngineFactory: engine was null");
             }

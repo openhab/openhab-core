@@ -15,11 +15,10 @@ package org.openhab.core.automation.module.script;
 import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -65,7 +64,7 @@ import org.slf4j.LoggerFactory;
 public class ScriptTransformationService
         implements TransformationService, RegistryChangeListener<TransformationConfiguration>, ConfigOptionProvider {
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
-    private static final String PROFILE_CONFIG_URI = "profile:transform:script";
+    private static final String PROFILE_CONFIG_URI = "profile:transform:SCRIPT";
 
     private static final Pattern SCRIPT_CONFIG_PATTERN = Pattern
             .compile("(?<scriptType>.*?):(?<scriptUid>.*?)(\\?(?<params>.*?))?");
@@ -227,13 +226,13 @@ public class ScriptTransformationService
         if (PROFILE_CONFIG_URI.equals(uri.toString())) {
             if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param)
                     || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)) {
-                return transformationConfigurationRegistry.getConfigurations(SUPPORTED_CONFIGURATION_TYPE).stream()
-                        .map(c -> new ParameterOption(c.getUID(), c.getLabel()))
-                        .collect(Collectors.toList());
+                // TODO: change to SUPPORTED_CONFIGURATION_TYPE once the DSL PR is merged.
+                return transformationConfigurationRegistry.getConfigurations(List.of("script")).stream()
+                        .map(c -> new ParameterOption(c.getUID(), c.getLabel())).collect(Collectors.toList());
             }
             if (ScriptProfile.CONFIG_SCRIPT_LANGUAGE.equals(param)) {
-                return supportedScriptTypes.entrySet().stream().map(e -> new ParameterOption(e.getKey(), e.getValue())).collect(
-                        Collectors.toList());
+                return supportedScriptTypes.entrySet().stream().map(e -> new ParameterOption(e.getKey(), e.getValue()))
+                        .collect(Collectors.toList());
             }
         }
         return null;
@@ -245,7 +244,9 @@ public class ScriptTransformationService
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void setScriptEngineFactory(ScriptEngineFactory engineFactory) {
         Map.Entry<String, String> parameterOption = ScriptEngineFactoryHelper.getParameterOption(engineFactory);
-        supportedScriptTypes.put(parameterOption.getKey(), parameterOption.getValue());
+        if (parameterOption != null) {
+            supportedScriptTypes.put(parameterOption.getKey(), parameterOption.getValue());
+        }
     }
 
     public void unsetScriptEngineFactory(ScriptEngineFactory engineFactory) {

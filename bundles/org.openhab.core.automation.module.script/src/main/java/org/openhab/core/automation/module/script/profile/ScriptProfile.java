@@ -69,15 +69,15 @@ public class ScriptProfile implements StateProfile {
         this.acceptedDataTypes = profileContext.getAcceptedDataTypes();
         this.handlerAcceptedCommandTypes = profileContext.getHandlerAcceptedCommandTypes();
 
-        this.scriptLanguage = ConfigParser.valueAsOrElse(profileContext.getConfiguration().get(CONFIG_SCRIPT_LANGUAGE), String.class, "");
+        this.scriptLanguage = ConfigParser.valueAsOrElse(profileContext.getConfiguration().get(CONFIG_SCRIPT_LANGUAGE),
+                String.class, "");
         this.toItemScript = ConfigParser.valueAsOrElse(profileContext.getConfiguration().get(CONFIG_TO_ITEM_SCRIPT),
                 String.class, "");
         this.toHandlerScript = ConfigParser
                 .valueAsOrElse(profileContext.getConfiguration().get(CONFIG_TO_HANDLER_SCRIPT), String.class, "");
 
         if (scriptLanguage.isBlank()) {
-            logger.error(
-                    "Script language is not defined. Profile will discard all states and commands.");
+            logger.error("Script language is not defined. Profile will discard all states and commands.");
             isConfigured = false;
             return;
         }

@@ -4,7 +4,7 @@
 	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
 
-	<config-description uri="profile:system:script">
+	<config-description uri="profile:transform:SCRIPT">
 		<parameter name="scriptLanguage" type="text" required="true">
 			<label>Script Language</label>
 			<description>MIME-type ("application/vnd.openhab.dsl.rule") or file extension ("js") of a scripting language</description>
