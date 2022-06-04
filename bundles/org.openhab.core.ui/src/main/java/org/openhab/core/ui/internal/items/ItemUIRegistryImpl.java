@@ -1104,8 +1104,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 State cmpState = state;
 
                 if (color.getState() == null) {
-                    logger.error("Error parsing color");
-                    continue;
+                    // If no state associated to the condition, we consider the condition as fulfilled.
+                    // It allows defining a default color as last condition in particular.
+                    colorString = color.getArg();
+                    break;
                 }
 
                 // If there's an item defined here, get its state
