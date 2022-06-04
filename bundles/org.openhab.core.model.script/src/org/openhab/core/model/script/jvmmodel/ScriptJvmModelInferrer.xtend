@@ -41,7 +41,7 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     static private final Logger logger = LoggerFactory.getLogger(ScriptJvmModelInferrer)
 
     /** Variable name for the input string in a "script transformation" or "script profile" */
-    public static final String VAR_INPUT_STRING = "input";
+    public static final String VAR_INPUT = "input";
 
     /** Variable name for the item in a "state triggered" or "command triggered" rule */
     public static final String VAR_TRIGGERING_ITEM = "triggeringItem";

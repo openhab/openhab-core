@@ -46,13 +46,18 @@ import org.openhab.core.transform.TransformationException;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class ScriptTransformationServiceTest {
-    private static final String SCRIPT_TYPE = "script";
+    private static final String SCRIPT_LANGUAGE = "script";
     private static final String SCRIPT_UID = "scriptUid";
+    private static final String INVALID_SCRIPT_UID = "invalidScriptUid";
+
     private static final String SCRIPT = "script";
     private static final String SCRIPT_OUTPUT = "output";
 
     private static final TransformationConfiguration TRANSFORMATION_CONFIGURATION = new TransformationConfiguration(
-            SCRIPT_UID, "label", "script", null, SCRIPT);
+            SCRIPT_UID, "label", ScriptTransformationService.SUPPORTED_CONFIGURATION_TYPE, null, SCRIPT);
+    private static final TransformationConfiguration INVALID_TRANSFORMATION_CONFIGURATION = new TransformationConfiguration(
+            INVALID_SCRIPT_UID, "label", "invalid", null, SCRIPT);
+
     private @Mock @NonNullByDefault({}) TransformationConfigurationRegistry transformationConfigurationRegistry;
     private @Mock @NonNullByDefault({}) ScriptEngineManager scriptEngineManager;
     private @Mock @NonNullByDefault({}) ScriptEngineContainer scriptEngineContainer;
@@ -65,29 +70,37 @@ public class ScriptTransformationServiceTest {
     public void setUp() throws ScriptException {
         service = new ScriptTransformationService(transformationConfigurationRegistry, scriptEngineManager);
 
-        when(scriptEngineManager.createScriptEngine(eq(SCRIPT_TYPE), any())).thenReturn(scriptEngineContainer);
+        when(scriptEngineManager.createScriptEngine(eq(SCRIPT_LANGUAGE), any())).thenReturn(scriptEngineContainer);
         when(scriptEngineManager.isSupported(anyString()))
-                .thenAnswer(scriptType -> SCRIPT_TYPE.equals(scriptType.getArgument(0)));
+                .thenAnswer(scriptType -> SCRIPT_LANGUAGE.equals(scriptType.getArgument(0)));
         when(scriptEngineContainer.getScriptEngine()).thenReturn(scriptEngine);
         when(scriptEngine.eval(SCRIPT)).thenReturn("output");
         when(scriptEngine.getContext()).thenReturn(scriptContext);
 
-        when(transformationConfigurationRegistry.get(anyString())).thenAnswer(
-                scriptUid -> SCRIPT_UID.equals(scriptUid.getArgument(0)) ? TRANSFORMATION_CONFIGURATION : null);
+        when(transformationConfigurationRegistry.get(anyString())).thenAnswer(arguments -> {
+            String scriptUid = arguments.getArgument(0);
+            if (SCRIPT_UID.equals(scriptUid)) {
+                return TRANSFORMATION_CONFIGURATION;
+            } else if (INVALID_SCRIPT_UID.equals(scriptUid)) {
+                return INVALID_TRANSFORMATION_CONFIGURATION;
+            } else {
+                return null;
+            }
+        });
     }
 
     @Test
     public void success() throws TransformationException {
-        String returnValue = Objects.requireNonNull(service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID, "input"));
+        String returnValue = Objects.requireNonNull(service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID, "input"));
 
         assertThat(returnValue, is(SCRIPT_OUTPUT));
     }
 
     @Test
     public void scriptExecutionParametersAreInjectedIntoEngineContext() throws TransformationException {
-        service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID + "?param1=value1&param2=value2", "input");
+        service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID + "?param1=value1&param2=value2", "input");
 
-        verify(scriptContext).setAttribute(eq("inputString"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
+        verify(scriptContext).setAttribute(eq("input"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param1"), eq("value1"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param2"), eq("value2"), eq(ScriptContext.ENGINE_SCOPE));
         verifyNoMoreInteractions(scriptContext);
@@ -95,26 +108,26 @@ public class ScriptTransformationServiceTest {
 
     @Test
     public void invalidScriptExecutionParametersAreDiscarded() throws TransformationException {
-        service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID + "?param1=value1&invalid", "input");
+        service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID + "?param1=value1&invalid", "input");
 
-        verify(scriptContext).setAttribute(eq("inputString"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
+        verify(scriptContext).setAttribute(eq("input"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param1"), eq("value1"), eq(ScriptContext.ENGINE_SCOPE));
         verifyNoMoreInteractions(scriptContext);
     }
 
     @Test
     public void scriptsAreCached() throws TransformationException {
-        service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID, "input");
-        service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID, "input");
+        service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID, "input");
+        service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID, "input");
 
         verify(transformationConfigurationRegistry).get(SCRIPT_UID);
     }
 
     @Test
     public void scriptCacheInvalidatedAfterChange() throws TransformationException {
-        service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID, "input");
+        service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID, "input");
         service.updated(TRANSFORMATION_CONFIGURATION, TRANSFORMATION_CONFIGURATION);
-        service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID, "input");
+        service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID, "input");
 
         verify(transformationConfigurationRegistry, times(2)).get(SCRIPT_UID);
     }
@@ -138,7 +151,7 @@ public class ScriptTransformationServiceTest {
     @Test
     public void unknownScriptUidThrowsException() {
         TransformationException e = assertThrows(TransformationException.class,
-                () -> service.transform(SCRIPT_TYPE + ":" + "foo", "input"));
+                () -> service.transform(SCRIPT_LANGUAGE + ":" + "foo", "input"));
 
         assertThat(e.getMessage(), is("Could not get script for UID 'foo'."));
     }
@@ -148,10 +161,18 @@ public class ScriptTransformationServiceTest {
         when(scriptEngine.eval(SCRIPT)).thenThrow(new ScriptException("exception"));
 
         TransformationException e = assertThrows(TransformationException.class,
-                () -> service.transform(SCRIPT_TYPE + ":" + SCRIPT_UID, "input"));
+                () -> service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID, "input"));
 
         assertThat(e.getMessage(), is("Failed to execute script."));
         assertThat(e.getCause(), instanceOf(ScriptException.class));
         assertThat(e.getCause().getMessage(), is("exception"));
+    }
+
+    @Test
+    public void invalidConfigurationTypeThrowsTransformationException() {
+        TransformationException e = assertThrows(TransformationException.class,
+                () -> service.transform(SCRIPT_LANGUAGE + ":" + INVALID_SCRIPT_UID, "input"));
+
+        assertThat(e.getMessage(), is("Configuration does not have correct type 'script' but 'invalid'."));
     }
 }
