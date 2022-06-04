@@ -46,7 +46,7 @@ import org.openhab.core.transform.TransformationException;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class ScriptTransformationServiceTest {
-    private static final String SCRIPT_LANGUAGE = "script";
+    private static final String SCRIPT_LANGUAGE = "customDsl";
     private static final String SCRIPT_UID = "scriptUid";
     private static final String INVALID_SCRIPT_UID = "invalidScriptUid";
 
@@ -72,7 +72,7 @@ public class ScriptTransformationServiceTest {
 
         when(scriptEngineManager.createScriptEngine(eq(SCRIPT_LANGUAGE), any())).thenReturn(scriptEngineContainer);
         when(scriptEngineManager.isSupported(anyString()))
-                .thenAnswer(scriptType -> SCRIPT_LANGUAGE.equals(scriptType.getArgument(0)));
+                .thenAnswer(arguments -> SCRIPT_LANGUAGE.equals(arguments.getArgument(0)));
         when(scriptEngineContainer.getScriptEngine()).thenReturn(scriptEngine);
         when(scriptEngine.eval(SCRIPT)).thenReturn("output");
         when(scriptEngine.getContext()).thenReturn(scriptContext);
