@@ -50,6 +50,7 @@ public class WidgetDTO {
     public String encoding;
     public String service;
     public String period;
+    public String yAxisDecimalPattern;
     public Boolean legend;
     public Boolean forceAsItem;
     public String state;
