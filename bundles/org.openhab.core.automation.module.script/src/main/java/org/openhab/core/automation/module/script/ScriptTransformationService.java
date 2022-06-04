@@ -99,13 +99,12 @@ public class ScriptTransformationService
         if (script == null) {
             TransformationConfiguration transformationConfiguration = transformationConfigurationRegistry
                     .get(scriptUid);
-            if (transformationConfiguration != null) {
+            if (transformationConfiguration != null && "script".equals(transformationConfiguration.getType())) {
                 script = transformationConfiguration.getContent();
             }
             if (script == null) {
                 throw new TransformationException("Could not get script for UID '" + scriptUid + "'.");
             }
-
             scriptCache.put(scriptUid, script);
         }
 
@@ -137,7 +136,7 @@ public class ScriptTransformationService
             ScriptEngine engine = compiledScript != null ? compiledScript.getEngine()
                     : scriptEngineContainer.getScriptEngine();
             ScriptContext executionContext = engine.getContext();
-            executionContext.setAttribute("inputString", source, ScriptContext.ENGINE_SCOPE);
+            executionContext.setAttribute("input", source, ScriptContext.ENGINE_SCOPE);
 
             String params = configMatcher.group("params");
             if (params != null) {
