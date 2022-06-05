@@ -732,7 +732,7 @@ public class PersistenceExtensions {
      *
      * @param item the {@link Item} to get the average value for
      * @param timestamp the point in time from which to search for the average value
-     * @return the average value since <code>timestamp</code> or the state of the given <code>item</code> if no
+     * @return the average value since <code>timestamp</code> or <code>null</code> if no
      *         previous states could be found or if the default persistence service does not refer to an available
      *         {@link QueryablePersistenceService}. The current state is included in the calculation.
      */
@@ -747,7 +747,7 @@ public class PersistenceExtensions {
      * @param item the {@link Item} to get the average value for
      * @param begin the point in time from which to start the summation
      * @param end the point in time to which to start the summation
-     * @return the average value since <code>timestamp</code> or the state of the given <code>item</code> if no
+     * @return the average value since <code>timestamp</code> or <code>null</code> if no
      *         previous states could be found or if the default persistence service does not refer to an available
      *         {@link QueryablePersistenceService}.
      */
@@ -762,7 +762,7 @@ public class PersistenceExtensions {
      * @param item the {@link Item} to get the average value for
      * @param timestamp the point in time from which to search for the average value
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the average value since <code>timestamp</code>, or the state of the given <code>item</code> if no
+     * @return the average value since <code>timestamp</code>, or <code>null</code> if no
      *         previous states could be found or if the persistence service given by <code>serviceId</code> does not
      *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
      *         calculation.
@@ -781,7 +781,7 @@ public class PersistenceExtensions {
      * @param begin the point in time from which to start the summation
      * @param end the point in time to which to start the summation
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the average value since <code>timestamp</code>, or the state of the given <code>item</code> if no
+     * @return the average value since <code>timestamp</code>, or <code>null</code> if no
      *         previous states could be found or if the persistence service given by <code>serviceId</code> does not
      *         refer to an available {@link QueryablePersistenceService}
      */
