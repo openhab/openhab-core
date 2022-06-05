@@ -7,7 +7,7 @@
 	<config-description uri="profile:transform:SCRIPT">
 		<parameter name="scriptLanguage" type="text" required="true">
 			<label>Script Language</label>
-			<description>MIME-type ("application/vnd.openhab.dsl.rule") or file extension ("js") of a scripting language</description>
+			<description>MIME-type ("application/vnd.openhab.dsl.rule") of the scripting language</description>
 		</parameter>
 		<parameter name="toItemScript" type="text">
 			<label>To Item Script</label>
