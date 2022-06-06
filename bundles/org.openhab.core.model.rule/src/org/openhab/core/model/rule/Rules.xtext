@@ -76,7 +76,7 @@ TimerTrigger:
 ;
 
 DateTimeTrigger:
-    'Time' 'equals' item=ItemName
+    'Time' 'is' item=ItemName
 ;
 
 SystemTrigger:
