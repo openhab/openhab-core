@@ -12,16 +12,11 @@
  */
 package org.openhab.core.automation.internal.provider.file;
 
-import static java.nio.file.StandardWatchEventKinds.*;
-
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchEvent.Kind;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.service.AbstractWatchService;
+import org.openhab.core.service.WatchService;
 
 /**
  * This class is an implementation of {@link AbstractWatchService} which is responsible for tracking changes in file
@@ -33,30 +28,35 @@ import org.openhab.core.service.AbstractWatchService;
  */
 @SuppressWarnings("rawtypes")
 @NonNullByDefault
-public class AutomationWatchService extends AbstractWatchService {
+public class AutomationWatchService implements WatchService.WatchEventListener {
 
+    private final WatchService watchService;
+    private final Path watchingDir;
     private AbstractFileProvider provider;
 
-    public AutomationWatchService(AbstractFileProvider provider, String watchingDir) {
-        super(watchingDir);
+    public AutomationWatchService(AbstractFileProvider provider, WatchService watchService, String watchingDir) {
+        this.watchService = watchService;
+        this.watchingDir = Path.of(watchingDir);
         this.provider = provider;
     }
 
-    @Override
-    protected boolean watchSubDirectories() {
-        return true;
+    public void activate() {
+        watchService.registerListener(this, watchingDir);
+    }
+
+    public void deactivate() {
+        watchService.unregisterListener(this);
+    }
+
+    public Path getSourcePath() {
+        return watchingDir;
     }
 
     @Override
-    protected Kind<?> @Nullable [] getWatchEventKinds(Path subDir) {
-        return new Kind<?>[] { ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY };
-    }
-
-    @Override
-    protected void processWatchEvent(WatchEvent<?> event, Kind<?> kind, Path path) {
+    public void processWatchEvent(WatchService.Kind kind, Path path) {
         File file = path.toFile();
         if (!file.isHidden()) {
-            if (ENTRY_DELETE.equals(kind)) {
+            if (kind == WatchService.Kind.DELETE) {
                 provider.removeResources(file);
             } else if (file.canRead()) {
                 provider.importResources(file);

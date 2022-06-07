@@ -19,6 +19,8 @@ import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.RuleTemplateProvider;
 import org.openhab.core.automation.template.TemplateProvider;
+import org.openhab.core.service.WatchService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -33,9 +35,17 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component(immediate = true, service = RuleTemplateProvider.class)
 public class TemplateFileProviderWatcher extends TemplateFileProvider {
 
+    private final WatchService watchService;
+
+    @Activate
+    public TemplateFileProviderWatcher(
+            @Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService) {
+        this.watchService = watchService;
+    }
+
     @Override
     protected void initializeWatchService(String watchingDir) {
-        WatchServiceUtil.initializeWatchService(watchingDir, this);
+        WatchServiceUtil.initializeWatchService(watchingDir, this, watchService);
     }
 
     @Override

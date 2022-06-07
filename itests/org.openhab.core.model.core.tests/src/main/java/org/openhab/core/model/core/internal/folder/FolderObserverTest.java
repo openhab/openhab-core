@@ -13,6 +13,7 @@
 package org.openhab.core.model.core.internal.folder;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -41,29 +42,27 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openhab.core.OpenHAB;
 import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
-import org.openhab.core.service.AbstractWatchService;
 import org.openhab.core.service.ReadyService;
+import org.openhab.core.service.WatchService;
+import org.openhab.core.service.WatchServiceFactory;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.LoggerFactory;
 
 /**
  * A test class for {@link FolderObserver} class. The following test cases aim
  * to check if {@link FolderObserver} invokes the correct {@link ModelRepository}'s methods
  * with correct arguments when certain events in the watched directory are triggered.
  *
- * {@link AbstractWatchService#initializeWatchService} method is called in the
- * {@link FolderObserver#updated} method and initializing a new WatchService
- * is related to creating a new {@link AbstractWatchQueueReader} which starts in a new Thread.
- * Since we rely on the {@link AbstractWatchQueueReader} to "listen" for changes, we have to
+ * Since we rely on the {@link WatchService} to "listen" for changes, we have to
  * be sure that it has been started.
  * Based on that putting the current Thread to sleep after each invocation of
- * {@link FolderObserver#updated} method is necessary.
+ * {@link FolderObserver#activate} method is necessary.
  * On the other hand, creating, modifying and deleting files and folders causes invocation
- * of {@link AbstractWatchQueueReader#processWatchEvent} method. That method is called asynchronously
+ * of {@link WatchService.WatchEventListener#processWatchEvent} method. That method is called asynchronously
  * and we do not know exactly when the event will be handled (it is OS specific).
  * Since the assertions in the tests depend on handling the events,
  * putting the current Thread to sleep after the file operations is also necessary.
@@ -88,9 +87,14 @@ public class FolderObserverTest extends JavaOSGiTest {
 
     private static final String INITIAL_FILE_CONTENT = "Initial content";
 
+    private static final String WATCH_SERVICE_NAME = "testWatcher";
+
     private @NonNullByDefault({}) Dictionary<String, Object> configProps;
     private @NonNullByDefault({}) String defaultWatchedDir;
     private @NonNullByDefault({}) FolderObserver folderObserver;
+    private @NonNullByDefault({}) WatchServiceFactory watchServiceFactory;
+    private @NonNullByDefault({}) WatchService watchService;
+
     private @NonNullByDefault({}) ModelRepoDummy modelRepo;
 
     private @Mock @NonNullByDefault({}) ModelParser modelParserMock;
@@ -98,7 +102,7 @@ public class FolderObserverTest extends JavaOSGiTest {
     private @Mock @NonNullByDefault({}) ComponentContext contextMock;
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws IOException, InterruptedException {
         configProps = new Hashtable<>();
 
         setupWatchedDirectory();
@@ -112,19 +116,33 @@ public class FolderObserverTest extends JavaOSGiTest {
      * Its path is set to the OpenHAB.CONFIG_DIR_PROG_ARGUMENT property.
      */
     private void setupWatchedDirectory() {
-        defaultWatchedDir = System.getProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT);
         WATCHED_DIRECTORY.mkdirs();
-        System.setProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT, WATCHED_DIRECTORY.getPath());
         EXISTING_SUBDIR_PATH.mkdirs();
     }
 
-    private void setUpServices() {
+    private void setUpServices() throws IOException, InterruptedException {
         when(modelParserMock.getExtension()).thenReturn("java");
         when(contextMock.getProperties()).thenReturn(configProps);
 
+        watchServiceFactory = getService(WatchServiceFactory.class);
+        watchServiceFactory.createWatchService(WATCH_SERVICE_NAME, WATCHED_DIRECTORY.toPath().toAbsolutePath());
+
+        waitForAssert(() -> {
+            List<WatchService> watchServices = getServices(WatchService.class, i -> true);
+            LoggerFactory.getLogger(FolderObserverTest.class).error("{}", watchServices);
+            watchService = getService(WatchService.class,
+                    s -> WATCH_SERVICE_NAME.equals(s.getProperty(WatchService.SERVICE_PROPERTY_NAME)));
+            assertThat(watchService, is(notNullValue()));
+        });
+
         modelRepo = new ModelRepoDummy();
 
-        folderObserver = new FolderObserver(modelRepo, readyServiceMock);
+        folderObserver = new FolderObserver(modelRepo, readyServiceMock, watchService) {
+            @Override
+            protected File getFile(String filename) {
+                return new File(WATCHED_DIRECTORY + File.separator + filename);
+            }
+        };
         folderObserver.addModelParser(modelParserMock);
     }
 
@@ -137,16 +155,13 @@ public class FolderObserverTest extends JavaOSGiTest {
     @AfterEach
     public void tearDown() throws Exception {
         folderObserver.deactivate();
+        watchServiceFactory.removeWatchService(WATCH_SERVICE_NAME);
+
         try (Stream<Path> walk = Files.walk(WATCHED_DIRECTORY.toPath())) {
             walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
         }
 
         modelRepo.clean();
-        if (defaultWatchedDir != null) {
-            System.setProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT, defaultWatchedDir);
-        } else {
-            System.clearProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT);
-        }
     }
 
     /**
@@ -164,15 +179,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         folderObserver.activate(contextMock);
 
         File file = new File(EXISTING_SUBDIR_PATH, "NewlyCreatedMockFile." + validExtension);
-        file.createNewFile();
-
-        /*
-         * In some OS, like MacOS, creating an empty file is not related to sending an ENTRY_CREATE event.
-         * So, it's necessary to put some initial content in that file.
-         */
-        if (!IS_OS_WINDOWS) {
-            Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8);
-        }
+        Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
 
         waitForAssert(() -> assertThat(file.exists(), is(true)));
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(true)), DFL_TIMEOUT * 2,
@@ -197,15 +204,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         folderObserver.activate(contextMock);
 
         File file = new File(EXISTING_SUBDIR_PATH, "MockFileForModification." + validExtension);
-        file.createNewFile();
-
-        /*
-         * In some OS, like MacOS, creating an empty file is not related to sending an ENTRY_CREATE event. So, it's
-         * necessary to put some initial content in that file.
-         */
-        if (!IS_OS_WINDOWS) {
-            Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
-        }
+        Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
 
         waitForAssert(() -> assertThat(file.exists(), is(true)));
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(true)), DFL_TIMEOUT * 2,
@@ -245,7 +244,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         folderObserver.activate(contextMock);
 
         File file = new File(EXISTING_SUBDIR_PATH, "NewlyCreatedMockFile." + noParserExtension);
-        file.createNewFile();
+        Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
 
         Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
@@ -266,7 +265,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         folderObserver.activate(contextMock);
 
         File file = new File(EXISTING_SUBDIR_PATH, "NewlyCreatedMockFile.java");
-        file.createNewFile();
+        Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
 
         Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
@@ -323,7 +322,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         folderObserver.activate(contextMock);
 
         File file = new File(WATCHED_DIRECTORY, Paths.get(subdir, "MockFileInNoExtSubDir.txt").toString());
-        file.createNewFile();
+        Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
 
         Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
@@ -340,7 +339,13 @@ public class FolderObserverTest extends JavaOSGiTest {
                 throw new IllegalStateException("intentional failure.");
             }
         };
-        FolderObserver localFolderObserver = new FolderObserver(modelRepo, readyServiceMock);
+        FolderObserver localFolderObserver = new FolderObserver(modelRepo, readyServiceMock, watchService) {
+            @Override
+            protected File getFile(String filename) {
+                return new File(WATCHED_DIRECTORY + File.separator + filename);
+            }
+        };
+
         localFolderObserver.addModelParser(modelParserMock);
 
         String validExtension = "java";
@@ -348,10 +353,8 @@ public class FolderObserverTest extends JavaOSGiTest {
         localFolderObserver.activate(contextMock);
 
         File mockFileWithValidExt = new File(EXISTING_SUBDIR_PATH, "MockFileForModification." + validExtension);
-        mockFileWithValidExt.createNewFile();
-        if (!IS_OS_WINDOWS) {
-            Files.writeString(mockFileWithValidExt.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8);
-        }
+        Files.writeString(mockFileWithValidExt.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE);
 
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(true)), DFL_TIMEOUT * 2,
                 DFL_SLEEP_TIME);
@@ -386,8 +389,7 @@ public class FolderObserverTest extends JavaOSGiTest {
              * So, it's necessary to put some initial content in that file.
              */
             File file = new File(EXISTING_SUBDIR_PATH, filename);
-            file.createNewFile();
-            Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8);
+            Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         } else {
             /*
              * In windows a hidden file cannot be created with a single api call.

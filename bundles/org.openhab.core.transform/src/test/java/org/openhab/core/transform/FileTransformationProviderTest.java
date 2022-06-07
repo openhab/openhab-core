@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -42,6 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.service.WatchService;
 
 /**
  * The {@link FileTransformationProviderTest} includes tests for the
@@ -61,7 +60,7 @@ public class FileTransformationProviderTest {
     private static final String ADDED_CONTENT = "added";
     private static final String ADDED_FILENAME = ADDED_CONTENT + "." + FOO_TYPE;
 
-    private @Mock @NonNullByDefault({}) WatchEvent<String> watchEventMock;
+    private @Mock @NonNullByDefault({}) WatchService watchService;
     private @Mock @NonNullByDefault({}) ProviderChangeListener<@NonNull Transformation> listenerMock;
 
     private @NonNullByDefault({}) FileTransformationProvider provider;
@@ -71,10 +70,11 @@ public class FileTransformationProviderTest {
     public void setup() throws IOException {
         // create directory
         targetPath = Files.createTempDirectory("fileTest");
+
         // set initial content
         Files.write(targetPath.resolve(INITIAL_FILENAME), INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
 
-        provider = new FileTransformationProvider(targetPath);
+        provider = new FileTransformationProvider(watchService, targetPath);
         provider.addProviderChangeListener(listenerMock);
     }
 
@@ -100,7 +100,7 @@ public class FileTransformationProviderTest {
         Transformation addedConfiguration = new Transformation(ADDED_FILENAME, ADDED_FILENAME, FOO_TYPE,
                 Map.of(FUNCTION, ADDED_CONTENT));
 
-        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
+        provider.processWatchEvent(WatchService.Kind.CREATE, path);
 
         // assert registry is notified and internal cache updated
         Mockito.verify(listenerMock).added(provider, addedConfiguration);
@@ -114,7 +114,7 @@ public class FileTransformationProviderTest {
         Transformation updatedConfiguration = new Transformation(INITIAL_FILENAME, INITIAL_FILENAME, FOO_TYPE,
                 Map.of(FUNCTION, "updated"));
 
-        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_MODIFY, path);
+        provider.processWatchEvent(WatchService.Kind.MODIFY, path);
 
         Mockito.verify(listenerMock).updated(provider, INITIAL_CONFIGURATION, updatedConfiguration);
         assertThat(provider.getAll(), contains(updatedConfiguration));
@@ -125,7 +125,7 @@ public class FileTransformationProviderTest {
     public void testDeletingConfigurationIsPropagated() {
         Path path = targetPath.resolve(INITIAL_FILENAME);
 
-        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_DELETE, path);
+        provider.processWatchEvent(WatchService.Kind.DELETE, path);
 
         Mockito.verify(listenerMock).removed(provider, INITIAL_CONFIGURATION);
         assertThat(provider.getAll(), not(contains(INITIAL_CONFIGURATION)));
@@ -140,7 +140,7 @@ public class FileTransformationProviderTest {
 
         Transformation expected = new Transformation(fileName, fileName, FOO_TYPE, Map.of(FUNCTION, INITIAL_CONTENT));
 
-        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
+        provider.processWatchEvent(WatchService.Kind.CREATE, path);
         assertThat(provider.getAll(), hasItem(expected));
     }
 
@@ -148,8 +148,8 @@ public class FileTransformationProviderTest {
     public void testMissingExtensionIsIgnored() throws IOException {
         Path path = targetPath.resolve("extensionMissing");
         Files.write(path, INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
-        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
-        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_MODIFY, path);
+        provider.processWatchEvent(WatchService.Kind.CREATE, path);
+        provider.processWatchEvent(WatchService.Kind.MODIFY, path);
 
         Mockito.verify(listenerMock, never()).added(any(), any());
         Mockito.verify(listenerMock, never()).updated(any(), any(), any());
@@ -159,8 +159,8 @@ public class FileTransformationProviderTest {
     public void testIgnoredExtensionIsIgnored() throws IOException {
         Path path = targetPath.resolve("extensionIgnore.txt");
         Files.write(path, INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
-        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
-        provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_MODIFY, path);
+        provider.processWatchEvent(WatchService.Kind.CREATE, path);
+        provider.processWatchEvent(WatchService.Kind.MODIFY, path);
 
         Mockito.verify(listenerMock, never()).added(any(), any());
         Mockito.verify(listenerMock, never()).updated(any(), any(), any());

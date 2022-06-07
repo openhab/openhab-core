@@ -19,6 +19,7 @@ import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.automation.module.script.rulesupport.loader.AbstractScriptFileWatcher;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.StartLevelService;
+import org.openhab.core.service.WatchService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -37,19 +38,18 @@ public class DefaultScriptFileWatcher extends AbstractScriptFileWatcher {
     private static final String FILE_DIRECTORY = "automation" + File.separator + "jsr223";
 
     @Activate
-    public DefaultScriptFileWatcher(final @Reference ScriptEngineManager manager,
+    public DefaultScriptFileWatcher(final @Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService
+            , final @Reference ScriptEngineManager manager,
             final @Reference ReadyService readyService, final @Reference StartLevelService startLevelService) {
-        super(manager, readyService, startLevelService, FILE_DIRECTORY);
+         super(watchService, manager, readyService, startLevelService, FILE_DIRECTORY, true);
     }
 
     @Activate
-    @Override
     public void activate() {
         super.activate();
     }
 
     @Deactivate
-    @Override
     public void deactivate() {
         super.deactivate();
     }

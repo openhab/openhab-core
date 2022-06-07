@@ -19,6 +19,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.OpenHAB.CONFIG_DIR_PROG_ARGUMENT;
+import static org.openhab.core.service.WatchService.Kind.CREATE;
+import static org.openhab.core.service.WatchService.Kind.DELETE;
+import static org.openhab.core.service.WatchService.Kind.MODIFY;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +53,7 @@ import org.openhab.core.automation.module.script.rulesupport.internal.loader.Scr
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.StartLevelService;
+import org.openhab.core.service.WatchService;
 import org.openhab.core.test.java.JavaTest;
 import org.opentest4j.AssertionFailedError;
 
@@ -64,13 +68,13 @@ import org.opentest4j.AssertionFailedError;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class AbstractScriptFileWatcherTest extends JavaTest {
 
-    private boolean watchSubDirectories = true;
     private @NonNullByDefault({}) AbstractScriptFileWatcher scriptFileWatcher;
 
     private @Mock @NonNullByDefault({}) ScriptEngineManager scriptEngineManagerMock;
     private @Mock @NonNullByDefault({}) ScriptDependencyTracker scriptDependencyTrackerMock;
     private @Mock @NonNullByDefault({}) StartLevelService startLevelServiceMock;
     private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
+    private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
 
     protected @NonNullByDefault({}) @TempDir Path tempScriptDir;
 
@@ -87,8 +91,6 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         // ensure initialize is not called on initialization
         when(startLevelServiceMock.getStartLevel()).thenAnswer(invocation -> currentStartLevel);
-
-        scriptFileWatcher = createScriptFileWatcher();
     }
 
     @AfterEach
@@ -98,6 +100,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testLoadOneDefaultFileAlreadyStarted() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -107,13 +110,14 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         Path p = getFile("script.js");
 
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
+        scriptFileWatcher.processWatchEvent(CREATE, p);
 
         verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p.toString());
     }
 
     @Test
     public void testSubDirectoryIncludedInInitialImport() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -134,12 +138,13 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testSubDirectoryIgnoredInInitialImport() {
+        scriptFileWatcher = createScriptFileWatcher(false);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
         when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
         when(scriptEngineManagerMock.loadScript(any(), any())).thenReturn(true);
-        watchSubDirectories = false;
+
         Path p0 = getFile("script.js");
         Path p1 = getFile("dir/script.js");
 
@@ -154,6 +159,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testLoadOneDefaultFileWaitUntilStarted() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -162,7 +168,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         updateStartLevel(20);
 
         Path p = getFile("script.js");
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
+        scriptFileWatcher.processWatchEvent(CREATE, p);
 
         awaitEmptyQueue();
 
@@ -179,6 +185,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testLoadOneCustomFileWaitUntilStarted() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -188,7 +195,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         updateStartLevel(50);
 
         Path p = getFile("script.sl60.js");
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
+        scriptFileWatcher.processWatchEvent(CREATE, p);
 
         awaitEmptyQueue();
 
@@ -205,6 +212,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testLoadTwoCustomFilesDifferentStartLevels() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -214,8 +222,8 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         Path p1 = getFile("script.sl70.js");
         Path p2 = getFile("script.sl50.js");
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p1);
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p2);
+        scriptFileWatcher.processWatchEvent(CREATE, p1);
+        scriptFileWatcher.processWatchEvent(CREATE, p2);
 
         awaitEmptyQueue();
 
@@ -245,6 +253,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testLoadTwoCustomFilesAlternativePatternDifferentStartLevels() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -252,9 +261,9 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         when(scriptEngineManagerMock.loadScript(any(), any())).thenReturn(true);
 
         Path p1 = getFile("sl70/script.js");
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p1);
+        scriptFileWatcher.processWatchEvent(CREATE, p1);
         Path p2 = getFile("sl50/script.js");
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p2);
+        scriptFileWatcher.processWatchEvent(CREATE, p2);
 
         // verify not yet called
         verify(scriptEngineManagerMock, never()).createScriptEngine(anyString(), anyString());
@@ -278,6 +287,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testLoadOneDefaultFileDelayedSupport() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(false);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -286,7 +296,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         updateStartLevel(100);
 
         Path p = getFile("script.js");
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
+        scriptFileWatcher.processWatchEvent(CREATE, p);
 
         // verify not yet called but checked
         waitForAssert(() -> verify(scriptEngineManagerMock).isSupported(anyString()));
@@ -304,6 +314,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testOrderingWithinSingleStartLevel() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -312,11 +323,11 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         updateStartLevel(50);
 
         Path p64 = getFile("script.sl64.js");
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p64);
+        scriptFileWatcher.processWatchEvent(CREATE, p64);
         Path p66 = getFile("script.sl66.js");
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p66);
+        scriptFileWatcher.processWatchEvent(CREATE, p66);
         Path p65 = getFile("script.sl65.js");
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p65);
+        scriptFileWatcher.processWatchEvent(CREATE, p65);
 
         updateStartLevel(70);
 
@@ -331,6 +342,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testOrderingStartlevelFolders() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -338,11 +350,11 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         when(scriptEngineManagerMock.loadScript(any(), any())).thenReturn(true);
 
         Path p50 = getFile("a_script.js");
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p50);
+        scriptFileWatcher.processWatchEvent(CREATE, p50);
         Path p40 = getFile("sl40/b_script.js");
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p40);
+        scriptFileWatcher.processWatchEvent(CREATE, p40);
         Path p30 = getFile("sl30/script.js");
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p30);
+        scriptFileWatcher.processWatchEvent(CREATE, p30);
 
         awaitEmptyQueue();
 
@@ -358,6 +370,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testReloadActiveWhenDependencyChanged() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         ScriptEngineFactory scriptEngineFactoryMock = mock(ScriptEngineFactory.class);
         when(scriptEngineFactoryMock.getDependencyTracker()).thenReturn(scriptDependencyTrackerMock);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
@@ -371,7 +384,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         Path p = getFile("script.js");
 
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
+        scriptFileWatcher.processWatchEvent(CREATE, p);
 
         awaitEmptyQueue();
 
@@ -386,6 +399,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testNotReloadInactiveWhenDependencyChanged() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -395,7 +409,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         Path p = getFile("script.js");
 
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
+        scriptFileWatcher.processWatchEvent(CREATE, p);
 
         awaitEmptyQueue();
 
@@ -408,6 +422,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testRemoveBeforeReAdd() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -420,12 +435,12 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         InOrder inOrder = inOrder(scriptEngineManagerMock);
         String scriptIdentifier = ScriptFileReference.getScriptIdentifier(p);
 
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
+        scriptFileWatcher.processWatchEvent(CREATE, p);
 
         awaitEmptyQueue();
         inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", scriptIdentifier);
 
-        scriptFileWatcher.processWatchEvent(null, ENTRY_MODIFY, p);
+        scriptFileWatcher.processWatchEvent(MODIFY, p);
 
         awaitEmptyQueue();
         inOrder.verify(scriptEngineManagerMock, timeout(10000)).removeEngine(scriptIdentifier);
@@ -434,6 +449,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testDirectoryAdded() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -445,7 +461,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         Path p2 = getFile("dir/script2.js");
         Path d = p1.getParent();
 
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, d);
+        scriptFileWatcher.processWatchEvent(CREATE, d);
 
         awaitEmptyQueue();
 
@@ -455,6 +471,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testDirectoryAddedSubDirIncluded() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -466,7 +483,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         Path p2 = getFile("dir/sub/script.js");
         Path d = p1.getParent();
 
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, d);
+        scriptFileWatcher.processWatchEvent(CREATE, d);
 
         awaitEmptyQueue();
 
@@ -478,19 +495,19 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testDirectoryAddedSubDirIgnored() {
+        scriptFileWatcher = createScriptFileWatcher(false);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
         when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
         when(scriptEngineManagerMock.loadScript(any(), any())).thenReturn(true);
-        watchSubDirectories = false;
         updateStartLevel(100);
 
         Path p1 = getFile("dir/script.js");
         Path p2 = getFile("dir/sub/script.js");
         Path d = p1.getParent();
 
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, d);
+        scriptFileWatcher.processWatchEvent(CREATE, d);
 
         awaitEmptyQueue();
 
@@ -501,6 +518,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testSortsAllFilesInNewDirectory() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -512,7 +530,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         Path p10 = getFile("dir/script2.sl10.js");
         Path d = p10.getParent();
 
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, d);
+        scriptFileWatcher.processWatchEvent(CREATE, d);
 
         awaitEmptyQueue();
 
@@ -523,6 +541,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testDirectoryRemoved() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -534,9 +553,9 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         Path p2 = getFile("dir/script2.js");
         Path d = p1.getParent();
 
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p1);
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p2);
-        scriptFileWatcher.processWatchEvent(null, ENTRY_DELETE, d);
+        scriptFileWatcher.processWatchEvent(CREATE, p1);
+        scriptFileWatcher.processWatchEvent(CREATE, p2);
+        scriptFileWatcher.processWatchEvent(DELETE, d);
 
         awaitEmptyQueue();
 
@@ -548,6 +567,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testScriptEngineRemovedOnFailedLoad() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
@@ -559,7 +579,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         when(scriptEngineContainer.getIdentifier()).thenReturn(ScriptFileReference.getScriptIdentifier(p));
 
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
+        scriptFileWatcher.processWatchEvent(CREATE, p);
 
         awaitEmptyQueue();
 
@@ -573,6 +593,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testIfInitializedForEarlyInitialization() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         CompletableFuture<?> initialized = scriptFileWatcher.ifInitialized();
 
         assertThat(initialized.isDone(), is(false));
@@ -583,6 +604,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
     @Test
     public void testIfInitializedForLateInitialization() {
+        scriptFileWatcher = createScriptFileWatcher(true);
         when(startLevelServiceMock.getStartLevel()).thenReturn(StartLevelService.STARTLEVEL_RULEENGINE);
         AbstractScriptFileWatcher watcher = createScriptFileWatcher();
 
@@ -623,16 +645,15 @@ class AbstractScriptFileWatcherTest extends JavaTest {
     }
 
     private AbstractScriptFileWatcher createScriptFileWatcher() {
-        return new AbstractScriptFileWatcher(scriptEngineManagerMock, readyServiceMock, startLevelServiceMock, "") {
+        return createScriptFileWatcher(false);
+    }
+
+    private AbstractScriptFileWatcher createScriptFileWatcher(boolean watchSubDirectories) {
+        return new AbstractScriptFileWatcher(watchServiceMock, scriptEngineManagerMock, readyServiceMock, startLevelServiceMock, "", watchSubDirectories) {
 
             @Override
             protected ScheduledExecutorService getScheduler() {
                 return new CountingScheduledExecutor(atomicInteger);
-            }
-
-            @Override
-            protected boolean watchSubDirectories() {
-                return watchSubDirectories;
             }
         };
     }

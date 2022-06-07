@@ -52,4 +52,6 @@ Fragment-Host: org.openhab.core.config.dispatch
 	org.openhab.core;version='[4.0.0,4.0.1)',\
 	org.openhab.core.config.dispatch;version='[4.0.0,4.0.1)',\
 	org.openhab.core.config.dispatch.tests;version='[4.0.0,4.0.1)',\
-	org.openhab.core.test;version='[4.0.0,4.0.1)'
+	org.openhab.core.test;version='[4.0.0,4.0.1)',\
+	io.methvin.directory-watcher;version='[0.17.1,0.17.2)',\
+	com.sun.jna;version='[5.12.1,5.12.2)'
