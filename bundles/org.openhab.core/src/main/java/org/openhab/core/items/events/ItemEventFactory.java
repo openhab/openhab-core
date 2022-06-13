@@ -14,6 +14,7 @@ package org.openhab.core.items.events;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -50,6 +51,8 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     private static final String ITEM_STATE_EVENT_TOPIC = "openhab/items/{itemName}/state";
 
+    private static final String ITEM_HISTORIC_STATE_EVENT_TOPIC = "openhab/items/{itemName}/historicstate";
+
     private static final String ITEM_STATE_PREDICTED_EVENT_TOPIC = "openhab/items/{itemName}/statepredicted";
 
     private static final String ITEM_STATE_CHANGED_EVENT_TOPIC = "openhab/items/{itemName}/statechanged";
@@ -66,9 +69,9 @@ public class ItemEventFactory extends AbstractEventFactory {
      * Constructs a new ItemEventFactory.
      */
     public ItemEventFactory() {
-        super(Set.of(ItemCommandEvent.TYPE, ItemStateEvent.TYPE, ItemStatePredictedEvent.TYPE,
-                ItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE, ItemRemovedEvent.TYPE,
-                GroupItemStateChangedEvent.TYPE));
+        super(Set.of(ItemCommandEvent.TYPE, ItemHistoricStateEvent.TYPE, ItemStateEvent.TYPE,
+                ItemStatePredictedEvent.TYPE, ItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE,
+                ItemRemovedEvent.TYPE, GroupItemStateChangedEvent.TYPE));
     }
 
     @Override
@@ -78,6 +81,8 @@ public class ItemEventFactory extends AbstractEventFactory {
             return createCommandEvent(topic, payload, source);
         } else if (ItemStateEvent.TYPE.equals(eventType)) {
             return createStateEvent(topic, payload, source);
+        } else if (ItemHistoricStateEvent.TYPE.equals(eventType)) {
+            return createHistoricStateEvent(topic, payload, source);
         } else if (ItemStatePredictedEvent.TYPE.equals(eventType)) {
             return createStatePredictedEvent(topic, payload);
         } else if (ItemStateChangedEvent.TYPE.equals(eventType)) {
@@ -115,6 +120,14 @@ public class ItemEventFactory extends AbstractEventFactory {
         ItemEventPayloadBean bean = deserializePayload(payload, ItemEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
         return new ItemStateEvent(topic, payload, itemName, state, source);
+    }
+
+    private Event createHistoricStateEvent(String topic, String payload, @Nullable String source) {
+        String itemName = getItemName(topic);
+        ItemHistoricStateEventPayloadBean bean = deserializePayload(payload, ItemHistoricStateEventPayloadBean.class);
+        State state = getState(bean.getType(), bean.getValue());
+        ZonedDateTime dateTime = ZonedDateTime.parse(bean.getDateTime());
+        return new ItemHistoricStateEvent(topic, payload, itemName, state, dateTime, source);
     }
 
     private Event createStatePredictedEvent(String topic, String payload) {
@@ -266,6 +279,26 @@ public class ItemEventFactory extends AbstractEventFactory {
      */
     public static ItemEvent createStateEvent(String itemName, State state) {
         return createStateEvent(itemName, state, null);
+    }
+
+    /**
+     * Creates an item historic state event.
+     *
+     * @param itemName the name of the item to send the state update for
+     * @param state the new state to send
+     * @param source the name of the source identifying the sender (can be null)
+     * @return the created item state event
+     * @throws IllegalArgumentException if itemName or state is null
+     */
+    public static ItemHistoricStateEvent createHistoricStateEvent(String itemName, State state, ZonedDateTime dateTime,
+            @Nullable String source) {
+        assertValidArguments(itemName, state, "state");
+        // TODO: use a different topic for historic state ? Would require changes to ItemUpdater.
+        String topic = buildTopic(ITEM_STATE_EVENT_TOPIC, itemName);
+        ItemHistoricStateEventPayloadBean bean = new ItemHistoricStateEventPayloadBean(getStateType(state),
+                state.toFullString(), dateTime.toString());
+        String payload = serializePayload(bean);
+        return new ItemHistoricStateEvent(topic, payload, itemName, state, dateTime, source);
     }
 
     /**
@@ -438,6 +471,40 @@ public class ItemEventFactory extends AbstractEventFactory {
 
         public String getValue() {
             return value;
+        }
+    }
+
+    /**
+     * This is a java bean that is used to serialize/deserialize item historic state event payload.
+     */
+    private static class ItemHistoricStateEventPayloadBean {
+        private @NonNullByDefault({}) String type;
+        private @NonNullByDefault({}) String value;
+        private @NonNullByDefault({}) String dateTime;
+
+        /**
+         * Default constructor for deserialization e.g. by Gson.
+         */
+        @SuppressWarnings("unused")
+        protected ItemHistoricStateEventPayloadBean() {
+        }
+
+        public ItemHistoricStateEventPayloadBean(String type, String value, String dateTime) {
+            this.type = type;
+            this.value = value;
+            this.dateTime = dateTime;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public String getDateTime() {
+            return dateTime;
         }
     }
 

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -220,6 +221,18 @@ public abstract class GenericItem implements ActiveItem {
     }
 
     /**
+     * Set a historic state.
+     *
+     * Subclasses may override this method in order to do necessary conversions upfront. Afterwards,
+     * {@link #applyHistoricState(State)} should be called by classes overriding this method.
+     *
+     * @param state historic state of this item
+     */
+    public void setHistoricState(State state, ZonedDateTime dateTime) {
+        applyHistoricState(state, dateTime);
+    }
+
+    /**
      * Sets new state, notifies listeners and sends events.
      *
      * Classes overriding the {@link #setState(State)} method should call this method in order to actually set the
@@ -234,6 +247,18 @@ public abstract class GenericItem implements ActiveItem {
         if (!oldState.equals(state)) {
             sendStateChangedEvent(state, oldState);
         }
+    }
+
+    /**
+     * Sets new state, notifies listeners and sends events.
+     *
+     * Classes overriding the {@link #setState(State)} method should call this method in order to actually set the
+     * state, inform listeners and send the event.
+     *
+     * @param state new state of this item
+     */
+    protected final void applyHistoricState(State state, ZonedDateTime dateTime) {
+        notifyHistoryListeners(state, dateTime);
     }
 
     private void sendStateChangedEvent(State newState, State oldState) {
@@ -267,6 +292,22 @@ public abstract class GenericItem implements ActiveItem {
             logger.warn("failed comparing oldState '{}' to newState '{}' for item {}: {}", oldState, newState,
                     GenericItem.this.getName(), e.getMessage(), e);
         }
+    }
+
+    protected void notifyHistoryListeners(final State state, final ZonedDateTime dateTime) {
+        // if nothing has changed, we send update notifications
+        Set<StateChangeListener> clonedListeners = new CopyOnWriteArraySet<>(listeners);
+        ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
+        clonedListeners.forEach(listener -> pool.execute(() -> {
+            try {
+                if (listener instanceof HistoricStateChangeListener) {
+                    ((HistoricStateChangeListener) listener).historicStateUpdated(GenericItem.this, state, dateTime);
+                }
+            } catch (Exception e) {
+                logger.warn("failed notifying listener '{}' about historic state of item {}: {}", listener,
+                        GenericItem.this.getName(), e.getMessage(), e);
+            }
+        }));
     }
 
     @Override

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.binding;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -56,6 +57,15 @@ public interface ThingHandlerCallback {
      * @param state state (must not be null)
      */
     void stateUpdated(ChannelUID channelUID, State state);
+
+    /**
+     * Informs about an update to a historic state for a channel.
+     *
+     * @param channelUID channel UID (must not be null)
+     * @param state state (must not be null)
+     * @param dateTime date time (must not be null)
+     */
+    void historicStateUpdated(ChannelUID channelUID, State state, ZonedDateTime dateTime);
 
     /**
      * Informs about a command, which is sent from the channel.

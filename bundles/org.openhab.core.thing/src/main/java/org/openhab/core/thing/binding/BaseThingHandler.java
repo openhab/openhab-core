@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.binding;
 
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -285,6 +286,39 @@ public abstract class BaseThingHandler implements ThingHandler {
     protected void updateState(String channelID, State state) {
         ChannelUID channelUID = new ChannelUID(this.getThing().getUID(), channelID);
         updateState(channelUID, state);
+    }
+
+    /**
+     *
+     * Updates a historic state of the thing.
+     *
+     * @param channelUID unique id of the channel, which was updated
+     * @param state new state
+     */
+    protected void updateHistoricState(ChannelUID channelUID, State state, ZonedDateTime dateTime) {
+        synchronized (this) {
+            if (this.callback != null) {
+                // TODO: check if this historic state is later than any existing state
+                this.callback.historicStateUpdated(channelUID, state, dateTime);
+            } else {
+                logger.warn(
+                        "Handler {} of thing {} tried updating channel {} although the handler was already disposed.",
+                        this.getClass().getSimpleName(), channelUID.getThingUID(), channelUID.getId());
+            }
+        }
+    }
+
+    /**
+     *
+     * Updates a historic state of the thing. Will use the thing UID to infer the
+     * unique channel UID from the given ID.
+     *
+     * @param channelID id of the channel, which was updated
+     * @param state new state
+     */
+    protected void updateHistoricState(String channelID, State state, ZonedDateTime dateTime) {
+        ChannelUID channelUID = new ChannelUID(this.getThing().getUID(), channelID);
+        updateHistoricState(channelUID, state, dateTime);
     }
 
     /**

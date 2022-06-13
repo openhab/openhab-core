@@ -16,6 +16,7 @@ import java.net.URI;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.text.MessageFormat;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -174,6 +175,11 @@ public class ThingManagerImpl
         @Override
         public void stateUpdated(ChannelUID channelUID, State state) {
             communicationManager.stateUpdated(channelUID, state);
+        }
+
+        @Override
+        public void historicStateUpdated(ChannelUID channelUID, State state, ZonedDateTime dateTime) {
+            communicationManager.historicStateUpdated(channelUID, state, dateTime);
         }
 
         @Override

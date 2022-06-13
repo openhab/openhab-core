@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.internal.profiles;
 
+import java.time.ZonedDateTime;
 import java.util.function.Function;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -20,6 +21,7 @@ import org.openhab.core.common.SafeCaller;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemStateConverter;
+import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.types.StringType;
@@ -27,6 +29,7 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.internal.CommunicationManager;
+import org.openhab.core.thing.internal.HistoricState;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.util.ThingHandlerHelper;
@@ -111,6 +114,12 @@ public class ProfileCallbackImpl implements ProfileCallback {
             return;
         }
 
+        ZonedDateTime dateTime = null;
+        if (state instanceof HistoricState) {
+            dateTime = ((HistoricState) state).getDateTime();
+            state = ((HistoricState) state).getState();
+        }
+
         State acceptedState;
         if (state instanceof StringType && !(item instanceof StringItem)) {
             acceptedState = TypeParser.parseState(item.getAcceptedDataTypes(), state.toString());
@@ -121,7 +130,15 @@ public class ProfileCallbackImpl implements ProfileCallback {
             acceptedState = itemStateConverter.convertToAcceptedState(state, item);
         }
 
-        eventPublisher.post(
-                ItemEventFactory.createStateEvent(link.getItemName(), acceptedState, link.getLinkedUID().toString()));
+        ItemEvent event;
+        if (dateTime != null) {
+            event = ItemEventFactory.createHistoricStateEvent(link.getItemName(), acceptedState, dateTime,
+                    link.getLinkedUID().toString());
+        } else {
+            event = ItemEventFactory.createStateEvent(link.getItemName(), acceptedState,
+                    link.getLinkedUID().toString());
+        }
+
+        eventPublisher.post(event);
     }
 }

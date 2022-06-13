@@ -12,6 +12,8 @@
  */
 package org.openhab.core.internal.items;
 
+import java.time.ZonedDateTime;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.GenericItem;
@@ -21,6 +23,7 @@ import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.AbstractItemEventSubscriber;
 import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemHistoricStateEvent;
 import org.openhab.core.items.events.ItemStateEvent;
 import org.openhab.core.types.State;
 import org.osgi.service.component.annotations.Activate;
@@ -95,6 +98,43 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
             }
         } catch (ItemNotFoundException e) {
             logger.debug("Received command for non-existing item: {}", e.getMessage());
+        }
+    }
+
+    @Override
+    protected void receiveHistoricState(ItemHistoricStateEvent event) {
+        String itemName = event.getItemName();
+        State newState = event.getItemState();
+        ZonedDateTime dateTime = event.getDateTime();
+        try {
+            GenericItem item = (GenericItem) itemRegistry.getItem(itemName);
+            boolean isAccepted = false;
+            if (item.getAcceptedDataTypes().contains(newState.getClass())) {
+                isAccepted = true;
+            } else {
+                // Look for class hierarchy
+                for (Class<? extends State> state : item.getAcceptedDataTypes()) {
+                    try {
+                        if (!state.isEnum() && state.getDeclaredConstructor().newInstance().getClass()
+                                .isAssignableFrom(newState.getClass())) {
+                            isAccepted = true;
+                            break;
+                        }
+                    } catch (ReflectiveOperationException e) {
+                        // Should never happen
+                        logger.warn("{} while creating {} instance: {}", e.getClass().getSimpleName(),
+                                state.getClass().getSimpleName(), e.getMessage());
+                    }
+                }
+            }
+            if (isAccepted) {
+                item.setHistoricState(newState, dateTime);
+            } else {
+                logger.debug("Received update of a not accepted type ({}) for item {}",
+                        newState.getClass().getSimpleName(), itemName);
+            }
+        } catch (ItemNotFoundException e) {
+            logger.debug("Received update for non-existing item: {}", e.getMessage());
         }
     }
 }

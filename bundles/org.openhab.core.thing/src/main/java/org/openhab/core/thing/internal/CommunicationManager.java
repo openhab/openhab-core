@@ -13,6 +13,7 @@
 package org.openhab.core.thing.internal;
 
 import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -564,6 +565,16 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         handleCallFromHandler(channelUID, thing, profile -> {
             if (profile instanceof StateProfile) {
                 ((StateProfile) profile).onStateUpdateFromHandler(state);
+            }
+        });
+    }
+
+    public void historicStateUpdated(ChannelUID channelUID, State state, ZonedDateTime dateTime) {
+        final Thing thing = getThing(channelUID.getThingUID());
+
+        handleCallFromHandler(channelUID, thing, profile -> {
+            if (profile instanceof StateProfile) {
+                ((StateProfile) profile).onStateUpdateFromHandler(new HistoricState(state, dateTime));
             }
         });
     }

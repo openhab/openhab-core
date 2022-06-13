@@ -12,6 +12,7 @@
  */
 package org.openhab.core.persistence.internal;
 
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,13 +32,14 @@ import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.HistoricStateChangeListener;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemRegistryChangeListener;
-import org.openhab.core.items.StateChangeListener;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
@@ -76,7 +78,7 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, service = PersistenceManager.class)
 @NonNullByDefault
 public class PersistenceManagerImpl
-        implements ItemRegistryChangeListener, PersistenceManager, StateChangeListener, ReadyTracker {
+        implements ItemRegistryChangeListener, PersistenceManager, HistoricStateChangeListener, ReadyTracker {
 
     private final Logger logger = LoggerFactory.getLogger(PersistenceManagerImpl.class);
 
@@ -150,6 +152,39 @@ public class PersistenceManagerImpl
                                 : PersistenceStrategy.Globals.UPDATE)) {
                             if (appliesToItem(itemConfig, item)) {
                                 persistenceServices.get(serviceName).store(item, itemConfig.getAlias());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Calls all persistence services which use change or update policy for the given item
+     *
+     * @param item the item to persist
+     * @param onlyChanges true, if it has the change strategy, false otherwise
+     */
+    private void handleHistoricStateEvent(Item item, State state, ZonedDateTime dateTime, boolean onlyChanges) {
+        logger.debug("Persisting item '{}' historic state '{}' at {}", item.getName(), state.toString(), dateTime.toString());
+        synchronized (persistenceServiceConfigs) {
+            for (Entry<String, @Nullable PersistenceServiceConfiguration> entry : persistenceServiceConfigs
+                    .entrySet()) {
+                final String serviceName = entry.getKey();
+                final PersistenceServiceConfiguration config = entry.getValue();
+                if (config != null && persistenceServices.containsKey(serviceName)
+                        && persistenceServices.get(serviceName) instanceof ModifiablePersistenceService) {
+                    ModifiablePersistenceService service = (ModifiablePersistenceService) persistenceServices
+                            .get(serviceName);
+                    logger.debug("  Using ModifiablePersistenceService '{}'", serviceName);
+                    for (PersistenceItemConfiguration itemConfig : config.getConfigs()) {
+                        if (hasStrategy(config, itemConfig, onlyChanges ? PersistenceStrategy.Globals.CHANGE
+                                : PersistenceStrategy.Globals.UPDATE)) {
+                            logger.debug("  trying ItemConfig '{}'", itemConfig.toString());
+                            if (appliesToItem(itemConfig, item)) {
+                                logger.debug("  config applies"); // false ??
+                                service.store(item, dateTime, state);
                             }
                         }
                     }
@@ -476,6 +511,11 @@ public class PersistenceManagerImpl
     @Override
     public void stateUpdated(Item item, State state) {
         handleStateEvent(item, false);
+    }
+
+    @Override
+    public void historicStateUpdated(Item item, State state, ZonedDateTime dateTime) {
+        handleHistoricStateEvent(item, state, dateTime, false);
     }
 
     @Override

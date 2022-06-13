@@ -33,7 +33,8 @@ import org.openhab.core.events.EventSubscriber;
 @NonNullByDefault
 public abstract class AbstractItemEventSubscriber implements EventSubscriber {
 
-    private final Set<String> subscribedEventTypes = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE);
+    private final Set<String> subscribedEventTypes = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE,
+            ItemHistoricStateEvent.TYPE);
 
     @Override
     public Set<String> getSubscribedEventTypes() {
@@ -51,6 +52,8 @@ public abstract class AbstractItemEventSubscriber implements EventSubscriber {
             receiveUpdate((ItemStateEvent) event);
         } else if (event instanceof ItemCommandEvent) {
             receiveCommand((ItemCommandEvent) event);
+        } else if (event instanceof ItemHistoricStateEvent) {
+            receiveHistoricState((ItemHistoricStateEvent) event);
         }
     }
 
@@ -72,5 +75,15 @@ public abstract class AbstractItemEventSubscriber implements EventSubscriber {
     protected void receiveUpdate(ItemStateEvent updateEvent) {
         // Default implementation: do nothing.
         // Can be implemented by subclass in order to handle item updates.
+    }
+
+    /**
+     * Callback method for receiving item historic state events from the openHAB event bus.
+     *
+     * @param event the item historic state event
+     */
+    protected void receiveHistoricState(ItemHistoricStateEvent event) {
+        // Default implementation: do nothing.
+        // Can be implemented by subclass in order to handle item historic states.
     }
 }
