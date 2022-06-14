@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 public class ScriptTransformationService
         implements TransformationService, RegistryChangeListener<TransformationConfiguration> {
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
+    public static final String SUPPORTED_CONFIGURATION_TYPE = "script";
 
     private static final Pattern SCRIPT_CONFIG_PATTERN = Pattern
             .compile("(?<scriptType>.*?):(?<scriptUid>.*?)(\\?(?<params>.*?))?");
@@ -100,12 +101,15 @@ public class ScriptTransformationService
             TransformationConfiguration transformationConfiguration = transformationConfigurationRegistry
                     .get(scriptUid);
             if (transformationConfiguration != null) {
+                if (!SUPPORTED_CONFIGURATION_TYPE.equals(transformationConfiguration.getType())) {
+                    throw new TransformationException("Configuration does not have correct type 'script' but '"
+                            + transformationConfiguration.getType() + "'.");
+                }
                 script = transformationConfiguration.getContent();
             }
             if (script == null) {
                 throw new TransformationException("Could not get script for UID '" + scriptUid + "'.");
             }
-
             scriptCache.put(scriptUid, script);
         }
 
@@ -137,7 +141,7 @@ public class ScriptTransformationService
             ScriptEngine engine = compiledScript != null ? compiledScript.getEngine()
                     : scriptEngineContainer.getScriptEngine();
             ScriptContext executionContext = engine.getContext();
-            executionContext.setAttribute("inputString", source, ScriptContext.ENGINE_SCOPE);
+            executionContext.setAttribute("input", source, ScriptContext.ENGINE_SCOPE);
 
             String params = configMatcher.group("params");
             if (params != null) {
