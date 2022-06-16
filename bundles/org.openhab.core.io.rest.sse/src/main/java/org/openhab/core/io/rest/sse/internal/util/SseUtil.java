@@ -85,7 +85,7 @@ public class SseUtil {
         } else {
             StringTokenizer tokenizer = new StringTokenizer(topicFilter, ",");
             while (tokenizer.hasMoreElements()) {
-                String regex = tokenizer.nextToken().trim().replace("*", ".*") + ".*";
+                String regex = tokenizer.nextToken().trim().replace("*", ".*") + "$";
                 filters.add(regex);
             }
         }
