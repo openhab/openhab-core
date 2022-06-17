@@ -38,11 +38,6 @@
           <groupId>org.eclipse.platform</groupId>
           <artifactId>org.eclipse.osgi</artifactId>
         </exclusion>
-        <exclusion>
-          <!-- See: https://github.com/eclipse-equinox/equinox.bundles/issues/54 -->
-          <groupId>org.osgi.service</groupId>
-          <artifactId>org.osgi.service.prefs</artifactId>
-        </exclusion>
       </exclusions>
     </dependency>
 
@@ -76,24 +71,12 @@
           <groupId>org.eclipse.platform</groupId>
           <artifactId>org.eclipse.osgi</artifactId>
         </exclusion>
-        <exclusion>
-          <!-- See: https://github.com/eclipse-equinox/equinox.bundles/issues/54 -->
-          <groupId>org.osgi.service</groupId>
-          <artifactId>org.osgi.service.prefs</artifactId>
-        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.codegen.ecore</artifactId>
       <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <!-- See: https://github.com/eclipse-equinox/equinox.bundles/issues/54 -->
-          <groupId>org.osgi.service</groupId>
-          <artifactId>org.osgi.service.prefs</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <!-- EMF MWE2 -->
