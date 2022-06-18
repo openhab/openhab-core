@@ -109,7 +109,7 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
     public @Nullable Thing remove(ThingUID thingUID) {
         Thing thing = get(thingUID);
         if (thing != null) {
-            notifyTrackers(thing, ThingTrackerEvent.THING_REMOVING);
+            notifyTrackers(thing, null, ThingTrackerEvent.THING_REMOVING);
         }
         return thing;
     }
@@ -129,20 +129,20 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
     protected void notifyListenersAboutAddedElement(Thing element) {
         super.notifyListenersAboutAddedElement(element);
         postEvent(ThingEventFactory.createAddedEvent(element));
-        notifyTrackers(element, ThingTrackerEvent.THING_ADDED);
+        notifyTrackers(null, element, ThingTrackerEvent.THING_ADDED);
     }
 
     @Override
     protected void notifyListenersAboutRemovedElement(Thing element) {
         super.notifyListenersAboutRemovedElement(element);
-        notifyTrackers(element, ThingTrackerEvent.THING_REMOVED);
+        notifyTrackers(element, null, ThingTrackerEvent.THING_REMOVED);
         postEvent(ThingEventFactory.createRemovedEvent(element));
     }
 
     @Override
     protected void notifyListenersAboutUpdatedElement(Thing oldElement, Thing element) {
         super.notifyListenersAboutUpdatedElement(oldElement, element);
-        notifyTrackers(element, ThingTrackerEvent.THING_UPDATED);
+        notifyTrackers(oldElement, element, ThingTrackerEvent.THING_UPDATED);
         postEvent(ThingEventFactory.createUpdateEvent(element, oldElement));
     }
 
@@ -204,21 +204,38 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
         }
     }
 
-    private void notifyTrackers(Thing thing, ThingTrackerEvent event) {
+    private void notifyTrackers(@Nullable Thing oldThing, @Nullable Thing newThing, ThingTrackerEvent event) {
         for (ThingTracker thingTracker : thingTrackers) {
             try {
                 switch (event) {
                     case THING_ADDED:
-                        thingTracker.thingAdded(thing, ThingTrackerEvent.THING_ADDED);
+                        if (newThing != null) {
+                            thingTracker.thingAdded(newThing, ThingTrackerEvent.THING_ADDED);
+                        } else {
+                            throw new IllegalArgumentException("newThing must not be null when thing is added");
+                        }
                         break;
                     case THING_REMOVING:
-                        thingTracker.thingRemoving(thing, ThingTrackerEvent.THING_REMOVING);
+                        if (oldThing != null) {
+                            thingTracker.thingRemoving(oldThing, ThingTrackerEvent.THING_REMOVING);
+                        } else {
+                            throw new IllegalArgumentException("oldThing must not be null when thing is removed");
+                        }
                         break;
                     case THING_REMOVED:
-                        thingTracker.thingRemoved(thing, ThingTrackerEvent.THING_REMOVED);
+                        if (oldThing != null) {
+                            thingTracker.thingRemoved(oldThing, ThingTrackerEvent.THING_REMOVED);
+                        } else {
+                            throw new IllegalArgumentException("oldThing must not be null when thing is removed");
+                        }
                         break;
                     case THING_UPDATED:
-                        thingTracker.thingUpdated(thing, ThingTrackerEvent.THING_UPDATED);
+                        if (oldThing != null && newThing != null) {
+                            thingTracker.thingUpdated(oldThing, newThing, ThingTrackerEvent.THING_UPDATED);
+                        } else {
+                            throw new IllegalArgumentException(
+                                    "oldThing and newThing must not be null when thing is removed");
+                        }
                         break;
                     default:
                         break;

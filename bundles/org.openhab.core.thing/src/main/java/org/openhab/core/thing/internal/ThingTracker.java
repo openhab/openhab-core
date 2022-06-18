@@ -72,8 +72,9 @@ public interface ThingTracker {
     /**
      * This method is called for every thing that was updated within the {@link ThingRegistryImpl}.
      *
-     * @param thing the thing which was updated
+     * @param oldThing the old think
+     * @param newThing the thing which was updated
      * @param thingTrackerEvent the event that occurred
      */
-    void thingUpdated(Thing thing, ThingTrackerEvent thingTrackerEvent);
+    void thingUpdated(Thing oldThing, Thing newThing, ThingTrackerEvent thingTrackerEvent);
 }
