@@ -33,14 +33,20 @@ public class TimerImpl implements Timer {
     private final Scheduler scheduler;
     private final ZonedDateTime startTime;
     private final SchedulerRunnable runnable;
+    private final @Nullable String identifier;
     private ScheduledCompletableFuture<?> future;
 
     public TimerImpl(Scheduler scheduler, ZonedDateTime startTime, SchedulerRunnable runnable) {
+        this(scheduler, startTime, runnable, null);
+    }
+
+    public TimerImpl(Scheduler scheduler, ZonedDateTime startTime, SchedulerRunnable runnable, @Nullable String identifier) {
         this.scheduler = scheduler;
         this.startTime = startTime;
         this.runnable = runnable;
+        this.identifier = identifier;
 
-        future = scheduler.schedule(runnable, startTime.toInstant());
+        future = scheduler.schedule(runnable, identifier, startTime.toInstant());
     }
 
     @Override

@@ -19,6 +19,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -67,7 +68,7 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public <T> ScheduledCompletableFuture<T> after(Callable<T> callable, Duration duration) {
-        return afterInternal(new ScheduledCompletableFutureOnce<>(duration), callable);
+        return afterInternal(new ScheduledCompletableFutureOnce<>(null, duration), callable);
     }
 
     private <T> ScheduledCompletableFutureOnce<T> afterInternal(ScheduledCompletableFutureOnce<T> deferred,
@@ -89,7 +90,8 @@ public class SchedulerImpl implements Scheduler {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
-                logger.warn("Scheduled job failed and stopped", e);
+                logger.warn("Scheduled job '{}' failed and stopped",
+                        Objects.requireNonNullElse(deferred.identifier, "<unknown>"), e);
                 deferred.completeExceptionally(e);
             }
         }, duration, TimeUnit.MILLISECONDS);
@@ -114,7 +116,7 @@ public class SchedulerImpl implements Scheduler {
                 runnable.run();
             }
         };
-        final ScheduledCompletableFutureOnce<T> wrappedPromise = new ScheduledCompletableFutureOnce<>(timeout);
+        final ScheduledCompletableFutureOnce<T> wrappedPromise = new ScheduledCompletableFutureOnce<>(null, timeout);
         Callable<T> callable = () -> {
             wrappedPromise.completeExceptionally(new TimeoutException());
             return null;
@@ -144,7 +146,7 @@ public class SchedulerImpl implements Scheduler {
     @Override
     public <T> ScheduledCompletableFuture<T> at(Callable<T> callable, Instant instant) {
         return atInternal(
-                new ScheduledCompletableFutureOnce<>(ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())),
+                new ScheduledCompletableFutureOnce<>(null, ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())),
                 callable);
     }
 
@@ -155,17 +157,22 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable, TemporalAdjuster temporalAdjuster) {
-        final ScheduledCompletableFutureRecurring<T> schedule = new ScheduledCompletableFutureRecurring<>(
-                ZonedDateTime.now());
+        return schedule(runnable, null, temporalAdjuster);
+    }
 
-        schedule(schedule, runnable, temporalAdjuster);
+    @Override
+    public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable, @Nullable String identifier,
+            TemporalAdjuster temporalAdjuster) {
+        final ScheduledCompletableFutureRecurring<T> schedule = new ScheduledCompletableFutureRecurring<>(identifier,
+                ZonedDateTime.now());
+        schedule(schedule, runnable, identifier, temporalAdjuster);
         return schedule;
     }
 
     private <T> void schedule(ScheduledCompletableFutureRecurring<T> recurringSchedule, SchedulerRunnable runnable,
-            TemporalAdjuster temporalAdjuster) {
+            @Nullable String identifier, TemporalAdjuster temporalAdjuster) {
         final Temporal newTime = recurringSchedule.getScheduledTime().with(temporalAdjuster);
-        final ScheduledCompletableFutureOnce<T> deferred = new ScheduledCompletableFutureOnce<>(
+        final ScheduledCompletableFutureOnce<T> deferred = new ScheduledCompletableFutureOnce<>(identifier,
                 ZonedDateTime.from(newTime));
 
         deferred.thenAccept(v -> {
@@ -173,7 +180,7 @@ public class SchedulerImpl implements Scheduler {
                 final SchedulerTemporalAdjuster schedulerTemporalAdjuster = (SchedulerTemporalAdjuster) temporalAdjuster;
 
                 if (!schedulerTemporalAdjuster.isDone(newTime)) {
-                    schedule(recurringSchedule, runnable, temporalAdjuster);
+                    schedule(recurringSchedule, runnable, identifier, temporalAdjuster);
                     return;
                 }
             }
@@ -195,9 +202,10 @@ public class SchedulerImpl implements Scheduler {
      */
     private static class ScheduledCompletableFutureRecurring<T> extends ScheduledCompletableFutureOnce<T> {
         private @Nullable volatile ScheduledCompletableFuture<T> scheduledPromise;
+        private @Nullable String identifier;
 
-        public ScheduledCompletableFutureRecurring(ZonedDateTime scheduledTime) {
-            super(scheduledTime);
+        public ScheduledCompletableFutureRecurring(@Nullable String identifier, ZonedDateTime scheduledTime) {
+            super(identifier, scheduledTime);
             exceptionally(e -> {
                 synchronized (this) {
                     if (e instanceof CancellationException) {
@@ -245,12 +253,14 @@ public class SchedulerImpl implements Scheduler {
     private static class ScheduledCompletableFutureOnce<T> extends CompletableFuture<T>
             implements ScheduledCompletableFuture<T> {
         private ZonedDateTime scheduledTime;
+        private @Nullable String identifier;
 
-        public ScheduledCompletableFutureOnce(Duration duration) {
-            this(ZonedDateTime.now().plusNanos(duration.toNanos()));
+        public ScheduledCompletableFutureOnce(@Nullable String identifier, Duration duration) {
+            this(identifier, ZonedDateTime.now().plusNanos(duration.toNanos()));
         }
 
-        public ScheduledCompletableFutureOnce(ZonedDateTime scheduledTime) {
+        public ScheduledCompletableFutureOnce(@Nullable String identifier, ZonedDateTime scheduledTime) {
+            this.identifier = identifier;
             this.scheduledTime = scheduledTime;
         }
 
