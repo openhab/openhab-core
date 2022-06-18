@@ -25,6 +25,8 @@ import org.openhab.core.OpenHAB;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
+import org.openhab.core.storage.json.internal.migration.BridgeImplTypeMigrator;
+import org.openhab.core.storage.json.internal.migration.ThingImplTypeMigrator;
 import org.openhab.core.storage.json.internal.migration.TypeMigrator;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
@@ -51,7 +53,8 @@ public class JsonStorageService implements StorageService {
     /**
      * Contains a map of needed migrations, key is the storage name
      */
-    private static final Map<String, List<TypeMigrator>> MIGRATORS = Map.of();
+    private static final Map<String, List<TypeMigrator>> MIGRATORS = Map.of( //
+            "org.openhab.core.thing.Thing", List.of(new BridgeImplTypeMigrator(), new ThingImplTypeMigrator()));
 
     private final Logger logger = LoggerFactory.getLogger(JsonStorageService.class);
 

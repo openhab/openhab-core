@@ -1,0 +1,130 @@
+{
+  "deconz:deconz:00313E041ED0": {
+    "class": "org.openhab.core.thing.internal.BridgeImpl",
+    "value": {
+      "label": "Phoscon (192.168.1.100:80)",
+      "channels": [],
+      "configuration": {
+        "properties": {
+          "host": "192.168.1.100",
+          "httpPort": 80,
+          "timeout": 2000,
+          "websocketTimeout": 120
+        }
+      },
+      "properties": {
+        "UDN": "56071c34-1111-4b08-bba8-d3f29e6d43d8"
+      },
+      "uid": {
+        "segments": [
+          "deconz",
+          "deconz",
+          "00313E041ED0"
+        ],
+        "uid": "deconz:deconz:00313E041ED0"
+      },
+      "thingTypeUID": {
+        "segments": [
+          "deconz",
+          "deconz"
+        ],
+        "uid": ""
+      }
+    }
+  },
+  "http:url:0a500ec3d8": {
+    "class": "org.openhab.core.thing.internal.ThingImpl",
+    "value": {
+      "label": "HTTP URL Thing",
+      "channels": [
+        {
+          "acceptedItemType": "DateTime",
+          "kind": "STATE",
+          "uid": {
+            "segments": [
+              "http",
+              "url",
+              "0a500ec3d8",
+              "lastFailure"
+            ],
+            "uid": "http:url:0a500ec3d8:lastFailure"
+          },
+          "channelTypeUID": {
+            "segments": [
+              "http",
+              "requestDateTime"
+            ],
+            "uid": "http:requestDateTime"
+          },
+          "label": "Last Failure",
+          "configuration": {
+            "properties": {
+              "stateTransformation": "abcd"
+            }
+          },
+          "properties": {},
+          "defaultTags": [],
+          "autoUpdatePolicy": "DEFAULT"
+        },
+        {
+          "acceptedItemType": "DateTime",
+          "kind": "STATE",
+          "uid": {
+            "segments": [
+              "http",
+              "url",
+              "0a500ec3d8",
+              "lastSuccess"
+            ],
+            "uid": "http:url:0a500ec3d8:lastSuccess"
+          },
+          "channelTypeUID": {
+            "segments": [
+              "http",
+              "requestDateTime"
+            ],
+            "uid": "http:requestDateTime"
+          },
+          "label": "Last Success",
+          "configuration": {
+            "properties": {}
+          },
+          "properties": {},
+          "defaultTags": [],
+          "autoUpdatePolicy": "DEFAULT"
+        }
+      ],
+      "configuration": {
+        "properties": {
+          "authMode": "BASIC",
+          "baseURL": "https://localhost:8443",
+          "bufferSize": 2048,
+          "commandMethod": "GET",
+          "delay": 0,
+          "ignoreSSLErrors": true,
+          "refresh": 30,
+          "stateMethod": "GET",
+          "timeout": 3000
+        }
+      },
+      "properties": {
+        "thingTypeVersion": "1"
+      },
+      "uid": {
+        "segments": [
+          "http",
+          "url",
+          "0a500ec3d8"
+        ],
+        "uid": "http:url:0a500ec3d8"
+      },
+      "thingTypeUID": {
+        "segments": [
+          "http",
+          "url"
+        ],
+        "uid": ""
+      }
+    }
+  }
+}
