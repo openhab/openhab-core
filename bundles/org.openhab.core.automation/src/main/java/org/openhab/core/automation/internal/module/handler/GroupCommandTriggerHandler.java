@@ -28,7 +28,9 @@ import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemRemovedEvent;
 import org.openhab.core.types.Command;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -59,21 +61,29 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
 
     public static final String CFG_GROUPNAME = "groupName";
     public static final String CFG_COMMAND = "command";
+    private final String ruleUID;
 
     private ServiceRegistration<?> eventSubscriberRegistration;
 
-    public GroupCommandTriggerHandler(Trigger module, BundleContext bundleContext, ItemRegistry itemRegistry) {
+    public GroupCommandTriggerHandler(Trigger module, String ruleUID, BundleContext bundleContext,
+            ItemRegistry itemRegistry) {
         super(module);
         this.groupName = (String) module.getConfiguration().get(CFG_GROUPNAME);
         this.command = (String) module.getConfiguration().get(CFG_COMMAND);
-        this.types = Set.of(ItemCommandEvent.TYPE);
+        this.types = Set.of(ItemCommandEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         this.bundleContext = bundleContext;
         this.itemRegistry = itemRegistry;
+        this.ruleUID = ruleUID;
         Dictionary<String, Object> properties = new Hashtable<>();
-        this.topic = "openhab/items/";
+        this.topic = "openhab/items/*";
         properties.put("event.topics", topic);
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);
+
+        if (itemRegistry.get(groupName) == null) {
+            logger.warn("Group '{}' needed for rule '{}', trigger '{}' not present in registry. Trigger will not work.",
+                    groupName, ruleUID, module.getId());
+        }
     }
 
     @Override
@@ -88,6 +98,20 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
 
     @Override
     public void receive(Event event) {
+        if (event instanceof ItemAddedEvent) {
+            if (groupName.equals(((ItemAddedEvent) event).getItem().name)) {
+                logger.info("Group '{}' needed for rule '{}', trigger '{}' added. Trigger will now work.", groupName,
+                        ruleUID, module.getId());
+                return;
+            }
+        } else if (event instanceof ItemRemovedEvent) {
+            if (groupName.equals(((ItemRemovedEvent) event).getItem().name)) {
+                logger.warn("Group '{}' needed for rule '{}', trigger '{}' removed. Trigger will no longer work.",
+                        groupName, ruleUID, module.getId());
+                return;
+            }
+        }
+
         if (callback instanceof TriggerHandlerCallback) {
             TriggerHandlerCallback cb = (TriggerHandlerCallback) callback;
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
@@ -123,6 +147,6 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
     @Override
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}", event.getTopic());
-        return event.getTopic().startsWith(topic);
+        return event.getTopic().startsWith("openhab/items/");
     }
 }

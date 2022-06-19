@@ -108,7 +108,7 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
             } else if (ChannelEventTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new ChannelEventTriggerHandler((Trigger) module, bundleContext);
             } else if (ItemCommandTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new ItemCommandTriggerHandler((Trigger) module, bundleContext);
+                return new ItemCommandTriggerHandler((Trigger) module, ruleUID, bundleContext, itemRegistry);
             } else if (SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new SystemTriggerHandler((Trigger) module, bundleContext);
             } else if (ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
@@ -116,17 +116,17 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
                 return new ThingStatusTriggerHandler((Trigger) module, bundleContext);
             } else if (ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
                     || ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new ItemStateTriggerHandler((Trigger) module, bundleContext);
+                return new ItemStateTriggerHandler((Trigger) module, ruleUID, bundleContext, itemRegistry);
             } else if (GroupCommandTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new GroupCommandTriggerHandler((Trigger) module, bundleContext, itemRegistry);
+                return new GroupCommandTriggerHandler((Trigger) module, ruleUID, bundleContext, itemRegistry);
             } else if (GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
                     || GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new GroupStateTriggerHandler((Trigger) module, bundleContext, itemRegistry);
+                return new GroupStateTriggerHandler((Trigger) module, ruleUID, bundleContext, itemRegistry);
             }
         } else if (module instanceof Condition) {
             // Handle conditions
             if (ItemStateConditionHandler.ITEM_STATE_CONDITION.equals(moduleTypeUID)) {
-                return new ItemStateConditionHandler((Condition) module, itemRegistry);
+                return new ItemStateConditionHandler((Condition) module, ruleUID, bundleContext, itemRegistry);
             } else if (GenericEventConditionHandler.MODULETYPE_ID.equals(moduleTypeUID)) {
                 return new GenericEventConditionHandler((Condition) module);
             } else if (CompareConditionHandler.MODULE_TYPE.equals(moduleTypeUID)) {

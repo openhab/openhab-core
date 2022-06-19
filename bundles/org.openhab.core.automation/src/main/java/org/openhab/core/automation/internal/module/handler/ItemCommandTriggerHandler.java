@@ -27,7 +27,10 @@ import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemRemovedEvent;
 import org.openhab.core.types.Command;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -57,20 +60,27 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
 
     private final Set<String> types;
     private final BundleContext bundleContext;
+    private final String ruleUID;
 
-    private @Nullable ServiceRegistration<?> eventSubscriberRegistration;
+    private final ServiceRegistration<?> eventSubscriberRegistration;
 
-    public ItemCommandTriggerHandler(Trigger module, BundleContext bundleContext) {
+    public ItemCommandTriggerHandler(Trigger module, String ruleUID, BundleContext bundleContext,
+            ItemRegistry itemRegistry) {
         super(module);
         this.itemName = (String) module.getConfiguration().get(CFG_ITEMNAME);
         this.command = (String) module.getConfiguration().get(CFG_COMMAND);
-        this.types = Set.of(ItemCommandEvent.TYPE);
         this.bundleContext = bundleContext;
+        this.ruleUID = ruleUID;
+        this.types = Set.of(ItemCommandEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         Dictionary<String, Object> properties = new Hashtable<>();
-        this.topic = "openhab/items/" + itemName + "/command";
+        this.topic = "openhab/items/" + itemName + "/*";
         properties.put("event.topics", topic);
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);
+        if (itemRegistry.get(itemName) == null) {
+            logger.warn("Item '{}' needed for rule '{}', trigger '{}' not present in registry. Trigger will not work.",
+                    itemName, ruleUID, module.getId());
+        }
     }
 
     @Override
@@ -85,6 +95,20 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
 
     @Override
     public void receive(Event event) {
+        if (event instanceof ItemAddedEvent) {
+            if (itemName.equals(((ItemAddedEvent) event).getItem().name)) {
+                logger.info("Item '{}' needed for rule '{}', trigger '{}' added. Trigger will now work.", itemName,
+                        ruleUID, module.getId());
+                return;
+            }
+        } else if (event instanceof ItemRemovedEvent) {
+            if (itemName.equals(((ItemRemovedEvent) event).getItem().name)) {
+                logger.warn("Item '{}' needed for rule '{}', trigger '{}' removed. Trigger will no longer work.",
+                        itemName, ruleUID, module.getId());
+                return;
+            }
+        }
+
         ModuleHandlerCallback callback = this.callback;
         if (callback != null) {
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
@@ -108,15 +132,12 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
     @Override
     public void dispose() {
         super.dispose();
-        if (eventSubscriberRegistration != null) {
-            eventSubscriberRegistration.unregister();
-            eventSubscriberRegistration = null;
-        }
+        eventSubscriberRegistration.unregister();
     }
 
     @Override
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
-        return event.getTopic().equals(topic);
+        return event.getTopic().contains("openhab/items/" + itemName + "/");
     }
 }
