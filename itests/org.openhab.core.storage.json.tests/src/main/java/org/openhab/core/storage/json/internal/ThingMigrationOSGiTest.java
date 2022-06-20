@@ -13,14 +13,13 @@
 package org.openhab.core.storage.json.internal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -47,8 +46,7 @@ public class ThingMigrationOSGiTest extends JavaOSGiTest {
     public void migrationParsable() throws IOException {
         Files.createDirectories(DB_DIR);
 
-        StorageService storageService = getService(StorageService.class);
-        assertThat(storageService, is(notNullValue()));
+        StorageService storageService = Objects.requireNonNull(getService(StorageService.class));
 
         // prepare storage
         Files.copy(bundleContext.getBundle().getResource(DB_NAME + ".json").openStream(),
