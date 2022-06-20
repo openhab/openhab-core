@@ -306,7 +306,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         // run the rule to check if the runtime rule has resolved module references and is executed successfully
         EventPublisher eventPublisher = getService(EventPublisher.class);
 
-        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
 
             @Override
@@ -357,7 +356,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         SwitchItem myMotionItem = (SwitchItem) itemRegistry.getItem("myMotionItem");
         assertThat(myMotionItem.getState(), is(UnDefType.NULL));
 
-        @NonNullByDefault
         EventSubscriber eventHandler = new EventSubscriber() {
 
             @Override
