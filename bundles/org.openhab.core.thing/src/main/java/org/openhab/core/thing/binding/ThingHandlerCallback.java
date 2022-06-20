@@ -53,17 +53,17 @@ public interface ThingHandlerCallback {
     /**
      * Informs about an updated state for a channel.
      *
-     * @param channelUID channel UID (must not be null)
-     * @param state state (must not be null)
+     * @param channelUID channel UID
+     * @param state state
      */
     void stateUpdated(ChannelUID channelUID, State state);
 
     /**
      * Informs about an update to a historic state for a channel.
      *
-     * @param channelUID channel UID (must not be null)
-     * @param state state (must not be null)
-     * @param dateTime date time (must not be null)
+     * @param channelUID channel UID
+     * @param state state
+     * @param dateTime date time
      */
     void historicStateUpdated(ChannelUID channelUID, State state, ZonedDateTime dateTime);
 
@@ -78,15 +78,15 @@ public interface ThingHandlerCallback {
     /**
      * Informs about an updated status of a thing.
      *
-     * @param thing thing (must not be null)
-     * @param thingStatus thing status (must not be null)
+     * @param thing thing
+     * @param thingStatus thing status
      */
     void statusUpdated(Thing thing, ThingStatusInfo thingStatus);
 
     /**
      * Informs about an update of the whole thing.
      *
-     * @param thing thing that was updated (must not be null)
+     * @param thing thing that was updated
      * @throws IllegalStateException if the {@link Thing} is read-only.
      */
     void thingUpdated(Thing thing);
@@ -94,7 +94,7 @@ public interface ThingHandlerCallback {
     /**
      * Validates the given configuration parameters against the configuration description.
      *
-     * @param thing thing with the updated configuration (must not be null)
+     * @param thing thing with the updated configuration
      * @param configurationParameters the configuration parameters to be validated
      * @throws ConfigValidationException if one or more of the given configuration parameters do not match
      *             their declarations in the configuration description
@@ -104,7 +104,7 @@ public interface ThingHandlerCallback {
     /**
      * Validates the given configuration parameters against the configuration description.
      *
-     * @param channel channel with the updated configuration (must not be null)
+     * @param channel channel with the updated configuration
      * @param configurationParameters the configuration parameters to be validated
      * @throws ConfigValidationException if one or more of the given configuration parameters do not match
      *             their declarations in the configuration description
@@ -139,8 +139,8 @@ public interface ThingHandlerCallback {
     /**
      * Informs the framework that the ThingType of the given {@link Thing} should be changed.
      *
-     * @param thing thing that should be migrated to another ThingType (must not be null)
-     * @param thingTypeUID the new type of the thing (must not be null)
+     * @param thing thing that should be migrated to another ThingType
+     * @param thingTypeUID the new type of the thing
      * @param configuration a configuration that should be applied to the given {@link Thing}
      */
     void migrateThingType(Thing thing, ThingTypeUID thingTypeUID, Configuration configuration);
@@ -148,7 +148,7 @@ public interface ThingHandlerCallback {
     /**
      * Informs the framework that a channel has been triggered.
      *
-     * @param thing thing (must not be null)
+     * @param thing thing
      * @param channelUID UID of the channel over which has been triggered.
      * @param event Event.
      */
@@ -169,7 +169,7 @@ public interface ThingHandlerCallback {
      * modify it. The methods {@link BaseThingHandler#editThing(Thing)} and {@link BaseThingHandler#updateThing(Thing)}
      * must be called to persist the changes.
      *
-     * @param thing {@link Thing} (must not be null)
+     * @param thing {@link Thing}
      * @param channelUID the UID of the {@link Channel} to be edited
      * @return a preconfigured {@link ChannelBuilder}
      * @throws IllegalArgumentException if no {@link Channel} with the given UID exists for the given {@link Thing}
@@ -191,7 +191,7 @@ public interface ThingHandlerCallback {
     /**
      * Returns whether at least one item is linked for the given UID of the channel.
      *
-     * @param channelUID UID of the channel (must not be null)
+     * @param channelUID UID of the channel
      * @return true if at least one item is linked, false otherwise
      */
     boolean isChannelLinked(ChannelUID channelUID);
@@ -199,7 +199,7 @@ public interface ThingHandlerCallback {
     /**
      * Returns the bridge of the thing.
      *
-     * @param bridgeUID {@link ThingUID} UID of the bridge (must not be null)
+     * @param bridgeUID {@link ThingUID} UID of the bridge
      * @return returns the bridge of the thing or null if the thing has no bridge
      */
     @Nullable

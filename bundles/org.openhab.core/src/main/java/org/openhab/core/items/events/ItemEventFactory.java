@@ -286,6 +286,7 @@ public class ItemEventFactory extends AbstractEventFactory {
      *
      * @param itemName the name of the item to send the state update for
      * @param state the new state to send
+     * @param dateTime the date time when the state is valid
      * @param source the name of the source identifying the sender (can be null)
      * @return the created item state event
      * @throws IllegalArgumentException if itemName or state is null
@@ -294,7 +295,7 @@ public class ItemEventFactory extends AbstractEventFactory {
             @Nullable String source) {
         assertValidArguments(itemName, state, "state");
         // TODO: use a different topic for historic state ? Would require changes to ItemUpdater.
-        String topic = buildTopic(ITEM_STATE_EVENT_TOPIC, itemName);
+        String topic = buildTopic(ITEM_HISTORIC_STATE_EVENT_TOPIC, itemName);
         ItemHistoricStateEventPayloadBean bean = new ItemHistoricStateEventPayloadBean(getStateType(state),
                 state.toFullString(), dateTime.toString());
         String payload = serializePayload(bean);

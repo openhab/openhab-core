@@ -295,14 +295,11 @@ public abstract class GenericItem implements ActiveItem {
     }
 
     protected void notifyHistoryListeners(final State state, final ZonedDateTime dateTime) {
-        // if nothing has changed, we send update notifications
         Set<StateChangeListener> clonedListeners = new CopyOnWriteArraySet<>(listeners);
         ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
         clonedListeners.forEach(listener -> pool.execute(() -> {
             try {
-                if (listener instanceof HistoricStateChangeListener) {
-                    ((HistoricStateChangeListener) listener).historicStateUpdated(GenericItem.this, state, dateTime);
-                }
+                listener.historicStateUpdated(GenericItem.this, state, dateTime);
             } catch (Exception e) {
                 logger.warn("failed notifying listener '{}' about historic state of item {}: {}", listener,
                         GenericItem.this.getName(), e.getMessage(), e);

@@ -19,6 +19,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.State;
 
+/**
+ * {@link ItemHistoricStateEvent}s can be used to deliver item historic states through the openHAB event bus.
+ * Historic state events must be created with the {@link ItemEventFactory}.
+ *
+ * @author Jan M. Hochstein - Initial contribution
+ */
 @NonNullByDefault
 public class ItemHistoricStateEvent extends ItemEvent {
 
@@ -34,12 +40,13 @@ public class ItemHistoricStateEvent extends ItemEvent {
     protected final ZonedDateTime dateTime;
 
     /**
-     * Constructs a new item state event.
+     * Constructs a new item historic state event.
      *
      * @param topic the topic
      * @param payload the payload
      * @param itemName the item name
      * @param itemState the item state
+     * @param dateTime the date time
      * @param source the source, can be null
      */
     protected ItemHistoricStateEvent(String topic, String payload, String itemName, State itemState,

@@ -293,12 +293,12 @@ public abstract class BaseThingHandler implements ThingHandler {
      * Updates a historic state of the thing.
      *
      * @param channelUID unique id of the channel, which was updated
-     * @param state new state
+     * @param state the state
+     * @param dateTime the date time when the state is valid
      */
     protected void updateHistoricState(ChannelUID channelUID, State state, ZonedDateTime dateTime) {
         synchronized (this) {
             if (this.callback != null) {
-                // TODO: check if this historic state is later than any existing state
                 this.callback.historicStateUpdated(channelUID, state, dateTime);
             } else {
                 logger.warn(
@@ -314,7 +314,8 @@ public abstract class BaseThingHandler implements ThingHandler {
      * unique channel UID from the given ID.
      *
      * @param channelID id of the channel, which was updated
-     * @param state new state
+     * @param state the state
+     * @param dateTime the date time when the state is valid
      */
     protected void updateHistoricState(String channelID, State state, ZonedDateTime dateTime) {
         ChannelUID channelUID = new ChannelUID(this.getThing().getUID(), channelID);

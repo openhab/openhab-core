@@ -58,26 +58,7 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
         State newState = updateEvent.getItemState();
         try {
             GenericItem item = (GenericItem) itemRegistry.getItem(itemName);
-            boolean isAccepted = false;
-            if (item.getAcceptedDataTypes().contains(newState.getClass())) {
-                isAccepted = true;
-            } else {
-                // Look for class hierarchy
-                for (Class<? extends State> state : item.getAcceptedDataTypes()) {
-                    try {
-                        if (!state.isEnum() && state.getDeclaredConstructor().newInstance().getClass()
-                                .isAssignableFrom(newState.getClass())) {
-                            isAccepted = true;
-                            break;
-                        }
-                    } catch (ReflectiveOperationException e) {
-                        // Should never happen
-                        logger.warn("{} while creating {} instance: {}", e.getClass().getSimpleName(),
-                                state.getClass().getSimpleName(), e.getMessage());
-                    }
-                }
-            }
-            if (isAccepted) {
+            if (isStateAcceptableForItem(item, newState)) {
                 item.setState(newState);
             } else {
                 logger.debug("Received update of a not accepted type ({}) for item {}",
@@ -108,26 +89,7 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
         ZonedDateTime dateTime = event.getDateTime();
         try {
             GenericItem item = (GenericItem) itemRegistry.getItem(itemName);
-            boolean isAccepted = false;
-            if (item.getAcceptedDataTypes().contains(newState.getClass())) {
-                isAccepted = true;
-            } else {
-                // Look for class hierarchy
-                for (Class<? extends State> state : item.getAcceptedDataTypes()) {
-                    try {
-                        if (!state.isEnum() && state.getDeclaredConstructor().newInstance().getClass()
-                                .isAssignableFrom(newState.getClass())) {
-                            isAccepted = true;
-                            break;
-                        }
-                    } catch (ReflectiveOperationException e) {
-                        // Should never happen
-                        logger.warn("{} while creating {} instance: {}", e.getClass().getSimpleName(),
-                                state.getClass().getSimpleName(), e.getMessage());
-                    }
-                }
-            }
-            if (isAccepted) {
+            if (isStateAcceptableForItem(item, newState)) {
                 item.setHistoricState(newState, dateTime);
             } else {
                 logger.debug("Received update of a not accepted type ({}) for item {}",
@@ -136,5 +98,28 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
         } catch (ItemNotFoundException e) {
             logger.debug("Received update for non-existing item: {}", e.getMessage());
         }
+    }
+
+    private boolean isStateAcceptableForItem(GenericItem item, State newState) {
+        boolean isAccepted = false;
+        if (item.getAcceptedDataTypes().contains(newState.getClass())) {
+            isAccepted = true;
+        } else {
+            // Look for class hierarchy
+            for (Class<? extends State> state : item.getAcceptedDataTypes()) {
+                try {
+                    if (!state.isEnum() && state.getDeclaredConstructor().newInstance().getClass()
+                            .isAssignableFrom(newState.getClass())) {
+                        isAccepted = true;
+                        break;
+                    }
+                } catch (ReflectiveOperationException e) {
+                    // Should never happen
+                    logger.warn("{} while creating {} instance: {}", e.getClass().getSimpleName(),
+                            state.getClass().getSimpleName(), e.getMessage());
+                }
+            }
+        }
+        return isAccepted;
     }
 }

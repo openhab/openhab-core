@@ -14,9 +14,17 @@ package org.openhab.core.thing.internal;
 
 import java.time.ZonedDateTime;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.State;
 
+/**
+ * A wrapper class for {@link State} which represents an item state plus a date time when the state is valid.
+ * 
+ * @author Jan M. Hochstein
+ *
+ */
+@NonNullByDefault
 public class HistoricState implements State {
 
     private State state;

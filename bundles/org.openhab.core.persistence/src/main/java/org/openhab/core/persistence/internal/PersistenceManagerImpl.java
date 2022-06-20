@@ -32,11 +32,11 @@ import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
-import org.openhab.core.items.HistoricStateChangeListener;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemRegistryChangeListener;
+import org.openhab.core.items.StateChangeListener;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
@@ -78,7 +78,7 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, service = PersistenceManager.class)
 @NonNullByDefault
 public class PersistenceManagerImpl
-        implements ItemRegistryChangeListener, PersistenceManager, HistoricStateChangeListener, ReadyTracker {
+        implements ItemRegistryChangeListener, PersistenceManager, StateChangeListener, ReadyTracker {
 
     private final Logger logger = LoggerFactory.getLogger(PersistenceManagerImpl.class);
 
@@ -164,10 +164,12 @@ public class PersistenceManagerImpl
      * Calls all persistence services which use change or update policy for the given item
      *
      * @param item the item to persist
-     * @param onlyChanges true, if it has the change strategy, false otherwise
+     * @param state the state
+     * @param dateTime the date time when the state is valid
      */
-    private void handleHistoricStateEvent(Item item, State state, ZonedDateTime dateTime, boolean onlyChanges) {
-        logger.debug("Persisting item '{}' historic state '{}' at {}", item.getName(), state.toString(), dateTime.toString());
+    private void handleHistoricStateEvent(Item item, State state, ZonedDateTime dateTime) {
+        logger.debug("Persisting item '{}' historic state '{}' at {}", item.getName(), state.toString(),
+                dateTime.toString());
         synchronized (persistenceServiceConfigs) {
             for (Entry<String, @Nullable PersistenceServiceConfiguration> entry : persistenceServiceConfigs
                     .entrySet()) {
@@ -179,11 +181,10 @@ public class PersistenceManagerImpl
                             .get(serviceName);
                     logger.debug("  Using ModifiablePersistenceService '{}'", serviceName);
                     for (PersistenceItemConfiguration itemConfig : config.getConfigs()) {
-                        if (hasStrategy(config, itemConfig, onlyChanges ? PersistenceStrategy.Globals.CHANGE
-                                : PersistenceStrategy.Globals.UPDATE)) {
+                        if (hasStrategy(config, itemConfig, PersistenceStrategy.Globals.UPDATE)) {
                             logger.debug("  trying ItemConfig '{}'", itemConfig.toString());
                             if (appliesToItem(itemConfig, item)) {
-                                logger.debug("  config applies"); // false ??
+                                logger.debug("  config applies");
                                 service.store(item, dateTime, state);
                             }
                         }
@@ -515,7 +516,7 @@ public class PersistenceManagerImpl
 
     @Override
     public void historicStateUpdated(Item item, State state, ZonedDateTime dateTime) {
-        handleHistoricStateEvent(item, state, dateTime, false);
+        handleHistoricStateEvent(item, state, dateTime);
     }
 
     @Override

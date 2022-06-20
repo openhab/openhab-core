@@ -12,6 +12,8 @@
  */
 package org.openhab.core.items;
 
+import java.time.ZonedDateTime;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.types.State;
 
@@ -43,4 +45,15 @@ public interface StateChangeListener {
      * @param state the current state, same before and after the update
      */
     public void stateUpdated(Item item, State state);
+
+    /**
+     * This method is called, if a historic state was updated
+     *
+     * @param item the item whose state was updated
+     * @param state the state
+     * @param dateTime the date time when the state is valid
+     */
+    default public void historicStateUpdated(Item item, State state, ZonedDateTime dateTime) {
+        throw new UnsupportedOperationException("this listener does not know how to handle historic states");
+    }
 }
