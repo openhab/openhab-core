@@ -87,6 +87,7 @@ public class ConfigDescriptionValidatorTest {
     private static final String INT_REQUIRED_PARAM_NAME = "int-required-param";
     private static final String INT_MIN_PARAM_NAME = "int-min-name";
     private static final String INT_MAX_PARAM_NAME = "int-max-name";
+    private static final String INT_OPTION_PARAM_NAME = "int-option-param-name";
 
     private static final String DECIMAL_PARAM_NAME = "decimal-param";
     private static final String DECIMAL_REQUIRED_PARAM_NAME = "decimal-required-param";
@@ -139,6 +140,9 @@ public class ConfigDescriptionValidatorTest {
             .create(INT_MIN_PARAM_NAME, ConfigDescriptionParameter.Type.INTEGER).withMinimum(MIN).build();
     private static final ConfigDescriptionParameter INT_MAX_PARAM = ConfigDescriptionParameterBuilder
             .create(INT_MAX_PARAM_NAME, ConfigDescriptionParameter.Type.INTEGER).withMaximum(MAX).build();
+    private static final ConfigDescriptionParameter INT_OPTION_PARAM = ConfigDescriptionParameterBuilder
+            .create(INT_OPTION_PARAM_NAME, Type.INTEGER).withMinimum(MIN).withMaximum(MAX)
+            .withOptions(List.of(new ParameterOption("10", "10"))).build();
 
     private static final ConfigDescriptionParameter DECIMAL_PARAM = ConfigDescriptionParameterBuilder
             .create(DECIMAL_PARAM_NAME, ConfigDescriptionParameter.Type.DECIMAL).build();
@@ -157,7 +161,7 @@ public class ConfigDescriptionValidatorTest {
             .withParameters(List.of(BOOL_PARAM, BOOL_REQUIRED_PARAM, TXT_PARAM, TXT_REQUIRED_PARAM, TXT_MIN_PARAM,
                     TXT_MAX_PARAM, TXT_PATTERN_PARAM, TXT_MAX_PATTERN_PARAM, TXT_PARAM_WITH_LIMITED_OPTIONS,
                     TXT_PARAM_WITH_UNLIMITED_OPTIONS, TXT_MULTIPLE_LIMIT_PARAM, INT_PARAM, INT_REQUIRED_PARAM,
-                    INT_MIN_PARAM, INT_MAX_PARAM, DECIMAL_PARAM, DECIMAL_REQUIRED_PARAM,
+                    INT_MIN_PARAM, INT_MAX_PARAM, DECIMAL_PARAM, DECIMAL_REQUIRED_PARAM, INT_OPTION_PARAM,
                     DECIMAL_WITH_LIMITED_OPTIONS_PARAM_OPTIONS, DECIMAL_MIN_PARAM, DECIMAL_MAX_PARAM))
             .build();
 
@@ -194,6 +198,7 @@ public class ConfigDescriptionValidatorTest {
         params.put(INT_REQUIRED_PARAM_NAME, 0);
         params.put(INT_MIN_PARAM_NAME, MIN);
         params.put(INT_MAX_PARAM_NAME, MAX);
+        params.put(INT_OPTION_PARAM_NAME, new BigDecimal("10.0"));
         params.put(DECIMAL_PARAM_NAME, null);
         params.put(DECIMAL_REQUIRED_PARAM_NAME, 0f);
         params.put(DECIMAL_WITH_LIMITED_OPTIONS_NAME, new BigDecimal("2.0"));
