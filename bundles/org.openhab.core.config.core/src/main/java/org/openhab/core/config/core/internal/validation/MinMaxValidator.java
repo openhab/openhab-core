@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.config.core.internal.validation.TypeIntrospections.TypeIntrospection;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
@@ -38,12 +39,11 @@ final class MinMaxValidator implements ConfigDescriptionParameterValidator {
             return null;
         }
 
-        String valString = (parameter.getType() == Type.INTEGER && value instanceof BigDecimal)
-                ? ((BigDecimal) value).setScale(0).toString()
-                : value.toString();
+        Object normalizedValue = ConfigUtil.normalizeType(value, parameter).toString();
+
         // Allow specified options to be outside the min/max value
         // Option values are a string, so we can do a simple compare
-        if (parameter.getOptions().stream().map(ParameterOption::getValue).anyMatch(v -> v.equals(valString))) {
+        if (parameter.getOptions().stream().map(ParameterOption::getValue).anyMatch(v -> v.equals(normalizedValue))) {
             return null;
         }
 
