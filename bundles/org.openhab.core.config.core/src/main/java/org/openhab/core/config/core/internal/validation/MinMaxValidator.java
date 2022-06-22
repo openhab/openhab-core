@@ -39,11 +39,12 @@ final class MinMaxValidator implements ConfigDescriptionParameterValidator {
             return null;
         }
 
-        Object normalizedValue = ConfigUtil.normalizeType(value, parameter).toString();
+        String normalizedValueString = ConfigUtil.normalizeType(value, parameter).toString();
 
         // Allow specified options to be outside the min/max value
         // Option values are a string, so we can do a simple compare
-        if (parameter.getOptions().stream().map(ParameterOption::getValue).anyMatch(v -> v.equals(normalizedValue))) {
+        if (parameter.getOptions().stream().map(ParameterOption::getValue)
+                .anyMatch(v -> v.equals(normalizedValueString))) {
             return null;
         }
 
