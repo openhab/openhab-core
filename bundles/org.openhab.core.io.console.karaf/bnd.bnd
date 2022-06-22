@@ -1,1 +1,3 @@
 Karaf-Commands: org.openhab.core.io.console.karaf.internal
+Automatic-Module-Name: ${def;bsn}
+Bundle-SymbolicName: ${project.artifactId}

@@ -12,9 +12,11 @@
  */
 package org.openhab.core.io.console.karaf.internal;
 
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.felix.service.command.Process;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -66,8 +68,8 @@ public class CommandWrapper implements Command, Action {
     @Override
     public Object execute(Session session, List<Object> argList) throws Exception {
         String[] args = argList.stream().map(Object::toString).toArray(String[]::new);
-
-        final Console console = new OSGiConsole(getScope(), session.getConsole());
+        PrintStream out = Process.Utils.current().out();
+        final Console console = new OSGiConsole(getScope(), out);
 
         if (args.length == 1 && "--help".equals(args[0])) {
             for (final String usage : command.getUsages()) {
