@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -72,8 +73,8 @@ public class WatchQueueReader implements Runnable {
     protected @Nullable WatchService watchService;
 
     private final Map<WatchKey, Path> registeredKeys = new HashMap<>();
-    private final Map<WatchKey, Set<AbstractWatchService>> keyToService = new HashMap<>();
-    private final Map<AbstractWatchService, Map<Path, byte[]>> hashes = new HashMap<>();
+    private final Map<WatchKey, Set<AbstractWatchService>> keyToService = new ConcurrentHashMap<>();
+    private final Map<AbstractWatchService, Map<Path, byte[]>> hashes = new ConcurrentHashMap<>();
     private final List<Notification> notifications = new CopyOnWriteArrayList<>();
 
     private @Nullable Thread qr;
