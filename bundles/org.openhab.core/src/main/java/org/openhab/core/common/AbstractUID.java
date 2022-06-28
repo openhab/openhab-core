@@ -69,14 +69,14 @@ public abstract class AbstractUID {
         int numberOfSegments = segments.size();
         if (numberOfSegments < minNumberOfSegments) {
             throw new IllegalArgumentException(
-                    String.format("UID must have at least %d segments.", minNumberOfSegments));
+                    String.format("UID must have at least %d segments: %s", minNumberOfSegments, segments));
         }
         for (int i = 0; i < numberOfSegments; i++) {
             String segment = segments.get(i);
             validateSegment(segment, i, numberOfSegments);
         }
         if (segments.get(numberOfSegments - 1).isBlank()) {
-            throw new IllegalArgumentException("Last segment must not be blank.");
+            throw new IllegalArgumentException("Last segment must not be blank: " + segments);
         }
         this.segments = List.copyOf(segments);
     }
