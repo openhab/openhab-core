@@ -43,8 +43,6 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,8 +65,9 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
     private static final SecureRandom RAND = new SecureRandom();
 
     @Activate
-    public UserRegistryImpl(BundleContext context, Map<String, Object> properties) {
-        super(UserProvider.class);
+    public UserRegistryImpl(final @Reference ManagedUserProvider managedUserProvider, BundleContext context,
+            Map<String, Object> properties) {
+        super(UserProvider.class, managedUserProvider);
         super.activate(context);
     }
 
@@ -76,17 +75,6 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
     @Deactivate
     protected void deactivate() {
         super.deactivate();
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setManagedProvider(ManagedUserProvider managedProvider) {
-        super.setManagedProvider(managedProvider);
-        super.addProvider(managedProvider);
-    }
-
-    protected void unsetManagedProvider(ManagedUserProvider managedProvider) {
-        super.unsetManagedProvider(managedProvider);
-        super.removeProvider(managedProvider);
     }
 
     @Override

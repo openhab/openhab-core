@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -28,7 +29,9 @@ import org.openhab.core.automation.template.RuleTemplateProvider;
 import org.openhab.core.automation.template.TemplateProvider;
 import org.openhab.core.automation.template.TemplateRegistry;
 import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.Provider;
+import org.openhab.core.common.registry.ProviderChangeListener;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -43,7 +46,7 @@ public class RuleTemplateRegistry extends AbstractRegistry<RuleTemplate, String,
         implements TemplateRegistry<RuleTemplate> {
 
     public RuleTemplateRegistry() {
-        super(RuleTemplateProvider.class);
+        super(RuleTemplateProvider.class, new ManagedRuleTemplateProvider());
     }
 
     @Override
@@ -119,5 +122,51 @@ public class RuleTemplateRegistry extends AbstractRegistry<RuleTemplate, String,
     @Override
     public Collection<RuleTemplate> getAll(@Nullable Locale locale) {
         return getByTag(null, locale);
+    }
+
+    private static class ManagedRuleTemplateProvider
+            implements RuleTemplateProvider, ManagedProvider<RuleTemplate, String> {
+        @Override
+        public void addProviderChangeListener(ProviderChangeListener<RuleTemplate> listener) {
+        }
+
+        @Override
+        public void removeProviderChangeListener(ProviderChangeListener<RuleTemplate> listener) {
+        }
+
+        @Override
+        public @Nullable RuleTemplate get(String key) {
+            return null;
+        }
+
+        @Override
+        public Collection<RuleTemplate> getAll() {
+            return List.of();
+        }
+
+        @Override
+        public void add(RuleTemplate element) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public @Nullable RuleTemplate remove(String key) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public @Nullable RuleTemplate update(RuleTemplate element) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
+            return null;
+        }
+
+        @Override
+        public Collection<RuleTemplate> getTemplates(@Nullable Locale locale) {
+            return List.of();
+        }
     }
 }

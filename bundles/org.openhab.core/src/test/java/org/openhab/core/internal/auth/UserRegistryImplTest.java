@@ -57,8 +57,7 @@ public class UserRegistryImplTest {
     public void setup() throws Exception {
         when(bundleContextMock.getService(same(managedProviderRefMock))).thenReturn(managedProviderMock);
 
-        registry = new UserRegistryImpl(bundleContextMock, Map.of());
-        registry.setManagedProvider(managedProviderMock);
+        registry = new UserRegistryImpl(managedProviderMock, bundleContextMock, Map.of());
         registry.waitForCompletedAsyncActivationTasks();
 
         ArgumentCaptor<ServiceListener> captor = ArgumentCaptor.forClass(ServiceListener.class);

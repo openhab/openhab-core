@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -32,7 +33,9 @@ import org.openhab.core.automation.type.ModuleTypeProvider;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.TriggerType;
 import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.Provider;
+import org.openhab.core.common.registry.ProviderChangeListener;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -47,7 +50,7 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
         implements ModuleTypeRegistry {
 
     public ModuleTypeRegistryImpl() {
-        super(ModuleTypeProvider.class);
+        super(ModuleTypeProvider.class, new ManagedModuleTypeProvider());
     }
 
     @Override
@@ -229,5 +232,50 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
             throw new IllegalArgumentException("Invalid template type:" + mType);
         }
         return result;
+    }
+
+    private static class ManagedModuleTypeProvider implements ModuleTypeProvider, ManagedProvider<ModuleType, String> {
+        @Override
+        public <T extends ModuleType> @Nullable T getModuleType(String UID, @Nullable Locale locale) {
+            return null;
+        }
+
+        @Override
+        public <T extends ModuleType> Collection<T> getModuleTypes(@Nullable Locale locale) {
+            return List.of();
+        }
+
+        @Override
+        public void addProviderChangeListener(ProviderChangeListener<ModuleType> listener) {
+        }
+
+        @Override
+        public void removeProviderChangeListener(ProviderChangeListener<ModuleType> listener) {
+        }
+
+        @Override
+        public @Nullable ModuleType get(String key) {
+            return null;
+        }
+
+        @Override
+        public Collection<ModuleType> getAll() {
+            return List.of();
+        }
+
+        @Override
+        public void add(ModuleType element) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public @Nullable ModuleType remove(String key) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public @Nullable ModuleType update(ModuleType element) {
+            throw new UnsupportedOperationException();
+        }
     }
 }

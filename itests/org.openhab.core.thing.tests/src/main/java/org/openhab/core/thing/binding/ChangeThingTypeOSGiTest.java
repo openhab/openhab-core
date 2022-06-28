@@ -121,12 +121,13 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void setup() throws URISyntaxException {
-        thingRegistry = getService(ThingRegistry.class);
-        assertThat(thingRegistry, is(notNullValue()));
-
         registerVolatileStorageService();
+
         managedThingProvider = getService(ManagedThingProvider.class);
         assertThat(managedThingProvider, is(notNullValue()));
+
+        thingRegistry = getService(ThingRegistry.class);
+        assertThat(thingRegistry, is(notNullValue()));
 
         configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
         assertThat(configDescriptionRegistry, is(notNullValue()));
@@ -344,8 +345,11 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         managedThingProvider = getService(ManagedThingProvider.class);
         assertThat(managedThingProvider, is(notNullValue()));
 
+        thingRegistry = getService(ThingRegistry.class);
+        assertThat(thingRegistry, is(notNullValue()));
+
+        waitForAssert(() -> assertThat(thingRegistry.getAll().size(), is(1)));
         Collection<Thing> res = thingRegistry.getAll();
-        assertThat(res.size(), is(1));
 
         Thing thing = res.iterator().next();
         assertThat(thing.getUID().toString(), is("testBinding::persistedThing"));

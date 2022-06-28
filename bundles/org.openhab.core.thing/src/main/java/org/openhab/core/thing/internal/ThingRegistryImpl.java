@@ -35,6 +35,7 @@ import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.openhab.core.thing.events.ThingEventFactory;
 import org.openhab.core.thing.internal.ThingTracker.ThingTrackerEvent;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -60,8 +61,10 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
 
     private final List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<>();
 
-    public ThingRegistryImpl() {
-        super(ThingProvider.class);
+    @Activate
+    public ThingRegistryImpl(final @Reference ManagedThingProvider managedThingProvider,
+            final @Reference ReadyService readyService) {
+        super(ThingProvider.class, managedThingProvider, readyService);
     }
 
     /**
@@ -298,25 +301,5 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
     @Override
     protected void unsetEventPublisher(EventPublisher eventPublisher) {
         super.unsetEventPublisher(eventPublisher);
-    }
-
-    @Override
-    @Reference
-    protected void setReadyService(ReadyService readyService) {
-        super.setReadyService(readyService);
-    }
-
-    @Override
-    protected void unsetReadyService(ReadyService readyService) {
-        super.unsetReadyService(readyService);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, name = "ManagedThingProvider")
-    protected void setManagedProvider(ManagedThingProvider provider) {
-        super.setManagedProvider(provider);
-    }
-
-    protected void unsetManagedProvider(ManagedThingProvider managedProvider) {
-        super.unsetManagedProvider(managedProvider);
     }
 }

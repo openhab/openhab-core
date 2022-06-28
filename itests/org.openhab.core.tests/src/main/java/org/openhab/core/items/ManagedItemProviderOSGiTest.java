@@ -58,6 +58,7 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
     @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
+
         itemProvider = getService(ManagedItemProvider.class);
         itemRegistry = getService(ItemRegistry.class);
     }
@@ -239,7 +240,7 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
         StrangeItemFactory factory = new StrangeItemFactory();
         registerService(factory);
         try {
-            assertThat(itemProvider.getAll().size(), is(1));
+            waitForAssert(() -> assertThat(itemProvider.getAll().size(), is(1)));
             assertThat(itemRegistry.getItems().size(), is(1));
             assertThat(itemProvider.get("SomeStrangeItem"), is(notNullValue()));
             assertThat(itemRegistry.getItem("SomeStrangeItem"), is(notNullValue()));
@@ -267,8 +268,8 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
 
         // start without the appropriate item factory - it only creates the group item
 
-        assertThat(itemProvider.getAll().size(), is(1));
-        assertThat(itemRegistry.getItems().size(), is(1));
+        waitForAssert(() -> assertThat(itemProvider.getAll().size(), is(1)));
+        waitForAssert(() -> assertThat(itemRegistry.getItems().size(), is(1)));
         assertThat(itemProvider.get("SomeStrangeItem"), is(nullValue()));
         assertThat(itemProvider.get("SomeGroupItem"), is(notNullValue()));
         assertThat(itemRegistry.getItem("SomeGroupItem"), is(notNullValue()));

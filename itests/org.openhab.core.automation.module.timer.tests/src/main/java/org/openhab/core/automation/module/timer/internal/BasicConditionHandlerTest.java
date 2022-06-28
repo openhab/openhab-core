@@ -61,7 +61,6 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.StartLevelService;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.openhab.core.test.storage.VolatileStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +73,6 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
     private final Logger logger = LoggerFactory.getLogger(BasicConditionHandlerTest.class);
-    private VolatileStorageService volatileStorageService = new VolatileStorageService();
     private @NonNullByDefault({}) RuleRegistry ruleRegistry;
     private @NonNullByDefault({}) RuleManager ruleEngine;
     private @Nullable Event itemEvent;
@@ -86,6 +84,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
      */
     @BeforeEach
     public void beforeBase() {
+        registerVolatileStorageService();
         EventPublisher eventPublisher = getService(EventPublisher.class);
         ItemRegistry itemRegistry = getService(ItemRegistry.class);
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
@@ -111,7 +110,6 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
             }
         };
         registerService(itemProvider);
-        registerService(volatileStorageService);
         waitForAssert(() -> {
             ruleRegistry = getService(RuleRegistry.class);
             assertThat(ruleRegistry, is(notNullValue()));

@@ -25,10 +25,9 @@ import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationProvider;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistryChangeListener;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +46,10 @@ public class PersistenceServiceConfigurationRegistryImpl
     private final Map<String, Provider<PersistenceServiceConfiguration>> serviceToProvider = new HashMap<>();
     private final Set<PersistenceServiceConfigurationRegistryChangeListener> registryChangeListeners = new CopyOnWriteArraySet<>();
 
-    public PersistenceServiceConfigurationRegistryImpl() {
-        super(PersistenceServiceConfigurationProvider.class);
+    @Activate
+    public PersistenceServiceConfigurationRegistryImpl(
+            final @Reference ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProvider) {
+        super(PersistenceServiceConfigurationProvider.class, managedPersistenceServiceConfigurationProvider);
     }
 
     @Override
@@ -105,14 +106,5 @@ public class PersistenceServiceConfigurationRegistryImpl
     @Override
     public void removeRegistryChangeListener(PersistenceServiceConfigurationRegistryChangeListener listener) {
         registryChangeListeners.remove(listener);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setManagedProvider(ManagedPersistenceServiceConfigurationProvider provider) {
-        super.setManagedProvider(provider);
-    }
-
-    protected void unsetManagedProvider(ManagedPersistenceServiceConfigurationProvider provider) {
-        super.unsetManagedProvider(provider);
     }
 }

@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.thing.UID;
 
@@ -42,8 +43,8 @@ public abstract class AbstractLinkRegistry<L extends AbstractLink, P extends Pro
     private final Map<String, Set<L>> itemNameToLink = new HashMap<>();
     private final Map<UID, Set<L>> linkedUidToLink = new HashMap<>();
 
-    protected AbstractLinkRegistry(final Class<P> providerClazz) {
-        super(providerClazz);
+    protected AbstractLinkRegistry(final Class<P> providerClazz, final ManagedProvider<L, String> managedProvider) {
+        super(providerClazz, managedProvider);
     }
 
     @Override

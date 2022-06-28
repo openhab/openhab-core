@@ -17,7 +17,6 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractRegistry;
-import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponentProvider;
@@ -39,8 +38,9 @@ public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, S
      *
      * @param namespace UI components namespace of this registry
      */
-    public UIComponentRegistryImpl(String namespace, @Nullable Set<UIComponentProvider> providers) {
-        super(null);
+    public UIComponentRegistryImpl(String namespace, @Nullable Set<UIComponentProvider> providers,
+            ManagedUIComponentProvider managedUIComponentProvider) {
+        super(null, managedUIComponentProvider);
         if (providers != null && !providers.isEmpty()) {
             for (Provider<RootUIComponent> provider : providers) {
                 addProvider(provider);
@@ -51,16 +51,10 @@ public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, S
     @Override
     public void addProvider(Provider<RootUIComponent> provider) {
         super.addProvider(provider);
-        if (getManagedProvider().isEmpty() && provider instanceof ManagedProvider) {
-            setManagedProvider((ManagedProvider<RootUIComponent, String>) provider);
-        }
     }
 
     @Override
     public void removeProvider(Provider<RootUIComponent> provider) {
-        if (getManagedProvider().isPresent() && provider instanceof ManagedProvider) {
-            unsetManagedProvider((ManagedProvider<RootUIComponent, String>) provider);
-        }
         super.removeProvider(provider);
     }
 }

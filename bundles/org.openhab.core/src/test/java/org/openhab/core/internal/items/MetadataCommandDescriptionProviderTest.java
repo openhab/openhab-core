@@ -63,8 +63,7 @@ public class MetadataCommandDescriptionProviderTest {
     public void setup() throws Exception {
         when(bundleContextMock.getService(same(managedProviderRefMock))).thenReturn(managedProviderMock);
 
-        metadataRegistryMock = new MetadataRegistryImpl(readyServiceMock);
-        metadataRegistryMock.setManagedProvider(managedProviderMock);
+        metadataRegistryMock = new MetadataRegistryImpl(managedProviderMock, readyServiceMock);
         metadataRegistryMock.activate(bundleContextMock);
         metadataRegistryMock.waitForCompletedAsyncActivationTasks();
 

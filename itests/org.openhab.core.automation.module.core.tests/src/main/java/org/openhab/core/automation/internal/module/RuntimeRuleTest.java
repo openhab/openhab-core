@@ -61,7 +61,6 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.StartLevelService;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.openhab.core.test.storage.VolatileStorageService;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.TypeParser;
 import org.osgi.framework.ServiceReference;
@@ -78,10 +77,10 @@ import org.slf4j.LoggerFactory;
 public class RuntimeRuleTest extends JavaOSGiTest {
 
     private final Logger logger = LoggerFactory.getLogger(RuntimeRuleTest.class);
-    private final VolatileStorageService volatileStorageService = new VolatileStorageService();
 
     @BeforeEach
     public void before() {
+        registerVolatileStorageService();
         EventPublisher eventPublisher = getService(EventPublisher.class);
         ItemRegistry itemRegistry = getService(ItemRegistry.class);
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
@@ -108,7 +107,6 @@ public class RuntimeRuleTest extends JavaOSGiTest {
                         new SwitchItem("myPresenceItem4"), new SwitchItem("myLampItem4"));
             }
         });
-        registerService(volatileStorageService);
 
         // start rule engine
         RuleEngineImpl ruleEngine = Objects.requireNonNull((RuleEngineImpl) getService(RuleManager.class));

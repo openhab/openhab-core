@@ -81,7 +81,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
 
     private final Collection<RegistryChangeListener<E>> listeners = new CopyOnWriteArraySet<>();
 
-    private Optional<ManagedProvider<E, K>> managedProvider = Optional.empty();
+    private ManagedProvider<E, K> managedProvider;
 
     private @Nullable EventPublisher eventPublisher;
     private @Nullable ReadyService readyService;
@@ -92,8 +92,15 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
      * @param providerClazz the class of the providers (see e.g. {@link AbstractRegistry#addProvider(Provider)}), null
      *            if no providers should be tracked automatically after activation
      */
-    protected AbstractRegistry(final @Nullable Class<P> providerClazz) {
+    protected AbstractRegistry(final @Nullable Class<P> providerClazz, final ManagedProvider<E, K> managedProvider) {
         this.providerClazz = providerClazz;
+        this.managedProvider = managedProvider;
+    }
+
+    protected AbstractRegistry(final @Nullable Class<P> providerClazz, final ManagedProvider<E, K> managedProvider,
+            ReadyService readyService) {
+        this(providerClazz, managedProvider);
+        this.readyService = readyService;
     }
 
     protected void activate(final BundleContext context) {
@@ -351,20 +358,18 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
 
     @Override
     public E add(E element) {
-        managedProvider.orElseThrow(() -> new IllegalStateException("ManagedProvider is not available")).add(element);
+        managedProvider.add(element);
         return element;
     }
 
     @Override
     public @Nullable E update(E element) {
-        return managedProvider.orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"))
-                .update(element);
+        return managedProvider.update(element);
     }
 
     @Override
     public @Nullable E remove(K key) {
-        return managedProvider.orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"))
-                .remove(key);
+        return managedProvider.remove(key);
     }
 
     protected void notifyListeners(E element, EventType eventType) {
@@ -552,17 +557,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
     }
 
     protected Optional<ManagedProvider<E, K>> getManagedProvider() {
-        return managedProvider;
-    }
-
-    protected void setManagedProvider(ManagedProvider<E, K> provider) {
-        managedProvider = Optional.ofNullable(provider);
-    }
-
-    protected void unsetManagedProvider(ManagedProvider<E, K> provider) {
-        if (managedProvider.isPresent() && managedProvider.get().equals(provider)) {
-            managedProvider = Optional.empty();
-        }
+        return Optional.of(managedProvider);
     }
 
     /**

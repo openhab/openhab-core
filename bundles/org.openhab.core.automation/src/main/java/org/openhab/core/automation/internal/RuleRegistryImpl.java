@@ -111,8 +111,8 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
 
     private final Logger logger = LoggerFactory.getLogger(RuleRegistryImpl.class.getName());
 
-    private @NonNullByDefault({}) ModuleTypeRegistry moduleTypeRegistry;
-    private @NonNullByDefault({}) RuleTemplateRegistry templateRegistry;
+    private final ModuleTypeRegistry moduleTypeRegistry;
+    private final RuleTemplateRegistry templateRegistry;
 
     /**
      * {@link Map} of template UIDs to rules where these templates participated.
@@ -123,8 +123,17 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      * Constructor that is responsible to invoke the super constructor with appropriate providerClazz
      * {@link RuleProvider} - the class of the providers that should be tracked automatically after activation.
      */
-    public RuleRegistryImpl() {
-        super(RuleProvider.class);
+    @Activate
+    public RuleRegistryImpl(final @Reference ManagedRuleProvider managedRuleProvider,
+            final @Reference ModuleTypeRegistry moduleTypeRegistry,
+            final @Reference TemplateRegistry<RuleTemplate> templateRegistry,
+            final @Reference ReadyService readyService) {
+        super(RuleProvider.class, managedRuleProvider, readyService);
+
+        this.moduleTypeRegistry = moduleTypeRegistry;
+        this.templateRegistry = (RuleTemplateRegistry) templateRegistry;
+
+        templateRegistry.addRegistryChangeListener(this);
     }
 
     /**
@@ -141,6 +150,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     @Override
     @Deactivate
     protected void deactivate() {
+        templateRegistry.removeRegistryChangeListener(this);
         super.deactivate();
     }
 
@@ -153,70 +163,6 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     @Override
     protected void unsetEventPublisher(EventPublisher eventPublisher) {
         super.unsetEventPublisher(eventPublisher);
-    }
-
-    @Override
-    @Reference
-    protected void setReadyService(ReadyService readyService) {
-        super.setReadyService(readyService);
-    }
-
-    @Override
-    protected void unsetReadyService(ReadyService readyService) {
-        super.unsetReadyService(readyService);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, name = "ManagedRuleProvider")
-    protected void setManagedProvider(ManagedRuleProvider managedProvider) {
-        super.setManagedProvider(managedProvider);
-    }
-
-    protected void unsetManagedProvider(ManagedRuleProvider managedProvider) {
-        super.unsetManagedProvider(managedProvider);
-    }
-
-    /**
-     * Bind the {@link ModuleTypeRegistry} service - called from DS.
-     *
-     * @param moduleTypeRegistry a {@link ModuleTypeRegistry} service.
-     */
-    @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC)
-    protected void setModuleTypeRegistry(ModuleTypeRegistry moduleTypeRegistry) {
-        this.moduleTypeRegistry = moduleTypeRegistry;
-    }
-
-    /**
-     * Unbind the {@link ModuleTypeRegistry} service - called from DS.
-     *
-     * @param moduleTypeRegistry a {@link ModuleTypeRegistry} service.
-     */
-    protected void unsetModuleTypeRegistry(ModuleTypeRegistry moduleTypeRegistry) {
-        this.moduleTypeRegistry = null;
-    }
-
-    /**
-     * Bind the {@link RuleTemplateRegistry} service - called from DS.
-     *
-     * @param templateRegistry a {@link RuleTemplateRegistry} service.
-     */
-    @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC)
-    protected void setTemplateRegistry(TemplateRegistry<RuleTemplate> templateRegistry) {
-        if (templateRegistry instanceof RuleTemplateRegistry registry) {
-            this.templateRegistry = registry;
-            templateRegistry.addRegistryChangeListener(this);
-        }
-    }
-
-    /**
-     * Unbind the {@link RuleTemplateRegistry} service - called from DS.
-     *
-     * @param templateRegistry a {@link RuleTemplateRegistry} service.
-     */
-    protected void unsetTemplateRegistry(TemplateRegistry<RuleTemplate> templateRegistry) {
-        if (templateRegistry instanceof RuleTemplateRegistry) {
-            this.templateRegistry = null;
-            templateRegistry.removeRegistryChangeListener(this);
-        }
     }
 
     /**

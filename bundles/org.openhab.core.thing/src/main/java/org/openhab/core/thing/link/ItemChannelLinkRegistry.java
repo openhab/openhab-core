@@ -54,8 +54,9 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
 
     @Activate
     public ItemChannelLinkRegistry(final @Reference ThingRegistry thingRegistry,
-            final @Reference ItemRegistry itemRegistry) {
-        super(ItemChannelLinkProvider.class);
+            final @Reference ItemRegistry itemRegistry,
+            final @Reference ManagedItemChannelLinkProvider managedItemChannelLinkProvider) {
+        super(ItemChannelLinkProvider.class, managedItemChannelLinkProvider);
         this.thingRegistry = thingRegistry;
         this.itemRegistry = itemRegistry;
     }
@@ -97,15 +98,6 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         return ((Stream<Thing>) getBoundChannels(itemName).stream()
                 .map(channelUID -> thingRegistry.get(channelUID.getThingUID())).filter(Objects::nonNull))
                 .collect(Collectors.toSet());
-    }
-
-    @Reference
-    protected void setManagedProvider(final ManagedItemChannelLinkProvider provider) {
-        super.setManagedProvider(provider);
-    }
-
-    protected void unsetManagedProvider(final ManagedItemChannelLinkProvider provider) {
-        super.unsetManagedProvider(provider);
     }
 
     @Override

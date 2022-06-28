@@ -22,7 +22,6 @@ import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.internal.module.handler.TimeOfDayTriggerHandler;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.openhab.core.test.storage.VolatileStorageService;
 
 /**
  * this tests the timeOfDay trigger
@@ -32,12 +31,11 @@ import org.openhab.core.test.storage.VolatileStorageService;
 @NonNullByDefault
 public class TimeOfDayTriggerHandlerTest extends JavaOSGiTest {
 
-    private VolatileStorageService volatileStorageService = new VolatileStorageService();
     private @NonNullByDefault({}) RuleRegistry ruleRegistry;
 
     @BeforeEach
     public void before() {
-        registerService(volatileStorageService);
+        registerVolatileStorageService();
         waitForAssert(() -> {
             ruleRegistry = getService(RuleRegistry.class);
             assertThat(ruleRegistry, is(notNullValue()));

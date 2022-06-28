@@ -45,6 +45,7 @@ public abstract class VoiceConsoleCommandExtensionTest extends JavaOSGiTest {
     @BeforeEach
     public void setup() {
         registerVolatileStorageService();
+
         voiceManager = getService(VoiceManager.class, VoiceManagerImpl.class);
         assertNotNull(voiceManager);
         audioManager = getService(AudioManager.class, AudioManager.class);

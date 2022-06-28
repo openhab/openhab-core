@@ -52,9 +52,9 @@ public class MetadataStateDescriptionFragmentProviderTest {
     private @Mock @NonNullByDefault({}) ServiceReference managedProviderRefMock;
     private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
     private @Mock @NonNullByDefault({}) ManagedMetadataProvider managedProviderMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
 
     private @Mock @NonNullByDefault({}) MetadataRegistryImpl metadataRegistryMock;
-    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
 
     private @NonNullByDefault({}) MetadataStateDescriptionFragmentProvider stateDescriptionFragmentProvider;
 
@@ -65,8 +65,7 @@ public class MetadataStateDescriptionFragmentProviderTest {
     public void setup() throws Exception {
         when(bundleContextMock.getService(same(managedProviderRefMock))).thenReturn(managedProviderMock);
 
-        metadataRegistryMock = new MetadataRegistryImpl(readyServiceMock);
-        metadataRegistryMock.setManagedProvider(managedProviderMock);
+        metadataRegistryMock = new MetadataRegistryImpl(managedProviderMock, readyServiceMock);
         metadataRegistryMock.activate(bundleContextMock);
         metadataRegistryMock.waitForCompletedAsyncActivationTasks();
 

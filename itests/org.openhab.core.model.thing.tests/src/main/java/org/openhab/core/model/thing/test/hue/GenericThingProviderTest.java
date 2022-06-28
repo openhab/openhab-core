@@ -58,6 +58,8 @@ public class GenericThingProviderTest extends JavaOSGiTest {
 
     @BeforeEach
     public void setUp() {
+        registerVolatileStorageService();
+
         thingRegistry = getService(ThingRegistry.class);
         assertThat(thingRegistry, is(notNullValue()));
         modelRepository = getService(ModelRepository.class);

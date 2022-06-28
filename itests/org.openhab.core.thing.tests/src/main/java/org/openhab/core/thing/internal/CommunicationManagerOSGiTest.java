@@ -69,6 +69,7 @@ import org.openhab.core.thing.internal.profiles.SystemProfileFactory;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkProvider;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 import org.openhab.core.thing.profiles.ProfileAdvisor;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
@@ -95,7 +96,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     private class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
         public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry) {
-            super(thingRegistry, itemRegistry);
+            super(thingRegistry, itemRegistry, mock(ManagedItemChannelLinkProvider.class));
         }
 
         @Override

@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.ui.components.UIComponentProvider;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
@@ -69,15 +70,17 @@ public class UIComponentRegistryFactoryImpl implements UIComponentRegistryFactor
     public UIComponentRegistryImpl getRegistry(String namespace) {
         UIComponentRegistryImpl registry = registries.get(namespace);
         if (registry == null) {
-            if (!managedProviderAvailable(namespace)) {
+            ManagedUIComponentProvider managedUIComponentProvider = managedProviderAvailable(namespace);
+            if (managedUIComponentProvider == null) {
                 logger.debug("Creating managed provider for '{}'", namespace);
                 Dictionary<String, Object> properties = new Hashtable<>();
                 properties.put(UIComponentProvider.CONFIG_NAMESPACE, namespace);
                 ComponentInstance<ManagedUIComponentProvider> instance = this.providerFactory.newInstance(properties);
                 createdProviders.add(instance);
+                managedUIComponentProvider = instance.getInstance();
             }
             Set<UIComponentProvider> namespaceProviders = this.providers.get(namespace);
-            registry = new UIComponentRegistryImpl(namespace, namespaceProviders);
+            registry = new UIComponentRegistryImpl(namespace, namespaceProviders, managedUIComponentProvider);
             registries.put(namespace, registry);
         }
         return registry;
@@ -88,12 +91,14 @@ public class UIComponentRegistryFactoryImpl implements UIComponentRegistryFactor
         createdProviders.forEach(ComponentInstance::dispose);
     }
 
-    private boolean managedProviderAvailable(String namespace) {
+    private @Nullable ManagedUIComponentProvider managedProviderAvailable(String namespace) {
         try {
-            return bc.getServiceReferences(UIComponentProvider.class, null).stream().map(bc::getService)
-                    .anyMatch(s -> namespace.equals(s.getNamespace()) && s instanceof ManagedProvider<?, ?>);
+            return (ManagedUIComponentProvider) bc.getServiceReferences(UIComponentProvider.class, null).stream()
+                    .map(bc::getService)
+                    .filter(s -> namespace.equals(s.getNamespace()) && s instanceof ManagedProvider<?, ?>).findAny()
+                    .orElse(null);
         } catch (InvalidSyntaxException e) {
-            return false;
+            return null;
         }
     }
 
