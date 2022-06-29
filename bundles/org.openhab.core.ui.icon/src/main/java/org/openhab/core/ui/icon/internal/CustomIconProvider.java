@@ -14,6 +14,7 @@ package org.openhab.core.ui.icon.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -49,7 +50,7 @@ public class CustomIconProvider extends AbstractResourceIconProvider {
 
     private @Nullable Path getIconFile(String filename, String iconSetId) {
         Path folder = Path.of(OpenHAB.getConfigFolder(), "icons", iconSetId);
-        try (Stream<Path> stream = Files.walk(folder)) {
+        try (Stream<Path> stream = Files.walk(folder, FileVisitOption.FOLLOW_LINKS)) {
             return stream.filter(file -> !Files.isDirectory(file) && filename.equals(file.getFileName().toString()))
                     .findAny().orElse(null);
         } catch (IOException e) {
