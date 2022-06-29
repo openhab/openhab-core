@@ -13,6 +13,7 @@
 package org.openhab.core.transform;
 
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
@@ -68,7 +69,7 @@ public class FileTransformationConfigurationProvider extends AbstractWatchServic
 
         // read initial contents
         try {
-            Files.walk(transformationPath).filter(Files::isRegularFile)
+            Files.walk(transformationPath, FileVisitOption.FOLLOW_LINKS).filter(Files::isRegularFile)
                     .forEach(f -> processPath(StandardWatchEventKinds.ENTRY_CREATE, f));
         } catch (IOException e) {
             logger.warn("Could not list files in '{}', transformation configurations might be missing: {}",
