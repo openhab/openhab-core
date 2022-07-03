@@ -95,9 +95,9 @@ public class FeatureInstaller implements ConfigurationListener {
     public static final String PREFIX = "openhab-";
     public static final String PREFIX_PACKAGE = "package-";
 
-    public static final String[] EXTENSION_TYPES = new String[] { EXTENSION_TYPE_AUTOMATION, EXTENSION_TYPE_BINDING,
+    public static final List<String> EXTENSION_TYPES = List.of(EXTENSION_TYPE_AUTOMATION, EXTENSION_TYPE_BINDING,
             EXTENSION_TYPE_MISC, EXTENSION_TYPE_PERSISTENCE, EXTENSION_TYPE_TRANSFORMATION, EXTENSION_TYPE_UI,
-            EXTENSION_TYPE_VOICE };
+            EXTENSION_TYPE_VOICE);
 
     private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
