@@ -31,6 +31,9 @@ public interface SystemProfiles {
     ProfileTypeUID OFFSET = new ProfileTypeUID(SYSTEM_SCOPE, "offset");
     ProfileTypeUID HYSTERESIS = new ProfileTypeUID(SYSTEM_SCOPE, "hysteresis");
     ProfileTypeUID RANGE = new ProfileTypeUID(SYSTEM_SCOPE, "range");
+    ProfileTypeUID BUTTON_TOGGLE_SWITCH = new ProfileTypeUID(SYSTEM_SCOPE, "button-toggle-switch");
+    ProfileTypeUID BUTTON_TOGGLE_PLAYER = new ProfileTypeUID(SYSTEM_SCOPE, "button-toggle-player");
+    ProfileTypeUID BUTTON_TOGGLE_ROLLERSHUTTER = new ProfileTypeUID(SYSTEM_SCOPE, "button-toggle-rollershutter");
     ProfileTypeUID RAWBUTTON_ON_OFF_SWITCH = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-on-off-switch");
     ProfileTypeUID RAWBUTTON_TOGGLE_PLAYER = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-player");
     ProfileTypeUID RAWBUTTON_TOGGLE_ROLLERSHUTTER = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-rollershutter");
