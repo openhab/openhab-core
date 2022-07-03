@@ -14,9 +14,8 @@ package org.openhab.core.karaf.internal;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -45,7 +44,7 @@ public class KarafAddonService implements AddonService {
 
     private final Logger logger = LoggerFactory.getLogger(KarafAddonService.class);
 
-    private final List<AddonType> typeList = new ArrayList<>(FeatureInstaller.EXTENSION_TYPES.length);
+    private final List<AddonType> typeList = new ArrayList<>(FeatureInstaller.EXTENSION_TYPES.size());
 
     private final FeaturesService featuresService;
     private final FeatureInstaller featureInstaller;
@@ -82,27 +81,18 @@ public class KarafAddonService implements AddonService {
 
     @Override
     public List<Addon> getAddons(Locale locale) {
-        List<Addon> addons = new LinkedList<>();
         try {
-            for (Feature feature : featuresService.listFeatures()) {
-                if (feature.getName().startsWith(FeatureInstaller.PREFIX)
-                        && List.of(FeatureInstaller.EXTENSION_TYPES).contains(getType(feature.getName()))) {
-                    Addon addon = getAddon(feature);
-                    // for simple packaging, we filter out all openHAB 1 add-ons as they cannot be used through the UI
-                    if (!FeatureInstaller.SIMPLE_PACKAGE.equals(featureInstaller.getCurrentPackage())
-                            || !addon.getVersion().startsWith("1.")) {
-                        addons.add(addon);
-                    }
-                }
-            }
+            return Arrays.stream(featuresService.listFeatures()).filter(this::isAddon).map(this::getAddon)
+                    .sorted(Comparator.comparing(Addon::getLabel)).collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("Exception while retrieving features: {}", e.getMessage());
-            return Collections.emptyList();
+            return List.of();
         }
+    }
 
-        // let's sort the result alphabetically
-        addons.sort(Comparator.comparing(Addon::getLabel));
-        return addons;
+    private boolean isAddon(Feature feature) {
+        return feature.getName().startsWith(FeatureInstaller.PREFIX)
+                && FeatureInstaller.EXTENSION_TYPES.contains(getType(feature.getName()));
     }
 
     @Override
