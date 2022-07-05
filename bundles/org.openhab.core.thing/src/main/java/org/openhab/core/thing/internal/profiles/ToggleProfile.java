@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class ToggleProfile<T extends State & Command> implements TriggerProfile {
 
-    private static final String EVENT_PARAM = "event";
+    public static final String EVENT_PARAM = "event";
 
     private final Logger logger = LoggerFactory.getLogger(ToggleProfile.class);
     private ProfileTypeUID uid;
