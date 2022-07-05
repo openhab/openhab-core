@@ -33,22 +33,23 @@ import org.slf4j.LoggerFactory;
  * @author Patrick Fink - Initial contribution
  */
 @NonNullByDefault
-public class ToggleProfile<StateType extends State & Command> implements TriggerProfile {
+public class ToggleProfile<T extends State & Command> implements TriggerProfile {
+
+    private static final String EVENT_PARAM = "event";
 
     private final Logger logger = LoggerFactory.getLogger(ToggleProfile.class);
     private ProfileTypeUID uid;
     private ChannelType channelType;
-    private StateType initialState;
-    private StateType alternativeState;
+    private T initialState;
+    private T alternativeState;
     private final ProfileCallback callback;
-    private static final String EVENT_PARAM = "event";
 
     private final String triggerEvent;
 
     private @Nullable State previousState;
 
     public ToggleProfile(ProfileCallback callback, ProfileContext context, ProfileTypeUID uid, ChannelType channelType,
-            StateType initialState, StateType alternativeState, String defaultEvent) {
+            T initialState, T alternativeState, String defaultEvent) {
         this.uid = uid;
         this.channelType = channelType;
         this.initialState = initialState;
@@ -80,7 +81,7 @@ public class ToggleProfile<StateType extends State & Command> implements Trigger
     @Override
     public void onTriggerFromHandler(String event) {
         if (triggerEvent.equals(event)) {
-            StateType newState = initialState.equals(previousState) ? alternativeState : initialState;
+            T newState = initialState.equals(previousState) ? alternativeState : initialState;
             callback.sendCommand(newState);
             previousState = newState;
         }
