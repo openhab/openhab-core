@@ -30,6 +30,7 @@ public interface SystemProfiles {
     ProfileTypeUID FOLLOW = new ProfileTypeUID(SYSTEM_SCOPE, "follow");
     ProfileTypeUID OFFSET = new ProfileTypeUID(SYSTEM_SCOPE, "offset");
     ProfileTypeUID HYSTERESIS = new ProfileTypeUID(SYSTEM_SCOPE, "hysteresis");
+    ProfileTypeUID NON_UNDEF = new ProfileTypeUID(SYSTEM_SCOPE, "non-undef");
     ProfileTypeUID RANGE = new ProfileTypeUID(SYSTEM_SCOPE, "range");
     ProfileTypeUID RAWBUTTON_ON_OFF_SWITCH = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-on-off-switch");
     ProfileTypeUID RAWBUTTON_TOGGLE_PLAYER = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-player");
@@ -59,6 +60,16 @@ public interface SystemProfiles {
     ProfileType HYSTERESIS_TYPE = ProfileTypeBuilder.newState(HYSTERESIS, "Hysteresis") //
             .withSupportedItemTypesOfChannel(CoreItemFactory.DIMMER, CoreItemFactory.NUMBER) //
             .withSupportedItemTypes(CoreItemFactory.SWITCH) //
+            .build();
+
+    // We accept all item types that can receive ON/OFF. All channel types are accepted, even though some of them cannot
+    // pass UNDEF - the profile still behaves correctly and as expected.
+    ProfileType NON_UNDEF_TYPE = ProfileTypeBuilder.newState(NON_UNDEF, "Non-Undef/Undef to ON/OFF")
+            .withSupportedItemTypes(CoreItemFactory.COLOR, CoreItemFactory.DIMMER, CoreItemFactory.SWITCH)
+            .withSupportedItemTypesOfChannel(CoreItemFactory.CALL, CoreItemFactory.COLOR, CoreItemFactory.CONTACT,
+                    CoreItemFactory.DATETIME, CoreItemFactory.DIMMER, CoreItemFactory.IMAGE, CoreItemFactory.LOCATION,
+                    CoreItemFactory.NUMBER, CoreItemFactory.PLAYER, CoreItemFactory.ROLLERSHUTTER,
+                    CoreItemFactory.STRING, CoreItemFactory.SWITCH)
             .build();
 
     ProfileType RANGE_TYPE = ProfileTypeBuilder.newState(RANGE, "Range") //
