@@ -14,9 +14,9 @@ package org.openhab.core.thing.internal.profiles;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
+import org.openhab.core.thing.profiles.ProfileFactory;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.TriggerProfile;
 import org.openhab.core.thing.type.ChannelType;
@@ -26,15 +26,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This profile allows a channel of the "system:rawbutton" type to be bound to an item.
+ * This profile reads the triggered events and uses the item's current state
+ * to toggle it. Being configurable via the constructor, {@link ProfileFactory}
+ * can use it for various system channel types and item types.
  *
- * It reads the triggered events and uses the item's current state and toggles it once it detects that the
- * button was pressed.
- *
- * @author Simon Kaufmann - Initial contribution
+ * @author Patrick Fink - Initial contribution
  */
 @NonNullByDefault
-public class ToggleProfile<StateType extends Command & State> implements TriggerProfile {
+public class ToggleProfile<StateType extends State & Command> implements TriggerProfile {
 
     private final Logger logger = LoggerFactory.getLogger(ToggleProfile.class);
     private ProfileTypeUID uid;
@@ -62,8 +61,8 @@ public class ToggleProfile<StateType extends Command & State> implements Trigger
         } else {
             if (triggerEventParam != null) {
                 logger.warn(
-                        "'{}' is not a valid trigger event for Profile '{}'. Default trigger event SHORT_PRESSED is used instead.",
-                        triggerEventParam, this.getProfileTypeUID().getAsString());
+                        "'{}' is not a valid trigger event for Profile '{}'. Default trigger event '{}' is used instead.",
+                        triggerEventParam, this.getProfileTypeUID().getAsString(), defaultEvent);
             }
             triggerEvent = defaultEvent;
         }
@@ -89,6 +88,6 @@ public class ToggleProfile<StateType extends Command & State> implements Trigger
 
     @Override
     public void onStateUpdateFromItem(State state) {
-        previousState = state.as(OnOffType.class);
+        previousState = state.as(initialState.getClass());
     }
 }
