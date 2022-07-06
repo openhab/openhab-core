@@ -147,7 +147,6 @@ public class ToggleProfileTest {
 
         assertEquals(Level.WARN, logAppender.list.get(0).getLevel());
         verifyAction(profile, OnOffType.ON, OnOffType.OFF);
-
     }
 
     private void initializeContextMock(@Nullable String triggerEvent) {
@@ -181,7 +180,6 @@ public class ToggleProfileTest {
         profile.onStateUpdateFromItem(preCondition);
         profile.onTriggerFromHandler(triggerEvent);
         verify(callbackMock, times(1)).sendCommand(eq(expectation));
-
     }
 
     private void verifyAction(@Nullable TriggerProfile profile, State preCondition, Command expectation) {
