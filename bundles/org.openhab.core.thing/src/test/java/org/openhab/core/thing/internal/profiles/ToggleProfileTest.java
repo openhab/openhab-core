@@ -43,7 +43,6 @@ import org.openhab.core.thing.profiles.TriggerProfile;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
@@ -57,7 +56,6 @@ import ch.qos.logback.core.read.ListAppender;
 @ExtendWith(MockitoExtension.class)
 @NonNullByDefault
 public class ToggleProfileTest {
-    private final Logger logger = LoggerFactory.getLogger(ToggleProfileTest.class);
 
     private @Mock @NonNullByDefault({}) SystemProfileFactory systemProfileFactory;
     private @Mock @NonNullByDefault({}) ProfileCallback callbackMock;
