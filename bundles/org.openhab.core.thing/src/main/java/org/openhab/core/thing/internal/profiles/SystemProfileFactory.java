@@ -26,7 +26,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.LocalizedKey;
 import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PlayPauseType;
+import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.CommonTriggerEvents;
 import org.openhab.core.thing.DefaultSystemChannelTypeProvider;
 import org.openhab.core.thing.profiles.Profile;
 import org.openhab.core.thing.profiles.ProfileAdvisor;
@@ -103,14 +107,32 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return new SystemOffsetProfile(callback, context);
         } else if (RANGE.equals(profileTypeUID)) {
             return new SystemRangeStateProfile(callback, context);
+        } else if (BUTTON_TOGGLE_SWITCH.equals(profileTypeUID)) {
+            return new ToggleProfile<OnOffType>(callback, context, BUTTON_TOGGLE_SWITCH,
+                    DefaultSystemChannelTypeProvider.SYSTEM_BUTTON, OnOffType.ON, OnOffType.OFF,
+                    CommonTriggerEvents.SHORT_PRESSED);
+        } else if (BUTTON_TOGGLE_PLAYER.equals(profileTypeUID)) {
+            return new ToggleProfile<PlayPauseType>(callback, context, BUTTON_TOGGLE_PLAYER,
+                    DefaultSystemChannelTypeProvider.SYSTEM_BUTTON, PlayPauseType.PLAY, PlayPauseType.PAUSE,
+                    CommonTriggerEvents.SHORT_PRESSED);
+        } else if (BUTTON_TOGGLE_ROLLERSHUTTER.equals(profileTypeUID)) {
+            return new ToggleProfile<UpDownType>(callback, context, BUTTON_TOGGLE_ROLLERSHUTTER,
+                    DefaultSystemChannelTypeProvider.SYSTEM_BUTTON, UpDownType.UP, UpDownType.DOWN,
+                    CommonTriggerEvents.SHORT_PRESSED);
         } else if (RAWBUTTON_ON_OFF_SWITCH.equals(profileTypeUID)) {
             return new RawButtonOnOffSwitchProfile(callback);
         } else if (RAWBUTTON_TOGGLE_SWITCH.equals(profileTypeUID)) {
-            return new RawButtonToggleSwitchProfile(callback);
+            return new ToggleProfile<OnOffType>(callback, context, RAWBUTTON_TOGGLE_SWITCH,
+                    DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON, OnOffType.ON, OnOffType.OFF,
+                    CommonTriggerEvents.PRESSED);
         } else if (RAWBUTTON_TOGGLE_PLAYER.equals(profileTypeUID)) {
-            return new RawButtonTogglePlayerProfile(callback);
+            return new ToggleProfile<PlayPauseType>(callback, context, RAWBUTTON_TOGGLE_PLAYER,
+                    DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON, PlayPauseType.PLAY, PlayPauseType.PAUSE,
+                    CommonTriggerEvents.PRESSED);
         } else if (RAWBUTTON_TOGGLE_ROLLERSHUTTER.equals(profileTypeUID)) {
-            return new RawButtonToggleRollershutterProfile(callback);
+            return new ToggleProfile<UpDownType>(callback, context, RAWBUTTON_TOGGLE_ROLLERSHUTTER,
+                    DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON, UpDownType.UP, UpDownType.DOWN,
+                    CommonTriggerEvents.PRESSED);
         } else if (RAWROCKER_DIMMER.equals(profileTypeUID)) {
             return new RawRockerDimmerProfile(callback, context);
         } else if (RAWROCKER_NEXT_PREVIOUS.equals(profileTypeUID)) {
