@@ -12,7 +12,7 @@
  */
 package org.openhab.core.thing.internal.profiles;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.thing.profiles.SystemProfiles.*;
@@ -35,6 +35,7 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.PlayPauseType;
 import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.thing.CommonTriggerEvents;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
@@ -43,11 +44,6 @@ import org.openhab.core.thing.profiles.TriggerProfile;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 
 /**
  *
@@ -55,7 +51,7 @@ import ch.qos.logback.core.read.ListAppender;
  */
 @ExtendWith(MockitoExtension.class)
 @NonNullByDefault
-public class ToggleProfileTest {
+public class ToggleProfileTest extends JavaTest {
 
     private @Mock @NonNullByDefault({}) SystemProfileFactory systemProfileFactory;
     private @Mock @NonNullByDefault({}) ProfileCallback callbackMock;
@@ -127,23 +123,31 @@ public class ToggleProfileTest {
 
     @Test
     public void testCorrectUserConfiguredEvent() {
-        ListAppender<ILoggingEvent> logAppender = createLogAppender();
+        setupInterceptedLogger(ToggleProfile.class, LogLevel.WARN);
 
-        initializeContextMock("RELEASED");
+        initializeContextMock(CommonTriggerEvents.RELEASED);
         TriggerProfile profile = newToggleProfile(RAWBUTTON_TOGGLE_SWITCH);
-        assertEquals(0, logAppender.list.size());
-        verifyAction(profile, UnDefType.NULL, OnOffType.ON, "RELEASED");
-        verifyAction(profile, OnOffType.ON, OnOffType.OFF, "RELEASED");
-        verifyAction(profile, OnOffType.OFF, OnOffType.ON, "RELEASED");
+
+        stopInterceptedLogger(ToggleProfile.class);
+        assertNoLogMessage(ToggleProfile.class);
+
+        verifyAction(profile, UnDefType.NULL, OnOffType.ON, CommonTriggerEvents.RELEASED);
+        verifyAction(profile, OnOffType.ON, OnOffType.OFF, CommonTriggerEvents.RELEASED);
+        verifyAction(profile, OnOffType.OFF, OnOffType.ON, CommonTriggerEvents.RELEASED);
     }
 
     @Test
     public void testWrongUserConfiguredEvent() {
-        ListAppender<ILoggingEvent> logAppender = createLogAppender();
-        initializeContextMock("SHORT_PRESSED");
+        setupInterceptedLogger(ToggleProfile.class, LogLevel.WARN);
+        initializeContextMock(CommonTriggerEvents.SHORT_PRESSED);
         TriggerProfile profile = newToggleProfile(RAWBUTTON_TOGGLE_SWITCH);
 
-        assertEquals(Level.WARN, logAppender.list.get(0).getLevel());
+        stopInterceptedLogger(ToggleProfile.class);
+        assertLogMessage(ToggleProfile.class, LogLevel.WARN,
+                "'" + CommonTriggerEvents.SHORT_PRESSED + "' is not a valid trigger event for Profile '"
+                        + profile.getProfileTypeUID().getAsString() + "'. Default trigger event '"
+                        + CommonTriggerEvents.PRESSED + "' is used instead.");
+
         verifyAction(profile, OnOffType.ON, OnOffType.OFF);
     }
 
@@ -157,30 +161,22 @@ public class ToggleProfileTest {
         initializeContextMock(null);
     }
 
-    private ListAppender<ILoggingEvent> createLogAppender() {
-        ch.qos.logback.classic.Logger toggleProfileLogger = (ch.qos.logback.classic.Logger) LoggerFactory
-                .getLogger(ToggleProfile.class);
-        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-        listAppender.start();
-        toggleProfileLogger.addAppender(listAppender);
-
-        return listAppender;
-    }
-
-    private @Nullable TriggerProfile newToggleProfile(ProfileTypeUID profileUID) {
+    private TriggerProfile newToggleProfile(ProfileTypeUID profileUID) {
         when(systemProfileFactory.createProfile(profileUID, callbackMock, contextMock)).thenCallRealMethod();
-        return (TriggerProfile) systemProfileFactory.createProfile(profileUID, callbackMock, contextMock);
+        TriggerProfile profile = (TriggerProfile) systemProfileFactory.createProfile(profileUID, callbackMock,
+                contextMock);
+        assertNotNull(profile);
+        return profile;
     }
 
-    private void verifyAction(@Nullable TriggerProfile profile, State preCondition, Command expectation,
-            String triggerEvent) {
+    private void verifyAction(TriggerProfile profile, State preCondition, Command expectation, String triggerEvent) {
         reset(callbackMock);
         profile.onStateUpdateFromItem(preCondition);
         profile.onTriggerFromHandler(triggerEvent);
         verify(callbackMock, times(1)).sendCommand(eq(expectation));
     }
 
-    private void verifyAction(@Nullable TriggerProfile profile, State preCondition, Command expectation) {
+    private void verifyAction(TriggerProfile profile, State preCondition, Command expectation) {
         verifyAction(profile, preCondition, expectation,
                 profile.getProfileTypeUID().getAsString().contains("rawbutton") ? CommonTriggerEvents.PRESSED
                         : CommonTriggerEvents.SHORT_PRESSED);
