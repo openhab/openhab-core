@@ -55,7 +55,7 @@ public class FileTransformationConfigurationProviderTest {
     private static final String INITIAL_CONTENT = "initial";
     private static final String INITIAL_FILENAME = INITIAL_CONTENT + "." + FOO_TYPE;
     private static final TransformationConfiguration INITIAL_CONFIGURATION = new TransformationConfiguration(
-            INITIAL_FILENAME, INITIAL_FILENAME, FOO_TYPE, null, INITIAL_CONTENT);
+            INITIAL_FILENAME, INITIAL_FILENAME, FOO_TYPE, "{}", null, INITIAL_CONTENT);
     private static final String ADDED_CONTENT = "added";
     private static final String ADDED_FILENAME = ADDED_CONTENT + "." + FOO_TYPE;
 
@@ -96,7 +96,7 @@ public class FileTransformationConfigurationProviderTest {
 
         Files.write(path, ADDED_CONTENT.getBytes(StandardCharsets.UTF_8));
         TransformationConfiguration addedConfiguration = new TransformationConfiguration(ADDED_FILENAME, ADDED_FILENAME,
-                FOO_TYPE, null, ADDED_CONTENT);
+                FOO_TYPE, "{}", null, ADDED_CONTENT);
 
         provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
 
@@ -110,7 +110,7 @@ public class FileTransformationConfigurationProviderTest {
         Path path = targetPath.resolve(INITIAL_FILENAME);
         Files.write(path, "updated".getBytes(StandardCharsets.UTF_8));
         TransformationConfiguration updatedConfiguration = new TransformationConfiguration(INITIAL_FILENAME,
-                INITIAL_FILENAME, FOO_TYPE, null, "updated");
+                INITIAL_FILENAME, FOO_TYPE, "{}", null, "updated");
 
         provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_MODIFY, path);
 
@@ -136,7 +136,7 @@ public class FileTransformationConfigurationProviderTest {
 
         Files.write(path, INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
 
-        TransformationConfiguration expected = new TransformationConfiguration(fileName, fileName, FOO_TYPE, "de",
+        TransformationConfiguration expected = new TransformationConfiguration(fileName, fileName, FOO_TYPE, "{}", "de",
                 INITIAL_CONTENT);
 
         provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);

@@ -47,22 +47,22 @@ public class TransformationConfigurationRegistryImplTest {
     private static final String MANAGED_WITH_DE_LANGUAGE_UID = "config:" + SERVICE + ":managed:de";
 
     private static final TransformationConfiguration MANAGED_WITHOUT_LANGUAGE = new TransformationConfiguration(
-            MANAGED_WITHOUT_LANGUAGE_UID, "", SERVICE, null, MANAGED_WITHOUT_LANGUAGE_UID);
+            MANAGED_WITHOUT_LANGUAGE_UID, "", SERVICE, SERVICE, null, MANAGED_WITHOUT_LANGUAGE_UID);
     private static final TransformationConfiguration MANAGED_WITH_EN_LANGUAGE = new TransformationConfiguration(
-            MANAGED_WITH_EN_LANGUAGE_UID, "", SERVICE, "en", MANAGED_WITH_EN_LANGUAGE_UID);
+            MANAGED_WITH_EN_LANGUAGE_UID, "", SERVICE, SERVICE, "en", MANAGED_WITH_EN_LANGUAGE_UID);
     private static final TransformationConfiguration MANAGED_WITH_DE_LANGUAGE = new TransformationConfiguration(
-            MANAGED_WITH_DE_LANGUAGE_UID, "", SERVICE, "de", MANAGED_WITH_DE_LANGUAGE_UID);
+            MANAGED_WITH_DE_LANGUAGE_UID, "", SERVICE, SERVICE, "de", MANAGED_WITH_DE_LANGUAGE_UID);
 
     private static final String FILE_WITHOUT_LANGUAGE_UID = "foo/FILE." + SERVICE;
     private static final String FILE_WITH_EN_LANGUAGE_UID = "foo/FILE_en." + SERVICE;
     private static final String FILE_WITH_DE_LANGUAGE_UID = "foo/FILE_de." + SERVICE;
 
     private static final TransformationConfiguration FILE_WITHOUT_LANGUAGE = new TransformationConfiguration(
-            FILE_WITHOUT_LANGUAGE_UID, "", SERVICE, null, FILE_WITHOUT_LANGUAGE_UID);
+            FILE_WITHOUT_LANGUAGE_UID, "", SERVICE, SERVICE, null, FILE_WITHOUT_LANGUAGE_UID);
     private static final TransformationConfiguration FILE_WITH_EN_LANGUAGE = new TransformationConfiguration(
-            FILE_WITH_EN_LANGUAGE_UID, "", SERVICE, "en", FILE_WITH_EN_LANGUAGE_UID);
+            FILE_WITH_EN_LANGUAGE_UID, "", SERVICE, SERVICE, "en", FILE_WITH_EN_LANGUAGE_UID);
     private static final TransformationConfiguration FILE_WITH_DE_LANGUAGE = new TransformationConfiguration(
-            FILE_WITH_DE_LANGUAGE_UID, "", SERVICE, "de", FILE_WITH_DE_LANGUAGE_UID);
+            FILE_WITH_DE_LANGUAGE_UID, "", SERVICE, SERVICE, "de", FILE_WITH_DE_LANGUAGE_UID);
 
     private @Mock @NonNullByDefault({}) LocaleProvider localeProviderMock;
 

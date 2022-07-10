@@ -54,9 +54,10 @@ public class ScriptTransformationServiceTest {
     private static final String SCRIPT_OUTPUT = "output";
 
     private static final TransformationConfiguration TRANSFORMATION_CONFIGURATION = new TransformationConfiguration(
-            SCRIPT_UID, "label", ScriptTransformationService.SUPPORTED_CONFIGURATION_TYPE, null, SCRIPT);
+            SCRIPT_UID, "label", ScriptTransformationService.SUPPORTED_CONFIGURATION_TYPE,
+            ScriptTransformationService.SUPPORTED_CONFIGURATION_TYPE, null, SCRIPT);
     private static final TransformationConfiguration INVALID_TRANSFORMATION_CONFIGURATION = new TransformationConfiguration(
-            INVALID_SCRIPT_UID, "label", "invalid", null, SCRIPT);
+            INVALID_SCRIPT_UID, "label", "invalid", "invalid", null, SCRIPT);
 
     private @Mock @NonNullByDefault({}) TransformationConfigurationRegistry transformationConfigurationRegistry;
     private @Mock @NonNullByDefault({}) ScriptEngineManager scriptEngineManager;

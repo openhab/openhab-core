@@ -26,6 +26,7 @@ public class TransformationConfigurationDTO {
     public String uid;
     public String label;
     public String type;
+    public String context;
     public @Nullable String language;
     public String content;
     public boolean editable = false;
@@ -34,6 +35,7 @@ public class TransformationConfigurationDTO {
         this.uid = transformationConfiguration.getUID();
         this.label = transformationConfiguration.getLabel();
         this.type = transformationConfiguration.getType();
+        this.context = transformationConfiguration.getContext();
         this.content = transformationConfiguration.getContent();
         this.language = transformationConfiguration.getLanguage();
     }

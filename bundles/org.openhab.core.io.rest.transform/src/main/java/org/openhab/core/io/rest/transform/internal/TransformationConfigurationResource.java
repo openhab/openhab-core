@@ -115,7 +115,9 @@ public class TransformationConfigurationResource implements RESTResource {
         if (configuration == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        return Response.ok(configuration).build();
+        TransformationConfigurationDTO dto = new TransformationConfigurationDTO(configuration);
+        dto.editable = isEditable(uid);
+        return Response.ok(dto).build();
     }
 
     @PUT
@@ -146,7 +148,8 @@ public class TransformationConfigurationResource implements RESTResource {
         }
 
         TransformationConfiguration transformationConfiguration = new TransformationConfiguration(newConfiguration.uid,
-                newConfiguration.label, newConfiguration.type, newConfiguration.language, newConfiguration.content);
+                newConfiguration.label, newConfiguration.type, newConfiguration.context, newConfiguration.language,
+                newConfiguration.content);
         try {
             if (oldConfiguration != null) {
                 managedTransformationConfigurationProvider.update(transformationConfiguration);

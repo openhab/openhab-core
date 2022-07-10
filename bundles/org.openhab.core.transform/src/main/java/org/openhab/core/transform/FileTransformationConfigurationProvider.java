@@ -135,7 +135,7 @@ public class FileTransformationConfigurationProvider extends AbstractWatchServic
                 String content = new String(Files.readAllBytes(path));
                 String uid = transformationPath.relativize(path).toString();
 
-                TransformationConfiguration newElement = new TransformationConfiguration(uid, uid, fileExtension,
+                TransformationConfiguration newElement = new TransformationConfiguration(uid, uid, fileExtension, "{}",
                         m.group("language"), content);
                 TransformationConfiguration oldElement = transformationConfigurations.put(path, newElement);
                 if (oldElement == null) {

@@ -56,7 +56,8 @@ public class ManagedTransformationConfigurationProvider
     protected @Nullable TransformationConfiguration toElement(String key,
             PersistedTransformationConfiguration persistableElement) {
         return new TransformationConfiguration(persistableElement.uid, persistableElement.label,
-                persistableElement.type, persistableElement.language, persistableElement.content);
+                persistableElement.type, persistableElement.context, persistableElement.language,
+                persistableElement.content);
     }
 
     @Override
@@ -96,6 +97,7 @@ public class ManagedTransformationConfigurationProvider
         public @NonNullByDefault({}) String uid;
         public @NonNullByDefault({}) String label;
         public @NonNullByDefault({}) String type;
+        public @NonNullByDefault({}) String context;
         public @Nullable String language;
         public @NonNullByDefault({}) String content;
 
@@ -107,6 +109,7 @@ public class ManagedTransformationConfigurationProvider
             this.uid = configuration.getUID();
             this.label = configuration.getLabel();
             this.type = configuration.getType();
+            this.context = configuration.getContext();
             this.language = configuration.getLanguage();
             this.content = configuration.getContent();
         }
