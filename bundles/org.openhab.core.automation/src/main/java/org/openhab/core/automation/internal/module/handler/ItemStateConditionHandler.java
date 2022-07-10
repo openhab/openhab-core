@@ -12,19 +12,30 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFilter;
+import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.events.ItemAddedEvent;
+import org.openhab.core.items.events.ItemRemovedEvent;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - refactored and simplified customized module handling
  */
 @NonNullByDefault
-public class ItemStateConditionHandler extends BaseConditionModuleHandler {
+public class ItemStateConditionHandler extends BaseConditionModuleHandler implements EventSubscriber, EventFilter {
 
     /**
      * Constants for Config-Parameters corresponding to Definition in ItemModuleTypeDefinition.json
@@ -49,15 +60,61 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler {
     public static final String ITEM_STATE_CONDITION = "core.ItemStateCondition";
 
     private final ItemRegistry itemRegistry;
+    private final String ruleUID;
+    private final String itemName;
+    private final BundleContext bundleContext;
+    private final Set<String> types;
+    private final ServiceRegistration<?> eventSubscriberRegistration;
 
-    public ItemStateConditionHandler(Condition condition, ItemRegistry itemRegistry) {
+    public ItemStateConditionHandler(Condition condition, String ruleUID, BundleContext bundleContext,
+            ItemRegistry itemRegistry) {
         super(condition);
         this.itemRegistry = itemRegistry;
+        this.bundleContext = bundleContext;
+        this.itemName = (String) module.getConfiguration().get(ITEM_NAME);
+        this.types = Set.of(ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
+        this.ruleUID = ruleUID;
+
+        Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put("event.topics", "openhab/items/" + itemName + "/*");
+        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
+                properties);
+
+        if (itemRegistry.get(itemName) == null) {
+            logger.warn("Item '{}' needed for rule '{}' is missing. Condition '{}' will not work.", itemName, ruleUID,
+                    module.getId());
+        }
+    }
+
+    @Override
+    public Set<String> getSubscribedEventTypes() {
+        return types;
+    }
+
+    @Override
+    public @Nullable EventFilter getEventFilter() {
+        return this;
+    }
+
+    @Override
+    public void receive(Event event) {
+        if (event instanceof ItemAddedEvent) {
+            if (itemName.equals(((ItemAddedEvent) event).getItem().name)) {
+                logger.info("Item '{}' needed for rule '{}' added. Condition '{}' will now work.", itemName, ruleUID,
+                        module.getId());
+                return;
+            }
+        } else if (event instanceof ItemRemovedEvent) {
+            if (itemName.equals(((ItemRemovedEvent) event).getItem().name)) {
+                logger.warn("Item '{}' needed for rule '{}' removed. Condition '{}' will no longer work.", itemName,
+                        ruleUID, module.getId());
+                return;
+            }
+        }
     }
 
     @Override
     public boolean isSatisfied(Map<String, Object> inputs) {
-        String itemName = (String) module.getConfiguration().get(ITEM_NAME);
         String state = (String) module.getConfiguration().get(STATE);
         String operator = (String) module.getConfiguration().get(OPERATOR);
         if (operator == null || state == null || itemName == null) {
@@ -166,5 +223,17 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler {
             }
         }
         return itemState.equals(compareState);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        eventSubscriberRegistration.unregister();
+    }
+
+    @Override
+    public boolean apply(Event event) {
+        logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
+        return event.getTopic().contains("openhab/items/" + itemName + "/");
     }
 }

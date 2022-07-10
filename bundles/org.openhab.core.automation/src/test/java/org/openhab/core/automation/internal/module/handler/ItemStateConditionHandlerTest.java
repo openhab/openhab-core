@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,16 +29,23 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.util.ConditionBuilder;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.events.ItemAddedEvent;
+import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.items.events.ItemRemovedEvent;
 import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.types.State;
+import org.osgi.framework.BundleContext;
 
 /**
  * Basic unit tests for {@link ItemStateConditionHandler}.
@@ -47,7 +55,7 @@ import org.openhab.core.types.State;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
-public class ItemStateConditionHandlerTest {
+public class ItemStateConditionHandlerTest extends JavaTest {
 
     public static class ParameterSet {
         public final String comparisonState;
@@ -145,10 +153,12 @@ public class ItemStateConditionHandlerTest {
     private final NumberItem item = new NumberItem(ITEM_NAME);
 
     private @NonNullByDefault({}) @Mock ItemRegistry mockItemRegistry;
+    private @NonNullByDefault({}) @Mock BundleContext mockBundleContext;
 
     @BeforeEach
     public void setup() throws ItemNotFoundException {
         when(mockItemRegistry.getItem(ITEM_NAME)).thenReturn(item);
+        when(mockItemRegistry.get(ITEM_NAME)).thenReturn(item);
     }
 
     @ParameterizedTest
@@ -238,6 +248,41 @@ public class ItemStateConditionHandlerTest {
                 .withId("conditionId") //
                 .withTypeUID(ItemStateConditionHandler.ITEM_STATE_CONDITION) //
                 .withConfiguration(configuration);
-        return new ItemStateConditionHandler(builder.build(), mockItemRegistry);
+        return new ItemStateConditionHandler(builder.build(), "", mockBundleContext, mockItemRegistry);
+    }
+
+    @Test
+    public void itemMessagesAreLogged() {
+        Configuration configuration = new Configuration();
+        configuration.put(ItemStateConditionHandler.ITEM_NAME, ITEM_NAME);
+        configuration.put(ItemStateConditionHandler.OPERATOR, "=");
+        Condition condition = ConditionBuilder.create() //
+                .withId("conditionId") //
+                .withTypeUID(ItemStateConditionHandler.ITEM_STATE_CONDITION) //
+                .withConfiguration(configuration) //
+                .build();
+
+        setupInterceptedLogger(ItemStateConditionHandler.class, LogLevel.INFO);
+
+        // missing on creation
+        when(mockItemRegistry.get(ITEM_NAME)).thenReturn(null);
+        ItemStateConditionHandler handler = new ItemStateConditionHandler(condition, "foo", mockBundleContext,
+                mockItemRegistry);
+        assertLogMessage(ItemStateConditionHandler.class, LogLevel.WARN,
+                "Item 'myItem' needed for rule 'foo' is missing. Condition 'conditionId' will not work.");
+
+        // added later
+        ItemAddedEvent addedEvent = ItemEventFactory.createAddedEvent(new SwitchItem(ITEM_NAME));
+        assertTrue(handler.apply(addedEvent));
+        handler.receive(addedEvent);
+        assertLogMessage(ItemStateConditionHandler.class, LogLevel.INFO,
+                "Item 'myItem' needed for rule 'foo' added. Condition 'conditionId' will now work.");
+
+        // removed later
+        ItemRemovedEvent removedEvent = ItemEventFactory.createRemovedEvent(new SwitchItem(ITEM_NAME));
+        assertTrue(handler.apply(removedEvent));
+        handler.receive(removedEvent);
+        assertLogMessage(ItemStateConditionHandler.class, LogLevel.WARN,
+                "Item 'myItem' needed for rule 'foo' removed. Condition 'conditionId' will no longer work.");
     }
 }
