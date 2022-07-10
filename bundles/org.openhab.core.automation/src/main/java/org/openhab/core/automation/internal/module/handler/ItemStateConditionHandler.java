@@ -81,9 +81,8 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
                 properties);
 
         if (itemRegistry.get(itemName) == null) {
-            logger.warn(
-                    "Item '{}' needed for rule '{}', condition '{}' not present in registry. Condition will not work.",
-                    itemName, ruleUID, module.getId());
+            logger.warn("Item '{}' needed for rule '{}' is missing. Condition '{}' will not work.", itemName, ruleUID,
+                    module.getId());
         }
     }
 
@@ -101,14 +100,14 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
     public void receive(Event event) {
         if (event instanceof ItemAddedEvent) {
             if (itemName.equals(((ItemAddedEvent) event).getItem().name)) {
-                logger.info("Item '{}' needed for rule '{}', condition '{}' added. Condition will now work.", itemName,
-                        ruleUID, module.getId());
+                logger.info("Item '{}' needed for rule '{}' added. Condition '{}' will now work.", itemName, ruleUID,
+                        module.getId());
                 return;
             }
         } else if (event instanceof ItemRemovedEvent) {
             if (itemName.equals(((ItemRemovedEvent) event).getItem().name)) {
-                logger.warn("Item '{}' needed for rule '{}', condition '{}' removed. Condition will no longer work.",
-                        itemName, ruleUID, module.getId());
+                logger.warn("Item '{}' needed for rule '{}' removed. Condition '{}' will no longer work.", itemName,
+                        ruleUID, module.getId());
                 return;
             }
         }

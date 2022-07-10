@@ -78,8 +78,8 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);
         if (itemRegistry.get(itemName) == null) {
-            logger.warn("Item '{}' needed for rule '{}', trigger '{}' not present in registry. Trigger will not work.",
-                    itemName, ruleUID, module.getId());
+            logger.warn("Item '{}' needed for rule '{}' is missing. Trigger '{}' will not work.", itemName, ruleUID,
+                    module.getId());
         }
     }
 
@@ -97,14 +97,14 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
     public void receive(Event event) {
         if (event instanceof ItemAddedEvent) {
             if (itemName.equals(((ItemAddedEvent) event).getItem().name)) {
-                logger.info("Item '{}' needed for rule '{}', trigger '{}' added. Trigger will now work.", itemName,
-                        ruleUID, module.getId());
+                logger.info("Item '{}' needed for rule '{}' added. Trigger '{}' will now work.", itemName, ruleUID,
+                        module.getId());
                 return;
             }
         } else if (event instanceof ItemRemovedEvent) {
             if (itemName.equals(((ItemRemovedEvent) event).getItem().name)) {
-                logger.warn("Item '{}' needed for rule '{}', trigger '{}' removed. Trigger will no longer work.",
-                        itemName, ruleUID, module.getId());
+                logger.warn("Item '{}' needed for rule '{}' removed. Trigger '{}' will no longer work.", itemName,
+                        ruleUID, module.getId());
                 return;
             }
         }

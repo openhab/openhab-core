@@ -81,8 +81,8 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
                 properties);
 
         if (itemRegistry.get(groupName) == null) {
-            logger.warn("Group '{}' needed for rule '{}', trigger '{}' not present in registry. Trigger will not work.",
-                    groupName, ruleUID, module.getId());
+            logger.warn("Group '{}' needed for rule '{}' is missing. Trigger '{}' will not work.", groupName, ruleUID,
+                    module.getId());
         }
     }
 
@@ -100,14 +100,14 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
     public void receive(Event event) {
         if (event instanceof ItemAddedEvent) {
             if (groupName.equals(((ItemAddedEvent) event).getItem().name)) {
-                logger.info("Group '{}' needed for rule '{}', trigger '{}' added. Trigger will now work.", groupName,
-                        ruleUID, module.getId());
+                logger.info("Group '{}' needed for rule '{}' added. Trigger '{}' will now work.", groupName, ruleUID,
+                        module.getId());
                 return;
             }
         } else if (event instanceof ItemRemovedEvent) {
             if (groupName.equals(((ItemRemovedEvent) event).getItem().name)) {
-                logger.warn("Group '{}' needed for rule '{}', trigger '{}' removed. Trigger will no longer work.",
-                        groupName, ruleUID, module.getId());
+                logger.warn("Group '{}' needed for rule '{}' removed. Trigger '{}' will no longer work.", groupName,
+                        ruleUID, module.getId());
                 return;
             }
         }
