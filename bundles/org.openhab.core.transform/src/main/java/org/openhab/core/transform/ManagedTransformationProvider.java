@@ -12,6 +12,7 @@
  */
 package org.openhab.core.transform;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 
@@ -19,26 +20,25 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractManagedProvider;
 import org.openhab.core.storage.StorageService;
-import org.openhab.core.transform.ManagedTransformationConfigurationProvider.PersistedTransformationConfiguration;
+import org.openhab.core.transform.ManagedTransformationProvider.PersistedTransformation;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * The {@link ManagedTransformationConfigurationProvider} implements a {@link TransformationConfigurationProvider} for
- * managed configurations stored in a JSON database
+ * The {@link ManagedTransformationProvider} implements a {@link TransformationProvider} for
+ * managed transformations stored in a JSON database
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-@Component(service = { TransformationConfigurationProvider.class,
-        ManagedTransformationConfigurationProvider.class }, immediate = true)
-public class ManagedTransformationConfigurationProvider
-        extends AbstractManagedProvider<TransformationConfiguration, String, PersistedTransformationConfiguration>
-        implements TransformationConfigurationProvider {
+@Component(service = { TransformationProvider.class, ManagedTransformationProvider.class }, immediate = true)
+public class ManagedTransformationProvider
+        extends AbstractManagedProvider<TransformationConfiguration, String, PersistedTransformation>
+        implements TransformationProvider {
 
     @Activate
-    public ManagedTransformationConfigurationProvider(final @Reference StorageService storageService) {
+    public ManagedTransformationProvider(final @Reference StorageService storageService) {
         super(storageService);
     }
 
@@ -53,16 +53,14 @@ public class ManagedTransformationConfigurationProvider
     }
 
     @Override
-    protected @Nullable TransformationConfiguration toElement(String key,
-            PersistedTransformationConfiguration persistableElement) {
+    protected @Nullable TransformationConfiguration toElement(String key, PersistedTransformation persistableElement) {
         return new TransformationConfiguration(persistableElement.uid, persistableElement.label,
-                persistableElement.type, persistableElement.context, persistableElement.language,
-                persistableElement.content);
+                persistableElement.type, persistableElement.language, persistableElement.configuration);
     }
 
     @Override
-    protected PersistedTransformationConfiguration toPersistableElement(TransformationConfiguration element) {
-        return new PersistedTransformationConfiguration(element);
+    protected PersistedTransformation toPersistableElement(TransformationConfiguration element) {
+        return new PersistedTransformation(element);
     }
 
     @Override
@@ -78,7 +76,7 @@ public class ManagedTransformationConfigurationProvider
     }
 
     private static void checkConfiguration(TransformationConfiguration element) {
-        Matcher matcher = TransformationConfigurationRegistry.CONFIG_UID_PATTERN.matcher(element.getUID());
+        Matcher matcher = TransformationRegistry.CONFIG_UID_PATTERN.matcher(element.getUID());
         if (!matcher.matches()) {
             throw new IllegalArgumentException(
                     "The transformation configuration UID '" + element.getUID() + "' is invalid.");
@@ -93,25 +91,23 @@ public class ManagedTransformationConfigurationProvider
         }
     }
 
-    public static class PersistedTransformationConfiguration {
+    public static class PersistedTransformation {
         public @NonNullByDefault({}) String uid;
         public @NonNullByDefault({}) String label;
         public @NonNullByDefault({}) String type;
-        public @NonNullByDefault({}) String context;
         public @Nullable String language;
-        public @NonNullByDefault({}) String content;
+        public @NonNullByDefault({}) Map<String, String> configuration;
 
-        protected PersistedTransformationConfiguration() {
+        protected PersistedTransformation() {
             // default constructor for deserialization
         }
 
-        public PersistedTransformationConfiguration(TransformationConfiguration configuration) {
+        public PersistedTransformation(TransformationConfiguration configuration) {
             this.uid = configuration.getUID();
             this.label = configuration.getLabel();
             this.type = configuration.getType();
-            this.context = configuration.getContext();
             this.language = configuration.getLanguage();
-            this.content = configuration.getContent();
+            this.configuration = configuration.getConfiguration();
         }
     }
 }

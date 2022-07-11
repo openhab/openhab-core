@@ -24,10 +24,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.i18n.LocaleProvider;
-import org.openhab.core.transform.ManagedTransformationConfigurationProvider;
+import org.openhab.core.transform.ManagedTransformationProvider;
 import org.openhab.core.transform.TransformationConfiguration;
-import org.openhab.core.transform.TransformationConfigurationProvider;
-import org.openhab.core.transform.TransformationConfigurationRegistry;
+import org.openhab.core.transform.TransformationProvider;
+import org.openhab.core.transform.TransformationRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -35,23 +35,23 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
- * The {@link TransformationConfigurationRegistryImpl} implements the {@link TransformationConfigurationRegistry}
+ * The {@link TransformationRegistryImpl} implements the {@link TransformationRegistry}
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true)
-public class TransformationConfigurationRegistryImpl
-        extends AbstractRegistry<TransformationConfiguration, String, TransformationConfigurationProvider>
-        implements TransformationConfigurationRegistry {
+public class TransformationRegistryImpl
+        extends AbstractRegistry<TransformationConfiguration, String, TransformationProvider>
+        implements TransformationRegistry {
     private static final Pattern FILENAME_PATTERN = Pattern
             .compile("(?<filename>.+)(_(?<language>[a-z]{2}))?\\.(?<extension>[^.]*)$");
 
     private final LocaleProvider localeProvider;
 
     @Activate
-    public TransformationConfigurationRegistryImpl(@Reference LocaleProvider localeProvider) {
-        super(TransformationConfigurationProvider.class);
+    public TransformationRegistryImpl(@Reference LocaleProvider localeProvider) {
+        super(TransformationProvider.class);
 
         this.localeProvider = localeProvider;
     }
@@ -82,16 +82,16 @@ public class TransformationConfigurationRegistryImpl
     }
 
     @Override
-    public Collection<TransformationConfiguration> getConfigurations(Collection<String> types) {
+    public Collection<TransformationConfiguration> getTransformations(Collection<String> types) {
         return getAll().stream().filter(e -> types.contains(e.getType())).collect(Collectors.toList());
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setManagedProvider(ManagedTransformationConfigurationProvider provider) {
+    protected void setManagedProvider(ManagedTransformationProvider provider) {
         super.setManagedProvider(provider);
     }
 
-    protected void unsetManagedProvider(ManagedTransformationConfigurationProvider provider) {
+    protected void unsetManagedProvider(ManagedTransformationProvider provider) {
         super.unsetManagedProvider(provider);
     }
 

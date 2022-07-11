@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.openhab.core.transform.TransformationConfiguration.FUNCTION;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -42,27 +44,27 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.common.registry.ProviderChangeListener;
 
 /**
- * The {@link FileTransformationConfigurationProviderTest} includes tests for the
- * {@link FileTransformationConfigurationProvider}
+ * The {@link FileTransformationProviderTest} includes tests for the
+ * {@link FileTransformationProvider}
  *
  * @author Jan N. Klug - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
-public class FileTransformationConfigurationProviderTest {
+public class FileTransformationProviderTest {
     private static final String FOO_TYPE = "foo";
     private static final String INITIAL_CONTENT = "initial";
     private static final String INITIAL_FILENAME = INITIAL_CONTENT + "." + FOO_TYPE;
     private static final TransformationConfiguration INITIAL_CONFIGURATION = new TransformationConfiguration(
-            INITIAL_FILENAME, INITIAL_FILENAME, FOO_TYPE, "{}", null, INITIAL_CONTENT);
+            INITIAL_FILENAME, INITIAL_FILENAME, FOO_TYPE, null, Map.of(FUNCTION, INITIAL_CONTENT));
     private static final String ADDED_CONTENT = "added";
     private static final String ADDED_FILENAME = ADDED_CONTENT + "." + FOO_TYPE;
 
     private @Mock @NonNullByDefault({}) WatchEvent<String> watchEventMock;
     private @Mock @NonNullByDefault({}) ProviderChangeListener<@NonNull TransformationConfiguration> listenerMock;
 
-    private @NonNullByDefault({}) FileTransformationConfigurationProvider provider;
+    private @NonNullByDefault({}) FileTransformationProvider provider;
     private @NonNullByDefault({}) Path targetPath;
 
     @BeforeEach
@@ -72,7 +74,7 @@ public class FileTransformationConfigurationProviderTest {
         // set initial content
         Files.write(targetPath.resolve(INITIAL_FILENAME), INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
 
-        provider = new FileTransformationConfigurationProvider(targetPath);
+        provider = new FileTransformationProvider(targetPath);
         provider.addProviderChangeListener(listenerMock);
     }
 
@@ -96,7 +98,7 @@ public class FileTransformationConfigurationProviderTest {
 
         Files.write(path, ADDED_CONTENT.getBytes(StandardCharsets.UTF_8));
         TransformationConfiguration addedConfiguration = new TransformationConfiguration(ADDED_FILENAME, ADDED_FILENAME,
-                FOO_TYPE, "{}", null, ADDED_CONTENT);
+                FOO_TYPE, null, Map.of(FUNCTION, ADDED_CONTENT));
 
         provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
 
@@ -110,7 +112,7 @@ public class FileTransformationConfigurationProviderTest {
         Path path = targetPath.resolve(INITIAL_FILENAME);
         Files.write(path, "updated".getBytes(StandardCharsets.UTF_8));
         TransformationConfiguration updatedConfiguration = new TransformationConfiguration(INITIAL_FILENAME,
-                INITIAL_FILENAME, FOO_TYPE, "{}", null, "updated");
+                INITIAL_FILENAME, FOO_TYPE, null, Map.of(FUNCTION, "updated"));
 
         provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_MODIFY, path);
 
@@ -136,8 +138,8 @@ public class FileTransformationConfigurationProviderTest {
 
         Files.write(path, INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
 
-        TransformationConfiguration expected = new TransformationConfiguration(fileName, fileName, FOO_TYPE, "{}", "de",
-                INITIAL_CONTENT);
+        TransformationConfiguration expected = new TransformationConfiguration(fileName, fileName, FOO_TYPE, "de",
+                Map.of(FUNCTION, INITIAL_CONTENT));
 
         provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
         assertThat(provider.getAll(), hasItem(expected));

@@ -35,9 +35,9 @@ import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.io.rest.transform.TransformationConfigurationDTO;
-import org.openhab.core.transform.ManagedTransformationConfigurationProvider;
+import org.openhab.core.transform.ManagedTransformationProvider;
 import org.openhab.core.transform.TransformationConfiguration;
-import org.openhab.core.transform.TransformationConfigurationRegistry;
+import org.openhab.core.transform.TransformationRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -77,16 +77,15 @@ public class TransformationConfigurationResource implements RESTResource {
     public static final String PATH_TRANSFORMATIONS = "transformations";
 
     private final Logger logger = LoggerFactory.getLogger(TransformationConfigurationResource.class);
-    private final TransformationConfigurationRegistry transformationConfigurationRegistry;
-    private final ManagedTransformationConfigurationProvider managedTransformationConfigurationProvider;
+    private final TransformationRegistry transformationRegistry;
+    private final ManagedTransformationProvider managedTransformationProvider;
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
 
     @Activate
-    public TransformationConfigurationResource(
-            final @Reference TransformationConfigurationRegistry transformationConfigurationRegistry,
-            final @Reference ManagedTransformationConfigurationProvider managedTransformationConfigurationProvider) {
-        this.transformationConfigurationRegistry = transformationConfigurationRegistry;
-        this.managedTransformationConfigurationProvider = managedTransformationConfigurationProvider;
+    public TransformationConfigurationResource(final @Reference TransformationRegistry transformationRegistry,
+            final @Reference ManagedTransformationProvider managedTransformationProvider) {
+        this.transformationRegistry = transformationRegistry;
+        this.managedTransformationProvider = managedTransformationProvider;
     }
 
     @GET
@@ -96,7 +95,7 @@ public class TransformationConfigurationResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TransformationConfigurationDTO.class)))) })
     public Response getTransformationConfigurations() {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
-        Stream<TransformationConfigurationDTO> stream = transformationConfigurationRegistry.stream()
+        Stream<TransformationConfigurationDTO> stream = transformationRegistry.stream()
                 .map(TransformationConfigurationDTO::new).peek(c -> c.editable = isEditable(c.uid));
         return Response.ok(new Stream2JSONInputStream(stream)).build();
     }
@@ -111,7 +110,7 @@ public class TransformationConfigurationResource implements RESTResource {
             @PathParam("uid") @Parameter(description = "Configuration UID") String uid) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
 
-        TransformationConfiguration configuration = transformationConfigurationRegistry.get(uid);
+        TransformationConfiguration configuration = transformationRegistry.get(uid);
         if (configuration == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -133,7 +132,7 @@ public class TransformationConfigurationResource implements RESTResource {
             @Parameter(description = "configuration", required = true) @Nullable TransformationConfigurationDTO newConfiguration) {
         logger.debug("Received HTTP PUT request at '{}'", uriInfo.getPath());
 
-        TransformationConfiguration oldConfiguration = transformationConfigurationRegistry.get(uid);
+        TransformationConfiguration oldConfiguration = transformationRegistry.get(uid);
         if (oldConfiguration != null && !isEditable(uid)) {
             return Response.status(Response.Status.METHOD_NOT_ALLOWED).build();
         }
@@ -148,13 +147,13 @@ public class TransformationConfigurationResource implements RESTResource {
         }
 
         TransformationConfiguration transformationConfiguration = new TransformationConfiguration(newConfiguration.uid,
-                newConfiguration.label, newConfiguration.type, newConfiguration.context, newConfiguration.language,
-                newConfiguration.content);
+                newConfiguration.label, newConfiguration.type, newConfiguration.language,
+                newConfiguration.configuration);
         try {
             if (oldConfiguration != null) {
-                managedTransformationConfigurationProvider.update(transformationConfiguration);
+                managedTransformationProvider.update(transformationConfiguration);
             } else {
-                managedTransformationConfigurationProvider.add(transformationConfiguration);
+                managedTransformationProvider.add(transformationConfiguration);
             }
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(Objects.requireNonNullElse(e.getMessage(), ""))
@@ -175,7 +174,7 @@ public class TransformationConfigurationResource implements RESTResource {
             @PathParam("uid") @Parameter(description = "Configuration UID") String uid) {
         logger.debug("Received HTTP DELETE request at '{}'", uriInfo.getPath());
 
-        TransformationConfiguration oldConfiguration = transformationConfigurationRegistry.get(uid);
+        TransformationConfiguration oldConfiguration = transformationRegistry.get(uid);
         if (oldConfiguration == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -184,12 +183,12 @@ public class TransformationConfigurationResource implements RESTResource {
             return Response.status(Response.Status.METHOD_NOT_ALLOWED).build();
         }
 
-        managedTransformationConfigurationProvider.remove(uid);
+        managedTransformationProvider.remove(uid);
 
         return Response.ok().build();
     }
 
     private boolean isEditable(String uid) {
-        return managedTransformationConfigurationProvider.get(uid) != null;
+        return managedTransformationProvider.get(uid) != null;
     }
 }

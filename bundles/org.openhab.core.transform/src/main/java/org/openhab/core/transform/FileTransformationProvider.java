@@ -12,6 +12,8 @@
  */
 package org.openhab.core.transform;
 
+import static org.openhab.core.transform.TransformationConfiguration.FUNCTION;
+
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -35,15 +37,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link FileTransformationConfigurationProvider} implements a {@link TransformationConfigurationProvider} for
- * supporting configurations stored in configuration files
+ * The {@link FileTransformationProvider} implements a {@link TransformationProvider} for
+ * supporting transformations stored in configuration files
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-@Component(service = TransformationConfigurationProvider.class, immediate = true)
-public class FileTransformationConfigurationProvider extends AbstractWatchService
-        implements TransformationConfigurationProvider {
+@Component(service = TransformationProvider.class, immediate = true)
+public class FileTransformationProvider extends AbstractWatchService implements TransformationProvider {
     private static final WatchEvent.Kind<?>[] WATCH_EVENTS = { StandardWatchEventKinds.ENTRY_CREATE,
             StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY };
     private static final Set<String> IGNORED_EXTENSIONS = Set.of("txt");
@@ -52,18 +53,18 @@ public class FileTransformationConfigurationProvider extends AbstractWatchServic
     private static final Path TRANSFORMATION_PATH = Path.of(OpenHAB.getConfigFolder(),
             TransformationService.TRANSFORM_FOLDER_NAME);
 
-    private final Logger logger = LoggerFactory.getLogger(FileTransformationConfigurationProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(FileTransformationProvider.class);
 
     private final Set<ProviderChangeListener<TransformationConfiguration>> listeners = ConcurrentHashMap.newKeySet();
     private final Map<Path, TransformationConfiguration> transformationConfigurations = new ConcurrentHashMap<>();
     private final Path transformationPath;
 
-    public FileTransformationConfigurationProvider() {
+    public FileTransformationProvider() {
         this(TRANSFORMATION_PATH);
     }
 
     // constructor package private used for testing
-    FileTransformationConfigurationProvider(Path transformationPath) {
+    FileTransformationProvider(Path transformationPath) {
         super(transformationPath.toString());
         this.transformationPath = transformationPath;
 
@@ -135,8 +136,8 @@ public class FileTransformationConfigurationProvider extends AbstractWatchServic
                 String content = new String(Files.readAllBytes(path));
                 String uid = transformationPath.relativize(path).toString();
 
-                TransformationConfiguration newElement = new TransformationConfiguration(uid, uid, fileExtension, "{}",
-                        m.group("language"), content);
+                TransformationConfiguration newElement = new TransformationConfiguration(uid, uid, fileExtension,
+                        m.group("language"), Map.of(FUNCTION, content));
                 TransformationConfiguration oldElement = transformationConfigurations.put(path, newElement);
                 if (oldElement == null) {
                     logger.trace("Added new configuration from file '{}'", path);

@@ -30,8 +30,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.transform.TransformationConfiguration;
-import org.openhab.core.transform.TransformationConfigurationRegistry;
 import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationRegistry;
 import org.openhab.core.transform.TransformationService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -65,21 +65,20 @@ public class ScriptTransformationService
     private final Map<String, CompiledScript> compiledScripts = new HashMap<>();
     private final Map<String, String> scriptCache = new HashMap<>();
 
-    private final TransformationConfigurationRegistry transformationConfigurationRegistry;
+    private final TransformationRegistry transformationRegistry;
     private final ScriptEngineManager scriptEngineManager;
 
     @Activate
-    public ScriptTransformationService(
-            @Reference TransformationConfigurationRegistry transformationConfigurationRegistry,
+    public ScriptTransformationService(@Reference TransformationRegistry transformationRegistry,
             @Reference ScriptEngineManager scriptEngineManager) {
-        this.transformationConfigurationRegistry = transformationConfigurationRegistry;
+        this.transformationRegistry = transformationRegistry;
         this.scriptEngineManager = scriptEngineManager;
-        transformationConfigurationRegistry.addRegistryChangeListener(this);
+        transformationRegistry.addRegistryChangeListener(this);
     }
 
     @Deactivate
     public void deactivate() {
-        transformationConfigurationRegistry.removeRegistryChangeListener(this);
+        transformationRegistry.removeRegistryChangeListener(this);
 
         // cleanup script engines
         scriptEngineContainers.values().stream().map(ScriptEngineContainer::getScriptEngine)
@@ -98,8 +97,7 @@ public class ScriptTransformationService
 
         String script = scriptCache.get(scriptUid);
         if (script == null) {
-            TransformationConfiguration transformationConfiguration = transformationConfigurationRegistry
-                    .get(scriptUid);
+            TransformationConfiguration transformationConfiguration = transformationRegistry.get(scriptUid);
             if (transformationConfiguration != null) {
                 if (!SUPPORTED_CONFIGURATION_TYPE.equals(transformationConfiguration.getType())) {
                     throw new TransformationException("Configuration does not have correct type 'script' but '"

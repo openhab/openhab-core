@@ -1,0 +1,21 @@
+{
+  "config:map:2480cdc5d0:de": {
+    "class": "org.openhab.core.transform.ManagedTransformationConfigurationProvider$PersistedTransformationConfiguration",
+    "value": {
+      "uid": "config:map:2480cdc5d0:de",
+      "label": "MAP DE 2",
+      "type": "map",
+      "language": "de",
+      "content": "dcyxc"
+    }
+  },
+  "config:script:testTransCfg": {
+    "class": "org.openhab.core.transform.ManagedTransformationConfigurationProvider$PersistedTransformationConfiguration",
+    "value": {
+      "uid": "config:script:testTransCfg",
+      "label": "Test Transformation X",
+      "type": "script",
+      "content": "if (input \u003d\u003d \u0027test\u0027) {\n  console.log(\"Test!\")\n}"
+    }
+  }
+}
