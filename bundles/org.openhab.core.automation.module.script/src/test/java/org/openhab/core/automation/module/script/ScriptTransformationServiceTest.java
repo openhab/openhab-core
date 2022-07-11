@@ -34,7 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.openhab.core.transform.TransformationConfiguration;
+import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationRegistry;
 
@@ -54,11 +54,10 @@ public class ScriptTransformationServiceTest {
     private static final String SCRIPT = "script";
     private static final String SCRIPT_OUTPUT = "output";
 
-    private static final TransformationConfiguration TRANSFORMATION_CONFIGURATION = new TransformationConfiguration(
-            SCRIPT_UID, "label", ScriptTransformationService.SUPPORTED_CONFIGURATION_TYPE, null,
-            Map.of(TransformationConfiguration.FUNCTION, SCRIPT));
-    private static final TransformationConfiguration INVALID_TRANSFORMATION_CONFIGURATION = new TransformationConfiguration(
-            INVALID_SCRIPT_UID, "label", "invalid", null, Map.of(TransformationConfiguration.FUNCTION, SCRIPT));
+    private static final Transformation TRANSFORMATION_CONFIGURATION = new Transformation(SCRIPT_UID, "label",
+            ScriptTransformationService.SUPPORTED_CONFIGURATION_TYPE, null, Map.of(Transformation.FUNCTION, SCRIPT));
+    private static final Transformation INVALID_TRANSFORMATION_CONFIGURATION = new Transformation(INVALID_SCRIPT_UID,
+            "label", "invalid", null, Map.of(Transformation.FUNCTION, SCRIPT));
 
     private @Mock @NonNullByDefault({}) TransformationRegistry transformationRegistry;
     private @Mock @NonNullByDefault({}) ScriptEngineManager scriptEngineManager;

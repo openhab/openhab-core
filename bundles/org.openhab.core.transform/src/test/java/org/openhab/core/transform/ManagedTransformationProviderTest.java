@@ -15,7 +15,7 @@ package org.openhab.core.transform;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.openhab.core.transform.TransformationConfiguration.FUNCTION;
+import static org.openhab.core.transform.Transformation.FUNCTION;
 
 import java.util.Map;
 
@@ -43,7 +43,7 @@ import org.openhab.core.test.storage.VolatileStorageService;
 @NonNullByDefault
 public class ManagedTransformationProviderTest {
 
-    private @Mock @NonNullByDefault({}) ProviderChangeListener<@NonNull TransformationConfiguration> listenerMock;
+    private @Mock @NonNullByDefault({}) ProviderChangeListener<@NonNull Transformation> listenerMock;
 
     private @NonNullByDefault({}) ManagedTransformationProvider provider;
 
@@ -56,12 +56,12 @@ public class ManagedTransformationProviderTest {
 
     @Test
     public void testValidConfigurationsAreAdded() {
-        TransformationConfiguration withoutLanguage = new TransformationConfiguration("config:foo:identifier", "",
-                "foo", null, Map.of(FUNCTION, "content"));
+        Transformation withoutLanguage = new Transformation("config:foo:identifier", "", "foo", null,
+                Map.of(FUNCTION, "content"));
         provider.add(withoutLanguage);
 
-        TransformationConfiguration withLanguage = new TransformationConfiguration("config:foo:identifier:de", "",
-                "foo", "de", Map.of(FUNCTION, "content"));
+        Transformation withLanguage = new Transformation("config:foo:identifier:de", "", "foo", "de",
+                Map.of(FUNCTION, "content"));
         provider.add(withLanguage);
 
         Mockito.verify(listenerMock).added(provider, withoutLanguage);
@@ -70,10 +70,10 @@ public class ManagedTransformationProviderTest {
 
     @Test
     public void testValidConfigurationsIsUpdated() {
-        TransformationConfiguration configuration = new TransformationConfiguration("config:foo:identifier", "", "foo",
-                null, Map.of(FUNCTION, "content"));
-        TransformationConfiguration updatedConfiguration = new TransformationConfiguration("config:foo:identifier", "",
-                "foo", null, Map.of(FUNCTION, "updated"));
+        Transformation configuration = new Transformation("config:foo:identifier", "", "foo", null,
+                Map.of(FUNCTION, "content"));
+        Transformation updatedConfiguration = new Transformation("config:foo:identifier", "", "foo", null,
+                Map.of(FUNCTION, "updated"));
 
         provider.add(configuration);
         provider.update(updatedConfiguration);
@@ -84,45 +84,45 @@ public class ManagedTransformationProviderTest {
 
     @Test
     public void testUidFormatValidation() {
-        TransformationConfiguration inValidUid = new TransformationConfiguration("invalid:foo:identifier", "", "foo",
-                null, Map.of(FUNCTION, "content"));
+        Transformation inValidUid = new Transformation("invalid:foo:identifier", "", "foo", null,
+                Map.of(FUNCTION, "content"));
 
         assertThrows(IllegalArgumentException.class, () -> provider.add(inValidUid));
     }
 
     @Test
     public void testLanguageValidations() {
-        TransformationConfiguration languageMissingInUid = new TransformationConfiguration("config:foo:identifier", "",
-                "foo", "de", Map.of(FUNCTION, "content"));
+        Transformation languageMissingInUid = new Transformation("config:foo:identifier", "", "foo", "de",
+                Map.of(FUNCTION, "content"));
 
         assertThrows(IllegalArgumentException.class, () -> provider.add(languageMissingInUid));
 
-        TransformationConfiguration languageMissingInConfiguration = new TransformationConfiguration(
-                "config:foo:identifier:de", "", "foo", null, Map.of(FUNCTION, "content"));
+        Transformation languageMissingInConfiguration = new Transformation("config:foo:identifier:de", "", "foo", null,
+                Map.of(FUNCTION, "content"));
 
         assertThrows(IllegalArgumentException.class, () -> provider.add(languageMissingInConfiguration));
 
-        TransformationConfiguration languageNotMatching = new TransformationConfiguration("config:foo:identifier:en",
-                "", "foo", "de", Map.of(FUNCTION, "content"));
+        Transformation languageNotMatching = new Transformation("config:foo:identifier:en", "", "foo", "de",
+                Map.of(FUNCTION, "content"));
 
         assertThrows(IllegalArgumentException.class, () -> provider.add(languageNotMatching));
     }
 
     @Test
     public void testTypeValidation() {
-        TransformationConfiguration typeNotMatching = new TransformationConfiguration("config:foo:identifier", "",
-                "bar", null, Map.of(FUNCTION, "content"));
+        Transformation typeNotMatching = new Transformation("config:foo:identifier", "", "bar", null,
+                Map.of(FUNCTION, "content"));
 
         assertThrows(IllegalArgumentException.class, () -> provider.add(typeNotMatching));
     }
 
     @Test
     public void testSerializationDeserializationResultsInSameConfiguration() {
-        TransformationConfiguration configuration = new TransformationConfiguration("config:foo:identifier", "", "foo",
-                null, Map.of(FUNCTION, "content"));
+        Transformation configuration = new Transformation("config:foo:identifier", "", "foo", null,
+                Map.of(FUNCTION, "content"));
         provider.add(configuration);
 
-        TransformationConfiguration configuration1 = provider.get("config:foo:identifier");
+        Transformation configuration1 = provider.get("config:foo:identifier");
 
         assertThat(configuration, is(configuration1));
     }

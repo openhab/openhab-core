@@ -12,7 +12,7 @@
  */
 package org.openhab.core.transform;
 
-import static org.openhab.core.transform.TransformationConfiguration.FUNCTION;
+import static org.openhab.core.transform.Transformation.FUNCTION;
 
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
@@ -55,8 +55,8 @@ public class FileTransformationProvider extends AbstractWatchService implements 
 
     private final Logger logger = LoggerFactory.getLogger(FileTransformationProvider.class);
 
-    private final Set<ProviderChangeListener<TransformationConfiguration>> listeners = ConcurrentHashMap.newKeySet();
-    private final Map<Path, TransformationConfiguration> transformationConfigurations = new ConcurrentHashMap<>();
+    private final Set<ProviderChangeListener<Transformation>> listeners = ConcurrentHashMap.newKeySet();
+    private final Map<Path, Transformation> transformationConfigurations = new ConcurrentHashMap<>();
     private final Path transformationPath;
 
     public FileTransformationProvider() {
@@ -79,17 +79,17 @@ public class FileTransformationProvider extends AbstractWatchService implements 
     }
 
     @Override
-    public void addProviderChangeListener(ProviderChangeListener<TransformationConfiguration> listener) {
+    public void addProviderChangeListener(ProviderChangeListener<Transformation> listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void removeProviderChangeListener(ProviderChangeListener<TransformationConfiguration> listener) {
+    public void removeProviderChangeListener(ProviderChangeListener<Transformation> listener) {
         listeners.remove(listener);
     }
 
     @Override
-    public Collection<TransformationConfiguration> getAll() {
+    public Collection<Transformation> getAll() {
         return transformationConfigurations.values();
     }
 
@@ -110,7 +110,7 @@ public class FileTransformationProvider extends AbstractWatchService implements 
 
     private void processPath(WatchEvent.Kind<?> kind, Path path) {
         if (StandardWatchEventKinds.ENTRY_DELETE.equals(kind)) {
-            TransformationConfiguration oldElement = transformationConfigurations.remove(path);
+            Transformation oldElement = transformationConfigurations.remove(path);
             if (oldElement != null) {
                 logger.trace("Removed configuration from file '{}", path);
                 listeners.forEach(listener -> listener.removed(this, oldElement));
@@ -136,9 +136,9 @@ public class FileTransformationProvider extends AbstractWatchService implements 
                 String content = new String(Files.readAllBytes(path));
                 String uid = transformationPath.relativize(path).toString();
 
-                TransformationConfiguration newElement = new TransformationConfiguration(uid, uid, fileExtension,
-                        m.group("language"), Map.of(FUNCTION, content));
-                TransformationConfiguration oldElement = transformationConfigurations.put(path, newElement);
+                Transformation newElement = new Transformation(uid, uid, fileExtension, m.group("language"),
+                        Map.of(FUNCTION, content));
+                Transformation oldElement = transformationConfigurations.put(path, newElement);
                 if (oldElement == null) {
                     logger.trace("Added new configuration from file '{}'", path);
                     listeners.forEach(listener -> listener.added(this, newElement));

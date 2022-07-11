@@ -16,10 +16,10 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.transform.TransformationConfiguration;
+import org.openhab.core.transform.Transformation;
 
 /**
- * The {@link TransformationConfigurationDTO} wraps a {@link TransformationConfiguration}
+ * The {@link TransformationConfigurationDTO} wraps a {@link Transformation}
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -32,11 +32,11 @@ public class TransformationConfigurationDTO {
     public Map<String, String> configuration;
     public boolean editable = false;
 
-    public TransformationConfigurationDTO(TransformationConfiguration transformationConfiguration) {
-        this.uid = transformationConfiguration.getUID();
-        this.label = transformationConfiguration.getLabel();
-        this.type = transformationConfiguration.getType();
-        this.language = transformationConfiguration.getLanguage();
-        this.configuration = transformationConfiguration.getConfiguration();
+    public TransformationConfigurationDTO(Transformation transformation) {
+        this.uid = transformation.getUID();
+        this.label = transformation.getLabel();
+        this.type = transformation.getType();
+        this.language = transformation.getLanguage();
+        this.configuration = transformation.getConfiguration();
     }
 }

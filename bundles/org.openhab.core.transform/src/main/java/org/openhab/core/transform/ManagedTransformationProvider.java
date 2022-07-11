@@ -33,9 +33,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @NonNullByDefault
 @Component(service = { TransformationProvider.class, ManagedTransformationProvider.class }, immediate = true)
-public class ManagedTransformationProvider
-        extends AbstractManagedProvider<TransformationConfiguration, String, PersistedTransformation>
-        implements TransformationProvider {
+public class ManagedTransformationProvider extends
+        AbstractManagedProvider<Transformation, String, PersistedTransformation> implements TransformationProvider {
 
     @Activate
     public ManagedTransformationProvider(final @Reference StorageService storageService) {
@@ -44,7 +43,7 @@ public class ManagedTransformationProvider
 
     @Override
     protected String getStorageName() {
-        return TransformationConfiguration.class.getName();
+        return Transformation.class.getName();
     }
 
     @Override
@@ -53,29 +52,29 @@ public class ManagedTransformationProvider
     }
 
     @Override
-    protected @Nullable TransformationConfiguration toElement(String key, PersistedTransformation persistableElement) {
-        return new TransformationConfiguration(persistableElement.uid, persistableElement.label,
-                persistableElement.type, persistableElement.language, persistableElement.configuration);
+    protected @Nullable Transformation toElement(String key, PersistedTransformation persistableElement) {
+        return new Transformation(persistableElement.uid, persistableElement.label, persistableElement.type,
+                persistableElement.language, persistableElement.configuration);
     }
 
     @Override
-    protected PersistedTransformation toPersistableElement(TransformationConfiguration element) {
+    protected PersistedTransformation toPersistableElement(Transformation element) {
         return new PersistedTransformation(element);
     }
 
     @Override
-    public void add(TransformationConfiguration element) {
+    public void add(Transformation element) {
         checkConfiguration(element);
         super.add(element);
     }
 
     @Override
-    public @Nullable TransformationConfiguration update(TransformationConfiguration element) {
+    public @Nullable Transformation update(Transformation element) {
         checkConfiguration(element);
         return super.update(element);
     }
 
-    private static void checkConfiguration(TransformationConfiguration element) {
+    private static void checkConfiguration(Transformation element) {
         Matcher matcher = TransformationRegistry.CONFIG_UID_PATTERN.matcher(element.getUID());
         if (!matcher.matches()) {
             throw new IllegalArgumentException(
@@ -102,7 +101,7 @@ public class ManagedTransformationProvider
             // default constructor for deserialization
         }
 
-        public PersistedTransformation(TransformationConfiguration configuration) {
+        public PersistedTransformation(Transformation configuration) {
             this.uid = configuration.getUID();
             this.label = configuration.getLabel();
             this.type = configuration.getType();

@@ -36,7 +36,7 @@ import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.io.rest.transform.TransformationConfigurationDTO;
 import org.openhab.core.transform.ManagedTransformationProvider;
-import org.openhab.core.transform.TransformationConfiguration;
+import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -104,13 +104,13 @@ public class TransformationConfigurationResource implements RESTResource {
     @Path("configurations/{uid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getTransformationConfiguration", summary = "Get a single transformation configuration", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TransformationConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Transformation.class))),
             @ApiResponse(responseCode = "404", description = "Not found") })
     public Response getTransformationConfiguration(
             @PathParam("uid") @Parameter(description = "Configuration UID") String uid) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
 
-        TransformationConfiguration configuration = transformationRegistry.get(uid);
+        Transformation configuration = transformationRegistry.get(uid);
         if (configuration == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -132,7 +132,7 @@ public class TransformationConfigurationResource implements RESTResource {
             @Parameter(description = "configuration", required = true) @Nullable TransformationConfigurationDTO newConfiguration) {
         logger.debug("Received HTTP PUT request at '{}'", uriInfo.getPath());
 
-        TransformationConfiguration oldConfiguration = transformationRegistry.get(uid);
+        Transformation oldConfiguration = transformationRegistry.get(uid);
         if (oldConfiguration != null && !isEditable(uid)) {
             return Response.status(Response.Status.METHOD_NOT_ALLOWED).build();
         }
@@ -146,14 +146,13 @@ public class TransformationConfigurationResource implements RESTResource {
                     .build();
         }
 
-        TransformationConfiguration transformationConfiguration = new TransformationConfiguration(newConfiguration.uid,
-                newConfiguration.label, newConfiguration.type, newConfiguration.language,
-                newConfiguration.configuration);
+        Transformation transformation = new Transformation(newConfiguration.uid, newConfiguration.label,
+                newConfiguration.type, newConfiguration.language, newConfiguration.configuration);
         try {
             if (oldConfiguration != null) {
-                managedTransformationProvider.update(transformationConfiguration);
+                managedTransformationProvider.update(transformation);
             } else {
-                managedTransformationProvider.add(transformationConfiguration);
+                managedTransformationProvider.add(transformation);
             }
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(Objects.requireNonNullElse(e.getMessage(), ""))
@@ -174,7 +173,7 @@ public class TransformationConfigurationResource implements RESTResource {
             @PathParam("uid") @Parameter(description = "Configuration UID") String uid) {
         logger.debug("Received HTTP DELETE request at '{}'", uriInfo.getPath());
 
-        TransformationConfiguration oldConfiguration = transformationRegistry.get(uid);
+        Transformation oldConfiguration = transformationRegistry.get(uid);
         if (oldConfiguration == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }

@@ -21,6 +21,6 @@ import org.openhab.core.common.registry.Provider;
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public interface TransformationProvider extends Provider<TransformationConfiguration> {
+public interface TransformationProvider extends Provider<Transformation> {
 
 }

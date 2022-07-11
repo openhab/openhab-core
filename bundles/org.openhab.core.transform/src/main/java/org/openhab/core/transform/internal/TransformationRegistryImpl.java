@@ -25,7 +25,7 @@ import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.transform.ManagedTransformationProvider;
-import org.openhab.core.transform.TransformationConfiguration;
+import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationProvider;
 import org.openhab.core.transform.TransformationRegistry;
 import org.osgi.service.component.annotations.Activate;
@@ -41,8 +41,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  */
 @NonNullByDefault
 @Component(immediate = true)
-public class TransformationRegistryImpl
-        extends AbstractRegistry<TransformationConfiguration, String, TransformationProvider>
+public class TransformationRegistryImpl extends AbstractRegistry<Transformation, String, TransformationProvider>
         implements TransformationRegistry {
     private static final Pattern FILENAME_PATTERN = Pattern
             .compile("(?<filename>.+)(_(?<language>[a-z]{2}))?\\.(?<extension>[^.]*)$");
@@ -57,8 +56,8 @@ public class TransformationRegistryImpl
     }
 
     @Override
-    public @Nullable TransformationConfiguration get(String uid, @Nullable Locale locale) {
-        TransformationConfiguration configuration = null;
+    public @Nullable Transformation get(String uid, @Nullable Locale locale) {
+        Transformation configuration = null;
 
         String language = Objects.requireNonNullElse(locale, localeProvider.getLocale()).getLanguage();
         Matcher uidMatcher = CONFIG_UID_PATTERN.matcher(uid);
@@ -82,7 +81,7 @@ public class TransformationRegistryImpl
     }
 
     @Override
-    public Collection<TransformationConfiguration> getTransformations(Collection<String> types) {
+    public Collection<Transformation> getTransformations(Collection<String> types) {
         return getAll().stream().filter(e -> types.contains(e.getType())).collect(Collectors.toList());
     }
 
@@ -96,7 +95,7 @@ public class TransformationRegistryImpl
     }
 
     @Override
-    protected void addProvider(Provider<TransformationConfiguration> provider) {
+    protected void addProvider(Provider<Transformation> provider) {
         // overridden to make method available for testing
         super.addProvider(provider);
     }

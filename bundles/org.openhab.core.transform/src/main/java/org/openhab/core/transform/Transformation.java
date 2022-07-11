@@ -20,12 +20,12 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Identifiable;
 
 /**
- * The {@link TransformationConfiguration} encapsulates a transformation configuration
+ * The {@link Transformation} encapsulates a transformation configuration
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class TransformationConfiguration implements Identifiable<String> {
+public class Transformation implements Identifiable<String> {
     public static final String FUNCTION = "function";
 
     private final String uid;
@@ -42,7 +42,7 @@ public class TransformationConfiguration implements Identifiable<String> {
      * @param language the language of this configuration (<code>null</code> if not set)
      * @param configuration the configuration (containing e.g. the transformation function)
      */
-    public TransformationConfiguration(String uid, String label, String type, @Nullable String language,
+    public Transformation(String uid, String label, String type, @Nullable String language,
             Map<String, String> configuration) {
         this.uid = uid;
         this.label = label;
@@ -68,11 +68,6 @@ public class TransformationConfiguration implements Identifiable<String> {
         return language;
     }
 
-    @Deprecated
-    public String getContent() {
-        return Objects.requireNonNull(configuration.get(FUNCTION));
-    }
-
     public Map<String, String> getConfiguration() {
         return configuration;
     }
@@ -85,7 +80,7 @@ public class TransformationConfiguration implements Identifiable<String> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        TransformationConfiguration that = (TransformationConfiguration) o;
+        Transformation that = (Transformation) o;
         return uid.equals(that.uid) && label.equals(that.label) && type.equals(that.type)
                 && Objects.equals(language, that.language) && configuration.equals(that.configuration);
     }
