@@ -102,7 +102,7 @@ public class ScriptTransformationService implements TransformationService, Regis
                     throw new TransformationException("Configuration does not have correct type 'script' but '"
                             + transformation.getType() + "'.");
                 }
-                script = transformation.getContent();
+                script = transformation.getConfiguration().get(Transformation.FUNCTION);
             }
             if (script == null) {
                 throw new TransformationException("Could not get script for UID '" + scriptUid + "'.");

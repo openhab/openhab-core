@@ -89,7 +89,6 @@ public class TransformationResource implements RESTResource {
     }
 
     @GET
-    @Path("configurations")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getTransformations", summary = "Get a list of all transformations", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TransformationDTO.class)))) })
@@ -101,7 +100,7 @@ public class TransformationResource implements RESTResource {
     }
 
     @GET
-    @Path("configurations/{uid}")
+    @Path("{uid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getTransformation", summary = "Get a single transformation", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Transformation.class))),
@@ -119,7 +118,7 @@ public class TransformationResource implements RESTResource {
     }
 
     @PUT
-    @Path("configurations/{uid}")
+    @Path("{uid}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "putTransformation", summary = "Put a single transformation", responses = {
@@ -161,7 +160,7 @@ public class TransformationResource implements RESTResource {
     }
 
     @DELETE
-    @Path("configurations/{uid}")
+    @Path("{uid}")
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "deleteTransformation", summary = "Get a single transformation", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
