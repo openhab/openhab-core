@@ -19,12 +19,12 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.transform.Transformation;
 
 /**
- * The {@link TransformationConfigurationDTO} wraps a {@link Transformation}
+ * The {@link TransformationDTO} wraps a {@link Transformation}
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class TransformationConfigurationDTO {
+public class TransformationDTO {
     public String uid;
     public String label;
     public String type;
@@ -32,7 +32,7 @@ public class TransformationConfigurationDTO {
     public Map<String, String> configuration;
     public boolean editable = false;
 
-    public TransformationConfigurationDTO(Transformation transformation) {
+    public TransformationDTO(Transformation transformation) {
         this.uid = transformation.getUID();
         this.label = transformation.getLabel();
         this.type = transformation.getType();

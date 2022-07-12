@@ -34,7 +34,7 @@ import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
-import org.openhab.core.io.rest.transform.TransformationConfigurationDTO;
+import org.openhab.core.io.rest.transform.TransformationDTO;
 import org.openhab.core.transform.ManagedTransformationProvider;
 import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationRegistry;
@@ -59,30 +59,30 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * The {@link TransformationConfigurationResource} is a REST resource for handling transformation configurations
+ * The {@link TransformationResource} is a REST resource for handling transformations
  *
  * @author Jan N. Klug - Initial contribution
  */
 @Component(immediate = true)
 @JaxrsResource
-@JaxrsName(TransformationConfigurationResource.PATH_TRANSFORMATIONS)
+@JaxrsName(TransformationResource.PATH_TRANSFORMATIONS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path(TransformationConfigurationResource.PATH_TRANSFORMATIONS)
+@Path(TransformationResource.PATH_TRANSFORMATIONS)
 @RolesAllowed({ Role.ADMIN })
 @SecurityRequirement(name = "oauth2", scopes = { "admin" })
-@Tag(name = TransformationConfigurationResource.PATH_TRANSFORMATIONS)
+@Tag(name = TransformationResource.PATH_TRANSFORMATIONS)
 @NonNullByDefault
-public class TransformationConfigurationResource implements RESTResource {
+public class TransformationResource implements RESTResource {
     public static final String PATH_TRANSFORMATIONS = "transformations";
 
-    private final Logger logger = LoggerFactory.getLogger(TransformationConfigurationResource.class);
+    private final Logger logger = LoggerFactory.getLogger(TransformationResource.class);
     private final TransformationRegistry transformationRegistry;
     private final ManagedTransformationProvider managedTransformationProvider;
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
 
     @Activate
-    public TransformationConfigurationResource(final @Reference TransformationRegistry transformationRegistry,
+    public TransformationResource(final @Reference TransformationRegistry transformationRegistry,
             final @Reference ManagedTransformationProvider managedTransformationProvider) {
         this.transformationRegistry = transformationRegistry;
         this.managedTransformationProvider = managedTransformationProvider;
@@ -91,30 +91,29 @@ public class TransformationConfigurationResource implements RESTResource {
     @GET
     @Path("configurations")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getTransformationConfigurations", summary = "Get a list of all transformation configurations", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TransformationConfigurationDTO.class)))) })
-    public Response getTransformationConfigurations() {
+    @Operation(operationId = "getTransformations", summary = "Get a list of all transformations", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TransformationDTO.class)))) })
+    public Response getTransformations() {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
-        Stream<TransformationConfigurationDTO> stream = transformationRegistry.stream()
-                .map(TransformationConfigurationDTO::new).peek(c -> c.editable = isEditable(c.uid));
+        Stream<TransformationDTO> stream = transformationRegistry.stream().map(TransformationDTO::new)
+                .peek(c -> c.editable = isEditable(c.uid));
         return Response.ok(new Stream2JSONInputStream(stream)).build();
     }
 
     @GET
     @Path("configurations/{uid}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getTransformationConfiguration", summary = "Get a single transformation configuration", responses = {
+    @Operation(operationId = "getTransformation", summary = "Get a single transformation", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Transformation.class))),
             @ApiResponse(responseCode = "404", description = "Not found") })
-    public Response getTransformationConfiguration(
-            @PathParam("uid") @Parameter(description = "Configuration UID") String uid) {
+    public Response getTransformation(@PathParam("uid") @Parameter(description = "Transformation UID") String uid) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
 
-        Transformation configuration = transformationRegistry.get(uid);
-        if (configuration == null) {
+        Transformation transformation = transformationRegistry.get(uid);
+        if (transformation == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        TransformationConfigurationDTO dto = new TransformationConfigurationDTO(configuration);
+        TransformationDTO dto = new TransformationDTO(transformation);
         dto.editable = isEditable(uid);
         return Response.ok(dto).build();
     }
@@ -123,33 +122,32 @@ public class TransformationConfigurationResource implements RESTResource {
     @Path("configurations/{uid}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "putTransformationConfiguration", summary = "Get a single transformation configuration", responses = {
+    @Operation(operationId = "putTransformation", summary = "Put a single transformation", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Bad Request (content missing or invalid)"),
-            @ApiResponse(responseCode = "405", description = "Configuration not editable") })
-    public Response putTransformationConfiguration(
-            @PathParam("uid") @Parameter(description = "Configuration UID") String uid,
-            @Parameter(description = "configuration", required = true) @Nullable TransformationConfigurationDTO newConfiguration) {
+            @ApiResponse(responseCode = "405", description = "Transformation not editable") })
+    public Response putTransformation(@PathParam("uid") @Parameter(description = "Transformation UID") String uid,
+            @Parameter(description = "transformation", required = true) @Nullable TransformationDTO newTransformation) {
         logger.debug("Received HTTP PUT request at '{}'", uriInfo.getPath());
 
-        Transformation oldConfiguration = transformationRegistry.get(uid);
-        if (oldConfiguration != null && !isEditable(uid)) {
+        Transformation oldTransformation = transformationRegistry.get(uid);
+        if (oldTransformation != null && !isEditable(uid)) {
             return Response.status(Response.Status.METHOD_NOT_ALLOWED).build();
         }
 
-        if (newConfiguration == null) {
+        if (newTransformation == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Content missing.").build();
         }
 
-        if (!uid.equals(newConfiguration.uid)) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("UID of configuration and path not matching.")
+        if (!uid.equals(newTransformation.uid)) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("UID of transformation and path not matching.")
                     .build();
         }
 
-        Transformation transformation = new Transformation(newConfiguration.uid, newConfiguration.label,
-                newConfiguration.type, newConfiguration.language, newConfiguration.configuration);
+        Transformation transformation = new Transformation(newTransformation.uid, newTransformation.label,
+                newTransformation.type, newTransformation.language, newTransformation.configuration);
         try {
-            if (oldConfiguration != null) {
+            if (oldTransformation != null) {
                 managedTransformationProvider.update(transformation);
             } else {
                 managedTransformationProvider.add(transformation);
@@ -165,16 +163,15 @@ public class TransformationConfigurationResource implements RESTResource {
     @DELETE
     @Path("configurations/{uid}")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "deleteTransformationConfiguration", summary = "Get a single transformation configuration", responses = {
+    @Operation(operationId = "deleteTransformation", summary = "Get a single transformation", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "UID not found"),
-            @ApiResponse(responseCode = "405", description = "Configuration not editable") })
-    public Response deleteTransformationConfiguration(
-            @PathParam("uid") @Parameter(description = "Configuration UID") String uid) {
+            @ApiResponse(responseCode = "405", description = "Transformation not editable") })
+    public Response deleteTransformation(@PathParam("uid") @Parameter(description = "Transformation UID") String uid) {
         logger.debug("Received HTTP DELETE request at '{}'", uriInfo.getPath());
 
-        Transformation oldConfiguration = transformationRegistry.get(uid);
-        if (oldConfiguration == null) {
+        Transformation oldTransformation = transformationRegistry.get(uid);
+        if (oldTransformation == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
