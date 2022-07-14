@@ -189,7 +189,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
                     .filter(t -> showUnpublished || Arrays.asList(t.tags).contains(PUBLISHED_TAG))
                     .map(t -> convertTopicItemToAddon(t, users)).forEach(addons::add);
         } catch (Exception e) {
-            logger.error("Unable to retrieve marketplace add-ons", e);
+            logger.warn("Unable to retrieve marketplace add-ons: {}", e.getMessage());
         }
         return addons;
     }
@@ -199,7 +199,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         String fullId = ADDON_ID_PREFIX + id;
         // check if it is an installed add-on (cachedAddons also contains possibly incomplete results from the remote
         // side, we need to retrieve them from Discourse)
-        if (installedAddons.contains(id)) {
+        if (installedAddons.contains(fullId)) {
             return cachedAddons.stream().filter(e -> fullId.equals(e.getId())).findAny().orElse(null);
         }
 
