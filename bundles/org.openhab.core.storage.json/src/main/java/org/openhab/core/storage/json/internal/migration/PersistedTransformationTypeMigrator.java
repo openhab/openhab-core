@@ -41,6 +41,7 @@ public class PersistedTransformationTypeMigrator implements TypeMigrator {
 
         JsonObject configuration = new JsonObject();
         configuration.addProperty("function", newValue.remove("content").getAsString());
+        newValue.remove("language");
         newValue.add("configuration", configuration);
 
         return newValue;

@@ -56,11 +56,11 @@ public class ManagedTransformationProviderTest {
 
     @Test
     public void testValidConfigurationsAreAdded() {
-        Transformation withoutLanguage = new Transformation("config:foo:identifier", "", "foo", null,
+        Transformation withoutLanguage = new Transformation("config:foo:identifier", "", "foo",
                 Map.of(FUNCTION, "content"));
         provider.add(withoutLanguage);
 
-        Transformation withLanguage = new Transformation("config:foo:identifier:de", "", "foo", "de",
+        Transformation withLanguage = new Transformation("config:foo:identifier:de", "", "foo",
                 Map.of(FUNCTION, "content"));
         provider.add(withLanguage);
 
@@ -70,9 +70,9 @@ public class ManagedTransformationProviderTest {
 
     @Test
     public void testValidConfigurationsIsUpdated() {
-        Transformation configuration = new Transformation("config:foo:identifier", "", "foo", null,
+        Transformation configuration = new Transformation("config:foo:identifier", "", "foo",
                 Map.of(FUNCTION, "content"));
-        Transformation updatedConfiguration = new Transformation("config:foo:identifier", "", "foo", null,
+        Transformation updatedConfiguration = new Transformation("config:foo:identifier", "", "foo",
                 Map.of(FUNCTION, "updated"));
 
         provider.add(configuration);
@@ -84,33 +84,15 @@ public class ManagedTransformationProviderTest {
 
     @Test
     public void testUidFormatValidation() {
-        Transformation inValidUid = new Transformation("invalid:foo:identifier", "", "foo", null,
+        Transformation inValidUid = new Transformation("invalid:foo:identifier", "", "foo",
                 Map.of(FUNCTION, "content"));
 
         assertThrows(IllegalArgumentException.class, () -> provider.add(inValidUid));
     }
 
     @Test
-    public void testLanguageValidations() {
-        Transformation languageMissingInUid = new Transformation("config:foo:identifier", "", "foo", "de",
-                Map.of(FUNCTION, "content"));
-
-        assertThrows(IllegalArgumentException.class, () -> provider.add(languageMissingInUid));
-
-        Transformation languageMissingInConfiguration = new Transformation("config:foo:identifier:de", "", "foo", null,
-                Map.of(FUNCTION, "content"));
-
-        assertThrows(IllegalArgumentException.class, () -> provider.add(languageMissingInConfiguration));
-
-        Transformation languageNotMatching = new Transformation("config:foo:identifier:en", "", "foo", "de",
-                Map.of(FUNCTION, "content"));
-
-        assertThrows(IllegalArgumentException.class, () -> provider.add(languageNotMatching));
-    }
-
-    @Test
     public void testTypeValidation() {
-        Transformation typeNotMatching = new Transformation("config:foo:identifier", "", "bar", null,
+        Transformation typeNotMatching = new Transformation("config:foo:identifier", "", "bar",
                 Map.of(FUNCTION, "content"));
 
         assertThrows(IllegalArgumentException.class, () -> provider.add(typeNotMatching));
@@ -118,7 +100,7 @@ public class ManagedTransformationProviderTest {
 
     @Test
     public void testSerializationDeserializationResultsInSameConfiguration() {
-        Transformation configuration = new Transformation("config:foo:identifier", "", "foo", null,
+        Transformation configuration = new Transformation("config:foo:identifier", "", "foo",
                 Map.of(FUNCTION, "content"));
         provider.add(configuration);
 

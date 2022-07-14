@@ -31,23 +31,18 @@ public class Transformation implements Identifiable<String> {
     private final String uid;
     private final String label;
     private final String type;
-    private final @Nullable String language;
-
     private final Map<String, String> configuration;
 
     /**
      * @param uid the configuration UID. The format is config:&lt;type&gt;:&lt;name&gt;[:&lt;locale&gt;]. For backward
      *            compatibility also filenames are allowed.
      * @param type the type of the configuration (file extension for file-based providers)
-     * @param language the language of this configuration (<code>null</code> if not set)
      * @param configuration the configuration (containing e.g. the transformation function)
      */
-    public Transformation(String uid, String label, String type, @Nullable String language,
-            Map<String, String> configuration) {
+    public Transformation(String uid, String label, String type, Map<String, String> configuration) {
         this.uid = uid;
         this.label = label;
         this.type = type;
-        this.language = language;
         this.configuration = configuration;
     }
 
@@ -64,10 +59,6 @@ public class Transformation implements Identifiable<String> {
         return type;
     }
 
-    public @Nullable String getLanguage() {
-        return language;
-    }
-
     public Map<String, String> getConfiguration() {
         return configuration;
     }
@@ -82,17 +73,17 @@ public class Transformation implements Identifiable<String> {
         }
         Transformation that = (Transformation) o;
         return uid.equals(that.uid) && label.equals(that.label) && type.equals(that.type)
-                && Objects.equals(language, that.language) && configuration.equals(that.configuration);
+                && configuration.equals(that.configuration);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uid, label, type, language, configuration);
+        return Objects.hash(uid, label, type, configuration);
     }
 
     @Override
     public String toString() {
-        return "TransformationConfiguration{uid='" + uid + "', label='" + label + "', type='" + type + "', language='"
-                + language + "', configuration='" + configuration + "'}";
+        return "TransformationConfiguration{uid='" + uid + "', label='" + label + "', type='" + type
+                + "', configuration='" + configuration + "'}";
     }
 }

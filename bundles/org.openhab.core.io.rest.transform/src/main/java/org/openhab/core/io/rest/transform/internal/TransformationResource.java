@@ -144,7 +144,7 @@ public class TransformationResource implements RESTResource {
         }
 
         Transformation transformation = new Transformation(newTransformation.uid, newTransformation.label,
-                newTransformation.type, newTransformation.language, newTransformation.configuration);
+                newTransformation.type, newTransformation.configuration);
         try {
             if (oldTransformation != null) {
                 managedTransformationProvider.update(transformation);

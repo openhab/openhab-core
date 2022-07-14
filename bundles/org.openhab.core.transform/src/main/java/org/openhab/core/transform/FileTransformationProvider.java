@@ -136,8 +136,7 @@ public class FileTransformationProvider extends AbstractWatchService implements 
                 String content = new String(Files.readAllBytes(path));
                 String uid = transformationPath.relativize(path).toString();
 
-                Transformation newElement = new Transformation(uid, uid, fileExtension, m.group("language"),
-                        Map.of(FUNCTION, content));
+                Transformation newElement = new Transformation(uid, uid, fileExtension, Map.of(FUNCTION, content));
                 Transformation oldElement = transformationConfigurations.put(path, newElement);
                 if (oldElement == null) {
                     logger.trace("Added new configuration from file '{}'", path);

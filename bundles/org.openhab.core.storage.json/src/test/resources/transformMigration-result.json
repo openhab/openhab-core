@@ -5,7 +5,6 @@
       "uid": "config:map:2480cdc5d0:de",
       "label": "MAP DE 2",
       "type": "map",
-      "language": "de",
       "configuration": { "function": "dcyxc" }
     }
   },

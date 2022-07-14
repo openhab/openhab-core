@@ -15,7 +15,6 @@ package org.openhab.core.io.rest.transform;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.transform.Transformation;
 
 /**
@@ -28,7 +27,6 @@ public class TransformationDTO {
     public String uid;
     public String label;
     public String type;
-    public @Nullable String language;
     public Map<String, String> configuration;
     public boolean editable = false;
 
@@ -36,7 +34,6 @@ public class TransformationDTO {
         this.uid = transformation.getUID();
         this.label = transformation.getLabel();
         this.type = transformation.getType();
-        this.language = transformation.getLanguage();
         this.configuration = transformation.getConfiguration();
     }
 }

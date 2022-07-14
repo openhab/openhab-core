@@ -57,7 +57,7 @@ public class FileTransformationProviderTest {
     private static final String INITIAL_CONTENT = "initial";
     private static final String INITIAL_FILENAME = INITIAL_CONTENT + "." + FOO_TYPE;
     private static final Transformation INITIAL_CONFIGURATION = new Transformation(INITIAL_FILENAME, INITIAL_FILENAME,
-            FOO_TYPE, null, Map.of(FUNCTION, INITIAL_CONTENT));
+            FOO_TYPE, Map.of(FUNCTION, INITIAL_CONTENT));
     private static final String ADDED_CONTENT = "added";
     private static final String ADDED_FILENAME = ADDED_CONTENT + "." + FOO_TYPE;
 
@@ -97,7 +97,7 @@ public class FileTransformationProviderTest {
         Path path = targetPath.resolve(ADDED_FILENAME);
 
         Files.write(path, ADDED_CONTENT.getBytes(StandardCharsets.UTF_8));
-        Transformation addedConfiguration = new Transformation(ADDED_FILENAME, ADDED_FILENAME, FOO_TYPE, null,
+        Transformation addedConfiguration = new Transformation(ADDED_FILENAME, ADDED_FILENAME, FOO_TYPE,
                 Map.of(FUNCTION, ADDED_CONTENT));
 
         provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
@@ -111,7 +111,7 @@ public class FileTransformationProviderTest {
     public void testUpdatingConfigurationIsPropagated() throws IOException {
         Path path = targetPath.resolve(INITIAL_FILENAME);
         Files.write(path, "updated".getBytes(StandardCharsets.UTF_8));
-        Transformation updatedConfiguration = new Transformation(INITIAL_FILENAME, INITIAL_FILENAME, FOO_TYPE, null,
+        Transformation updatedConfiguration = new Transformation(INITIAL_FILENAME, INITIAL_FILENAME, FOO_TYPE,
                 Map.of(FUNCTION, "updated"));
 
         provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_MODIFY, path);
@@ -138,8 +138,7 @@ public class FileTransformationProviderTest {
 
         Files.write(path, INITIAL_CONTENT.getBytes(StandardCharsets.UTF_8));
 
-        Transformation expected = new Transformation(fileName, fileName, FOO_TYPE, "de",
-                Map.of(FUNCTION, INITIAL_CONTENT));
+        Transformation expected = new Transformation(fileName, fileName, FOO_TYPE, Map.of(FUNCTION, INITIAL_CONTENT));
 
         provider.processWatchEvent(watchEventMock, StandardWatchEventKinds.ENTRY_CREATE, path);
         assertThat(provider.getAll(), hasItem(expected));

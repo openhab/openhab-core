@@ -54,7 +54,7 @@ public class ManagedTransformationProvider extends
     @Override
     protected @Nullable Transformation toElement(String key, PersistedTransformation persistableElement) {
         return new Transformation(persistableElement.uid, persistableElement.label, persistableElement.type,
-                persistableElement.language, persistableElement.configuration);
+                persistableElement.configuration);
     }
 
     @Override
@@ -80,10 +80,6 @@ public class ManagedTransformationProvider extends
             throw new IllegalArgumentException(
                     "The transformation configuration UID '" + element.getUID() + "' is invalid.");
         }
-        if (!Objects.equals(element.getLanguage(), matcher.group("language"))) {
-            throw new IllegalArgumentException("The transformation configuration UID '" + element.getUID()
-                    + "' contains(misses) a language, but it is not set (set).");
-        }
         if (!Objects.equals(element.getType(), matcher.group("type"))) {
             throw new IllegalArgumentException("The transformation configuration UID '" + element.getUID()
                     + "' is not matching the type '" + element.getType() + "'.");
@@ -94,7 +90,6 @@ public class ManagedTransformationProvider extends
         public @NonNullByDefault({}) String uid;
         public @NonNullByDefault({}) String label;
         public @NonNullByDefault({}) String type;
-        public @Nullable String language;
         public @NonNullByDefault({}) Map<String, String> configuration;
 
         protected PersistedTransformation() {
@@ -105,7 +100,6 @@ public class ManagedTransformationProvider extends
             this.uid = configuration.getUID();
             this.label = configuration.getLabel();
             this.type = configuration.getType();
-            this.language = configuration.getLanguage();
             this.configuration = configuration.getConfiguration();
         }
     }

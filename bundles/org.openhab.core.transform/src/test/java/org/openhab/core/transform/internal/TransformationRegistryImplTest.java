@@ -49,22 +49,22 @@ public class TransformationRegistryImplTest {
     private static final String MANAGED_WITH_DE_LANGUAGE_UID = "config:" + SERVICE + ":managed:de";
 
     private static final Transformation MANAGED_WITHOUT_LANGUAGE = new Transformation(MANAGED_WITHOUT_LANGUAGE_UID, "",
-            SERVICE, null, Map.of(FUNCTION, MANAGED_WITHOUT_LANGUAGE_UID));
+            SERVICE, Map.of(FUNCTION, MANAGED_WITHOUT_LANGUAGE_UID));
     private static final Transformation MANAGED_WITH_EN_LANGUAGE = new Transformation(MANAGED_WITH_EN_LANGUAGE_UID, "",
-            SERVICE, "en", Map.of(FUNCTION, MANAGED_WITH_EN_LANGUAGE_UID));
+            SERVICE, Map.of(FUNCTION, MANAGED_WITH_EN_LANGUAGE_UID));
     private static final Transformation MANAGED_WITH_DE_LANGUAGE = new Transformation(MANAGED_WITH_DE_LANGUAGE_UID, "",
-            SERVICE, "de", Map.of(FUNCTION, MANAGED_WITH_DE_LANGUAGE_UID));
+            SERVICE, Map.of(FUNCTION, MANAGED_WITH_DE_LANGUAGE_UID));
 
     private static final String FILE_WITHOUT_LANGUAGE_UID = "foo/FILE." + SERVICE;
     private static final String FILE_WITH_EN_LANGUAGE_UID = "foo/FILE_en." + SERVICE;
     private static final String FILE_WITH_DE_LANGUAGE_UID = "foo/FILE_de." + SERVICE;
 
     private static final Transformation FILE_WITHOUT_LANGUAGE = new Transformation(FILE_WITHOUT_LANGUAGE_UID, "",
-            SERVICE, null, Map.of(FUNCTION, FILE_WITHOUT_LANGUAGE_UID));
+            SERVICE, Map.of(FUNCTION, FILE_WITHOUT_LANGUAGE_UID));
     private static final Transformation FILE_WITH_EN_LANGUAGE = new Transformation(FILE_WITH_EN_LANGUAGE_UID, "",
-            SERVICE, "en", Map.of(FUNCTION, FILE_WITH_EN_LANGUAGE_UID));
+            SERVICE, Map.of(FUNCTION, FILE_WITH_EN_LANGUAGE_UID));
     private static final Transformation FILE_WITH_DE_LANGUAGE = new Transformation(FILE_WITH_DE_LANGUAGE_UID, "",
-            SERVICE, "de", Map.of(FUNCTION, FILE_WITH_DE_LANGUAGE_UID));
+            SERVICE, Map.of(FUNCTION, FILE_WITH_DE_LANGUAGE_UID));
 
     private @Mock @NonNullByDefault({}) LocaleProvider localeProviderMock;
 
