@@ -12,6 +12,7 @@
  */
 package org.openhab.core.transform;
 
+import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -19,32 +20,30 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Identifiable;
 
 /**
- * The {@link TransformationConfiguration} encapsulates a transformation configuration
+ * The {@link Transformation} encapsulates a transformation configuration
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class TransformationConfiguration implements Identifiable<String> {
+public class Transformation implements Identifiable<String> {
+    public static final String FUNCTION = "function";
+
     private final String uid;
     private final String label;
     private final String type;
-    private final @Nullable String language;
-    private final String content;
+    private final Map<String, String> configuration;
 
     /**
      * @param uid the configuration UID. The format is config:&lt;type&gt;:&lt;name&gt;[:&lt;locale&gt;]. For backward
      *            compatibility also filenames are allowed.
      * @param type the type of the configuration (file extension for file-based providers)
-     * @param language the language of this configuration (<code>null</code> if not set)
-     * @param content the content of this configuration
+     * @param configuration the configuration (containing e.g. the transformation function)
      */
-    public TransformationConfiguration(String uid, String label, String type, @Nullable String language,
-            String content) {
+    public Transformation(String uid, String label, String type, Map<String, String> configuration) {
         this.uid = uid;
         this.label = label;
         this.type = type;
-        this.content = content;
-        this.language = language;
+        this.configuration = configuration;
     }
 
     @Override
@@ -60,12 +59,8 @@ public class TransformationConfiguration implements Identifiable<String> {
         return type;
     }
 
-    public @Nullable String getLanguage() {
-        return language;
-    }
-
-    public String getContent() {
-        return content;
+    public Map<String, String> getConfiguration() {
+        return configuration;
     }
 
     @Override
@@ -76,19 +71,19 @@ public class TransformationConfiguration implements Identifiable<String> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        TransformationConfiguration that = (TransformationConfiguration) o;
+        Transformation that = (Transformation) o;
         return uid.equals(that.uid) && label.equals(that.label) && type.equals(that.type)
-                && Objects.equals(language, that.language) && content.equals(that.content);
+                && configuration.equals(that.configuration);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uid, label, type, language, content);
+        return Objects.hash(uid, label, type, configuration);
     }
 
     @Override
     public String toString() {
-        return "TransformationConfiguration{uid='" + uid + "', label='" + label + "', type='" + type + "', language='"
-                + language + "', content='" + content + "'}";
+        return "TransformationConfiguration{uid='" + uid + "', label='" + label + "', type='" + type
+                + "', configuration='" + configuration + "'}";
     }
 }

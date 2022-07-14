@@ -21,29 +21,29 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Registry;
 
 /**
- * The {@link TransformationConfigurationRegistry} is the interface for the transformation configuration registry
+ * The {@link TransformationRegistry} is the interface for the transformation registry
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public interface TransformationConfigurationRegistry extends Registry<TransformationConfiguration, String> {
+public interface TransformationRegistry extends Registry<Transformation, String> {
     Pattern CONFIG_UID_PATTERN = Pattern.compile("config:(?<type>\\w+):(?<name>\\w+)(:(?<language>\\w+))?");
 
     /**
-     * Get a localized version of the configuration for a given UID
+     * Get a localized version of the transformation for a given UID
      *
      * @param uid the configuration UID
      * @param locale a locale (system locale is used if <code>null</code>)
-     * @return the requested {@link TransformationConfiguration} (or <code>null</code> if not found).
+     * @return the requested {@link Transformation} (or <code>null</code> if not found).
      */
     @Nullable
-    TransformationConfiguration get(String uid, @Nullable Locale locale);
+    Transformation get(String uid, @Nullable Locale locale);
 
     /**
-     * Get all configurations which match the given types
+     * Get all transformations which match the given types
      *
      * @param types a {@link Collection} of configuration types
-     * @return a {@link Collection} of {@link TransformationConfiguration}s
+     * @return a {@link Collection} of {@link Transformation}s
      */
-    Collection<TransformationConfiguration> getConfigurations(Collection<String> types);
+    Collection<Transformation> getTransformations(Collection<String> types);
 }

@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.Map;
 import java.util.Objects;
 
 import javax.script.ScriptContext;
@@ -33,9 +34,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.openhab.core.transform.TransformationConfiguration;
-import org.openhab.core.transform.TransformationConfigurationRegistry;
+import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationRegistry;
 
 /**
  * The {@link ScriptTransformationServiceTest} holds tests for the {@link ScriptTransformationService}
@@ -53,12 +54,12 @@ public class ScriptTransformationServiceTest {
     private static final String SCRIPT = "script";
     private static final String SCRIPT_OUTPUT = "output";
 
-    private static final TransformationConfiguration TRANSFORMATION_CONFIGURATION = new TransformationConfiguration(
-            SCRIPT_UID, "label", ScriptTransformationService.SUPPORTED_CONFIGURATION_TYPE, null, SCRIPT);
-    private static final TransformationConfiguration INVALID_TRANSFORMATION_CONFIGURATION = new TransformationConfiguration(
-            INVALID_SCRIPT_UID, "label", "invalid", null, SCRIPT);
+    private static final Transformation TRANSFORMATION_CONFIGURATION = new Transformation(SCRIPT_UID, "label",
+            ScriptTransformationService.SUPPORTED_CONFIGURATION_TYPE, Map.of(Transformation.FUNCTION, SCRIPT));
+    private static final Transformation INVALID_TRANSFORMATION_CONFIGURATION = new Transformation(INVALID_SCRIPT_UID,
+            "label", "invalid", Map.of(Transformation.FUNCTION, SCRIPT));
 
-    private @Mock @NonNullByDefault({}) TransformationConfigurationRegistry transformationConfigurationRegistry;
+    private @Mock @NonNullByDefault({}) TransformationRegistry transformationRegistry;
     private @Mock @NonNullByDefault({}) ScriptEngineManager scriptEngineManager;
     private @Mock @NonNullByDefault({}) ScriptEngineContainer scriptEngineContainer;
     private @Mock @NonNullByDefault({}) ScriptEngine scriptEngine;
@@ -68,7 +69,7 @@ public class ScriptTransformationServiceTest {
 
     @BeforeEach
     public void setUp() throws ScriptException {
-        service = new ScriptTransformationService(transformationConfigurationRegistry, scriptEngineManager);
+        service = new ScriptTransformationService(transformationRegistry, scriptEngineManager);
 
         when(scriptEngineManager.createScriptEngine(eq(SCRIPT_LANGUAGE), any())).thenReturn(scriptEngineContainer);
         when(scriptEngineManager.isSupported(anyString()))
@@ -77,7 +78,7 @@ public class ScriptTransformationServiceTest {
         when(scriptEngine.eval(SCRIPT)).thenReturn("output");
         when(scriptEngine.getContext()).thenReturn(scriptContext);
 
-        when(transformationConfigurationRegistry.get(anyString())).thenAnswer(arguments -> {
+        when(transformationRegistry.get(anyString())).thenAnswer(arguments -> {
             String scriptUid = arguments.getArgument(0);
             if (SCRIPT_UID.equals(scriptUid)) {
                 return TRANSFORMATION_CONFIGURATION;
@@ -120,7 +121,7 @@ public class ScriptTransformationServiceTest {
         service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID, "input");
         service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID, "input");
 
-        verify(transformationConfigurationRegistry).get(SCRIPT_UID);
+        verify(transformationRegistry).get(SCRIPT_UID);
     }
 
     @Test
@@ -129,7 +130,7 @@ public class ScriptTransformationServiceTest {
         service.updated(TRANSFORMATION_CONFIGURATION, TRANSFORMATION_CONFIGURATION);
         service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID, "input");
 
-        verify(transformationConfigurationRegistry, times(2)).get(SCRIPT_UID);
+        verify(transformationRegistry, times(2)).get(SCRIPT_UID);
     }
 
     @Test

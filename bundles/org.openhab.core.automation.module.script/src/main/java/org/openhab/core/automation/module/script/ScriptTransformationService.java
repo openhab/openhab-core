@@ -29,9 +29,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
-import org.openhab.core.transform.TransformationConfiguration;
-import org.openhab.core.transform.TransformationConfigurationRegistry;
+import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationRegistry;
 import org.openhab.core.transform.TransformationService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -48,8 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(service = TransformationService.class, property = { "openhab.transform=SCRIPT" })
 @NonNullByDefault
-public class ScriptTransformationService
-        implements TransformationService, RegistryChangeListener<TransformationConfiguration> {
+public class ScriptTransformationService implements TransformationService, RegistryChangeListener<Transformation> {
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
     public static final String SUPPORTED_CONFIGURATION_TYPE = "script";
 
@@ -65,21 +64,20 @@ public class ScriptTransformationService
     private final Map<String, CompiledScript> compiledScripts = new HashMap<>();
     private final Map<String, String> scriptCache = new HashMap<>();
 
-    private final TransformationConfigurationRegistry transformationConfigurationRegistry;
+    private final TransformationRegistry transformationRegistry;
     private final ScriptEngineManager scriptEngineManager;
 
     @Activate
-    public ScriptTransformationService(
-            @Reference TransformationConfigurationRegistry transformationConfigurationRegistry,
+    public ScriptTransformationService(@Reference TransformationRegistry transformationRegistry,
             @Reference ScriptEngineManager scriptEngineManager) {
-        this.transformationConfigurationRegistry = transformationConfigurationRegistry;
+        this.transformationRegistry = transformationRegistry;
         this.scriptEngineManager = scriptEngineManager;
-        transformationConfigurationRegistry.addRegistryChangeListener(this);
+        transformationRegistry.addRegistryChangeListener(this);
     }
 
     @Deactivate
     public void deactivate() {
-        transformationConfigurationRegistry.removeRegistryChangeListener(this);
+        transformationRegistry.removeRegistryChangeListener(this);
 
         // cleanup script engines
         scriptEngineContainers.values().stream().map(ScriptEngineContainer::getScriptEngine)
@@ -98,14 +96,13 @@ public class ScriptTransformationService
 
         String script = scriptCache.get(scriptUid);
         if (script == null) {
-            TransformationConfiguration transformationConfiguration = transformationConfigurationRegistry
-                    .get(scriptUid);
-            if (transformationConfiguration != null) {
-                if (!SUPPORTED_CONFIGURATION_TYPE.equals(transformationConfiguration.getType())) {
+            Transformation transformation = transformationRegistry.get(scriptUid);
+            if (transformation != null) {
+                if (!SUPPORTED_CONFIGURATION_TYPE.equals(transformation.getType())) {
                     throw new TransformationException("Configuration does not have correct type 'script' but '"
-                            + transformationConfiguration.getType() + "'.");
+                            + transformation.getType() + "'.");
                 }
-                script = transformationConfiguration.getContent();
+                script = transformation.getConfiguration().get(Transformation.FUNCTION);
             }
             if (script == null) {
                 throw new TransformationException("Could not get script for UID '" + scriptUid + "'.");
@@ -164,17 +161,17 @@ public class ScriptTransformationService
     }
 
     @Override
-    public void added(TransformationConfiguration element) {
+    public void added(Transformation element) {
         clearCache(element.getUID());
     }
 
     @Override
-    public void removed(TransformationConfiguration element) {
+    public void removed(Transformation element) {
         clearCache(element.getUID());
     }
 
     @Override
-    public void updated(TransformationConfiguration oldElement, TransformationConfiguration element) {
+    public void updated(Transformation oldElement, Transformation element) {
         clearCache(element.getUID());
     }
 

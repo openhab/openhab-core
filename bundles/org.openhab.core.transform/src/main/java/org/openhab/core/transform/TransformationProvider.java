@@ -16,11 +16,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Provider;
 
 /**
- * The {@link TransformationConfigurationProvider} is implemented by providers for transformation configurations
+ * The {@link TransformationProvider} is implemented by providers for transformations
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public interface TransformationConfigurationProvider extends Provider<TransformationConfiguration> {
+public interface TransformationProvider extends Provider<Transformation> {
 
 }
