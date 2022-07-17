@@ -25,6 +25,8 @@ import org.apache.karaf.features.FeaturesService;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
+import org.openhab.core.binding.BindingInfo;
+import org.openhab.core.binding.BindingInfoRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -48,12 +50,15 @@ public class KarafAddonService implements AddonService {
 
     private final FeaturesService featuresService;
     private final FeatureInstaller featureInstaller;
+    private final BindingInfoRegistry bindingInfoRegistry;
 
     @Activate
     public KarafAddonService(final @Reference FeatureInstaller featureInstaller,
-            final @Reference FeaturesService featuresService) {
+            final @Reference FeaturesService featuresService,
+            final @Reference BindingInfoRegistry bindingInfoRegistry) {
         this.featureInstaller = featureInstaller;
         this.featuresService = featuresService;
+        this.bindingInfoRegistry = bindingInfoRegistry;
         typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_AUTOMATION, "Automation"));
         typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_BINDING, "Bindings"));
         typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_MISC, "Misc"));
@@ -111,12 +116,20 @@ public class KarafAddonService implements AddonService {
         String name = getName(feature.getName());
         String type = getType(feature.getName());
         String link = null;
+        String configDescriptionURI = "";
         switch (type) {
             case FeatureInstaller.EXTENSION_TYPE_AUTOMATION:
                 link = "https://www.openhab.org/addons/automation/" + name + "/";
                 break;
             case FeatureInstaller.EXTENSION_TYPE_BINDING:
                 link = "https://www.openhab.org/addons/bindings/" + name + "/";
+                BindingInfo bindingInfo = bindingInfoRegistry.getBindingInfo(name);
+                if (bindingInfo != null) {
+                    URI uri = bindingInfo.getConfigDescriptionURI();
+                    if (uri != null) {
+                        configDescriptionURI = uri.toString();
+                    }
+                }
                 break;
             case FeatureInstaller.EXTENSION_TYPE_MISC:
                 // Not possible to define URL
@@ -148,7 +161,8 @@ public class KarafAddonService implements AddonService {
         return Addon.create(type + "-" + name).withType(type).withLabel(feature.getDescription())
                 .withVersion(feature.getVersion()).withContentType(ADDONS_CONTENTTYPE).withLink(link)
                 .withLoggerPackages(packages).withAuthor(ADDONS_AUTHOR, true)
-                .withInstalled(featuresService.isInstalled(feature)).build();
+                .withConfigDescriptionURI(configDescriptionURI).withInstalled(featuresService.isInstalled(feature))
+                .build();
     }
 
     @Override
