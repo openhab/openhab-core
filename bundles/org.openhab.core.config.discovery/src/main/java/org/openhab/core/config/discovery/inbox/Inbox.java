@@ -13,6 +13,7 @@
 package org.openhab.core.config.discovery.inbox;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -57,7 +58,7 @@ public interface Inbox {
      * @param result the discovery result to be added to this inbox (could be null)
      * @return true if the specified discovery result could be added or updated, otherwise false
      */
-    boolean add(@Nullable DiscoveryResult result);
+    CompletableFuture<Boolean> add(@Nullable DiscoveryResult result);
 
     /**
      * Removes the {@link DiscoveryResult} associated with the specified {@code Thing} ID from

@@ -84,9 +84,12 @@ public class PersistentInboxTest {
     private @Mock @NonNullByDefault({}) ThingTypeRegistry thingTypeRegistryMock;
     private @Mock @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistryMock;
     private @Mock @NonNullByDefault({}) ThingHandlerFactory thingHandlerFactoryMock;
+    private @Mock @NonNullByDefault({}) ThingType thingTypeMock;
 
     @BeforeEach
     public void setup() {
+        when(thingTypeMock.getConfigDescriptionURI()).thenReturn(null);
+        when(thingTypeRegistryMock.getThingType(any())).thenReturn(thingTypeMock);
         when(storageServiceMock.getStorage(any(String.class), any(ClassLoader.class))).thenReturn(storageMock);
         doAnswer(invocation -> lastAddedThing = (Thing) invocation.getArguments()[0]).when(thingRegistryMock)
                 .add(any(Thing.class));

@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -54,6 +56,7 @@ import org.openhab.core.config.discovery.inbox.InboxListener;
 import org.openhab.core.config.discovery.inbox.events.InboxAddedEvent;
 import org.openhab.core.config.discovery.inbox.events.InboxRemovedEvent;
 import org.openhab.core.config.discovery.inbox.events.InboxUpdatedEvent;
+import org.openhab.core.config.discovery.test.DummyThingTypeProvider;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
@@ -140,7 +143,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     private final String discoveryResultLabel = "MyLabel";
 
     @SuppressWarnings("serial")
-    private final Map<String, Object> discoveryResultProperties = new LinkedHashMap<String, Object>() {
+    private final Map<String, Object> discoveryResultProperties = new LinkedHashMap<>() {
         {
             put("ip", "192.168.3.99");
             put("pnr", 1234455);
@@ -172,12 +175,26 @@ public class InboxOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
     private @NonNullByDefault({}) ThingRegistry registry;
 
+    private @NonNullByDefault({}) ThingTypeRegistry thingTypeRegistry;
+
+    private @NonNullByDefault({}) DummyThingTypeProvider dummyThingTypeProvider;
+
     @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
 
         discoveryResults.clear();
         inboxListeners.clear();
+
+        dummyThingTypeProvider = new DummyThingTypeProvider();
+        registerService(dummyThingTypeProvider);
+
+        dummyThingTypeProvider.add(testTypeUID, testThingType);
+        dummyThingTypeProvider.add(THING_TYPE_UID, testThingType);
+        dummyThingTypeProvider.add(BRIDGE_THING_TYPE_UID, testThingType);
+
+        thingTypeRegistry = getService(ThingTypeRegistry.class);
+        assertThat(thingTypeRegistry, is(notNullValue()));
 
         inbox = (PersistentInbox) getService(Inbox.class);
         assertThat(inbox, is(notNullValue()));
@@ -237,11 +254,15 @@ public class InboxOSGiTest extends JavaOSGiTest {
     }
 
     private boolean addDiscoveryResult(DiscoveryResult discoveryResult) {
-        boolean result = inbox.add(discoveryResult);
-        if (result) {
-            discoveryResults.put(discoveryResult.getThingUID(), discoveryResult);
+        CompletableFuture<Boolean> future = inbox.add(discoveryResult);
+        waitForAssert(() -> assertThat(future.isDone(), is(true)));
+
+        try {
+            return future.get();
+        } catch (ExecutionException | InterruptedException ignored) {
         }
-        return result;
+
+        return false;
     }
 
     private boolean removeDiscoveryResult(ThingUID thingUID) {
@@ -261,6 +282,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGetAllIncludesPreviouslyAddedDiscoveryResult() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("dummyBindingId", "dummyThingType");
+        dummyThingTypeProvider.add(thingTypeUID, testThingType);
         ThingUID thingUID = new ThingUID(thingTypeUID, "thingId");
 
         List<DiscoveryResult> allDiscoveryResults = inbox.getAll();
@@ -294,6 +316,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGetAllIncludesPreviouslyUpdatedDiscoveryResult() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("dummyBindingId", "dummyThingType");
+        dummyThingTypeProvider.add(thingTypeUID, testThingType);
+
         ThingUID thingUID = new ThingUID(thingTypeUID, "dummyThingId");
 
         List<DiscoveryResult> allDiscoveryResults = inbox.getAll();
@@ -335,6 +359,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGetAllIncludesTwoPreviouslyAddedDiscoveryResults() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("dummyBindingId", "dummyThingType");
+        dummyThingTypeProvider.add(thingTypeUID, testThingType);
+
         ThingUID thingUID = new ThingUID(thingTypeUID, "dummyThingId");
 
         List<DiscoveryResult> allDiscoveryResults = inbox.getAll();
@@ -358,6 +384,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGetAllNotIncludesRemovedDiscoveryResult() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("dummyBindingId", "dummyThingType");
+        dummyThingTypeProvider.add(thingTypeUID, testThingType);
+
         ThingUID thingUID = new ThingUID(thingTypeUID, "dummyThingId");
 
         List<DiscoveryResult> allDiscoveryResults = inbox.getAll();
@@ -384,6 +412,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGetAllIncludesRemovedUpdatedDiscoveryResult() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("dummyBindingId", "dummyThingType");
+        dummyThingTypeProvider.add(thingTypeUID, testThingType);
+
         ThingUID thingUID = new ThingUID(thingTypeUID, "dummyThingId");
 
         List<DiscoveryResult> allDiscoveryResults = inbox.getAll();
@@ -423,6 +453,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatInboxListenerIsNotifiedAboutPreviouslyAddedDiscoveryResult() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("dummyBindingId", "dummyThingType");
+        dummyThingTypeProvider.add(thingTypeUID, testThingType);
+
         ThingUID thingUID = new ThingUID(thingTypeUID, "dummyThingId");
 
         List<DiscoveryResult> allDiscoveryResults = inbox.getAll();
@@ -488,6 +520,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatInboxListenerIsNotifiedAboutPreviouslyUpdatedDiscoveryResult() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("dummyBindingId", "dummyThingType");
+        dummyThingTypeProvider.add(thingTypeUID, testThingType);
+
         ThingUID thingUID = new ThingUID(thingTypeUID, "dummyThingId");
 
         List<DiscoveryResult> allDiscoveryResults = inbox.getAll();
@@ -560,6 +594,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatInboxListenerIsNotifiedAboutPreviouslyRemovedDiscoveryResult() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("dummyBindingId", "dummyThingType");
+        dummyThingTypeProvider.add(thingTypeUID, testThingType);
+
         ThingUID thingUID = new ThingUID(thingTypeUID, "dummyThingId");
 
         List<DiscoveryResult> allDiscoveryResults = inbox.getAll();
@@ -628,6 +664,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
         assertThat(inbox.getAll().size(), is(0));
 
         ThingTypeUID thingTypeUID = new ThingTypeUID("dummyBindingId", "dummyThingType");
+        dummyThingTypeProvider.add(thingTypeUID, testThingType);
+
         ThingUID thingUID = new ThingUID(thingTypeUID, "dummyThingId");
 
         Map<String, Object> props = new HashMap<>();
@@ -653,6 +691,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
         ThingTypeUID thingTypeUID = new ThingTypeUID("dummyBindingId", "dummyThingType");
         ThingUID thingUID = new ThingUID(thingTypeUID, "dummyThingId");
+        dummyThingTypeProvider.add(thingTypeUID, testThingType);
 
         managedThingProvider.add(ThingBuilder.create(thingTypeUID, "dummyThingId").build());
 
@@ -673,6 +712,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
         assertThat(inbox.getAll().size(), is(0));
 
         ThingTypeUID thingTypeUID = new ThingTypeUID("dummyBindingId2", "dummyThingType");
+        dummyThingTypeProvider.add(thingTypeUID, testThingType);
+
         ThingUID thingUID = new ThingUID(thingTypeUID, "dummyThingId");
 
         managedThingProvider.add(ThingBuilder.create(thingTypeUID, "dummyThingId").build());
@@ -699,6 +740,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatInboxEventSubscribersReceiveEventsAboutDiscoveryResultChanges() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("some", "thing");
+        dummyThingTypeProvider.add(thingTypeUID, testThingType);
+
         ThingUID thingUID = new ThingUID(thingTypeUID, "uid");
         final AsyncResultWrapper<Event> receivedEvent = new AsyncResultWrapper<>();
 
@@ -914,6 +957,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     @SuppressWarnings("null")
     public void assertThatApproveSetsTheDiscoveredLabelIfNoOtherIsGiven() {
+
         inbox.add(testDiscoveryResult);
         Thing approvedThing = inbox.approve(testThing.getUID(), null, null);
         Thing addedThing = registry.get(testThing.getUID());
@@ -1023,6 +1067,40 @@ public class InboxOSGiTest extends JavaOSGiTest {
         // should remove a result
         inbox.removeOlderResults(discoveryService2, now, Set.of(testThingType.getUID()), null);
         assertThat(inbox.getAll().size(), is(0));
+    }
+
+    @Test
+    public void assertThatResultWithMissingThingTypeNotAdded() throws ExecutionException, InterruptedException {
+        ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "missingThingType");
+        ThingUID thingUID = new ThingUID("bindingId", "missingThingType", "thingId");
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID).build();
+
+        // reduce time between retries to ensure the test does not time out
+        inbox.setDiscoveryResultAddRetryInterval(1);
+
+        CompletableFuture future = inbox.add(discoveryResult);
+
+        waitForAssert(() -> future.isDone(), 30, 5);
+
+        assertThat(future.get(), is(false));
+    }
+
+    @Test
+    public void assertThatResultWithLaterAddedThingTypeIsAdded() throws ExecutionException, InterruptedException {
+        ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "missingThingType");
+        ThingUID thingUID = new ThingUID("bindingId", "missingThingType", "thingId");
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID).build();
+
+        // reduce time between retries to ensure the test does not time out
+        inbox.setDiscoveryResultAddRetryInterval(1);
+
+        CompletableFuture future = inbox.add(discoveryResult);
+
+        dummyThingTypeProvider.add(thingTypeUID, ThingTypeBuilder.instance(thingTypeUID, "label").build());
+
+        waitForAssert(() -> future.isDone(), 30, 5);
+
+        assertThat(future.get(), is(true));
     }
 
     class DummyThingHandlerFactory extends BaseThingHandlerFactory {
