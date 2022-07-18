@@ -13,15 +13,19 @@
 package org.openhab.core.io.console.internal.extension;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
@@ -36,6 +40,7 @@ import org.osgi.service.component.annotations.Reference;
  * Console command extension for the {@link MetadataRegistry}.
  *
  * @author Andre Fuechsel - Initial contribution
+ * @author Jan N. Klug - Added removal of orphaned metadata
  */
 @Component(service = ConsoleCommandExtension.class)
 @NonNullByDefault
@@ -45,6 +50,7 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
     private static final String SUBCMD_LIST_INTERNAL = "listinternal";
     private static final String SUBCMD_ADD = "add";
     private static final String SUBCMD_REMOVE = "remove";
+    private static final String SUBCMD_ORPHAN = "orphan";
 
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
@@ -59,7 +65,7 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] {
+        return Arrays.asList( //
                 buildCommandUsage(SUBCMD_LIST + " [<itemName> [<namespace>]]",
                         "lists all available metadata, can be filtered for a specifc item and namespace"),
                 buildCommandUsage(SUBCMD_LIST_INTERNAL + " [<itemName> [<namespace>]]",
@@ -67,7 +73,9 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
                 buildCommandUsage(SUBCMD_REMOVE + " <itemName> [<namespace>]",
                         "removes metadata for the specific item (for all namespaces or for the given namespace only)"),
                 buildCommandUsage(SUBCMD_ADD + " <itemName> <namespace> <value> [\"{key1=value1, key2=value2, ...}\"]",
-                        "adds or updates metadata value (and optional config values) for the specific item in the given namespace") });
+                        "adds or updates metadata value (and optional config values) for the specific item in the given namespace"),
+                buildCommandUsage(SUBCMD_ORPHAN + " list|purge",
+                        "lists or removes all metadata for which no corresponding item is present"));
     }
 
     @Override
@@ -88,6 +96,14 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
                         addMetadata(console, args[1], args[2], args[3], args.length > 4 ? args[4] : null);
                     }
                     break;
+                case SUBCMD_ORPHAN:
+                    if (args.length == 2 && (args[1].equals("list") || args[1].equals("purge"))) {
+                        orphan(console, args[1], metadataRegistry.getAll(), itemRegistry.getAll());
+                    } else {
+                        console.println("Specify action 'list' or 'purge' to be executed: orphan <list|purge>");
+                    }
+                    return;
+
                 case SUBCMD_REMOVE:
                     removeMetadata(console, args[1], args.length > 2 ? args[2] : null);
                     break;
@@ -134,10 +150,10 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
             Metadata metadata = new Metadata(key, value, configMap);
             if (metadataRegistry.get(key) != null) {
                 metadataRegistry.update(metadata);
-                console.println("Updated: " + metadata.toString());
+                console.println("Updated: " + metadata);
             } else {
                 metadataRegistry.add(metadata);
-                console.println("Added: " + metadata.toString());
+                console.println("Added: " + metadata);
             }
         }
     }
@@ -154,7 +170,7 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
         Map<String, Object> map = new HashMap<>();
         for (String part : configStr.split("\\s*,\\s*")) {
             String[] subparts = part.split("=", 2);
-            if (subparts.length == 2 && subparts[0] != null && subparts[1] != null) {
+            if (subparts.length == 2) {
                 map.put(subparts[0].trim(), subparts[1].trim());
             }
         }
@@ -177,9 +193,22 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
     private void removeMetadata(Console console, MetadataKey key) {
         Metadata metadata = metadataRegistry.remove(key);
         if (metadata != null) {
-            console.println("Removed: " + metadata.toString());
+            console.println("Removed: " + metadata);
         } else {
             console.println("Metadata element for " + key + " could not be found.");
         }
+    }
+
+    private void orphan(Console console, String action, Collection<Metadata> metadata, Collection<Item> items) {
+        Collection<String> itemNames = items.stream().map(Item::getName).collect(Collectors.toCollection(HashSet::new));
+
+        metadata.forEach(md -> {
+            if (!itemNames.contains(md.getUID().getItemName())) {
+                console.println("Item missing: " + md.getUID());
+                if ("purge".equals(action)) {
+                    metadataRegistry.remove(md.getUID());
+                }
+            }
+        });
     }
 }
