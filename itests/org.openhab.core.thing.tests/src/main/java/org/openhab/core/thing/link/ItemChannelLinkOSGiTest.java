@@ -183,25 +183,25 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
 
         int expected = BULK_ITEM_COUNT * BULK_THING_COUNT * BULK_CHANNEL_COUNT;
 
-        int removed = itemChannelLinkRegistry.compress();
+        int removed = itemChannelLinkRegistry.purge();
         assertThat(removed, is(0));
         assertThat(itemChannelLinkRegistry.getAll(), hasSize(expected));
 
         managedItemProvider.remove(BULK_BASE_ITEM_NAME + "_0_0_0");
-        removed = itemChannelLinkRegistry.compress();
+        removed = itemChannelLinkRegistry.purge();
         expected -= removed;
         assertThat(removed, is(1));
         assertThat(itemChannelLinkRegistry.getAll(), hasSize(expected));
 
         managedThingProvider.remove(new ThingUID(BULK_BASE_THING_UID + "_1_0"));
-        removed = itemChannelLinkRegistry.compress();
+        removed = itemChannelLinkRegistry.purge();
         expected -= removed;
         assertThat(removed, is(BULK_CHANNEL_COUNT));
         assertThat(itemChannelLinkRegistry.getAll(), hasSize(expected));
 
         managedItemProvider.remove(BULK_BASE_ITEM_NAME + "_2_0_0");
         managedThingProvider.remove(new ThingUID(BULK_BASE_THING_UID + "_2_0"));
-        removed = itemChannelLinkRegistry.compress();
+        removed = itemChannelLinkRegistry.purge();
         expected -= removed;
         assertThat(removed, is(BULK_CHANNEL_COUNT));
         assertThat(itemChannelLinkRegistry.getAll(), hasSize(expected));

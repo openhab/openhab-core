@@ -159,7 +159,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      *
      * @return the number of removed links
      */
-    public int compress() {
+    public int purge() {
         ManagedProvider<ItemChannelLink, String> managedProvider = getManagedProvider()
                 .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
 

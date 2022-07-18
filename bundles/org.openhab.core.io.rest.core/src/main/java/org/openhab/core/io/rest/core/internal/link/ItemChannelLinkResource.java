@@ -21,6 +21,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -291,6 +292,17 @@ public class ItemChannelLinkResource implements RESTResource {
             return Response.status(Status.METHOD_NOT_ALLOWED).build();
         }
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/purge")
+    @Operation(operationId = "purgeDatabase", summary = "Remove unused/orphaned links.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK") })
+    public Response purge() {
+        itemChannelLinkRegistry.purge();
+        return Response.ok().build();
     }
 
     private boolean isEditable(String linkId) {
