@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -612,6 +613,21 @@ public class ItemResource implements RESTResource {
         }
 
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/metadata/purge")
+    @Operation(operationId = "purgeDatabase", summary = "Remove unused/orphaned metadata.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK") })
+    public Response purge() {
+        Collection<String> itemNames = itemRegistry.stream().map(Item::getName)
+                .collect(Collectors.toCollection(HashSet::new));
+
+        metadataRegistry.getAll().stream().filter(md -> !itemNames.contains(md.getUID().getItemName()))
+                .forEach(md -> metadataRegistry.remove(md.getUID()));
+        return Response.ok().build();
     }
 
     /**

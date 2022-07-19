@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.core.internal.link;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,6 +21,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -47,6 +49,7 @@ import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.link.AbstractLink;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
@@ -139,6 +142,24 @@ public class ItemChannelLinkResource implements RESTResource {
         }
 
         return Response.ok(new Stream2JSONInputStream(linkStream)).build();
+    }
+
+    @DELETE
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{object}")
+    @Operation(operationId = "removeAllLinksForObject", summary = "Delete all links that refer to an item or thing.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK") })
+    public Response removeAllLinksForObject(
+            @PathParam("object") @Parameter(description = "item name or thing UID") String object) {
+        int removedLinks;
+        try {
+            ThingUID thingUID = new ThingUID(object);
+            removedLinks = itemChannelLinkRegistry.removeLinksForThing(thingUID);
+        } catch (IllegalArgumentException e) {
+            removedLinks = itemChannelLinkRegistry.removeLinksForItem(object);
+        }
+        return Response.ok(Map.of("count", removedLinks)).build();
     }
 
     @GET
@@ -271,6 +292,17 @@ public class ItemChannelLinkResource implements RESTResource {
             return Response.status(Status.METHOD_NOT_ALLOWED).build();
         }
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/purge")
+    @Operation(operationId = "purgeDatabase", summary = "Remove unused/orphaned links.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK") })
+    public Response purge() {
+        itemChannelLinkRegistry.purge();
+        return Response.ok().build();
     }
 
     private boolean isEditable(String linkId) {

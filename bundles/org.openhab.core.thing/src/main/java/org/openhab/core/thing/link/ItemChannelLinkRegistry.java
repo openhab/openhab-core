@@ -12,16 +12,19 @@
  */
 package org.openhab.core.thing.link;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.service.ReadyService;
+import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
@@ -127,10 +130,50 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         super.unsetEventPublisher(eventPublisher);
     }
 
-    public void removeLinksForThing(final ThingUID thingUID) {
-        ((ManagedItemChannelLinkProvider) getManagedProvider()
-                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available")))
-                        .removeLinksForThing(thingUID);
+    /**
+     * Remove all links related to a thing
+     *
+     * @param thingUID the UID of the thing
+     * @return the number of removed links
+     */
+    public int removeLinksForThing(final ThingUID thingUID) {
+        ManagedItemChannelLinkProvider managedProvider = (ManagedItemChannelLinkProvider) getManagedProvider()
+                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
+        return managedProvider.removeLinksForThing(thingUID);
+    }
+
+    /**
+     * Remove all links related to an item
+     *
+     * @param itemName the name of the item
+     * @return the number of removed links
+     */
+    public int removeLinksForItem(final String itemName) {
+        ManagedItemChannelLinkProvider managedProvider = (ManagedItemChannelLinkProvider) getManagedProvider()
+                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
+        return managedProvider.removeLinksForItem(itemName);
+    }
+
+    /**
+     * Remove all orphaned (item or channel missing) links
+     *
+     * @return the number of removed links
+     */
+    public int purge() {
+        ManagedProvider<ItemChannelLink, String> managedProvider = getManagedProvider()
+                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
+
+        Set<String> allItems = itemRegistry.stream().map(Item::getName).collect(Collectors.toSet());
+        Set<ChannelUID> allChannels = thingRegistry.stream().map(Thing::getChannels).flatMap(List::stream)
+                .map(Channel::getUID).collect(Collectors.toSet());
+
+        Set<String> toRemove = managedProvider.getAll().stream()
+                .filter(link -> !allItems.contains(link.getItemName()) || !allChannels.contains(link.getLinkedUID()))
+                .map(ItemChannelLink::getUID).collect(Collectors.toSet());
+
+        toRemove.forEach(managedProvider::remove);
+
+        return toRemove.size();
     }
 
     @Override
