@@ -56,7 +56,8 @@ public interface Inbox {
      * This method returns silently, if the specified {@link DiscoveryResult} is {@code null}.
      *
      * @param result the discovery result to be added to this inbox (could be null)
-     * @return true if the specified discovery result could be added or updated, otherwise false
+     * @return {@link CompletableFuture} future that completes to <code>true</code> if the specified discovery result
+     *         could be added or updated, otherwise to <code>false</code>
      */
     CompletableFuture<Boolean> add(@Nullable DiscoveryResult result);
 
