@@ -203,7 +203,7 @@ public class FeatureInstaller implements ConfigurationListener {
             }
             installAddons(config); // we don't have to wait even if the job is running, because method is synchronized
         }
-        
+
         processingConfigQueue.set(false);
     }
 
