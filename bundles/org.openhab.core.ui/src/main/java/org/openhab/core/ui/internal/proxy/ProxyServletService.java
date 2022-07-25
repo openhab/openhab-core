@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -44,13 +43,11 @@ import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletName;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +78,8 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(immediate = true, property = { "service.pid=org.openhab.proxy" })
+@HttpWhiteboardServletName(ProxyServletService.PROXY_ALIAS)
+@HttpWhiteboardServletPattern(ProxyServletService.PROXY_ALIAS + "/*")
 public class ProxyServletService extends HttpServlet {
 
     /** the alias for this servlet */
@@ -96,14 +95,18 @@ public class ProxyServletService extends HttpServlet {
 
     private @Nullable Servlet impl;
 
-    protected final HttpService httpService;
     protected final ItemUIRegistry itemUIRegistry;
     protected final List<SitemapProvider> sitemapProviders = new CopyOnWriteArrayList<>();
 
     @Activate
-    public ProxyServletService(@Reference ItemUIRegistry itemUIRegistry, @Reference HttpService httpService) {
+    public ProxyServletService(@Reference ItemUIRegistry itemUIRegistry, Map<String, Object> config) {
         this.itemUIRegistry = itemUIRegistry;
-        this.httpService = httpService;
+
+        Servlet servlet = getImpl();
+
+        logger.debug("Starting up '{}' servlet  at /{}", servlet.getServletInfo(), PROXY_ALIAS);
+
+        Hashtable<String, @Nullable String> props = propsFromConfig(config);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -153,38 +156,6 @@ public class ProxyServletService extends HttpServlet {
         }
 
         return props;
-    }
-
-    @Activate
-    protected void activate(Map<String, Object> config) {
-        try {
-            Servlet servlet = getImpl();
-
-            logger.debug("Starting up '{}' servlet  at /{}", servlet.getServletInfo(), PROXY_ALIAS);
-
-            Hashtable<String, @Nullable String> props = propsFromConfig(config);
-            httpService.registerServlet("/" + PROXY_ALIAS, servlet, props, createHttpContext());
-        } catch (NamespaceException | ServletException e) {
-            logger.error("Error during servlet startup: {}", e.getMessage());
-        }
-    }
-
-    @Deactivate
-    protected void deactivate() {
-        try {
-            httpService.unregister("/" + PROXY_ALIAS);
-        } catch (IllegalArgumentException e) {
-            // ignore, had not been registered before
-        }
-    }
-
-    /**
-     * Creates a {@link HttpContext}
-     *
-     * @return a {@link HttpContext}
-     */
-    protected HttpContext createHttpContext() {
-        return httpService.createDefaultHttpContext();
     }
 
     /**

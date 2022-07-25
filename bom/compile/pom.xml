@@ -18,7 +18,8 @@
 
   <properties>
     <californium.version>2.7.4</californium.version>
-    <jetty.version>9.4.46.v20220331</jetty.version>
+    <jetty.version>9.4.50.v20221201</jetty.version>
+    <pax.web.version>8.0.15</pax.web.version>
     <swagger.version>2.1.9</swagger.version>
   </properties>
 
@@ -26,17 +27,37 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi.core</artifactId>
-      <version>7.0.0</version>
+      <version>8.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>osgi.cmpn</artifactId>
-      <version>7.0.0</version>
+      <artifactId>org.osgi.service.cm</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component</artifactId>
+      <version>1.5.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+      <version>1.5.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.event</artifactId>
+      <version>1.4.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.jaxrs</artifactId>
+      <version>1.0.1</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi.annotation</artifactId>
-      <version>7.0.0</version>
+      <version>8.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -148,6 +169,12 @@
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.websocket</groupId>
+      <artifactId>websocket-server</artifactId>
+      <version>${jetty.version}</version>
+      <scope>compile</scope>
+    </dependency>
 
     <!-- JmDNS -->
     <dependency>
@@ -199,6 +226,44 @@
           <artifactId>annotations</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+
+    <!-- Pax Web -->
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-api</artifactId>
+      <version>${pax.web.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-extender-whiteboard</artifactId>
+      <version>${pax.web.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-jetty</artifactId>
+      <version>${pax.web.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-jsp</artifactId>
+      <version>${pax.web.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-runtime</artifactId>
+      <version>${pax.web.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-spi</artifactId>
+      <version>${pax.web.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <!-- Serial Communication -->
