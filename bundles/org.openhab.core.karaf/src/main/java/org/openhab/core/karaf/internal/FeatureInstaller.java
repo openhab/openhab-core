@@ -118,8 +118,6 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private @Nullable String onlineRepoUrl = null;
 
-    private @Nullable ScheduledFuture<?> installJob;
-
     private boolean paxCfgUpdated = true; // a flag used to check whether CM has already successfully updated the pax
                                           // configuration as this must be waited for before trying to add feature repos
     private @Nullable Map<String, Object> configMapCache;
@@ -138,24 +136,7 @@ public class FeatureInstaller implements ConfigurationListener {
         scheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("karaf-addons"));
         setOnlineRepoUrl();
         modified(config);
-        scheduler.scheduleWithFixedDelay(() -> {
-            logger.debug("Running scheduled sync job");
-            try {
-                Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(ADDONS_PID).getProperties();
-                final Map<String, Object> cfgMap = new HashMap<>();
-                final Enumeration<String> enumeration = cfg.keys();
-                while (enumeration.hasMoreElements()) {
-                    final String key = enumeration.nextElement();
-                    cfgMap.put(key, cfg.get(key));
-                }
-                if (!cfgMap.equals(configMapCache) && !processingConfigQueue.get()) {
-                    modified(cfgMap);
-                }
-            } catch (IOException e) {
-                logger.debug("Failed to retrieve the addons configuration from configuration admin: {}",
-                        e.getMessage());
-            }
-        }, 1, 1, TimeUnit.MINUTES);
+        scheduler.scheduleWithFixedDelay(this::syncConfiguration, 1, 1, TimeUnit.MINUTES);
     }
 
     @Deactivate
@@ -171,7 +152,41 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    private void processConfigQueue() {
+    private void syncConfiguration() {
+        logger.debug("Running scheduled sync job");
+        try {
+            Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(ADDONS_PID).getProperties();
+            if (cfg == null) {
+                logger.debug("Configuration has no properties yet. Skipping update.");
+                return;
+            }
+            final Map<String, Object> cfgMap = new HashMap<>();
+            final Enumeration<String> enumeration = cfg.keys();
+            while (enumeration.hasMoreElements()) {
+                final String key = enumeration.nextElement();
+                cfgMap.put(key, cfg.get(key));
+            }
+            if (!cfgMap.equals(configMapCache) && !processingConfigQueue.get()) {
+                modified(cfgMap);
+            }
+        } catch (IOException e) {
+            logger.debug("Failed to retrieve the addons configuration from configuration admin: {}",
+                    e.getMessage());
+        }
+    }
+
+    private synchronized void processConfigQueue() {
+        if (!allKarsInstalled()) {
+            // some kars are not installed, delay installation for 15s, we keep the processing flag
+            // because further updates will be added to the queue and are therefore not interfering
+            // with our order
+            // we don't need to keep the job, if the service is shutdown, the scheduler is also shutting
+            // down and in all other cases we are protected by the processing flag
+            logger.info("Some .kar files are not installed yet. Delaying add-on installation by 15s.");
+            scheduler.schedule(this::processConfigQueue, 15, TimeUnit.SECONDS);
+            return;
+        }
+
         Map<String, Object> config;
 
         while ((config = configQueue.poll()) != null) {
@@ -194,13 +209,6 @@ public class FeatureInstaller implements ConfigurationListener {
                 continue;
             }
 
-            // if there is an installation job, we cancel it.
-            ScheduledFuture<?> installJob = this.installJob;
-            if (installJob != null) {
-                logger.trace("Configuration changed. Cancelling installation job.");
-                installJob.cancel(false); // do not interrupt running job, this might cause problems
-                this.installJob = null;
-            }
             installAddons(config); // we don't have to wait even if the job is running, because method is synchronized
         }
 
@@ -373,16 +381,7 @@ public class FeatureInstaller implements ConfigurationListener {
         return changed;
     }
 
-    private synchronized void installAddons(final Map<String, Object> config) {
-        if (!allKarsInstalled()) {
-            // some kars are not installed, delay installation for 15s
-            logger.info("Some .kar files are not installed yet. Delaying add-on installation by 15s.");
-            installJob = scheduler.schedule(() -> installAddons(config), 15, TimeUnit.SECONDS);
-            return;
-        }
-
-        installJob = null; // either this is called by the job itself or it is null anyway
-
+    private void installAddons(final Map<String, Object> config) {
         final Set<String> currentAddons = new HashSet<>(); // the currently installed ones
         final Set<String> targetAddons = new HashSet<>(); // the target we want to have installed afterwards
         final Set<String> installAddons = new HashSet<>(); // the ones to be installed (the diff)
@@ -445,7 +444,7 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    private synchronized void installFeatures(Set<String> addons) {
+    private void installFeatures(Set<String> addons) {
         try {
             if (logger.isDebugEnabled()) {
                 logger.debug("Installing '{}'", String.join(", ", addons));
@@ -483,7 +482,7 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    private synchronized boolean installFeature(String name) {
+    private boolean installFeature(String name) {
         try {
             Feature[] features = featuresService.listInstalledFeatures();
             if (!anyMatchingFeature(features, withName(name))) {
@@ -502,7 +501,7 @@ public class FeatureInstaller implements ConfigurationListener {
         return false;
     }
 
-    private synchronized void uninstallFeature(String name) {
+    private void uninstallFeature(String name) {
         try {
             Feature[] features = featuresService.listInstalledFeatures();
             if (anyMatchingFeature(features, withName(name))) {
@@ -515,7 +514,7 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    private synchronized boolean installPackage(final Map<String, Object> config) {
+    private boolean installPackage(final Map<String, Object> config) {
         boolean configChanged = false;
         Object packageName = config.get(OpenHAB.CFG_PACKAGE);
         if (packageName instanceof String) {
