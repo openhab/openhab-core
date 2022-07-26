@@ -36,7 +36,6 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
@@ -136,12 +135,13 @@ public class FeatureInstaller implements ConfigurationListener {
         scheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("karaf-addons"));
         setOnlineRepoUrl();
         modified(config);
+
         scheduler.scheduleWithFixedDelay(this::syncConfiguration, 1, 1, TimeUnit.MINUTES);
     }
 
     @Deactivate
     protected void deactivate() {
-        scheduler.shutdownNow();
+        scheduler.shutdown();
     }
 
     @Modified
@@ -170,8 +170,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 modified(cfgMap);
             }
         } catch (IOException e) {
-            logger.debug("Failed to retrieve the addons configuration from configuration admin: {}",
-                    e.getMessage());
+            logger.debug("Failed to retrieve the addons configuration from configuration admin: {}", e.getMessage());
         }
     }
 
@@ -449,8 +448,8 @@ public class FeatureInstaller implements ConfigurationListener {
             if (logger.isDebugEnabled()) {
                 logger.debug("Installing '{}'", String.join(", ", addons));
             }
-            featuresService.installFeatures(addons,
-                    EnumSet.of(FeaturesService.Option.Upgrade, FeaturesService.Option.NoFailOnFeatureNotFound));
+            featuresService.installFeatures(addons, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles,
+                    FeaturesService.Option.Upgrade, FeaturesService.Option.NoFailOnFeatureNotFound));
             try {
                 Feature[] features = featuresService.listInstalledFeatures();
                 Set<String> installed = new HashSet<>();
