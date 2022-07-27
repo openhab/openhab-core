@@ -212,6 +212,12 @@ public class FeatureInstaller implements ConfigurationListener {
         }
 
         processingConfigQueue.set(false);
+
+        try {
+            featuresService.refreshFeatures(EnumSet.of(FeaturesService.Option.Upgrade));
+        } catch (Exception e) {
+            logger.error("Failed to refresh bundles after processing config update", e);
+        }
     }
 
     @Nullable
@@ -485,7 +491,8 @@ public class FeatureInstaller implements ConfigurationListener {
         try {
             Feature[] features = featuresService.listInstalledFeatures();
             if (!anyMatchingFeature(features, withName(name))) {
-                featuresService.installFeature(name);
+                featuresService.installFeature(name,
+                        EnumSet.of(FeaturesService.Option.Upgrade, FeaturesService.Option.NoAutoRefreshBundles));
                 features = featuresService.listInstalledFeatures();
                 if (anyMatchingFeature(features, withName(name))) {
                     logger.debug("Installed '{}'", name);
