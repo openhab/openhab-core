@@ -187,6 +187,7 @@ public class FeatureInstaller implements ConfigurationListener {
         }
 
         Map<String, Object> config;
+        boolean changed = false;
 
         while ((config = configQueue.poll()) != null) {
             // cache the last processed config
@@ -203,18 +204,23 @@ public class FeatureInstaller implements ConfigurationListener {
             }
 
             if (installPackage(config)) {
+                changed = true;
                 // our package selection has changed, so let's wait for the values to be available in config admin
                 // which we will receive as another call to modified
                 continue;
             }
 
-            installAddons(config); // we don't have to wait even if the job is running, because method is synchronized
+            if (installAddons(config)) {
+                changed = true;
+            }
         }
 
         processingConfigQueue.set(false);
 
         try {
-            featuresService.refreshFeatures(EnumSet.of(FeaturesService.Option.Upgrade));
+            if (changed) {
+                featuresService.refreshFeatures(EnumSet.noneOf(FeaturesService.Option.class));
+            }
         } catch (Exception e) {
             logger.error("Failed to refresh bundles after processing config update", e);
         }
@@ -386,7 +392,7 @@ public class FeatureInstaller implements ConfigurationListener {
         return changed;
     }
 
-    private void installAddons(final Map<String, Object> config) {
+    private boolean installAddons(final Map<String, Object> config) {
         final Set<String> currentAddons = new HashSet<>(); // the currently installed ones
         final Set<String> targetAddons = new HashSet<>(); // the target we want to have installed afterwards
         final Set<String> installAddons = new HashSet<>(); // the ones to be installed (the diff)
@@ -435,6 +441,8 @@ public class FeatureInstaller implements ConfigurationListener {
 
         // do the de-installation
         uninstallAddons.forEach(this::uninstallFeature);
+
+        return !installAddons.isEmpty() || !uninstallAddons.isEmpty();
     }
 
     private Set<String> getAllFeatureNamesWithPrefix(String prefix) {
