@@ -13,6 +13,22 @@
 					"label": "Item",
 					"description": "the name of the item",
 					"required": true
+				},
+				{
+					"name": "timeOnly",
+					"type": "BOOLEAN",
+					"label": "Time only",
+					"description": "Specifies whether only the time of the item should be compared or the date and time.",
+					"options": [
+						{
+							"label": "Yes",
+							"value": "true"
+						},
+						{
+							"label": "No",
+							"value": "false"
+						}
+					]
 				}
 			]
 		}
