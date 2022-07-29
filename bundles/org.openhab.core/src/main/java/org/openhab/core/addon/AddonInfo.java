@@ -44,10 +44,11 @@ public class AddonInfo implements Identifiable<String> {
     private final List<String> countries;
     private final @Nullable String configDescriptionURI;
     private final String serviceId;
+    private @Nullable String sourceBundle;
 
     private AddonInfo(String id, String type, String name, String description, @Nullable String author,
             @Nullable String connection, List<String> countries, @Nullable String configDescriptionURI,
-            @Nullable String serviceId) throws IllegalArgumentException {
+            @Nullable String serviceId, @Nullable String sourceBundle) throws IllegalArgumentException {
         // mandatory fields
         if (id.isBlank()) {
             throw new IllegalArgumentException("The ID must neither be null nor empty!");
@@ -73,6 +74,7 @@ public class AddonInfo implements Identifiable<String> {
         this.countries = countries;
         this.configDescriptionURI = configDescriptionURI;
         this.serviceId = Objects.requireNonNullElse(serviceId, type + "." + id);
+        this.sourceBundle = sourceBundle;
     }
 
     /**
@@ -139,6 +141,10 @@ public class AddonInfo implements Identifiable<String> {
         return configDescriptionURI;
     }
 
+    public @Nullable String getSourceBundle() {
+        return sourceBundle;
+    }
+
     public List<String> getCountries() {
         return countries;
     }
@@ -162,6 +168,7 @@ public class AddonInfo implements Identifiable<String> {
         private List<String> countries = List.of();
         private @Nullable String configDescriptionURI = "";
         private @Nullable String serviceId;
+        private @Nullable String sourceBundle;
 
         private Builder(String id, String type) {
             this.id = id;
@@ -178,6 +185,7 @@ public class AddonInfo implements Identifiable<String> {
             this.countries = addonInfo.countries;
             this.configDescriptionURI = addonInfo.configDescriptionURI;
             this.serviceId = addonInfo.serviceId;
+            this.sourceBundle = addonInfo.sourceBundle;
         }
 
         public Builder withName(String name) {
@@ -220,6 +228,11 @@ public class AddonInfo implements Identifiable<String> {
             return this;
         }
 
+        public Builder withSourceBundle(@Nullable String sourceBundle) {
+            this.sourceBundle = sourceBundle;
+            return this;
+        }
+
         /**
          * Build an {@link AddonInfo} from this builder
          * 
@@ -228,7 +241,7 @@ public class AddonInfo implements Identifiable<String> {
          */
         public AddonInfo build() throws IllegalArgumentException {
             return new AddonInfo(id, type, name, description, author, connection, countries, configDescriptionURI,
-                    serviceId);
+                    serviceId, sourceBundle);
         }
     }
 }
