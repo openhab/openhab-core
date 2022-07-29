@@ -55,7 +55,12 @@ public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUI
 
     @Override
     protected @Nullable Thing toElement(String key, ThingStorageEntity persistableElement) {
-        return ThingDTOMapper.map(persistableElement, persistableElement.isBridge);
+        try {
+            return ThingDTOMapper.map(persistableElement, persistableElement.isBridge);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Failed to create thing with UID '{}' from stored entity: {}", key, e.getMessage());
+        }
+        return null;
     }
 
     @Override
