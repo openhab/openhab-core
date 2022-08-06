@@ -76,7 +76,7 @@ TimerTrigger:
 ;
 
 DateTimeTrigger:
-    'Time' 'is' item=ItemName
+    'Time' 'is' item=ItemName (timeOnly?='timeOnly')?
 ;
 
 SystemTrigger:

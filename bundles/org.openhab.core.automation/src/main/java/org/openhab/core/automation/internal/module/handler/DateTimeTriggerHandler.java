@@ -57,14 +57,17 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
 
     public static final String MODULE_TYPE_ID = "timer.DateTimeTrigger";
     public static final String CONFIG_ITEM_NAME = "itemName";
+    public static final String CONFIG_TIME_ONLY = "timeOnly";
 
     private static final DateTimeFormatter CRON_FORMATTER = DateTimeFormatter.ofPattern("s m H d M * uuuu");
+    private static final DateTimeFormatter CRON_TIMEONLY_FORMATTER = DateTimeFormatter.ofPattern("s m H * * * *");
 
     private final Logger logger = LoggerFactory.getLogger(DateTimeTriggerHandler.class);
 
     private final CronScheduler scheduler;
     private final String itemName;
     private String cronExpression = CronAdjuster.REBOOT;
+    private Boolean timeOnly = false;
 
     private @Nullable ScheduledCompletableFuture<?> schedule;
     private @Nullable ServiceRegistration<?> eventSubscriberRegistration;
@@ -78,6 +81,8 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
             logger.warn("itemName is blank in module '{}', trigger will not work", module.getId());
             return;
         }
+        this.timeOnly = ConfigParser.valueAsOrElse(module.getConfiguration().get(CONFIG_TIME_ONLY), Boolean.class,
+                false);
         Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("event.topics", "openhab/items/" + itemName + "/*");
         eventSubscriberRegistration = bundleContext.registerService(EventSubscriber.class.getName(), this, properties);
@@ -173,7 +178,9 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
         if (value instanceof UnDefType) {
             cronExpression = CronAdjuster.REBOOT;
         } else if (value instanceof DateTimeType) {
-            cronExpression = ((DateTimeType) value).getZonedDateTime().format(CRON_FORMATTER);
+            boolean itemIsTimeOnly = ((DateTimeType) value).toString().startsWith("1970-01-01T");
+            cronExpression = ((DateTimeType) value).getZonedDateTime()
+                    .format(timeOnly || itemIsTimeOnly ? CRON_TIMEONLY_FORMATTER : CRON_FORMATTER);
             startScheduler();
         } else {
             logger.warn("Received {} which is not an accepted value for trigger of type '{}", value, MODULE_TYPE_ID);
