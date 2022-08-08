@@ -96,6 +96,21 @@ public interface VoiceManager {
     void say(String text, @Nullable String voiceId, @Nullable String sinkId, @Nullable PercentType volume);
 
     /**
+     * Speaks the passed string with the given volume using the provided voiceId and the given audio sink, and possibly
+     * use the TTS cache.
+     * If the voiceId is fully qualified (i.e. with a tts prefix), the according TTS service will be used, otherwise the
+     * voiceId is assumed to be available on the default TTS service.
+     *
+     * @param text The text to say
+     * @param voiceId The id of the voice to use (either with or without prefix) or null
+     * @param sinkId The id of the audio sink to use or null
+     * @param volume The volume to be used or null if the default notification volume should be used
+     * @param enableCache enable the TTS cache system
+     */
+    void say(String text, @Nullable String voiceId, @Nullable String sinkId, @Nullable PercentType volume,
+            @Nullable Boolean enableCache);
+
+    /**
      * Interprets the passed string using the default services for HLI and locale.
      *
      * @param text The text to interpret

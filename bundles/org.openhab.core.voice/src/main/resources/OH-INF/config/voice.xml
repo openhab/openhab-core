@@ -49,6 +49,16 @@
 			<description>A melody to be played to advertise the user the dialog processing is going to start, leave empty to
 				disable it. (Spaced separated list of notes. Example: "A O:100 A':50")</description>
 		</parameter>
+		<parameter name="enableCacheTTS" type="boolean">
+			<label>Enable TTS caching</label>
+			<description>true to enable caching files produced by the TTS services on disk.</description>
+			<default>true</default>
+		</parameter>
+		<parameter name="cacheSizeTTS" type="integer">
+			<label>TTS Cache Size</label>
+			<description>The limit size of the TTS cache (in kB).</description>
+			<default>10240</default>
+		</parameter>
 	</config-description>
 
 </config-description:config-descriptions>

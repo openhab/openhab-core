@@ -61,6 +61,8 @@ import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.internal.cache.TTSCache;
+import org.openhab.core.voice.internal.cache.TTSLRUCacheImpl;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
 import org.osgi.framework.Bundle;
@@ -86,6 +88,7 @@ import org.slf4j.LoggerFactory;
  * @author Wouter Born - Sort TTS options
  * @author Laurent Garnier - Updated methods startDialog and added method stopDialog
  * @author Miguel Álvarez - Use dialog context
+ * @author Gwendal Roulleau - Adding cache/concurrent read functionality
  */
 @Component(immediate = true, configurationPid = VoiceManagerImpl.CONFIGURATION_PID, //
         property = Constants.SERVICE_PID + "=org.openhab.voice")
@@ -94,6 +97,9 @@ import org.slf4j.LoggerFactory;
 public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, DialogProcessor.DialogEventListener {
 
     public static final String CONFIGURATION_PID = "org.openhab.voice";
+
+    // a small default cache size for all the TTS services (in kB)
+    public static final Integer DEFAULT_CACHE_SIZE_TTS = 10240;
 
     // the default keyword to use if no other is configured
     private static final String DEFAULT_KEYWORD = "Wakeup";
@@ -109,6 +115,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private static final String CONFIG_DEFAULT_TTS = "defaultTTS";
     private static final String CONFIG_DEFAULT_VOICE = "defaultVoice";
     private static final String CONFIG_PREFIX_DEFAULT_VOICE = "defaultVoice.";
+    private static final String CONFIG_CACHE_SIZE_TTS = "cacheSizeTTS";
+    private static final String CONFIG_ENABLE_CACHE_TTS = "enableCacheTTS";
 
     private final Logger logger = LoggerFactory.getLogger(VoiceManagerImpl.class);
     private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
@@ -138,11 +146,17 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private @Nullable String defaultKS;
     private @Nullable String defaultHLI;
     private @Nullable String defaultVoice;
+    private Integer cacheSizeTTS = DEFAULT_CACHE_SIZE_TTS;
+    private Boolean enableCacheTTS = true;
+
     private final Map<String, String> defaultVoices = new HashMap<>();
     private final Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
     private final Map<String, DialogProcessor> singleDialogProcessors = new ConcurrentHashMap<>();
     private @Nullable DialogContext lastDialogContext;
     private @Nullable ScheduledFuture<?> dialogRegistrationFuture;
+
+    @Nullable
+    private TTSCache ttsCache;
 
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
@@ -190,6 +204,22 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             this.defaultHLI = config.containsKey(CONFIG_DEFAULT_HLI) ? config.get(CONFIG_DEFAULT_HLI).toString() : null;
             this.defaultVoice = config.containsKey(CONFIG_DEFAULT_VOICE) ? config.get(CONFIG_DEFAULT_VOICE).toString()
                     : null;
+            this.enableCacheTTS = Boolean.parseBoolean(config.getOrDefault(CONFIG_ENABLE_CACHE_TTS, "true").toString());
+            try {
+                this.cacheSizeTTS = Integer
+                        .parseInt(config.getOrDefault(CONFIG_CACHE_SIZE_TTS, DEFAULT_CACHE_SIZE_TTS).toString());
+            } catch (NumberFormatException e) {
+                logger.warn("Cannot parse TTS cache size. Using 10240kB default size.");
+                this.cacheSizeTTS = DEFAULT_CACHE_SIZE_TTS;
+            }
+            if (enableCacheTTS) {
+                try {
+                    this.ttsCache = new TTSLRUCacheImpl(cacheSizeTTS * 1024);
+                } catch (IOException | SecurityException e) {
+                    logger.warn("Cannot initialize the TTS cache folder. Reason: {}", e.getMessage());
+                    this.enableCacheTTS = false;
+                }
+            }
 
             for (String key : config.keySet()) {
                 if (key.startsWith(CONFIG_PREFIX_DEFAULT_VOICE)) {
@@ -227,6 +257,12 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public void say(String text, @Nullable String voiceId, @Nullable String sinkId, @Nullable PercentType volume) {
+        say(text, voiceId, sinkId, volume, null);
+    }
+
+    @Override
+    public void say(String text, @Nullable String voiceId, @Nullable String sinkId, @Nullable PercentType volume,
+            @Nullable Boolean enableCache) {
         Objects.requireNonNull(text, "Text cannot be said as it is null.");
 
         try {
@@ -267,8 +303,18 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                         + sink.getId() + "'");
             }
 
-            AudioStream audioStream = tts.synthesize(text, voice, ttsAudioFormat);
-            if (!sink.getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(audioStream))) {
+            AudioStream audioStream = null;
+            Boolean enableCacheMethodParameter = enableCache != null ? enableCache : true;
+            if (this.enableCacheTTS && tts.isCacheEnabled() && enableCacheMethodParameter) {
+                TTSCache ttsCacheFinal = ttsCache;
+                if (this.enableCacheTTS && ttsCacheFinal != null) {
+                    audioStream = ttsCacheFinal.getOrSynthetize(tts, text, voice, ttsAudioFormat);
+                }
+            } else {
+                audioStream = tts.synthesize(text, voice, ttsAudioFormat);
+            }
+            AudioStream audioStreamFinal = audioStream;
+            if (!sink.getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(audioStreamFinal))) {
                 throw new TTSException(
                         "Failed playing audio stream '" + audioStream + "' as audio sink doesn't support it");
             }

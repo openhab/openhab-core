@@ -12,6 +12,9 @@
  */
 package org.openhab.core.voice;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 import java.util.Set;
 
@@ -72,4 +75,34 @@ public interface TTSService {
      *             {@link AudioStream}
      */
     public AudioStream synthesize(String text, Voice voice, AudioFormat requestedFormat) throws TTSException;
+
+    /**
+     * Check if this TTS service accepts the system-wide TTS cache service.
+     *
+     * @return
+     */
+    public default boolean isCacheEnabled() {
+        return true;
+    }
+
+    /**
+     * Construct a uniquely identifying string for the request. Could be overridden by the TTS service if
+     * it uses some unique external parameter and wants to identify variability in the cache.
+     *
+     * @param text The text to convert to speech
+     * @param voice The voice to use for speech
+     * @param requestedFormat The audio format to return the results in
+     * @return A likely unique key identifying the combination of parameters and/or internal state,
+     *         as a string suitable to be part of a filename. This will be used in the cache system to store the result.
+     */
+    public default String getCacheKey(String text, Voice voice, AudioFormat requestedFormat) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            return "nomd5algorithm";
+        }
+        byte[] binaryKey = ((text + voice.getUID() + requestedFormat.toString()).getBytes());
+        return String.format("%032x", new BigInteger(1, md.digest(binaryKey)));
+    }
 }

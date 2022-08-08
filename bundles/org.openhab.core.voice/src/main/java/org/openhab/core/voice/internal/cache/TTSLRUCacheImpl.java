@@ -1,0 +1,364 @@
+/**
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.core.voice.internal.cache;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.FileStore;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.voice.TTSException;
+import org.openhab.core.voice.TTSService;
+import org.openhab.core.voice.Voice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Cache system to avoid requesting {@link TTSService} for the same utterances.
+ * This is a LRU cache (least recently used entry is evicted if the size
+ * is exceeded)
+ * Size is based on the size on disk (in kilobytes)
+ *
+ * @author Gwendal Roulleau - Initial contribution
+ */
+@NonNullByDefault
+public class TTSLRUCacheImpl implements TTSCache {
+
+    private final Logger logger = LoggerFactory.getLogger(TTSLRUCacheImpl.class);
+
+    public static final String INFO_EXT = ".info";
+    public static final String SOUND_EXT = ".snd";
+
+    private static final String VOICE_TTS_CACHE_PID = "org.openhab.voice.tts";
+    private static final String CACHE_FOLDER_NAME = "cache";
+
+    /**
+     * A map to store all cached entries
+     */
+    private Map<String, TTSResult> ttsResultMap;
+
+    /**
+     * The most recently used {@link TTSResult}
+     */
+    @Nullable
+    private TTSResult head;
+
+    /**
+     * The least recently used {@link TTSResult}. Could be evicted soon.
+     */
+    @Nullable
+    private TTSResult tail;
+
+    /**
+     * Lock the cache to handle concurrency
+     */
+    private ReentrantLock lock = new ReentrantLock();
+
+    /**
+     * The size limit, in bytes. The size is not a hard one, because the final size of the
+     * current request is not known and may or may not exceed the limit.
+     */
+    private long limitSize;
+
+    private File cacheFolder;
+
+    /**
+     * Check free disk space and construct a cache system for TTS result.
+     *
+     * @param Target size of the cache in kB. The size is not a hard one, because the final size of the
+     *            current request is not known and may exceed the limit.
+     * @throws IOException when we cannot create the cache directory or if we have not enough space (*2 security margin)
+     */
+    public TTSLRUCacheImpl(long size) throws IOException {
+        this.ttsResultMap = new ConcurrentHashMap<>();
+        this.limitSize = size;
+
+        cacheFolder = new File(new File(OpenHAB.getUserDataFolder(), CACHE_FOLDER_NAME), VOICE_TTS_CACHE_PID);
+        // creating directory if needed :
+        if (!cacheFolder.exists()) {
+            logger.debug("Creating TTS cache folder '{}'", cacheFolder.getAbsolutePath());
+            cacheFolder.mkdirs();
+        }
+        // check if we have enough space :
+        if (getFreeSpaceInTheDirectory(cacheFolder) < (limitSize * 2)) {
+            throw new IOException("Not enough space for the TTS cache");
+        }
+        logger.debug("Using TTS cache folder '{}'", cacheFolder.getAbsolutePath());
+
+        cleandCacheDirectory();
+        loadAll();
+        makeSpace();
+    }
+
+    private void cleandCacheDirectory() {
+        try {
+            List<@Nullable Path> filesInCacheFolder = Files.list(cacheFolder.toPath()).collect(Collectors.toList());
+
+            // 1 delete empty files
+            for (Path path : filesInCacheFolder) {
+                if (path != null) {
+                    File file = path.toFile();
+                    if (file.length() == 0) {
+                        file.delete();
+                    }
+                }
+            }
+
+            // 2 clean orphan
+            for (Path path : filesInCacheFolder) {
+                if (path != null) {
+                    File file = path.toFile();
+                    Optional<String> extension = Optional.ofNullable(file.getName()).filter(f -> f.contains("."))
+                            .map(f -> f.substring(file.getName().lastIndexOf(".")));
+                    if (extension.isPresent()) {
+                        String fileNameWithoutExtension = file.getName().replaceAll("\\.\\w+$", "");
+                        String otherExt;
+                        if (extension.get().equals(INFO_EXT)) {
+                            otherExt = SOUND_EXT;
+                        } else if (extension.get().equals(SOUND_EXT)) {
+                            otherExt = INFO_EXT;
+                        } else {
+                            continue;
+                        }
+                        if (!new File(cacheFolder, fileNameWithoutExtension + otherExt).exists()) {
+                            file.delete();
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            logger.warn("Cannot load the TTS cache directory : {}", e.getMessage());
+            return;
+        }
+    }
+
+    private long getFreeSpaceInTheDirectory(File cacheFolder) {
+        try {
+            URI rootURI = new URI("file:///");
+            Path rootPath = Paths.get(rootURI);
+            Path dirPath = rootPath.resolve(cacheFolder.toPath().getParent());
+            FileStore dirFileStore = Files.getFileStore(dirPath);
+            return dirFileStore.getUsableSpace();
+        } catch (URISyntaxException | IOException e) {
+            logger.error("Cannot compute free disk space for the TTS cache. Reason: {}", e.getMessage());
+            return 0;
+        }
+    }
+
+    @Override
+    public AudioStream getOrSynthetize(TTSService tts, String text, Voice voice, AudioFormat requestedFormat)
+            throws TTSException {
+        // initialize the supplier stream from the TTS service :
+        AudioStreamSupplier ttsSynthetizerSupplier = new AudioStreamSupplier(tts, text, voice, requestedFormat);
+        this.lock.lock(); // (a get operation also need the lock as it will update the head of the cache)
+        try {
+            String key = tts.getClass().getSimpleName() + "_" + tts.getCacheKey(text, voice, requestedFormat);
+            // try to get from cache
+            TTSResult ttsResult = get(key);
+            if (ttsResult == null || !ttsResult.getText().equals(text)) { // it's a cache miss or a false positive, we
+                                                                          // must (re)create it
+                logger.debug("Cache miss {}", key);
+                ttsResult = new TTSResult(cacheFolder, key, ttsSynthetizerSupplier);
+                put(key, ttsResult);
+            } else {
+                logger.debug("Cache hit {}", key);
+            }
+            return ttsResult.getAudioStreamClient(ttsSynthetizerSupplier);
+        } finally {
+            this.lock.unlock();
+        }
+    }
+
+    /**
+     * Load all {@link TTSResult} cached to the disk.
+     */
+    private void loadAll() {
+        ttsResultMap.clear();
+
+        try (Stream<Path> stream = Files.list(cacheFolder.toPath())) {
+            // Load the TTSResult from cache directory, order by date
+            List<@Nullable TTSResult> ttsResultOrderedList = stream
+                    .filter(path -> path.getFileName().toString().endsWith(INFO_EXT)).map(Path::toFile)
+                    .sorted((file1, file2) -> Long.valueOf(file1.lastModified() - file2.lastModified()).intValue())
+                    .map(this::buildFromFile).filter(Objects::nonNull).collect(Collectors.toList());
+
+            // Now create links between ordered entries in the list :
+            TTSResult previous = null;
+            for (TTSResult current : ttsResultOrderedList) {
+                if (current != null) {
+                    if (head == null) {
+                        head = current;
+                    }
+                    if (tail == null) {
+                        tail = current;
+                    }
+
+                    current.setPrevious(previous);
+                    if (previous != null) {
+                        previous.setNext(current);
+                    }
+                    previous = current;
+                }
+            }
+
+            ttsResultMap = ttsResultOrderedList.stream()
+                    .collect(Collectors.toMap(TTSResult::getKey, Function.identity()));
+        } catch (IOException e) {
+            logger.warn("Cannot load the TTS cache directory : {}", e.getMessage());
+        }
+    }
+
+    private @Nullable TTSResult buildFromFile(File file) {
+        String fileNameWithoutExtension = file.getName().replaceAll("\\.\\w+$", "");
+        try {
+            return new TTSResult(cacheFolder, fileNameWithoutExtension);
+        } catch (IOException e) {
+            logger.info("Cannot get TTS Result cache from file {}", file.getName());
+            return null;
+        }
+    }
+
+    /**
+     * Put a {@link TTSResult} in the cache structure
+     * It will be put as the most recently used.
+     * If already existing, it will delete and replace the old entry.
+     * Make some space if needed
+     *
+     * @param key a unique key identifier
+     * @param value the {@link TTSResult} entry to cache
+     */
+    protected void put(String key, TTSResult value) {
+        this.makeSpace();
+        // delete result if it already exists (we will replace it)
+        removeAndDeleteFiles(this.ttsResultMap.get(key));
+        // Putting it in head position
+        moveToHead(value);
+        // tail could be empty and must be filled (if cache is new)
+        if (tail == null) {
+            tail = value;
+        }
+    }
+
+    /**
+     * Move a {@link TTSResult} to the most recently used position.
+     *
+     * @param newHead The node to become head of the LRU cache
+     */
+    private void moveToHead(TTSResult newHead) {
+        if (newHead.equals(head)) { // already at head
+            return;
+        }
+
+        // remove it from the chained link and re-construct the chain
+        remove(newHead);
+
+        TTSResult oldHead = head;
+        if (oldHead != null) {
+            oldHead.setPrevious(newHead);
+            newHead.setNext(oldHead);
+            newHead.setPrevious(null);
+        }
+        head = newHead;
+        this.ttsResultMap.put(newHead.getKey(), newHead);
+    }
+
+    /**
+     * Check if the cache is not already full and make space if needed
+     */
+    private void makeSpace() {
+        Long cacheSize = ttsResultMap.values().stream().map(TTSResult::getCurrentSize).reduce(0L, (Long::sum));
+        while (cacheSize >= limitSize && !ttsResultMap.isEmpty()) {
+            removeAndDeleteFiles(tail);
+            cacheSize = ttsResultMap.values().stream().map(TTSResult::getCurrentSize).reduce(0L, (Long::sum));
+        }
+    }
+
+    /**
+     * Remove the node from the LRU linked list,
+     * And rebuild its neighbor if needed
+     *
+     * @param toDelete the node to remove
+     */
+    private void remove(@Nullable TTSResult toDelete) {
+        if (toDelete == null) {
+            return;
+        }
+
+        TTSResult beforeToDelete = toDelete.getPrevious();
+        TTSResult afterToDelete = toDelete.getNext();
+        if (toDelete.equals(head)) { // the one to delete is the actual head. update the head :
+            head = afterToDelete;
+        } else if (beforeToDelete != null && !beforeToDelete.equals(afterToDelete)) {
+            beforeToDelete.setNext(afterToDelete);
+        }
+        if (toDelete.equals(tail)) { // the one to delete is the actual tail. update the tail :
+            tail = beforeToDelete;
+        } else if (afterToDelete != null && !afterToDelete.equals(beforeToDelete)) {
+            afterToDelete.setPrevious(beforeToDelete);
+        }
+
+        ttsResultMap.remove(toDelete.getKey());
+    }
+
+    /**
+     * Delete a node in the cache, with the files.
+     *
+     * @param toDelete
+     */
+    private void removeAndDeleteFiles(@Nullable TTSResult toDelete) {
+        if (toDelete == null) {
+            return;
+        }
+        // 1 Remove the node from the map cache
+        remove(toDelete);
+
+        // 2 Delete the files
+        toDelete.deleteFiles();
+    }
+
+    /**
+     * Return the {@link TTSResult} in cache, or null if absent
+     * The associated TTS result is now the most recently used sound,
+     * and so the last to be eventually expelled if space is needed.
+     *
+     * @param key a unique key
+     * @return The value in cache associated to the key
+     */
+    @Nullable
+    protected TTSResult get(String key) {
+        TTSResult ttsResult = ttsResultMap.get(key);
+        if (ttsResult != null) {
+            moveToHead(ttsResult);
+            return ttsResult;
+        }
+        return null;
+    }
+}
