@@ -102,23 +102,28 @@ public class TTSLRUCacheImpl implements TTSCache {
         this.limitSize = size;
 
         cacheFolder = new File(new File(OpenHAB.getUserDataFolder(), CACHE_FOLDER_NAME), VOICE_TTS_CACHE_PID);
-        // creating directory if needed :
-        if (!cacheFolder.exists()) {
-            logger.debug("Creating TTS cache folder '{}'", cacheFolder.getAbsolutePath());
-            cacheFolder.mkdirs();
-        }
+        checkFolder();
+
         // check if we have enough space :
         if (getFreeSpaceInTheDirectory(cacheFolder) < (limitSize * 2)) {
             throw new IOException("Not enough space for the TTS cache");
         }
         logger.debug("Using TTS cache folder '{}'", cacheFolder.getAbsolutePath());
 
-        cleandCacheDirectory();
+        cleanCacheDirectory();
         loadAll();
         makeSpace();
     }
 
-    private void cleandCacheDirectory() {
+    private void checkFolder() {
+        // creating directory if needed :
+        if (!cacheFolder.exists()) {
+            logger.debug("Creating TTS cache folder '{}'", cacheFolder.getAbsolutePath());
+            cacheFolder.mkdirs();
+        }
+    }
+
+    private void cleanCacheDirectory() {
         try {
             List<@Nullable Path> filesInCacheFolder = Files.list(cacheFolder.toPath()).collect(Collectors.toList());
 
@@ -176,6 +181,8 @@ public class TTSLRUCacheImpl implements TTSCache {
     @Override
     public AudioStream getOrSynthetize(TTSService tts, String text, Voice voice, AudioFormat requestedFormat)
             throws TTSException {
+        checkFolder();
+
         // initialize the supplier stream from the TTS service :
         AudioStreamSupplier ttsSynthetizerSupplier = new AudioStreamSupplier(tts, text, voice, requestedFormat);
         this.lock.lock(); // (a get operation also need the lock as it will update the head of the cache)
