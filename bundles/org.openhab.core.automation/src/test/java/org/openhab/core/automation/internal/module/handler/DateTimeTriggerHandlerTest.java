@@ -43,7 +43,7 @@ import org.osgi.framework.BundleContext;
  */
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
-class DateTimeTriggerHandlerTest {
+public class DateTimeTriggerHandlerTest {
     private @NonNullByDefault({}) @Mock Trigger mockTrigger;
     private @NonNullByDefault({}) @Mock ItemRegistry mockItemRegistry;
     private @NonNullByDefault({}) @Mock BundleContext mockBundleContext;
