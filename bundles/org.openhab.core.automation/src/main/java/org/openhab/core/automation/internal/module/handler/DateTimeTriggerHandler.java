@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -179,7 +180,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
             cronExpression = CronAdjuster.REBOOT;
         } else if (value instanceof DateTimeType) {
             boolean itemIsTimeOnly = ((DateTimeType) value).toString().startsWith("1970-01-01T");
-            cronExpression = ((DateTimeType) value).getZonedDateTime()
+            cronExpression = ((DateTimeType) value).getZonedDateTime().withZoneSameInstant(ZoneId.systemDefault())
                     .format(timeOnly || itemIsTimeOnly ? CRON_TIMEONLY_FORMATTER : CRON_FORMATTER);
             startScheduler();
         } else {
