@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -331,7 +331,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             return null;
         }
 
-        if (lastAccessToken.isExpired(LocalDateTime.now(), tokenExpiresInSeconds)
+        if (lastAccessToken.isExpired(Instant.now(), tokenExpiresInSeconds)
                 && lastAccessToken.getRefreshToken() != null) {
             return refreshToken();
         }

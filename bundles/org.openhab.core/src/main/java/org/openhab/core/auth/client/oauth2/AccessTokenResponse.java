@@ -14,8 +14,6 @@ package org.openhab.core.auth.client.oauth2;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Objects;
 
 /**
@@ -112,22 +110,6 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      *            by the authorization server.
      * @return true if object is not-initialized, or expired, or expired early due to buffer
      */
-    @Deprecated
-    public boolean isExpired(LocalDateTime givenTime, int tokenExpiresInBuffer) {
-        return createdOn == null
-                || isExpired(givenTime.atZone(ZoneId.systemDefault()).toInstant(), tokenExpiresInBuffer);
-    }
-
-    /**
-     * Calculate if the token is expired against the given time.
-     * It also returns true even if the token is not initialized (i.e. object newly created).
-     *
-     * @param givenTime To calculate if the token is expired against the givenTime.
-     * @param tokenExpiresInBuffer A positive integer in seconds to act as additional buffer to the calculation.
-     *            This causes the OAuthToken to expire earlier then the stated expiry-time given
-     *            by the authorization server.
-     * @return true if object is not-initialized, or expired, or expired early due to buffer
-     */
     public boolean isExpired(Instant givenTime, int tokenExpiresInBuffer) {
         return createdOn == null
                 || createdOn.plusSeconds(expiresIn).minusSeconds(tokenExpiresInBuffer).isBefore(givenTime);
@@ -181,12 +163,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         this.state = state;
     }
 
-    @Deprecated
-    public LocalDateTime getCreatedOn() {
-        return LocalDateTime.ofInstant(createdOn, ZoneId.systemDefault());
-    }
-
-    public Instant getCreatedOnAsInstant() {
+    public Instant getCreatedOn() {
         return createdOn;
     }
 
