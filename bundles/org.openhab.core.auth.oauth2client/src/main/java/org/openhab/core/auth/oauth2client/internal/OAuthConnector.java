@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -312,7 +312,7 @@ public class OAuthConnector {
 
             if (statusCode == HttpStatus.OK_200) {
                 AccessTokenResponse jsonResponse = gson.fromJson(content, AccessTokenResponse.class);
-                jsonResponse.setCreatedOn(LocalDateTime.now()); // this is not supplied by the response
+                jsonResponse.setCreatedOn(Instant.now()); // this is not supplied by the response
                 logger.debug("grant type {} to URL {} success", grantType, request.getURI());
                 return jsonResponse;
             } else if (statusCode == HttpStatus.BAD_REQUEST_400) {
