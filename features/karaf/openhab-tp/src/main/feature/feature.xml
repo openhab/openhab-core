@@ -108,6 +108,12 @@
 		<bundle>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.whiteboard/2.0.0</bundle>
 	</feature>
 
+	<feature name="openhab.tp-jna" description="Java Native Access (JNA)" version="${project.version}">
+		<capability>openhab.tp;feature=jna;version=${jna.version}</capability>
+		<bundle dependency="true">mvn:net.java.dev.jna/jna/${jna.version}</bundle>
+		<bundle dependency="true">mvn:net.java.dev.jna/jna-platform/${jna.version}</bundle>
+	</feature>
+
 	<feature name="openhab.tp-cxf" description="Apache CXF" version="${project.version}">
 		<capability>openhab.tp;feature=cxf;version=3.4.5</capability>
 		<feature dependency="true">openhab.tp-jaxws</feature>

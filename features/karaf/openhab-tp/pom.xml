@@ -16,6 +16,7 @@
 
   <properties>
     <jetty.version>9.4.46.v20220331</jetty.version>
+    <jna.version>5.11.0</jna.version>
   </properties>
 
   <build>

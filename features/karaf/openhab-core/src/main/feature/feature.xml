@@ -37,6 +37,9 @@
 		<requirement>openhab.tp;filter:="(feature=httpclient)"</requirement>
 		<feature dependency="true">openhab.tp-httpclient</feature>
 
+		<requirement>openhab.tp;filter:="(feature=jna)"</requirement>
+		<feature dependency="true">openhab.tp-jna</feature>
+
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
@@ -408,7 +411,7 @@
 		<feature prerequisite="true">wrapper</feature>
 		<feature prerequisite="true">jaas</feature>
 		<!-- This bundle needs to be started early as it registers the 404 and startup pages on Jetty -->
-		<!-- It is temperarily disabled due to https://github.com/openhab/openhab-core/issues/422 -->
+		<!-- It is temporarily disabled due to https://github.com/openhab/openhab-core/issues/422 -->
 		<!-- <bundle start-level="30">mvn:org.openhab.core.bundles/org.openhab.ui.start/${project.version}</bundle> -->
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.karaf/${project.version}</bundle>
 		<config name="org.openhab.audio">
@@ -421,11 +424,6 @@
 
 	<feature name="openhab-runtime-certificate" description="SSL Certificate Generator" version="${project.version}">
 		<bundle start-level="20">mvn:org.openhab.core.bundles/org.openhab.core.io.jetty.certificate/${project.version}</bundle>
-	</feature>
-
-	<feature name="openhab-runtime-jna" description="Java Native Access (JNA)" version="${project.version}">
-		<bundle>mvn:net.java.dev.jna/jna/${jna.version}</bundle>
-		<bundle>mvn:net.java.dev.jna/jna-platform/${jna.version}</bundle>
 	</feature>
 
 	<feature name="openhab-transport-coap" description="CoAP Transport" version="${project.version}">
