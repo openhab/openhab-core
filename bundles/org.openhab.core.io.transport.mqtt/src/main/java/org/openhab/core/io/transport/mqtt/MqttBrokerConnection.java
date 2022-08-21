@@ -62,6 +62,8 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 @NonNullByDefault
 public class MqttBrokerConnection {
     final Logger logger = LoggerFactory.getLogger(MqttBrokerConnection.class);
+    public static final Protocol DEFAULT_PROTOCOL = Protocol.TCP;
+    public static final MqttVersion DEFAULT_MQTT_VERSION = MqttVersion.V3;
     public static final int DEFAULT_KEEPALIVE_INTERVAL = 60;
     public static final int DEFAULT_QOS = 0;
 
