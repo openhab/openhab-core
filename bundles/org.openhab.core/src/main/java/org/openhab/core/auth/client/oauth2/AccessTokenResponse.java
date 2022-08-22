@@ -13,7 +13,7 @@
 package org.openhab.core.auth.client.oauth2;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -98,7 +98,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      * This should be slightly later than the actual time the access token
      * is produced at the server.
      */
-    private LocalDateTime createdOn;
+    private Instant createdOn;
 
     /**
      * Calculate if the token is expired against the given time.
@@ -110,7 +110,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      *            by the authorization server.
      * @return true if object is not-initialized, or expired, or expired early due to buffer
      */
-    public boolean isExpired(LocalDateTime givenTime, int tokenExpiresInBuffer) {
+    public boolean isExpired(Instant givenTime, int tokenExpiresInBuffer) {
         return createdOn == null
                 || createdOn.plusSeconds(expiresIn).minusSeconds(tokenExpiresInBuffer).isBefore(givenTime);
     }
@@ -163,11 +163,11 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         this.state = state;
     }
 
-    public LocalDateTime getCreatedOn() {
+    public Instant getCreatedOn() {
         return createdOn;
     }
 
-    public void setCreatedOn(LocalDateTime createdOn) {
+    public void setCreatedOn(Instant createdOn) {
         this.createdOn = createdOn;
     }
 
