@@ -14,6 +14,8 @@ package org.openhab.core.io.transport.mqtt;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection.MqttVersion;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection.Protocol;
 
 /**
  * Contains configuration for a MqttBrokerConnection.
@@ -30,6 +32,9 @@ public class MqttBrokerConnectionConfig {
     public @Nullable Integer port;
     public boolean secure = true;
     public boolean hostnameValidated = true;
+    // Protocol parameters
+    public Protocol protocol = MqttBrokerConnection.DEFAULT_PROTOCOL;
+    public MqttVersion mqttVersion = MqttBrokerConnection.DEFAULT_MQTT_VERSION;
     // Authentication parameters
     public @Nullable String username;
     public @Nullable String password;
