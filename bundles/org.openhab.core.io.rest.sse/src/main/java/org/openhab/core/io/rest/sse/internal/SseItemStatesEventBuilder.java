@@ -25,6 +25,7 @@ import javax.ws.rs.sse.OutboundSseEvent.Builder;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.sse.internal.dto.StateDTO;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -60,11 +61,14 @@ public class SseItemStatesEventBuilder {
 
     private final BundleContext bundleContext;
     private final ItemRegistry itemRegistry;
+    private final LocaleService localeService;
 
     @Activate
-    public SseItemStatesEventBuilder(final BundleContext bundleContext, final @Reference ItemRegistry itemRegistry) {
+    public SseItemStatesEventBuilder(final BundleContext bundleContext, final @Reference ItemRegistry itemRegistry,
+            final @Reference LocaleService localeService) {
         this.bundleContext = bundleContext;
         this.itemRegistry = itemRegistry;
+        this.localeService = localeService;
     }
 
     public @Nullable OutboundSseEvent buildEvent(Builder eventBuilder, Set<String> itemNames) {
@@ -74,7 +78,7 @@ public class SseItemStatesEventBuilder {
                 Item item = itemRegistry.getItem(itemName);
                 StateDTO stateDto = new StateDTO();
                 stateDto.state = item.getState().toString();
-                String displayState = getDisplayState(item, Locale.getDefault());
+                String displayState = getDisplayState(item, localeService.getLocale(null));
                 // Only include the display state if it's different than the raw state
                 if (stateDto.state != null && !stateDto.state.equals(displayState)) {
                     stateDto.displayState = displayState;
