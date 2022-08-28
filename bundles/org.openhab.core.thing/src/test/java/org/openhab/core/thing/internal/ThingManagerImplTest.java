@@ -33,6 +33,9 @@ import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
@@ -77,6 +80,8 @@ public class ThingManagerImplTest extends JavaTest {
         when(bundleMock.getSymbolicName()).thenReturn("test");
         when(bundleResolverMock.resolveBundle(any())).thenReturn(bundleMock);
         when(thingMock.getUID()).thenReturn(new ThingUID("test", "thing"));
+        when(thingMock.getStatusInfo())
+                .thenReturn(new ThingStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE, null));
     }
 
     private ThingManagerImpl createThingManager() {
@@ -187,6 +192,9 @@ public class ThingManagerImplTest extends JavaTest {
         Thing thingMock2 = mock(Thing.class);
 
         when(thingMock2.getUID()).thenReturn(new ThingUID("test", "thing2"));
+        when(thingMock2.getStatusInfo())
+                .thenReturn(new ThingStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE, null));
+
         setupInterceptedLogger(ThingManagerImpl.class, LogLevel.DEBUG);
 
         ThingManagerImpl thingManager = createThingManager();

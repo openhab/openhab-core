@@ -559,6 +559,7 @@ public class ThingManagerImpl
             logger.error("A thing with UID '{}' is already tracked by ThingManager. This is a bug.", thing.getUID());
         }
         this.things.put(thing.getUID(), thing);
+        eventPublisher.post(ThingEventFactory.createStatusInfoEvent(thing.getUID(), thing.getStatusInfo()));
         logger.debug("Thing '{}' is tracked by ThingManager.", thing.getUID());
         if (!isHandlerRegistered(thing)) {
             registerAndInitializeHandler(thing, getThingHandlerFactory(thing));
@@ -1125,7 +1126,7 @@ public class ThingManagerImpl
             final @Nullable ThingHandlerFactory thingHandlerFactory) {
         if (isDisabledByStorage(thing.getUID())) {
             logger.debug("Not registering a handler at this point. Thing is disabled.");
-            thing.setStatusInfo(new ThingStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.DISABLED, null));
+            setThingStatus(thing, new ThingStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.DISABLED, null));
         } else {
             if (thingHandlerFactory != null) {
                 final String identifier = getBundleIdentifier(thingHandlerFactory);
@@ -1138,6 +1139,8 @@ public class ThingManagerImpl
                             identifier);
                 }
             } else {
+                setThingStatus(thing, new ThingStatusInfo(ThingStatus.UNINITIALIZED,
+                        ThingStatusDetail.HANDLER_REGISTERING_ERROR, "Handler factory not found"));
                 logger.debug("Not registering a handler at this point. No handler factory for thing '{}' found.",
                         thing.getUID());
             }

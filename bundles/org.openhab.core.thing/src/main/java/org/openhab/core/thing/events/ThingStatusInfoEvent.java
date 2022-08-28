@@ -12,7 +12,10 @@
  */
 package org.openhab.core.thing.events;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEvent;
 import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.ThingUID;
@@ -75,5 +78,22 @@ public class ThingStatusInfoEvent extends AbstractEvent {
     @Override
     public String toString() {
         return String.format("Thing '%s' updated: %s", thingUID, thingStatusInfo);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+        ThingStatusInfoEvent that = (ThingStatusInfoEvent) o;
+        return thingUID.equals(that.thingUID) && thingStatusInfo.equals(that.thingStatusInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), thingUID, thingStatusInfo);
     }
 }
