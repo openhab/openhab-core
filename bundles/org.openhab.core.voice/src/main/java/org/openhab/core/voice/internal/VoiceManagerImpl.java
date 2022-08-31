@@ -304,15 +304,17 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             }
 
             AudioStream audioStream = null;
-            Boolean enableCacheMethodParameter = enableCache != null ? enableCache : true;
-            if (this.enableCacheTTS && tts.isCacheEnabled() && enableCacheMethodParameter) {
-                TTSCache ttsCacheFinal = ttsCache;
-                if (this.enableCacheTTS && ttsCacheFinal != null) {
-                    audioStream = ttsCacheFinal.getOrSynthetize(tts, text, voice, ttsAudioFormat);
-                }
+
+            TTSCache ttsCacheFinal = ttsCache;
+            // the method parameter is prioritary
+            // else the TTS AND the global configuration should be OK to use cache
+            if (((enableCache != null && enableCache) || this.enableCacheTTS && tts.isCacheEnabled())
+                    && ttsCacheFinal != null) {
+                audioStream = ttsCacheFinal.getOrSynthetize(tts, text, voice, ttsAudioFormat);
             } else {
                 audioStream = tts.synthesize(text, voice, ttsAudioFormat);
             }
+
             AudioStream audioStreamFinal = audioStream;
             if (!sink.getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(audioStreamFinal))) {
                 throw new TTSException(
