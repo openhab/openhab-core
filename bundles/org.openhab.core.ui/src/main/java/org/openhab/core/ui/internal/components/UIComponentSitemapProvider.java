@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -28,13 +30,16 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.sitemap.SitemapProvider;
+import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.SitemapPackage;
+import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.model.sitemap.sitemap.impl.ChartImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.ColorArrayImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ColorpickerImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.DefaultImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.FrameImpl;
@@ -50,6 +55,7 @@ import org.openhab.core.model.sitemap.sitemap.impl.SliderImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.SwitchImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.TextImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.VideoImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.VisibilityRuleImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.WebviewImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.WidgetImpl;
 import org.openhab.core.ui.components.RootUIComponent;
@@ -78,6 +84,9 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
     private static final String SITEMAP_PREFIX = "uicomponents_";
     private static final String SITEMAP_SUFFIX = ".sitemap";
+
+    private static final String COMPARATOR_STRING = "==|!=|<=|>=|<|>";
+    private static final Pattern COMPARATOR = Pattern.compile(COMPARATOR_STRING);
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
     private @Nullable UIComponentRegistryFactory componentRegistryFactory;
@@ -175,6 +184,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 widget = imageWidget;
                 setWidgetPropertyFromComponentConfig(widget, component, "url", SitemapPackage.IMAGE__URL);
                 setWidgetPropertyFromComponentConfig(widget, component, "refresh", SitemapPackage.IMAGE__REFRESH);
+                addIconColor(imageWidget.getIconColor(), component);
                 break;
             case "Video":
                 VideoImpl videoWidget = (VideoImpl) SitemapFactory.eINSTANCE.createVideo();
@@ -269,7 +279,9 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 }
             }
 
-            // TODO: process visibility & color rules
+            addWidgetVisibility(widget.getVisibility(), component);
+            addLabelColor(widget.getLabelColor(), component);
+            addValueColor(widget.getValueColor(), component);
         }
 
         return widget;
@@ -313,6 +325,77 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         mapping.setLabel(label);
                         mappings.add(mapping);
                     }
+                }
+            }
+        }
+    }
+
+    private void addWidgetVisibility(EList<VisibilityRule> visibility, UIComponent component) {
+        if (component.getConfig() != null && component.getConfig().containsKey("visibility")) {
+            for (Object sourceVisibility : (Collection<?>) component.getConfig().get("visibility")) {
+                if (sourceVisibility instanceof String) {
+                    String item = sourceVisibility.toString().split(COMPARATOR_STRING)[0].trim();
+                    Matcher matcher = COMPARATOR.matcher(sourceVisibility.toString());
+                    String condition = "";
+                    if (matcher.find()) {
+                        condition = matcher.group();
+                    }
+                    String sign = "";
+                    String state = sourceVisibility.toString().split(COMPARATOR_STRING)[1].trim();
+                    if ((state.charAt(0) == '+') || (state.charAt(0) == '-')) {
+                        sign = state.substring(0, 0);
+                        state = state.substring(1).trim();
+                    }
+                    VisibilityRuleImpl visibilityRule = (VisibilityRuleImpl) SitemapFactory.eINSTANCE
+                            .createVisibilityRule();
+                    visibilityRule.setItem(item);
+                    visibilityRule.setCondition(condition);
+                    visibilityRule.setSign(sign);
+                    visibilityRule.setState(state);
+                    visibility.add(visibilityRule);
+                }
+            }
+        }
+    }
+
+    private void addLabelColor(EList<ColorArray> labelColor, UIComponent component) {
+        addColor(labelColor, component, "labelcolor");
+    }
+
+    private void addValueColor(EList<ColorArray> valueColor, UIComponent component) {
+        addColor(valueColor, component, "valuecolor");
+    }
+
+    private void addIconColor(EList<ColorArray> iconColor, UIComponent component) {
+        addColor(iconColor, component, "valuecolor");
+    }
+
+    private void addColor(EList<ColorArray> color, UIComponent component, String key) {
+        if (component.getConfig() != null && component.getConfig().containsKey(key)) {
+            for (Object sourceColor : (Collection<?>) component.getConfig().get(key)) {
+                if (sourceColor instanceof String) {
+                    String item = "";
+                    String condition = "";
+                    String sign = "";
+                    String state = "";
+                    Matcher matcher = COMPARATOR.matcher(sourceColor.toString());
+                    if (matcher.find()) {
+                        item = sourceColor.toString().split(COMPARATOR_STRING, 2)[0].trim();
+                        condition = matcher.group();
+                        state = sourceColor.toString().split(COMPARATOR_STRING, 2)[1].split("=")[0].trim();
+                        if ((state.charAt(0) == '+') || (state.charAt(0) == '-')) {
+                            sign = state.substring(0, 0);
+                            state = state.substring(1).trim();
+                        }
+                    }
+                    String arg = sourceColor.toString().split("=")[sourceColor.toString().split("=").length - 1].trim();
+                    ColorArrayImpl colorArray = (ColorArrayImpl) SitemapFactory.eINSTANCE.createColorArray();
+                    colorArray.setItem(item);
+                    colorArray.setCondition(condition);
+                    colorArray.setSign(sign);
+                    colorArray.setState(state);
+                    colorArray.setArg(arg);
+                    color.add(colorArray);
                 }
             }
         }
