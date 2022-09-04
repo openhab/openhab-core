@@ -41,6 +41,7 @@ import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.library.types.PercentType;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
@@ -229,8 +230,14 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK") })
     public Response say(@Parameter(description = "text to speak", required = true) String text,
             @QueryParam("voiceid") @Parameter(description = "voice id") @Nullable String voiceId,
-            @QueryParam("sinkid") @Parameter(description = "audio sink id") @Nullable String sinkId) {
-        voiceManager.say(text, voiceId, sinkId);
+            @QueryParam("sinkid") @Parameter(description = "audio sink id") @Nullable String sinkId,
+            @QueryParam("volume") @Parameter(description = "volume level") @Nullable String volume,
+            @QueryParam("enableCache") @Parameter(description = "enable TTS cache") Boolean enableCache) {
+        PercentType volumePercent = null;
+        if (volume != null && !volume.isEmpty()) {
+            volumePercent = new PercentType(volume);
+        }
+        voiceManager.say(text, voiceId, sinkId, volumePercent, enableCache);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 
