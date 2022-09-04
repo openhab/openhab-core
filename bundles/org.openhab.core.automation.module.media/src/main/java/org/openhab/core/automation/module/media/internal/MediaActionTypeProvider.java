@@ -109,8 +109,8 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
                 .create(SayActionHandler.PARAM_TEXT, Type.TEXT).withRequired(true).withLabel("Text")
                 .withDescription("the text to speak").build();
         ConfigDescriptionParameter enabledCacheConfigDescriptionParameter = ConfigDescriptionParameterBuilder
-                .create(SayActionHandler.PARAM_ENABLECACHE, Type.BOOLEAN).withRequired(false).withLabel("Enable Cache")
-                .withDescription("Enable the TTS cache for this sentence").build();
+                .create(SayActionHandler.PARAM_ENABLECACHE, Type.BOOLEAN).withDefault("true").withRequired(false)
+                .withLabel("Enable Cache").withDescription("Enable the TTS cache for this sentence").build();
         return List.of(textConfigDescriptionParameter, getAudioSinkConfigDescParam(locale),
                 getVolumeConfigDescParam(locale), enabledCacheConfigDescriptionParameter);
     }

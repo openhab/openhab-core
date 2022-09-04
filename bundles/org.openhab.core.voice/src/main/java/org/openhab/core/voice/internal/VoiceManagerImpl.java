@@ -308,8 +308,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             TTSCache ttsCacheFinal = ttsCache;
             // the method parameter is prioritary
             // else the TTS AND the global configuration should be OK to use cache
-            if (((enableCache != null && enableCache) || this.enableCacheTTS && tts.isCacheEnabled())
-                    && ttsCacheFinal != null) {
+            if (((enableCache != null && enableCache)
+                    || (enableCache == null && this.enableCacheTTS && tts.isCacheEnabled())) && ttsCacheFinal != null) {
                 audioStream = ttsCacheFinal.getOrSynthetize(tts, text, voice, ttsAudioFormat);
             } else {
                 audioStream = tts.synthesize(text, voice, ttsAudioFormat);
