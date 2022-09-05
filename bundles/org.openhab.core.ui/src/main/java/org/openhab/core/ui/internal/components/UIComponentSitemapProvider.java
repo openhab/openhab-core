@@ -87,6 +87,10 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
     private static final String COMPARATOR_STRING = "==|!=|<=|>=|<|>";
     private static final Pattern COMPARATOR = Pattern.compile(COMPARATOR_STRING);
+    private static final Pattern VISIBILITY_PATTERN = Pattern
+            .compile("(?<item>[A-Za-z]\\w*)\\s*(?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>\\S+)");
+    private static final Pattern COLOR_PATTERN = Pattern.compile(
+            "((?<item>[A-Za-z]\\w*)?\\s*((?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>\\S+))?\\s*=)?\\s*(?<arg>\\S+)");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
     private @Nullable UIComponentRegistryFactory componentRegistryFactory;
@@ -334,25 +338,23 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         if (component.getConfig() != null && component.getConfig().containsKey("visibility")) {
             for (Object sourceVisibility : (Collection<?>) component.getConfig().get("visibility")) {
                 if (sourceVisibility instanceof String) {
-                    String item = sourceVisibility.toString().split(COMPARATOR_STRING)[0].trim();
-                    Matcher matcher = COMPARATOR.matcher(sourceVisibility.toString());
-                    String condition = "";
-                    if (matcher.find()) {
-                        condition = matcher.group();
+                    Matcher matcher = VISIBILITY_PATTERN.matcher(sourceVisibility.toString());
+                    if (matcher.matches()) {
+                        String item = matcher.group("item");
+                        String condition = matcher.group("condition");
+                        String sign = matcher.group("sign");
+                        String state = matcher.group("state");
+                        VisibilityRuleImpl visibilityRule = (VisibilityRuleImpl) SitemapFactory.eINSTANCE
+                                .createVisibilityRule();
+                        visibilityRule.setItem(item);
+                        visibilityRule.setCondition(condition);
+                        visibilityRule.setSign(sign);
+                        visibilityRule.setState(state);
+                        visibility.add(visibilityRule);
+                    } else {
+                        logger.warn("Syntax error in visibility '{}' rule for widget {}", sourceVisibility,
+                                component.getType());
                     }
-                    String sign = "";
-                    String state = sourceVisibility.toString().split(COMPARATOR_STRING)[1].trim();
-                    if ((state.charAt(0) == '+') || (state.charAt(0) == '-')) {
-                        sign = state.substring(0, 0);
-                        state = state.substring(1).trim();
-                    }
-                    VisibilityRuleImpl visibilityRule = (VisibilityRuleImpl) SitemapFactory.eINSTANCE
-                            .createVisibilityRule();
-                    visibilityRule.setItem(item);
-                    visibilityRule.setCondition(condition);
-                    visibilityRule.setSign(sign);
-                    visibilityRule.setState(state);
-                    visibility.add(visibilityRule);
                 }
             }
         }
@@ -374,28 +376,24 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         if (component.getConfig() != null && component.getConfig().containsKey(key)) {
             for (Object sourceColor : (Collection<?>) component.getConfig().get(key)) {
                 if (sourceColor instanceof String) {
-                    String item = "";
-                    String condition = "";
-                    String sign = "";
-                    String state = "";
-                    Matcher matcher = COMPARATOR.matcher(sourceColor.toString());
-                    if (matcher.find()) {
-                        item = sourceColor.toString().split(COMPARATOR_STRING, 2)[0].trim();
-                        condition = matcher.group();
-                        state = sourceColor.toString().split(COMPARATOR_STRING, 2)[1].split("=")[0].trim();
-                        if ((state.charAt(0) == '+') || (state.charAt(0) == '-')) {
-                            sign = state.substring(0, 0);
-                            state = state.substring(1).trim();
-                        }
+                    Matcher matcher = COLOR_PATTERN.matcher(sourceColor.toString());
+                    if (matcher.matches()) {
+                        String item = matcher.group("item");
+                        String condition = matcher.group("condition");
+                        String sign = matcher.group("sign");
+                        String state = matcher.group("state");
+                        String arg = matcher.group("arg");
+                        ColorArrayImpl colorArray = (ColorArrayImpl) SitemapFactory.eINSTANCE.createColorArray();
+                        colorArray.setItem(item);
+                        colorArray.setCondition(condition);
+                        colorArray.setSign(sign);
+                        colorArray.setState(state);
+                        colorArray.setArg(arg);
+                        color.add(colorArray);
+                    } else {
+                        logger.warn("Syntax error in {} rule '{}' for widget {}", key, sourceColor,
+                                component.getType());
                     }
-                    String arg = sourceColor.toString().split("=")[sourceColor.toString().split("=").length - 1].trim();
-                    ColorArrayImpl colorArray = (ColorArrayImpl) SitemapFactory.eINSTANCE.createColorArray();
-                    colorArray.setItem(item);
-                    colorArray.setCondition(condition);
-                    colorArray.setSign(sign);
-                    colorArray.setState(state);
-                    colorArray.setArg(arg);
-                    color.add(colorArray);
                 }
             }
         }
