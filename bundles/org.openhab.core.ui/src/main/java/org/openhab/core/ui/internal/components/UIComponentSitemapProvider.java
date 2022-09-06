@@ -346,7 +346,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         visibilityRule.setState(matcher.group("state"));
                         visibility.add(visibilityRule);
                     } else {
-                        logger.warn("Syntax error in visibility '{}' rule for widget {}", sourceVisibility,
+                        logger.warn("Syntax error in visibility rule '{}' for widget {}", sourceVisibility,
                                 component.getType());
                     }
                 }
