@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -28,13 +30,16 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.sitemap.SitemapProvider;
+import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.SitemapPackage;
+import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.model.sitemap.sitemap.impl.ChartImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.ColorArrayImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ColorpickerImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.DefaultImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.FrameImpl;
@@ -50,6 +55,7 @@ import org.openhab.core.model.sitemap.sitemap.impl.SliderImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.SwitchImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.TextImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.VideoImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.VisibilityRuleImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.WebviewImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.WidgetImpl;
 import org.openhab.core.ui.components.RootUIComponent;
@@ -78,6 +84,11 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
     private static final String SITEMAP_PREFIX = "uicomponents_";
     private static final String SITEMAP_SUFFIX = ".sitemap";
+
+    private static final Pattern VISIBILITY_PATTERN = Pattern
+            .compile("(?<item>[A-Za-z]\\w*)\\s*(?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>\\S+)");
+    private static final Pattern COLOR_PATTERN = Pattern.compile(
+            "((?<item>[A-Za-z]\\w*)?\\s*((?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>\\S+))?\\s*=)?\\s*(?<arg>\\S+)");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
     private @Nullable UIComponentRegistryFactory componentRegistryFactory;
@@ -175,6 +186,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 widget = imageWidget;
                 setWidgetPropertyFromComponentConfig(widget, component, "url", SitemapPackage.IMAGE__URL);
                 setWidgetPropertyFromComponentConfig(widget, component, "refresh", SitemapPackage.IMAGE__REFRESH);
+                addIconColor(imageWidget.getIconColor(), component);
                 break;
             case "Video":
                 VideoImpl videoWidget = (VideoImpl) SitemapFactory.eINSTANCE.createVideo();
@@ -269,7 +281,9 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 }
             }
 
-            // TODO: process visibility & color rules
+            addWidgetVisibility(widget.getVisibility(), component);
+            addLabelColor(widget.getLabelColor(), component);
+            addValueColor(widget.getValueColor(), component);
         }
 
         return widget;
@@ -312,6 +326,62 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         mapping.setCmd(cmd);
                         mapping.setLabel(label);
                         mappings.add(mapping);
+                    }
+                }
+            }
+        }
+    }
+
+    private void addWidgetVisibility(EList<VisibilityRule> visibility, UIComponent component) {
+        if (component.getConfig() != null && component.getConfig().containsKey("visibility")) {
+            for (Object sourceVisibility : (Collection<?>) component.getConfig().get("visibility")) {
+                if (sourceVisibility instanceof String) {
+                    Matcher matcher = VISIBILITY_PATTERN.matcher(sourceVisibility.toString());
+                    if (matcher.matches()) {
+                        VisibilityRuleImpl visibilityRule = (VisibilityRuleImpl) SitemapFactory.eINSTANCE
+                                .createVisibilityRule();
+                        visibilityRule.setItem(matcher.group("item"));
+                        visibilityRule.setCondition(matcher.group("condition"));
+                        visibilityRule.setSign(matcher.group("sign"));
+                        visibilityRule.setState(matcher.group("state"));
+                        visibility.add(visibilityRule);
+                    } else {
+                        logger.warn("Syntax error in visibility rule '{}' for widget {}", sourceVisibility,
+                                component.getType());
+                    }
+                }
+            }
+        }
+    }
+
+    private void addLabelColor(EList<ColorArray> labelColor, UIComponent component) {
+        addColor(labelColor, component, "labelcolor");
+    }
+
+    private void addValueColor(EList<ColorArray> valueColor, UIComponent component) {
+        addColor(valueColor, component, "valuecolor");
+    }
+
+    private void addIconColor(EList<ColorArray> iconColor, UIComponent component) {
+        addColor(iconColor, component, "valuecolor");
+    }
+
+    private void addColor(EList<ColorArray> color, UIComponent component, String key) {
+        if (component.getConfig() != null && component.getConfig().containsKey(key)) {
+            for (Object sourceColor : (Collection<?>) component.getConfig().get(key)) {
+                if (sourceColor instanceof String) {
+                    Matcher matcher = COLOR_PATTERN.matcher(sourceColor.toString());
+                    if (matcher.matches()) {
+                        ColorArrayImpl colorArray = (ColorArrayImpl) SitemapFactory.eINSTANCE.createColorArray();
+                        colorArray.setItem(matcher.group("item"));
+                        colorArray.setCondition(matcher.group("condition"));
+                        colorArray.setSign(matcher.group("sign"));
+                        colorArray.setState(matcher.group("state"));
+                        colorArray.setArg(matcher.group("arg"));
+                        color.add(colorArray);
+                    } else {
+                        logger.warn("Syntax error in {} rule '{}' for widget {}", key, sourceColor,
+                                component.getType());
                     }
                 }
             }
