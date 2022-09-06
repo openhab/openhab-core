@@ -85,8 +85,6 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private static final String SITEMAP_PREFIX = "uicomponents_";
     private static final String SITEMAP_SUFFIX = ".sitemap";
 
-    private static final String COMPARATOR_STRING = "==|!=|<=|>=|<|>";
-    private static final Pattern COMPARATOR = Pattern.compile(COMPARATOR_STRING);
     private static final Pattern VISIBILITY_PATTERN = Pattern
             .compile("(?<item>[A-Za-z]\\w*)\\s*(?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>\\S+)");
     private static final Pattern COLOR_PATTERN = Pattern.compile(
@@ -340,16 +338,12 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 if (sourceVisibility instanceof String) {
                     Matcher matcher = VISIBILITY_PATTERN.matcher(sourceVisibility.toString());
                     if (matcher.matches()) {
-                        String item = matcher.group("item");
-                        String condition = matcher.group("condition");
-                        String sign = matcher.group("sign");
-                        String state = matcher.group("state");
                         VisibilityRuleImpl visibilityRule = (VisibilityRuleImpl) SitemapFactory.eINSTANCE
                                 .createVisibilityRule();
-                        visibilityRule.setItem(item);
-                        visibilityRule.setCondition(condition);
-                        visibilityRule.setSign(sign);
-                        visibilityRule.setState(state);
+                        visibilityRule.setItem(matcher.group("item"));
+                        visibilityRule.setCondition(matcher.group("condition"));
+                        visibilityRule.setSign(matcher.group("sign"));
+                        visibilityRule.setState(matcher.group("state"));
                         visibility.add(visibilityRule);
                     } else {
                         logger.warn("Syntax error in visibility '{}' rule for widget {}", sourceVisibility,
@@ -378,17 +372,12 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 if (sourceColor instanceof String) {
                     Matcher matcher = COLOR_PATTERN.matcher(sourceColor.toString());
                     if (matcher.matches()) {
-                        String item = matcher.group("item");
-                        String condition = matcher.group("condition");
-                        String sign = matcher.group("sign");
-                        String state = matcher.group("state");
-                        String arg = matcher.group("arg");
                         ColorArrayImpl colorArray = (ColorArrayImpl) SitemapFactory.eINSTANCE.createColorArray();
-                        colorArray.setItem(item);
-                        colorArray.setCondition(condition);
-                        colorArray.setSign(sign);
-                        colorArray.setState(state);
-                        colorArray.setArg(arg);
+                        colorArray.setItem(matcher.group("item"));
+                        colorArray.setCondition(matcher.group("condition"));
+                        colorArray.setSign(matcher.group("sign"));
+                        colorArray.setState(matcher.group("state"));
+                        colorArray.setArg(matcher.group("arg"));
                         color.add(colorArray);
                     } else {
                         logger.warn("Syntax error in {} rule '{}' for widget {}", key, sourceColor,
