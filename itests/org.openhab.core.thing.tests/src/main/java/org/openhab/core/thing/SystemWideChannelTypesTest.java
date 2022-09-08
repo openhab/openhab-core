@@ -36,7 +36,7 @@ import org.openhab.core.types.StateOption;
 @NonNullByDefault
 public class SystemWideChannelTypesTest extends JavaOSGiTest {
 
-    private static final int NUMBER_OF_SYSTEM_WIDE_CHANNEL_TYPES = 25;
+    private static final int NUMBER_OF_SYSTEM_WIDE_CHANNEL_TYPES = 29;
 
     private @NonNullByDefault({}) ChannelTypeProvider systemChannelTypeProvider;
 
@@ -77,6 +77,10 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
         assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_INDOOR_TEMPERATURE, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ATMOSPHERIC_HUMIDITY, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_BAROMETRIC_PRESSURE, null));
+        assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_POWER, null));
+        assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_CURRENT, null));
+        assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_POTENTIAL, null));
+        assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRICAL_ENERGY, null));
     }
 
     @Test
