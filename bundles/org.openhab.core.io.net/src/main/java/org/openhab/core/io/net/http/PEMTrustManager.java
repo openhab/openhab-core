@@ -62,7 +62,8 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
      * <code>"-----END CERTIFICATE-----"</code>. The base 64 encoded certificate information are placed in between.
      *
      * @param pemCert the PEM certificate
-     * @throws CertificateException
+     * @throws CertificateInstantiationException
+     * @throws CertificateParsingException
      */
     public PEMTrustManager(String pemCert) throws CertificateException {
         if (!pemCert.isBlank() && pemCert.startsWith(BEGIN_CERT)) {
@@ -70,7 +71,8 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
                 trustedCert = (X509Certificate) CertificateFactory.getInstance("X.509")
                         .generateCertificate(certInputStream);
             } catch (IOException e) {
-                throw new CertificateException(e);
+                LoggerFactory.getLogger(PEMTrustManager.class).debug("An IOException occurred: {}", e.getMessage());
+                throw new CertificateInstantiationException(e);
             }
         } else {
             throw new CertificateParsingException("Certificate is either empty or cannot be parsed correctly");
@@ -210,7 +212,10 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
                 return BEGIN_CERT + System.lineSeparator() + Base64.getEncoder().encodeToString(bytes)
                         + System.lineSeparator() + END_CERT;
             }
-        } catch (NoSuchAlgorithmException | KeyManagementException | IOException e) {
+        } catch (IOException e) {
+            LoggerFactory.getLogger(PEMTrustManager.class).debug("An IOException occurred: {}", e.getMessage());
+            throw new CertificateInstantiationException(e);
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
             LoggerFactory.getLogger(PEMTrustManager.class).error("An unexpected exception occurred: ", e);
         } finally {
             if (connection != null) {
@@ -246,6 +251,10 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
 
         public CertificateInstantiationException(String message) {
             super(message);
+        }
+
+        public CertificateInstantiationException(Throwable cause) {
+            super(cause);
         }
     }
 }
