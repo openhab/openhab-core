@@ -40,6 +40,7 @@ import javax.net.ssl.X509ExtendedTrustManager;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -53,6 +54,8 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
 
     public static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
     public static final String END_CERT = "-----END CERTIFICATE-----";
+
+    private final Logger logger = LoggerFactory.getLogger(PEMTrustManager.class);
 
     private final X509Certificate trustedCert;
 
@@ -71,7 +74,7 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
                 trustedCert = (X509Certificate) CertificateFactory.getInstance("X.509")
                         .generateCertificate(certInputStream);
             } catch (IOException e) {
-                LoggerFactory.getLogger(PEMTrustManager.class).debug("An IOException occurred: {}", e.getMessage());
+                logger.debug("An IOException occurred: {}", e.getMessage());
                 throw new CertificateInstantiationException(e);
             }
         } else {
