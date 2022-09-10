@@ -77,6 +77,7 @@ import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.firmware.Firmware;
 import org.openhab.core.thing.dto.ChannelDTO;
 import org.openhab.core.thing.dto.ChannelDTOMapper;
@@ -481,8 +482,7 @@ public class ThingResource implements RESTResource {
             return getThingNotFoundResponse(thingUID);
         }
 
-        // ask whether the Thing exists as a managed thing, so it can get
-        // updated, 409 otherwise
+        // ask whether the Thing exists as a managed thing, so it can get updated, 409 otherwise
         Thing managed = managedThingProvider.get(thingUIDObject);
         if (managed == null) {
             logger.info("Received HTTP PUT request for update configuration at '{}' for an unmanaged thing '{}'.",
@@ -490,11 +490,18 @@ public class ThingResource implements RESTResource {
             return getThingResponse(Status.CONFLICT, thing, locale,
                     "Cannot update Thing " + thingUID + " as it is not editable.");
         }
+        // check if handler of Thing is available, so it can be updated, 409 otherwise
+        ThingHandler thingHandler = thing.getHandler();
+        if (thingHandler == null) {
+            logger.info("Received HTTP PUT request for update configuration at '{}' for an uninitialized thing '{}'.",
+                    uriInfo.getPath(), thingUID);
+            return getThingResponse(Status.CONFLICT, thing, locale,
+                    "Cannot update Thing " + thingUID + " as it is not initialized.");
+        }
 
-        // only move on if Thing is known to be managed, so it can get updated
+        // only move on if Thing is known to be managed and handler is available, so it can get updated
         try {
-            // note that we create a Configuration instance here in order to
-            // have normalized types
+            // note that we create a Configuration instance here in order to have normalized types
             thingRegistry.updateConfiguration(thingUIDObject,
                     new Configuration(
                             normalizeConfiguration(configurationParameters, thing.getThingTypeUID(), thing.getUID()))
@@ -746,12 +753,6 @@ public class ThingResource implements RESTResource {
             linkedItemsMap.put(channel.getUID().getId(), linkedItems);
         }
         return linkedItemsMap;
-    }
-
-    public static void updateConfiguration(Thing thing, Configuration configuration) {
-        for (String parameterName : configuration.keySet()) {
-            thing.getConfiguration().put(parameterName, configuration.get(parameterName));
-        }
     }
 
     private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
