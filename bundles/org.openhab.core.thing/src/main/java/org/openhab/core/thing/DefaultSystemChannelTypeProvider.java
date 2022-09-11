@@ -97,6 +97,14 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             "atmospheric-humidity");
     public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_BAROMETRIC_PRESSURE = new ChannelTypeUID(BINDING_ID,
             "barometric-pressure");
+    public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_POWER = new ChannelTypeUID(BINDING_ID,
+            "electric-power");
+    public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_CURRENT = new ChannelTypeUID(BINDING_ID,
+            "electric-current");
+    public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_VOLTAGE = new ChannelTypeUID(BINDING_ID,
+            "electric-voltage");
+    public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_ELECTRICAL_ENERGY = new ChannelTypeUID(BINDING_ID,
+            "electrical-energy");
 
     /**
      * Signal strength default system wide {@link ChannelType}. Represents signal strength of a device as a number
@@ -347,13 +355,56 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.3f %unit%").build())
             .withTags(List.of("Measurement", "Pressure")).build();
 
+    // Energy
+
+    /**
+     * Electric-power: system wide {@link ChannelType} which shows the electric power
+     */
+    public static final ChannelType SYSTEM_ELECTRIC_POWER = ChannelTypeBuilder
+            .state(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_POWER, "Electric Power", "Number:Power")
+            .withDescription("Current electric power").withCategory("Energy")
+            .withStateDescriptionFragment(
+                    StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
+            .withTags(List.of("Measurement", "Power")).build();
+
+    /**
+     * Electric-current: system wide {@link ChannelType} which shows the electric current
+     */
+    public static final ChannelType SYSTEM_ELECTRIC_CURRENT = ChannelTypeBuilder
+            .state(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_CURRENT, "Electric Current", "Number:ElectricCurrent")
+            .withDescription("Current electric current").withCategory("Energy")
+            .withStateDescriptionFragment(
+                    StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
+            .withTags(List.of("Measurement", "Current")).build();
+
+    /**
+     * Electric-voltage: system wide {@link ChannelType} which shows the electric voltage
+     */
+    public static final ChannelType SYSTEM_ELECTRIC_VOLTAGE = ChannelTypeBuilder
+            .state(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_VOLTAGE, "Electric Voltage", "Number:ElectricPotential")
+            .withDescription("Current electric voltage").withCategory("Energy")
+            .withStateDescriptionFragment(
+                    StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
+            .withTags(List.of("Measurement", "Voltage")).build();
+
+    /**
+     * Electrical-energy: system wide {@link ChannelType} which shows the electrical energy
+     */
+    public static final ChannelType SYSTEM_ELECTRICAL_ENERGY = ChannelTypeBuilder
+            .state(SYSTEM_CHANNEL_TYPE_UID_ELECTRICAL_ENERGY, "Electrical Energy", "Number:Energy")
+            .withDescription("Current electrical energy").withCategory("Energy")
+            .withStateDescriptionFragment(
+                    StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
+            .withTags(List.of("Measurement", "Energy")).build();
+
     private static final Collection<ChannelType> CHANNEL_TYPES = List.of(SYSTEM_CHANNEL_SIGNAL_STRENGTH,
             SYSTEM_CHANNEL_LOW_BATTERY, SYSTEM_CHANNEL_BATTERY_LEVEL, SYSTEM_TRIGGER, SYSTEM_RAWBUTTON, SYSTEM_BUTTON,
             SYSTEM_RAWROCKER, SYSTEM_POWER, SYSTEM_LOCATION, SYSTEM_MOTION, SYSTEM_BRIGHTNESS, SYSTEM_COLOR,
             SYSTEM_COLOR_TEMPERATURE, SYSTEM_COLOR_TEMPERATURE_ABS, SYSTEM_VOLUME, SYSTEM_MUTE, SYSTEM_MEDIA_CONTROL,
             SYSTEM_MEDIA_TITLE, SYSTEM_MEDIA_ARTIST, SYSTEM_WIND_DIRECTION, SYSTEM_WIND_SPEED,
             SYSTEM_OUTDOOR_TEMPERATURE, SYSTEM_INDOOR_TEMPERATURE, SYSTEM_ATMOSPHERIC_HUMIDITY,
-            SYSTEM_BAROMETRIC_PRESSURE);
+            SYSTEM_BAROMETRIC_PRESSURE, SYSTEM_ELECTRIC_POWER, SYSTEM_ELECTRIC_CURRENT, SYSTEM_ELECTRIC_VOLTAGE,
+            SYSTEM_ELECTRICAL_ENERGY);
 
     private final Map<LocalizedKey, ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
 
