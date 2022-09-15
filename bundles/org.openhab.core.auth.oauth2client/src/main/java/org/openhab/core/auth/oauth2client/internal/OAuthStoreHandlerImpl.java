@@ -15,7 +15,10 @@ package org.openhab.core.auth.oauth2client.internal;
 import static org.openhab.core.auth.oauth2client.internal.StorageRecordType.*;
 
 import java.security.GeneralSecurityException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -236,13 +239,17 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
 
         public StorageFacade(Storage<String> storage) {
             this.storage = storage;
-            // Add adapters for LocalDateTime
+            // Add adapters for Instant
             gson = new GsonBuilder()
-                    .registerTypeAdapter(LocalDateTime.class,
-                            (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> LocalDateTime
-                                    .parse(json.getAsString()))
-                    .registerTypeAdapter(LocalDateTime.class,
-                            (JsonSerializer<LocalDateTime>) (date, type,
+                    .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, typeOfT, context) -> {
+                        try {
+                            return Instant.parse(json.getAsString());
+                        } catch (DateTimeParseException e) {
+                            return LocalDateTime.parse(json.getAsString()).atZone(ZoneId.systemDefault()).toInstant();
+                        }
+                    })
+                    .registerTypeAdapter(Instant.class,
+                            (JsonSerializer<Instant>) (date, type,
                                     jsonSerializationContext) -> new JsonPrimitive(date.toString()))
                     .setPrettyPrinting().create();
         }
