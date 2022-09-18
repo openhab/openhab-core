@@ -14,14 +14,14 @@ package org.openhab.core.karaf.internal;
 
 import static java.util.function.Predicate.not;
 
-import java.io.FileInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -30,12 +30,15 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -43,10 +46,12 @@ import java.util.stream.Stream;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.kar.KarService;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.AddonEventFactory;
 import org.openhab.core.common.NamedThreadFactory;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
@@ -71,6 +76,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = "org.openhab.addons", service = { FeatureInstaller.class, ConfigurationListener.class })
 @ConfigurableService(category = "system", label = "Add-on Management", description_uri = FeatureInstaller.CONFIG_URI)
+@NonNullByDefault
 public class FeatureInstaller implements ConfigurationListener {
 
     protected static final String CONFIG_URI = "system:addons";
@@ -82,137 +88,174 @@ public class FeatureInstaller implements ConfigurationListener {
     public static final String EXTENSION_TYPE_TRANSFORMATION = "transformation";
     public static final String EXTENSION_TYPE_UI = "ui";
     public static final String EXTENSION_TYPE_VOICE = "voice";
-
-    public static final String SIMPLE_PACKAGE = "simple";
-    public static final String MINIMAL_PACKAGE = "minimal";
-    private static final String CFG_REMOTE = "remote";
-
-    private static final String PAX_URL_PID = "org.ops4j.pax.url.mvn";
-    private static final String ADDONS_PID = "org.openhab.addons";
-    private static final String PROPERTY_MVN_REPOS = "org.ops4j.pax.url.mvn.repositories";
-
-    public static final String STANDARD_PACKAGE = "standard";
-    public static final String PREFIX = "openhab-";
-    public static final String PREFIX_PACKAGE = "package-";
-
     public static final List<String> EXTENSION_TYPES = List.of(EXTENSION_TYPE_AUTOMATION, EXTENSION_TYPE_BINDING,
             EXTENSION_TYPE_MISC, EXTENSION_TYPE_PERSISTENCE, EXTENSION_TYPE_TRANSFORMATION, EXTENSION_TYPE_UI,
             EXTENSION_TYPE_VOICE);
 
-    private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
+    public static final String PREFIX = "openhab-";
+    public static final String PREFIX_PACKAGE = "package-";
+    public static final String SIMPLE_PACKAGE = "simple";
+    public static final String MINIMAL_PACKAGE = "minimal";
 
-    private String onlineRepoUrl = null;
+    public static final String STANDARD_PACKAGE = "standard";
+
+    private static final String CFG_REMOTE = "remote";
+    private static final String PAX_URL_PID = "org.ops4j.pax.url.mvn";
+    private static final String ADDONS_PID = "org.openhab.addons";
+    private static final String PROPERTY_MVN_REPOS = "org.ops4j.pax.url.mvn.repositories";
+
+    private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
     private final ConfigurationAdmin configurationAdmin;
     private final FeaturesService featuresService;
     private final KarService karService;
-    private static EventPublisher eventPublisher;
+    private final EventPublisher eventPublisher;
+    private final ScheduledExecutorService scheduler;
+    private final AtomicBoolean processingConfigQueue = new AtomicBoolean();
 
-    private ScheduledExecutorService scheduler;
-    private @Nullable ScheduledFuture<?> installJob;
+    private final LinkedBlockingQueue<Map<String, Object>> configQueue = new LinkedBlockingQueue<>();
+
+    private @Nullable String onlineRepoUrl = null;
 
     private boolean paxCfgUpdated = true; // a flag used to check whether CM has already successfully updated the pax
                                           // configuration as this must be waited for before trying to add feature repos
-    private Map<String, Object> configMapCache;
+    private @Nullable Map<String, Object> configMapCache;
 
-    private static String currentPackage = null;
-
-    private static boolean anyMatchingFeature(Feature[] features, Predicate<Feature> predicate) {
-        return Stream.of(features).anyMatch(predicate);
-    }
-
-    private static Predicate<Feature> withName(final String name) {
-        return feature -> feature.getName().equals(name);
-    }
+    private @Nullable String currentPackage = null;
 
     @Activate
     public FeatureInstaller(final @Reference ConfigurationAdmin configurationAdmin,
-            final @Reference FeaturesService featuresService, final @Reference KarService karService) {
+            final @Reference FeaturesService featuresService, final @Reference KarService karService,
+            final @Reference EventPublisher eventPublisher, Map<String, Object> config) {
         this.configurationAdmin = configurationAdmin;
         this.featuresService = featuresService;
         this.karService = karService;
-    }
+        this.eventPublisher = eventPublisher;
 
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        FeatureInstaller.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        FeatureInstaller.eventPublisher = null;
-    }
-
-    private Exception debugException(Exception e) {
-        return logger.isDebugEnabled() ? e : null;
-    }
-
-    @Activate
-    protected void activate(final Map<String, Object> config) {
         scheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("karaf-addons"));
         setOnlineRepoUrl();
         modified(config);
-        scheduler.scheduleWithFixedDelay(() -> {
-            logger.debug("Running scheduled sync job");
-            try {
-                Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(ADDONS_PID).getProperties();
-                final Map<String, Object> cfgMap = new HashMap<>();
-                final Enumeration<String> enumeration = cfg.keys();
-                while (enumeration.hasMoreElements()) {
-                    final String key = enumeration.nextElement();
-                    cfgMap.put(key, cfg.get(key));
-                }
-                if (!cfgMap.equals(configMapCache)) {
-                    configMapCache = cfgMap;
-                    modified(cfgMap);
-                }
-            } catch (IOException e) {
-                logger.debug("Failed to retrieve the addons configuration from configuration admin: {}",
-                        e.getMessage());
-            }
-        }, 1, 1, TimeUnit.MINUTES);
+
+        scheduler.scheduleWithFixedDelay(this::syncConfiguration, 1, 1, TimeUnit.MINUTES);
     }
 
     @Deactivate
     protected void deactivate() {
-        if (scheduler != null) {
-            scheduler.shutdownNow();
-            scheduler = null;
-        }
+        scheduler.shutdown();
     }
 
     @Modified
     protected void modified(final Map<String, Object> config) {
-        boolean changed = false;
-        boolean online = (config.get(CFG_REMOTE) == null && getOnlineStatus())
-                || (config.get(CFG_REMOTE) != null && "true".equals(config.get(CFG_REMOTE).toString()));
-        if (getOnlineStatus() != online) {
-            changed = setOnlineStatus(online);
+        configQueue.add(config);
+        if (processingConfigQueue.compareAndSet(false, true)) {
+            scheduler.execute(this::processConfigQueue);
         }
+    }
 
-        final boolean configChanged = changed;
-        if (configChanged) {
-            // let's set the flag immediately, so that we do not miss the event
-            paxCfgUpdated = false;
-        }
-
-        scheduler.execute(() -> {
-            if (configChanged) {
-                waitForConfigUpdateEvent();
-            }
-            if (installPackage(config)) {
-                // our package selection has changed, so let's wait for the values to be available in config admin
-                // which we will receive as another call to modified
+    private void syncConfiguration() {
+        logger.debug("Running scheduled sync job");
+        try {
+            Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(ADDONS_PID).getProperties();
+            if (cfg == null) {
+                logger.debug("Configuration has no properties yet. Skipping update.");
                 return;
             }
-            // if there is an install job running, we cancel it.
-            ScheduledFuture<?> installJob = this.installJob;
-            if (installJob != null) {
-                logger.trace("Configuration changed. Cancelling installation job.");
-                installJob.cancel(false); // do not interrupt running job, this might cause problems
-                this.installJob = null;
+            final Map<String, Object> cfgMap = new HashMap<>();
+            final Enumeration<String> enumeration = cfg.keys();
+            while (enumeration.hasMoreElements()) {
+                final String key = enumeration.nextElement();
+                cfgMap.put(key, cfg.get(key));
             }
-            installAddons(config); // we don't have to wait even if the job is running, because method is synchronized
-        });
+            if (!cfgMap.equals(configMapCache) && !processingConfigQueue.get()) {
+                modified(cfgMap);
+            }
+        } catch (IOException e) {
+            logger.debug("Failed to retrieve the addons configuration from configuration admin: {}", e.getMessage());
+        }
+    }
+
+    private synchronized void processConfigQueue() {
+        if (!allKarsInstalled()) {
+            // some kars are not installed, delay installation for 15s, we keep the processing flag
+            // because further updates will be added to the queue and are therefore not interfering
+            // with our order
+            // we don't need to keep the job, if the service is shutdown, the scheduler is also shutting
+            // down and in all other cases we are protected by the processing flag
+            logger.info("Some .kar files are not installed yet. Delaying add-on installation by 15s.");
+            scheduler.schedule(this::processConfigQueue, 15, TimeUnit.SECONDS);
+            return;
+        }
+
+        Map<String, Object> config;
+        boolean changed = false;
+
+        while ((config = configQueue.poll()) != null) {
+            // cache the last processed config
+            configMapCache = config;
+
+            // online mode is either determined by the configuration or by the status of the online repository
+            boolean onlineMode = ConfigParser.valueAsOrElse(config.get(CFG_REMOTE), Boolean.class,
+                    getOnlineRepositoryMode());
+            boolean repoConfigurationChanged = getOnlineRepositoryMode() != onlineMode
+                    && setOnlineRepositoryMode(onlineMode);
+
+            if (repoConfigurationChanged) {
+                waitForConfigUpdateEvent();
+            }
+
+            if (installPackage(config)) {
+                changed = true;
+                // our package selection has changed, so let's wait for the values to be available in config admin
+                // which we will receive as another call to modified
+                continue;
+            }
+
+            if (installAddons(config)) {
+                changed = true;
+            }
+        }
+
+        processingConfigQueue.set(false);
+
+        try {
+            if (changed) {
+                featuresService.refreshFeatures(EnumSet.noneOf(FeaturesService.Option.class));
+            }
+        } catch (Exception e) {
+            logger.error("Failed to refresh bundles after processing config update", e);
+        }
+    }
+
+    @Nullable
+    String getCurrentPackage() {
+        return currentPackage;
+    }
+
+    public void addAddon(String type, String id) {
+        try {
+            changeAddonConfig(type, id, Collection::add);
+        } catch (IOException e) {
+            logger.warn("Adding add-on 'openhab-{}-{}' failed: {}", type, id, e.getMessage(), debugException(e));
+        }
+    }
+
+    public void removeAddon(String type, String id) {
+        try {
+            changeAddonConfig(type, id, Collection::remove);
+        } catch (IOException e) {
+            logger.warn("Removing add-on 'openhab-{}-{}' failed: {}", type, id, e.getMessage(), debugException(e));
+        }
+    }
+
+    @Override
+    public void configurationEvent(@Nullable ConfigurationEvent event) {
+        if (event != null && PAX_URL_PID.equals(event.getPid()) && event.getType() == ConfigurationEvent.CM_UPDATED) {
+            paxCfgUpdated = true;
+        }
+    }
+
+    private @Nullable Exception debugException(Exception e) {
+        return logger.isDebugEnabled() ? e : null;
     }
 
     private boolean allKarsInstalled() {
@@ -242,80 +285,51 @@ public class FeatureInstaller implements ConfigurationListener {
         while (!paxCfgUpdated && counter++ < 50) {
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
         }
+        logger.warn("Waited for 5s to receive config update, but configuration was not updated. Proceeding anyway.");
     }
 
-    public boolean addAddon(String type, String id) {
-        try {
-            Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID, null);
-            Dictionary<String, Object> props = cfg.getProperties();
-            Object typeProp = props.get(type);
-            String[] addonIds = typeProp != null ? typeProp.toString().split(",") : new String[0];
-            List<String> trimmedAddonIds = Arrays.stream(addonIds).map(addonId -> addonId.trim())
-                    .collect(Collectors.toList());
-            if (!trimmedAddonIds.contains(id)) {
-                List<String> newAddonIds = new ArrayList<>(trimmedAddonIds.size() + 1);
-                newAddonIds.addAll(trimmedAddonIds);
-                newAddonIds.add(id);
-                props.put(type, newAddonIds.stream().collect(Collectors.joining(",")));
-                cfg.update(props);
-                return true;
-            } else {
-                // it is already contained
-                return false;
-            }
-        } catch (IOException e) {
-            logger.warn("Adding add-on 'openhab-{}-{}' failed: {}", type, id, e.getMessage(), debugException(e));
-            return false;
-        }
-    }
-
-    public boolean removeAddon(String type, String id) {
-        try {
-            Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID, null);
-            Dictionary<String, Object> props = cfg.getProperties();
-            Object typeProp = props.get(type);
-            String[] addonIds = typeProp != null ? typeProp.toString().split(",") : new String[0];
-            List<String> trimmedAddonIds = Arrays.stream(addonIds).map(addonId -> addonId.trim())
-                    .collect(Collectors.toList());
-            if (trimmedAddonIds.contains(id)) {
-                List<String> newAddonIds = new ArrayList<>(trimmedAddonIds);
-                boolean success = newAddonIds.remove(id);
-                props.put(type, newAddonIds.stream().collect(Collectors.joining(",")));
-                cfg.update(props);
-                return success;
-            } else {
-                // it is not contained, so we cannot remove it
-                return false;
-            }
-        } catch (IOException e) {
-            logger.warn("Removing add-on 'openhab-{}-{}' failed: {}", type, id, e.getMessage(), debugException(e));
-            return false;
+    private void changeAddonConfig(String type, String id, BiFunction<Collection<String>, String, Boolean> method)
+            throws IOException {
+        Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID, null);
+        Dictionary<String, Object> props = cfg.getProperties();
+        Object typeProp = props.get(type);
+        String[] addonIds = typeProp != null ? typeProp.toString().split(",") : new String[0];
+        Set<String> normalizedIds = new HashSet<>(); // sets don't allow duplicates
+        Arrays.stream(addonIds).map(String::strip).forEach(normalizedIds::add);
+        if (method.apply(normalizedIds, id)) {
+            // collection changed
+            props.put(type, String.join(",", normalizedIds));
+            cfg.update(props);
         }
     }
 
     private void setOnlineRepoUrl() {
-        Properties prop = new Properties();
-
         Path versionFilePath = Paths.get(OpenHAB.getUserDataFolder(), "etc", "version.properties");
-        try (FileInputStream fis = new FileInputStream(versionFilePath.toFile())) {
-            prop.load(fis);
+        try (BufferedReader reader = Files.newBufferedReader(versionFilePath)) {
+            Properties prop = new Properties();
+            prop.load(reader);
+
+            String repo = prop.getProperty("online-repo", "").strip();
+            if (!repo.isEmpty()) {
+                this.onlineRepoUrl = repo + "@id=openhab@snapshots";
+            } else {
+                logger.warn("Cannot determine online repo url - online repo support will be disabled.");
+            }
         } catch (Exception e) {
             logger.warn("Cannot determine online repo url - online repo support will be disabled. Error: {}",
                     e.getMessage(), debugException(e));
         }
-
-        String repo = prop.getProperty("online-repo");
-        if (repo != null && !repo.trim().isEmpty()) {
-            this.onlineRepoUrl = repo.trim() + "@id=openhab@snapshots";
-        } else {
-            logger.warn("Cannot determine online repo url - online repo support will be disabled.");
-        }
     }
 
-    private boolean getOnlineStatus() {
+    /**
+     * Checks if the online repository is part of the maven repository list
+     *
+     * @return <code>true</code> if present, <code>false</code> otherwise
+     */
+    private boolean getOnlineRepositoryMode() {
         if (onlineRepoUrl != null) {
             try {
                 Configuration paxCfg = configurationAdmin.getConfiguration(PAX_URL_PID, null);
@@ -324,10 +338,8 @@ public class FeatureInstaller implements ConfigurationListener {
                     return false;
                 }
                 Object repos = properties.get(PROPERTY_MVN_REPOS);
-                List<String> repoCfg;
                 if (repos instanceof String) {
-                    repoCfg = List.of(((String) repos).split(","));
-                    return repoCfg.contains(onlineRepoUrl);
+                    return List.of(((String) repos).split(",")).contains(onlineRepoUrl);
                 }
             } catch (IOException e) {
                 logger.error("Failed getting the add-on management online/offline mode: {}", e.getMessage(),
@@ -337,37 +349,39 @@ public class FeatureInstaller implements ConfigurationListener {
         return false;
     }
 
-    private boolean setOnlineStatus(boolean status) {
+    /**
+     * Enables or disables the online repository in the maven repository list
+     *
+     * @param enabled the requested setting
+     * @return <code>true</code> if the configuration was changed, <code>false</code> otherwise
+     */
+    private boolean setOnlineRepositoryMode(boolean enabled) {
         boolean changed = false;
+        String onlineRepoUrl = this.onlineRepoUrl;
         if (onlineRepoUrl != null) {
             try {
                 Configuration paxCfg = configurationAdmin.getConfiguration(PAX_URL_PID, null);
                 paxCfg.setBundleLocation("?");
-                Dictionary<String, Object> properties = paxCfg.getProperties();
-                if (properties == null) {
-                    properties = new Hashtable<>();
-                }
+                Dictionary<String, Object> properties = Objects.requireNonNullElse(paxCfg.getProperties(),
+                        new Hashtable<>());
                 List<String> repoCfg = new ArrayList<>();
                 Object repos = properties.get(PROPERTY_MVN_REPOS);
                 if (repos instanceof String) {
-                    repoCfg = new ArrayList<>(Arrays.asList(((String) repos).split(",")));
+                    repoCfg.addAll(Arrays.asList(((String) repos).split(",")));
                     repoCfg.remove("");
                 }
-                if (status) {
-                    if (!repoCfg.contains(onlineRepoUrl)) {
-                        repoCfg.add(onlineRepoUrl);
-                        changed = true;
-                        logger.debug("Added repo '{}' to feature repo list.", onlineRepoUrl);
-                    }
-                } else {
-                    if (repoCfg.contains(onlineRepoUrl)) {
-                        repoCfg.remove(onlineRepoUrl);
-                        changed = true;
-                        logger.debug("Removed repo '{}' from feature repo list.", onlineRepoUrl);
-                    }
+                if (enabled && !repoCfg.contains(onlineRepoUrl)) {
+                    repoCfg.add(onlineRepoUrl);
+                    changed = true;
+                    logger.debug("Added repo '{}' to feature repo list.", onlineRepoUrl);
+                } else if (!enabled && repoCfg.contains(onlineRepoUrl)) {
+                    repoCfg.remove(onlineRepoUrl);
+                    changed = true;
+                    logger.debug("Removed repo '{}' from feature repo list.", onlineRepoUrl);
                 }
                 if (changed) {
                     properties.put(PROPERTY_MVN_REPOS, String.join(",", repoCfg));
+                    paxCfgUpdated = true;
                     paxCfg.update(properties);
                 }
             } catch (IOException e) {
@@ -378,16 +392,7 @@ public class FeatureInstaller implements ConfigurationListener {
         return changed;
     }
 
-    private synchronized void installAddons(final Map<String, Object> config) {
-        if (!allKarsInstalled()) {
-            // some kars are not installed, delay installation for 15s
-            logger.info("Some .kar files are not installed yet. Delaying add-on installation by 15s.");
-            installJob = scheduler.schedule(() -> installAddons(config), 15, TimeUnit.SECONDS);
-            return;
-        }
-
-        installJob = null; // either this is called by the job itself or it is null anyway
-
+    private boolean installAddons(final Map<String, Object> config) {
         final Set<String> currentAddons = new HashSet<>(); // the currently installed ones
         final Set<String> targetAddons = new HashSet<>(); // the target we want to have installed afterwards
         final Set<String> installAddons = new HashSet<>(); // the ones to be installed (the diff)
@@ -398,7 +403,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 try {
                     Feature[] features = featuresService.listInstalledFeatures();
                     String typePrefix = PREFIX + type + "-";
-                    Set<String> configFeatureNames = Stream.of(((String) configValue).split(",")) //
+                    Set<String> configFeatureNames = Arrays.stream(((String) configValue).split(",")) //
                             .map(String::strip) //
                             .filter(not(String::isEmpty)) //
                             .map(addon -> typePrefix + addon) //
@@ -416,12 +421,9 @@ public class FeatureInstaller implements ConfigurationListener {
                         }
                     }
 
-                    // we collect all installed add-ons
-                    for (String name : getAllFeatureNamesWithPrefix(typePrefix)) {
-                        if (anyMatchingFeature(features, withName(name))) {
-                            currentAddons.add(name);
-                        }
-                    }
+                    // we collect all installed add-ons of this type
+                    getAllFeatureNamesWithPrefix(typePrefix).stream()
+                            .filter(name -> anyMatchingFeature(features, withName(name))).forEach(currentAddons::add);
                 } catch (Exception e) {
                     logger.error("Failed retrieving features: {}", e.getMessage(), debugException(e));
                 }
@@ -438,9 +440,9 @@ public class FeatureInstaller implements ConfigurationListener {
         }
 
         // do the de-installation
-        if (!uninstallAddons.isEmpty()) {
-            uninstallFeatures(uninstallAddons);
-        }
+        uninstallAddons.forEach(this::uninstallFeature);
+
+        return !installAddons.isEmpty() || !uninstallAddons.isEmpty();
     }
 
     private Set<String> getAllFeatureNamesWithPrefix(String prefix) {
@@ -451,17 +453,17 @@ public class FeatureInstaller implements ConfigurationListener {
                     .collect(Collectors.toSet());
         } catch (Exception e) {
             logger.error("Failed retrieving features: {}", e.getMessage(), debugException(e));
-            return Collections.emptySet();
+            return Set.of();
         }
     }
 
-    private synchronized void installFeatures(Set<String> addons) {
+    private void installFeatures(Set<String> addons) {
         try {
             if (logger.isDebugEnabled()) {
-                logger.debug("Installing '{}'", addons.stream().collect(Collectors.joining(", ")));
+                logger.debug("Installing '{}'", String.join(", ", addons));
             }
-            featuresService.installFeatures(addons,
-                    EnumSet.of(FeaturesService.Option.Upgrade, FeaturesService.Option.NoFailOnFeatureNotFound));
+            featuresService.installFeatures(addons, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles,
+                    FeaturesService.Option.Upgrade, FeaturesService.Option.NoFailOnFeatureNotFound));
             try {
                 Feature[] features = featuresService.listInstalledFeatures();
                 Set<String> installed = new HashSet<>();
@@ -476,38 +478,29 @@ public class FeatureInstaller implements ConfigurationListener {
                 }
 
                 if (!installed.isEmpty() && logger.isDebugEnabled()) {
-                    logger.debug("Installed '{}'", installed.stream().collect(Collectors.joining(", ")));
+                    logger.debug("Installed '{}'", String.join(", ", installed));
                 }
                 if (!failed.isEmpty()) {
-                    logger.error("Failed installing '{}'", failed.stream().collect(Collectors.joining(", ")));
+                    logger.error("Failed installing '{}'", String.join(", ", failed));
                     configMapCache = null; // make sure we retry the installation
                 }
-
-                for (String addon : installed) {
-                    postInstalledEvent(addon);
-                }
+                installed.forEach(this::postInstalledEvent);
             } catch (Exception e) {
                 logger.error("Failed retrieving features: {}", e.getMessage(), debugException(e));
                 configMapCache = null; // make sure we retry the installation
             }
         } catch (Exception e) {
-            logger.error("Failed installing '{}': {}", addons.stream().collect(Collectors.joining(", ")),
-                    e.getMessage(), debugException(e));
+            logger.error("Failed installing '{}': {}", String.join(", ", addons), e.getMessage(), debugException(e));
             configMapCache = null; // make sure we retry the installation
         }
     }
 
-    private synchronized void uninstallFeatures(Set<String> addons) {
-        for (String addon : addons) {
-            uninstallFeature(addon);
-        }
-    }
-
-    private synchronized boolean installFeature(String name) {
+    private boolean installFeature(String name) {
         try {
             Feature[] features = featuresService.listInstalledFeatures();
             if (!anyMatchingFeature(features, withName(name))) {
-                featuresService.installFeature(name);
+                featuresService.installFeature(name,
+                        EnumSet.of(FeaturesService.Option.Upgrade, FeaturesService.Option.NoAutoRefreshBundles));
                 features = featuresService.listInstalledFeatures();
                 if (anyMatchingFeature(features, withName(name))) {
                     logger.debug("Installed '{}'", name);
@@ -522,43 +515,34 @@ public class FeatureInstaller implements ConfigurationListener {
         return false;
     }
 
-    private synchronized boolean uninstallFeature(String name) {
+    private void uninstallFeature(String name) {
         try {
             Feature[] features = featuresService.listInstalledFeatures();
             if (anyMatchingFeature(features, withName(name))) {
                 featuresService.uninstallFeature(name);
                 logger.debug("Uninstalled '{}'", name);
                 postUninstalledEvent(name);
-                return true;
             }
         } catch (Exception e) {
             logger.debug("Failed uninstalling '{}': {}", name, e.getMessage());
         }
-        return false;
     }
 
-    private synchronized boolean installPackage(final Map<String, Object> config) {
+    private boolean installPackage(final Map<String, Object> config) {
         boolean configChanged = false;
         Object packageName = config.get(OpenHAB.CFG_PACKAGE);
         if (packageName instanceof String) {
             currentPackage = (String) packageName;
-            String fullName = PREFIX + PREFIX_PACKAGE + ((String) packageName).trim();
-            if (MINIMAL_PACKAGE.equals(currentPackage)) {
-                // no changes are done to the add-ons list, so the installer should proceed
-                configChanged = false;
-            } else {
-                if (installFeature(fullName)) {
-                    configChanged = true;
-                }
+            String fullName = PREFIX + PREFIX_PACKAGE + ((String) packageName).strip();
+            if (!MINIMAL_PACKAGE.equals(currentPackage)) {
+                configChanged = installFeature(fullName);
             }
 
             // uninstall all other packages
             try {
-                for (Feature feature : featuresService.listFeatures()) {
-                    if (feature.getName().startsWith(PREFIX + PREFIX_PACKAGE) && !feature.getName().equals(fullName)) {
-                        uninstallFeature(feature.getName());
-                    }
-                }
+                Stream.of(featuresService.listFeatures()).map(Feature::getName)
+                        .filter(feature -> feature.startsWith(PREFIX + PREFIX_PACKAGE) && !feature.equals(fullName))
+                        .forEach(this::uninstallFeature);
             } catch (Exception e) {
                 logger.error("Failed retrieving features: {}", e.getMessage(), debugException(e));
             }
@@ -566,30 +550,23 @@ public class FeatureInstaller implements ConfigurationListener {
         return configChanged;
     }
 
-    @Override
-    public void configurationEvent(ConfigurationEvent event) {
-        if (PAX_URL_PID.equals(event.getPid()) && event.getType() == ConfigurationEvent.CM_UPDATED) {
-            paxCfgUpdated = true;
-        }
-    }
-
-    private static void postInstalledEvent(String featureName) {
+    private void postInstalledEvent(String featureName) {
         String extensionId = featureName.substring(PREFIX.length());
-        if (eventPublisher != null) {
-            Event event = AddonEventFactory.createAddonInstalledEvent(extensionId);
-            eventPublisher.post(event);
-        }
+        Event event = AddonEventFactory.createAddonInstalledEvent(extensionId);
+        eventPublisher.post(event);
     }
 
-    private static void postUninstalledEvent(String featureName) {
+    private void postUninstalledEvent(String featureName) {
         String extensionId = featureName.substring(PREFIX.length());
-        if (eventPublisher != null) {
-            Event event = AddonEventFactory.createAddonUninstalledEvent(extensionId);
-            eventPublisher.post(event);
-        }
+        Event event = AddonEventFactory.createAddonUninstalledEvent(extensionId);
+        eventPublisher.post(event);
     }
 
-    String getCurrentPackage() {
-        return currentPackage;
+    private static boolean anyMatchingFeature(Feature[] features, Predicate<Feature> predicate) {
+        return Arrays.stream(features).anyMatch(predicate);
+    }
+
+    private static Predicate<Feature> withName(final String name) {
+        return feature -> feature.getName().equals(name);
     }
 }
