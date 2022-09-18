@@ -305,7 +305,6 @@ public class ThingManagerImpl
             if (channelType != null) {
                 URI configDescriptionURI = channelType.getConfigDescriptionURI();
                 if (configDescriptionURI != null) {
-                    configDescriptionValidator.validate(configurationParameters, configDescriptionURI);
                 }
             }
         }
@@ -1140,7 +1139,7 @@ public class ThingManagerImpl
                 }
             } else {
                 setThingStatus(thing, new ThingStatusInfo(ThingStatus.UNINITIALIZED,
-                        ThingStatusDetail.HANDLER_REGISTERING_ERROR, "Handler factory not found"));
+                        ThingStatusDetail.HANDLER_MISSING_ERROR, "Handler factory not found"));
                 logger.debug("Not registering a handler at this point. No handler factory for thing '{}' found.",
                         thing.getUID());
             }
