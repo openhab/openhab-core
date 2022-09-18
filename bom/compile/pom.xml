@@ -17,6 +17,7 @@
   <description>The dependencies that are used to compile the core bundles</description>
 
   <properties>
+    <californium.version>2.7.3</californium.version>
     <jetty.version>9.4.46.v20220331</jetty.version>
     <swagger.version>2.1.9</swagger.version>
   </properties>
@@ -70,17 +71,28 @@
     <dependency>
       <groupId>org.eclipse.californium</groupId>
       <artifactId>californium-core</artifactId>
-      <version>2.0.0</version>
+      <version>${californium.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.californium</groupId>
       <artifactId>scandium</artifactId>
-      <version>2.0.0</version>
+      <version>${californium.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.californium</groupId>
       <artifactId>element-connector</artifactId>
-      <version>2.0.0</version>
+      <version>${californium.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>net.i2p.crypto</groupId>
+          <artifactId>eddsa</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.orbit.bundles</groupId>
+      <artifactId>net.i2p.crypto.eddsa</artifactId>
+      <version>0.3.0.v20220506-1020</version>
     </dependency>
 
     <!-- Gson -->

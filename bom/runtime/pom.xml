@@ -16,6 +16,7 @@
   <name>openHAB Core :: BOM :: Runtime</name>
 
   <properties>
+    <californium.version>2.7.3</californium.version>
     <cxf.version>3.4.5</cxf.version>
     <!-- revert version of jackson-databind to ${jackson.version} when versions are in-line again -->
     <jackson.version>2.12.6</jackson.version>
@@ -411,17 +412,28 @@
     <dependency>
       <groupId>org.eclipse.californium</groupId>
       <artifactId>californium-core</artifactId>
-      <version>2.0.0</version>
+      <version>${californium.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.californium</groupId>
       <artifactId>scandium</artifactId>
-      <version>2.0.0</version>
+      <version>${californium.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.californium</groupId>
       <artifactId>element-connector</artifactId>
-      <version>2.0.0</version>
+      <version>${californium.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>net.i2p.crypto</groupId>
+          <artifactId>eddsa</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.orbit.bundles</groupId>
+      <artifactId>net.i2p.crypto.eddsa</artifactId>
+      <version>0.3.0.v20220506-1020</version>
     </dependency>
 
     <!-- Gson -->
