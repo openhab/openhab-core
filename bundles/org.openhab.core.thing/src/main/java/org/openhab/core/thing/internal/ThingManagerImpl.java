@@ -305,6 +305,7 @@ public class ThingManagerImpl
             if (channelType != null) {
                 URI configDescriptionURI = channelType.getConfigDescriptionURI();
                 if (configDescriptionURI != null) {
+                    configDescriptionValidator.validate(configurationParameters, configDescriptionURI);
                 }
             }
         }
