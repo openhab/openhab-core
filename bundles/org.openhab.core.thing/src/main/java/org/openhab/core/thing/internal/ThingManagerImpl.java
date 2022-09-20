@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -43,6 +44,7 @@ import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
 import org.openhab.core.config.core.validation.ConfigValidationException;
@@ -608,6 +610,7 @@ public class ThingManagerImpl
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public void thingUpdated(Thing oldThing, Thing newThing, ThingTrackerEvent thingTrackerEvent) {
         ThingUID thingUID = newThing.getUID();
+        normalizeThingConfiguration(newThing);
         if (thingUpdatedLock.contains(thingUID)) {
             // called from the thing handler itself, therefore
             // it exists, is initializing/initialized and
@@ -849,6 +852,44 @@ public class ThingManagerImpl
         }
 
         configDescriptionValidator.validate(configuration.getProperties(), configDescriptionURI);
+    }
+
+    private void normalizeThingConfiguration(Thing thing) throws ConfigValidationException {
+        ThingType thingType = thingTypeRegistry.getThingType(thing.getThingTypeUID());
+        normalizeConfiguration(thingType, thing.getUID(), ThingType::getConfigDescriptionURI, thing.getConfiguration());
+
+        for (Channel channel : thing.getChannels()) {
+            ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
+            normalizeConfiguration(channelType, channel.getUID(), ChannelType::getConfigDescriptionURI,
+                    channel.getConfiguration());
+        }
+    }
+
+    private <T extends Identifiable<?>> void normalizeConfiguration(@Nullable T prototype, UID targetUID,
+            Function<T, @Nullable URI> configDescriptionURIFunction, Configuration configuration)
+            throws ConfigValidationException {
+        if (prototype == null) {
+            logger.debug("Prototype for '{}' is not known, assuming it is already normalized", targetUID);
+            return;
+        }
+
+        URI configDescriptionURI = configDescriptionURIFunction.apply(prototype);
+        if (configDescriptionURI == null) {
+            logger.debug("Config description URI for '{}' not found, assuming '{}' is normalized", prototype.getUID(),
+                    targetUID);
+            return;
+        }
+
+        ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
+        if (configDescription == null) {
+            logger.warn(
+                    "No config description for '{}' found when normalizing configuration for '{}'. This is probably a bug.",
+                    configDescriptionURI, targetUID);
+            return;
+        }
+
+        Objects.requireNonNull(ConfigUtil.normalizeTypes(configuration.getProperties(), List.of(configDescription)))
+                .forEach(configuration::put);
     }
 
     private void doInitializeHandler(final ThingHandler thingHandler) {
@@ -1130,7 +1171,9 @@ public class ThingManagerImpl
         } else {
             if (thingHandlerFactory != null) {
                 final String identifier = getBundleIdentifier(thingHandlerFactory);
+
                 if (loadedXmlThingTypes.contains(identifier)) {
+                    normalizeThingConfiguration(thing);
                     registerHandler(thing, thingHandlerFactory);
                     initializeHandler(thing);
                 } else {
