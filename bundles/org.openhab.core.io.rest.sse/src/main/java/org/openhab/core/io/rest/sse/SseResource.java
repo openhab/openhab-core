@@ -101,11 +101,13 @@ public class SseResource implements RESTResource, SsePublisher {
 
     private static final String X_ACCEL_BUFFERING_HEADER = "X-Accel-Buffering";
 
+    public static final int ALIVE_INTERVAL_SECONDS = 10;
+
     private final Logger logger = LoggerFactory.getLogger(SseResource.class);
 
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
-    private final ScheduledFuture<?> cleanSubscriptionsJob;
+    private final ScheduledFuture<?> aliveEventJob;
 
     private @Context @NonNullByDefault({}) Sse sse;
 
@@ -120,12 +122,13 @@ public class SseResource implements RESTResource, SsePublisher {
         this.executorService = Executors.newSingleThreadExecutor();
         this.itemStatesEventBuilder = itemStatesEventBuilder;
 
-        cleanSubscriptionsJob = scheduler.scheduleWithFixedDelay(() -> {
-            logger.debug("Run clean SSE subscriptions job");
-            OutboundSseEvent outboundSseEvent = sse.newEventBuilder().name("event")
-                    .mediaType(MediaType.APPLICATION_JSON_TYPE).data(new ServerAliveEvent()).build();
-            topicBroadcaster.send(outboundSseEvent);
-        }, 1, 2, TimeUnit.MINUTES);
+        aliveEventJob = scheduler.scheduleWithFixedDelay(() -> {
+            logger.debug("Sending alive event to SSE connections");
+            OutboundSseEvent aliveEvent = sse.newEventBuilder().name("alive").mediaType(MediaType.APPLICATION_JSON_TYPE)
+                    .data(new AliveEvent()).build();
+            itemStatesBroadcaster.send(aliveEvent);
+            topicBroadcaster.send(aliveEvent);
+        }, 1, ALIVE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
     @Deactivate
@@ -133,7 +136,7 @@ public class SseResource implements RESTResource, SsePublisher {
         itemStatesBroadcaster.close();
         topicBroadcaster.close();
         executorService.shutdown();
-        cleanSubscriptionsJob.cancel(true);
+        aliveEventJob.cancel(true);
     }
 
     @Override
@@ -262,7 +265,8 @@ public class SseResource implements RESTResource, SsePublisher {
         }
     }
 
-    private static class ServerAliveEvent {
+    private static class AliveEvent {
         public final String type = "ALIVE";
+        public final int interval = ALIVE_INTERVAL_SECONDS;
     }
 }
