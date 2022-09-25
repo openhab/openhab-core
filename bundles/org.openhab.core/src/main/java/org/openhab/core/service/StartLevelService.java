@@ -172,6 +172,7 @@ public class StartLevelService {
         // clean up
         slmarker.clear();
         trackers.values().forEach(t -> readyService.unregisterTracker(t));
+        trackers.clear();
 
         // set up trackers and markers
         startlevels = parseConfig(configuration);
