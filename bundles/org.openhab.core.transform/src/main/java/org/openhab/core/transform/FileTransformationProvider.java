@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public class FileTransformationProvider extends AbstractWatchService implements TransformationProvider {
     private static final WatchEvent.Kind<?>[] WATCH_EVENTS = { StandardWatchEventKinds.ENTRY_CREATE,
             StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY };
-    private static final Set<String> IGNORED_EXTENSIONS = Set.of("txt");
+    private static final Set<String> IGNORED_EXTENSIONS = Set.of("txt", "swp");
     private static final Pattern FILENAME_PATTERN = Pattern
             .compile("(?<filename>.+?)(_(?<language>[a-z]{2}))?\\.(?<extension>[^.]*)$");
     private static final Path TRANSFORMATION_PATH = Path.of(OpenHAB.getConfigFolder(),
