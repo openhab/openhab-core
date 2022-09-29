@@ -40,7 +40,8 @@ public class TimerImpl implements Timer {
         this(scheduler, startTime, runnable, null);
     }
 
-    public TimerImpl(Scheduler scheduler, ZonedDateTime startTime, SchedulerRunnable runnable, @Nullable String identifier) {
+    public TimerImpl(Scheduler scheduler, ZonedDateTime startTime, SchedulerRunnable runnable,
+            @Nullable String identifier) {
         this.scheduler = scheduler;
         this.startTime = startTime;
         this.runnable = runnable;
@@ -57,7 +58,7 @@ public class TimerImpl implements Timer {
     @Override
     public synchronized boolean reschedule(ZonedDateTime newTime) {
         future.cancel(false);
-        future = scheduler.schedule(runnable, newTime.toInstant());
+        future = scheduler.schedule(runnable, identifier, newTime.toInstant());
         return true;
     }
 
