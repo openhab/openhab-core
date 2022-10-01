@@ -62,6 +62,8 @@ public abstract class GenericItem implements ActiveItem {
 
     protected @Nullable EventPublisher eventPublisher;
 
+    protected @Nullable MetadataRegistry metadataRegistry;
+
     protected Set<StateChangeListener> listeners = new CopyOnWriteArraySet<>(
             Collections.newSetFromMap(new WeakHashMap<>()));
 
@@ -172,16 +174,21 @@ public abstract class GenericItem implements ActiveItem {
      * member order in case this item is exchanged in a group.
      */
     public void dispose() {
-        this.listeners.clear();
-        this.eventPublisher = null;
-        this.stateDescriptionService = null;
-        this.commandDescriptionService = null;
-        this.unitProvider = null;
-        this.itemStateConverter = null;
+        listeners.clear();
+        eventPublisher = null;
+        metadataRegistry = null;
+        stateDescriptionService = null;
+        commandDescriptionService = null;
+        unitProvider = null;
+        itemStateConverter = null;
     }
 
     public void setEventPublisher(@Nullable EventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
+    }
+
+    public void setMetadataRegistry(@Nullable MetadataRegistry metadataRegistry) {
+        this.metadataRegistry = metadataRegistry;
     }
 
     public void setStateDescriptionService(@Nullable StateDescriptionService stateDescriptionService) {

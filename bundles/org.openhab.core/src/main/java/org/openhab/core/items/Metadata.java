@@ -13,8 +13,6 @@
 package org.openhab.core.items;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -42,14 +40,13 @@ public final class Metadata implements Identifiable<MetadataKey> {
     Metadata() {
         key = new MetadataKey();
         value = "";
-        configuration = Collections.emptyMap();
+        configuration = Map.of();
     }
 
     public Metadata(MetadataKey key, String value, @Nullable Map<String, Object> configuration) {
         this.key = key;
         this.value = value;
-        this.configuration = configuration != null ? Collections.unmodifiableMap(new HashMap<>(configuration))
-                : Collections.emptyMap();
+        this.configuration = configuration != null ? Map.copyOf(configuration) : Map.of();
     }
 
     @Override
@@ -95,10 +92,7 @@ public final class Metadata implements Identifiable<MetadataKey> {
             return false;
         }
         Metadata other = (Metadata) obj;
-        if (!key.equals(other.key)) {
-            return false;
-        }
-        return true;
+        return key.equals(other.key);
     }
 
     @Override

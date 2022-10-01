@@ -368,12 +368,14 @@ public class ItemRegistryImplTest extends JavaTest {
         itemProvider.add(item);
 
         assertNotNull(item.eventPublisher);
+        assertNotNull(item.metadataRegistry);
         assertNotNull(item.itemStateConverter);
         assertNotNull(item.unitProvider);
 
         itemProvider.update(new SwitchItem("Item1"));
 
         assertNull(item.eventPublisher);
+        assertNull(item.metadataRegistry);
         assertNull(item.itemStateConverter);
         assertNull(item.unitProvider);
         assertEquals(0, item.listeners.size());
