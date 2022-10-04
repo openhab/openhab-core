@@ -99,4 +99,9 @@ public class EventLogger implements EventSubscriber, ReadyTracker {
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
         loggingActive = false;
     }
+
+    @Override
+    public int getPriority() {
+        return -1;
+    }
 }

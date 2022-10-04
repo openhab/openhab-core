@@ -350,6 +350,16 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
+    public void testItemCommandEventVetoed() {
+        var event = ItemEventFactory.createCommandEvent(ITEM_NAME_1, OnOffType.ON);
+        event.veto();
+        manager.receive(event);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
+        verifyNoMoreInteractions(autoUpdateManagerMock);
+    }
+
+    @Test
     public void testItemStateEventSingleLink() {
         manager.receive(ItemEventFactory.createStateEvent(ITEM_NAME_2, OnOffType.ON));
         waitForAssert(() -> {

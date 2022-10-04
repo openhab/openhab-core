@@ -25,8 +25,10 @@ import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.items.SwitchItem;
@@ -56,17 +58,26 @@ public class ItemUpdaterOSGiTest extends JavaOSGiTest {
         itemRegistry = getService(ItemRegistry.class);
         assertNotNull(itemRegistry);
 
-        itemRegistry.add(new SwitchItem("switch"));
+        var groupItem = new GroupItem("group");
+        groupItem.setEventPublisher(eventPublisher);
+        var switchItem = new SwitchItem("switch");
+        groupItem.addMember(switchItem);
+        itemRegistry.add(switchItem);
+        itemRegistry.add(groupItem);
 
         EventSubscriber eventSubscriber = new EventSubscriber() {
             @Override
             public void receive(Event event) {
+                // veto OFF commands, for the veto test
+                if (event instanceof ItemCommandEvent && ((ItemCommandEvent) event).getItemCommand() == OnOffType.OFF) {
+                    ((ItemCommandEvent) event).veto();
+                }
                 receivedEvents.add(event);
             }
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Set.of(ItemStateChangedEvent.TYPE);
+                return Set.of(ItemStateChangedEvent.TYPE, ItemCommandEvent.TYPE);
             }
 
             @Override
@@ -111,6 +122,48 @@ public class ItemUpdaterOSGiTest extends JavaOSGiTest {
         Thread.sleep(100);
 
         // make sure no state changed event has been sent
+        assertTrue(receivedEvents.isEmpty());
+    }
+
+    @Test
+    public void testItemCommandEventForwardsToGroupMembers() throws Exception {
+        eventPublisher.post(ItemEventFactory.createCommandEvent("group", OnOffType.ON));
+
+        // first the group item gets a command event
+        waitForAssert(() -> {
+            assertFalse(receivedEvents.isEmpty());
+            ItemCommandEvent commandEvent = (ItemCommandEvent) receivedEvents.poll();
+            assertNotNull(commandEvent);
+            assertFalse(commandEvent.isVetoed());
+            assertEquals("group", commandEvent.getItemName());
+            assertEquals(OnOffType.ON, commandEvent.getItemCommand());
+        });
+        // then the member of the group gets the event
+        waitForAssert(() -> {
+            assertFalse(receivedEvents.isEmpty());
+            ItemCommandEvent commandEvent = (ItemCommandEvent) receivedEvents.poll();
+            assertNotNull(commandEvent);
+            assertEquals("switch", commandEvent.getItemName());
+            assertEquals(OnOffType.ON, commandEvent.getItemCommand());
+        });
+    }
+
+    @Test
+    public void testItemCommandEventVetoedDoesNothing() throws Exception {
+        eventPublisher.post(ItemEventFactory.createCommandEvent("group", OnOffType.OFF));
+
+        waitForAssert(() -> {
+            assertFalse(receivedEvents.isEmpty());
+            ItemCommandEvent commandEvent = (ItemCommandEvent) receivedEvents.poll();
+            assertNotNull(commandEvent);
+            assertTrue(commandEvent.isVetoed());
+            assertEquals("group", commandEvent.getItemName());
+            assertEquals(OnOffType.OFF, commandEvent.getItemCommand());
+        });
+        // wait for all events to be processed
+        Thread.sleep(100);
+
+        // make sure no more command event has been sent
         assertTrue(receivedEvents.isEmpty());
     }
 }

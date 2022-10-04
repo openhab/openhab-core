@@ -13,9 +13,9 @@
 package org.openhab.core.internal.events;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -115,7 +115,14 @@ public class EventHandler implements AutoCloseable {
         Set<EventSubscriber> eventTypeSubscribers = typedEventSubscribers.get(eventType);
         Set<EventSubscriber> allEventTypeSubscribers = typedEventSubscribers.get(EventSubscriber.ALL_EVENT_TYPES);
 
-        Set<EventSubscriber> subscribers = new HashSet<>();
+        Set<EventSubscriber> subscribers = new TreeSet<>((s1, s2) -> {
+            // order is reversed so lower priorities sort later
+            int comparison = Integer.compare(s2.getPriority(), s1.getPriority());
+            if (comparison == 0) {
+                comparison = Integer.compare(s1.hashCode(), s2.hashCode());
+            }
+            return comparison;
+        });
         if (eventTypeSubscribers != null) {
             subscribers.addAll(eventTypeSubscribers);
         }

@@ -54,6 +54,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
     protected @NonNullByDefault({}) Set<String> tags;
     protected @NonNullByDefault({}) Visibility visibility;
     protected @Nullable String description;
+    protected boolean synchronous = false;
 
     protected transient volatile RuleStatusInfo status = new RuleStatusInfo(RuleStatus.UNINITIALIZED,
             RuleStatusDetail.NONE);
@@ -213,6 +214,20 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
         modules.addAll(conditions);
         modules.addAll(actions);
         return Collections.unmodifiableList(modules);
+    }
+
+    /**
+     * This method is used to configure a {@link Rule} to run synchronously.
+     *
+     * @param synchronous the synchronicity preference
+     */
+    public void setSynchronous(boolean synchronous) {
+        this.synchronous = synchronous;
+    }
+
+    @Override
+    public boolean isSynchronous() {
+        return synchronous;
     }
 
     @SuppressWarnings("unchecked")

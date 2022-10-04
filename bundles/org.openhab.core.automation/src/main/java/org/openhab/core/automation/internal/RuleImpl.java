@@ -53,6 +53,7 @@ public class RuleImpl implements Rule {
     protected Set<String> tags;
     protected Visibility visibility;
     protected @Nullable String description;
+    protected boolean synchronous;
 
     /**
      * Constructor for creating an empty {@link Rule} with a specified rule identifier.
@@ -62,7 +63,7 @@ public class RuleImpl implements Rule {
      * @param uid the rule's identifier, or {@code null} if a random identifier should be generated.
      */
     public RuleImpl(@Nullable String uid) {
-        this(uid, null, null, null, null, null, null, null, null, null, null);
+        this(uid, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     /**
@@ -86,11 +87,13 @@ public class RuleImpl implements Rule {
      *            {@link RuleRegistry} to validate the {@link Rule}'s configuration, as well as to create and configure
      *            the {@link Rule}'s modules, or null if the {@link Rule} should not be created from a template.
      * @param visibility the {@link Rule}'s visibility
+     * @param synchronous the {@link Rule}'s synchronicity'
      */
     public RuleImpl(@Nullable String uid, final @Nullable String name, final @Nullable String description,
             final @Nullable Set<String> tags, @Nullable List<Trigger> triggers, @Nullable List<Condition> conditions,
             @Nullable List<Action> actions, @Nullable List<ConfigDescriptionParameter> configDescriptions,
-            @Nullable Configuration configuration, @Nullable String templateUID, @Nullable Visibility visibility) {
+            @Nullable Configuration configuration, @Nullable String templateUID, @Nullable Visibility visibility,
+            @Nullable Boolean synchronous) {
         this.uid = uid == null ? UUID.randomUUID().toString() : uid;
         this.name = name;
         this.description = description;
@@ -103,6 +106,7 @@ public class RuleImpl implements Rule {
                 : new Configuration(configuration.getProperties());
         this.templateUID = templateUID;
         this.visibility = visibility == null ? Visibility.VISIBLE : visibility;
+        this.synchronous = synchronous == null ? false : synchronous;
     }
 
     @Override
@@ -258,6 +262,11 @@ public class RuleImpl implements Rule {
         modules.addAll(conditions);
         modules.addAll(actions);
         return Collections.unmodifiableList(modules);
+    }
+
+    @Override
+    public boolean isSynchronous() {
+        return synchronous;
     }
 
     @Override

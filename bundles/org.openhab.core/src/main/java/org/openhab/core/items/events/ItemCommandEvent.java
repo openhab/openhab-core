@@ -32,6 +32,8 @@ public class ItemCommandEvent extends ItemEvent {
 
     private final Command command;
 
+    private boolean vetoed;
+
     /**
      * Constructs a new item command event object.
      *
@@ -45,6 +47,7 @@ public class ItemCommandEvent extends ItemEvent {
             @Nullable String source) {
         super(topic, payload, itemName, source);
         this.command = command;
+        vetoed = false;
     }
 
     @Override
@@ -63,6 +66,26 @@ public class ItemCommandEvent extends ItemEvent {
 
     @Override
     public String toString() {
-        return String.format("Item '%s' received command %s", itemName, command);
+        if (isVetoed()) {
+            return String.format("Command %s to Item '%s' was vetoed.", command, itemName);
+        } else {
+            return String.format("Item '%s' received command %s", itemName, command);
+        }
+    }
+
+    /**
+     * Veto this event.
+     */
+    public void veto() {
+        vetoed = true;
+    }
+
+    /**
+     * Gets the veto status of this event.
+     *
+     * @return if the event has been vetoed.
+     */
+    public boolean isVetoed() {
+        return vetoed;
     }
 }

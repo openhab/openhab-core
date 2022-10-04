@@ -154,4 +154,16 @@ public interface Rule extends Identifiable<String> {
         }
         return null;
     }
+
+    /**
+     * This method is used to determine if the rule should be run synchronously.
+     * A synchronous rule will run in the context of the thread triggering it
+     * (likely the EventHandler thread), and as such, should not block on
+     * anything and return speedily.
+     *
+     * @return the {@link Rule}'s synchronicity preference
+     */
+    default boolean isSynchronous() {
+        return false;
+    }
 }

@@ -590,11 +590,11 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @param rule rule object for which the callback is looking for.
      * @return a {@link TriggerHandlerCallback} corresponding to the passed {@link Rule} object.
      */
-    private synchronized TriggerHandlerCallbackImpl getTriggerHandlerCallback(String ruleUID) {
-        TriggerHandlerCallbackImpl result = thCallbacks.get(ruleUID);
+    private synchronized TriggerHandlerCallbackImpl getTriggerHandlerCallback(WrappedRule rule) {
+        TriggerHandlerCallbackImpl result = thCallbacks.get(rule.getUID());
         if (result == null) {
-            result = new TriggerHandlerCallbackImpl(this, ruleUID);
-            thCallbacks.put(ruleUID, result);
+            result = new TriggerHandlerCallbackImpl(this, rule.getUID(), rule.unwrap().isSynchronous());
+            thCallbacks.put(rule.getUID(), result);
         }
         return result;
     }
@@ -630,7 +630,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     private void register(WrappedRule rule) {
         final String ruleUID = rule.getUID();
 
-        TriggerHandlerCallback thCallback = getTriggerHandlerCallback(ruleUID);
+        TriggerHandlerCallback thCallback = getTriggerHandlerCallback(rule);
         rule.getTriggers().forEach(trigger -> {
             TriggerHandler triggerHandler = trigger.getModuleHandler();
             if (triggerHandler != null) {

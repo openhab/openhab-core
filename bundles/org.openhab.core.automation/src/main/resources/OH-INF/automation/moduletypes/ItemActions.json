@@ -119,6 +119,21 @@
 					]
 				}
 			]
+		},
+		{
+			"uid": "core.VetoCommandAction",
+			"label": "veto a command",
+			"description": "Prevents a command from being processed.",
+			"visibility": "EXPERT",
+			"inputs": [
+				{
+					"name": "event",
+					"type": "org.openhab.core.events.Event",
+					"label": "Event",
+					"description": "The event which was sent.",
+					"reference": "event"
+				}
+			]
 		}
 	]
 }

@@ -50,6 +50,11 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
     }
 
     @Override
+    public int getPriority() {
+        return -1;
+    }
+
+    @Override
     protected void receiveUpdate(ItemStateEvent updateEvent) {
         String itemName = updateEvent.getItemName();
         State newState = updateEvent.getItemState();
@@ -87,6 +92,10 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
 
     @Override
     protected void receiveCommand(ItemCommandEvent commandEvent) {
+        if (commandEvent.isVetoed()) {
+            return;
+        }
+
         try {
             Item item = itemRegistry.getItem(commandEvent.getItemName());
             if (item instanceof GroupItem) {

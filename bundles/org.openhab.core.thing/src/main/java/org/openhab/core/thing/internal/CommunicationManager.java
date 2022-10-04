@@ -206,6 +206,11 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         }
     }
 
+    @Override
+    public int getPriority() {
+        return -1;
+    }
+
     private @Nullable Thing getThing(ThingUID thingUID) {
         return thingRegistry.get(thingUID);
     }
@@ -336,6 +341,10 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     }
 
     private void receiveCommand(ItemCommandEvent commandEvent) {
+        if (commandEvent.isVetoed()) {
+            return;
+        }
+
         final String itemName = commandEvent.getItemName();
         final Command command = commandEvent.getItemCommand();
         final Item item = getItem(itemName);

@@ -51,6 +51,7 @@ public class RuleBuilder {
     private Set<String> tags;
     private @Nullable Visibility visibility;
     private @Nullable String description;
+    private @Nullable Boolean synchronous;
 
     protected RuleBuilder(Rule rule) {
         this.triggers = new LinkedList<>(rule.getTriggers());
@@ -64,6 +65,7 @@ public class RuleBuilder {
         this.tags = new HashSet<>(rule.getTags());
         this.visibility = rule.getVisibility();
         this.description = rule.getDescription();
+        this.synchronous = rule.isSynchronous();
     }
 
     public static RuleBuilder create(String ruleId) {
@@ -75,7 +77,7 @@ public class RuleBuilder {
         return create(r.getUID()).withActions(r.getActions()).withConditions(r.getConditions())
                 .withTriggers(r.getTriggers()).withConfiguration(r.getConfiguration())
                 .withConfigurationDescriptions(r.getConfigurationDescriptions()).withDescription(r.getDescription())
-                .withName(r.getName()).withTags(r.getTags());
+                .withName(r.getName()).withTags(r.getTags()).withSynchronous(r.isSynchronous());
     }
 
     public static RuleBuilder create(RuleTemplate template, String uid, @Nullable String name,
@@ -165,8 +167,13 @@ public class RuleBuilder {
         return this;
     }
 
+    public RuleBuilder withSynchronous(@Nullable Boolean synchronous) {
+        this.synchronous = synchronous;
+        return this;
+    }
+
     public Rule build() {
         return new RuleImpl(uid, name, description, tags, triggers, conditions, actions, configDescriptions,
-                configuration, templateUID, visibility);
+                configuration, templateUID, visibility, synchronous);
     }
 }

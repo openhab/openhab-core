@@ -124,7 +124,8 @@ public class ScriptedAutomationManager {
             }
         }
 
-        builder.withName(name).withDescription(element.getDescription()).withTags(element.getTags());
+        builder.withName(name).withDescription(element.getDescription()).withTags(element.getTags())
+                .withSynchronous(element.isSynchronous());
 
         // used for numbering the modules of the rule
         int moduleIndex = 1;

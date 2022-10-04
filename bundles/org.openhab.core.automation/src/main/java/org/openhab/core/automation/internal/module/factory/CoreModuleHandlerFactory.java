@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
+import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseModuleHandlerFactory;
 import org.openhab.core.automation.handler.ModuleHandler;
@@ -39,6 +40,7 @@ import org.openhab.core.automation.internal.module.handler.RuleEnablementActionH
 import org.openhab.core.automation.internal.module.handler.RunRuleActionHandler;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.VetoCommandActionHandler;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.ItemRegistry;
 import org.osgi.framework.BundleContext;
@@ -71,19 +73,21 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
             GenericEventTriggerHandler.MODULE_TYPE_ID, ChannelEventTriggerHandler.MODULE_TYPE_ID,
             GenericEventConditionHandler.MODULETYPE_ID, GenericEventConditionHandler.MODULETYPE_ID,
             CompareConditionHandler.MODULE_TYPE, SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID,
-            RuleEnablementActionHandler.UID, RunRuleActionHandler.UID);
+            RuleEnablementActionHandler.UID, RunRuleActionHandler.UID, VetoCommandActionHandler.VETO_COMMAND_ACTION);
 
     private ItemRegistry itemRegistry;
     private EventPublisher eventPublisher;
+    private RuleRegistry ruleRegistry;
 
     private BundleContext bundleContext;
 
     @Activate
     public CoreModuleHandlerFactory(BundleContext bundleContext, final @Reference EventPublisher eventPublisher,
-            final @Reference ItemRegistry itemRegistry) {
+            final @Reference ItemRegistry itemRegistry, final @Reference RuleRegistry ruleRegistry) {
         this.bundleContext = bundleContext;
         this.eventPublisher = eventPublisher;
         this.itemRegistry = itemRegistry;
+        this.ruleRegistry = ruleRegistry;
     }
 
     @Override
@@ -142,6 +146,8 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
                 return new RuleEnablementActionHandler((Action) module);
             } else if (RunRuleActionHandler.UID.equals(moduleTypeUID)) {
                 return new RunRuleActionHandler((Action) module);
+            } else if (VetoCommandActionHandler.VETO_COMMAND_ACTION.equals(moduleTypeUID)) {
+                return new VetoCommandActionHandler((Action) module, ruleUID, ruleRegistry);
             }
         }
 

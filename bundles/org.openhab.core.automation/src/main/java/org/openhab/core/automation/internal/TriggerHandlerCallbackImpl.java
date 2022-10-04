@@ -43,20 +43,28 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
 
     private final String ruleUID;
 
-    private ScheduledExecutorService executor;
+    private @Nullable ScheduledExecutorService executor;
 
     private @Nullable Future<?> future;
 
-    protected TriggerHandlerCallbackImpl(RuleEngineImpl re, String ruleUID) {
+    protected TriggerHandlerCallbackImpl(RuleEngineImpl re, String ruleUID, boolean isSynchronous) {
         this.re = re;
         this.ruleUID = ruleUID;
-        executor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("rule-" + ruleUID));
+        if (!isSynchronous) {
+            executor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("rule-" + ruleUID));
+        }
     }
 
     @Override
     public void triggered(Trigger trigger, Map<String, ?> context) {
         synchronized (this) {
-            future = executor.submit(new TriggerData(trigger, context));
+            ScheduledExecutorService localExecutor = executor;
+            TriggerData triggerData = new TriggerData(trigger, context);
+            if (localExecutor != null) {
+                future = executor.submit(triggerData);
+            } else {
+                triggerData.run();
+            }
         }
         re.logger.debug("The trigger '{}' of rule '{}' is triggered.", trigger.getId(), ruleUID);
     }
@@ -93,7 +101,10 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     public void dispose() {
         synchronized (this) {
             AccessController.doPrivileged((PrivilegedAction<@Nullable Void>) () -> {
-                executor.shutdownNow();
+                ScheduledExecutorService localExecutor = executor;
+                if (localExecutor != null) {
+                    localExecutor.shutdownNow();
+                }
                 return null;
             });
         }
@@ -131,6 +142,10 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
 
     @Override
     public ScheduledExecutorService getScheduler() {
-        return executor;
+        ScheduledExecutorService localExecutor = executor;
+        if (localExecutor != null) {
+            return localExecutor;
+        }
+        throw new IllegalStateException("getScheduler() called on a synchronous rule.");
     }
 }

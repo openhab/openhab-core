@@ -40,7 +40,8 @@ public class RuleDTOMapper {
                 .withConfiguration(new Configuration(ruleDto.configuration))
                 .withConfigurationDescriptions(ConfigDescriptionDTOMapper.map(ruleDto.configDescriptions))
                 .withTemplateUID(ruleDto.templateUID).withVisibility(ruleDto.visibility).withTags(ruleDto.tags)
-                .withName(ruleDto.name).withDescription(ruleDto.description).build();
+                .withName(ruleDto.name).withDescription(ruleDto.description).withSynchronous(ruleDto.synchronous)
+                .build();
     }
 
     protected static void fillProperties(final Rule from, final RuleDTO to) {
@@ -55,5 +56,6 @@ public class RuleDTOMapper {
         to.tags = from.getTags();
         to.visibility = from.getVisibility();
         to.description = from.getDescription();
+        to.synchronous = from.isSynchronous();
     }
 }

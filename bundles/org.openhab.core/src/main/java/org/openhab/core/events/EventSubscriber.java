@@ -55,4 +55,15 @@ public interface EventSubscriber {
      * @param event the received event (not null)
      */
     void receive(Event event);
+
+    /**
+     * Allows a subscriber to declare their priority in relation to other subscribers. For example
+     * to ensure that they can process an event before or after other subscribers. Lower priorities
+     * are processed later.
+     *
+     * @return the relative priority of this subscriber; default of 0.
+     */
+    default int getPriority() {
+        return 0;
+    }
 }
