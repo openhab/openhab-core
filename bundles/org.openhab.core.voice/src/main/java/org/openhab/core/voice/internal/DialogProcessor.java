@@ -150,6 +150,10 @@ public class DialogProcessor implements KSListener, STTListener {
         this.ttsFormat = VoiceManagerImpl.getBestMatch(tts.getSupportedFormats(), sink.getSupportedFormats());
     }
 
+    public void startSingleDialog() {
+        executeSimpleDialog();
+    }
+
     public void start() {
         KSService ksService = ks;
         if (ksService != null) {
@@ -209,6 +213,10 @@ public class DialogProcessor implements KSListener, STTListener {
         abortKS();
         closeStreamKS();
         toggleProcessing(false);
+    }
+
+    public boolean isProcessing() {
+        return processing;
     }
 
     private void abortKS() {
@@ -375,5 +383,18 @@ public class DialogProcessor implements KSListener, STTListener {
                 logger.warn("Error saying '{}': {}", text, e.getMessage());
             }
         }
+    }
+
+    /**
+     * Check if other DialogProcessor instance have same configuration ignoring the configured keyword
+     *
+     * @param dialogProcessor Other DialogProcessor instance
+     */
+    public boolean isCompatible(DialogProcessor dialogProcessor) {
+        return this.sink.equals(dialogProcessor.sink) && this.source.equals(dialogProcessor.source)
+                && Objects.equals(this.ks, dialogProcessor.ks) && this.stt.equals(dialogProcessor.stt)
+                && this.tts.equals(dialogProcessor.tts) && this.hlis.size() == dialogProcessor.hlis.size()
+                && this.hlis.containsAll(dialogProcessor.hlis) && this.locale.equals(dialogProcessor.locale)
+                && Objects.equals(this.listeningItem, dialogProcessor.listeningItem);
     }
 }

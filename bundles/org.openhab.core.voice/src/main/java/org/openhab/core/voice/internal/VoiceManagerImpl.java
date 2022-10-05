@@ -126,6 +126,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     private final Map<String, String> defaultVoices = new HashMap<>();
 
     private Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
+    private Map<String, DialogProcessor> singleDialogProcessors = new HashMap<>();
 
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
@@ -544,6 +545,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         AudioSource audioSource = (source == null) ? audioManager.getSource() : source;
         if (audioSource != null) {
             DialogProcessor processor = dialogProcessors.remove(audioSource.getId());
+            if (processor == null) {
+                cleanSingleDialogProcessors();
+                processor = singleDialogProcessors.get(audioSource.getId());
+            }
             if (processor != null) {
                 processor.stop();
                 logger.debug("Dialog stopped for source {} ({})", audioSource.getLabel(null), audioSource.getId());
@@ -598,13 +603,24 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             throw new IllegalStateException(
                     "Cannot execute a simple dialog as provided locale is not supported by all services.");
         } else {
-            DialogProcessor processor = dialogProcessors.get(audioSource.getId());
-            if (processor == null) {
+            var isSingleDialog = false;
+            DialogProcessor activeProcessor = dialogProcessors.get(audioSource.getId());
+            cleanSingleDialogProcessors();
+            if (activeProcessor == null) {
+                isSingleDialog = true;
+                activeProcessor = singleDialogProcessors.get(audioSource.getId());
+            }
+            var processor = new DialogProcessor(sttService, ttsService, prefVoice, interpreters, audioSource, audioSink,
+                    loc, item, this.eventPublisher, this.i18nProvider, b);
+            if (activeProcessor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
-                processor = new DialogProcessor(sttService, ttsService, prefVoice, interpreters, audioSource, audioSink,
-                        loc, item, this.eventPublisher, this.i18nProvider, b);
                 processor.start();
+                singleDialogProcessors.put(audioSource.getId(), processor);
+            } else if (!isSingleDialog && activeProcessor.isCompatible(processor)) {
+                logger.debug("Executing a simple dialog for active source {} ({})", audioSource.getLabel(null),
+                        audioSource.getId());
+                activeProcessor.startSingleDialog();
             } else {
                 throw new IllegalStateException(String.format(
                         "Cannot execute a simple dialog as a dialog is already started for audio source '%s'.",
@@ -862,5 +878,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             }
         }
         return null;
+    }
+
+    private void cleanSingleDialogProcessors() {
+        singleDialogProcessors.forEach((key, processor) -> {
+            if (!processor.isProcessing()) {
+                singleDialogProcessors.remove(key);
+            }
+        });
     }
 }
