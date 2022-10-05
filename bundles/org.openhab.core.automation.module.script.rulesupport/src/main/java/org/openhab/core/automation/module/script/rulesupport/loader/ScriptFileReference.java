@@ -105,6 +105,10 @@ public class ScriptFileReference implements Comparable<ScriptFileReference> {
             String name2 = path2.getFileName().toString();
             LOGGER.trace("o2 [{}], path2 [{}], name2 [{}]", other.scriptFileURL, path2, name2);
 
+            int startLevelCompare = Integer.compare(getStartLevel(), other.getStartLevel());
+            if (startLevelCompare != 0) {
+                return startLevelCompare;
+            }
             int nameCompare = name1.compareToIgnoreCase(name2);
             if (nameCompare != 0) {
                 return nameCompare;

@@ -267,6 +267,33 @@ class ScriptFileWatcherTest {
     }
 
     @Test
+    public void testOrderingStartlevelFolders() {
+        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
+        when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
+
+        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+
+        Path p50 = getFile("a_script.js");
+        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p50);
+        Path p40 = getFile("sl40/b_script.js");
+        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p40);
+        Path p30 = getFile("sl30/script.js");
+        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p30);
+
+        updateStartLevel(70);
+
+        InOrder inOrder = inOrder(scriptEngineManager);
+
+        inOrder.verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js",
+                p30.toFile().toURI().toString());
+        inOrder.verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js",
+                p40.toFile().toURI().toString());
+        inOrder.verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js",
+                p50.toFile().toURI().toString());
+    }
+
+    @Test
     public void testReloadActiveWhenDependencyChanged() {
         when(scriptEngineManager.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
