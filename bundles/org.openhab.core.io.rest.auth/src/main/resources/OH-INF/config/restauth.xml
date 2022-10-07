@@ -15,7 +15,7 @@
 		<parameter name="trustedNetworks" type="text">
 			<advanced>true</advanced>
 			<label>Trusted Networks</label>
-			<description>Comma separate list of CDIR, to grant implicit user role to request originated from these networks
+			<description>Grant implicit user role to requests originated from these networks; Comma separated list of CDIR
 				(ignored if "Implicit User Role" is enabled).</description>
 		</parameter>
 		<parameter name="allowBasicAuth" type="boolean">
