@@ -13,13 +13,17 @@
 package org.openhab.core.io.rest.auth.internal;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import javax.annotation.Priority;
 import javax.servlet.http.HttpServletRequest;
@@ -66,6 +70,7 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - Add support for API tokens
  * @author Sebastian Gerber - Add basic auth caching
  * @author Kai Kreuzer - Add null annotations, constructor initialization
+ * @author Miguel Álvarez - Add trusted networks for implicit user role
  */
 @PreMatching
 @Component(configurationPid = "org.openhab.restauth", property = Constants.SERVICE_PID + "=org.openhab.restauth")
@@ -80,14 +85,15 @@ public class AuthFilter implements ContainerRequestFilter {
 
     private static final String ALT_AUTH_HEADER = "X-OPENHAB-TOKEN";
     private static final String API_TOKEN_PREFIX = "oh.";
-
     protected static final String CONFIG_URI = "system:restauth";
     private static final String CONFIG_ALLOW_BASIC_AUTH = "allowBasicAuth";
     private static final String CONFIG_IMPLICIT_USER_ROLE = "implicitUserRole";
+    private static final String CONFIG_TRUSTED_NETWORKS = "trustedNetworks";
     private static final String CONFIG_CACHE_EXPIRATION = "cacheExpiration";
 
     private boolean allowBasicAuth = false;
     private boolean implicitUserRole = true;
+    private List<String> trustedNetworks = List.of();
     private Long cacheExpiration = 6L;
 
     private ExpiringUserSecurityContextCache authCache = new ExpiringUserSecurityContextCache(
@@ -139,6 +145,9 @@ public class AuthFilter implements ContainerRequestFilter {
             allowBasicAuth = value != null && "true".equals(value.toString());
             value = properties.get(CONFIG_IMPLICIT_USER_ROLE);
             implicitUserRole = value == null || !"false".equals(value.toString());
+            value = properties.get(CONFIG_TRUSTED_NETWORKS);
+            trustedNetworks = value == null ? List.of()
+                    : Arrays.stream(value.toString().split(",")).map(String::trim).collect(Collectors.toList());
             value = properties.get(CONFIG_CACHE_EXPIRATION);
             if (value != null) {
                 try {
@@ -258,13 +267,64 @@ public class AuthFilter implements ContainerRequestFilter {
                             }
                         }
                     }
-                } else if (implicitUserRole) {
+                } else if (isImplicitUserRole(requestContext)) {
                     requestContext.setSecurityContext(new AnonymousUserSecurityContext());
                 }
             } catch (AuthenticationException e) {
                 logger.warn("Unauthorized API request from {}: {}", servletRequest.getRemoteAddr(), e.getMessage());
                 requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
             }
+        }
+    }
+
+    private boolean isImplicitUserRole(ContainerRequestContext requestContext) {
+        if (implicitUserRole) {
+            return true;
+        }
+        if (trustedNetworks.isEmpty()) {
+            return false;
+        }
+        return trustedNetworks.stream().anyMatch((networkCDIR) -> {
+            var clientIp = getClientIp(requestContext);
+            var isInTrustedNetwork = isIpInSubnet(clientIp, networkCDIR);
+            if (isInTrustedNetwork) {
+                logger.debug("Granted implicit user role to request with ip {} as part of network {}", clientIp,
+                        networkCDIR);
+            }
+            return isInTrustedNetwork;
+        });
+    }
+
+    private String getClientIp(ContainerRequestContext requestContext) {
+        String ipForwarded = requestContext.getHeaderString("x-forwarded-for");
+        String[] ips = ipForwarded == null ? null : ipForwarded.split(",");
+        String client_ip = (ips == null || ips.length == 0) ? null : ips[0];
+        client_ip = (client_ip == null || client_ip.isEmpty()) ? servletRequest.getRemoteAddr() : client_ip;
+        return client_ip;
+    }
+
+    private boolean isIpInSubnet(final String ip, final String subnetCDIR) {
+        try {
+            var subnetCDIRParts = subnetCDIR.split("/");
+            var networkMask = subnetCDIRParts[0];
+            var networkPrefix = Integer.parseInt(subnetCDIRParts[1]);
+            final byte[] ipBin = InetAddress.getByName(ip).getAddress();
+            final byte[] netBin = InetAddress.getByName(networkMask).getAddress();
+            if (ipBin.length != netBin.length)
+                return false;
+            int p = networkPrefix;
+            int i = 0;
+            while (p >= 8) {
+                if (ipBin[i] != netBin[i])
+                    return false;
+                ++i;
+                p -= 8;
+            }
+            final int m = (65280 >> p) & 255;
+            return (ipBin[i] & m) == (netBin[i] & m);
+        } catch (final Throwable t) {
+            logger.debug("Error validating network CDIR {}: {}", subnetCDIR, t.getMessage());
+            return false;
         }
     }
 }
