@@ -15,6 +15,7 @@ package org.openhab.core.thing.link;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,7 +68,9 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return an unmodifiable set of bound channels for the given item name
      */
     public Set<ChannelUID> getBoundChannels(final String itemName) {
-        return getLinks(itemName).parallelStream().map(link -> link.getLinkedUID()).collect(Collectors.toSet());
+        return getLinks(itemName).parallelStream().map(link -> link.getLinkedUID())
+                // collect to concurrent set, similar to collecting to ConcurrentHashMap.newKeySet()
+                .collect(Collectors.toConcurrentMap(Function.identity(), x -> Boolean.TRUE)).keySet();
     }
 
     @Override
@@ -84,7 +87,10 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      */
     public Set<Item> getLinkedItems(final UID uid) {
         return ((Stream<Item>) super.getLinkedItemNames(uid).parallelStream()
-                .map(itemName -> itemRegistry.get(itemName)).filter(Objects::nonNull)).collect(Collectors.toSet());
+                .map(itemName -> itemRegistry.get(itemName)).filter(Objects::nonNull))
+                        // collect to concurrent set, similar to collecting to ConcurrentHashMap.newKeySet()
+                        .collect(Collectors.toConcurrentMap(Function.identity(), x -> Boolean.TRUE)).keySet();
+
     }
 
     /**
@@ -94,9 +100,10 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return an unmodifiable set of bound things for the given item name
      */
     public Set<Thing> getBoundThings(final String itemName) {
-        return ((Stream<Thing>) getBoundChannels(itemName).parallelStream()
+        return ((Stream<Thing>) getBoundChannels(itemName).parallelStream()// XX
                 .map(channelUID -> thingRegistry.get(channelUID.getThingUID())).filter(Objects::nonNull))
-                        .collect(Collectors.toSet());
+                        // collect to concurrent set, similar to collecting to ConcurrentHashMap.newKeySet()
+                        .collect(Collectors.toConcurrentMap(Function.identity(), x -> Boolean.TRUE)).keySet();
     }
 
     @Reference

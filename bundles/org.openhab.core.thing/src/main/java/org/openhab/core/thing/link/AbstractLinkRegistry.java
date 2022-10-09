@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -184,7 +185,9 @@ public abstract class AbstractLinkRegistry<L extends AbstractLink, P extends Pro
             if (forLinkedUID == null) {
                 return Set.of();
             }
-            return forLinkedUID.parallelStream().map(link -> link.getItemName()).collect(Collectors.toSet());
+            return forLinkedUID.parallelStream().map(link -> link.getItemName())
+                    // collect to concurrent set, similar to collecting to ConcurrentHashMap.newKeySet()
+                    .collect(Collectors.toConcurrentMap(Function.identity(), x -> Boolean.TRUE)).keySet();
         } finally {
             toLinkLock.readLock().unlock();
         }
