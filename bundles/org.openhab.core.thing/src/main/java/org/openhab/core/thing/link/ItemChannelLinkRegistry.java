@@ -90,7 +90,6 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                 .map(itemName -> itemRegistry.get(itemName)).filter(Objects::nonNull))
                         // collect to concurrent set, similar to collecting to ConcurrentHashMap.newKeySet()
                         .collect(Collectors.toConcurrentMap(Function.identity(), x -> Boolean.TRUE)).keySet();
-
     }
 
     /**
