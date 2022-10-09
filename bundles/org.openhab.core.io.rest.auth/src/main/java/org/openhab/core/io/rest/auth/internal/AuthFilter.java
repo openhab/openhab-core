@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -271,7 +272,7 @@ public class AuthFilter implements ContainerRequestFilter {
                     requestContext.setSecurityContext(new AnonymousUserSecurityContext());
                 }
             } catch (AuthenticationException e) {
-                logger.warn("Unauthorized API request from {}: {}", servletRequest.getRemoteAddr(), e.getMessage());
+                logger.warn("Unauthorized API request from {}: {}", getClientIp(requestContext), e.getMessage());
                 requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
             }
         }
@@ -281,26 +282,14 @@ public class AuthFilter implements ContainerRequestFilter {
         if (implicitUserRole) {
             return true;
         }
-        if (trustedNetworks.isEmpty()) {
-            return false;
-        }
-        return trustedNetworks.stream().anyMatch((networkCDIR) -> {
-            var clientIp = getClientIp(requestContext);
-            var isInTrustedNetwork = isIpInSubnet(clientIp, networkCDIR);
-            if (isInTrustedNetwork) {
-                logger.debug("Granted implicit user role to request with ip {} as part of network {}", clientIp,
-                        networkCDIR);
-            }
-            return isInTrustedNetwork;
-        });
+        String clientIp = getClientIp(requestContext);
+        return trustedNetworks.stream().anyMatch(networkCIDR -> isIpInSubnet(clientIp, networkCIDR));
     }
 
     private String getClientIp(ContainerRequestContext requestContext) {
-        String ipForwarded = requestContext.getHeaderString("x-forwarded-for");
-        String[] ips = ipForwarded == null ? null : ipForwarded.split(",");
-        String client_ip = (ips == null || ips.length == 0) ? null : ips[0];
-        client_ip = (client_ip == null || client_ip.isEmpty()) ? servletRequest.getRemoteAddr() : client_ip;
-        return client_ip;
+        String ipForwarded = Objects.requireNonNullElse(requestContext.getHeaderString("x-forwarded-for"), "");
+        String clientIp = ipForwarded.split(",")[0];
+        return clientIp.isBlank() ? servletRequest.getRemoteAddr() : clientIp;
     }
 
     private boolean isIpInSubnet(final String ip, final String subnetCDIR) {
