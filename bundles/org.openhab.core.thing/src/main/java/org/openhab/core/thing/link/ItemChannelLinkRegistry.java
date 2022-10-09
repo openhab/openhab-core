@@ -99,7 +99,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return an unmodifiable set of bound things for the given item name
      */
     public Set<Thing> getBoundThings(final String itemName) {
-        return ((Stream<Thing>) getBoundChannels(itemName).parallelStream()// XX
+        return ((Stream<Thing>) getBoundChannels(itemName).parallelStream()
                 .map(channelUID -> thingRegistry.get(channelUID.getThingUID())).filter(Objects::nonNull))
                         // collect to concurrent set, similar to collecting to ConcurrentHashMap.newKeySet()
                         .collect(Collectors.toConcurrentMap(Function.identity(), x -> Boolean.TRUE)).keySet();
