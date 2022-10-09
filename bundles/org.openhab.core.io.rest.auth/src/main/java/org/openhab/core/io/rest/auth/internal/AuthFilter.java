@@ -14,17 +14,17 @@ package org.openhab.core.io.rest.auth.internal;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import javax.annotation.Priority;
 import javax.servlet.http.HttpServletRequest;
@@ -94,7 +94,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
     private boolean allowBasicAuth = false;
     private boolean implicitUserRole = true;
-    private List<String> trustedNetworks = List.of();
+    private List<CIDR> trustedNetworks = List.of();
     private Long cacheExpiration = 6L;
 
     private ExpiringUserSecurityContextCache authCache = new ExpiringUserSecurityContextCache(
@@ -147,8 +147,7 @@ public class AuthFilter implements ContainerRequestFilter {
             value = properties.get(CONFIG_IMPLICIT_USER_ROLE);
             implicitUserRole = value == null || !"false".equals(value.toString());
             value = properties.get(CONFIG_TRUSTED_NETWORKS);
-            trustedNetworks = value == null ? List.of()
-                    : Arrays.stream(value.toString().split(",")).map(String::trim).collect(Collectors.toList());
+            trustedNetworks = value == null ? List.of() : parseTrustedNetworks(value.toString());
             value = properties.get(CONFIG_CACHE_EXPIRATION);
             if (value != null) {
                 try {
@@ -282,38 +281,59 @@ public class AuthFilter implements ContainerRequestFilter {
         if (implicitUserRole) {
             return true;
         }
-        String clientIp = getClientIp(requestContext);
-        return trustedNetworks.stream().anyMatch(networkCIDR -> isIpInSubnet(clientIp, networkCIDR));
+        try {
+            byte[] clientAddress = InetAddress.getByName(getClientIp(requestContext)).getAddress();
+            return trustedNetworks.stream().anyMatch(networkCIDR -> networkCIDR.isInRange(clientAddress));
+        } catch (IOException e) {
+            logger.debug("Error validating trusted networks: {}", e.getMessage());
+            return false;
+        }
     }
 
-    private String getClientIp(ContainerRequestContext requestContext) {
+    private List<CIDR> parseTrustedNetworks(String value) {
+        var cidrList = new ArrayList<CIDR>();
+        for (var cidrString : value.split(",")) {
+            try {
+                cidrList.add(new CIDR(cidrString.trim()));
+            } catch (UnknownHostException e) {
+                logger.warn("Error parsing trusted networks configuration, disabled.");
+                return List.of();
+            }
+        }
+        return cidrList;
+    }
+
+    private String getClientIp(ContainerRequestContext requestContext) throws UnknownHostException {
         String ipForwarded = Objects.requireNonNullElse(requestContext.getHeaderString("x-forwarded-for"), "");
         String clientIp = ipForwarded.split(",")[0];
         return clientIp.isBlank() ? servletRequest.getRemoteAddr() : clientIp;
     }
 
-    private boolean isIpInSubnet(final String ip, final String subnetCDIR) {
-        try {
-            var subnetCDIRParts = subnetCDIR.split("/");
-            var networkIp = subnetCDIRParts[0];
-            var networkPrefix = Integer.parseInt(subnetCDIRParts[1]);
-            final byte[] ipBin = InetAddress.getByName(ip).getAddress();
-            final byte[] netBin = InetAddress.getByName(networkIp).getAddress();
-            if (ipBin.length != netBin.length)
+    private static class CIDR {
+        private final byte[] networkBytes;
+        private final int prefix;
+
+        public CIDR(String cidr) throws UnknownHostException {
+            String[] parts = cidr.split("/");
+            this.prefix = Integer.parseInt(parts[1]);
+            this.networkBytes = InetAddress.getByName(parts[0]).getAddress();
+        }
+
+        public boolean isInRange(byte[] address) {
+            if (networkBytes.length != address.length) {
                 return false;
-            int p = networkPrefix;
+            }
+            int p = this.prefix;
             int i = 0;
             while (p > 8) {
-                if (ipBin[i] != netBin[i])
+                if (networkBytes[i] != address[i]) {
                     return false;
+                }
                 ++i;
                 p -= 8;
             }
             final int m = (65280 >> p) & 255;
-            return (ipBin[i] & m) == (netBin[i] & m);
-        } catch (final Throwable t) {
-            logger.debug("Error validating network CDIR {}: {}", subnetCDIR, t.getMessage());
-            return false;
+            return (networkBytes[i] & m) == (address[i] & m);
         }
     }
 }
