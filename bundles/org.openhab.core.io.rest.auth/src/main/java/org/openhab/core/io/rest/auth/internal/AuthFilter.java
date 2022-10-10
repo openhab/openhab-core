@@ -47,6 +47,7 @@ import org.openhab.core.auth.UserApiTokenCredentials;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
@@ -146,8 +147,8 @@ public class AuthFilter implements ContainerRequestFilter {
             allowBasicAuth = value != null && "true".equals(value.toString());
             value = properties.get(CONFIG_IMPLICIT_USER_ROLE);
             implicitUserRole = value == null || !"false".equals(value.toString());
-            value = properties.get(CONFIG_TRUSTED_NETWORKS);
-            trustedNetworks = value == null ? List.of() : parseTrustedNetworks(value.toString());
+            trustedNetworks = parseTrustedNetworks(
+                    ConfigParser.valueAsOrElse(properties.get(CONFIG_TRUSTED_NETWORKS), String.class, ""));
             value = properties.get(CONFIG_CACHE_EXPIRATION);
             if (value != null) {
                 try {
@@ -296,8 +297,7 @@ public class AuthFilter implements ContainerRequestFilter {
             try {
                 cidrList.add(new CIDR(cidrString.trim()));
             } catch (UnknownHostException e) {
-                logger.warn("Error parsing trusted networks configuration, disabled.");
-                return List.of();
+                logger.warn("Error parsing trusted network cidr: {}", cidrString);
             }
         }
         return cidrList;
