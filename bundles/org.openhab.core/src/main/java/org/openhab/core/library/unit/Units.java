@@ -171,6 +171,7 @@ public final class Units extends CustomUnits {
                     MultiplyConverter.ofRational(BigInteger.valueOf(1852), BigInteger.valueOf(1000))));
     public static final Unit<SolidAngle> STERADIAN = addUnit(tech.units.indriya.unit.Units.STERADIAN);
     public static final Unit<Temperature> KELVIN = addUnit(tech.units.indriya.unit.Units.KELVIN);
+    public static final Unit<?> MIRED = addUnit(MetricPrefix.MEGA(tech.units.indriya.unit.Units.KELVIN).inverse());
     public static final Unit<Time> SECOND = addUnit(tech.units.indriya.unit.Units.SECOND);
     public static final Unit<Time> MINUTE = addUnit(tech.units.indriya.unit.Units.MINUTE);
     public static final Unit<Time> HOUR = addUnit(tech.units.indriya.unit.Units.HOUR);
@@ -266,6 +267,7 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(MILLIAMPERE_HOUR, "mAh");
         SimpleUnitFormat.getInstance().label(MILLIBAR, "mbar");
         SimpleUnitFormat.getInstance().label(MILLIMETRE_OF_MERCURY, MILLIMETRE_OF_MERCURY.getSymbol());
+        SimpleUnitFormat.getInstance().label(MIRED, "mired");
         SimpleUnitFormat.getInstance().label(PARTS_PER_BILLION, "ppb");
         SimpleUnitFormat.getInstance().label(PARTS_PER_MILLION, "ppm");
         SimpleUnitFormat.getInstance().label(PETABYTE, "PB");

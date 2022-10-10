@@ -140,4 +140,28 @@ public class NumberItemTest {
 
         assertThat(item.getStateDescription().getPattern(), is("%.1f " + UnitUtils.UNIT_PLACEHOLDER));
     }
+
+    @SuppressWarnings("null")
+    @Test
+    public void testMiredToKelvin() {
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
+        when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null)).thenReturn(
+                StateDescriptionFragmentBuilder.create().withPattern("%.0f K").build().toStateDescription());
+        item.setStateDescriptionService(stateDescriptionServiceMock);
+        item.setState(new QuantityType<>("370 mired"));
+
+        assertThat(item.getState().format("%.0f K"), is("2703 K"));
+    }
+
+    @SuppressWarnings("null")
+    @Test
+    public void testKelvinToMired() {
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
+        when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null)).thenReturn(
+                StateDescriptionFragmentBuilder.create().withPattern("%.0f mired").build().toStateDescription());
+        item.setStateDescriptionService(stateDescriptionServiceMock);
+        item.setState(new QuantityType<>("2700 K"));
+
+        assertThat(item.getState().format("%.0f mired"), is("370 mired"));
+    }
 }

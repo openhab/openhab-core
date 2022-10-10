@@ -120,7 +120,7 @@ public class NumberItem extends GenericItem {
             Unit<?> stateUnit = ((QuantityType<?>) state).getUnit();
             if (itemUnit != null && (!stateUnit.getSystemUnit().equals(itemUnit.getSystemUnit())
                     || UnitUtils.isDifferentMeasurementSystem(itemUnit, stateUnit))) {
-                QuantityType<?> convertedState = ((QuantityType<?>) state).toUnit(itemUnit);
+                QuantityType<?> convertedState = ((QuantityType<?>) state).toInvertibleUnit(itemUnit);
                 if (convertedState != null) {
                     super.setState(convertedState);
                     return;

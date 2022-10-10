@@ -472,4 +472,15 @@ public class QuantityTypeTest {
         QuantityType<DataTransferRate> octets = gsm2G.toUnit(MetricPrefix.KILO(Units.OCTET).divide(Units.SECOND));
         assertEquals(14375, octets.intValue());
     }
+
+    @Test
+    public void testMireds() {
+        QuantityType<Temperature> colorTemp = new QuantityType<>("2700 K");
+        QuantityType<?> mireds = colorTemp.toInvertibleUnit(Units.MIRED);
+        assertEquals(370, mireds.intValue());
+        assertThat(colorTemp.equals(mireds), is(true));
+        assertThat(mireds.equals(colorTemp), is(true));
+        QuantityType<?> andBack = mireds.toInvertibleUnit(Units.KELVIN);
+        assertEquals(2700, andBack.intValue());
+    }
 }
