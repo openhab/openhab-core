@@ -13,12 +13,17 @@
 package org.openhab.core.io.rest.auth.internal;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 import javax.annotation.Priority;
@@ -42,6 +47,7 @@ import org.openhab.core.auth.UserApiTokenCredentials;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
@@ -66,6 +72,7 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - Add support for API tokens
  * @author Sebastian Gerber - Add basic auth caching
  * @author Kai Kreuzer - Add null annotations, constructor initialization
+ * @author Miguel Álvarez - Add trusted networks for implicit user role
  */
 @PreMatching
 @Component(configurationPid = "org.openhab.restauth", property = Constants.SERVICE_PID + "=org.openhab.restauth")
@@ -80,14 +87,15 @@ public class AuthFilter implements ContainerRequestFilter {
 
     private static final String ALT_AUTH_HEADER = "X-OPENHAB-TOKEN";
     private static final String API_TOKEN_PREFIX = "oh.";
-
     protected static final String CONFIG_URI = "system:restauth";
     private static final String CONFIG_ALLOW_BASIC_AUTH = "allowBasicAuth";
     private static final String CONFIG_IMPLICIT_USER_ROLE = "implicitUserRole";
+    private static final String CONFIG_TRUSTED_NETWORKS = "trustedNetworks";
     private static final String CONFIG_CACHE_EXPIRATION = "cacheExpiration";
 
     private boolean allowBasicAuth = false;
     private boolean implicitUserRole = true;
+    private List<CIDR> trustedNetworks = List.of();
     private Long cacheExpiration = 6L;
 
     private ExpiringUserSecurityContextCache authCache = new ExpiringUserSecurityContextCache(
@@ -139,6 +147,8 @@ public class AuthFilter implements ContainerRequestFilter {
             allowBasicAuth = value != null && "true".equals(value.toString());
             value = properties.get(CONFIG_IMPLICIT_USER_ROLE);
             implicitUserRole = value == null || !"false".equals(value.toString());
+            trustedNetworks = parseTrustedNetworks(
+                    ConfigParser.valueAsOrElse(properties.get(CONFIG_TRUSTED_NETWORKS), String.class, ""));
             value = properties.get(CONFIG_CACHE_EXPIRATION);
             if (value != null) {
                 try {
@@ -258,13 +268,72 @@ public class AuthFilter implements ContainerRequestFilter {
                             }
                         }
                     }
-                } else if (implicitUserRole) {
+                } else if (isImplicitUserRole(requestContext)) {
                     requestContext.setSecurityContext(new AnonymousUserSecurityContext());
                 }
             } catch (AuthenticationException e) {
-                logger.warn("Unauthorized API request from {}: {}", servletRequest.getRemoteAddr(), e.getMessage());
+                logger.warn("Unauthorized API request from {}: {}", getClientIp(requestContext), e.getMessage());
                 requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
             }
+        }
+    }
+
+    private boolean isImplicitUserRole(ContainerRequestContext requestContext) {
+        if (implicitUserRole) {
+            return true;
+        }
+        try {
+            byte[] clientAddress = InetAddress.getByName(getClientIp(requestContext)).getAddress();
+            return trustedNetworks.stream().anyMatch(networkCIDR -> networkCIDR.isInRange(clientAddress));
+        } catch (IOException e) {
+            logger.debug("Error validating trusted networks: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    private List<CIDR> parseTrustedNetworks(String value) {
+        var cidrList = new ArrayList<CIDR>();
+        for (var cidrString : value.split(",")) {
+            try {
+                cidrList.add(new CIDR(cidrString.trim()));
+            } catch (UnknownHostException e) {
+                logger.warn("Error parsing trusted network cidr: {}", cidrString);
+            }
+        }
+        return cidrList;
+    }
+
+    private String getClientIp(ContainerRequestContext requestContext) throws UnknownHostException {
+        String ipForwarded = Objects.requireNonNullElse(requestContext.getHeaderString("x-forwarded-for"), "");
+        String clientIp = ipForwarded.split(",")[0];
+        return clientIp.isBlank() ? servletRequest.getRemoteAddr() : clientIp;
+    }
+
+    private static class CIDR {
+        private final byte[] networkBytes;
+        private final int prefix;
+
+        public CIDR(String cidr) throws UnknownHostException {
+            String[] parts = cidr.split("/");
+            this.prefix = Integer.parseInt(parts[1]);
+            this.networkBytes = InetAddress.getByName(parts[0]).getAddress();
+        }
+
+        public boolean isInRange(byte[] address) {
+            if (networkBytes.length != address.length) {
+                return false;
+            }
+            int p = this.prefix;
+            int i = 0;
+            while (p > 8) {
+                if (networkBytes[i] != address[i]) {
+                    return false;
+                }
+                ++i;
+                p -= 8;
+            }
+            final int m = (65280 >> p) & 255;
+            return (networkBytes[i] & m) == (address[i] & m);
         }
     }
 }

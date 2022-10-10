@@ -12,6 +12,12 @@
 				authentication to break.</description>
 			<default>true</default>
 		</parameter>
+		<parameter name="trustedNetworks" type="text">
+			<advanced>true</advanced>
+			<label>Trusted Networks</label>
+			<description>Grant implicit user role to requests originating from these networks; Comma separated list of CIDR
+				(ignored if "Implicit User Role" is enabled).</description>
+		</parameter>
 		<parameter name="allowBasicAuth" type="boolean">
 			<advanced>true</advanced>
 			<label>Allow Basic Authentication</label>
