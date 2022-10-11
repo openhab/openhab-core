@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Priority;
 import javax.servlet.http.HttpServletRequest;
@@ -85,13 +87,13 @@ import org.slf4j.LoggerFactory;
 public class AuthFilter implements ContainerRequestFilter {
     private final Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
-    private static final String ALT_AUTH_HEADER = "X-OPENHAB-TOKEN";
-    private static final String API_TOKEN_PREFIX = "oh.";
+    static final String ALT_AUTH_HEADER = "X-OPENHAB-TOKEN";
+    static final String API_TOKEN_PREFIX = "oh.";
     protected static final String CONFIG_URI = "system:restauth";
-    private static final String CONFIG_ALLOW_BASIC_AUTH = "allowBasicAuth";
-    private static final String CONFIG_IMPLICIT_USER_ROLE = "implicitUserRole";
-    private static final String CONFIG_TRUSTED_NETWORKS = "trustedNetworks";
-    private static final String CONFIG_CACHE_EXPIRATION = "cacheExpiration";
+    static final String CONFIG_ALLOW_BASIC_AUTH = "allowBasicAuth";
+    static final String CONFIG_IMPLICIT_USER_ROLE = "implicitUserRole";
+    static final String CONFIG_TRUSTED_NETWORKS = "trustedNetworks";
+    static final String CONFIG_CACHE_EXPIRATION = "cacheExpiration";
 
     private boolean allowBasicAuth = false;
     private boolean implicitUserRole = true;
@@ -143,19 +145,16 @@ public class AuthFilter implements ContainerRequestFilter {
     @Modified
     protected void modified(@Nullable Map<String, Object> properties) {
         if (properties != null) {
-            Object value = properties.get(CONFIG_ALLOW_BASIC_AUTH);
-            allowBasicAuth = value != null && "true".equals(value.toString());
-            value = properties.get(CONFIG_IMPLICIT_USER_ROLE);
-            implicitUserRole = value == null || !"false".equals(value.toString());
+            allowBasicAuth = ConfigParser.valueAsOrElse(properties.get(CONFIG_ALLOW_BASIC_AUTH), Boolean.class, false);
+            implicitUserRole = ConfigParser.valueAsOrElse(properties.get(CONFIG_IMPLICIT_USER_ROLE), Boolean.class,
+                    true);
             trustedNetworks = parseTrustedNetworks(
                     ConfigParser.valueAsOrElse(properties.get(CONFIG_TRUSTED_NETWORKS), String.class, ""));
-            value = properties.get(CONFIG_CACHE_EXPIRATION);
-            if (value != null) {
-                try {
-                    cacheExpiration = Long.valueOf(value.toString());
-                } catch (NumberFormatException e) {
-                    logger.warn("Ignoring invalid configuration value '{}' for cacheExpiration parameter.", value);
-                }
+            try {
+                cacheExpiration = ConfigParser.valueAsOrElse(properties.get(CONFIG_CACHE_EXPIRATION), Long.class, 6L);
+            } catch (NumberFormatException e) {
+                logger.warn("Ignoring invalid configuration value '{}' for cacheExpiration parameter.",
+                        properties.get(CONFIG_CACHE_EXPIRATION));
             }
             authCache.clear();
         }
@@ -295,7 +294,9 @@ public class AuthFilter implements ContainerRequestFilter {
         var cidrList = new ArrayList<CIDR>();
         for (var cidrString : value.split(",")) {
             try {
-                cidrList.add(new CIDR(cidrString.trim()));
+                if (!value.isBlank()) {
+                    cidrList.add(new CIDR(cidrString.trim()));
+                }
             } catch (UnknownHostException e) {
                 logger.warn("Error parsing trusted network cidr: {}", cidrString);
             }
@@ -310,13 +311,17 @@ public class AuthFilter implements ContainerRequestFilter {
     }
 
     private static class CIDR {
+        private static final Pattern CIDR_PATTERN = Pattern.compile("(?<networkAddress>.*?)/(?<prefixLength>\\d+)");
         private final byte[] networkBytes;
         private final int prefix;
 
         public CIDR(String cidr) throws UnknownHostException {
-            String[] parts = cidr.split("/");
-            this.prefix = Integer.parseInt(parts[1]);
-            this.networkBytes = InetAddress.getByName(parts[0]).getAddress();
+            Matcher m = CIDR_PATTERN.matcher(cidr);
+            if (!m.matches()) {
+                throw new UnknownHostException();
+            }
+            this.prefix = Integer.parseInt(m.group("prefixLength"));
+            this.networkBytes = InetAddress.getByName(m.group("networkAddress")).getAddress();
         }
 
         public boolean isInRange(byte[] address) {
