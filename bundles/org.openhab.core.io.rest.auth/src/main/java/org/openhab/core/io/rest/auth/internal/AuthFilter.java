@@ -294,7 +294,7 @@ public class AuthFilter implements ContainerRequestFilter {
         var cidrList = new ArrayList<CIDR>();
         for (var cidrString : value.split(",")) {
             try {
-                if (!value.isBlank()) {
+                if (!cidrString.isBlank()) {
                     cidrList.add(new CIDR(cidrString.trim()));
                 }
             } catch (UnknownHostException e) {
