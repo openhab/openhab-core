@@ -17,7 +17,9 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -159,7 +161,9 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
 
         // date time static functions
         elements.put("ChronoUnit", ChronoUnit.class);
+        elements.put("DayOfWeek", DayOfWeek.class);
         elements.put("Duration", Duration.class);
+        elements.put("Month", Month.class);
         elements.put("ZoneId", ZoneId.class);
         elements.put("ZonedDateTime", ZonedDateTime.class);
 
