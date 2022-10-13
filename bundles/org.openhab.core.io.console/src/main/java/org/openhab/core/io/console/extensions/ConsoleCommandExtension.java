@@ -15,6 +15,8 @@ package org.openhab.core.io.console.extensions;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.io.console.Completer;
 import org.openhab.core.io.console.Console;
 
 /**
@@ -53,4 +55,11 @@ public interface ConsoleCommandExtension {
      * @return the help texts for this extension
      */
     List<String> getUsages();
+
+    /**
+     * @return a {@link Completer} object for this command
+     */
+    default @Nullable Completer getCompleter() {
+        return null;
+    }
 }

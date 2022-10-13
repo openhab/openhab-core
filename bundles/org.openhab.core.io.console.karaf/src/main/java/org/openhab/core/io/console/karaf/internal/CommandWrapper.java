@@ -82,8 +82,8 @@ public class CommandWrapper implements Command, Action {
     }
 
     @Override
-    public Completer getCompleter(boolean arg0) {
-        return null;
+    public Completer getCompleter(boolean scoped) {
+        return new CompleterWrapper(command, scoped);
     }
 
     @Override

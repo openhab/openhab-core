@@ -15,7 +15,9 @@ package org.openhab.core.io.console.internal.extension;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.io.console.Completer;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
@@ -92,5 +94,11 @@ public class UpdateConsoleCommandExtension extends AbstractConsoleCommandExtensi
         } else {
             printUsage(console);
         }
+    }
+
+    @Override
+    public @Nullable Completer getCompleter() {
+        return new ItemConsoleCommandCompleter(itemRegistry,
+                (Item i) -> i.getAcceptedDataTypes().toArray(Class<?>[]::new));
     }
 }
