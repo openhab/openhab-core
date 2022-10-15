@@ -80,6 +80,10 @@ public class NumberItem extends GenericItem {
         internalSend(command);
     }
 
+    public void send(QuantityType command) {
+        internalSend(command);
+    }
+
     @Override
     public @Nullable StateDescription getStateDescription(@Nullable Locale locale) {
         StateDescription stateDescription = super.getStateDescription(locale);
