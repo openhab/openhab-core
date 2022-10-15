@@ -15,7 +15,9 @@ package org.openhab.core.model.script.scoping;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
+import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -104,7 +106,9 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
 
         // date time static functions
         result.add(ChronoUnit.class);
+        result.add(DayOfWeek.class);
         result.add(Duration.class);
+        result.add(Month.class);
         result.add(ZoneId.class);
         result.add(ZonedDateTime.class);
 
