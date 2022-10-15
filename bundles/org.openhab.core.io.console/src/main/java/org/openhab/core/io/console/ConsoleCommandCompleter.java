@@ -20,15 +20,15 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Implementing this interface allows a {@link ConsoleCommandExtension} to
  * provide completions for the user as they write commands.
  *
- * @author Kai Kreuzer - Initial contribution
+ * @author Cody Cutrer - Initial contribution
  */
 @NonNullByDefault
-public interface Completer {
+public interface ConsoleCommandCompleter {
     /**
-     * populate possible completion candidates.
-     *
-     * @param buffer the begining string typed by the user
-     * @param cursorArgumentIndex the argument index the cursor is in
+     * Populate possible completion candidates.
+     * 
+     * @param args An array of all arguments to be passed to the ConsoleCommandExtension's execute method
+     * @param cursorArgumentIndex the argument index the cursor is currently in
      * @param cursorPosition the position of the cursor within the argument
      * @param candidates a list to fill with possible completion candidates
      * @return if a candidate was found

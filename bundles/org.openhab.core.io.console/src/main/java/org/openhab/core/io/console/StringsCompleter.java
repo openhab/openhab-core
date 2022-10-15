@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.console;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
@@ -21,45 +20,39 @@ import java.util.TreeSet;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Completer for a set of strings
+ * Completer for a set of strings.
+ * 
+ * It will provide candidate completions for whichever argument the cursor is located in.
  *
  * @author Cody Cutrer - Initial contribution
  */
 @NonNullByDefault
-public class StringsCompleter implements Completer {
+public class StringsCompleter implements ConsoleCommandCompleter {
     private final SortedSet<String> strings;
     private final boolean caseSensitive;
 
     public StringsCompleter() {
-        this(false);
+        this(List.of(), false);
     }
 
-    public StringsCompleter(final boolean caseSensitive) {
+    /**
+     * @param strings The set of valid strings to be completed
+     * @param caseSensitive if strings must match case sensitively when the user is typing them
+     */
+    public StringsCompleter(final Collection<String> strings, boolean caseSensitive) {
         this.strings = new TreeSet<>(caseSensitive ? String::compareTo : String::compareToIgnoreCase);
         this.caseSensitive = caseSensitive;
+        this.strings.addAll(strings);
     }
 
-    public StringsCompleter(final Collection<String> strings) {
-        this(strings, false);
-    }
-
-    public StringsCompleter(final Collection<String> strings, boolean caseSensitive) {
-        this(caseSensitive);
-        getStrings().addAll(strings);
-    }
-
-    public StringsCompleter(final String[] strings, boolean caseSensitive) {
-        this(Arrays.asList(strings), caseSensitive);
-    }
-
-    public StringsCompleter(final String[] strings) {
-        this(Arrays.asList(strings), false);
-    }
-
+    /**
+     * Gets the strings that are allowed for this completer, so that you can modify the set.
+     */
     public SortedSet<String> getStrings() {
         return strings;
     }
 
+    @Override
     public boolean complete(String[] args, int cursorArgumentIndex, int cursorPosition, List<String> candidates) {
         String argument;
         if (cursorArgumentIndex >= 0 && cursorArgumentIndex < args.length) {

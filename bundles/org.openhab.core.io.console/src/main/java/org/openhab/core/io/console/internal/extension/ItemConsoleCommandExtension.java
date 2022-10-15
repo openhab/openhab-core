@@ -17,11 +17,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.io.console.Completer;
 import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.ConsoleCommandCompleter;
 import org.openhab.core.io.console.StringsCompleter;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
@@ -52,9 +53,9 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
     private static final String SUBCMD_ADDTAG = "addTag";
     private static final String SUBCMD_RMTAG = "rmTag";
     private static final StringsCompleter SUBCMD_COMPLETER = new StringsCompleter(
-            List.of(SUBCMD_LIST, SUBCMD_CLEAR, SUBCMD_REMOVE, SUBCMD_ADDTAG, SUBCMD_RMTAG));
+            List.of(SUBCMD_LIST, SUBCMD_CLEAR, SUBCMD_REMOVE, SUBCMD_ADDTAG, SUBCMD_RMTAG), false);
 
-    private class ItemConsoleCommandCompleter implements Completer {
+    private class ItemConsoleCommandCompleter implements ConsoleCommandCompleter {
         @Override
         public boolean complete(String[] args, int cursorArgumentIndex, int cursorPosition, List<String> candidates) {
             if (cursorArgumentIndex <= 0) {
@@ -73,7 +74,7 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
                     default:
                         return false;
                 }
-                return new StringsCompleter(items.stream().map(i -> i.getName()).toArray(String[]::new), true)
+                return new StringsCompleter(items.stream().map(i -> i.getName()).collect(Collectors.toList()), true)
                         .complete(args, cursorArgumentIndex, cursorPosition, candidates);
             }
             if (cursorArgumentIndex == 2 && args[0].equals(SUBCMD_RMTAG)) {
@@ -169,7 +170,7 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
     }
 
     @Override
-    public @Nullable Completer getCompleter() {
+    public @Nullable ConsoleCommandCompleter getCompleter() {
         return new ItemConsoleCommandCompleter();
     }
 

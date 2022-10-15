@@ -17,24 +17,27 @@ import java.util.List;
 
 import org.apache.karaf.shell.api.console.Candidate;
 import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
-import org.eclipse.jdt.annotation.NonNull;
-import org.openhab.core.io.console.Completer;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.io.console.ConsoleCommandCompleter;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 
 /**
  *
  * @author Cody Cutrer - Initial contribution
  */
-public class CompleterWrapper implements org.apache.karaf.shell.api.console.Completer {
+@NonNullByDefault({})
+public class CompleterWrapper implements Completer {
 
-    private final Completer completer;
-    private final @NonNull String command;
-    private final @NonNull String commandDescription;
-    private final String globalCommand;
+    private final @Nullable ConsoleCommandCompleter completer;
+    private final String command;
+    private final String commandDescription;
+    private final @Nullable String globalCommand;
 
-    public CompleterWrapper(final @NonNull ConsoleCommandExtension command, boolean scoped) {
+    public CompleterWrapper(final ConsoleCommandExtension command, boolean scoped) {
         this.completer = command.getCompleter();
         this.command = command.getCommand();
         this.commandDescription = command.getDescription();
@@ -66,7 +69,7 @@ public class CompleterWrapper implements org.apache.karaf.shell.api.console.Comp
         if (commandLine.getCursorArgumentIndex() < 0)
             return -1;
 
-        Completer localCompleter = completer;
+        var localCompleter = completer;
         if (localCompleter == null)
             return -1;
 

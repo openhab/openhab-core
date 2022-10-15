@@ -16,8 +16,8 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.io.console.Completer;
 import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.ConsoleCommandCompleter;
 
 /**
  * Client which provide a console command have to implement this interface
@@ -57,9 +57,12 @@ public interface ConsoleCommandExtension {
     List<String> getUsages();
 
     /**
-     * @return a {@link Completer} object for this command
+     * This method allows a {@link ConsoleCommandExtension} to provide an object to enable
+     * tab-completion functionality for the user.
+     * 
+     * @return a {@link ConsoleCommandCompleter} object for this command
      */
-    default @Nullable Completer getCompleter() {
+    default @Nullable ConsoleCommandCompleter getCompleter() {
         return null;
     }
 }

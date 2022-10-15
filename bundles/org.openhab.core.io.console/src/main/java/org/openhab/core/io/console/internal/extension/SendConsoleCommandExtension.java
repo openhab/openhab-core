@@ -18,8 +18,8 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.io.console.Completer;
 import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.ConsoleCommandCompleter;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.items.Item;
@@ -105,7 +105,7 @@ public class SendConsoleCommandExtension extends AbstractConsoleCommandExtension
     }
 
     @Override
-    public @Nullable Completer getCompleter() {
+    public @Nullable ConsoleCommandCompleter getCompleter() {
         return new ItemConsoleCommandCompleter(itemRegistry,
                 (Item i) -> i.getAcceptedCommandTypes().toArray(Class<?>[]::new));
     }
