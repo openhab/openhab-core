@@ -262,7 +262,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * Convert this QuantityType to a new {@link QuantityType} using the given target unit.
      *
      * @param targetUnit the unit to which this {@link QuantityType} will be converted to.
-     * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of an erro.
+     * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of an error.
      */
     @SuppressWarnings("unchecked")
     public @Nullable QuantityType<T> toUnit(Unit<?> targetUnit) {
@@ -294,7 +294,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * Convert this QuantityType to a new {@link QuantityType} using the given target unit.
      * 
      * Implicit conversions using inverse units are allowed (i.e. mired <=> Kelvin). This may
-     * changed the dimension.
+     * change the dimension.
      *
      * @param targetUnit the unit to which this {@link QuantityType} will be converted to.
      * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of an erro.
