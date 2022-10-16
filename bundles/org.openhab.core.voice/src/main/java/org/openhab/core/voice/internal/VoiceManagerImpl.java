@@ -603,7 +603,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             throw new IllegalStateException(
                     "Cannot execute a simple dialog as provided locale is not supported by all services.");
         } else {
-            var isSingleDialog = false;
+            boolean isSingleDialog = false;
             DialogProcessor activeProcessor = dialogProcessors.get(audioSource.getId());
             cleanSingleDialogProcessors();
             if (activeProcessor == null) {

@@ -386,15 +386,16 @@ public class DialogProcessor implements KSListener, STTListener {
     }
 
     /**
-     * Check if other DialogProcessor instance have same configuration ignoring the configured keyword
+     * Check if other DialogProcessor instance have same configuration ignoring the keyword spotting configuration
      *
      * @param dialogProcessor Other DialogProcessor instance
      */
     public boolean isCompatible(DialogProcessor dialogProcessor) {
         return this.sink.equals(dialogProcessor.sink) && this.source.equals(dialogProcessor.source)
-                && Objects.equals(this.ks, dialogProcessor.ks) && this.stt.equals(dialogProcessor.stt)
-                && this.tts.equals(dialogProcessor.tts) && this.hlis.size() == dialogProcessor.hlis.size()
-                && this.hlis.containsAll(dialogProcessor.hlis) && this.locale.equals(dialogProcessor.locale)
+                && this.stt.equals(dialogProcessor.stt) && this.tts.equals(dialogProcessor.tts)
+                && Objects.equals(this.prefVoice, dialogProcessor.prefVoice)
+                && this.hlis.size() == dialogProcessor.hlis.size() && this.hlis.containsAll(dialogProcessor.hlis)
+                && this.locale.equals(dialogProcessor.locale)
                 && Objects.equals(this.listeningItem, dialogProcessor.listeningItem);
     }
 }
