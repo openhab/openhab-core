@@ -219,9 +219,10 @@ public class QuantityType<T extends Quantity<T>> extends Number
             return false;
         }
         QuantityType<?> other = (QuantityType<?>) obj;
-        if (!quantity.getUnit().isCompatible(other.quantity.getUnit())) {
+        if (!quantity.getUnit().isCompatible(other.quantity.getUnit())
+                && !quantity.getUnit().inverse().isCompatible(other.quantity.getUnit())) {
             return false;
-        } else if (compareTo((QuantityType<T>) other) != 0) {
+        } else if (internalCompareTo(other) != 0) {
             return false;
         }
 
@@ -230,6 +231,10 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     @Override
     public int compareTo(QuantityType<T> o) {
+        return internalCompareTo((QuantityType<?>) o);
+    }
+
+    private int internalCompareTo(QuantityType<?> o) {
         if (quantity.getUnit().isCompatible(o.quantity.getUnit())) {
             QuantityType<T> v1 = this.toUnit(getUnit().getSystemUnit());
             QuantityType<?> v2 = o.toUnit(o.getUnit().getSystemUnit());
@@ -238,6 +243,8 @@ public class QuantityType<T extends Quantity<T>> extends Number
             } else {
                 throw new IllegalArgumentException("Unable to convert to system unit during compare.");
             }
+        } else if (quantity.getUnit().inverse().isCompatible(o.quantity.getUnit())) {
+            return inverse().internalCompareTo(o);
         } else {
             throw new IllegalArgumentException("Can not compare incompatible units.");
         }
@@ -255,7 +262,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * Convert this QuantityType to a new {@link QuantityType} using the given target unit.
      *
      * @param targetUnit the unit to which this {@link QuantityType} will be converted to.
-     * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of a
+     * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of an error.
      */
     @SuppressWarnings("unchecked")
     public @Nullable QuantityType<T> toUnit(Unit<?> targetUnit) {
@@ -281,6 +288,22 @@ public class QuantityType<T extends Quantity<T>> extends Number
         }
 
         return null;
+    }
+
+    /**
+     * Convert this QuantityType to a new {@link QuantityType} using the given target unit.
+     * 
+     * Implicit conversions using inverse units are allowed (i.e. mired <=> Kelvin). This may
+     * change the dimension.
+     *
+     * @param targetUnit the unit to which this {@link QuantityType} will be converted to.
+     * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of an erro.
+     */
+    public @Nullable QuantityType<?> toInvertibleUnit(Unit<?> targetUnit) {
+        if (!targetUnit.equals(getUnit()) && getUnit().inverse().isCompatible(targetUnit)) {
+            return inverse().toUnit(targetUnit);
+        }
+        return toUnit(targetUnit);
     }
 
     public BigDecimal toBigDecimal() {
@@ -489,5 +512,14 @@ public class QuantityType<T extends Quantity<T>> extends Number
         final Quantity<T> sum = Arrays.asList(quantity, offset.quantity).stream().reduce(QuantityFunctions.sum(unit))
                 .get();
         return new QuantityType<T>(sum);
+    }
+
+    /**
+     * Return the reciprocal of this QuantityType.
+     * 
+     * @return a QuantityType with both the value and unit reciprocated
+     */
+    public QuantityType<?> inverse() {
+        return new QuantityType<>(this.quantity.inverse());
     }
 }

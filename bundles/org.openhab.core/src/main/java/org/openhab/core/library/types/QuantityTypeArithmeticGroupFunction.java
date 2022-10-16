@@ -92,7 +92,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                             sum = itemState; // initialise the sum from the first item
                             count++;
                         } else {
-                            itemState = itemState.toUnit(sum.getUnit());
+                            itemState = itemState.toInvertibleUnit(sum.getUnit());
                             if (itemState != null) {
                                 sum = sum.add(itemState);
                                 count++;

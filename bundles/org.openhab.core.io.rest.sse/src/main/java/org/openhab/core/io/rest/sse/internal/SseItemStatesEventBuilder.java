@@ -135,7 +135,7 @@ public class SseItemStatesEventBuilder {
                                 // state description will display the new unit:
                                 Unit<?> patternUnit = UnitUtils.parseUnit(pattern);
                                 if (patternUnit != null && !quantityState.getUnit().equals(patternUnit)) {
-                                    quantityState = quantityState.toUnit(patternUnit);
+                                    quantityState = quantityState.toInvertibleUnit(patternUnit);
                                 }
 
                                 if (quantityState != null) {

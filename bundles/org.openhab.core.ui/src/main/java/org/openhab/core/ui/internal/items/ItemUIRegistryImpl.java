@@ -413,7 +413,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         // display the new unit:
                         Unit<?> patternUnit = UnitUtils.parseUnit(formatPattern);
                         if (patternUnit != null && !quantityState.getUnit().equals(patternUnit)) {
-                            quantityState = quantityState.toUnit(patternUnit);
+                            quantityState = quantityState.toInvertibleUnit(patternUnit);
                         }
 
                         // The widget may define its own unit in the widget label. Convert to this unit:
@@ -462,7 +462,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private QuantityType<?> convertStateToWidgetUnit(QuantityType<?> quantityState, Widget w) {
         Unit<?> widgetUnit = UnitUtils.parseUnit(getFormatPattern(w.getLabel()));
         if (widgetUnit != null && !widgetUnit.equals(quantityState.getUnit())) {
-            return Objects.requireNonNullElse(quantityState.toUnit(widgetUnit), quantityState);
+            return Objects.requireNonNullElse(quantityState.toInvertibleUnit(widgetUnit), quantityState);
         }
 
         return quantityState;

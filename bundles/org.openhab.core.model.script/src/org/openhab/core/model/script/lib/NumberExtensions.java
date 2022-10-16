@@ -374,7 +374,7 @@ public class NumberExtensions {
     public static BigDecimal numberToBigDecimal(Number number) {
         if (number instanceof QuantityType) {
             QuantityType<?> state = ((QuantityType<?>) number)
-                    .toUnit(((QuantityType<?>) number).getUnit().getSystemUnit());
+                    .toInvertibleUnit(((QuantityType<?>) number).getUnit().getSystemUnit());
             if (state != null) {
                 return state.toBigDecimal();
             }

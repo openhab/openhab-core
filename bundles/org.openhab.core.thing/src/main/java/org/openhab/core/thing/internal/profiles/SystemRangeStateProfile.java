@@ -69,7 +69,7 @@ public class SystemRangeStateProfile implements StateProfile {
         if (upperParam == null) {
             throw new IllegalArgumentException(String.format("Parameter '%s' is not a Number value.", UPPER_PARAM));
         }
-        final QuantityType<?> convertedUpperParam = upperParam.toUnit(lower.getUnit());
+        final QuantityType<?> convertedUpperParam = upperParam.toInvertibleUnit(lower.getUnit());
         if (convertedUpperParam == null) {
             throw new IllegalArgumentException(
                     String.format("Units of parameters '%s' and '%s' are not compatible: %s != %s", LOWER_PARAM,
@@ -153,8 +153,8 @@ public class SystemRangeStateProfile implements StateProfile {
                 finalLower = new QuantityType<>(lower.toBigDecimal(), qtState.getUnit());
                 finalUpper = new QuantityType<>(upper.toBigDecimal(), qtState.getUnit());
             } else {
-                finalLower = lower.toUnit(qtState.getUnit());
-                finalUpper = upper.toUnit(qtState.getUnit());
+                finalLower = lower.toInvertibleUnit(qtState.getUnit());
+                finalUpper = upper.toInvertibleUnit(qtState.getUnit());
                 if (finalLower == null || finalUpper == null) {
                     logger.warn(
                             "Cannot compare state '{}' to boundaries because units (lower={}, upper={}) do not match.",

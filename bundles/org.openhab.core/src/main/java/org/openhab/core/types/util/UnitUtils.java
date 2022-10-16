@@ -16,6 +16,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
@@ -116,8 +117,11 @@ public class UnitUtils {
                 if (field.getType().isAssignableFrom(Unit.class) && Modifier.isStatic(field.getModifiers())) {
                     Type genericType = field.getGenericType();
                     if (genericType instanceof ParameterizedType) {
-                        String dimension = ((Class<?>) ((ParameterizedType) genericType).getActualTypeArguments()[0])
-                                .getSimpleName();
+                        Type typeParam = ((ParameterizedType) genericType).getActualTypeArguments()[0];
+                        if (typeParam instanceof WildcardType) {
+                            continue;
+                        }
+                        String dimension = ((Class<?>) typeParam).getSimpleName();
                         try {
                             Unit<?> systemUnit = (Unit<?>) field.get(null);
                             if (systemUnit == null) {
