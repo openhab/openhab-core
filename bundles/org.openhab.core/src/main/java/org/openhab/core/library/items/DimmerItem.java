@@ -51,6 +51,10 @@ public class DimmerItem extends SwitchItem {
         internalSend(command);
     }
 
+    public void send(IncreaseDecreaseType command) {
+        internalSend(command);
+    }
+
     @Override
     public List<Class<? extends State>> getAcceptedDataTypes() {
         return ACCEPTED_DATA_TYPES;
