@@ -62,7 +62,7 @@ public class ItemConsoleCommandCompleter implements ConsoleCommandCompleter {
                 Stream<Class<?>> enums = Stream.of(localDataTypeGetter.apply(item)).filter(Class::isEnum);
                 Stream<? super Enum<?>> enumConstants = enums.flatMap(
                         t -> Stream.of(Objects.requireNonNull(((Class<? extends Enum<?>>) t).getEnumConstants())));
-                return new StringsCompleter(enumConstants.map(Object::toString).collect(Collectors.toList()), true)
+                return new StringsCompleter(enumConstants.map(Object::toString).collect(Collectors.toList()), false)
                         .complete(args, cursorArgumentIndex, cursorPosition, candidates);
             } catch (ItemNotFoundException | ItemNotUniqueException e) {
                 return false;

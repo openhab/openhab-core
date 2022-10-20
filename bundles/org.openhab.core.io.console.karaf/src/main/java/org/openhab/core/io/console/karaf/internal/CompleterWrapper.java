@@ -74,7 +74,7 @@ public class CompleterWrapper implements Completer {
             return -1;
 
         String[] args = commandLine.getArguments();
-        boolean result = localCompleter.complete(Arrays.copyOfRange(args, 1, args.length - 1),
+        boolean result = localCompleter.complete(Arrays.copyOfRange(args, 1, args.length),
                 commandLine.getCursorArgumentIndex() - 1, commandLine.getArgumentPosition(), candidates);
         return result ? commandLine.getBufferPosition() - commandLine.getArgumentPosition() : -1;
     }
