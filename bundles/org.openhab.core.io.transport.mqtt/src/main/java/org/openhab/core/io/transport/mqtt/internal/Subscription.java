@@ -44,8 +44,11 @@ public class Subscription {
     public void add(MqttMessageSubscriber subscriber) {
         if (subscribers.add(subscriber)) {
             // new subscriber. deliver all known retained messages
-            retainedMessages.entrySet().parallelStream()
-                    .forEach(entry -> processMessage(subscriber, entry.getKey(), entry.getValue()));
+            retainedMessages.entrySet().parallelStream().forEach(entry -> {
+                if (entry.getValue().length > 0) {
+                    processMessage(subscriber, entry.getKey(), entry.getValue());
+                }
+            });
         }
     }
 
@@ -71,12 +74,11 @@ public class Subscription {
     }
 
     public void messageArrived(String topic, byte[] payload, boolean retain) {
-        if (retain) {
-            if (payload.length > 0) {
-                retainedMessages.put(topic, payload);
-            } else {
-                retainedMessages.remove(topic);
-            }
+        // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc385349265
+        // Only the first message delivered will have the retain flag; subsequent messages
+        //
+        if (retain || retainedMessages.containsKey(topic)) {
+            retainedMessages.put(topic, payload);
         }
         subscribers.parallelStream().forEach(subscriber -> processMessage(subscriber, topic, payload));
     }

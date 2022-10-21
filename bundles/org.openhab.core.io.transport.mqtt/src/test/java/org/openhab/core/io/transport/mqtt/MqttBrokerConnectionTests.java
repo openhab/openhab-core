@@ -47,9 +47,14 @@ import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
 @NonNullByDefault
 public class MqttBrokerConnectionTests extends JavaTest {
     private static final byte[] HELLO_BYTES = "hello".getBytes();
+    private static final byte[] GOODBYE_BYTES = "goodbye".getBytes();
 
     private static byte[] eqHelloBytes() {
         return eq(HELLO_BYTES);
+    }
+
+    private static byte[] eqGoodbyeBytes() {
+        return eq(GOODBYE_BYTES);
     }
 
     @Test
@@ -138,6 +143,28 @@ public class MqttBrokerConnectionTests extends JavaTest {
 
         // Remove subscriber (while connected)
         assertTrue(connection.unsubscribe("topic", subscriber).get(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void retain()
+            throws ConfigurationException, MqttException, InterruptedException, ExecutionException, TimeoutException {
+        MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("123.123.123.123", null, false, false,
+                "MqttBrokerConnectionTests");
+
+        MqttMessageSubscriber subscriber1 = mock(MqttMessageSubscriber.class);
+        MqttMessageSubscriber subscriber2 = mock(MqttMessageSubscriber.class);
+        connection.subscribe("topic", subscriber1);
+
+        Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("topic").payload(HELLO_BYTES).retain(true).build();
+        connection.getSubscribers().get("topic").messageArrived(publishMessage);
+
+        publishMessage = Mqtt3Publish.builder().topic("topic").payload(GOODBYE_BYTES).build();
+        connection.getSubscribers().get("topic").messageArrived(publishMessage);
+
+        connection.subscribe("topic", subscriber2);
+
+        // the retained message was updated even though the subsequent message didn't have the retained flag
+        verify(subscriber2).processMessage(eq("topic"), eqGoodbyeBytes());
     }
 
     @Test
