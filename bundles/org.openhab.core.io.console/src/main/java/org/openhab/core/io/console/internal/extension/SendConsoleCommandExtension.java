@@ -13,10 +13,13 @@
 package org.openhab.core.io.console.internal.extension;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.ConsoleCommandCompleter;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.items.Item;
@@ -78,7 +81,7 @@ public class SendConsoleCommandExtension extends AbstractConsoleCommandExtension
                             console.print("  " + acceptedType.getSimpleName());
                             if (acceptedType.isEnum()) {
                                 console.print(": ");
-                                for (Object e : acceptedType.getEnumConstants()) {
+                                for (Object e : Objects.requireNonNull(acceptedType.getEnumConstants())) {
                                     console.print(e + " ");
                                 }
                             }
@@ -99,5 +102,11 @@ public class SendConsoleCommandExtension extends AbstractConsoleCommandExtension
         } else {
             printUsage(console);
         }
+    }
+
+    @Override
+    public @Nullable ConsoleCommandCompleter getCompleter() {
+        return new ItemConsoleCommandCompleter(itemRegistry,
+                (Item i) -> i.getAcceptedCommandTypes().toArray(Class<?>[]::new));
     }
 }

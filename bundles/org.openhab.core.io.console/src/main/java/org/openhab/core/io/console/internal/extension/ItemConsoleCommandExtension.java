@@ -17,9 +17,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.ConsoleCommandCompleter;
+import org.openhab.core.io.console.StringsCompleter;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.items.GenericItem;
@@ -48,6 +52,42 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
     private static final String SUBCMD_REMOVE = "remove";
     private static final String SUBCMD_ADDTAG = "addTag";
     private static final String SUBCMD_RMTAG = "rmTag";
+    private static final StringsCompleter SUBCMD_COMPLETER = new StringsCompleter(
+            List.of(SUBCMD_LIST, SUBCMD_CLEAR, SUBCMD_REMOVE, SUBCMD_ADDTAG, SUBCMD_RMTAG), false);
+
+    private class ItemConsoleCommandCompleter implements ConsoleCommandCompleter {
+        @Override
+        public boolean complete(String[] args, int cursorArgumentIndex, int cursorPosition, List<String> candidates) {
+            if (cursorArgumentIndex <= 0) {
+                return SUBCMD_COMPLETER.complete(args, cursorArgumentIndex, cursorPosition, candidates);
+            }
+            if (cursorArgumentIndex == 1) {
+                Collection<Item> items;
+                switch (args[0]) {
+                    case SUBCMD_ADDTAG:
+                    case SUBCMD_RMTAG:
+                        items = managedItemProvider.getAll();
+                        break;
+                    case SUBCMD_REMOVE:
+                        items = itemRegistry.getAll();
+                        break;
+                    default:
+                        return false;
+                }
+                return new StringsCompleter(items.stream().map(i -> i.getName()).collect(Collectors.toList()), true)
+                        .complete(args, cursorArgumentIndex, cursorPosition, candidates);
+            }
+            if (cursorArgumentIndex == 2 && args[0].equals(SUBCMD_RMTAG)) {
+                Item item = managedItemProvider.get(args[1]);
+                if (item == null) {
+                    return false;
+                }
+                return new StringsCompleter(item.getTags(), true).complete(args, cursorArgumentIndex, cursorPosition,
+                        candidates);
+            }
+            return false;
+        }
+    }
 
     private final ItemRegistry itemRegistry;
     private final ManagedItemProvider managedItemProvider;
@@ -127,6 +167,11 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
         } else {
             printUsage(console);
         }
+    }
+
+    @Override
+    public @Nullable ConsoleCommandCompleter getCompleter() {
+        return new ItemConsoleCommandCompleter();
     }
 
     private <T> void handleTags(final Consumer<T> func, final T tag, GenericItem gItem, Console console) {

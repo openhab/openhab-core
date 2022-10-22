@@ -15,7 +15,9 @@ package org.openhab.core.io.console.internal.extension;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.ConsoleCommandCompleter;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.items.Item;
@@ -68,5 +70,10 @@ public class StatusConsoleCommandExtension extends AbstractConsoleCommandExtensi
         } else {
             printUsage(console);
         }
+    }
+
+    @Override
+    public @Nullable ConsoleCommandCompleter getCompleter() {
+        return new ItemConsoleCommandCompleter(itemRegistry);
     }
 }
