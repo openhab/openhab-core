@@ -13,6 +13,7 @@
 package org.openhab.core.model.script.actions;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.xbase.XExpression;
@@ -31,6 +32,8 @@ import org.openhab.core.scheduler.Scheduler;
  * This allows a script to call another script, which is available as a file.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Jan N. Klug - Add ability to name timers / scheduled jobs
+ * @author Florian Hotze - Add ability to use a lock object for synchronization of multi-thread access
  */
 public class ScriptExecution {
 
@@ -77,7 +80,21 @@ public class ScriptExecution {
      * @throws ScriptExecutionException if an error occurs during the execution
      */
     public static Timer createTimer(ZonedDateTime instant, Procedure0 closure) {
-        return createTimer(null, instant, closure);
+        return createTimer(null, instant, closure, null);
+    }
+
+    /**
+     * Schedules a block of code for later execution.
+     *
+     * @param instant the point in time when the code should be executed
+     * @param closure the code block to execute
+     * @param lock the lock object for synchronization of multi-thread access
+     *
+     * @return a handle to the created timer, so that it can be canceled or rescheduled
+     * @throws ScriptExecutionException if an error occurs during the execution
+     */
+    public static Timer createTimer(ZonedDateTime instant, Procedure0 closure, Object lock) {
+        return createTimer(null, instant, closure, lock);
     }
 
     /**
@@ -91,11 +108,35 @@ public class ScriptExecution {
      * @throws ScriptExecutionException if an error occurs during the execution
      */
     public static Timer createTimer(@Nullable String identifier, ZonedDateTime instant, Procedure0 closure) {
+        return createTimer(identifier, instant, closure, null);
+    }
+
+    /**
+     * Schedules a block of code for later execution.
+     *
+     * @param identifier an optional identifier
+     * @param instant the point in time when the code should be executed
+     * @param closure the code block to execute
+     * @param lock the lock object for synchronization of multi-thread access
+     *
+     * @return a handle to the created timer, so that it can be canceled or rescheduled
+     * @throws ScriptExecutionException if an error occurs during the execution
+     */
+    public static Timer createTimer(@Nullable String identifier, ZonedDateTime instant, Procedure0 closure, @Nullable Object lock) {
         Scheduler scheduler = ScriptServiceUtil.getScheduler();
 
-        return new TimerImpl(scheduler, instant, () -> {
-            closure.apply();
-        }, identifier);
+        if (Objects.nonNull(lock)) {
+            return new TimerImpl(scheduler, instant, () -> {
+                synchronized (lock) {
+                    closure.apply();
+                }
+            }, identifier);
+        } else {
+            return new TimerImpl(scheduler, instant, () -> {
+                closure.apply();
+            }, identifier);
+        }
+
     }
 
     /**
@@ -109,7 +150,22 @@ public class ScriptExecution {
      * @throws ScriptExecutionException if an error occurs during the execution
      */
     public static Timer createTimerWithArgument(ZonedDateTime instant, Object arg1, Procedure1<Object> closure) {
-        return createTimerWithArgument(null, instant, arg1, closure);
+        return createTimerWithArgument(null, instant, arg1, closure, null);
+    }
+
+    /**
+     * Schedules a block of code (with argument) for later execution
+     *
+     * @param instant the point in time when the code should be executed
+     * @param arg1 the argument to pass to the code block
+     * @param closure the code block to execute
+     * @param lock the lock object for synchronization of multi-thread access
+     *
+     * @return a handle to the created timer, so that it can be canceled or rescheduled
+     * @throws ScriptExecutionException if an error occurs during the execution
+     */
+    public static Timer createTimerWithArgument(ZonedDateTime instant, Object arg1, Procedure1<Object> closure, @Nullable Object lock) {
+        return createTimerWithArgument(null, instant, arg1, closure, lock);
     }
 
     /**
@@ -124,10 +180,35 @@ public class ScriptExecution {
      * @throws ScriptExecutionException if an error occurs during the execution
      */
     public static Timer createTimerWithArgument(@Nullable String identifier,  ZonedDateTime instant, Object arg1, Procedure1<Object> closure) {
+        return createTimerWithArgument(identifier, instant, arg1, closure, null);
+    }
+
+    /**
+     * Schedules a block of code (with argument) for later execution
+     *
+     * @param identifier an optional identifier
+     * @param instant the point in time when the code should be executed
+     * @param arg1 the argument to pass to the code block
+     * @param closure the code block to execute
+     *
+     * @return a handle to the created timer, so that it can be canceled or rescheduled
+     * @throws ScriptExecutionException if an error occurs during the execution
+     */
+    public static Timer createTimerWithArgument(@Nullable String identifier,  ZonedDateTime instant, Object arg1, Procedure1<Object> closure, @Nullable Object lock) {
         Scheduler scheduler = ScriptServiceUtil.getScheduler();
 
-        return new TimerImpl(scheduler, instant, () -> {
-            closure.apply(arg1);
-        }, identifier);
+        if (Objects.nonNull(lock)) {
+            return new TimerImpl(scheduler, instant, () -> {
+                synchronized (lock) {
+                    closure.apply(arg1);
+                }
+
+            }, identifier);
+        } else {
+            return new TimerImpl(scheduler, instant, () -> {
+                closure.apply(arg1);
+            }, identifier);
+        }
+
     }
 }
