@@ -76,7 +76,8 @@ public class Subscription {
     public void messageArrived(String topic, byte[] payload, boolean retain) {
         // http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc385349265
         // Only the first message delivered will have the retain flag; subsequent messages
-        //
+        // will not have the flag set. So see if we retained it in the past, and continue
+        // to retain it (even if it's now empty - we need to know to continue to retain it)
         if (retain || retainedMessages.containsKey(topic)) {
             retainedMessages.put(topic, payload);
         }
