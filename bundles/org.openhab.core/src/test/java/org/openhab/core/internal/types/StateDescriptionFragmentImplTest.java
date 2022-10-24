@@ -15,6 +15,7 @@ package org.openhab.core.internal.types;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -72,6 +73,42 @@ public class StateDescriptionFragmentImplTest {
         fragment = source.merge(sourceWithOptions);
 
         assertThat(fragment.getOptions(), is(not(sourceWithOptions.getOptions())));
+    }
+
+    @Test
+    public void mergeFragmentWithUnits() {
+        StateDescriptionFragmentImpl userFragment = new StateDescriptionFragmentImpl();
+        userFragment.setPattern("%0.0f °F");
+
+        StateDescriptionFragmentImpl channelFragment = new StateDescriptionFragmentImpl();
+        channelFragment.setPattern("%0.1f °C");
+        channelFragment.setMinimum(BigDecimal.ZERO);
+        channelFragment.setMaximum(new BigDecimal(100));
+        channelFragment.setStep(new BigDecimal(0.5));
+
+        userFragment.merge(channelFragment);
+        assertThat(userFragment.getPattern(), is("%0.0f °F"));
+        assertThat(userFragment.getMinimum(), is(new BigDecimal(32)));
+        assertThat(userFragment.getMaximum(), is(new BigDecimal(212)));
+        assertThat(userFragment.getStep(), is(new BigDecimal("0.9")));
+    }
+
+    @Test
+    public void mergeFragmentWithInvertibleUnits() {
+        StateDescriptionFragmentImpl userFragment = new StateDescriptionFragmentImpl();
+        userFragment.setPattern("%0.0f K");
+
+        StateDescriptionFragmentImpl channelFragment = new StateDescriptionFragmentImpl();
+        channelFragment.setPattern("%0.0f mired");
+        channelFragment.setMinimum(new BigDecimal(153));
+        channelFragment.setMaximum(new BigDecimal(400));
+        channelFragment.setStep(BigDecimal.ONE);
+
+        userFragment.merge(channelFragment);
+        assertThat(userFragment.getPattern(), is("%0.0f K"));
+        assertThat(userFragment.getMinimum(), is(new BigDecimal(2500)));
+        assertThat(userFragment.getMaximum(), is(new BigDecimal(6536)));
+        assertThat(userFragment.getStep(), is(nullValue()));
     }
 
     @Test
