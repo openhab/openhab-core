@@ -149,4 +149,22 @@ public class ChannelUID extends UID {
         List<String> allSegments = getAllSegments();
         return new ThingUID(allSegments.subList(0, allSegments.size() - 1).toArray(new String[allSegments.size() - 1]));
     }
+
+    /**
+     * Returns the binding id.
+     * 
+     * @return binding id
+     */
+    public String getBindingId() {
+        return getSegment(0);
+    }
+
+    /**
+     * Returns the thing type UID.
+     * 
+     * @return thing type UID
+     */
+    public ThingTypeUID getThingTypeUID() {
+        return new ThingTypeUID(getSegment(0), getSegment(1));
+    }
 }

@@ -150,6 +150,24 @@ public class ThingUID extends UID {
     }
 
     /**
+     * Returns the binding id.
+     * 
+     * @return binding id
+     */
+    public String getBindingId() {
+        return getSegment(0);
+    }
+
+    /**
+     * Returns the thing type UID.
+     * 
+     * @return thing type UID
+     */
+    public ThingTypeUID getThingTypeUID() {
+        return new ThingTypeUID(getSegment(0), getSegment(1));
+    }
+
+    /**
      * Returns the id.
      *
      * @return id the id

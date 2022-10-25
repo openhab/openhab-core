@@ -44,6 +44,20 @@ public class ThingTypeUID extends UID {
         return 2;
     }
 
+    /**
+     * Returns the binding id.
+     * 
+     * @return binding id
+     */
+    public String getBindingId() {
+        return getSegment(0);
+    }
+
+    /**
+     * Returns the id.
+     *
+     * @return id the id
+     */
     public String getId() {
         return getSegment(1);
     }
