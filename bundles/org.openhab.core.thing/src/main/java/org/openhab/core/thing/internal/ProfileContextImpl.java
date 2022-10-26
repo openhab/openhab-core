@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.items.Item;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
@@ -34,18 +36,20 @@ public class ProfileContextImpl implements ProfileContext {
     private static final String THREAD_POOL_NAME = "profiles";
     private final Configuration configuration;
 
+    private final @Nullable Item item;
     private final List<Class<? extends State>> acceptedDataTypes;
     private final List<Class<? extends Command>> acceptedCommandTypes;
     private final List<Class<? extends Command>> handlerAcceptedCommandTypes;
 
     public ProfileContextImpl(Configuration configuration) {
-        this(configuration, List.of(), List.of(), List.of());
+        this(configuration, null, List.of(), List.of(), List.of());
     }
 
-    public ProfileContextImpl(Configuration configuration, List<Class<? extends State>> acceptedDataTypes,
-            List<Class<? extends Command>> acceptedCommandTypes,
+    public ProfileContextImpl(Configuration configuration, @Nullable Item item,
+            List<Class<? extends State>> acceptedDataTypes, List<Class<? extends Command>> acceptedCommandTypes,
             List<Class<? extends Command>> handlerAcceptedCommandTypes) {
         this.configuration = configuration;
+        this.item = item;
         this.acceptedDataTypes = acceptedDataTypes;
         this.acceptedCommandTypes = acceptedCommandTypes;
         this.handlerAcceptedCommandTypes = handlerAcceptedCommandTypes;
@@ -54,6 +58,11 @@ public class ProfileContextImpl implements ProfileContext {
     @Override
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    @Override
+    public @Nullable Item getItem() {
+        return item;
     }
 
     @Override

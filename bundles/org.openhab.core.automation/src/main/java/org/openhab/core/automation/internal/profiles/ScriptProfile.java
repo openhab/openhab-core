@@ -19,6 +19,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.items.Item;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * The {@link ScriptProfile} delegates its actions to scripts.
  *
  * Scripts are just rules that are tagged "Script". If they have any triggers
- * or conditions, they are ignored. `callback` and `command` or `state` (as
+ * or conditions, they are ignored. `callback`, `item`, and `command` or `state` (as
  * appropriate) are provided as context to the script. If script returns `true`
  * then the default action (as if it were a {@link SystemDefaultProfile}) is
  * taken; otherwise no other actions are taken and it's up to the script to
@@ -52,6 +53,7 @@ public class ScriptProfile implements StateProfile {
 
     private static final String CALLBACK_VAR = "callback";
     private static final String COMMAND_VAR = "command";
+    private static final String ITEM_VAR = "item";
     private static final String STATE_VAR = "state";
     private static final String RESULT_VAR_SUFFIX = ".result";
 
@@ -60,6 +62,7 @@ public class ScriptProfile implements StateProfile {
     private final Logger logger = LoggerFactory.getLogger(ScriptProfile.class);
 
     private final ProfileCallback callback;
+    private final @Nullable Item item;
     private final RuleManager ruleManager;
     private final RuleRegistry ruleRegistry;
     private @Nullable final String onCommandFromItemParam, onStateUpdateFromHandlerParam, onCommandFromHandlerParam,
@@ -68,6 +71,7 @@ public class ScriptProfile implements StateProfile {
     public ScriptProfile(ProfileCallback callback, ProfileContext context, RuleManager ruleManager,
             RuleRegistry ruleRegistry) {
         this.callback = callback;
+        this.item = context.getItem();
         this.ruleManager = ruleManager;
         this.ruleRegistry = ruleRegistry;
 
@@ -138,6 +142,7 @@ public class ScriptProfile implements StateProfile {
         }
         var context = new HashMap<String, Object>();
         context.put(CALLBACK_VAR, callback);
+        context.put(ITEM_VAR, item);
         context.put(variableName, variableValue);
 
         ruleManager.runNow(scriptName, false, context);

@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.items.Item;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 
@@ -37,6 +39,15 @@ public interface ProfileContext {
      * @return the configuration
      */
     Configuration getConfiguration();
+
+    /**
+     * Get the item the profile is linked to
+     * 
+     * @return the item the profile is applied to
+     */
+    default @Nullable Item getItem() {
+        return null;
+    }
 
     /**
      * Get a scheduler to be used within profiles (if needed at all)

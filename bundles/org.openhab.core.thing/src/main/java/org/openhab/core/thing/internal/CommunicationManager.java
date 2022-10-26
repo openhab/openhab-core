@@ -297,7 +297,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         if (item != null && thing != null) {
             Channel channel = thing.getChannel(link.getLinkedUID());
             if (channel != null) {
-                context = new ProfileContextImpl(link.getConfiguration(), item.getAcceptedDataTypes(),
+                context = new ProfileContextImpl(link.getConfiguration(), item, item.getAcceptedDataTypes(),
                         item.getAcceptedCommandTypes(), acceptedCommandTypeMap.getOrDefault(
                                 Objects.requireNonNullElse(channel.getAcceptedItemType(), ""), List.of()));
             }
