@@ -1032,6 +1032,15 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             } else {
                 executeActions(rule, false);
             }
+            if (context != null) {
+                try {
+                    context.clear();
+                    context.putAll(getContext(ruleUID, null));
+                } catch (UnsupportedOperationException e) {
+                    // the caller didn't provide a mutable map to get outputs
+                    // just ignore
+                }
+            }
             logger.debug("The rule '{}' is executed.", ruleUID);
         } catch (Throwable t) {
             logger.error("Failed to execute rule '{}': ", ruleUID, t);

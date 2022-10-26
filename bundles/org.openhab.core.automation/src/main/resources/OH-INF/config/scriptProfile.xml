@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="profile:system:script">
+		<parameter name="onCommandFromItem" type="text">
+			<label>onCommandFromItem Script ID</label>
+			<description><![CDATA[
+				Script for handling a command coming from a linked item. Default action is
+				<tt>callback.handleCommand(command)</tt>
+				.]]>
+			</description>
+		</parameter>
+		<parameter name="onStateUpdateFromHandler" type="text">
+			<label>onStateUpdateFromHandler Script ID</label>
+			<description><![CDATA[
+				Script for handling a state update coming from a binding. Default action is
+				<tt>callback.sendUpdate(state)</tt>
+				.]]>
+			</description>
+		</parameter>
+		<parameter name="onCommandFromHandler" type="text">
+			<label>onCommandFromHandler Script ID</label>
+			<description><![CDATA[
+				Script for handling a command coming from a binding. Default action is
+				<tt>callback.sendCommand(command)</tt>
+				.]]>
+			</description>
+		</parameter>
+
+		<parameter name="onStateUpdateFromItem" type="text">
+			<label>onStateUpdateFromItem Script ID</label>
+			<description>Script for handling a state update coming from an item. Default action does nothing.</description>
+		</parameter>
+	</config-description>
+</config-description:config-descriptions>
