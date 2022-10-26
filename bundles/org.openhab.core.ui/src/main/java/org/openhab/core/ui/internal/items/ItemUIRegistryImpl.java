@@ -1333,7 +1333,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         int index = label.lastIndexOf(" ");
         String labelUnit = index > 0 ? label.substring(index) : null;
         if (labelUnit != null && !state.getUnit().toString().equals(labelUnit)) {
-            return state.toUnit(labelUnit);
+            return state.toInvertibleUnit(labelUnit);
         }
         return state;
     }
