@@ -110,7 +110,7 @@ public class ItemStateConverterImpl implements ItemStateConverter {
     }
 
     private State convertOrUndef(QuantityType<?> quantityState, Unit<?> targetUnit) {
-        QuantityType<?> converted = quantityState.toUnit(targetUnit);
+        QuantityType<?> converted = quantityState.toInvertibleUnit(targetUnit);
         if (converted != null) {
             return converted;
         }

@@ -134,6 +134,23 @@ public class ItemStateConverterImplTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    public void numberItemMiredConversion(Locale locale) {
+        Locale.setDefault(locale);
+
+        NumberItem item = mock(NumberItem.class);
+        StateDescription stateDescription = mock(StateDescription.class);
+        when(item.getStateDescription()).thenReturn(stateDescription);
+        doReturn(Temperature.class).when(item).getDimension();
+        when(stateDescription.getPattern()).thenReturn("%.1f K");
+
+        State originalState = new QuantityType<>("153 mired");
+        State convertedState = itemStateConverter.convertToAcceptedState(originalState, item);
+
+        assertThat(((QuantityType) convertedState).intValue(), is(6535));
+    }
+
+    @ParameterizedTest
+    @MethodSource("locales")
     public void numberItemWitDimensionShouldConvertToLocaleBasedUnit(Locale locale) {
         Locale.setDefault(locale);
 

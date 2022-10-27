@@ -306,6 +306,16 @@ public class QuantityType<T extends Quantity<T>> extends Number
         return toUnit(targetUnit);
     }
 
+    @SuppressWarnings("unchecked")
+    public @Nullable QuantityType<?> toInvertibleUnit(String targetUnit) {
+        Unit<?> unit = (Unit<?>) AbstractUnit.parse(targetUnit);
+        if (unit != null) {
+            return toInvertibleUnit(unit);
+        }
+
+        return null;
+    }
+
     public BigDecimal toBigDecimal() {
         return new BigDecimal(quantity.getValue().toString());
     }
