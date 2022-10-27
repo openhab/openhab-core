@@ -30,6 +30,7 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemRemovedEvent;
 import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.State;
@@ -166,6 +167,12 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
             } else if (compareState instanceof QuantityType) {
                 return qtState.compareTo((QuantityType) compareState) <= 0;
             }
+        } else if (itemState instanceof PercentType && null != compareState) {
+            // we need to handle PercentType first, otherwise the comparison will fail
+            PercentType percentState = compareState.as(PercentType.class);
+            if (null != percentState) {
+                return ((PercentType) itemState).compareTo(percentState) <= 0;
+            }
         } else if (itemState instanceof DecimalType && null != compareState) {
             DecimalType decimalState = compareState.as(DecimalType.class);
             if (null != decimalState) {
@@ -194,6 +201,12 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
                         new QuantityType<>(((DecimalType) compareState).toBigDecimal(), qtState.getUnit())) >= 0;
             } else if (compareState instanceof QuantityType) {
                 return qtState.compareTo((QuantityType) compareState) >= 0;
+            }
+        } else if (itemState instanceof PercentType && null != compareState) {
+            // we need to handle PercentType first, otherwise the comparison will fail
+            PercentType percentState = compareState.as(PercentType.class);
+            if (null != percentState) {
+                return ((PercentType) itemState).compareTo(percentState) >= 0;
             }
         } else if (itemState instanceof DecimalType && null != compareState) {
             DecimalType decimalState = compareState.as(DecimalType.class);
