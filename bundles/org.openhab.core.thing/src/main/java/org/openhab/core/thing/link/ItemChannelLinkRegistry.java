@@ -67,12 +67,12 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return an unmodifiable set of bound channels for the given item name
      */
     public Set<ChannelUID> getBoundChannels(final String itemName) {
-        return getLinks(itemName).parallelStream().map(link -> link.getLinkedUID()).collect(Collectors.toSet());
+        return getLinks(itemName).stream().map(link -> link.getLinkedUID()).collect(Collectors.toSet());
     }
 
     @Override
     public Set<String> getLinkedItemNames(final UID uid) {
-        return super.getLinkedItemNames(uid).parallelStream().filter(itemName -> itemRegistry.get(itemName) != null)
+        return super.getLinkedItemNames(uid).stream().filter(itemName -> itemRegistry.get(itemName) != null)
                 .collect(Collectors.toSet());
     }
 
@@ -83,8 +83,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return an unmodifiable set of bound items for the given channel UID
      */
     public Set<Item> getLinkedItems(final UID uid) {
-        return ((Stream<Item>) super.getLinkedItemNames(uid).parallelStream()
-                .map(itemName -> itemRegistry.get(itemName)).filter(Objects::nonNull)).collect(Collectors.toSet());
+        return ((Stream<Item>) super.getLinkedItemNames(uid).stream().map(itemName -> itemRegistry.get(itemName))
+                .filter(Objects::nonNull)).collect(Collectors.toSet());
     }
 
     /**
@@ -94,7 +94,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return an unmodifiable set of bound things for the given item name
      */
     public Set<Thing> getBoundThings(final String itemName) {
-        return ((Stream<Thing>) getBoundChannels(itemName).parallelStream()
+        return ((Stream<Thing>) getBoundChannels(itemName).stream()
                 .map(channelUID -> thingRegistry.get(channelUID.getThingUID())).filter(Objects::nonNull))
                         .collect(Collectors.toSet());
     }
