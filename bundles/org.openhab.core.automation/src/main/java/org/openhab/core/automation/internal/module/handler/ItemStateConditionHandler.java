@@ -12,6 +12,11 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -24,11 +29,13 @@ import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemRemovedEvent;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
@@ -66,12 +73,14 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
     private final BundleContext bundleContext;
     private final Set<String> types;
     private final ServiceRegistration<?> eventSubscriberRegistration;
+    private final TimeZoneProvider timeZoneProvider;
 
     public ItemStateConditionHandler(Condition condition, String ruleUID, BundleContext bundleContext,
-            ItemRegistry itemRegistry) {
+            ItemRegistry itemRegistry, TimeZoneProvider timeZoneProvider) {
         super(condition);
         this.itemRegistry = itemRegistry;
         this.bundleContext = bundleContext;
+        this.timeZoneProvider = timeZoneProvider;
         this.itemName = (String) module.getConfiguration().get(ITEM_NAME);
         this.types = Set.of(ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         this.ruleUID = ruleUID;
@@ -152,7 +161,11 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         Item item = itemRegistry.getItem(itemName);
         State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);
         State itemState = item.getState();
-        if (itemState instanceof QuantityType) {
+        if (itemState instanceof DateTimeType) {
+            ZonedDateTime itemTime = ((DateTimeType) itemState).getZonedDateTime();
+            ZonedDateTime compareTime = getCompareTime(state);
+            return itemTime.compareTo(compareTime) <= 0;
+        } else if (itemState instanceof QuantityType) {
             QuantityType qtState = (QuantityType) itemState;
             if (compareState instanceof DecimalType) {
                 // allow compareState without unit -> implicitly assume its the same as the one from the
@@ -187,7 +200,11 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         Item item = itemRegistry.getItem(itemName);
         State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);
         State itemState = item.getState();
-        if (itemState instanceof QuantityType) {
+        if (itemState instanceof DateTimeType) {
+            ZonedDateTime itemTime = ((DateTimeType) itemState).getZonedDateTime();
+            ZonedDateTime compareTime = getCompareTime(state);
+            return itemTime.compareTo(compareTime) >= 0;
+        } else if (itemState instanceof QuantityType) {
             QuantityType qtState = (QuantityType) itemState;
             if (compareState instanceof DecimalType) {
                 // allow compareState without unit -> implicitly assume its the same as the one from the
@@ -248,5 +265,38 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
         return event.getTopic().contains("openhab/items/" + itemName + "/");
+    }
+
+    private ZonedDateTime getCompareTime(String input) {
+        if (input.isBlank()) {
+            // no parameter given, use now
+            return ZonedDateTime.now();
+        }
+        try {
+            return ZonedDateTime.parse(input);
+        } catch (DateTimeParseException ignored) {
+        }
+        try {
+            return LocalDateTime.parse(input, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    .atZone(timeZoneProvider.getTimeZone());
+        } catch (DateTimeParseException ignored) {
+        }
+        try {
+            int dayPosition = input.indexOf("D");
+            if (dayPosition == -1) {
+                // no date in string, add period symbol and time separator
+                return ZonedDateTime.now().plus(Duration.parse("PT" + input));
+            } else if (dayPosition == input.length() - 1) {
+                // day is the last symbol, only add the period symbol
+                return ZonedDateTime.now().plus(Duration.parse("P" + input));
+            } else {
+                // add period symbol and time separator
+                return ZonedDateTime.now().plus(Duration
+                        .parse("P" + input.substring(0, dayPosition + 1) + "T" + input.substring(dayPosition + 1)));
+            }
+        } catch (DateTimeParseException e) {
+            logger.warn("Couldn't get a comparable time from '{}', using now", input);
+        }
+        return ZonedDateTime.now();
     }
 }

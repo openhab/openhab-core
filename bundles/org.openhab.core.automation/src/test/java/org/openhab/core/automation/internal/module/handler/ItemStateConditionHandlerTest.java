@@ -15,6 +15,7 @@ package org.openhab.core.automation.internal.module.handler;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -32,15 +33,18 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.util.ConditionBuilder;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.items.events.ItemRemovedEvent;
+import org.openhab.core.library.items.DateTimeItem;
 import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
@@ -75,6 +79,10 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 case "Dimmer":
                     item = new DimmerItem(ITEM_NAME);
                     ((DimmerItem) item).setState(itemState);
+                    break;
+                case "DateTime":
+                    item = new DateTimeItem(ITEM_NAME);
+                    ((DateTimeItem) item).setState(itemState);
                     break;
                 default:
                     throw new IllegalArgumentException();
@@ -112,7 +120,9 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 { new ParameterSet("Number", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("Number", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(40), true) }, //
-                { new ParameterSet("Dimmer", "20", new PercentType(20), false) } });
+                { new ParameterSet("Dimmer", "20", new PercentType(20), false) }, //
+                { new ParameterSet("DateTime", "-1H", new DateTimeType(), true) }, //
+                { new ParameterSet("DateTime", "1D1M", new DateTimeType(), false) } });
     }
 
     public static Collection<Object[]> greaterThanOrEqualsParameters() {
@@ -133,7 +143,8 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 { new ParameterSet("Number", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT), true) }, //
                 { new ParameterSet("Number", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(40), true) }, //
-                { new ParameterSet("Dimmer", "40", new PercentType(20), false) } });
+                { new ParameterSet("Dimmer", "40", new PercentType(20), false) }, //
+                { new ParameterSet("DateTime", "2000-01-01T12:05:00", new DateTimeType(), true) } });
     }
 
     public static Collection<Object[]> lessThanParameters() {
@@ -148,7 +159,10 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 { new ParameterSet("Number", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("Number", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("Dimmer", "40", new PercentType(20), true) }, //
-                { new ParameterSet("Dimmer", "20", new PercentType(20), false) } });
+                { new ParameterSet("Dimmer", "20", new PercentType(20), false) }, //
+                { new ParameterSet("DateTime", "-1D", new DateTimeType(), false) }, //
+                { new ParameterSet("DateTime", "1D5M", new DateTimeType(), true) }, //
+                { new ParameterSet("DateTime", "2050-01-01T12:05:00+01:00", new DateTimeType(), true) } });
     }
 
     public static Collection<Object[]> lessThanOrEqualsParameters() {
@@ -169,7 +183,8 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 { new ParameterSet("Number", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT), true) }, //
                 { new ParameterSet("Number", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(40), false) }, //
-                { new ParameterSet("Dimmer", "40", new PercentType(20), true) } });
+                { new ParameterSet("Dimmer", "40", new PercentType(20), true) }, //
+                { new ParameterSet("DateTime", "", new DateTimeType(), true) } });
     }
 
     private static final String ITEM_NAME = "myItem";
@@ -178,11 +193,13 @@ public class ItemStateConditionHandlerTest extends JavaTest {
 
     private @NonNullByDefault({}) @Mock ItemRegistry mockItemRegistry;
     private @NonNullByDefault({}) @Mock BundleContext mockBundleContext;
+    private @NonNullByDefault({}) @Mock TimeZoneProvider mockTimeZoneProvider;
 
     @BeforeEach
     public void setup() throws ItemNotFoundException {
         when(mockItemRegistry.getItem(ITEM_NAME)).thenAnswer(i -> item);
         when(mockItemRegistry.get(ITEM_NAME)).thenAnswer(i -> item);
+        when(mockTimeZoneProvider.getTimeZone()).thenReturn(ZoneId.systemDefault());
     }
 
     public Item getItem() {
@@ -276,7 +293,8 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 .withId("conditionId") //
                 .withTypeUID(ItemStateConditionHandler.ITEM_STATE_CONDITION) //
                 .withConfiguration(configuration);
-        return new ItemStateConditionHandler(builder.build(), "", mockBundleContext, mockItemRegistry);
+        return new ItemStateConditionHandler(builder.build(), "", mockBundleContext, mockItemRegistry,
+                mockTimeZoneProvider);
     }
 
     @Test
@@ -295,7 +313,7 @@ public class ItemStateConditionHandlerTest extends JavaTest {
         // missing on creation
         when(mockItemRegistry.get(ITEM_NAME)).thenReturn(null);
         ItemStateConditionHandler handler = new ItemStateConditionHandler(condition, "foo", mockBundleContext,
-                mockItemRegistry);
+                mockItemRegistry, mockTimeZoneProvider);
         assertLogMessage(ItemStateConditionHandler.class, LogLevel.WARN,
                 "Item 'myItem' needed for rule 'foo' is missing. Condition 'conditionId' will not work.");
 

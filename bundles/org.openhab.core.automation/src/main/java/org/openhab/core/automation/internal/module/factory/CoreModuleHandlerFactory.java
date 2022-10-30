@@ -40,6 +40,7 @@ import org.openhab.core.automation.internal.module.handler.RunRuleActionHandler;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.ItemRegistry;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
@@ -73,17 +74,18 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
             CompareConditionHandler.MODULE_TYPE, SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID,
             RuleEnablementActionHandler.UID, RunRuleActionHandler.UID);
 
-    private ItemRegistry itemRegistry;
-    private EventPublisher eventPublisher;
-
-    private BundleContext bundleContext;
+    private final ItemRegistry itemRegistry;
+    private final TimeZoneProvider timeZoneProvider;
+    private final EventPublisher eventPublisher;
+    private final BundleContext bundleContext;
 
     @Activate
     public CoreModuleHandlerFactory(BundleContext bundleContext, final @Reference EventPublisher eventPublisher,
-            final @Reference ItemRegistry itemRegistry) {
+            final @Reference ItemRegistry itemRegistry, final @Reference TimeZoneProvider timeZoneProvider) {
         this.bundleContext = bundleContext;
         this.eventPublisher = eventPublisher;
         this.itemRegistry = itemRegistry;
+        this.timeZoneProvider = timeZoneProvider;
     }
 
     @Override
@@ -126,7 +128,8 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
         } else if (module instanceof Condition) {
             // Handle conditions
             if (ItemStateConditionHandler.ITEM_STATE_CONDITION.equals(moduleTypeUID)) {
-                return new ItemStateConditionHandler((Condition) module, ruleUID, bundleContext, itemRegistry);
+                return new ItemStateConditionHandler((Condition) module, ruleUID, bundleContext, itemRegistry,
+                        timeZoneProvider);
             } else if (GenericEventConditionHandler.MODULETYPE_ID.equals(moduleTypeUID)) {
                 return new GenericEventConditionHandler((Condition) module);
             } else if (CompareConditionHandler.MODULE_TYPE.equals(moduleTypeUID)) {
