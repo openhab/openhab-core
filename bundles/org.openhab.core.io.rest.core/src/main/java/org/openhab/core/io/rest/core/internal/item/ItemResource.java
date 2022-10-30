@@ -792,12 +792,12 @@ public class ItemResource implements RESTResource {
 
         Class<? extends org.openhab.core.semantics.Tag> semanticClass = SemanticTags.getById(semanticClassName);
         if (semanticClass == null) {
-            return Response.status(Status.NOT_FOUND.getStatusCode()).build();
+            return Response.status(Status.NOT_FOUND).build();
         }
 
         Item foundItem = findParentByTag(getItem(itemName), SemanticsPredicates.isA(semanticClass));
         if (foundItem == null) {
-            return Response.status(Status.NOT_FOUND.getStatusCode()).build();
+            return Response.status(Status.NOT_FOUND).build();
         }
 
         EnrichedItemDTO dto = EnrichedItemDTOMapper.map(foundItem, false, null, uriBuilder(uriInfo, httpHeaders),
