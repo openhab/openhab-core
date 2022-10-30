@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -35,9 +36,14 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -332,5 +338,37 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
         Response response = itemResource.removeMetadata(ITEM_NAME1, "namespace");
         assertEquals(409, response.getStatus());
+    }
+
+    @SuppressWarnings("unused")
+    private static Stream<Arguments> findTagTestSource() {
+        return Stream.of( //
+                Arguments.of(ITEM_NAME3, "Location", hasItems(ITEM_NAME1)), // super-class of set tag
+                Arguments.of(ITEM_NAME3, "HVAC", hasItems(ITEM_NAME2)), // tag
+                Arguments.of(ITEM_NAME3, "Point", hasItems(ITEM_NAME3)), // self
+                Arguments.of(ITEM_NAME3, "NotATag", null), // invalid tag
+                Arguments.of(ITEM_NAME3, "Outdoor", null) // valid tag, not present
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("findTagTestSource")
+    public void findTagTest(String itemName, String semanticClassName, @Nullable Matcher<Iterable> matcher)
+            throws IOException {
+        // setup test: item1 has the location, item2 the equipment, item3 is the point
+        item1.addTag("Office");
+        item2.addTag("HVAC");
+        item2.addGroupName(ITEM_NAME1);
+        item3.addTag("Point");
+        item3.addGroupName(ITEM_NAME2);
+
+        // do test
+        Response response = itemResource.getSemanticItem(uriInfoMock, httpHeadersMock, null, itemName,
+                semanticClassName);
+        if (matcher != null) {
+            assertThat(readItemNamesFromResponse(response), matcher);
+        } else {
+            assertThat(response.getStatus(), is(404));
+        }
     }
 }
