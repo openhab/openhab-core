@@ -241,7 +241,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Color-temperature: default system wide {@link ChannelType} which allows changing the color temperature in Kelvin
      */
     public static final ChannelType SYSTEM_COLOR_TEMPERATURE_ABS = ChannelTypeBuilder
-            .state(SYSTEM_CHANNEL_TYPE_UID_COLOR_TEMPERATURE_ABS, "Color Temperature", CoreItemFactory.NUMBER)
+            .state(SYSTEM_CHANNEL_TYPE_UID_COLOR_TEMPERATURE_ABS, "Color Temperature", "Number:Temperature")
             .withDescription("Controls the color temperature of the light in Kelvin").withCategory("ColorLight")
             .isAdvanced(true)
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(new BigDecimal(1000))
