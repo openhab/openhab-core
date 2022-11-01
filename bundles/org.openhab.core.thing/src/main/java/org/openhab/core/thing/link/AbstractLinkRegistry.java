@@ -135,8 +135,7 @@ public abstract class AbstractLinkRegistry<L extends AbstractLink, P extends Pro
             if (forItemName == null || forLinkedUID == null) {
                 return false;
             } else {
-                boolean commonItems = !Collections.disjoint(forItemName, forLinkedUID);
-                return commonItems;
+                return !Collections.disjoint(forItemName, forLinkedUID);
             }
         } finally {
             toLinkLock.readLock().unlock();
