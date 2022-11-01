@@ -44,7 +44,7 @@ public class Subscription {
     public void add(MqttMessageSubscriber subscriber) {
         if (subscribers.add(subscriber)) {
             // new subscriber. deliver all known retained messages
-            retainedMessages.entrySet().parallelStream().forEach(entry -> {
+            retainedMessages.entrySet().stream().forEach(entry -> {
                 if (entry.getValue().length > 0) {
                     processMessage(subscriber, entry.getKey(), entry.getValue());
                 }
@@ -81,7 +81,7 @@ public class Subscription {
         if (retain || retainedMessages.containsKey(topic)) {
             retainedMessages.put(topic, payload);
         }
-        subscribers.parallelStream().forEach(subscriber -> processMessage(subscriber, topic, payload));
+        subscribers.stream().forEach(subscriber -> processMessage(subscriber, topic, payload));
     }
 
     private void processMessage(MqttMessageSubscriber subscriber, String topic, byte[] payload) {
