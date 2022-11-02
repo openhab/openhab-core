@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,29 +13,29 @@
 package org.openhab.core.items.events;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.State;
 
 /**
- * {@link GroupItemStateChangedEvent}s can be used to deliver group item state changes through the openHAB event bus. In
- * contrast to the {@link GroupStateUpdatedEvent} the {@link GroupItemStateChangedEvent} is only sent if the state
- * changed.
+ * {@link GroupStateUpdatedEvent}s can be used to deliver group item state updates through the openHAB event bus.
+ * In contrast to the {@link GroupItemStateChangedEvent} it is always sent.
  * State events must be created with the {@link ItemEventFactory}.
  *
- * @author Christoph Knauf - Initial contribution
+ * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class GroupItemStateChangedEvent extends ItemStateChangedEvent {
+public class GroupStateUpdatedEvent extends ItemStateUpdatedEvent {
 
     /**
      * The group item state changed event type.
      */
-    public static final String TYPE = GroupItemStateChangedEvent.class.getSimpleName();
+    public static final String TYPE = GroupStateUpdatedEvent.class.getSimpleName();
 
     private final String memberName;
 
-    protected GroupItemStateChangedEvent(String topic, String payload, String itemName, String memberName,
-            State newItemState, State oldItemState) {
-        super(topic, payload, itemName, newItemState, oldItemState);
+    protected GroupStateUpdatedEvent(String topic, String payload, String itemName, String memberName,
+            State newItemState, @Nullable String source) {
+        super(topic, payload, itemName, newItemState, source);
         this.memberName = memberName;
     }
 
@@ -53,6 +53,6 @@ public class GroupItemStateChangedEvent extends ItemStateChangedEvent {
 
     @Override
     public String toString() {
-        return String.format("%s through %s", super.toString(), memberName);
+        return String.format("Group '%s' updated to %s through %s", itemName, itemState, memberName);
     }
 }

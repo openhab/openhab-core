@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.service.CommandDescriptionService;
@@ -371,6 +372,7 @@ public class GroupItem extends GenericItem implements StateChangeListener {
             State calculatedState = function.calculate(getStateMembers(getMembers()));
             newState = itemStateConverter.convertToAcceptedState(calculatedState, baseItem);
             setState(newState);
+            sendGroupStateUpdatedEvent(item.getName(), newState);
         }
         if (!oldState.equals(newState)) {
             sendGroupStateChangedEvent(item.getName(), newState, oldState);
@@ -413,9 +415,17 @@ public class GroupItem extends GenericItem implements StateChangeListener {
         }
     }
 
+    private void sendGroupStateUpdatedEvent(String memberName, State state) {
+        EventPublisher eventPublisher1 = this.eventPublisher;
+        if (eventPublisher1 != null) {
+            eventPublisher1.post(ItemEventFactory.createGroupStateEvent(getName(), memberName, state, null));
+        }
+    }
+
     private void sendGroupStateChangedEvent(String memberName, State newState, State oldState) {
-        if (eventPublisher != null) {
-            eventPublisher
+        EventPublisher eventPublisher1 = this.eventPublisher;
+        if (eventPublisher1 != null) {
+            eventPublisher1
                     .post(ItemEventFactory.createGroupStateChangedEvent(getName(), memberName, newState, oldState));
         }
     }

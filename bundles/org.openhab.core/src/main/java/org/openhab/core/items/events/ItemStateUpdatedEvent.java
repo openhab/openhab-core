@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,18 +17,18 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.State;
 
 /**
- * {@link ItemStateEvent}s can be used to deliver item status updates through the openHAB event bus.
- * State events must be created with the {@link ItemEventFactory}.
+ * {@link ItemStateUpdatedEvent}s can be used to report item status updates through the openHAB event bus.
+ * State update events must be created with the {@link ItemEventFactory}.
  *
- * @author Stefan Bußweiler - Initial contribution
+ * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class ItemStateEvent extends ItemEvent {
+public class ItemStateUpdatedEvent extends ItemEvent {
 
     /**
      * The item state event type.
      */
-    public static final String TYPE = ItemStateEvent.class.getSimpleName();
+    public static final String TYPE = ItemStateUpdatedEvent.class.getSimpleName();
 
     protected final State itemState;
 
@@ -41,7 +41,8 @@ public class ItemStateEvent extends ItemEvent {
      * @param itemState the item state
      * @param source the source, can be null
      */
-    protected ItemStateEvent(String topic, String payload, String itemName, State itemState, @Nullable String source) {
+    protected ItemStateUpdatedEvent(String topic, String payload, String itemName, State itemState,
+            @Nullable String source) {
         super(topic, payload, itemName, source);
         this.itemState = itemState;
     }
@@ -62,6 +63,6 @@ public class ItemStateEvent extends ItemEvent {
 
     @Override
     public String toString() {
-        return String.format("Item '%s' shall update to %s", itemName, itemState);
+        return String.format("Item '%s' updated to %s", itemName, itemState);
     }
 }
