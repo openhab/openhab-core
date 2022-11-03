@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class AudioNoteSynthesizer {
-    private final Logger logger = LoggerFactory.getLogger(AudioNoteSynthesizer.class);
     private final long sampleRate;
     private final int bitDepth;
     private final int bitRate;
@@ -101,7 +100,6 @@ public class AudioNoteSynthesizer {
         }
         if (!bigEndian) {
             // for little endian add the RIFF header to the stream to increase compatibility
-            logger.warn("Check using riff header");
             return getAudioStreamWithRIFFHeader(audioBuffer);
         } else {
             return getAudioStream(audioBuffer);
