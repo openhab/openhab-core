@@ -91,6 +91,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     protected static final String CONFIG_URI = "system:voice";
     private static final String CONFIG_KEYWORD = "keyword";
     private static final String CONFIG_LISTENING_ITEM = "listeningItem";
+    private static final String CONFIG_LISTENING_NOTE = "listeningNote";
     private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
     private static final String CONFIG_DEFAULT_KS = "defaultKS";
     private static final String CONFIG_DEFAULT_STT = "defaultSTT";
@@ -118,6 +119,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
      */
     private String keyword = DEFAULT_KEYWORD;
     private @Nullable String listeningItem;
+    private @Nullable String listeningNote;
     private @Nullable String defaultTTS;
     private @Nullable String defaultSTT;
     private @Nullable String defaultKS;
@@ -154,6 +156,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             this.keyword = config.containsKey(CONFIG_KEYWORD) ? config.get(CONFIG_KEYWORD).toString() : DEFAULT_KEYWORD;
             this.listeningItem = config.containsKey(CONFIG_LISTENING_ITEM)
                     ? config.get(CONFIG_LISTENING_ITEM).toString()
+                    : null;
+            this.listeningNote = config.containsKey(CONFIG_LISTENING_NOTE)
+                    ? config.get(CONFIG_LISTENING_NOTE).toString()
                     : null;
             this.defaultTTS = config.containsKey(CONFIG_DEFAULT_TTS) ? config.get(CONFIG_DEFAULT_TTS).toString() : null;
             this.defaultSTT = config.containsKey(CONFIG_DEFAULT_STT) ? config.get(CONFIG_DEFAULT_STT).toString() : null;
@@ -528,7 +533,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 logger.debug("Starting a new dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
                 processor = new DialogProcessor(ksService, sttService, ttsService, prefVoice, interpreters, audioSource,
-                        audioSink, loc, kw, item, this.eventPublisher, this.i18nProvider, b);
+                        audioSink, loc, kw, item, listeningNote, this.eventPublisher, this.i18nProvider, b);
                 dialogProcessors.put(audioSource.getId(), processor);
                 processor.start();
             } else {
@@ -603,7 +608,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
                 processor = new DialogProcessor(sttService, ttsService, prefVoice, interpreters, audioSource, audioSink,
-                        loc, item, this.eventPublisher, this.i18nProvider, b);
+                        loc, item, listeningNote, this.eventPublisher, this.i18nProvider, b);
                 processor.start();
             } else {
                 throw new IllegalStateException(String.format(

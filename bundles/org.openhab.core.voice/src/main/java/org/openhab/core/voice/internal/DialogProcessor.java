@@ -17,6 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -27,6 +29,7 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.audio.utils.AudioNoteSynthesizer;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.items.ItemUtil;
@@ -67,6 +70,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Laurent Garnier - Added stop() + null annotations + resources releasing
  * @author Miguel Álvarez - Close audio streams + use RecognitionStartEvent
+ * @author Miguel Álvarez - Add sounds
  */
 @NonNullByDefault
 public class DialogProcessor implements KSListener, STTListener {
@@ -90,6 +94,7 @@ public class DialogProcessor implements KSListener, STTListener {
     private final @Nullable AudioFormat ksFormat;
     private final @Nullable AudioFormat sttFormat;
     private final @Nullable AudioFormat ttsFormat;
+    private final AudioNoteSynthesizer.@Nullable Note listeningNote;
 
     /**
      * If the processor is currently processing a keyword event and thus should not spot further ones.
@@ -106,11 +111,12 @@ public class DialogProcessor implements KSListener, STTListener {
 
     private @Nullable AudioStream streamKS;
     private @Nullable AudioStream streamSTT;
+    private @Nullable AudioNoteSynthesizer noteSynthesizer;
 
     public DialogProcessor(KSService ks, STTService stt, TTSService tts, @Nullable Voice voice,
             List<HumanLanguageInterpreter> hlis, AudioSource source, AudioSink sink, Locale locale, String keyword,
-            @Nullable String listeningItem, EventPublisher eventPublisher, TranslationProvider i18nProvider,
-            Bundle bundle) {
+            @Nullable String listeningItem, @Nullable String listeningNote, EventPublisher eventPublisher,
+            TranslationProvider i18nProvider, Bundle bundle) {
         this.locale = locale;
         this.ks = ks;
         this.hlis = hlis;
@@ -127,11 +133,19 @@ public class DialogProcessor implements KSListener, STTListener {
         this.ksFormat = VoiceManagerImpl.getBestMatch(source.getSupportedFormats(), ks.getSupportedFormats());
         this.sttFormat = VoiceManagerImpl.getBestMatch(source.getSupportedFormats(), stt.getSupportedFormats());
         this.ttsFormat = VoiceManagerImpl.getBestMatch(tts.getSupportedFormats(), sink.getSupportedFormats());
+        var synthesizerFormat = VoiceManagerImpl.getBestMatch(AudioNoteSynthesizer.getSupportedFormats(),
+                sink.getSupportedFormats());
+        this.listeningNote = listeningNote != null ? AudioNoteSynthesizer.Note.fromString(listeningNote).get() : null;
+        if (synthesizerFormat != null && this.listeningNote != null) {
+            this.noteSynthesizer = new AudioNoteSynthesizer(synthesizerFormat);
+            logger.debug("Sounds enabled");
+        }
     }
 
     public DialogProcessor(STTService stt, TTSService tts, @Nullable Voice voice, List<HumanLanguageInterpreter> hlis,
             AudioSource source, AudioSink sink, Locale locale, @Nullable String listeningItem,
-            EventPublisher eventPublisher, TranslationProvider i18nProvider, Bundle bundle) {
+            @Nullable String listeningNote, EventPublisher eventPublisher, TranslationProvider i18nProvider,
+            Bundle bundle) {
         this.locale = locale;
         this.ks = null;
         this.hlis = hlis;
@@ -148,6 +162,14 @@ public class DialogProcessor implements KSListener, STTListener {
         this.ksFormat = null;
         this.sttFormat = VoiceManagerImpl.getBestMatch(source.getSupportedFormats(), stt.getSupportedFormats());
         this.ttsFormat = VoiceManagerImpl.getBestMatch(tts.getSupportedFormats(), sink.getSupportedFormats());
+        var synthesizerFormat = VoiceManagerImpl.getBestMatch(AudioNoteSynthesizer.getSupportedFormats(),
+                sink.getSupportedFormats());
+        this.listeningNote = listeningNote != null ? AudioNoteSynthesizer.Note.fromString(listeningNote).orElse(null)
+                : null;
+        if (synthesizerFormat != null && this.listeningNote != null) {
+            this.noteSynthesizer = new AudioNoteSynthesizer(synthesizerFormat);
+            logger.debug("Sounds enabled");
+        }
     }
 
     public void start() {
@@ -165,6 +187,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 AudioStream stream = source.getInputStream(fmt);
                 streamKS = stream;
                 ksServiceHandle = ksService.spot(this, stream, locale, keyword);
+                playStartSound();
             } catch (AudioException e) {
                 logger.warn("Encountered audio error: {}", e.getMessage());
             } catch (KSException e) {
@@ -185,6 +208,7 @@ public class DialogProcessor implements KSListener, STTListener {
             logger.warn("No compatible audio format found for stt '{}' and source '{}'", stt.getId(), source.getId());
             return;
         }
+        playOnListeningSound();
         try {
             AudioStream stream = source.getInputStream(fmt);
             streamSTT = stream;
@@ -209,6 +233,7 @@ public class DialogProcessor implements KSListener, STTListener {
         abortKS();
         closeStreamKS();
         toggleProcessing(false);
+        playStopSound();
     }
 
     private void abortKS() {
@@ -373,6 +398,38 @@ public class DialogProcessor implements KSListener, STTListener {
                 logger.debug("Error saying '{}': {}", text, e.getMessage(), e);
             } else {
                 logger.warn("Error saying '{}': {}", text, e.getMessage());
+            }
+        }
+    }
+
+    private void playStartSound() {
+        playNotes(Stream.of(AudioNoteSynthesizer.Note.G, AudioNoteSynthesizer.Note.A, AudioNoteSynthesizer.Note.B)
+                .map(note -> AudioNoteSynthesizer.noteSound(note, 100L)).collect(Collectors.toList()));
+    }
+
+    private void playStopSound() {
+        playNotes(Stream.of(AudioNoteSynthesizer.Note.B, AudioNoteSynthesizer.Note.A, AudioNoteSynthesizer.Note.G)
+                .map(note -> AudioNoteSynthesizer.noteSound(note, 100L)).collect(Collectors.toList()));
+    }
+
+    private void playOnListeningSound() {
+        var listeningNote = this.listeningNote;
+        if (listeningNote != null) {
+            playNotes(List.of(AudioNoteSynthesizer.noteSound(listeningNote, 200L)));
+        }
+    }
+
+    private void playNotes(List<AudioNoteSynthesizer.Sound> notes) {
+        var noteSynthesizer = this.noteSynthesizer;
+        if (noteSynthesizer != null) {
+            try (AudioStream stream = noteSynthesizer.getStream(notes)) {
+                if (sink.getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(stream))) {
+                    sink.process(stream);
+                } else {
+                    logger.warn("Failed playing synthesizer sound as audio sink doesn't support it.");
+                }
+            } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException | IOException e) {
+                logger.warn("{} playing synthesizer sound: {}", e.getClass().getName(), e.getMessage());
             }
         }
     }
