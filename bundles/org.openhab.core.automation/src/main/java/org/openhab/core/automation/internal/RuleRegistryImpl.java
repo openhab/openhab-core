@@ -107,6 +107,9 @@ import org.slf4j.LoggerFactory;
 public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvider>
         implements RuleRegistry, RegistryChangeListener<RuleTemplate> {
 
+    private static final String CONFIG_URI_RULE = "system:rule";
+    private static final String CONFIG_URI_SCRIPT = "system:rule:script";
+
     private static final String SOURCE = RuleRegistryImpl.class.getSimpleName();
 
     private final Logger logger = LoggerFactory.getLogger(RuleRegistryImpl.class.getName());

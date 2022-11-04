@@ -57,7 +57,7 @@ public class ScriptProfile implements StateProfile {
     private static final String STATE_VAR = "state";
     private static final String RESULT_VAR_SUFFIX = ".result";
 
-    private static final String SCRIPT_TAG = "Script";
+    public static final String SCRIPT_TAG = "Script";
 
     private final Logger logger = LoggerFactory.getLogger(ScriptProfile.class);
 
@@ -120,14 +120,16 @@ public class ScriptProfile implements StateProfile {
             return null;
         }
 
-        logger.debug("Profile configured with {}='{}'", paramName, param);
+        if (param != null) {
+            logger.debug("Profile configured with {}='{}'", paramName, param);
+        }
 
         return (String) param;
     }
 
     private boolean runScript(String callbackName, @Nullable String scriptName, String variableName,
             Type variableValue) {
-        if (scriptName == null) {
+        if (scriptName == null || scriptName.isEmpty()) {
             return true;
         }
 
