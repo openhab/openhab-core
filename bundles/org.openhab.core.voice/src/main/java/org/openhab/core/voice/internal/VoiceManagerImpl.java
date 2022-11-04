@@ -27,6 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -126,7 +127,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     private final Map<String, String> defaultVoices = new HashMap<>();
 
     private Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
-    private Map<String, DialogProcessor> singleDialogProcessors = new HashMap<>();
+    private ConcurrentHashMap<String, DialogProcessor> singleDialogProcessors = new ConcurrentHashMap<>();
 
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
@@ -545,8 +546,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         AudioSource audioSource = (source == null) ? audioManager.getSource() : source;
         if (audioSource != null) {
             DialogProcessor processor = dialogProcessors.remove(audioSource.getId());
+            cleanSingleDialogProcessors();
             if (processor == null) {
-                cleanSingleDialogProcessors();
                 processor = singleDialogProcessors.get(audioSource.getId());
             }
             if (processor != null) {
@@ -881,10 +882,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     }
 
     private void cleanSingleDialogProcessors() {
-        singleDialogProcessors.forEach((key, processor) -> {
-            if (!processor.isProcessing()) {
-                singleDialogProcessors.remove(key);
-            }
-        });
+        singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
     }
 }
