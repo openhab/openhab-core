@@ -30,8 +30,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Audio note synthesizer. A utility to sent note sounds to audio sinks.
