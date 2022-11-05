@@ -172,6 +172,10 @@ public class DialogProcessor implements KSListener, STTListener {
         }
     }
 
+    public void startSingleDialog() {
+        executeSimpleDialog();
+    }
+
     public void start() {
         KSService ksService = ks;
         if (ksService != null) {
@@ -234,6 +238,10 @@ public class DialogProcessor implements KSListener, STTListener {
         closeStreamKS();
         toggleProcessing(false);
         playStopSound();
+    }
+
+    public boolean isProcessing() {
+        return processing;
     }
 
     private void abortKS() {
@@ -432,5 +440,19 @@ public class DialogProcessor implements KSListener, STTListener {
                 logger.warn("{} playing synthesizer sound: {}", e.getClass().getName(), e.getMessage());
             }
         }
+    }
+
+    /**
+     * Check if other DialogProcessor instance have same configuration ignoring the keyword spotting configuration
+     *
+     * @param dialogProcessor Other DialogProcessor instance
+     */
+    public boolean isCompatible(DialogProcessor dialogProcessor) {
+        return this.sink.equals(dialogProcessor.sink) && this.source.equals(dialogProcessor.source)
+                && this.stt.equals(dialogProcessor.stt) && this.tts.equals(dialogProcessor.tts)
+                && Objects.equals(this.prefVoice, dialogProcessor.prefVoice)
+                && this.hlis.size() == dialogProcessor.hlis.size() && this.hlis.containsAll(dialogProcessor.hlis)
+                && this.locale.equals(dialogProcessor.locale)
+                && Objects.equals(this.listeningItem, dialogProcessor.listeningItem);
     }
 }
