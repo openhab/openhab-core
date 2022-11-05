@@ -14,16 +14,12 @@ package org.openhab.core.voice.internal;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
-import org.openhab.core.audio.AudioSink;
-import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
@@ -32,6 +28,7 @@ import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.voice.DialogContext;
 import org.openhab.core.voice.KSErrorEvent;
 import org.openhab.core.voice.KSEvent;
 import org.openhab.core.voice.KSException;
@@ -44,12 +41,10 @@ import org.openhab.core.voice.RecognitionStopEvent;
 import org.openhab.core.voice.STTEvent;
 import org.openhab.core.voice.STTException;
 import org.openhab.core.voice.STTListener;
-import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.STTServiceHandle;
 import org.openhab.core.voice.SpeechRecognitionErrorEvent;
 import org.openhab.core.voice.SpeechRecognitionEvent;
 import org.openhab.core.voice.TTSException;
-import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
@@ -73,16 +68,7 @@ public class DialogProcessor implements KSListener, STTListener {
 
     private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
 
-    private final @Nullable KSService ks;
-    private final STTService stt;
-    private final TTSService tts;
-    private final @Nullable Voice prefVoice;
-    private final List<HumanLanguageInterpreter> hlis;
-    private final AudioSource source;
-    private final AudioSink sink;
-    private final Locale locale;
-    private final String keyword;
-    private final @Nullable String listeningItem;
+    private final DialogContext dialogContext;
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
     private final Bundle bundle;
@@ -107,68 +93,38 @@ public class DialogProcessor implements KSListener, STTListener {
     private @Nullable AudioStream streamKS;
     private @Nullable AudioStream streamSTT;
 
-    public DialogProcessor(KSService ks, STTService stt, TTSService tts, @Nullable Voice voice,
-            List<HumanLanguageInterpreter> hlis, AudioSource source, AudioSink sink, Locale locale, String keyword,
-            @Nullable String listeningItem, EventPublisher eventPublisher, TranslationProvider i18nProvider,
+    public DialogProcessor(DialogContext context, EventPublisher eventPublisher, TranslationProvider i18nProvider,
             Bundle bundle) {
-        this.locale = locale;
-        this.ks = ks;
-        this.hlis = hlis;
-        this.stt = stt;
-        this.tts = tts;
-        this.prefVoice = voice;
-        this.source = source;
-        this.sink = sink;
-        this.keyword = keyword;
-        this.listeningItem = listeningItem;
+        this.dialogContext = context;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
         this.bundle = bundle;
-        this.ksFormat = VoiceManagerImpl.getBestMatch(source.getSupportedFormats(), ks.getSupportedFormats());
-        this.sttFormat = VoiceManagerImpl.getBestMatch(source.getSupportedFormats(), stt.getSupportedFormats());
-        this.ttsFormat = VoiceManagerImpl.getBestMatch(tts.getSupportedFormats(), sink.getSupportedFormats());
-    }
-
-    public DialogProcessor(STTService stt, TTSService tts, @Nullable Voice voice, List<HumanLanguageInterpreter> hlis,
-            AudioSource source, AudioSink sink, Locale locale, @Nullable String listeningItem,
-            EventPublisher eventPublisher, TranslationProvider i18nProvider, Bundle bundle) {
-        this.locale = locale;
-        this.ks = null;
-        this.hlis = hlis;
-        this.stt = stt;
-        this.tts = tts;
-        this.prefVoice = voice;
-        this.source = source;
-        this.sink = sink;
-        this.keyword = "";
-        this.listeningItem = listeningItem;
-        this.eventPublisher = eventPublisher;
-        this.i18nProvider = i18nProvider;
-        this.bundle = bundle;
-        this.ksFormat = null;
-        this.sttFormat = VoiceManagerImpl.getBestMatch(source.getSupportedFormats(), stt.getSupportedFormats());
-        this.ttsFormat = VoiceManagerImpl.getBestMatch(tts.getSupportedFormats(), sink.getSupportedFormats());
-    }
-
-    public void startSingleDialog() {
-        executeSimpleDialog();
+        var ks = context.ks();
+        this.ksFormat = ks != null
+                ? VoiceManagerImpl.getBestMatch(context.source().getSupportedFormats(), ks.getSupportedFormats())
+                : null;
+        this.sttFormat = VoiceManagerImpl.getBestMatch(context.source().getSupportedFormats(),
+                context.stt().getSupportedFormats());
+        this.ttsFormat = VoiceManagerImpl.getBestMatch(context.tts().getSupportedFormats(),
+                context.sink().getSupportedFormats());
     }
 
     public void start() {
-        KSService ksService = ks;
-        if (ksService != null) {
+        KSService ksService = dialogContext.ks();
+        String keyword = dialogContext.keyword();
+        if (ksService != null && keyword != null) {
             abortKS();
             closeStreamKS();
             AudioFormat fmt = ksFormat;
             if (fmt == null) {
                 logger.warn("No compatible audio format found for ks '{}' and source '{}'", ksService.getId(),
-                        source.getId());
+                        dialogContext.source().getId());
                 return;
             }
             try {
-                AudioStream stream = source.getInputStream(fmt);
+                AudioStream stream = dialogContext.source().getInputStream(fmt);
                 streamKS = stream;
-                ksServiceHandle = ksService.spot(this, stream, locale, keyword);
+                ksServiceHandle = ksService.spot(this, stream, dialogContext.locale(), keyword);
             } catch (AudioException e) {
                 logger.warn("Encountered audio error: {}", e.getMessage());
             } catch (KSException e) {
@@ -176,29 +132,30 @@ public class DialogProcessor implements KSListener, STTListener {
                 closeStreamKS();
             }
         } else {
-            executeSimpleDialog();
+            logger.error("Miss configured dialog processor, should not happen!");
         }
     }
 
-    private void executeSimpleDialog() {
+    public void startSimpleDialog() {
         abortSTT();
         closeStreamSTT();
         isSTTServerAborting = false;
         AudioFormat fmt = sttFormat;
         if (fmt == null) {
-            logger.warn("No compatible audio format found for stt '{}' and source '{}'", stt.getId(), source.getId());
+            logger.warn("No compatible audio format found for stt '{}' and source '{}'", dialogContext.stt().getId(),
+                    dialogContext.source().getId());
             return;
         }
         try {
-            AudioStream stream = source.getInputStream(fmt);
+            AudioStream stream = dialogContext.source().getInputStream(fmt);
             streamSTT = stream;
-            sttServiceHandle = stt.recognize(this, stream, locale, new HashSet<>());
+            sttServiceHandle = dialogContext.stt().recognize(this, stream, dialogContext.locale(), new HashSet<>());
         } catch (AudioException e) {
             logger.warn("Error creating the audio stream: {}", e.getMessage());
         } catch (STTException e) {
             closeStreamSTT();
             String msg = e.getMessage();
-            String text = i18nProvider.getText(bundle, "error.stt-exception", null, locale);
+            String text = i18nProvider.getText(bundle, "error.stt-exception", null, dialogContext.locale());
             if (msg != null) {
                 say(text == null ? msg : text.replace("{0}", msg));
             } else if (text != null) {
@@ -265,7 +222,7 @@ public class DialogProcessor implements KSListener, STTListener {
             return;
         }
         processing = value;
-        String item = listeningItem;
+        String item = dialogContext.listeningItem();
         if (item != null && ItemUtil.isValidItemName(item)) {
             OnOffType command = (value) ? OnOffType.ON : OnOffType.OFF;
             eventPublisher.post(ItemEventFactory.createCommandEvent(item, command));
@@ -278,11 +235,11 @@ public class DialogProcessor implements KSListener, STTListener {
             isSTTServerAborting = false;
             if (ksEvent instanceof KSpottedEvent) {
                 logger.debug("KSpottedEvent event received");
-                executeSimpleDialog();
+                startSimpleDialog();
             } else if (ksEvent instanceof KSErrorEvent) {
                 logger.debug("KSErrorEvent event received");
                 KSErrorEvent kse = (KSErrorEvent) ksEvent;
-                String text = i18nProvider.getText(bundle, "error.ks-error", null, locale);
+                String text = i18nProvider.getText(bundle, "error.ks-error", null, dialogContext.locale());
                 say(text == null ? kse.getMessage() : text.replace("{0}", kse.getMessage()));
             }
         }
@@ -299,9 +256,9 @@ public class DialogProcessor implements KSListener, STTListener {
                 toggleProcessing(false);
                 String answer = "";
                 String error = null;
-                for (HumanLanguageInterpreter interpreter : hlis) {
+                for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
                     try {
-                        answer = interpreter.interpret(locale, question);
+                        answer = interpreter.interpret(dialogContext.locale(), question);
                         logger.debug("Interpretation result: {}", answer);
                         error = null;
                         break;
@@ -325,7 +282,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 abortSTT();
                 toggleProcessing(false);
                 SpeechRecognitionErrorEvent sre = (SpeechRecognitionErrorEvent) sttEvent;
-                String text = i18nProvider.getText(bundle, "error.stt-error", null, locale);
+                String text = i18nProvider.getText(bundle, "error.stt-error", null, dialogContext.locale());
                 say(text == null ? sre.getMessage() : text.replace("{0}", sre.getMessage()));
             }
         }
@@ -343,10 +300,11 @@ public class DialogProcessor implements KSListener, STTListener {
         }
         try {
             Voice voice = null;
-            for (Voice currentVoice : tts.getAvailableVoices()) {
-                if (!locale.getLanguage().equals(currentVoice.getLocale().getLanguage())) {
+            for (Voice currentVoice : dialogContext.tts().getAvailableVoices()) {
+                if (!dialogContext.locale().getLanguage().equals(currentVoice.getLocale().getLanguage())) {
                     continue;
                 }
+                var prefVoice = dialogContext.voice();
                 if (voice == null || (prefVoice != null && prefVoice.getUID().equals(currentVoice.getUID()))) {
                     voice = currentVoice;
                 }
@@ -357,15 +315,15 @@ public class DialogProcessor implements KSListener, STTListener {
 
             AudioFormat audioFormat = ttsFormat;
             if (audioFormat == null) {
-                throw new TTSException("No compatible audio format found for TTS '" + tts.getId() + "' and sink '"
-                        + sink.getId() + "'");
+                throw new TTSException("No compatible audio format found for TTS '" + dialogContext.tts().getId()
+                        + "' and sink '" + dialogContext.sink().getId() + "'");
             }
 
-            AudioStream audioStream = tts.synthesize(text, voice, audioFormat);
+            AudioStream audioStream = dialogContext.tts().synthesize(text, voice, audioFormat);
 
-            if (sink.getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(audioStream))) {
+            if (dialogContext.sink().getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(audioStream))) {
                 try {
-                    sink.process(audioStream);
+                    dialogContext.sink().process(audioStream);
                 } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Error saying '{}': {}", text, e.getMessage(), e);
@@ -391,11 +349,14 @@ public class DialogProcessor implements KSListener, STTListener {
      * @param dialogProcessor Other DialogProcessor instance
      */
     public boolean isCompatible(DialogProcessor dialogProcessor) {
-        return this.sink.equals(dialogProcessor.sink) && this.source.equals(dialogProcessor.source)
-                && this.stt.equals(dialogProcessor.stt) && this.tts.equals(dialogProcessor.tts)
-                && Objects.equals(this.prefVoice, dialogProcessor.prefVoice)
-                && this.hlis.size() == dialogProcessor.hlis.size() && this.hlis.containsAll(dialogProcessor.hlis)
-                && this.locale.equals(dialogProcessor.locale)
-                && Objects.equals(this.listeningItem, dialogProcessor.listeningItem);
+        return dialogContext.sink().equals(dialogProcessor.dialogContext.sink())
+                && dialogContext.source().equals(dialogProcessor.dialogContext.source())
+                && dialogContext.stt().equals(dialogProcessor.dialogContext.stt())
+                && dialogContext.tts().equals(dialogProcessor.dialogContext.tts())
+                && Objects.equals(dialogContext.voice(), dialogProcessor.dialogContext.voice())
+                && dialogContext.hlis().size() == dialogProcessor.dialogContext.hlis().size()
+                && dialogContext.hlis().containsAll(dialogProcessor.dialogContext.hlis())
+                && dialogContext.locale().equals(dialogProcessor.dialogContext.locale())
+                && Objects.equals(dialogContext.listeningItem(), dialogProcessor.dialogContext.listeningItem());
     }
 }
