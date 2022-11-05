@@ -489,14 +489,12 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         HumanLanguageInterpreter hli = getHLI();
         AudioSource audioSource = audioManager.getSource();
         AudioSink audioSink = audioManager.getSink();
-        Locale loc = localeProvider.getLocale();
-        String item = this.listeningItem;
         if (ksService == null || sttService == null || ttsService == null || hli == null || audioSource == null
-                || audioSink == null || prefVoice == null) {
-            throw new IllegalStateException("Cannot start dialog as services are missing.");
+                || audioSink == null) {
+            throw new IllegalStateException("Cannot load default dialog context as services are missing.");
         }
         return new DialogContext(ksService, keyword, sttService, ttsService, prefVoice, List.of(hli), audioSource,
-                audioSink, loc, listeningItem);
+                audioSink, localeProvider.getLocale(), listeningItem);
     }
 
     @Override

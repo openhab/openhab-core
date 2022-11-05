@@ -109,7 +109,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 context.sink().getSupportedFormats());
     }
 
-    public void start() {
+    public void start() throws IllegalStateException {
         KSService ksService = dialogContext.ks();
         String keyword = dialogContext.keyword();
         if (ksService != null && keyword != null) {
@@ -132,7 +132,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 closeStreamKS();
             }
         } else {
-            logger.error("Miss configured dialog processor, should not happen!");
+            throw new IllegalStateException("Unable to run persistent dialog ks service is not configured");
         }
     }
 
