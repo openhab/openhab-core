@@ -56,7 +56,7 @@ public class UnitsTest {
     }
 
     @Test
-    public void poundInKilogramConversion() {
+    public void pound2KilogramConversion() {
         Quantity<Mass> lb = Quantities.getQuantity(BigDecimal.ONE, ImperialUnits.POUND);
 
         assertThat(lb.to(SIUnits.GRAM),
