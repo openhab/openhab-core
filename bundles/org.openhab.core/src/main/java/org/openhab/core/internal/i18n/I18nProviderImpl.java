@@ -25,12 +25,39 @@ import java.util.ResourceBundle;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
+import javax.measure.quantity.Acceleration;
+import javax.measure.quantity.AmountOfSubstance;
 import javax.measure.quantity.Angle;
+import javax.measure.quantity.Area;
+import javax.measure.quantity.CatalyticActivity;
 import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.ElectricCapacitance;
+import javax.measure.quantity.ElectricCharge;
+import javax.measure.quantity.ElectricConductance;
+import javax.measure.quantity.ElectricCurrent;
+import javax.measure.quantity.ElectricInductance;
+import javax.measure.quantity.ElectricPotential;
+import javax.measure.quantity.ElectricResistance;
+import javax.measure.quantity.Energy;
+import javax.measure.quantity.Force;
+import javax.measure.quantity.Frequency;
+import javax.measure.quantity.Illuminance;
 import javax.measure.quantity.Length;
+import javax.measure.quantity.LuminousFlux;
+import javax.measure.quantity.LuminousIntensity;
+import javax.measure.quantity.MagneticFlux;
+import javax.measure.quantity.MagneticFluxDensity;
+import javax.measure.quantity.Mass;
+import javax.measure.quantity.Power;
 import javax.measure.quantity.Pressure;
+import javax.measure.quantity.RadiationDoseAbsorbed;
+import javax.measure.quantity.RadiationDoseEffective;
+import javax.measure.quantity.Radioactivity;
+import javax.measure.quantity.SolidAngle;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
+import javax.measure.quantity.Time;
+import javax.measure.quantity.Volume;
 import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -40,7 +67,13 @@ import org.openhab.core.i18n.LocationProvider;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.library.dimension.ArealDensity;
+import org.openhab.core.library.dimension.DataAmount;
+import org.openhab.core.library.dimension.DataTransferRate;
+import org.openhab.core.library.dimension.Density;
+import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.dimension.VolumetricFlowRate;
 import org.openhab.core.library.types.PointType;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
@@ -107,7 +140,7 @@ public class I18nProviderImpl
     private @Nullable ZoneId timeZone;
 
     // UnitProvider
-    private static final String MEASUREMENT_SYSTEM = "measurementSystem";
+    static final String MEASUREMENT_SYSTEM = "measurementSystem";
     private @Nullable SystemOfUnits measurementSystem;
     private final Map<Class<? extends Quantity<?>>, Map<SystemOfUnits, Unit<? extends Quantity<?>>>> dimensionMap = new HashMap<>();
 
@@ -122,7 +155,7 @@ public class I18nProviderImpl
     }
 
     @Deactivate
-    protected void deactivate(ComponentContext componentContext) {
+    protected void deactivate() {
         this.resourceBundleTracker.close();
     }
 
@@ -319,8 +352,8 @@ public class I18nProviderImpl
         return text;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends Quantity<T>> @Nullable Unit<T> getUnit(@Nullable Class<T> dimension) {
         Map<SystemOfUnits, Unit<? extends Quantity<?>>> map = dimensionMap.get(dimension);
         if (map == null) {
@@ -344,39 +377,53 @@ public class I18nProviderImpl
     }
 
     private void initDimensionMap() {
-        Map<SystemOfUnits, Unit<? extends Quantity<?>>> temperatureMap = new HashMap<>();
-        temperatureMap.put(SIUnits.getInstance(), SIUnits.CELSIUS);
-        temperatureMap.put(ImperialUnits.getInstance(), ImperialUnits.FAHRENHEIT);
-        dimensionMap.put(Temperature.class, temperatureMap);
+        addDefaultUnit(Acceleration.class, Units.METRE_PER_SQUARE_SECOND);
+        addDefaultUnit(AmountOfSubstance.class, Units.MOLE);
+        addDefaultUnit(Angle.class, Units.DEGREE_ANGLE, Units.DEGREE_ANGLE);
+        addDefaultUnit(Area.class, SIUnits.SQUARE_METRE, ImperialUnits.SQUARE_FOOT);
+        addDefaultUnit(ArealDensity.class, Units.DOBSON_UNIT);
+        addDefaultUnit(CatalyticActivity.class, Units.KATAL);
+        addDefaultUnit(DataAmount.class, Units.BYTE);
+        addDefaultUnit(DataTransferRate.class, Units.MEGABIT_PER_SECOND);
+        addDefaultUnit(Density.class, Units.KILOGRAM_PER_CUBICMETRE);
+        addDefaultUnit(Dimensionless.class, Units.ONE);
+        addDefaultUnit(ElectricCapacitance.class, Units.FARAD);
+        addDefaultUnit(ElectricCharge.class, Units.COULOMB);
+        addDefaultUnit(ElectricConductance.class, Units.SIEMENS);
+        addDefaultUnit(ElectricConductivity.class, Units.SIEMENS_PER_METRE);
+        addDefaultUnit(ElectricCurrent.class, Units.AMPERE);
+        addDefaultUnit(ElectricInductance.class, Units.HENRY);
+        addDefaultUnit(ElectricPotential.class, Units.VOLT);
+        addDefaultUnit(ElectricResistance.class, Units.OHM);
+        addDefaultUnit(Energy.class, Units.JOULE);
+        addDefaultUnit(Force.class, Units.NEWTON);
+        addDefaultUnit(Frequency.class, Units.HERTZ);
+        addDefaultUnit(Illuminance.class, Units.LUX);
+        addDefaultUnit(Intensity.class, Units.IRRADIANCE);
+        addDefaultUnit(Length.class, SIUnits.METRE, ImperialUnits.INCH);
+        addDefaultUnit(LuminousFlux.class, Units.LUMEN);
+        addDefaultUnit(LuminousIntensity.class, Units.CANDELA);
+        addDefaultUnit(MagneticFlux.class, Units.WEBER);
+        addDefaultUnit(MagneticFluxDensity.class, Units.TESLA);
+        addDefaultUnit(Mass.class, SIUnits.KILOGRAM, ImperialUnits.POUND);
+        addDefaultUnit(Power.class, Units.WATT);
+        addDefaultUnit(Pressure.class, HECTO(SIUnits.PASCAL), ImperialUnits.INCH_OF_MERCURY);
+        addDefaultUnit(RadiationDoseAbsorbed.class, Units.GRAY);
+        addDefaultUnit(RadiationDoseEffective.class, Units.SIEVERT);
+        addDefaultUnit(Radioactivity.class, Units.BECQUEREL);
+        addDefaultUnit(SolidAngle.class, Units.STERADIAN);
+        addDefaultUnit(Speed.class, SIUnits.KILOMETRE_PER_HOUR, ImperialUnits.MILES_PER_HOUR);
+        addDefaultUnit(Temperature.class, SIUnits.CELSIUS, ImperialUnits.FAHRENHEIT);
+        addDefaultUnit(Time.class, Units.SECOND);
+        addDefaultUnit(Volume.class, SIUnits.CUBIC_METRE, ImperialUnits.GALLON_LIQUID_US);
+        addDefaultUnit(VolumetricFlowRate.class, Units.LITRE_PER_MINUTE, ImperialUnits.GALLON_PER_MINUTE);
+    }
 
-        Map<SystemOfUnits, Unit<? extends Quantity<?>>> pressureMap = new HashMap<>();
-        pressureMap.put(SIUnits.getInstance(), HECTO(SIUnits.PASCAL));
-        pressureMap.put(ImperialUnits.getInstance(), ImperialUnits.INCH_OF_MERCURY);
-        dimensionMap.put(Pressure.class, pressureMap);
+    private <T extends Quantity<T>> void addDefaultUnit(Class<T> dimension, Unit<T> siUnit, Unit<T> imperialUnit) {
+        dimensionMap.put(dimension, Map.of(SIUnits.getInstance(), siUnit, ImperialUnits.getInstance(), imperialUnit));
+    }
 
-        Map<SystemOfUnits, Unit<? extends Quantity<?>>> speedMap = new HashMap<>();
-        speedMap.put(SIUnits.getInstance(), SIUnits.KILOMETRE_PER_HOUR);
-        speedMap.put(ImperialUnits.getInstance(), ImperialUnits.MILES_PER_HOUR);
-        dimensionMap.put(Speed.class, speedMap);
-
-        Map<SystemOfUnits, Unit<? extends Quantity<?>>> lengthMap = new HashMap<>();
-        lengthMap.put(SIUnits.getInstance(), SIUnits.METRE);
-        lengthMap.put(ImperialUnits.getInstance(), ImperialUnits.INCH);
-        dimensionMap.put(Length.class, lengthMap);
-
-        Map<SystemOfUnits, Unit<? extends Quantity<?>>> intensityMap = new HashMap<>();
-        intensityMap.put(SIUnits.getInstance(), Units.IRRADIANCE);
-        intensityMap.put(ImperialUnits.getInstance(), Units.IRRADIANCE);
-        dimensionMap.put(Intensity.class, intensityMap);
-
-        Map<SystemOfUnits, Unit<? extends Quantity<?>>> percentMap = new HashMap<>();
-        percentMap.put(SIUnits.getInstance(), Units.ONE);
-        percentMap.put(ImperialUnits.getInstance(), Units.ONE);
-        dimensionMap.put(Dimensionless.class, percentMap);
-
-        Map<SystemOfUnits, Unit<? extends Quantity<?>>> angleMap = new HashMap<>();
-        angleMap.put(SIUnits.getInstance(), Units.DEGREE_ANGLE);
-        angleMap.put(ImperialUnits.getInstance(), Units.DEGREE_ANGLE);
-        dimensionMap.put(Angle.class, angleMap);
+    private <T extends Quantity<T>> void addDefaultUnit(Class<T> dimension, Unit<T> unit) {
+        dimensionMap.put(dimension, Map.of(SIUnits.getInstance(), unit, ImperialUnits.getInstance(), unit));
     }
 }
