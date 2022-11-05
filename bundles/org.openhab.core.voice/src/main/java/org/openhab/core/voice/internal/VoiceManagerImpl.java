@@ -127,7 +127,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     private final Map<String, String> defaultVoices = new HashMap<>();
 
     private Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
-    private ConcurrentHashMap<String, DialogProcessor> singleDialogProcessors = new ConcurrentHashMap<>();
+    private Map<String, DialogProcessor> singleDialogProcessors = new ConcurrentHashMap<>();
 
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
@@ -546,7 +546,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         AudioSource audioSource = (source == null) ? audioManager.getSource() : source;
         if (audioSource != null) {
             DialogProcessor processor = dialogProcessors.remove(audioSource.getId());
-            cleanSingleDialogProcessors();
+            singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
             if (processor == null) {
                 processor = singleDialogProcessors.get(audioSource.getId());
             }
@@ -606,7 +606,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         } else {
             boolean isSingleDialog = false;
             DialogProcessor activeProcessor = dialogProcessors.get(audioSource.getId());
-            cleanSingleDialogProcessors();
+            singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
             if (activeProcessor == null) {
                 isSingleDialog = true;
                 activeProcessor = singleDialogProcessors.get(audioSource.getId());
@@ -879,9 +879,5 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             }
         }
         return null;
-    }
-
-    private void cleanSingleDialogProcessors() {
-        singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
     }
 }
