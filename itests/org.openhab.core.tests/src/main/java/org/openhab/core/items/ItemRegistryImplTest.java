@@ -383,15 +383,11 @@ public class ItemRegistryImplTest extends JavaTest {
     public void assertStateDescriptionServiceGetsInjected() {
         GenericItem item = spy(new SwitchItem("Item1"));
         NumberItem baseItem = spy(new NumberItem("baseItem"));
-        GenericItem group = new GroupItem( "Group", baseItem);
+        GenericItem group = new GroupItem("Group", baseItem);
         itemProvider.add(item);
         itemProvider.add(group);
 
-        verify(item).setStateDescriptionService(null);
-
-        ((ItemRegistryImpl) itemRegistry).setStateDescriptionService(mock(StateDescriptionService.class));
         verify(item).setStateDescriptionService(any(StateDescriptionService.class));
-
         verify(baseItem).setStateDescriptionService(any(StateDescriptionService.class));
     }
 
@@ -399,15 +395,11 @@ public class ItemRegistryImplTest extends JavaTest {
     public void assertUnitProviderGetsInjected() {
         GenericItem item = spy(new SwitchItem("Item1"));
         NumberItem baseItem = spy(new NumberItem("baseItem"));
-        GenericItem group = new GroupItem( "Group", baseItem);
+        GenericItem group = new GroupItem("Group", baseItem);
         itemProvider.add(item);
         itemProvider.add(group);
 
-        verify(item).setUnitProvider(null);
-
-        ((ItemRegistryImpl) itemRegistry).setUnitProvider(mock(UnitProvider.class));
         verify(item).setUnitProvider(any(UnitProvider.class));
-
         verify(baseItem).setUnitProvider(any(UnitProvider.class));
     }
 
@@ -415,7 +407,7 @@ public class ItemRegistryImplTest extends JavaTest {
     public void assertCommandDescriptionServiceGetsInjected() {
         GenericItem item = spy(new SwitchItem("Item1"));
         NumberItem baseItem = spy(new NumberItem("baseItem"));
-        GenericItem group = new GroupItem( "Group", baseItem);
+        GenericItem group = new GroupItem("Group", baseItem);
         itemProvider.add(item);
         itemProvider.add(group);
 
