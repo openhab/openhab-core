@@ -31,7 +31,7 @@ import org.openhab.core.voice.text.InterpretationException;
  * @author Kai Kreuzer - Initial contribution
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Laurent Garnier - Updated methods startDialog and added method stopDialog
- * @author Miguel - New dialog methods using DialogContext
+ * @author Miguel Álvarez - New dialog methods using DialogContext
  */
 @NonNullByDefault
 public interface VoiceManager {
@@ -126,12 +126,12 @@ public interface VoiceManager {
     /**
      * Returns an object with the default required services and configurations for dialog processing
      *
-     * @throws IllegalStateException if some required service is not all available
+     * @throws IllegalStateException if some required service is not available
      */
     DialogContext getDefaultDialogContext() throws IllegalStateException;
 
     /**
-     * Returns an object with the last used services and configurations used for dialog processing if any.
+     * Returns an object with the services and configurations last used for dialog processing if any.
      * The underling value is updated before an active dialog starts to interpret the transcription result.
      */
     @Nullable
