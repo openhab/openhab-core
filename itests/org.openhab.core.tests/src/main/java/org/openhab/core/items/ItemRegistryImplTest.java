@@ -380,14 +380,43 @@ public class ItemRegistryImplTest extends JavaTest {
     }
 
     @Test
+    public void assertStateDescriptionServiceGetsInjected() {
+        GenericItem item = spy(new SwitchItem("Item1"));
+        NumberItem baseItem = spy(new NumberItem("baseItem"));
+        GenericItem group = new GroupItem("Group", baseItem);
+        itemProvider.add(item);
+        itemProvider.add(group);
+
+        verify(item).setStateDescriptionService(any(StateDescriptionService.class));
+        verify(baseItem).setStateDescriptionService(any(StateDescriptionService.class));
+    }
+
+    @Test
+    public void assertUnitProviderGetsInjected() {
+        GenericItem item = spy(new SwitchItem("Item1"));
+        NumberItem baseItem = spy(new NumberItem("baseItem"));
+        GenericItem group = new GroupItem("Group", baseItem);
+        itemProvider.add(item);
+        itemProvider.add(group);
+
+        verify(item).setUnitProvider(any(UnitProvider.class));
+        verify(baseItem).setUnitProvider(any(UnitProvider.class));
+    }
+
+    @Test
     public void assertCommandDescriptionServiceGetsInjected() {
         GenericItem item = spy(new SwitchItem("Item1"));
+        NumberItem baseItem = spy(new NumberItem("baseItem"));
+        GenericItem group = new GroupItem("Group", baseItem);
         itemProvider.add(item);
+        itemProvider.add(group);
 
         verify(item).setCommandDescriptionService(null);
 
         ((ItemRegistryImpl) itemRegistry).setCommandDescriptionService(mock(CommandDescriptionService.class));
         verify(item).setCommandDescriptionService(any(CommandDescriptionService.class));
+
+        verify(baseItem).setCommandDescriptionService(any(CommandDescriptionService.class));
     }
 
     @Test

@@ -293,14 +293,14 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setUnitProvider(UnitProvider unitProvider) {
+    public void setUnitProvider(UnitProvider unitProvider) {
         this.unitProvider = unitProvider;
         for (Item item : getItems()) {
             ((GenericItem) item).setUnitProvider(unitProvider);
         }
     }
 
-    protected void unsetUnitProvider(UnitProvider unitProvider) {
+    public void unsetUnitProvider(UnitProvider unitProvider) {
         this.unitProvider = null;
         for (Item item : getItems()) {
             ((GenericItem) item).setUnitProvider(null);
@@ -455,7 +455,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setStateDescriptionService(StateDescriptionService stateDescriptionService) {
+    public void setStateDescriptionService(StateDescriptionService stateDescriptionService) {
         this.stateDescriptionService = stateDescriptionService;
 
         for (Item item : getItems()) {
@@ -463,7 +463,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         }
     }
 
-    protected void unsetStateDescriptionService(StateDescriptionService stateDescriptionService) {
+    public void unsetStateDescriptionService(StateDescriptionService stateDescriptionService) {
         this.stateDescriptionService = null;
 
         for (Item item : getItems()) {
