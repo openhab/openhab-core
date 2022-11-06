@@ -914,4 +914,41 @@ public class PersistenceExtensionsTest {
                 ZonedDateTime.of(2011, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()));
         assertFalse(updated);
     }
+
+    @Test
+    public void testCountBetween() {
+        long counts = PersistenceExtensions.countBetween(numberItem,
+                ZonedDateTime.of(1940, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
+                ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
+        assertEquals(0, counts);
+
+        counts = PersistenceExtensions.countBetween(numberItem,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
+                ZonedDateTime.of(2011, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
+        assertEquals(7, counts);
+
+        counts = PersistenceExtensions.countBetween(numberItem,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
+                ZonedDateTime.of(2011, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()));
+        assertEquals(0, counts);
+    }
+
+    @Test
+    public void testCountSince() {
+        long counts = PersistenceExtensions.countSince(numberItem,
+                ZonedDateTime.of(1980, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
+        assertEquals(33, counts);
+
+        counts = PersistenceExtensions.countSince(numberItem,
+                ZonedDateTime.of(2007, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
+        assertEquals(6, counts);
+
+        counts = PersistenceExtensions.countSince(numberItem,
+                ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
+        assertEquals(0, counts);
+
+        counts = PersistenceExtensions.countSince(numberItem,
+                ZonedDateTime.of(2000, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()));
+        assertEquals(0, counts);
+    }
 }
