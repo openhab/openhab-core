@@ -27,6 +27,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.service.CommandDescriptionService;
+import org.openhab.core.service.StateDescriptionService;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.slf4j.Logger;
@@ -225,14 +227,6 @@ public class GroupItem extends GenericItem implements StateChangeListener {
         members.clear();
     }
 
-    @Override
-    public void setUnitProvider(@Nullable UnitProvider unitProvider) {
-        super.setUnitProvider(unitProvider);
-        if (baseItem != null && baseItem instanceof GenericItem) {
-            ((GenericItem) baseItem).setUnitProvider(unitProvider);
-        }
-    }
-
     /**
      * The accepted data types of a group item is the same as of the underlying base item.
      * If none is defined, the intersection of all sets of accepted data types of all group
@@ -393,6 +387,30 @@ public class GroupItem extends GenericItem implements StateChangeListener {
             this.state = state;
         }
         notifyListeners(oldState, state);
+    }
+
+    @Override
+    public void setStateDescriptionService(@Nullable StateDescriptionService stateDescriptionService) {
+        super.setStateDescriptionService(stateDescriptionService);
+        if (baseItem instanceof GenericItem) {
+            ((GenericItem) baseItem).setStateDescriptionService(stateDescriptionService);
+        }
+    }
+
+    @Override
+    public void setCommandDescriptionService(@Nullable CommandDescriptionService commandDescriptionService) {
+        super.setCommandDescriptionService(commandDescriptionService);
+        if (baseItem instanceof GenericItem) {
+            ((GenericItem) baseItem).setCommandDescriptionService(commandDescriptionService);
+        }
+    }
+
+    @Override
+    public void setUnitProvider(@Nullable UnitProvider unitProvider) {
+        super.setUnitProvider(unitProvider);
+        if (baseItem instanceof GenericItem) {
+            ((GenericItem) baseItem).setUnitProvider(unitProvider);
+        }
     }
 
     private void sendGroupStateChangedEvent(String memberName, State newState, State oldState) {
