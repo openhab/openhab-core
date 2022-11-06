@@ -124,11 +124,18 @@ public interface VoiceManager {
     Voice getPreferredVoice(Set<Voice> voices);
 
     /**
-     * Returns a record with the default required services and configurations for dialog processing
+     * Returns an object with the default required services and configurations for dialog processing
      *
      * @throws IllegalStateException if some required service is not all available
      */
     DialogContext getDefaultDialogContext() throws IllegalStateException;
+
+    /**
+     * Returns an object with the last used services and configurations used for dialog processing if any.
+     * The underling value is updated before an active dialog starts to interpret the transcription result.
+     */
+    @Nullable
+    DialogContext getLastDialogContext();
 
     /**
      * Starts an infinite dialog sequence using all default services: keyword spotting on the default audio source,
@@ -223,7 +230,6 @@ public interface VoiceManager {
      * Stop the dialog associated to the audio source
      *
      * @param context the record describing the configured services and options for the dialog
-     *
      * @throws IllegalStateException if no dialog is started for the audio source
      */
     void stopDialog(DialogContext context) throws IllegalStateException;

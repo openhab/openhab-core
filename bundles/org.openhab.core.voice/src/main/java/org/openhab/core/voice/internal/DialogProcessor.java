@@ -62,6 +62,8 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Laurent Garnier - Added stop() + null annotations + resources releasing
  * @author Miguel Álvarez - Close audio streams + use RecognitionStartEvent
+ * @author Miguel Álvarez - Use dialog context
+ *
  */
 @NonNullByDefault
 public class DialogProcessor implements KSListener, STTListener {
@@ -76,6 +78,7 @@ public class DialogProcessor implements KSListener, STTListener {
     private final @Nullable AudioFormat ksFormat;
     private final @Nullable AudioFormat sttFormat;
     private final @Nullable AudioFormat ttsFormat;
+    private final DialogEventListener eventListener;
 
     /**
      * If the processor is currently processing a keyword event and thus should not spot further ones.
@@ -93,9 +96,10 @@ public class DialogProcessor implements KSListener, STTListener {
     private @Nullable AudioStream streamKS;
     private @Nullable AudioStream streamSTT;
 
-    public DialogProcessor(DialogContext context, EventPublisher eventPublisher, TranslationProvider i18nProvider,
-            Bundle bundle) {
+    public DialogProcessor(DialogContext context, DialogEventListener eventListener, EventPublisher eventPublisher,
+            TranslationProvider i18nProvider, Bundle bundle) {
         this.dialogContext = context;
+        this.eventListener = eventListener;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
         this.bundle = bundle;
@@ -109,6 +113,11 @@ public class DialogProcessor implements KSListener, STTListener {
                 context.sink().getSupportedFormats());
     }
 
+    /**
+     * Starts a persistent dialog
+     * 
+     * @throws IllegalStateException if keyword spot service is misconfigured
+     */
     public void start() throws IllegalStateException {
         KSService ksService = dialogContext.ks();
         String keyword = dialogContext.keyword();
@@ -136,6 +145,9 @@ public class DialogProcessor implements KSListener, STTListener {
         }
     }
 
+    /**
+     * Starts a single dialog
+     */
     public void startSimpleDialog() {
         abortSTT();
         closeStreamSTT();
@@ -164,6 +176,9 @@ public class DialogProcessor implements KSListener, STTListener {
         }
     }
 
+    /**
+     * Stops any dialog execution
+     */
     public void stop() {
         abortSTT();
         closeStreamSTT();
@@ -172,6 +187,9 @@ public class DialogProcessor implements KSListener, STTListener {
         toggleProcessing(false);
     }
 
+    /**
+     * Indicates if voice recognition is running.
+     */
     public boolean isProcessing() {
         return processing;
     }
@@ -235,7 +253,11 @@ public class DialogProcessor implements KSListener, STTListener {
             isSTTServerAborting = false;
             if (ksEvent instanceof KSpottedEvent) {
                 logger.debug("KSpottedEvent event received");
-                startSimpleDialog();
+                try {
+                    startSimpleDialog();
+                } catch (IllegalStateException e) {
+                    logger.warn("{}", e.getMessage());
+                }
             } else if (ksEvent instanceof KSErrorEvent) {
                 logger.debug("KSErrorEvent event received");
                 KSErrorEvent kse = (KSErrorEvent) ksEvent;
@@ -254,6 +276,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 String question = sre.getTranscript();
                 logger.debug("Text recognized: {}", question);
                 toggleProcessing(false);
+                eventListener.onBeforeDialogInterpretation(dialogContext);
                 String answer = "";
                 String error = null;
                 for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
@@ -358,5 +381,14 @@ public class DialogProcessor implements KSListener, STTListener {
                 && dialogContext.hlis().containsAll(dialogProcessor.dialogContext.hlis())
                 && dialogContext.locale().equals(dialogProcessor.dialogContext.locale())
                 && Objects.equals(dialogContext.listeningItem(), dialogProcessor.dialogContext.listeningItem());
+    }
+
+    public interface DialogEventListener {
+        /**
+         * Runs before starting to interpret the transcription result
+         *
+         * @param context used by the dialog processor
+         */
+        void onBeforeDialogInterpretation(DialogContext context);
     }
 }

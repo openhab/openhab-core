@@ -77,12 +77,13 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort TTS options
  * @author Laurent Garnier - Updated methods startDialog and added method stopDialog
+ * @author Miguel Álvarez - Use dialog context
  */
 @Component(immediate = true, configurationPid = VoiceManagerImpl.CONFIGURATION_PID, //
         property = Constants.SERVICE_PID + "=org.openhab.voice")
 @ConfigurableService(category = "system", label = "Voice", description_uri = VoiceManagerImpl.CONFIG_URI)
 @NonNullByDefault
-public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
+public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, DialogProcessor.DialogEventListener {
 
     public static final String CONFIGURATION_PID = "org.openhab.voice";
 
@@ -129,6 +130,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     private Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
     private Map<String, DialogProcessor> singleDialogProcessors = new ConcurrentHashMap<>();
+    private @Nullable DialogContext lastDialogContext = null;
 
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
@@ -489,12 +491,16 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         HumanLanguageInterpreter hli = getHLI();
         AudioSource audioSource = audioManager.getSource();
         AudioSink audioSink = audioManager.getSink();
-        if (ksService == null || sttService == null || ttsService == null || hli == null || audioSource == null
-                || audioSink == null) {
+        if (sttService == null || ttsService == null || hli == null || audioSource == null || audioSink == null) {
             throw new IllegalStateException("Cannot load default dialog context as services are missing.");
         }
         return new DialogContext(ksService, keyword, sttService, ttsService, prefVoice, List.of(hli), audioSource,
                 audioSink, localeProvider.getLocale(), listeningItem);
+    }
+
+    @Override
+    public @Nullable DialogContext getLastDialogContext() {
+        return lastDialogContext;
     }
 
     @Override
@@ -569,7 +575,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             if (processor == null) {
                 logger.debug("Starting a new dialog for source {} ({})", context.source().getLabel(null),
                         context.source().getId());
-                processor = new DialogProcessor(context, this.eventPublisher, this.i18nProvider, b);
+                processor = new DialogProcessor(context, this, this.eventPublisher, this.i18nProvider, b);
                 dialogProcessors.put(context.source().getId(), processor);
                 processor.start();
             } else {
@@ -666,7 +672,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 isSingleDialog = true;
                 activeProcessor = singleDialogProcessors.get(audioSource.getId());
             }
-            var processor = new DialogProcessor(context, this.eventPublisher, this.i18nProvider, b);
+            var processor = new DialogProcessor(context, this, this.eventPublisher, this.i18nProvider, b);
             if (activeProcessor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
@@ -933,5 +939,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             }
         }
         return null;
+    }
+
+    @Override
+    public void onBeforeDialogInterpretation(DialogContext context) {
+        lastDialogContext = context;
     }
 }
