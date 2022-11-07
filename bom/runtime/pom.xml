@@ -16,7 +16,7 @@
   <name>openHAB Core :: BOM :: Runtime</name>
 
   <properties>
-    <californium.version>2.7.3</californium.version>
+    <californium.version>2.7.4</californium.version>
     <cxf.version>3.4.5</cxf.version>
     <!-- revert version of jackson-databind to ${jackson.version} when versions are in-line again -->
     <jackson.version>2.12.7</jackson.version>
