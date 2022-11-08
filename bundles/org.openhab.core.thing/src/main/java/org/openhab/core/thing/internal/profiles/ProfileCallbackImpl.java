@@ -65,6 +65,11 @@ public class ProfileCallbackImpl implements ProfileCallback {
     }
 
     @Override
+    public ItemChannelLink getItemChannelLink() {
+        return link;
+    }
+
+    @Override
     public void handleCommand(Command command) {
         Thing thing = thingProvider.apply(link.getLinkedUID().getThingUID());
         if (thing != null) {
