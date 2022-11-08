@@ -81,7 +81,12 @@ public class NumberItem extends GenericItem {
     }
 
     public void send(QuantityType command) {
-        internalSend(command);
+        if (dimension == null) {
+            DecimalType strippedCommand = new DecimalType(command.toBigDecimal());
+            internalSend(strippedCommand);
+        } else {
+            internalSend(command);
+        }
     }
 
     @Override

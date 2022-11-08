@@ -23,11 +23,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.PercentType;
@@ -129,6 +132,40 @@ public class NumberItemTest {
         item.setState(new QuantityType<>("10 A")); // should not be accepted as valid state
 
         assertThat(item.getState(), is(UnDefType.NULL));
+    }
+
+    @Test
+    public void testCommandUnitIsPassedForDimensionItem() {
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
+        UnitProvider unitProvider = mock(UnitProvider.class);
+        when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+        item.setUnitProvider(unitProvider);
+        EventPublisher eventPublisher = mock(EventPublisher.class);
+        item.setEventPublisher(eventPublisher);
+
+        QuantityType<?> command = new QuantityType<>("15 °C");
+        item.send(new QuantityType<>("15 °C"));
+
+        ArgumentCaptor<ItemCommandEvent> captor = ArgumentCaptor.forClass(ItemCommandEvent.class);
+        verify(eventPublisher).post(captor.capture());
+
+        ItemCommandEvent event = captor.getValue();
+        assertThat(event.getItemCommand(), is(new QuantityType<>("15 °C")));
+    }
+
+    @Test
+    public void testCommandUnitIsStrippedForDimensionlessItem() {
+        NumberItem item = new NumberItem("Number", ITEM_NAME);
+        EventPublisher eventPublisher = mock(EventPublisher.class);
+        item.setEventPublisher(eventPublisher);
+
+        item.send(new QuantityType<>("15 °C"));
+
+        ArgumentCaptor<ItemCommandEvent> captor = ArgumentCaptor.forClass(ItemCommandEvent.class);
+        verify(eventPublisher).post(captor.capture());
+
+        ItemCommandEvent event = captor.getValue();
+        assertThat(event.getItemCommand(), is(new DecimalType("15")));
     }
 
     @SuppressWarnings("null")
