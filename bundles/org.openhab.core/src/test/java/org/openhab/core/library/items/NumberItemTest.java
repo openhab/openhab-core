@@ -105,6 +105,14 @@ public class NumberItemTest {
     }
 
     @Test
+    public void testSetQuantityOnPlainNumberStripsUnit() {
+        NumberItem item = new NumberItem(ITEM_NAME);
+        item.setState(new QuantityType<>("20 °C"));
+
+        assertThat(item.getState(), is(new DecimalType("20")));
+    }
+
+    @Test
     public void testSetQuantityTypeConverted() {
         NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
         item.setState(new QuantityType<>(68, ImperialUnits.FAHRENHEIT));

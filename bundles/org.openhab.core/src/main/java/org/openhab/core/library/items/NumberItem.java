@@ -109,6 +109,13 @@ public class NumberItem extends GenericItem {
 
     @Override
     public void setState(State state) {
+        // QuantityType update to a NumberItem without, strip unit
+        if (state instanceof QuantityType && dimension == null) {
+            DecimalType plainState = new DecimalType(((QuantityType<?>) state).toBigDecimal());
+            super.setState(plainState);
+            return;
+        }
+
         // DecimalType update for a NumberItem with dimension, convert to QuantityType:
         if (state instanceof DecimalType && dimension != null) {
             Unit<?> unit = getUnit();

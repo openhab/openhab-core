@@ -72,6 +72,10 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                     item = new NumberItem(ITEM_NAME);
                     ((NumberItem) item).setState(itemState);
                     break;
+                case "Number:Temperature":
+                    item = new NumberItem("Number:Temperature", ITEM_NAME);
+                    ((NumberItem) item).setState(itemState);
+                    break;
                 case "Dimmer":
                     item = new DimmerItem(ITEM_NAME);
                     ((DimmerItem) item).setState(itemState);
@@ -89,15 +93,16 @@ public class ItemStateConditionHandlerTest extends JavaTest {
         return Arrays.asList(new Object[][] { //
                 { new ParameterSet("Number", "5", new DecimalType(23), false) }, //
                 { new ParameterSet("Number", "5", new DecimalType(5), true) }, //
-                { new ParameterSet("Number", "5 °C", new DecimalType(23), false) }, //
-                { new ParameterSet("Number", "5 °C", new DecimalType(5), false) }, //
-                { new ParameterSet("Number", "0", new QuantityType<>(), true) }, //
-                { new ParameterSet("Number", "5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number", "5", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT), true) }, //
-                { new ParameterSet("Number", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) } });
+                { new ParameterSet("Number:Temperature", "5 °C", new DecimalType(23), false) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new DecimalType(5), false) }, //
+                { new ParameterSet("Number:Temperature", "0", new QuantityType<>(), true) }, //
+                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT),
+                        true) }, //
+                { new ParameterSet("Number:Temperature", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) } });
     }
 
     public static Collection<Object[]> greaterThanParameters() {
@@ -106,11 +111,11 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 { new ParameterSet("Number", "5", new DecimalType(5), false) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(23), true) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(5), false) }, //
-                { new ParameterSet("Number", "0", new QuantityType<>(), false) }, //
-                { new ParameterSet("Number", "5", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number", "5", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("Number:Temperature", "0", new QuantityType<>(), false) }, //
+                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(40), true) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(20), false) } });
     }
@@ -123,15 +128,16 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 { new ParameterSet("Number", "5 °C", new DecimalType(23), true) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(5), true) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(4), false) }, //
-                { new ParameterSet("Number", "0", new QuantityType<>(), true) }, //
-                { new ParameterSet("Number", "5", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number", "5", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number", "5", new QuantityType<>(4, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT), true) }, //
-                { new ParameterSet("Number", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "0", new QuantityType<>(), true) }, //
+                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(4, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("Number:Temperature", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT),
+                        true) }, //
+                { new ParameterSet("Number:Temperature", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(40), true) }, //
                 { new ParameterSet("Dimmer", "40", new PercentType(20), false) } });
     }
@@ -142,11 +148,11 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 { new ParameterSet("Number", "5", new DecimalType(4), true) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(23), false) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(4), true) }, //
-                { new ParameterSet("Number", "0", new QuantityType<>(), false) }, //
-                { new ParameterSet("Number", "5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number", "5", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "0", new QuantityType<>(), false) }, //
+                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("Dimmer", "40", new PercentType(20), true) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(20), false) } });
     }
@@ -159,15 +165,16 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 { new ParameterSet("Number", "5 °C", new DecimalType(23), false) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(5), true) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(4), true) }, //
-                { new ParameterSet("Number", "0", new QuantityType<>(), true) }, //
-                { new ParameterSet("Number", "5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number", "5", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number", "5", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT), true) }, //
-                { new ParameterSet("Number", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "0", new QuantityType<>(), true) }, //
+                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("Number:Temperature", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT),
+                        true) }, //
+                { new ParameterSet("Number:Temperature", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(40), false) }, //
                 { new ParameterSet("Dimmer", "40", new PercentType(20), true) } });
     }

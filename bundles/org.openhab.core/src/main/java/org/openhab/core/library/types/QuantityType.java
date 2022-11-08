@@ -160,8 +160,6 @@ public class QuantityType<T extends Quantity<T>> extends Number
      *
      * @param value the non null measurement value.
      * @param unit the non null measurement unit.
-     * @param conversionUnits the optional unit map which is used to determine the {@link MeasurementSystem} specific
-     *            unit for conversion.
      */
     public QuantityType(Number value, Unit<T> unit) {
         // Avoid scientific notation for double
