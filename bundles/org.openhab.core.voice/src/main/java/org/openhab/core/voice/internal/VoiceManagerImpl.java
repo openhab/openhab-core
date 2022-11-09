@@ -92,7 +92,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     protected static final String CONFIG_URI = "system:voice";
     private static final String CONFIG_KEYWORD = "keyword";
     private static final String CONFIG_LISTENING_ITEM = "listeningItem";
-    private static final String CONFIG_LISTENING_NOTE = "listeningNote";
+    private static final String CONFIG_LISTENING_MELODY = "listeningMelody";
     private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
     private static final String CONFIG_DEFAULT_KS = "defaultKS";
     private static final String CONFIG_DEFAULT_STT = "defaultSTT";
@@ -120,7 +120,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
      */
     private String keyword = DEFAULT_KEYWORD;
     private @Nullable String listeningItem;
-    private @Nullable String listeningNote;
+    private @Nullable String listeningMelody;
     private @Nullable String defaultTTS;
     private @Nullable String defaultSTT;
     private @Nullable String defaultKS;
@@ -159,8 +159,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             this.listeningItem = config.containsKey(CONFIG_LISTENING_ITEM)
                     ? config.get(CONFIG_LISTENING_ITEM).toString()
                     : null;
-            this.listeningNote = config.containsKey(CONFIG_LISTENING_NOTE)
-                    ? config.get(CONFIG_LISTENING_NOTE).toString()
+            this.listeningMelody = config.containsKey(CONFIG_LISTENING_MELODY)
+                    ? config.get(CONFIG_LISTENING_MELODY).toString()
                     : null;
             this.defaultTTS = config.containsKey(CONFIG_DEFAULT_TTS) ? config.get(CONFIG_DEFAULT_TTS).toString() : null;
             this.defaultSTT = config.containsKey(CONFIG_DEFAULT_STT) ? config.get(CONFIG_DEFAULT_STT).toString() : null;
@@ -535,7 +535,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 logger.debug("Starting a new dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
                 processor = new DialogProcessor(ksService, sttService, ttsService, prefVoice, interpreters, audioSource,
-                        audioSink, loc, kw, item, listeningNote, this.eventPublisher, this.i18nProvider, b);
+                        audioSink, loc, kw, item, listeningMelody, this.eventPublisher, this.i18nProvider, b);
                 dialogProcessors.put(audioSource.getId(), processor);
                 processor.start();
             } else {
@@ -617,7 +617,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 activeProcessor = singleDialogProcessors.get(audioSource.getId());
             }
             var processor = new DialogProcessor(sttService, ttsService, prefVoice, interpreters, audioSource, audioSink,
-                    loc, item, listeningNote, this.eventPublisher, this.i18nProvider, b);
+                    loc, item, listeningMelody, this.eventPublisher, this.i18nProvider, b);
             if (activeProcessor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());

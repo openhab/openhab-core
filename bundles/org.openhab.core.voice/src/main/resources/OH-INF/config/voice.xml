@@ -38,23 +38,16 @@
 			<description>If provided, the item will be switched on during the period when the dialog processor has spotted the
 				keyword and is listening for commands.</description>
 		</parameter>
-		<parameter name="listeningNote" type="text">
+		<parameter name="listeningMelody" type="text">
 			<options>
-				<option value="B">Si</option>
-				<option value="A#">Si b</option>
-				<option value="A">La</option>
-				<option value="G#">Sol #</option>
-				<option value="G">Sol</option>
-				<option value="F#">Fa #</option>
-				<option value="F">Fa</option>
-				<option value="E">Mi</option>
-				<option value="D#">Mi b</option>
-				<option value="D">Re</option>
-				<option value="C#">Do #</option>
-				<option value="C">Do</option>
+				<option value="Bb">Bb</option>
+				<option value="F#">F#</option>
+				<option value="E">E</option>
 			</options>
-			<label>Listening Note</label>
-			<description>Note to be played by the dialog processor sink to advertise the user the recognition is going to start.</description>
+			<limitToOptions>false</limitToOptions>
+			<label>Listening Melody</label>
+			<description>A melody to be played to advertise the user the dialog processing is going to start, leave empty to
+				disable it. (Spaced separated list of notes. Example: "A O:100 A':50")</description>
 		</parameter>
 	</config-description>
 

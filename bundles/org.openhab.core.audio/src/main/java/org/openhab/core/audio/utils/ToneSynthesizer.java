@@ -17,6 +17,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -32,14 +34,14 @@ import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
 
 /**
- * Audio note synthesizer. A utility to sent note sounds to audio sinks.
+ * An audio tone synthesizer. A utility to sent tone melodies to audio sinks.
  * Limited to wav little endian streams.
  *
  * @author Miguel Álvarez - Initial contribution
  *
  */
 @NonNullByDefault
-public class AudioNoteSynthesizer {
+public class ToneSynthesizer {
     private final long sampleRate;
     private final int bitDepth;
     private final int bitRate;
@@ -51,15 +53,65 @@ public class AudioNoteSynthesizer {
                 null));
     }
 
-    public static Sound noteSound(Note note, long millis) {
-        return new Sound(note.getFrequency(), millis);
+    /**
+     * Parses a tone melody into a list of {@link Tone} instances.
+     * The melody should be a spaced separated list of note names or silences (character 0 or O).
+     * You can optionally add the character "'" to increase the note one octave.
+     * You can optionally add ":ms" where ms is an int value to customize the note/silence milliseconds duration
+     * (defaults to 200ms).
+     * 
+     * @param melody to be parsed.
+     * @return list of {@link Tone} instances.
+     * @throws ParseException if melody can not be played.
+     */
+    public static List<Tone> parseMelody(String melody) throws ParseException {
+        var melodySounds = new ArrayList<Tone>();
+        var noteTextList = melody.split("\\s");
+        var melodyTextIndex = 0;
+        for (var i = 0; i < noteTextList.length; i++) {
+            var noteText = noteTextList[i];
+            var noteTextParts = noteText.split(":");
+            var soundMillis = 200;
+            switch (noteTextParts.length) {
+                case 2:
+                    try {
+                        soundMillis = Integer.parseInt(noteTextParts[1]);
+                    } catch (NumberFormatException e) {
+                        throw new ParseException("Unable to parse note duration " + noteText, melodyTextIndex);
+                    }
+                case 1:
+                    var note = noteTextParts[0];
+                    int octaves = (int) note.chars().filter(ch -> ch == '\'').count();
+                    note = note.replaceAll("'", "");
+                    var noteObj = Note.fromString(note);
+                    if (noteObj.isPresent()) {
+                        melodySounds.add(noteTone(noteObj.get(), soundMillis, octaves));
+                        break;
+                    } else if (note.equals("O") || note.equals("0")) {
+                        melodySounds.add(silenceTone(soundMillis));
+                        break;
+                    }
+                default:
+                    throw new ParseException("Unable to parse note " + noteText, melodyTextIndex);
+            }
+            melodyTextIndex += noteText.length() + 1;
+        }
+        return melodySounds;
     }
 
-    public static Sound silenceSound(long millis) {
-        return new Sound(0.0, millis);
+    public static Tone noteTone(Note note, long millis) {
+        return noteTone(note, millis, 0);
     }
 
-    public AudioNoteSynthesizer(AudioFormat audioFormat) {
+    public static Tone noteTone(Note note, long millis, int octaves) {
+        return new Tone(note.getFrequency() * (octaves + 1), millis);
+    }
+
+    public static Tone silenceTone(long millis) {
+        return new Tone(0.0, millis);
+    }
+
+    public ToneSynthesizer(AudioFormat audioFormat) {
         assert audioFormat.getFrequency() != null;
         this.sampleRate = audioFormat.getFrequency();
         assert audioFormat.getBitDepth() != null;
@@ -74,13 +126,13 @@ public class AudioNoteSynthesizer {
     }
 
     public AudioStream getStream(Note note, long millis) throws IOException {
-        return getStream(List.of(noteSound(note, millis)));
+        return getStream(List.of(noteTone(note, millis)));
     }
 
-    public AudioStream getStream(List<Sound> sounds) throws IOException {
+    public AudioStream getStream(List<Tone> tones) throws IOException {
         int byteRate = (int) (sampleRate * bitDepth * channels / 8);
         byte[] audioBuffer = new byte[0];
-        for (var sound : sounds) {
+        for (var sound : tones) {
             var frequency = sound.frequency;
             var millis = sound.millis;
             int samplesPerChannel = (int) Math.ceil(sampleRate * (((double) millis) / 1000));
@@ -159,29 +211,29 @@ public class AudioNoteSynthesizer {
         }
     }
 
-    public static class Sound {
+    public static class Tone {
         private final double frequency;
         private final long millis;
 
-        private Sound(double frequency, long millis) {
+        private Tone(double frequency, long millis) {
             this.frequency = frequency;
             this.millis = millis;
         }
     }
 
     public enum Note {
-        B(List.of("B"), 493.88),
-        Bb(List.of("A#", "Bb"), 466.16),
-        A(List.of("A"), 440.0),
-        Ab(List.of("G#", "Ab"), 415.30),
-        G(List.of("G"), 392.0),
-        Gb(List.of("F#", "Gb"), 369.99),
-        F(List.of("F"), 349.23),
-        E(List.of("E"), 329.63),
-        Eb(List.of("D#", "Eb"), 311.13),
-        D(List.of("D"), 293.66),
-        Cb(List.of("C#", "Db"), 277.18),
-        C(List.of("C"), 261.63);
+        B(List.of("B", "Si"), 493.88),
+        Bb(List.of("A#", "Bb", "LA#", "SIb"), 466.16),
+        A(List.of("A", "LA"), 440.0),
+        Ab(List.of("G#", "Ab", "SOL#", "LAb"), 415.30),
+        G(List.of("G", "SOL"), 392.0),
+        Gb(List.of("F#", "Gb", "FA#", "SOLb"), 369.99),
+        F(List.of("F", "FA"), 349.23),
+        E(List.of("E", "MI"), 329.63),
+        Eb(List.of("D#", "Eb", "RE#", "MIb"), 311.13),
+        D(List.of("D", "RE"), 293.66),
+        Cb(List.of("C#", "Db", "DO#", "REb"), 277.18),
+        C(List.of("C", "DO"), 261.63);
 
         private final List<String> names;
         private final double frequency;
@@ -196,7 +248,8 @@ public class AudioNoteSynthesizer {
         }
 
         public static Optional<Note> fromString(String note) {
-            return Arrays.stream(Note.values()).filter(note1 -> note1.names.contains(note)).findAny();
+            return Arrays.stream(Note.values())
+                    .filter(note1 -> note1.names.stream().filter(note::equalsIgnoreCase).count() == 1).findAny();
         }
     }
 }
