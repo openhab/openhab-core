@@ -195,17 +195,17 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Override
-    public void playMelody(String melody) throws AudioException {
+    public void playMelody(String melody) {
         playMelody(melody, null);
     }
 
     @Override
-    public void playMelody(String melody, @Nullable String sinkId) throws AudioException {
+    public void playMelody(String melody, @Nullable String sinkId) {
         playMelody(melody, sinkId, null);
     }
 
     @Override
-    public void playMelody(String melody, @Nullable String sinkId, @Nullable PercentType volume) throws AudioException {
+    public void playMelody(String melody, @Nullable String sinkId, @Nullable PercentType volume) {
         AudioSink sink = getSink(sinkId);
         if (sink == null) {
             logger.warn("Failed playing melody as no audio sink {} was found.", sinkId);

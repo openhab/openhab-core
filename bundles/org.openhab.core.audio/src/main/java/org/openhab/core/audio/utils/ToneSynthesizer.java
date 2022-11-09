@@ -125,19 +125,24 @@ public class ToneSynthesizer {
         this.bigEndian = bigEndian;
     }
 
-    public AudioStream getStream(Note note, long millis) throws IOException {
-        return getStream(List.of(noteTone(note, millis)));
-    }
-
+    /**
+     * Synthesize a list of {@link Tone} into a wav audio stream
+     * 
+     * @param tones the list of {@link Tone}
+     * @return an audio stream with the synthesized tones
+     * @throws IOException in case of problems writing the audio stream
+     */
     public AudioStream getStream(List<Tone> tones) throws IOException {
         int byteRate = (int) (sampleRate * bitDepth * channels / 8);
         byte[] audioBuffer = new byte[0];
-        for (var sound : tones) {
+        var fixedTones = new ArrayList<>(tones);
+        fixedTones.add(silenceTone(100));
+        for (var sound : fixedTones) {
             var frequency = sound.frequency;
             var millis = sound.millis;
             int samplesPerChannel = (int) Math.ceil(sampleRate * (((double) millis) / 1000));
             int byteSize = (int) Math.ceil(byteRate * ((double) millis / 1000));
-            byte[] audioPart = getAudioBytes(frequency, byteSize, samplesPerChannel);
+            byte[] audioPart = getAudioBytes(frequency, samplesPerChannel);
             audioBuffer = ByteBuffer.allocate(audioBuffer.length + audioPart.length).put(audioBuffer).put(audioPart)
                     .array();
         }
@@ -174,8 +179,8 @@ public class ToneSynthesizer {
                 AudioFormat.CODEC_PCM_SIGNED, bigEndian, bitDepth, bitRate, sampleRate, channels));
     }
 
-    private byte[] getAudioBytes(double frequency, int byteSize, int samplesPerChannel) {
-        var audioBuffer = ByteBuffer.allocate(byteSize);
+    private byte[] getAudioBytes(double frequency, int samplesPerChannel) {
+        var audioBuffer = ByteBuffer.allocate(samplesPerChannel * (bitDepth / 8) * channels);
         audioBuffer.order(bigEndian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
         for (int i = 0; i < samplesPerChannel; i++) {
             short sample = (short) getSample(frequency, i);

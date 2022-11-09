@@ -17,7 +17,6 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
@@ -60,11 +59,7 @@ public class SynthesizeActionHandler extends BaseActionModuleHandler {
 
     @Override
     public @Nullable Map<String, Object> execute(Map<String, Object> context) {
-        try {
-            audioManager.playMelody(melody, sink, volume);
-        } catch (AudioException e) {
-            logger.error("Error playing melody '{}': {}", melody, e.getMessage());
-        }
+        audioManager.playMelody(melody, sink, volume);
         return null;
     }
 }

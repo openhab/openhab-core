@@ -206,12 +206,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     private void playMelodyOnSink(@Nullable String sinkId, String melody, @Nullable PercentType volume,
             Console console) {
-        try {
-            audioManager.playMelody(melody, sinkId, volume);
-        } catch (AudioException e) {
-            console.println(Objects.requireNonNullElse(e.getMessage(),
-                    String.format("An error occurred while playing melody '%s' on sink '%s'", melody, sinkId)));
-        }
+        audioManager.playMelody(melody, sinkId, volume);
     }
 
     private void playOnSinks(String pattern, String fileName, @Nullable PercentType volume, Console console) {

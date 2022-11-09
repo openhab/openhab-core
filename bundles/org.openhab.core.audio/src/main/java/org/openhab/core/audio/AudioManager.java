@@ -121,9 +121,8 @@ public interface AudioManager {
      * (defaults to 200ms).
      *
      * @param melody The url to stream from or null if streaming should be stopped.
-     * @throws AudioException in case the melody cannot be played
      */
-    void playMelody(String melody) throws AudioException;
+    void playMelody(String melody);
 
     /**
      * Parse and synthesize a melody and play it into the given sink.
@@ -135,9 +134,8 @@ public interface AudioManager {
      *
      * @param melody The url to stream from or null if streaming should be stopped.
      * @param sinkId The id of the audio sink to use or null for the default.
-     * @throws AudioException in case the melody cannot be played
      */
-    void playMelody(String melody, @Nullable String sinkId) throws AudioException;
+    void playMelody(String melody, @Nullable String sinkId);
 
     /**
      * Parse and synthesize a melody and play it into the given sink at the desired volume.
@@ -150,9 +148,8 @@ public interface AudioManager {
      * @param melody The url to stream from or null if streaming should be stopped.
      * @param sinkId The id of the audio sink to use or null for the default.
      * @param volume The volume to be used or null if the default notification volume should be used
-     * @throws AudioException in case the melody cannot be played
      */
-    void playMelody(String melody, @Nullable String sinkId, @Nullable PercentType volume) throws AudioException;
+    void playMelody(String melody, @Nullable String sinkId, @Nullable PercentType volume);
 
     /**
      * Retrieves the current volume of a sink
