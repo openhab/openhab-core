@@ -22,6 +22,11 @@ import org.osgi.service.component.annotations.Reference;
 
 import java.util.Objects;
 
+/**
+ * This class registers an OSGi service for the ScriptExecution action.
+ *
+ * @author Jan N. Klug - Initial contribution
+ */
 @Component(immediate = true)
 @NonNullByDefault
 public class ScriptExecutionActionService implements ActionService {

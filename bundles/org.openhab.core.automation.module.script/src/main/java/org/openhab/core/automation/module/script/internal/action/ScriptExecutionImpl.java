@@ -13,13 +13,12 @@
 package org.openhab.core.automation.module.script.internal.action;
 
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleManager;
+import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.module.script.action.ScriptExecution;
 import org.openhab.core.automation.module.script.action.Timer;
 import org.openhab.core.scheduler.Scheduler;
@@ -39,18 +38,14 @@ public class ScriptExecutionImpl implements ScriptExecution {
 
     private final Scheduler scheduler;
     private final RuleManager ruleManager;
+    private final RuleRegistry ruleRegistry;
 
     @Activate
-    public ScriptExecutionImpl(@Reference RuleManager ruleManager, @Reference Scheduler scheduler) {
+    public ScriptExecutionImpl(@Reference RuleRegistry ruleRegistry, @Reference RuleManager ruleManager,
+            @Reference Scheduler scheduler) {
+        this.ruleRegistry = ruleRegistry;
         this.scheduler = scheduler;
         this.ruleManager = ruleManager;
-    }
-
-    @Override
-    public Object callScript(String scriptName) {
-        Map<String, Object> context = new HashMap<>();
-        ruleManager.runNow(scriptName, false, context);
-        return context;
     }
 
     @Override

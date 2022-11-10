@@ -14,8 +14,14 @@ package org.openhab.core.model.script.actions;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.lib.Procedures;
 import org.openhab.core.automation.module.script.action.Timer;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.model.script.engine.Script;
+import org.openhab.core.model.script.engine.ScriptEngine;
+import org.openhab.core.model.script.engine.ScriptExecutionException;
 import org.openhab.core.model.script.engine.action.ActionDoc;
 import org.openhab.core.model.script.internal.engine.action.ScriptExecutionActionService;
 import org.slf4j.Logger;
@@ -24,16 +30,47 @@ import org.slf4j.LoggerFactory;
 import java.time.ZonedDateTime;
 
 /**
- * The {@link ScriptExecution} is a
+ * The {@link ScriptExecution} is a wrapper for the ScriptExecution actions
  *
  * @author Jan N. Klug - Initial contribution
  */
-@NonNullByDefault public class ScriptExecution {
+@NonNullByDefault
+public class ScriptExecution {
 
     private static final Logger logger = LoggerFactory.getLogger(ScriptExecution.class);
 
-    public static Object callScript(String scriptUid) {
-        return ScriptExecutionActionService.getScriptExecution().callScript(scriptUid);
+    /**
+     * Calls a script which must be located in the configurations/scripts folder.
+     *
+     * @param scriptName the name of the script (if the name does not end with
+     *            the .script file extension it is added)
+     *
+     * @return the return value of the script
+     * @throws ScriptExecutionException if an error occurs during the execution
+     */
+    @ActionDoc(text = "call a script file")
+    public static Object callScript(String scriptName) throws ScriptExecutionException {
+        ModelRepository repo = ScriptServiceUtil.getModelRepository();
+        if (repo != null) {
+            String scriptNameWithExt = scriptName;
+            if (!scriptName.endsWith(Script.SCRIPT_FILEEXT)) {
+                scriptNameWithExt = scriptName + "." + Script.SCRIPT_FILEEXT;
+            }
+            XExpression expr = (XExpression) repo.getModel(scriptNameWithExt);
+            if (expr != null) {
+                ScriptEngine scriptEngine = ScriptServiceUtil.getScriptEngine();
+                if (scriptEngine != null) {
+                    Script script = scriptEngine.newScriptFromXExpression(expr);
+                    return script.execute();
+                } else {
+                    throw new ScriptExecutionException("Script engine is not available.");
+                }
+            } else {
+                throw new ScriptExecutionException("Script '" + scriptName + "' cannot be found.");
+            }
+        } else {
+            throw new ScriptExecutionException("Model repository is not available.");
+        }
     }
 
     @ActionDoc(text = "create a timer")
@@ -41,14 +78,17 @@ import java.time.ZonedDateTime;
         return ScriptExecutionActionService.getScriptExecution().createTimer(zonedDateTime, closure::apply);
     }
 
+    @ActionDoc(text = "create an identifiable timer ")
     public static Timer createTimer(@Nullable String identifier,  ZonedDateTime zonedDateTime, Procedures.Procedure0 closure) {
         return ScriptExecutionActionService.getScriptExecution().createTimer(identifier, zonedDateTime, closure::apply);
     }
 
+    @ActionDoc(text = "create a timer with argument")
     public static Timer createTimerWithArgument(ZonedDateTime zonedDateTime, Object arg1, Procedures.Procedure1 closure) {
         return ScriptExecutionActionService.getScriptExecution().createTimerWithArgument(zonedDateTime, arg1, closure::apply);
     }
 
+    @ActionDoc(text = "create an identifiable timer with argument")
     public static Timer createTimerWithArgument(@Nullable String identifier,  ZonedDateTime zonedDateTime, Object arg1, Procedures.Procedure1 closure) {
         return ScriptExecutionActionService.getScriptExecution().createTimerWithArgument(identifier, zonedDateTime, arg1, closure::apply);
     }

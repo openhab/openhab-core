@@ -19,20 +19,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * The {@link ScriptExecution} is a
+ * The {@link ScriptExecution} allows creating timers for asynchronous script execution
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
 public interface ScriptExecution {
-    /**
-     * Calls a script which must be located in the configurations/scripts folder.
-     *
-     * @param scriptName the name of the script (if the name does not end with
-     *            the .script file extension it is added)
-     * @return the return value of the script
-     */
-    Object callScript(String scriptName);
 
     /**
      * Schedules a block of code for later execution.
