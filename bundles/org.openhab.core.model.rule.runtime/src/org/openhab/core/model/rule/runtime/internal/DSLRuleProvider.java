@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -58,6 +59,7 @@ import org.openhab.core.model.rule.rules.TimerTrigger;
 import org.openhab.core.model.rule.rules.DateTimeTrigger;
 import org.openhab.core.model.rule.rules.UpdateEventTrigger;
 import org.openhab.core.model.script.runtime.DSLScriptContextProvider;
+import org.openhab.core.model.script.script.Script;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
 import org.openhab.core.service.ReadyService;
@@ -170,6 +172,28 @@ public class DSLRuleProvider
                 default:
                     logger.debug("Unknown event type.");
             }
+        } else if ("script".equals(ruleModelType)) {
+            switch (type) {
+                case MODIFIED:
+                    Rule oldRule = rules.remove(modelFileName);
+                    if (oldRule != null) {
+                        removeRule(oldRule);
+                    }
+                case ADDED:
+                    EObject model = modelRepository.getModel(modelFileName);
+                    if (model instanceof Script) {
+                        addRule(toRule(modelFileName, ((Script) model)));
+                    }
+                    break;
+                case REMOVED:
+                    oldRule = rules.remove(modelFileName);
+                    if (oldRule != null) {
+                        removeRule(oldRule);
+                    }
+                    break;
+                default:
+                    logger.debug("Unknown event type.");
+            }
         }
     }
 
@@ -242,6 +266,18 @@ public class DSLRuleProvider
         for (ProviderChangeListener<Rule> providerChangeListener : listeners) {
             providerChangeListener.removed(this, rule);
         }
+    }
+
+    private Rule toRule(String modelName, Script script) {
+        String scriptText = NodeModelUtils.findActualNodeFor(script).getText();
+
+        Configuration cfg = new Configuration();
+        cfg.put("script", removeIndentation(scriptText));
+        cfg.put("type", MIMETYPE_OPENHAB_DSL_RULE);
+        List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID("script.ScriptAction")
+                .withConfiguration(cfg).build());
+
+        return RuleBuilder.create(modelName).withTags("Script").withName(modelName).withActions(actions).build();
     }
 
     private Rule toRule(String modelName, org.openhab.core.model.rule.rules.Rule rule, int index) {

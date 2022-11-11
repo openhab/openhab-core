@@ -440,7 +440,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     /**
      * This method add a new rule into rule engine. Scope identity of the Rule is the identity of the caller.
      *
-     * @param rule a rule which has to be added.
+     * @param newRule a rule which has to be added.
      */
     protected void addRule(Rule newRule) {
         synchronized (this) {
@@ -587,7 +587,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * Gets {@link TriggerHandlerCallback} for passed {@link Rule}. If it does not exists, a callback object is
      * created.
      *
-     * @param rule rule object for which the callback is looking for.
+     * @param ruleUID rule object for which the callback is looking for.
      * @return a {@link TriggerHandlerCallback} corresponding to the passed {@link Rule} object.
      */
     private synchronized TriggerHandlerCallbackImpl getTriggerHandlerCallback(String ruleUID) {
@@ -1005,17 +1005,19 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     @Override
-    public void runNow(String ruleUID, boolean considerConditions, @Nullable Map<String, Object> context) {
+    public Map<String, Object> runNow(String ruleUID, boolean considerConditions,
+            @Nullable Map<String, Object> context) {
+        Map<String, Object> returnContext = new HashMap<>();
         final WrappedRule rule = getManagedRule(ruleUID);
         if (rule == null) {
             logger.warn("Failed to execute rule '{}': Invalid Rule UID", ruleUID);
-            return;
+            return returnContext;
         }
         synchronized (this) {
             final RuleStatus ruleStatus = getRuleStatus(ruleUID);
             if (ruleStatus != null && ruleStatus != RuleStatus.IDLE) {
                 logger.error("Failed to execute rule ‘{}' with status '{}'", ruleUID, ruleStatus.name());
-                return;
+                return returnContext;
             }
             // change state to RUNNING
             setStatus(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING));
@@ -1025,14 +1027,11 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             if (context != null && !context.isEmpty()) {
                 getContext(ruleUID, null).putAll(context);
             }
-            if (considerConditions) {
-                if (calculateConditions(rule)) {
-                    executeActions(rule, false);
-                }
-            } else {
+            if (!considerConditions || calculateConditions(rule)) {
                 executeActions(rule, false);
             }
             logger.debug("The rule '{}' is executed.", ruleUID);
+            returnContext.putAll(getContext(ruleUID, null));
         } catch (Throwable t) {
             logger.error("Failed to execute rule '{}': ", ruleUID, t);
         }
@@ -1042,11 +1041,12 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
             }
         }
+        return returnContext;
     }
 
     @Override
-    public void runNow(String ruleUID) {
-        runNow(ruleUID, false, null);
+    public Map<String, Object> runNow(String ruleUID) {
+        return runNow(ruleUID, false, null);
     }
 
     /**
@@ -1092,11 +1092,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @return copy of current context in rule engine
      */
     private Map<String, Object> getContext(String ruleUID, @Nullable Set<Connection> connections) {
-        Map<String, Object> context = contextMap.get(ruleUID);
-        if (context == null) {
-            context = new HashMap<>();
-            contextMap.put(ruleUID, context);
-        }
+        Map<String, Object> context = contextMap.computeIfAbsent(ruleUID, k -> new HashMap<>());
         if (connections != null) {
             StringBuffer sb = new StringBuffer();
             for (Connection c : connections) {
