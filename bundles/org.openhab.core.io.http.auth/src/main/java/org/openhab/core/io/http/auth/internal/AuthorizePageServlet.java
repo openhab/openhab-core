@@ -133,7 +133,7 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
 
             String baseRedirectUri = params.get("redirect_uri")[0];
             String responseType = params.get("response_type")[0];
-            String clientId = params.get("redirect_uri")[0];
+            String clientId = params.get("client_id")[0];
             String scope = params.get("scope")[0];
 
             if (!"code".equals(responseType)) {
