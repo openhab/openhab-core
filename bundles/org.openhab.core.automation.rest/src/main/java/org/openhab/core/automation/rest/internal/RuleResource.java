@@ -312,19 +312,20 @@ public class RuleResource implements RESTResource {
     @POST
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{ruleUID}/runnow")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(operationId = "runRuleNow", summary = "Executes actions of the rule.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
-    public Response runNow(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID)
+    public Response runNow(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
+            @Nullable @Parameter(description = "the context for running this rule") Map<String, Object> context)
             throws IOException {
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule == null) {
-            logger.info("Received HTTP PUT request for run now at '{}' for the unknown rule '{}'.", uriInfo.getPath(),
+            logger.info("Received HTTP POST request for run now at '{}' for the unknown rule '{}'.", uriInfo.getPath(),
                     ruleUID);
             return Response.status(Status.NOT_FOUND).build();
         } else {
-            ruleManager.runNow(ruleUID);
+            ruleManager.runNow(ruleUID, false, context);
             return Response.ok().build();
         }
     }
