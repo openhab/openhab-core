@@ -29,41 +29,41 @@ public interface ScriptExecution {
     /**
      * Schedules a block of code for later execution.
      *
-     * @param instant the point in time when the code should be executed
+     * @param zonedDateTime the point in time when the code should be executed
      * @param closure the code block to execute
      * @return a handle to the created timer, so that it can be canceled or rescheduled
      */
-    Timer createTimer(ZonedDateTime instant, Runnable closure);
+    Timer createTimer(ZonedDateTime zonedDateTime, Runnable closure);
 
     /**
      * Schedules a block of code for later execution.
      *
      * @param identifier an optional identifier
-     * @param instant the point in time when the code should be executed
+     * @param zonedDateTime the point in time when the code should be executed
      * @param closure the code block to execute
      * @return a handle to the created timer, so that it can be canceled or rescheduled
      */
-    Timer createTimer(@Nullable String identifier, ZonedDateTime instant, Runnable closure);
+    Timer createTimer(@Nullable String identifier, ZonedDateTime zonedDateTime, Runnable closure);
 
     /**
      * Schedules a block of code (with argument) for later execution
      *
-     * @param instant the point in time when the code should be executed
+     * @param zonedDateTime the point in time when the code should be executed
      * @param arg1 the argument to pass to the code block
      * @param closure the code block to execute
      * @return a handle to the created timer, so that it can be canceled or rescheduled
      */
-    Timer createTimerWithArgument(ZonedDateTime instant, Object arg1, Consumer<Object> closure);
+    Timer createTimerWithArgument(ZonedDateTime zonedDateTime, Object arg1, Consumer<Object> closure);
 
     /**
      * Schedules a block of code (with argument) for later execution
      *
      * @param identifier an optional identifier
-     * @param instant the point in time when the code should be executed
+     * @param zonedDateTime the point in time when the code should be executed
      * @param arg1 the argument to pass to the code block
      * @param closure the code block to execute
      * @return a handle to the created timer, so that it can be canceled or rescheduled
      */
-    Timer createTimerWithArgument(@Nullable String identifier, ZonedDateTime instant, Object arg1,
+    Timer createTimerWithArgument(@Nullable String identifier, ZonedDateTime zonedDateTime, Object arg1,
             Consumer<Object> closure);
 }

@@ -49,23 +49,23 @@ public class ScriptExecutionImpl implements ScriptExecution {
     }
 
     @Override
-    public Timer createTimer(ZonedDateTime instant, Runnable runnable) {
-        return createTimer(null, instant, runnable);
+    public Timer createTimer(ZonedDateTime zonedDateTime, Runnable runnable) {
+        return createTimer(null, zonedDateTime, runnable);
     }
 
     @Override
-    public Timer createTimer(@Nullable String identifier, ZonedDateTime instant, Runnable runnable) {
-        return new TimerImpl(scheduler, instant, runnable::run, identifier);
+    public Timer createTimer(@Nullable String identifier, ZonedDateTime zonedDateTime, Runnable runnable) {
+        return new TimerImpl(scheduler, zonedDateTime, runnable::run, identifier);
     }
 
     @Override
-    public Timer createTimerWithArgument(ZonedDateTime instant, Object arg1, Consumer<Object> consumer) {
-        return createTimerWithArgument(null, instant, arg1, consumer);
+    public Timer createTimerWithArgument(ZonedDateTime zonedDateTime, Object arg1, Consumer<Object> consumer) {
+        return createTimerWithArgument(null, zonedDateTime, arg1, consumer);
     }
 
     @Override
-    public Timer createTimerWithArgument(@Nullable String identifier, ZonedDateTime instant, Object arg1,
+    public Timer createTimerWithArgument(@Nullable String identifier, ZonedDateTime zonedDateTime, Object arg1,
             Consumer<Object> consumer) {
-        return new TimerImpl(scheduler, instant, () -> consumer.accept(arg1), identifier);
+        return new TimerImpl(scheduler, zonedDateTime, () -> consumer.accept(arg1), identifier);
     }
 }
