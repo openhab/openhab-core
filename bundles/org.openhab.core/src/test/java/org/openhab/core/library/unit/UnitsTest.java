@@ -23,6 +23,7 @@ import javax.measure.Quantity;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Energy;
 import javax.measure.quantity.Length;
+import javax.measure.quantity.Mass;
 import javax.measure.quantity.Power;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
@@ -52,6 +53,14 @@ public class UnitsTest {
 
     private static <Q extends Quantity<?>> Matcher<? super Q> isQuantityEquals(Q quantity) {
         return new QuantityEquals(quantity);
+    }
+
+    @Test
+    public void pound2KilogramConversion() {
+        Quantity<Mass> lb = Quantities.getQuantity(BigDecimal.ONE, ImperialUnits.POUND);
+
+        assertThat(lb.to(SIUnits.GRAM),
+                isQuantityEquals(Quantities.getQuantity(new BigDecimal("453.59237"), SIUnits.GRAM)));
     }
 
     @Test
