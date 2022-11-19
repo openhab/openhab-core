@@ -20,6 +20,7 @@ Export-Package: org.openhab.core.model.script,\
 Import-Package: \
  org.openhab.core.audio,\
  org.openhab.core.common.registry,\
+ org.openhab.core.automation.module.script.action,\
  org.openhab.core.ephemeris,\
  org.openhab.core.events,\
  org.openhab.core.items,\

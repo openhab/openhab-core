@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.script.internal.actions;
+package org.openhab.core.automation.module.script;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -21,8 +21,9 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.automation.module.script.action.Timer;
+import org.openhab.core.automation.module.script.internal.action.TimerImpl;
 import org.openhab.core.internal.scheduler.SchedulerImpl;
-import org.openhab.core.model.script.actions.Timer;
 import org.openhab.core.scheduler.SchedulerRunnable;
 
 /**

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.script.actions;
+package org.openhab.core.automation.module.script.action;
 
 import java.time.ZonedDateTime;
 
