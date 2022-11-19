@@ -42,6 +42,15 @@ public class HSBTypeTest {
     }
 
     @Test
+    public void testFormat() {
+        HSBType hsb = new HSBType("316,69,47");
+
+        assertEquals("color 316,69,47", hsb.format("color %hsb%"));
+        assertEquals("color 119,37,97", hsb.format("color %rgb%"));
+        assertEquals("color 316,69,47", hsb.format("color %s"));
+    }
+
+    @Test
     public void testHsbToRgbConversion() {
         compareHsbToRgbValues("0,100,100", 255, 0, 0); // red
         compareHsbToRgbValues("0,0,0", 0, 0, 0); // black
