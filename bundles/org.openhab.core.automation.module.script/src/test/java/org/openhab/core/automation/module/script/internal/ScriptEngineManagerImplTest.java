@@ -40,7 +40,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.automation.module.script.ScriptDependencyTracker;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
-import org.openhab.core.test.java.JavaTest;
 
 /**
  * The {@link ScriptEngineManagerImplTest} is a test class for the {@link ScriptEngineManagerImpl}
@@ -50,7 +49,7 @@ import org.openhab.core.test.java.JavaTest;
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class ScriptEngineManagerImplTest extends JavaTest {
+public class ScriptEngineManagerImplTest {
 
     private static final String SUPPORTED_SCRIPT_TYPE = "supported";
 
