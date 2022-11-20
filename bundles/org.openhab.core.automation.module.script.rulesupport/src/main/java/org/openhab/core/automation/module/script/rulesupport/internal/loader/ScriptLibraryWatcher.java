@@ -17,6 +17,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
+import java.util.function.Consumer;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -28,10 +29,15 @@ import org.openhab.core.service.AbstractWatchService;
  * @author Jonathan Gilbert - Initial contribution
  */
 @NonNullByDefault
-public abstract class ScriptLibraryWatcher extends AbstractWatchService {
+public class ScriptLibraryWatcher extends AbstractWatchService {
 
-    public ScriptLibraryWatcher(final String libraryPath) {
+    // package private for testing
+    final Consumer<String> listener;
+
+    public ScriptLibraryWatcher(final String libraryPath, Consumer<String> listener) {
         super(libraryPath);
+
+        this.listener = listener;
     }
 
     @Override
@@ -49,14 +55,12 @@ public abstract class ScriptLibraryWatcher extends AbstractWatchService {
         File file = path.toFile();
         if (!file.isHidden()) {
             if (kind.equals(ENTRY_DELETE)) {
-                this.updateFile(file.getPath());
+                listener.accept(file.getPath());
             }
 
             if (file.canRead() && (kind.equals(ENTRY_CREATE) || kind.equals(ENTRY_MODIFY))) {
-                this.updateFile(file.getPath());
+                listener.accept(file.getPath());
             }
         }
     }
-
-    protected abstract void updateFile(String filePath);
 }

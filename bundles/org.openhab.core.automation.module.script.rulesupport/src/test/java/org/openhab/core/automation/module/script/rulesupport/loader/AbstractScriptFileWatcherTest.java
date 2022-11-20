@@ -29,11 +29,17 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.openhab.core.automation.module.script.ScriptDependencyListener;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.openhab.core.automation.module.script.ScriptDependencyTracker;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
+import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.automation.module.script.rulesupport.internal.loader.DelegatingScheduledExecutorService;
 import org.openhab.core.service.ReadyMarker;
@@ -47,22 +53,26 @@ import org.opentest4j.AssertionFailedError;
  * @author Jonathan Gilbert - initial contribution
  */
 @NonNullByDefault
-class ScriptFileWatcherTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class AbstractScriptFileWatcherTest {
 
-    private @NonNullByDefault({}) ScriptFileWatcher scriptFileWatcher;
-    private @NonNullByDefault({}) ScriptEngineManager scriptEngineManager;
-    private @NonNullByDefault({}) DependencyTracker dependencyTracker;
+    private @NonNullByDefault({}) AbstractScriptFileWatcher scriptFileWatcher;
+
+    @Mock
+    private @NonNullByDefault({}) ScriptEngineManager scriptEngineManagerMock;
+    @Mock
+    private @NonNullByDefault({}) ScriptDependencyTracker scriptDependencyTrackerMock;
+    @Mock
     private @NonNullByDefault({}) ReadyService readyService;
 
     protected @NonNullByDefault({}) @TempDir Path tempScriptDir;
 
     @BeforeEach
     public void setUp() {
-        scriptEngineManager = mock(ScriptEngineManager.class);
-        dependencyTracker = mock(DependencyTracker.class);
-        readyService = mock(ReadyService.class);
-        scriptFileWatcher = new ScriptFileWatcher(scriptEngineManager, dependencyTracker, readyService,
-                "automation" + File.separator + "jsr223");
+        scriptFileWatcher = new AbstractScriptFileWatcher(scriptEngineManagerMock, readyService,
+                "automation" + File.separator + "jsr223") {
+        };
         scriptFileWatcher.activate();
     }
 
@@ -96,10 +106,10 @@ class ScriptFileWatcherTest {
 
     @Test
     public void testLoadOneDefaultFileAlreadyStarted() {
-        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
-        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
 
         updateStartLevel(100);
 
@@ -107,33 +117,34 @@ class ScriptFileWatcherTest {
 
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
 
-        verify(scriptEngineManager, timeout(10000)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p.toFile().toURI().toString());
     }
 
     @Test
     public void testLoadOneDefaultFileWaitUntilStarted() {
-        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
-        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
 
         Path p = getFile("script.js");
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
 
         // verify not yet called
-        verify(scriptEngineManager, never()).createScriptEngine(anyString(), anyString());
+        verify(scriptEngineManagerMock, never()).createScriptEngine(anyString(), anyString());
 
         // verify is called when the start level increases
         updateStartLevel(100);
-        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
+                p.toFile().toURI().toString());
     }
 
     @Test
     public void testLoadOneCustomFileWaitUntilStarted() {
-        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
-        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
 
         updateStartLevel(50);
 
@@ -141,19 +152,20 @@ class ScriptFileWatcherTest {
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
 
         // verify not yet called
-        verify(scriptEngineManager, never()).createScriptEngine(anyString(), anyString());
+        verify(scriptEngineManagerMock, never()).createScriptEngine(anyString(), anyString());
 
         // verify is called when the start level increases
         updateStartLevel(100);
-        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
+                p.toFile().toURI().toString());
     }
 
     @Test
     public void testLoadTwoCustomFilesDifferentStartLevels() {
-        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
-        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
 
         Path p1 = getFile("script.sl70.js");
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p1);
@@ -161,29 +173,31 @@ class ScriptFileWatcherTest {
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p2);
 
         // verify not yet called
-        verify(scriptEngineManager, never()).createScriptEngine(anyString(), anyString());
+        verify(scriptEngineManagerMock, never()).createScriptEngine(anyString(), anyString());
 
         updateStartLevel(40);
 
         // verify not yet called
-        verify(scriptEngineManager, never()).createScriptEngine(anyString(), anyString());
+        verify(scriptEngineManagerMock, never()).createScriptEngine(anyString(), anyString());
 
         updateStartLevel(60);
 
-        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p2.toFile().toURI().toString());
-        verify(scriptEngineManager, never()).createScriptEngine(anyString(), eq(p1.toFile().toURI().toString()));
+        verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
+                p2.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, never()).createScriptEngine(anyString(), eq(p1.toFile().toURI().toString()));
 
         updateStartLevel(80);
 
-        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p1.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
+                p1.toFile().toURI().toString());
     }
 
     @Test
     public void testLoadTwoCustomFilesAlternativePatternDifferentStartLevels() {
-        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
-        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
 
         Path p1 = getFile("sl70/script.js");
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p1);
@@ -191,21 +205,23 @@ class ScriptFileWatcherTest {
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p2);
 
         // verify not yet called
-        verify(scriptEngineManager, never()).createScriptEngine(anyString(), anyString());
+        verify(scriptEngineManagerMock, never()).createScriptEngine(anyString(), anyString());
 
         updateStartLevel(40);
 
         // verify not yet called
-        verify(scriptEngineManager, never()).createScriptEngine(anyString(), anyString());
+        verify(scriptEngineManagerMock, never()).createScriptEngine(anyString(), anyString());
 
         updateStartLevel(60);
 
-        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p2.toFile().toURI().toString());
-        verify(scriptEngineManager, never()).createScriptEngine(anyString(), eq(p1.toFile().toURI().toString()));
+        verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
+                p2.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, never()).createScriptEngine(anyString(), eq(p1.toFile().toURI().toString()));
 
         updateStartLevel(80);
 
-        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p1.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
+                p1.toFile().toURI().toString());
     }
 
     @Test
@@ -216,10 +232,10 @@ class ScriptFileWatcherTest {
         ArgumentCaptor<Runnable> scheduledTask = ArgumentCaptor.forClass(Runnable.class);
         scriptFileWatcher.setExecutorFactory(() -> scheduledExecutorService);
 
-        when(scriptEngineManager.isSupported("js")).thenReturn(false);
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(false);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
-        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
         updateStartLevel(100);
 
         verify(scheduledExecutorService).scheduleWithFixedDelay(scheduledTask.capture(), anyLong(), anyLong(), any());
@@ -228,24 +244,25 @@ class ScriptFileWatcherTest {
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
 
         // verify not yet called
-        verify(scriptEngineManager, never()).createScriptEngine(anyString(), anyString());
+        verify(scriptEngineManagerMock, never()).createScriptEngine(anyString(), anyString());
 
         // add support is added for .js files
-        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         // update (in current thread)
         scheduledTask.getValue().run();
 
         // verify script has now been processed
-        verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
+                p.toFile().toURI().toString());
     }
 
     @Test
     public void testOrderingWithinSingleStartLevel() {
-        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
 
-        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
 
         Path p64 = getFile("script.sl64.js");
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p64);
@@ -256,23 +273,23 @@ class ScriptFileWatcherTest {
 
         updateStartLevel(70);
 
-        InOrder inOrder = inOrder(scriptEngineManager);
+        InOrder inOrder = inOrder(scriptEngineManagerMock);
 
-        inOrder.verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js",
+        inOrder.verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
                 p64.toFile().toURI().toString());
-        inOrder.verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js",
+        inOrder.verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
                 p65.toFile().toURI().toString());
-        inOrder.verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js",
+        inOrder.verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
                 p66.toFile().toURI().toString());
     }
 
     @Test
     public void testOrderingStartlevelFolders() {
-        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
 
-        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
 
         Path p50 = getFile("a_script.js");
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p50);
@@ -283,22 +300,25 @@ class ScriptFileWatcherTest {
 
         updateStartLevel(70);
 
-        InOrder inOrder = inOrder(scriptEngineManager);
+        InOrder inOrder = inOrder(scriptEngineManagerMock);
 
-        inOrder.verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js",
+        inOrder.verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
                 p30.toFile().toURI().toString());
-        inOrder.verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js",
+        inOrder.verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
                 p40.toFile().toURI().toString());
-        inOrder.verify(scriptEngineManager, timeout(10000).times(1)).createScriptEngine("js",
+        inOrder.verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
                 p50.toFile().toURI().toString());
     }
 
     @Test
     public void testReloadActiveWhenDependencyChanged() {
-        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        ScriptEngineFactory scriptEngineFactoryMock = mock(ScriptEngineFactory.class);
+        when(scriptEngineFactoryMock.getDependencyTracker()).thenReturn(scriptDependencyTrackerMock);
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
-        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+        when(scriptEngineContainer.getFactory()).thenReturn(scriptEngineFactoryMock);
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
 
         updateStartLevel(100);
 
@@ -308,15 +328,16 @@ class ScriptFileWatcherTest {
 
         scriptFileWatcher.onDependencyChange(p.toFile().toURI().toString());
 
-        verify(scriptEngineManager, timeout(10000).times(2)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, timeout(10000).times(2)).createScriptEngine("js",
+                p.toFile().toURI().toString());
     }
 
     @Test
     public void testNotReloadInactiveWhenDependencyChanged() {
-        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
-        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
 
         Path p = getFile("script.js");
 
@@ -324,44 +345,15 @@ class ScriptFileWatcherTest {
 
         scriptFileWatcher.onDependencyChange(p.toFile().toURI().toString());
 
-        verify(scriptEngineManager, never()).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, never()).createScriptEngine("js", p.toFile().toURI().toString());
     }
 
-    @Test
-    public void testRegisterDependency() {
-        when(scriptEngineManager.isSupported("js")).thenReturn(true);
-        ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
-        when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
-        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
-
-        updateStartLevel(100);
-
-        Path p = getFile("script.js");
-
-        when(scriptEngineContainer.getIdentifier()).thenReturn(p.toFile().toURI().toString());
-
-        // capture and run the listener
-        ArgumentCaptor<ScriptDependencyListener> listener = ArgumentCaptor.forClass(ScriptDependencyListener.class);
-
-        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
-
-        verify(scriptEngineManager).loadScript(eq(p.toFile().toURI().toString()), any(), listener.capture());
-
-        listener.getValue().accept("test");
-
-        // verify the dependency was tracked
-        verify(dependencyTracker).addLibForScript(p.toFile().toURI().toString(), "test");
-    }
-
-    /**
-     * @see https://github.com/openhab/openhab-core/issues/2246
-     */
     @Test
     public void testRemoveBeforeReAdd() {
-        when(scriptEngineManager.isSupported("js")).thenReturn(true);
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
-        when(scriptEngineManager.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
 
         updateStartLevel(100);
 
@@ -370,7 +362,8 @@ class ScriptFileWatcherTest {
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
         scriptFileWatcher.processWatchEvent(null, ENTRY_MODIFY, p);
 
-        verify(scriptEngineManager).removeEngine(p.toFile().toURI().toString());
-        verify(scriptEngineManager, timeout(10000).times(2)).createScriptEngine("js", p.toFile().toURI().toString());
+        verify(scriptEngineManagerMock).removeEngine(p.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, timeout(10000).times(2)).createScriptEngine("js",
+                p.toFile().toURI().toString());
     }
 }
