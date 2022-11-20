@@ -100,6 +100,7 @@ public class ScriptModuleHandlerFactory extends BaseModuleHandlerFactory impleme
     public void onDependencyChange(String engineIdentifier) {
         ScriptActionHandler handler = trackedHandlers.get(engineIdentifier);
         if (handler != null) {
+            logger.debug("Resetting script engine for script {}", engineIdentifier);
             handler.resetScriptEngine();
         }
     }

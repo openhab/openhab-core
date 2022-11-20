@@ -12,6 +12,10 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.loader;
 
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
@@ -27,10 +31,6 @@ import org.openhab.core.automation.module.script.rulesupport.internal.loader.col
 import org.openhab.core.service.AbstractWatchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
 /**
  * The {@link AbstractScriptDependencyTracker} tracks dependencies between scripts and reloads dependees
@@ -87,7 +87,8 @@ public abstract class AbstractScriptDependencyTracker implements ScriptDependenc
                         || (file.canRead() && (kind.equals(ENTRY_CREATE) || kind.equals(ENTRY_MODIFY))))) {
                     AbstractScriptDependencyTracker.this.dependencyChanged(file.getPath());
                 }
-            }};
+            }
+        };
     }
 
     protected void dependencyChanged(String dependency) {
