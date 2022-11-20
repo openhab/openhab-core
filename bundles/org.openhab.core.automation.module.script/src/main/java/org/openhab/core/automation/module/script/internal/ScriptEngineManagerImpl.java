@@ -155,6 +155,12 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
                     addAttributeToScriptContext(engine, CONTEXT_KEY_ENGINE_IDENTIFIER, engineIdentifier);
                     addAttributeToScriptContext(engine, CONTEXT_KEY_EXTENSION_ACCESSOR, scriptExtensionManager);
+
+                    ScriptDependencyTracker tracker = engineFactory.getDependencyTracker();
+                    if (tracker != null) {
+                        addAttributeToScriptContext(engine, CONTEXT_KEY_DEPENDENCY_LISTENER,
+                                tracker.getTracker(engineIdentifier));
+                    }
                 } else {
                     logger.error("ScriptEngine for language '{}' could not be created for identifier: {}", scriptType,
                             engineIdentifier);
@@ -174,12 +180,6 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             logger.error("Could not load script, as no ScriptEngine has been created");
         } else {
             ScriptEngine engine = container.getScriptEngine();
-
-            ScriptDependencyTracker tracker = container.getFactory().getDependencyTracker();
-            if (tracker != null) {
-                addAttributeToScriptContext(engine, CONTEXT_KEY_DEPENDENCY_LISTENER,
-                        tracker.getTracker(engineIdentifier));
-            }
 
             try {
                 engine.eval(scriptData);

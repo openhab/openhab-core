@@ -14,6 +14,8 @@ package org.openhab.core.automation.module.script.internal.factory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -23,6 +25,7 @@ import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.BaseModuleHandlerFactory;
 import org.openhab.core.automation.handler.ModuleHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
+import org.openhab.core.automation.module.script.ScriptDependencyTracker;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.automation.module.script.internal.handler.ScriptActionHandler;
 import org.openhab.core.automation.module.script.internal.handler.ScriptConditionHandler;
@@ -39,14 +42,16 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-@Component(service = ModuleHandlerFactory.class)
-public class ScriptModuleHandlerFactory extends BaseModuleHandlerFactory {
+@Component(service = { ModuleHandlerFactory.class, ScriptDependencyTracker.Listener.class })
+public class ScriptModuleHandlerFactory extends BaseModuleHandlerFactory implements ScriptDependencyTracker.Listener {
 
     private final Logger logger = LoggerFactory.getLogger(ScriptModuleHandlerFactory.class);
 
     private static final Collection<String> TYPES = List.of(ScriptActionHandler.TYPE_ID,
             ScriptConditionHandler.TYPE_ID);
     private @NonNullByDefault({}) ScriptEngineManager scriptEngineManager;
+
+    private Map<String, ScriptActionHandler> trackedHandlers = new ConcurrentHashMap<>();
 
     @Override
     @Deactivate
@@ -68,7 +73,9 @@ public class ScriptModuleHandlerFactory extends BaseModuleHandlerFactory {
                     scriptEngineManager);
             return handler;
         } else if (ScriptActionHandler.TYPE_ID.equals(moduleTypeUID) && module instanceof Action) {
-            ScriptActionHandler handler = new ScriptActionHandler((Action) module, ruleUID, scriptEngineManager);
+            ScriptActionHandler handler = new ScriptActionHandler((Action) module, ruleUID, scriptEngineManager,
+                    this::onHandlerRemoval);
+            trackedHandlers.put(handler.getEngineIdentifier(), handler);
             return handler;
         } else {
             logger.error("The ModuleHandler is not supported: {}", moduleTypeUID);
@@ -83,5 +90,17 @@ public class ScriptModuleHandlerFactory extends BaseModuleHandlerFactory {
 
     public void unsetScriptEngineManager(ScriptEngineManager scriptEngineManager) {
         this.scriptEngineManager = null;
+    }
+
+    private void onHandlerRemoval(ScriptActionHandler handler) {
+        trackedHandlers.values().remove(handler);
+    }
+
+    @Override
+    public void onDependencyChange(String engineIdentifier) {
+        ScriptActionHandler handler = trackedHandlers.get(engineIdentifier);
+        if (handler != null) {
+            handler.resetScriptEngine();
+        }
     }
 }

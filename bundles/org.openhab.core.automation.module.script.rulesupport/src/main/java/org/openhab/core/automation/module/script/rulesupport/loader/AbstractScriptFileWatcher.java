@@ -321,10 +321,13 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
     public void onDependencyChange(@Nullable String scriptId) {
         logger.debug("Reimporting {}...", scriptId);
         try {
-            importFileWhenReady(new ScriptFileReference(new URL(scriptId)));
-        } catch (MalformedURLException e) {
-            logger.warn("Failed to reimport {} as it cannot be parsed as a URL", scriptId);
+            ScriptFileReference scriptFileReference = new ScriptFileReference(new URL(scriptId));
+            if (loaded.contains(scriptFileReference)) {
+                importFileWhenReady(scriptFileReference);
+            }
+        } catch (MalformedURLException ignored) {
         }
+        logger.debug("Ignoring dependency change for {} as it is no file or not loaded by this file watcher", scriptId);
     }
 
     @Override
