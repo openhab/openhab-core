@@ -22,9 +22,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptDependencyTracker;
 import org.openhab.core.automation.module.script.rulesupport.internal.loader.ScriptLibraryWatcher;
 import org.openhab.core.automation.module.script.rulesupport.internal.loader.collection.BidiSetBag;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +96,8 @@ public abstract class AbstractScriptDependencyTracker implements ScriptDependenc
     /**
      * Add a dependency change listener
      *
-     * Since this is done via service injection and OSGi annotations are not inherited it is required that sub-classes expose this method with proper annotation
+     * Since this is done via service injection and OSGi annotations are not inherited it is required that sub-classes
+     * expose this method with proper annotation
      *
      * @param listener the dependency change listener
      */
