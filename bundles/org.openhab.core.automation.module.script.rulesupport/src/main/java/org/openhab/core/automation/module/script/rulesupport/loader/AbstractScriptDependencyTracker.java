@@ -12,6 +12,9 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.loader;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.WatchEvent;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,10 +23,14 @@ import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptDependencyTracker;
-import org.openhab.core.automation.module.script.rulesupport.internal.loader.ScriptLibraryWatcher;
 import org.openhab.core.automation.module.script.rulesupport.internal.loader.collection.BidiSetBag;
+import org.openhab.core.service.AbstractWatchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
 /**
  * The {@link AbstractScriptDependencyTracker} tracks dependencies between scripts and reloads dependees
@@ -31,6 +38,7 @@ import org.slf4j.LoggerFactory;
  * that wants to support dependency tracking
  *
  * @author Jonathan Gilbert - Initial contribution
+ * @author Jan N. Klug - Refactored to OSGi service
  */
 @NonNullByDefault
 public abstract class AbstractScriptDependencyTracker implements ScriptDependencyTracker {
@@ -41,27 +49,45 @@ public abstract class AbstractScriptDependencyTracker implements ScriptDependenc
     private final Set<ScriptDependencyTracker.Listener> dependencyChangeListeners = ConcurrentHashMap.newKeySet();
 
     private final BidiSetBag<String, String> scriptToLibs = new BidiSetBag<>();
-    private @Nullable ScriptLibraryWatcher scriptLibraryWatcher;
+    private @Nullable AbstractWatchService dependencyWatchService;
 
     public AbstractScriptDependencyTracker(final String libraryPath) {
         this.libraryPath = libraryPath;
     }
 
     public void activate() {
-        ScriptLibraryWatcher scriptLibraryWatcher = createScriptLibraryWatcher();
-        scriptLibraryWatcher.activate();
-        this.scriptLibraryWatcher = scriptLibraryWatcher;
+        AbstractWatchService dependencyWatchService = createDependencyWatchService();
+        dependencyWatchService.activate();
+        this.dependencyWatchService = dependencyWatchService;
     }
 
     public void deactivate() {
-        ScriptLibraryWatcher scriptLibraryWatcher = this.scriptLibraryWatcher;
-        if (scriptLibraryWatcher != null) {
-            scriptLibraryWatcher.deactivate();
+        AbstractWatchService dependencyWatchService = this.dependencyWatchService;
+        if (dependencyWatchService != null) {
+            dependencyWatchService.deactivate();
         }
     }
 
-    protected ScriptLibraryWatcher createScriptLibraryWatcher() {
-        return new ScriptLibraryWatcher(libraryPath, this::dependencyChanged);
+    protected AbstractWatchService createDependencyWatchService() {
+        return new AbstractWatchService(libraryPath) {
+            @Override
+            protected boolean watchSubDirectories() {
+                return true;
+            }
+
+            @Override
+            protected WatchEvent.Kind<?> @Nullable [] getWatchEventKinds(Path path) {
+                return new WatchEvent.Kind<?>[] { ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY };
+            }
+
+            @Override
+            protected void processWatchEvent(WatchEvent<?> watchEvent, WatchEvent.Kind<?> kind, Path path) {
+                File file = path.toFile();
+                if (!file.isHidden() && (kind.equals(ENTRY_DELETE)
+                        || (file.canRead() && (kind.equals(ENTRY_CREATE) || kind.equals(ENTRY_MODIFY))))) {
+                    AbstractScriptDependencyTracker.this.dependencyChanged(file.getPath());
+                }
+            }};
     }
 
     protected void dependencyChanged(String dependency) {

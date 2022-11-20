@@ -30,7 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.openhab.core.automation.module.script.ScriptDependencyTracker;
-import org.openhab.core.automation.module.script.rulesupport.internal.loader.ScriptLibraryWatcher;
+import org.openhab.core.service.AbstractWatchService;
 
 /**
  * The {@link AbstractScriptDependencyTrackerTest} contains tests for the {@link AbstractScriptDependencyTracker}
@@ -42,7 +42,7 @@ public class AbstractScriptDependencyTrackerTest {
 
     private static final String WATCH_DIR = "test";
 
-    private @Nullable ScriptLibraryWatcher scriptLibraryWatcher;
+    private @Nullable AbstractWatchService dependencyWatchService;
 
     private @NonNullByDefault({}) AbstractScriptDependencyTracker scriptDependencyTracker;
 
@@ -51,10 +51,10 @@ public class AbstractScriptDependencyTrackerTest {
         scriptDependencyTracker = new AbstractScriptDependencyTracker(WATCH_DIR) {
 
             @Override
-            protected ScriptLibraryWatcher createScriptLibraryWatcher() {
-                ScriptLibraryWatcher scriptLibraryWatcher = Mockito.spy(super.createScriptLibraryWatcher());
-                AbstractScriptDependencyTrackerTest.this.scriptLibraryWatcher = scriptLibraryWatcher;
-                return scriptLibraryWatcher;
+            protected AbstractWatchService createDependencyWatchService() {
+                AbstractWatchService dependencyWatchService = Mockito.spy(super.createDependencyWatchService());
+                AbstractScriptDependencyTrackerTest.this.dependencyWatchService = dependencyWatchService;
+                return dependencyWatchService;
             }
 
             @Override
@@ -62,6 +62,7 @@ public class AbstractScriptDependencyTrackerTest {
                 super.dependencyChanged(dependency);
             }
         };
+
         scriptDependencyTracker.activate();
     }
 
@@ -72,18 +73,18 @@ public class AbstractScriptDependencyTrackerTest {
 
     @Test
     public void testScriptLibraryWatcherIsCreatedAndActivated() {
-        assertThat(scriptLibraryWatcher, is(notNullValue()));
+        assertThat(dependencyWatchService, is(notNullValue()));
 
-        assertThat(scriptLibraryWatcher.getSourcePath(), is(Path.of(WATCH_DIR)));
+        assertThat(dependencyWatchService.getSourcePath(), is(Path.of(WATCH_DIR)));
 
-        verify(scriptLibraryWatcher).activate();
+        verify(dependencyWatchService).activate();
     }
 
     @Test
     public void testScriptLibraryWatchersIsDeactivatedOnShutdown() {
         scriptDependencyTracker.deactivate();
 
-        verify(scriptLibraryWatcher).deactivate();
+        verify(dependencyWatchService).deactivate();
     }
 
     @Test
