@@ -17,9 +17,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.common.registry.AbstractProvider;
+import org.openhab.core.common.registry.ManagedProvider;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -30,7 +32,8 @@ import org.osgi.service.component.annotations.Component;
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ScriptedRuleProvider.class, RuleProvider.class })
-public class ScriptedRuleProvider extends AbstractProvider<Rule> implements RuleProvider {
+public class ScriptedRuleProvider extends AbstractProvider<Rule>
+        implements RuleProvider, ManagedProvider<Rule, String> {
     private final Map<String, Rule> rules = new HashMap<>();
 
     @Override
@@ -38,21 +41,48 @@ public class ScriptedRuleProvider extends AbstractProvider<Rule> implements Rule
         return rules.values();
     }
 
-    public void addRule(Rule rule) {
+    @Override
+    public @Nullable Rule get(String ruleUID) {
+        return rules.get(ruleUID);
+    }
+
+    @Override
+    public void add(Rule rule) {
         rules.put(rule.getUID(), rule);
 
         notifyListenersAboutAddedElement(rule);
     }
 
-    public void removeRule(String ruleUID) {
-        Rule rule = rules.get(ruleUID);
-        if (rule != null) {
-            removeRule(rule);
+    @Deprecated
+    public void addRule(Rule rule) {
+        add(rule);
+    }
+
+    @Override
+    public @Nullable Rule update(Rule rule) {
+        Rule oldRule = rules.get(rule.getUID());
+        if (oldRule != null) {
+            rules.put(rule.getUID(), rule);
+            notifyListenersAboutUpdatedElement(oldRule, rule);
         }
+        return oldRule;
+    }
+
+    @Override
+    public @Nullable Rule remove(String ruleUID) {
+        Rule rule = rules.remove(ruleUID);
+        if (rule != null) {
+            notifyListenersAboutRemovedElement(rule);
+        }
+        return rule;
+    }
+
+    @Deprecated
+    public void removeRule(String ruleUID) {
+        remove(ruleUID);
     }
 
     public void removeRule(Rule rule) {
-        rules.remove(rule.getUID());
-        notifyListenersAboutRemovedElement(rule);
+        remove(rule.getUID());
     }
 }
