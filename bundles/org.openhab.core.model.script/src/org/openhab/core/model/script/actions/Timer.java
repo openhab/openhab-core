@@ -27,7 +27,7 @@ import java.time.ZonedDateTime;
 @NonNullByDefault
 public class Timer {
 
-    private org.openhab.core.automation.module.script.action.Timer timer;
+    private final org.openhab.core.automation.module.script.action.Timer timer;
 
     public Timer(org.openhab.core.automation.module.script.action.Timer timer) {
         this.timer = timer;
