@@ -16,7 +16,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.lib.Procedures;
-import org.openhab.core.automation.module.script.action.Timer;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.model.script.engine.Script;
@@ -75,21 +74,21 @@ public class ScriptExecution {
 
     @ActionDoc(text = "create a timer")
     public static Timer createTimer(ZonedDateTime zonedDateTime, Procedures.Procedure0 closure) {
-        return ScriptExecutionActionService.getScriptExecution().createTimer(zonedDateTime, closure::apply);
+        return new Timer(ScriptExecutionActionService.getScriptExecution().createTimer(zonedDateTime, closure::apply));
     }
 
     @ActionDoc(text = "create an identifiable timer ")
     public static Timer createTimer(@Nullable String identifier, ZonedDateTime zonedDateTime, Procedures.Procedure0 closure) {
-        return ScriptExecutionActionService.getScriptExecution().createTimer(identifier, zonedDateTime, closure::apply);
+        return new Timer(ScriptExecutionActionService.getScriptExecution().createTimer(identifier, zonedDateTime, closure::apply));
     }
 
     @ActionDoc(text = "create a timer with argument")
     public static Timer createTimerWithArgument(ZonedDateTime zonedDateTime, Object arg1, Procedures.Procedure1 closure) {
-        return ScriptExecutionActionService.getScriptExecution().createTimerWithArgument(zonedDateTime, arg1, closure::apply);
+        return new Timer(ScriptExecutionActionService.getScriptExecution().createTimerWithArgument(zonedDateTime, arg1, closure::apply));
     }
 
     @ActionDoc(text = "create an identifiable timer with argument")
     public static Timer createTimerWithArgument(@Nullable String identifier, ZonedDateTime zonedDateTime, Object arg1, Procedures.Procedure1 closure) {
-        return ScriptExecutionActionService.getScriptExecution().createTimerWithArgument(identifier, zonedDateTime, arg1, closure::apply);
+        return new Timer(ScriptExecutionActionService.getScriptExecution().createTimerWithArgument(identifier, zonedDateTime, arg1, closure::apply));
     }
 }
