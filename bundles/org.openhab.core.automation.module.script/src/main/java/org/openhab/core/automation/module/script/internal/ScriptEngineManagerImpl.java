@@ -198,7 +198,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     logger.trace("ScriptEngine does not support Invocable interface");
                 }
             } catch (Exception ex) {
-                logger.error("Error during evaluation of script '{}': {}", engineIdentifier, ex.getMessage());
+                logger.error("Error during evaluation of script '{}'", engineIdentifier, ex);
             }
         }
     }
