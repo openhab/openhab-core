@@ -59,6 +59,9 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     private static final float RGB2XY[][] = { { 0.4124f, 0.3576f, 0.1805f }, { 0.2126f, 0.7152f, 0.0722f },
             { 0.0193f, 0.1192f, 0.9505f } };
 
+    private static final String UNIT_HSB = "%hsb%";
+    private static final String UNIT_RGB = "%rgb%";
+
     protected BigDecimal hue;
     protected BigDecimal saturation;
 
@@ -241,6 +244,21 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     @Override
     public String toFullString() {
         return getHue() + "," + getSaturation() + "," + getBrightness();
+    }
+
+    @Override
+    public String format(String pattern) {
+        String formatPattern = pattern;
+        String val = getHue() + "," + getSaturation() + "," + getBrightness();
+        if (pattern.contains(UNIT_HSB)) {
+            formatPattern = pattern.replace(UNIT_HSB, "%s");
+        } else if (pattern.contains(UNIT_RGB)) {
+            formatPattern = pattern.replace(UNIT_RGB, "%s");
+            PercentType[] rgb = toRGB();
+            val = convertPercentToByte(rgb[0]) + "," + convertPercentToByte(rgb[1]) + ","
+                    + convertPercentToByte(rgb[2]);
+        }
+        return String.format(formatPattern, val);
     }
 
     @Override
