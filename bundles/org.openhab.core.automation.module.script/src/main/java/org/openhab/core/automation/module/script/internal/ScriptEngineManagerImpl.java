@@ -199,6 +199,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 }
             } catch (Exception ex) {
                 logger.error("Error during evaluation of script '{}': {}", engineIdentifier, ex.getMessage());
+                logger.debug("", ex);
             }
         }
     }
