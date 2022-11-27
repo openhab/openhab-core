@@ -21,8 +21,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
-import org.openhab.core.library.unit.ImperialUnits;
-import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
@@ -44,10 +42,6 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class SystemOffsetProfile implements StateProfile {
 
-    private static final @Nullable QuantityType<Temperature> ZERO_CELSIUS_IN_KELVIN = new QuantityType<>(0,
-            SIUnits.CELSIUS).toUnit(Units.KELVIN);
-    private static final @Nullable QuantityType<Temperature> ZERO_FAHRENHEIT_IN_KELVIN = new QuantityType<>(0,
-            ImperialUnits.FAHRENHEIT).toUnit(Units.KELVIN);
     static final String OFFSET_PARAM = "offset";
 
     private final Logger logger = LoggerFactory.getLogger(SystemOffsetProfile.class);
@@ -152,20 +146,11 @@ public class SystemOffsetProfile implements StateProfile {
             QuantityType<Temperature> offset) {
         // do the math in Kelvin and afterwards convert it back to the unit of the state
         final QuantityType<Temperature> kelvinState = qtState.toUnit(Units.KELVIN);
-        final QuantityType<Temperature> kelvinOffset = offset.toUnit(Units.KELVIN);
+        final QuantityType<Temperature> kelvinOffset = offset.toUnitRelative(Units.KELVIN);
         if (kelvinState == null || kelvinOffset == null) {
             return null;
         }
 
-        final QuantityType<Temperature> finalOffset;
-        if (SIUnits.CELSIUS.equals(offset.getUnit())) {
-            finalOffset = kelvinOffset.add(ZERO_CELSIUS_IN_KELVIN.negate());
-        } else if (ImperialUnits.FAHRENHEIT.equals(offset.getUnit())) {
-            finalOffset = kelvinOffset.add(ZERO_FAHRENHEIT_IN_KELVIN.negate());
-        } else {
-            // offset is already in Kelvin
-            finalOffset = offset;
-        }
-        return kelvinState.add(finalOffset).toUnit(qtState.getUnit());
+        return kelvinState.add(kelvinOffset).toUnit(qtState.getUnit());
     }
 }

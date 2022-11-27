@@ -314,6 +314,31 @@ public class QuantityType<T extends Quantity<T>> extends Number
         return null;
     }
 
+    /**
+     * Convert this QuantityType to a new {@link QuantityType} using the given target unit.
+     *
+     * Similar to {@link toUnit}, except that it treats the values as relative instead of absolute.
+     * This means that any offsets in the conversion of absolute values are ignored.
+     * This is useful when your quantity represents a delta, and not necessarily a measured
+     * value itself. For example, 32 °F, when converted with toUnit to Celsius, it will become 0 °C.
+     * But when converted with toUnitRelative, it will become 17.8 °C.
+     *
+     * @param targetUnit the unit to which this {@link QuantityType} will be converted to.
+     * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of an error.
+     */
+    @SuppressWarnings("unchecked")
+    public @Nullable QuantityType<T> toUnitRelative(Unit<T> targetUnit) {
+        if (targetUnit.equals(getUnit())) {
+            return this;
+        }
+        if (!quantity.getUnit().isCompatible(targetUnit)) {
+            return null;
+        }
+        Quantity<?> result = quantity.to(targetUnit);
+
+        return new QuantityType<T>(result.getValue(), (Unit<T>) targetUnit);
+    }
+
     public BigDecimal toBigDecimal() {
         return new BigDecimal(quantity.getValue().toString());
     }

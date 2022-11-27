@@ -40,6 +40,7 @@ import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.unit.BinaryPrefix;
+import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
@@ -482,5 +483,12 @@ public class QuantityTypeTest {
         assertThat(mireds.equals(colorTemp), is(true));
         QuantityType<?> andBack = mireds.toInvertibleUnit(Units.KELVIN);
         assertEquals(2700, andBack.intValue());
+    }
+
+    @Test
+    public void testRelativeConversion() {
+        QuantityType<Temperature> c = new QuantityType("1 °C");
+        QuantityType<Temperature> f = c.toUnitRelative(ImperialUnits.FAHRENHEIT);
+        assertEquals(1.8, f.doubleValue());
     }
 }
