@@ -1094,7 +1094,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the number of persisted values of a given {@link Item} from a point in time until now.
+     * Gets the number of available historic data points of a given {@link Item} from a point in time until now.
      * The default {@link PersistenceService} is used.
      *
      * @param item the {@link Item} to query
@@ -1106,7 +1106,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the number of persisted values of a given {@link Item} from a point in time until now.
+     * Gets the number of available historic data points of a given {@link Item} from a point in time until now.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the {@link Item} to query
@@ -1119,7 +1119,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the number of persisted values of a given {@link Item} between two points in time.
+     * Gets the number of available historic data points of a given {@link Item} between two points in time.
      * The default {@link PersistenceService} is used.
      *
      * @param item the {@link Item} to query
@@ -1132,7 +1132,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the number of persisted values of a given {@link Item} between two points in time.
+     * Gets the number of available historic data points of a given {@link Item} between two points in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the {@link Item} to query
