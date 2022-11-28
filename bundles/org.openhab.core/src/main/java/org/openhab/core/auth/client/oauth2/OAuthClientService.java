@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.google.gson.JsonDeserializer;
 
 /**
- * This is the service factory to produce a OAuth2 service client that authenticates using OAUTH2.
+ * This is the service factory to produce an OAuth2 service client that authenticates using OAUTH2.
  * This is a service factory pattern; the OAuthe2 service client is not shared between bundles.
  *
  * <p>
@@ -104,7 +104,7 @@ public interface OAuthClientService extends AutoCloseable {
      *            If the state is null, a random UUID will be generated and added state=<random UUID>,
      *            the state will be assigned to the requestParams in this case.
      * @return An authorization URL during the Authorization Code Grant with http request parameters filled in.
-     *         e.g Produces an URL string like this:
+     *         e.g Produces a URL string like this:
      *         https://oauth.provider?response_type=code&client_id=myClientId&redirect_uri=redirectURI&scope=myScope&state=mySecureRandomState
      * @throws OAuthException if authorizationUrl or clientId were not previously provided (null)
      */

@@ -27,7 +27,7 @@ import org.openhab.core.items.ItemUtil;
 import org.openhab.core.types.State;
 
 /**
- * The {@link ItemDTOMapper} is an utility class to map items into item data transfer objects (DTOs).
+ * The {@link ItemDTOMapper} is a utility class to map items into item data transfer objects (DTOs).
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Stefan Bußweiler - Moved to core and renamed class to DTO mapper

@@ -24,7 +24,7 @@
 
 	<thing-type id="onoff-light" extensible="alert">
 		<label>Magic Light - On/Off</label>
-		<description>A on/off light</description>
+		<description>An on/off light</description>
 
 		<channels>
 			<channel id="switch" typeId="switch"/>

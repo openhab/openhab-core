@@ -15,7 +15,7 @@ package org.openhab.core.voice;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * An handle to a {@link STTService}
+ * A handle to a {@link STTService}
  *
  * @author Kelly Davis - Initial contribution
  */

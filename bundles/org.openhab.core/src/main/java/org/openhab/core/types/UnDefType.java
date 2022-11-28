@@ -17,7 +17,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * There are situations when item states do not have any defined value.
  * This might be because they have not been initialized yet (never
- * received an state update so far) or because their state is ambiguous
+ * received a state update so far) or because their state is ambiguous
  * (e.g. a dimmed light that is treated as a switch (ON/OFF) will have
  * an undefined state if it is dimmed to 50%).
  *

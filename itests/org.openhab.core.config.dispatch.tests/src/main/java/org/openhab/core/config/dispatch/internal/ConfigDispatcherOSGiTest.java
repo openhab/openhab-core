@@ -1004,7 +1004,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
          * If a property is not present in the configuration's properties,
          * configuration.getProperties().get(property) should return null.
          *
-         * Sending events, related to modification of file, is a OS specific action.
+         * Sending events, related to modification of file, is an OS specific action.
          * So when we check if a configuration is updated, we use separate waitForAssert-s
          * in order to be sure that the events are processed before the assertion.
          */
@@ -1025,7 +1025,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
          * If a property is not present in the configuration's properties,
          * configuration.getProperties().get(property) should return null.
          *
-         * Sending events, related to modification of file, is a OS specific action.
+         * Sending events, related to modification of file, is an OS specific action.
          * So when we check if a configuration is updated, we use separate waitForAssert-s
          * in order to be sure that the events are processed before the assertion.
          */

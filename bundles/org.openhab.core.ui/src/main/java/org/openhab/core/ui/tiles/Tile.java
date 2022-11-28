@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * A tile can be registered by an UI as a service in order to appear on the main openHAB UI.
+ * A tile can be registered by a UI as a service in order to appear on the main openHAB UI.
  *
  * @author Kai Kreuzer - initial contribution
  * @author Yannick Schaus - refactored into core, remove references to dashboard

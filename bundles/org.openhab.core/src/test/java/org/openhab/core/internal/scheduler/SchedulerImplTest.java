@@ -99,7 +99,7 @@ public class SchedulerImplTest extends JavaTest {
     @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testAfterResolvedWithException() throws InterruptedException {
         Callable<Void> callable = () -> {
-            // Pass a exception not very likely thrown by the scheduler it self to avoid missing real exceptions.
+            // Pass an exception not very likely thrown by the scheduler it self to avoid missing real exceptions.
             throw new FileNotFoundException("testBeforeTimeoutException");
         };
         ScheduledCompletableFuture<Void> after = scheduler.after(callable, Duration.ofMillis(100));

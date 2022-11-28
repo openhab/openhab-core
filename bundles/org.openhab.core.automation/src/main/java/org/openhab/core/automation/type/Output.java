@@ -46,7 +46,7 @@ import org.openhab.core.automation.Rule;
 public class Output {
 
     /**
-     * is an unique name of the {@code Output} in scope of the {@link Module}.
+     * is a unique name of the {@code Output} in scope of the {@link Module}.
      */
     private String name;
 
@@ -112,7 +112,7 @@ public class Output {
      * @param name a unique name of the {@code Output}.
      * @param type the type of the output data.
      * @param label a single word description of the {@code Output}.
-     * @param description is an user friendly description of the {@code Output}.
+     * @param description is a user friendly description of the {@code Output}.
      * @param tags are associated with the {@code Output}. The tags add additional restrictions to connections
      *            between {@link Input}s and {@link Output}s. The {@link Input}'s tags must be subset of the
      *            {@code Output}'s tags to succeed the connection.<br>
@@ -147,7 +147,7 @@ public class Output {
      * This method is used for getting the name of {@code Output}. It must be unique in
      * scope of {@link Rule}.
      *
-     * @return name is an unique identifier of the {@code Output}.
+     * @return name is a unique identifier of the {@code Output}.
      */
     public String getName() {
         return name;

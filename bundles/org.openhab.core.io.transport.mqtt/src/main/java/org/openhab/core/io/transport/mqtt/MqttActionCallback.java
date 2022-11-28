@@ -15,7 +15,7 @@ package org.openhab.core.io.transport.mqtt;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Implement this to be notified of the success or error of a any method in {@link MqttBrokerConnection} that takes a
+ * Implement this to be notified of the success or error of any method in {@link MqttBrokerConnection} that takes a
  * callback.
  *
  * @author David Graeff - Initial contribution

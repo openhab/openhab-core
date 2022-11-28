@@ -17,7 +17,7 @@ import org.openhab.core.semantics.Point;
 import org.openhab.core.semantics.TagInfo;
 
 /**
- * This class defines a Alarm.
+ * This class defines an Alarm.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */

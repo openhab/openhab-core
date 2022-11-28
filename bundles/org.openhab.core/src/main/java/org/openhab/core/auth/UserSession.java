@@ -37,7 +37,7 @@ public class UserSession {
     /**
      * Constructs a new session.
      *
-     * @param sessionId an unique ID for the session
+     * @param sessionId a unique ID for the session
      * @param refreshToken the refresh token associated to the session
      * @param clientId the client ID associated to the session
      * @param redirectUri the callback URI provided when the client was authorized by the user

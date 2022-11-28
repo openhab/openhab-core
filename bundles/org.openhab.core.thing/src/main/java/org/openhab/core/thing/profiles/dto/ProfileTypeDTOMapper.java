@@ -17,7 +17,7 @@ import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.TriggerProfileType;
 
 /**
- * The {@link ProfileTypeDTOMapper} is an utility class to map profile-types into profile-type data transfer
+ * The {@link ProfileTypeDTOMapper} is a utility class to map profile-types into profile-type data transfer
  * objects (DTOs).
  *
  * @author Stefan Triller - Initial contribution

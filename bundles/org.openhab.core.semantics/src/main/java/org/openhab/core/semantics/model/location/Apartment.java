@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.semantics.TagInfo;
 
 /**
- * This class defines a Apartment.
+ * This class defines an Apartment.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */

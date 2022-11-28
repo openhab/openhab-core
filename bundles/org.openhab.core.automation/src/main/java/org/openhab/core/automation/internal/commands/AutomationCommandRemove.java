@@ -89,7 +89,7 @@ public class AutomationCommandRemove extends AutomationCommand {
      * This method serves to create an {@link URL} object or {@link File} object from a string that is passed as
      * a parameter of the command. From the {@link File} object the URL is constructed.
      *
-     * @param parameterValue is a string that is passed as parameter of the command and it supposed to be an URL
+     * @param parameterValue is a string that is passed as parameter of the command and it supposed to be a URL
      *            representation.
      * @return an {@link URL} object created from the string that is passed as parameter of the command or <b>null</b>
      *         if either no legal protocol could be found in the specified string or the string could not be parsed.

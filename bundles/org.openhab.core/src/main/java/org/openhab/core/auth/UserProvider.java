@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Provider;
 
 /**
- * A interface for a {@link Provider} of {@link User} entities
+ * An interface for a {@link Provider} of {@link User} entities
  *
  * @author Yannick Schaus - initial contribution
  *

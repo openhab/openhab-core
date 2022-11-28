@@ -17,7 +17,7 @@ import org.openhab.core.semantics.Equipment;
 import org.openhab.core.semantics.TagInfo;
 
 /**
- * This class defines a Inverter.
+ * This class defines an Inverter.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */

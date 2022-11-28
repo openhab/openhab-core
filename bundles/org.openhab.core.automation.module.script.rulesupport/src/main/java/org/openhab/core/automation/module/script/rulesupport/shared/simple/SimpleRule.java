@@ -35,7 +35,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.Configuration;
 
 /**
- * convenience Rule class with an action handler. This allows to define Rules which have a execution block.
+ * convenience Rule class with an action handler. This allows to define Rules which have an execution block.
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Kai Kreuzer - made it implement Rule

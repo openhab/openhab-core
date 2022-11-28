@@ -377,7 +377,7 @@ public class TokenResource implements RESTResource {
             throw new TokenEndpointException(ErrorType.INVALID_REQUEST);
         }
 
-        // find an user associated with the provided refresh token
+        // find a user associated with the provided refresh token
         Optional<User> refreshTokenUser = userRegistry.getAll().stream().filter(
                 u -> ((ManagedUser) u).getSessions().stream().anyMatch(s -> refreshToken.equals(s.getRefreshToken())))
                 .findAny();

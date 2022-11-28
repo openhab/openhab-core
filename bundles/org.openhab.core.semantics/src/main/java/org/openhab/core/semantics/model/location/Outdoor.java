@@ -17,7 +17,7 @@ import org.openhab.core.semantics.Location;
 import org.openhab.core.semantics.TagInfo;
 
 /**
- * This class defines a Outdoor.
+ * This class defines an Outdoor.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */

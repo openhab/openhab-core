@@ -28,7 +28,7 @@ public final class RuleExecution implements Comparable<RuleExecution> {
     private final Rule rule;
 
     /**
-     * Creates an new {@link RuleExecution}.
+     * Creates a new {@link RuleExecution}.
      *
      * @param date The time when the rule will be executed.
      * @param rule The rule that will be executed.

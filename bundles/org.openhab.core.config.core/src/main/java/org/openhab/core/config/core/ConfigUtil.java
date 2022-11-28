@@ -174,7 +174,7 @@ public class ConfigUtil {
      * @param value the value to return as normalized type
      * @param configDescriptionParameter the parameter that needs to be normalized
      * @return corresponding value as a valid type
-     * @throws IllegalArgumentException if a invalid type has been given
+     * @throws IllegalArgumentException if an invalid type has been given
      */
     public static Object normalizeType(Object value, @Nullable ConfigDescriptionParameter configDescriptionParameter) {
         if (configDescriptionParameter != null) {

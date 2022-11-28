@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is an ModuleHandler implementation for trigger channels with specific events
+ * This is a ModuleHandler implementation for trigger channels with specific events
  *
  * @author Stefan Triller - Initial contribution
  */

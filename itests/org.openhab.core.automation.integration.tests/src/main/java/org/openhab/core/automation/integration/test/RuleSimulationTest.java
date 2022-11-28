@@ -177,7 +177,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
     }
 
     /**
-     * creates a rule with an cron expression trigger, that fires Wednesday and Friday at 10:30. Has one
+     * creates a rule with a cron expression trigger, that fires Wednesday and Friday at 10:30. Has one
      * condition that it should only run between 8:00 and 11:00.
      */
     private static Rule createRuleWithCronExpressionTrigger() {
@@ -206,7 +206,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
     }
 
     /**
-     * creates a rule with an day of time trigger at 16:00, that has an side condition to fire only
+     * creates a rule with a day of time trigger at 16:00, that has a side condition to fire only
      * on Monday and Wednesday.
      */
     private static Rule createRuleWithTimeOfDayTrigger() {
@@ -234,7 +234,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
     }
 
     /**
-     * creates a rule with an day of time trigger at 10:00, that has an side condition to fire only
+     * creates a rule with a day of time trigger at 10:00, that has a side condition to fire only
      * on the weekend.
      */
     private static Rule createRuleWithEphemerisCondition() {
