@@ -69,6 +69,8 @@ def createTagSetClass(def line, String tagSet) {
     def parent = line.Parent
     def parentClass = parent ? parent : type
     def pkg = type.toLowerCase()
+    def ch = label.toLowerCase().charAt(0)
+    def article = ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o' || ch == 'u' ? "an" : "a"
     def file = new FileWriter("${baseDir}/src/main/java/org/openhab/core/semantics/model/${pkg}/${tag}.java")
     file.write(header)
     file.write("package org.openhab.core.semantics.model." + pkg + ";\n\n")
@@ -79,7 +81,7 @@ def createTagSetClass(def line, String tagSet) {
     file.write("""import org.openhab.core.semantics.TagInfo;
 
 /**
- * This class defines a ${label}.
+ * This class defines ${article} ${label}.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
