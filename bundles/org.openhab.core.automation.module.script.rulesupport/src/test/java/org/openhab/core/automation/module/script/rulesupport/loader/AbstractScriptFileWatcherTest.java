@@ -59,12 +59,9 @@ class AbstractScriptFileWatcherTest {
 
     private @NonNullByDefault({}) AbstractScriptFileWatcher scriptFileWatcher;
 
-    @Mock
-    private @NonNullByDefault({}) ScriptEngineManager scriptEngineManagerMock;
-    @Mock
-    private @NonNullByDefault({}) ScriptDependencyTracker scriptDependencyTrackerMock;
-    @Mock
-    private @NonNullByDefault({}) ReadyService readyService;
+    private @Mock @NonNullByDefault({}) ScriptEngineManager scriptEngineManagerMock;
+    private @Mock @NonNullByDefault({}) ScriptDependencyTracker scriptDependencyTrackerMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyService;
 
     protected @NonNullByDefault({}) @TempDir Path tempScriptDir;
 

@@ -85,7 +85,7 @@ public abstract class AbstractScriptDependencyTracker implements ScriptDependenc
                 File file = path.toFile();
                 if (!file.isHidden() && (kind.equals(ENTRY_DELETE)
                         || (file.canRead() && (kind.equals(ENTRY_CREATE) || kind.equals(ENTRY_MODIFY))))) {
-                    AbstractScriptDependencyTracker.this.dependencyChanged(file.getPath());
+                    dependencyChanged(file.getPath());
                 }
             }
         };
@@ -93,8 +93,7 @@ public abstract class AbstractScriptDependencyTracker implements ScriptDependenc
 
     protected void dependencyChanged(String dependency) {
         Set<String> scripts = new HashSet<>(scriptToLibs.getKeys(dependency)); // take a copy as it will change as we
-        AbstractScriptDependencyTracker.this.logger.debug("Library {} changed; reimporting {} scripts...", libraryPath,
-                scripts.size());
+        logger.debug("Library {} changed; reimporting {} scripts...", libraryPath, scripts.size());
         for (String scriptUrl : scripts) {
             for (ScriptDependencyTracker.Listener listener : dependencyChangeListeners) {
                 try {
@@ -123,7 +122,7 @@ public abstract class AbstractScriptDependencyTracker implements ScriptDependenc
     /**
      * Add a dependency change listener
      *
-     * Since this is done via service injection and OSGi annotations are not inherited it is required that sub-classes
+     * Since this is done via service injection and OSGi annotations are not inherited it is required that subclasses
      * expose this method with proper annotation
      *
      * @param listener the dependency change listener
