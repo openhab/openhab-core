@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.semantics.TagInfo;
 
 /**
- * This class defines a Entry.
+ * This class defines an Entry.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */

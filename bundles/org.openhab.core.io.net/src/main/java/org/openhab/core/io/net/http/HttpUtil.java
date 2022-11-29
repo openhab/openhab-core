@@ -347,7 +347,7 @@ public class HttpUtil {
     }
 
     /**
-     * Download the image data from an URL.
+     * Download the image data from a URL.
      *
      * If content type is not found in the headers, the data is scanned to determine the content type.
      *
@@ -360,7 +360,7 @@ public class HttpUtil {
     }
 
     /**
-     * Download the image data from an URL.
+     * Download the image data from a URL.
      *
      * If content type is not found in the headers, the data is scanned to determine the content type.
      *
@@ -374,7 +374,7 @@ public class HttpUtil {
     }
 
     /**
-     * Download the image data from an URL.
+     * Download the image data from a URL.
      *
      * @param url the URL of the image to be downloaded
      * @param scanTypeInContent true to allow the scan of data to determine the content type if not found in the headers
@@ -388,7 +388,7 @@ public class HttpUtil {
     }
 
     /**
-     * Download the image data from an URL.
+     * Download the image data from a URL.
      *
      * @param url the URL of the image to be downloaded
      * @param scanTypeInContent true to allow the scan of data to determine the content type if not found in the headers
@@ -403,7 +403,7 @@ public class HttpUtil {
     }
 
     /**
-     * Download the data from an URL.
+     * Download the data from a URL.
      *
      * @param url the URL of the data to be downloaded
      * @param contentTypeRegex the REGEX the content type must match; null to ignore the content type
@@ -419,7 +419,7 @@ public class HttpUtil {
     }
 
     /**
-     * Download the data from an URL.
+     * Download the data from a URL.
      *
      * @param url the URL of the data to be downloaded
      * @param contentTypeRegex the REGEX the content type must match; null to ignore the content type

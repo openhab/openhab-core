@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * An UIComponent represents a piece of UI element for a client frontend to render; it is kept very simple and delegates
+ * A UIComponent represents a piece of UI element for a client frontend to render; it is kept very simple and delegates
  * the actual rendering and behavior to the frontend.
  *
  * It has a reference to a component's name as defined by the frontend, a map of configuration parameters, and several

@@ -32,8 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is an AudioStream from an URL. Note that some sinks, like Sonos, can directly handle URL
- * based streams, and therefore can/should call getURL() to get an direct reference to the URL.
+ * This is an AudioStream from a URL. Note that some sinks, like Sonos, can directly handle URL
+ * based streams, and therefore can/should call getURL() to get a direct reference to the URL.
  *
  * @author Karel Goderis - Initial contribution
  * @author Kai Kreuzer - Refactored to not require a source

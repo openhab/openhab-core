@@ -71,7 +71,7 @@ import org.slf4j.LoggerFactory;
  * This service provides functionality around voice services and is the central service to be used directly by others.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Yannick Schaus - Added ability to provide a item for feedback during listening phases
+ * @author Yannick Schaus - Added ability to provide an item for feedback during listening phases
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort TTS options

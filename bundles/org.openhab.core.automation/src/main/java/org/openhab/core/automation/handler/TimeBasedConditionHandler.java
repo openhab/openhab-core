@@ -17,7 +17,7 @@ import java.time.ZonedDateTime;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * {@link ConditionHandler} that evaluates, if the current time satisfies an specified condition.
+ * {@link ConditionHandler} that evaluates, if the current time satisfies a specified condition.
  *
  * @author Sönke Küper - Initial contribution
  */

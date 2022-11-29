@@ -17,7 +17,7 @@ import org.openhab.core.semantics.Equipment;
 import org.openhab.core.semantics.TagInfo;
 
 /**
- * This class defines a Alarm System.
+ * This class defines an Alarm System.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */

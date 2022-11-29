@@ -28,7 +28,7 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.util.ThingHelper;
 
 /**
- * The {@link ThingDTOMapper} is an utility class to map things into data transfer objects (DTO).
+ * The {@link ThingDTOMapper} is a utility class to map things into data transfer objects (DTO).
  *
  * @author Stefan Bußweiler - Initial contribution
  * @author Kai Kreuzer - Added DTO to Thing mapping

@@ -86,7 +86,7 @@ public interface DiscoveryResult {
     /**
      * Returns the representation property of this result object.
      * <p>
-     * The representation property represents an unique human and/or machine readable identifier of the thing that was
+     * The representation property represents a unique human and/or machine readable identifier of the thing that was
      * discovered. Its actual value can be retrieved from the {@link DiscoveryResult#getProperties()} map. Such unique
      * identifiers are typically the <code>ipAddress</code>, the <code>macAddress</code> or the
      * <code>serialNumber</code> of the discovered thing.

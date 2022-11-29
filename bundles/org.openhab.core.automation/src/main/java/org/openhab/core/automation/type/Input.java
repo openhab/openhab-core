@@ -135,7 +135,7 @@ public class Input {
     /**
      * Gets the name of Input. It must be unique in scope of the {@link Rule}.
      *
-     * @return name is an unique identifier of the Input.
+     * @return name is a unique identifier of the Input.
      */
     public String getName() {
         return name;

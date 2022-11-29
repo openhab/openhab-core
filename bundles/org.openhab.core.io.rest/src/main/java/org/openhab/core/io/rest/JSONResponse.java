@@ -183,7 +183,7 @@ public class JSONResponse {
     }
 
     /**
-     * An piped input stream that is marked to produce JSON string.
+     * A piped input stream that is marked to produce JSON string.
      *
      * @author Markus Rathgeb - Initial contribution
      */

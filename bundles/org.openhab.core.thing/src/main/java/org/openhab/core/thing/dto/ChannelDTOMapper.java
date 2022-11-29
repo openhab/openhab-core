@@ -22,7 +22,7 @@ import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
- * The {@link ChannelDTOMapper} is an utility class to map channels into channel data transfer objects (DTOs).
+ * The {@link ChannelDTOMapper} is a utility class to map channels into channel data transfer objects (DTOs).
  *
  * @author Stefan Bußweiler - Initial contribution
  * @author Kai Kreuzer - added DTO to channel mapping

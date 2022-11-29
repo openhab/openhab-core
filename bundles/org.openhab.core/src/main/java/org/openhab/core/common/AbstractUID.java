@@ -51,7 +51,7 @@ public abstract class AbstractUID {
     }
 
     /**
-     * Creates a AbstractUID for a list of segments.
+     * Creates an AbstractUID for a list of segments.
      *
      * @param segments the id segments
      */

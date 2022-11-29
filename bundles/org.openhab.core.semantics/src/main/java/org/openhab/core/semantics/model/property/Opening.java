@@ -17,7 +17,7 @@ import org.openhab.core.semantics.Property;
 import org.openhab.core.semantics.TagInfo;
 
 /**
- * This class defines a Opening.
+ * This class defines an Opening.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */

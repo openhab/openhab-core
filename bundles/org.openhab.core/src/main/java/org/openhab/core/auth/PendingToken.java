@@ -16,9 +16,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * The pending information used in a OAuth2 authorization flow, set after the user has authorized the client to access
+ * The pending information used in an OAuth2 authorization flow, set after the user has authorized the client to access
  * resources, and has been redirected to the callback URI with an authorization code. The information will be used when
- * it calls the token endpoint to exchange the authorization code for a access token and a refresh token.
+ * it calls the token endpoint to exchange the authorization code for an access token and a refresh token.
  *
  * The authorization code for a token is sensible information while it is valid, therefore the client is supposed to
  * call the token endpoint to perform the exchange it immediately after receiving it. The information should remain in

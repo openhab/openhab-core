@@ -17,7 +17,7 @@ import org.openhab.core.semantics.Location;
 import org.openhab.core.semantics.TagInfo;
 
 /**
- * This class defines a Indoor.
+ * This class defines an Indoor.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */

@@ -26,7 +26,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public interface SerialPortManager {
     /**
-     * Gets an serial port identifier for a given name.
+     * Gets a serial port identifier for a given name.
      *
      * @param name the name
      * @return a serial port identifier or null

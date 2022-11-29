@@ -56,7 +56,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 
 /**
- * An endpoint to generate and provide a OpenAPI description.
+ * An endpoint to generate and provide an OpenAPI description.
  *
  * @author Markus Rathgeb - Initial contribution
  * @author Kai Kreuzer - made it a RESTResource to register in the root bean
@@ -93,7 +93,7 @@ public class OpenApiResource implements RESTResource {
     /**
      * Gets the current JAX-RS Whiteboard provided endpoint information by OpenAPI.
      *
-     * @return a OpenAPI description of the endpoints
+     * @return an OpenAPI description of the endpoints
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

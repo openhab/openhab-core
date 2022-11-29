@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * This is an data transfer object for a UI tile.
+ * This is a data transfer object for a UI tile.
  *
  * @author Yannick Schaus - Initial contribution
  */
