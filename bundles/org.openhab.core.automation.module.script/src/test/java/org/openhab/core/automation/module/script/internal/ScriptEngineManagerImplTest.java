@@ -53,26 +53,13 @@ public class ScriptEngineManagerImplTest {
 
     private static final String SUPPORTED_SCRIPT_TYPE = "supported";
 
-    @Mock
-    private @NonNullByDefault({}) ScriptExtensionManager scriptExtensionManagerMock;
-
-    @Mock
-    private @NonNullByDefault({}) ScriptEngineFactory scriptEngineFactoryMock;
-
-    @Mock
-    private @NonNullByDefault({}) ScriptEngine scriptEngineMock;
-
-    @Mock
-    private @NonNullByDefault({}) javax.script.ScriptEngineFactory internalScriptEngineFactoryMock;
-
-    @Mock
-    private @NonNullByDefault({}) ScriptDependencyTracker scriptDependencyTrackerMock;
-
-    @Mock
-    private @NonNullByDefault({}) ScriptContext scriptContextMock;
-
-    @Mock
-    private @NonNullByDefault({}) Consumer<String> dependencyListenerMock;
+    private @Mock @NonNullByDefault({}) ScriptExtensionManager scriptExtensionManagerMock;
+    private @Mock @NonNullByDefault({}) ScriptEngineFactory scriptEngineFactoryMock;
+    private @Mock @NonNullByDefault({}) ScriptEngine scriptEngineMock;
+    private @Mock @NonNullByDefault({}) javax.script.ScriptEngineFactory internalScriptEngineFactoryMock;
+    private @Mock @NonNullByDefault({}) ScriptDependencyTracker scriptDependencyTrackerMock;
+    private @Mock @NonNullByDefault({}) ScriptContext scriptContextMock;
+    private @Mock @NonNullByDefault({}) Consumer<String> dependencyListenerMock;
 
     private @NonNullByDefault({}) ScriptEngineManagerImpl scriptEngineManager;
 
