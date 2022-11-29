@@ -84,6 +84,24 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         scriptEngineManager.removeEngine(engineIdentifier);
     }
 
+    /**
+     * Reset the script engine to force a script reload
+     *
+     */
+    public synchronized void resetScriptEngine() {
+        scriptEngineManager.removeEngine(engineIdentifier);
+        scriptEngine = Optional.empty();
+    }
+
+    /**
+     * Gets the script engine identifier for this module
+     *
+     * @return the engine identifier string
+     */
+    public String getEngineIdentifier() {
+        return engineIdentifier;
+    }
+
     protected Optional<ScriptEngine> getScriptEngine() {
         return scriptEngine.isPresent() ? scriptEngine : createScriptEngine();
     }

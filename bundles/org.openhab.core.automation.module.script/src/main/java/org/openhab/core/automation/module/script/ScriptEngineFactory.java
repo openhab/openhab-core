@@ -74,4 +74,14 @@ public interface ScriptEngineFactory {
      */
     @Nullable
     ScriptEngine createScriptEngine(String scriptType);
+
+    /**
+     * This method returns a {@link ScriptDependencyTracker} if it is available
+     *
+     * @return a {@link ScriptDependencyTracker} or <code>null</code> if dependency tracking is not supported for
+     *         {@link ScriptEngine}s created by this factory
+     */
+    default @Nullable ScriptDependencyTracker getDependencyTracker() {
+        return null;
+    }
 }

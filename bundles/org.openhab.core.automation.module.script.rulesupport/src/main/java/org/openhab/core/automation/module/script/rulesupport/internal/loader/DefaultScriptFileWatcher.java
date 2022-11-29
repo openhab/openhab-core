@@ -16,7 +16,7 @@ import java.io.File;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
-import org.openhab.core.automation.module.script.rulesupport.loader.ScriptFileWatcher;
+import org.openhab.core.automation.module.script.rulesupport.loader.AbstractScriptFileWatcher;
 import org.openhab.core.service.ReadyService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -31,14 +31,14 @@ import org.osgi.service.component.annotations.Reference;
  */
 @NonNullByDefault
 @Component(immediate = true)
-public class DefaultScriptFileWatcher extends ScriptFileWatcher {
+public class DefaultScriptFileWatcher extends AbstractScriptFileWatcher {
 
     private static final String FILE_DIRECTORY = "automation" + File.separator + "jsr223";
 
     @Activate
     public DefaultScriptFileWatcher(final @Reference ScriptEngineManager manager,
             final @Reference ReadyService readyService) {
-        super(manager, null, readyService, FILE_DIRECTORY);
+        super(manager, readyService, FILE_DIRECTORY);
     }
 
     @Activate

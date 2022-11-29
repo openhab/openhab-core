@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -25,61 +26,84 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Provides optimized lookup of values for a key, as well as keys referencing a value.
  *
  * @author Jonathan Gilbert - Initial contribution
+ * @author Jan N. Klug - Make implementation thread-safe
  * @param <K> Type of Key
  * @param <V> Type of Value
  */
 @NonNullByDefault
 public class BidiSetBag<K, V> {
-    private Map<K, Set<V>> keyToValues = new HashMap<>();
-    private Map<V, Set<K>> valueToKeys = new HashMap<>();
+
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final Map<K, Set<V>> keyToValues = new HashMap<>();
+    private final Map<V, Set<K>> valueToKeys = new HashMap<>();
 
     public void put(K key, V value) {
-        addElement(keyToValues, key, value);
-        addElement(valueToKeys, value, key);
+        lock.writeLock().lock();
+        try {
+            keyToValues.computeIfAbsent(key, k -> new HashSet<>()).add(value);
+            valueToKeys.computeIfAbsent(value, v -> new HashSet<>()).add(key);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     public Set<V> getValues(K key) {
-        Set<V> existing = keyToValues.get(key);
-        return existing == null ? Collections.emptySet() : Collections.unmodifiableSet(existing);
+        lock.readLock().lock();
+        try {
+            Set<V> values = keyToValues.getOrDefault(key, Set.of());
+            return Collections.unmodifiableSet(values);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public Set<K> getKeys(V value) {
-        Set<K> existing = valueToKeys.get(value);
-        return existing == null ? Collections.emptySet() : Collections.unmodifiableSet(existing);
+        lock.readLock().lock();
+        try {
+            Set<K> keys = valueToKeys.getOrDefault(value, Set.of());
+            return Collections.unmodifiableSet(keys);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public Set<V> removeKey(K key) {
-        Set<V> values = keyToValues.remove(key);
-        if (values != null) {
-            for (V value : values) {
-                valueToKeys.computeIfPresent(value, (k, v) -> {
-                    v.remove(key);
-                    return v;
-                });
+        lock.writeLock().lock();
+        try {
+            Set<V> values = keyToValues.remove(key);
+            if (values != null) {
+                for (V value : values) {
+                    valueToKeys.computeIfPresent(value, (k, v) -> {
+                        v.remove(key);
+                        return v;
+                    });
+                }
+                return values;
+            } else {
+                return Set.of();
             }
-            return values;
-        } else {
-            return Collections.emptySet();
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
     public Set<K> removeValue(V value) {
-        Set<K> keys = valueToKeys.remove(value);
-        if (keys != null) {
-            for (K key : keys) {
-                keyToValues.computeIfPresent(key, (k, v) -> {
-                    v.remove(value);
-                    return v;
-                });
+        lock.writeLock().lock();
+        try {
+            Set<K> keys = valueToKeys.remove(value);
+            if (keys != null) {
+                for (K key : keys) {
+                    keyToValues.computeIfPresent(key, (k, v) -> {
+                        v.remove(value);
+                        return v;
+                    });
+                }
+                return keys;
+            } else {
+                return Set.of();
             }
-            return keys;
-        } else {
-            return Collections.emptySet();
+        } finally {
+            lock.writeLock().unlock();
         }
-    }
-
-    private static <T, U> void addElement(Map<T, Set<U>> map, T key, U value) {
-        Set<U> elements = map.compute(key, (k, l) -> l == null ? new HashSet<>() : l);
-        elements.add(value);
     }
 }

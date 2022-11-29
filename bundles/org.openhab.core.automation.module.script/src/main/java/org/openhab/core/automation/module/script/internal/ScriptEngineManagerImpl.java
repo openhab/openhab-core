@@ -31,7 +31,7 @@ import javax.script.SimpleScriptContext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.module.script.ScriptDependencyListener;
+import org.openhab.core.automation.module.script.ScriptDependencyTracker;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
@@ -155,6 +155,12 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
                     addAttributeToScriptContext(engine, CONTEXT_KEY_ENGINE_IDENTIFIER, engineIdentifier);
                     addAttributeToScriptContext(engine, CONTEXT_KEY_EXTENSION_ACCESSOR, scriptExtensionManager);
+
+                    ScriptDependencyTracker tracker = engineFactory.getDependencyTracker();
+                    if (tracker != null) {
+                        addAttributeToScriptContext(engine, CONTEXT_KEY_DEPENDENCY_LISTENER,
+                                tracker.getTracker(engineIdentifier));
+                    }
                 } else {
                     logger.error("ScriptEngine for language '{}' could not be created for identifier: {}", scriptType,
                             engineIdentifier);
@@ -169,21 +175,11 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
     @Override
     public void loadScript(String engineIdentifier, InputStreamReader scriptData) {
-        loadScript(engineIdentifier, scriptData, null);
-    }
-
-    @Override
-    public void loadScript(String engineIdentifier, InputStreamReader scriptData,
-            @Nullable ScriptDependencyListener dependencyListener) {
         ScriptEngineContainer container = loadedScriptEngineInstances.get(engineIdentifier);
         if (container == null) {
             logger.error("Could not load script, as no ScriptEngine has been created");
         } else {
             ScriptEngine engine = container.getScriptEngine();
-
-            if (dependencyListener != null) {
-                addAttributeToScriptContext(engine, CONTEXT_KEY_DEPENDENCY_LISTENER, dependencyListener);
-            }
 
             try {
                 engine.eval(scriptData);
@@ -208,6 +204,10 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     public void removeEngine(String engineIdentifier) {
         ScriptEngineContainer container = loadedScriptEngineInstances.remove(engineIdentifier);
         if (container != null) {
+            ScriptDependencyTracker tracker = container.getFactory().getDependencyTracker();
+            if (tracker != null) {
+                tracker.removeTracking(engineIdentifier);
+            }
             ScriptEngine scriptEngine = container.getScriptEngine();
             if (scriptEngine instanceof Invocable) {
                 Invocable inv = (Invocable) scriptEngine;
