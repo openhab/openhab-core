@@ -13,7 +13,6 @@
 package org.openhab.core.automation.module.script.internal.action;
 
 import java.time.ZonedDateTime;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -64,7 +63,7 @@ public class TimerImpl implements Timer {
 
     @Override
     public @Nullable ZonedDateTime getExecutionTime() {
-        return future.isCancelled() ? null : ZonedDateTime.now().plusNanos(future.getDelay(TimeUnit.NANOSECONDS));
+        return future.isCancelled() ? null : future.getScheduledTime();
     }
 
     @Override
