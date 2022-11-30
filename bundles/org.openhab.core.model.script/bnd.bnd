@@ -35,6 +35,7 @@ Import-Package: \
  org.openhab.core.thing,\
  org.openhab.core.thing.binding,\
  org.openhab.core.thing.events,\
+ org.openhab.core.transform,\
  org.openhab.core.transform.actions,\
  org.openhab.core.types,\
  org.openhab.core.voice,\
