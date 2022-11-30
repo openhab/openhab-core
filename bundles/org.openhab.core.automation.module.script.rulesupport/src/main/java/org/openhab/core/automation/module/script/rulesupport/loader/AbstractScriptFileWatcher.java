@@ -24,9 +24,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -138,43 +140,75 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
         if (rootDirectory.exists()) {
             File[] files = rootDirectory.listFiles();
             if (files != null) {
+                Collection<ScriptFileReference> resources = new TreeSet<>();
                 for (File f : files) {
                     if (!f.isHidden()) {
-                        importResources(f);
+                        resources.addAll(collectResources(f));
+                    }
+                }
+                importResources(resources);
+            }
+        }
+    }
+
+    /**
+     * Collects all resources from the specified file or directory,
+     * possibly including subdirectories.
+     *
+     * The results will be sorted.
+     *
+     * @param file the file or directory to import resources from
+     */
+    private Collection<ScriptFileReference> collectResources(File file) {
+        Collection<ScriptFileReference> resources = new TreeSet<>();
+        if (!file.exists()) {
+            return resources;
+        }
+
+        if (file.isDirectory()) {
+            if (watchSubDirectories()) {
+                File[] files = file.listFiles();
+                if (files != null) {
+                    for (File f : files) {
+                        if (!f.isHidden()) {
+                            resources.addAll(collectResources(f));
+                        }
                     }
                 }
             }
+        } else {
+            try {
+                URL url = file.toURI().toURL();
+                resources.add(new ScriptFileReference(url));
+            } catch (MalformedURLException e) {
+                // can't happen for the 'file' protocol handler with a correctly formatted URI
+                logger.debug("Can't create a URL", e);
+            }
+        }
+        return resources;
+    }
+
+    /**
+     * Imports a collect of resources
+     *
+     * @param resources the resources to be imported
+     */
+
+    private void importResources(Collection<ScriptFileReference> resources) {
+        for (ScriptFileReference ref : resources) {
+            importFileWhenReady(ref);
         }
     }
 
     /**
      * Imports resources from the specified file or directory.
      *
+     * All resources will be collected and sorted before importing.
+     *
      * @param file the file or directory to import resources from
      */
     private void importResources(File file) {
-        if (file.exists()) {
-            if (file.isDirectory()) {
-                if (watchSubDirectories()) {
-                    File[] files = file.listFiles();
-                    if (files != null) {
-                        for (File f : files) {
-                            if (!f.isHidden()) {
-                                importResources(f);
-                            }
-                        }
-                    }
-                }
-            } else {
-                try {
-                    URL url = file.toURI().toURL();
-                    importFileWhenReady(new ScriptFileReference(url));
-                } catch (MalformedURLException e) {
-                    // can't happen for the 'file' protocol handler with a correctly formatted URI
-                    logger.debug("Can't create a URL", e);
-                }
-            }
-        }
+        importResources(collectResources(file));
     }
 
     @Override
@@ -302,9 +336,7 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
             pending.removeAll(newlySupported);
         }
 
-        for (ScriptFileReference ref : newlySupported) {
-            importFileWhenReady(ref);
-        }
+        importResources(newlySupported);
     }
 
     private synchronized void onStartLevelChanged(int newLevel) {
