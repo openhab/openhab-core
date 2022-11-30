@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -55,9 +56,9 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
 
     private final Lock cacheLock = new ReentrantLock();
     private final Map<String, Object> sharedCache = new HashMap<>();
-    private final Map<String, Set<String>> sharedCacheKeyAccessors = new HashMap<>();
+    private final Map<String, Set<String>> sharedCacheKeyAccessors = new ConcurrentHashMap<>();
 
-    private final Map<String, ValueCacheImpl> privateCaches = new HashMap<>();
+    private final Map<String, ValueCacheImpl> privateCaches = new ConcurrentHashMap<>();
 
     public CacheScriptExtension() {
     }
