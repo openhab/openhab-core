@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 
 /**
- * A {@link ItemChannelLinkAddedEvent} notifies subscribers that an item channel link has been added.
+ * An {@link ItemChannelLinkAddedEvent} notifies subscribers that an item channel link has been added.
  * Events must be created with the {@link LinkEventFactory}.
  *
  * @author Dennis Nobel - Initial contribution

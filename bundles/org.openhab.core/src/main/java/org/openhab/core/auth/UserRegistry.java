@@ -40,7 +40,7 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
     public User register(String username, String password, Set<String> roles);
 
     /**
-     * Change the password for an {@link User} in this registry. The implementation receives the new password and is
+     * Change the password for a {@link User} in this registry. The implementation receives the new password and is
      * responsible for their secure storage (for instance by hashing the password).
      *
      * @param username the username of the existing user

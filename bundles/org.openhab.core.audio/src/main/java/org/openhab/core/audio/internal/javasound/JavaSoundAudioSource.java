@@ -229,7 +229,7 @@ public class JavaSoundAudioSource implements AudioSource {
     }
 
     /**
-     * Converts a javax.sound.sampled.AudioFormat to a org.openhab.core.audio.AudioFormat
+     * Converts a javax.sound.sampled.AudioFormat to an org.openhab.core.audio.AudioFormat
      *
      * @param audioFormat the AudioFormat to convert
      * @return The converted AudioFormat
