@@ -29,6 +29,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioManager;
+import org.openhab.core.audio.AudioSource;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
@@ -411,7 +412,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertThat(ttsService.getSynthesized(), is("Interpreted text"));
         assertTrue(sink.getIsStreamProcessed());
 
-        voiceManager.stopDialog(null);
+        voiceManager.stopDialog((AudioSource) null);
 
         assertTrue(ksService.isAborted());
     }
