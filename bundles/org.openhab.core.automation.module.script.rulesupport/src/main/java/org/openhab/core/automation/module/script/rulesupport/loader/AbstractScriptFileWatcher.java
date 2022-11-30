@@ -154,12 +154,14 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
      */
     private void importResources(File file) {
         if (file.exists()) {
-            File[] files = file.listFiles();
-            if (files != null) {
+            if (file.isDirectory()) {
                 if (watchSubDirectories()) {
-                    for (File f : files) {
-                        if (!f.isHidden()) {
-                            importResources(f);
+                    File[] files = file.listFiles();
+                    if (files != null) {
+                        for (File f : files) {
+                            if (!f.isHidden()) {
+                                importResources(f);
+                            }
                         }
                     }
                 }
@@ -190,13 +192,24 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
         File file = path.toFile();
         if (!file.isHidden()) {
             try {
-                URL fileUrl = file.toURI().toURL();
                 if (ENTRY_DELETE.equals(kind)) {
-                    removeFile(new ScriptFileReference(fileUrl));
+                    if (file.isDirectory()) {
+                        if (watchSubDirectories()) {
+                            synchronized (this) {
+                                String prefix = file.toString() + File.separator;
+                                var toRemove = loaded.stream()
+                                        .filter(f -> f.getScriptFileURL().getFile().startsWith(prefix))
+                                        .collect(Collectors.toList());
+                                toRemove.forEach(this::removeFile);
+                            }
+                        }
+                    } else {
+                        removeFile(new ScriptFileReference(file.toURI().toURL()));
+                    }
                 }
 
                 if (file.canRead() && (ENTRY_CREATE.equals(kind) || ENTRY_MODIFY.equals(kind))) {
-                    importFileWhenReady(new ScriptFileReference(fileUrl));
+                    importResources(file);
                 }
             } catch (MalformedURLException e) {
                 logger.error("malformed", e);
