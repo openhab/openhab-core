@@ -40,8 +40,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.automation.module.script.ScriptDependencyTracker;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
-import org.openhab.core.common.SafeCaller;
-import org.openhab.core.common.SafeCallerBuilder;
+import org.openhab.core.internal.common.SafeCallerImpl;
 
 /**
  * The {@link ScriptEngineManagerImplTest} is a test class for the {@link ScriptEngineManagerImpl}
@@ -65,44 +64,6 @@ public class ScriptEngineManagerImplTest {
 
     private @NonNullByDefault({}) ScriptEngineManagerImpl scriptEngineManager;
 
-    private static class SafeCallerMock implements SafeCaller {
-        public <T> SafeCallerBuilder<T> create(T target, Class<T> interfaceType) {
-            return new SafeCallerBuilderMock(target);
-        }
-
-        private static class SafeCallerBuilderMock<T> implements SafeCallerBuilder<T> {
-            final T target;
-
-            SafeCallerBuilderMock(T target) {
-                this.target = target;
-            }
-
-            public T build() {
-                return target;
-            }
-
-            public SafeCallerBuilder<T> withTimeout(long timeout) {
-                return this;
-            }
-
-            public SafeCallerBuilder<T> withIdentifier(Object identifier) {
-                return this;
-            }
-
-            public SafeCallerBuilder<T> onException(Consumer<Throwable> exceptionHandler) {
-                return this;
-            }
-
-            public SafeCallerBuilder<T> onTimeout(Runnable timeoutHandler) {
-                return this;
-            }
-
-            public SafeCallerBuilder<T> withAsync() {
-                return this;
-            }
-        }
-    }
-
     @BeforeEach
     public void setup() {
         when(scriptEngineMock.getFactory()).thenReturn(internalScriptEngineFactoryMock);
@@ -113,7 +74,7 @@ public class ScriptEngineManagerImplTest {
         when(scriptEngineFactoryMock.getDependencyTracker()).thenReturn(scriptDependencyTrackerMock);
         when(scriptDependencyTrackerMock.getTracker(any())).thenReturn(dependencyListenerMock);
 
-        scriptEngineManager = new ScriptEngineManagerImpl(scriptExtensionManagerMock, new SafeCallerMock());
+        scriptEngineManager = new ScriptEngineManagerImpl(scriptExtensionManagerMock, new SafeCallerImpl(null));
         scriptEngineManager.addScriptEngineFactory(scriptEngineFactoryMock);
     }
 
