@@ -277,7 +277,7 @@ public interface OAuthClientService extends AutoCloseable {
     boolean isClosed();
 
     /**
-     * Adds a {@link AccessTokenRefreshListener}.
+     * Adds an {@link AccessTokenRefreshListener}.
      *
      * @param listener the listener to add
      */

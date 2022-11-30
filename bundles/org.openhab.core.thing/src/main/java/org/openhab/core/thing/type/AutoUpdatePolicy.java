@@ -43,7 +43,7 @@ public enum AutoUpdatePolicy {
     RECOMMEND;
 
     /**
-     * Parses the input string into a {@link AutoUpdatePolicy}.
+     * Parses the input string into an {@link AutoUpdatePolicy}.
      *
      * @param input the input string
      * @return the parsed AutoUpdatePolicy

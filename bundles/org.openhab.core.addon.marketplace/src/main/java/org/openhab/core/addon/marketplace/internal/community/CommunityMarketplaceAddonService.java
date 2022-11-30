@@ -272,7 +272,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     }
 
     /**
-     * Transforms a {@link DiscourseTopicItem} to a {@link Addon}
+     * Transforms a {@link DiscourseTopicItem} to an {@link Addon}
      *
      * @param topic the topic
      * @return the list item
@@ -344,7 +344,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     }
 
     /**
-     * Transforms a {@link DiscourseTopicResponseDTO} to a {@link Addon}
+     * Transforms a {@link DiscourseTopicResponseDTO} to an {@link Addon}
      *
      * @param topic the topic
      * @return the list item

@@ -24,7 +24,7 @@ import org.openhab.core.voice.Voice;
 public class VoiceMapper {
 
     /**
-     * Maps a {@link Voice} to an {@link VoiceDTO}.
+     * Maps a {@link Voice} to a {@link VoiceDTO}.
      *
      * @param voice the voice
      *

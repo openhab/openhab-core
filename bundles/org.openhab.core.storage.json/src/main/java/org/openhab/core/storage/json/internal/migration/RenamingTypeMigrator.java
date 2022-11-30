@@ -15,7 +15,7 @@ package org.openhab.core.storage.json.internal.migration;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link RenamingTypeMigrator} is an {@link TypeMigrator} for renaming types
+ * The {@link RenamingTypeMigrator} is a {@link TypeMigrator} for renaming types
  *
  * @author Jan N. Klug - Initial contribution
  */

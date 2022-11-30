@@ -45,7 +45,7 @@ public class Semantics {
     }
 
     /**
-     * Checks if the given {@link Item} is a {@link Equipment}.
+     * Checks if the given {@link Item} is an {@link Equipment}.
      *
      * @param item the Item to check
      * @return return true, if the given Item is an Equipment, false otherwise

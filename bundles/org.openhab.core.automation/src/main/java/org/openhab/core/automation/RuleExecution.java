@@ -17,7 +17,7 @@ import java.util.Date;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Expected execution of an {@link Rule}.
+ * Expected execution of a {@link Rule}.
  *
  * @author Sönke Küper - Initial contribution
  */

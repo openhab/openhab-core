@@ -53,7 +53,7 @@ public interface AudioSink {
      * If the passed {@link AudioStream} is not supported by this instance, an {@link UnsupportedAudioStreamException}
      * is thrown.
      *
-     * If the passed {@link AudioStream} has a {@link AudioFormat} not supported by this instance,
+     * If the passed {@link AudioStream} has an {@link AudioFormat} not supported by this instance,
      * an {@link UnsupportedAudioFormatException} is thrown.
      *
      * In case the audioStream is null, this should be interpreted as a request to end any currently playing stream.
