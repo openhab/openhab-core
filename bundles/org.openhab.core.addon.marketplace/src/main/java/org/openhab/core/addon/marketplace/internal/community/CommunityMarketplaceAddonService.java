@@ -272,7 +272,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     }
 
     /**
-     * Transforms a {@link DiscourseTopicItem} to a {@link Addon}
+     * Transforms a {@link DiscourseTopicItem} to an {@link Addon}
      *
      * @param topic the topic
      * @return the list item
@@ -323,7 +323,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
                 "posts_count", postsCount, //
                 "tags", tags.toArray(String[]::new));
 
-        // try to use an handler to determine if the add-on is installed
+        // try to use a handler to determine if the add-on is installed
         boolean installed = addonHandlers.stream()
                 .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(id));
 
@@ -344,7 +344,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     }
 
     /**
-     * Transforms a {@link DiscourseTopicResponseDTO} to a {@link Addon}
+     * Transforms a {@link DiscourseTopicResponseDTO} to an {@link Addon}
      *
      * @param topic the topic
      * @return the list item

@@ -17,7 +17,7 @@ import org.openhab.core.semantics.Property;
 import org.openhab.core.semantics.TagInfo;
 
 /**
- * This class defines a Oil.
+ * This class defines an Oil.
  *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */

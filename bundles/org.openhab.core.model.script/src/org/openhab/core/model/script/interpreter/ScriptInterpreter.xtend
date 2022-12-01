@@ -69,7 +69,7 @@ public class ScriptInterpreter extends XbaseInterpreter {
             val value = context.getValue(QualifiedName.create(jvmField.simpleName))
             value ?: {
 
-                // Looks like we have an state, command or item field
+                // Looks like we have a state, command or item field
                 val fieldName = jvmField.simpleName
                 fieldName.stateOrCommand ?: fieldName.item
             }

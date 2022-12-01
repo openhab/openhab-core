@@ -116,7 +116,7 @@ public class AudioPlayer extends Thread {
     }
 
     /**
-     * Converts a org.openhab.core.audio.AudioFormat
+     * Converts an org.openhab.core.audio.AudioFormat
      * to a javax.sound.sampled.AudioFormat
      *
      * @param audioFormat The AudioFormat to convert

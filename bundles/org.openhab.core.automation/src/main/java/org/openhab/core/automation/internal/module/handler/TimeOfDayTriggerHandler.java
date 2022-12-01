@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is an ModuleHandler implementation for Triggers which trigger the rule
+ * This is a ModuleHandler implementation for Triggers which trigger the rule
  * at a specific time (format 'hh:mm').
  *
  * @author Kai Kreuzer - Initial contribution
@@ -57,7 +57,7 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
     }
 
     /**
-     * Creates an cron-Expression from the configured time.
+     * Creates a cron-Expression from the configured time.
      */
     private static String buildExpressionFromConfigurationTime(String time) {
         try {

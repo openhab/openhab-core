@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is an ModuleHandler implementation for Triggers which trigger the rule
+ * This is a ModuleHandler implementation for Triggers which trigger the rule
  * based on a cron expression. The cron expression can be set with the
  * configuration.
  *

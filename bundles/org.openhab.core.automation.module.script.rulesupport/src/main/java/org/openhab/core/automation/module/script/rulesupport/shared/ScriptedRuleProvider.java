@@ -12,34 +12,29 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.shared;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
-import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.common.registry.AbstractProvider;
+import org.openhab.core.common.registry.ManagedProvider;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * This RuleProvider keeps Rules at added by scripts during the runtime. This ensures that Rules are not kept on reboot,
+ * This RuleProvider keeps Rules added by scripts during runtime. This ensures that Rules are not kept on reboot,
  * but have to be added by the scripts again.
  *
  * @author Simon Merschjohann - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ScriptedRuleProvider.class, RuleProvider.class })
-public class ScriptedRuleProvider implements RuleProvider {
-    private final Collection<ProviderChangeListener<Rule>> listeners = new ArrayList<>();
-
+public class ScriptedRuleProvider extends AbstractProvider<Rule>
+        implements RuleProvider, ManagedProvider<Rule, String> {
     private final Map<String, Rule> rules = new HashMap<>();
-
-    @Override
-    public void addProviderChangeListener(ProviderChangeListener<Rule> listener) {
-        listeners.add(listener);
-    }
 
     @Override
     public Collection<Rule> getAll() {
@@ -47,29 +42,47 @@ public class ScriptedRuleProvider implements RuleProvider {
     }
 
     @Override
-    public void removeProviderChangeListener(ProviderChangeListener<Rule> listener) {
-        listeners.remove(listener);
+    public @Nullable Rule get(String ruleUID) {
+        return rules.get(ruleUID);
     }
 
-    public void addRule(Rule rule) {
+    @Override
+    public void add(Rule rule) {
         rules.put(rule.getUID(), rule);
 
-        for (ProviderChangeListener<Rule> providerChangeListener : listeners) {
-            providerChangeListener.added(this, rule);
-        }
+        notifyListenersAboutAddedElement(rule);
     }
 
-    public void removeRule(String ruleUID) {
-        Rule rule = rules.get(ruleUID);
-        if (rule != null) {
-            removeRule(rule);
+    @Deprecated
+    public void addRule(Rule rule) {
+        add(rule);
+    }
+
+    @Override
+    public @Nullable Rule update(Rule rule) {
+        Rule oldRule = rules.get(rule.getUID());
+        if (oldRule != null) {
+            rules.put(rule.getUID(), rule);
+            notifyListenersAboutUpdatedElement(oldRule, rule);
         }
+        return oldRule;
+    }
+
+    @Override
+    public @Nullable Rule remove(String ruleUID) {
+        Rule rule = rules.remove(ruleUID);
+        if (rule != null) {
+            notifyListenersAboutRemovedElement(rule);
+        }
+        return rule;
+    }
+
+    @Deprecated
+    public void removeRule(String ruleUID) {
+        remove(ruleUID);
     }
 
     public void removeRule(Rule rule) {
-        rules.remove(rule.getUID());
-        for (ProviderChangeListener<Rule> providerChangeListener : listeners) {
-            providerChangeListener.removed(this, rule);
-        }
+        remove(rule.getUID());
     }
 }

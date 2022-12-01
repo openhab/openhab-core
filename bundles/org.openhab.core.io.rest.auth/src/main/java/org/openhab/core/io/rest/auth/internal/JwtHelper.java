@@ -133,7 +133,7 @@ public class JwtHelper {
     }
 
     /**
-     * Performs verifications on a JWT token, then parses it into a {@link AuthenticationException} instance
+     * Performs verifications on a JWT token, then parses it into an {@link AuthenticationException} instance
      *
      * @param jwt the base64-encoded JWT token from the request
      * @return the {@link Authentication} derived from the information in the token

@@ -26,7 +26,7 @@ import org.openhab.core.thing.dto.ThingDTOMapper;
 import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
 
 /**
- * The {@link EnrichedThingDTOMapper} is an utility class to map things into enriched thing data transfer objects
+ * The {@link EnrichedThingDTOMapper} is a utility class to map things into enriched thing data transfer objects
  * (DTOs).
  *
  * @author Dennis Nobel - Initial contribution

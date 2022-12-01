@@ -324,7 +324,7 @@ public class ReferenceResolver {
      *             {@link SecurityManager#checkPackageAccess s.checkPackageAccess()} denies
      *             access to the package of this class</li>
      *             </ul>
-     * @throws ArrayIndexOutOfBoundsException if one of the tokens represent a invalid index in the list.
+     * @throws ArrayIndexOutOfBoundsException if one of the tokens represent an invalid index in the list.
      * @throws NullPointerException if the path references something in a non existing map entry.
      * @throws NumberFormatException if one of the tokens is accessing a list and the token that represent the
      *             index can't be converted to integer.

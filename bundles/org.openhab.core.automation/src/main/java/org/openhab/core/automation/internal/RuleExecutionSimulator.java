@@ -52,7 +52,7 @@ final class RuleExecutionSimulator {
     private final RuleEngineImpl ruleEngine;
 
     /**
-     * Constructs an new {@link RuleExecutionSimulator}.
+     * Constructs a new {@link RuleExecutionSimulator}.
      */
     public RuleExecutionSimulator(RuleRegistry ruleRegistry, RuleEngineImpl ruleEngine) {
         this.ruleRegistry = ruleRegistry;

@@ -31,6 +31,7 @@ import org.openhab.core.voice.text.InterpretationException;
  * @author Kai Kreuzer - Initial contribution
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Laurent Garnier - Updated methods startDialog and added method stopDialog
+ * @author Miguel Álvarez - New dialog methods using DialogContext
  */
 @NonNullByDefault
 public interface VoiceManager {
@@ -123,6 +124,20 @@ public interface VoiceManager {
     Voice getPreferredVoice(Set<Voice> voices);
 
     /**
+     * Returns an object with the default required services and configurations for dialog processing
+     *
+     * @throws IllegalStateException if some required service is not available
+     */
+    DialogContext getDefaultDialogContext() throws IllegalStateException;
+
+    /**
+     * Returns an object with the services and configurations last used for dialog processing if any.
+     * The underling value is updated before an active dialog starts to interpret the transcription result.
+     */
+    @Nullable
+    DialogContext getLastDialogContext();
+
+    /**
      * Starts an infinite dialog sequence using all default services: keyword spotting on the default audio source,
      * audio source listening to retrieve a question or a command (default Speech to Text service), interpretation and
      * handling of the command, and finally playback of the answer on the default audio sink (default Text to Speech
@@ -133,6 +148,7 @@ public interface VoiceManager {
      * @throws IllegalStateException if required services are not all available or the default locale is not supported
      *             by all these services or a dialog is already started for the default audio source
      */
+    @Deprecated
     void startDialog() throws IllegalStateException;
 
     /**
@@ -182,10 +198,24 @@ public interface VoiceManager {
      * @throws IllegalStateException if required services are not all available or the provided locale is not supported
      *             by all these services or a dialog is already started for this audio source
      */
+    @Deprecated
     void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts, @Nullable Voice voice,
             List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
             throws IllegalStateException;
+
+    /**
+     * Starts an infinite dialog sequence: keyword spotting on the audio source, audio source listening to retrieve
+     * a question or a command (Speech to Text service), interpretation and handling of the command, and finally
+     * playback of the answer on the audio sink (Text to Speech service).
+     *
+     * Only one dialog can be started for an audio source.
+     *
+     * @param context the record describing the configured services and options for the dialog
+     * @throws IllegalStateException if required services are not compatible or the provided locale is not supported
+     *             by all these services or a dialog is already started for this audio source
+     */
+    void startDialog(DialogContext context) throws IllegalStateException;
 
     /**
      * Stop the dialog associated to an audio source
@@ -193,7 +223,16 @@ public interface VoiceManager {
      * @param source the audio source or null to consider the default audio source
      * @throws IllegalStateException if no dialog is started for the audio source
      */
+    @Deprecated
     void stopDialog(@Nullable AudioSource source) throws IllegalStateException;
+
+    /**
+     * Stop the dialog associated to the audio source
+     *
+     * @param context the record describing the configured services and options for the dialog
+     * @throws IllegalStateException if no dialog is started for the audio source
+     */
+    void stopDialog(DialogContext context) throws IllegalStateException;
 
     /**
      * Executes a simple dialog sequence without keyword spotting using all default services: default audio source
@@ -205,6 +244,7 @@ public interface VoiceManager {
      * @throws IllegalStateException if required services are not all available or the provided default locale is not
      *             supported by all these services or a dialog is already started for the default audio source
      */
+    @Deprecated
     void listenAndAnswer() throws IllegalStateException;
 
     /**
@@ -227,9 +267,23 @@ public interface VoiceManager {
      * @throws IllegalStateException if required services are not all available or the provided locale is not supported
      *             by all these services or a dialog is already started for this audio source
      */
+    @Deprecated
     void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, @Nullable Voice voice,
             List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException;
+
+    /**
+     * Executes a simple dialog sequence without keyword spotting: audio source listening to retrieve a question or a
+     * command (Speech to Text service), interpretation and handling of the command, and finally playback of the
+     * answer on the audio sink (Text to Speech service).
+     *
+     * Only possible if no dialog processor is already started for the audio source.
+     *
+     * @param context the record describing the configured services and options for the dialog
+     * @throws IllegalStateException the provided locale is not supported by all these services or a dialog is already
+     *             started for this audio source
+     */
+    void listenAndAnswer(DialogContext context) throws IllegalStateException;
 
     /**
      * Retrieves a TTS service.

@@ -12,71 +12,52 @@
  */
 package org.openhab.core.model.script.actions;
 
-import java.time.ZonedDateTime;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import java.time.ZonedDateTime;
+
 /**
- * A timer is a handle for a block of code that is scheduled for future execution. A timer
- * can be canceled or rescheduled.
- * The script action "createTimer" returns a {@link Timer} instance.
+ * The {@link Timer} is a wrapper for the {@link org.openhab.core.automation.module.script.action.Timer}
+ * interface. This is necessary because the implementation methods of an interface can't be called from
+ * the script engine if the implementation is not in a public package or internal to the model bundle
  *
- * @author Kai Kreuzer - Initial contribution
+ * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public interface Timer {
+public class Timer {
 
-    /**
-     * Cancels the timer
-     *
-     * @return true, if cancellation was successful
-     */
-    boolean cancel();
+    private final org.openhab.core.automation.module.script.action.Timer timer;
 
-    /**
-     * Gets the scheduled exection time
-     *
-     * @return the scheduled execution time, or null if the timer was cancelled
-     */
-    @Nullable
-    ZonedDateTime getExecutionTime();
+    public Timer(org.openhab.core.automation.module.script.action.Timer timer) {
+        this.timer = timer;
+    }
 
-    /**
-     * Determines whether the scheduled execution is yet to happen.
-     *
-     * @return true, if the code is still scheduled to execute, false otherwise
-     */
-    boolean isActive();
+    public boolean cancel() {
+        return timer.cancel();
+    }
 
-    /**
-     * Determines whether the timer has been cancelled
-     *
-     * @return true, if the timer has been cancelled, false otherwise
-     */
-    boolean isCancelled();
+    public @Nullable ZonedDateTime getExecutionTime() {
+        return timer.getExecutionTime();
+    }
 
-    /**
-     * Determines whether the scheduled code is currently executed.
-     *
-     * @return true, if the code is being executed, false otherwise
-     */
-    boolean isRunning();
+    public boolean isActive() {
+        return timer.isActive();
+    }
 
-    /**
-     * Determines whether the scheduled execution has already terminated.
-     *
-     * @return true, if the scheduled execution has already terminated, false otherwise
-     */
-    boolean hasTerminated();
+    public boolean isCancelled() {
+        return timer.isCancelled();
+    }
 
-    /**
-     * Reschedules a timer to a new starting time.
-     * This can also be called after a timer has terminated, which will result in another
-     * execution of the same code.
-     *
-     * @param newTime the new time to execute the code
-     * @return true, if the rescheduling was done successful
-     */
-    boolean reschedule(ZonedDateTime newTime);
+    public boolean isRunning() {
+        return timer.isRunning();
+    }
+
+    public boolean hasTerminated() {
+        return timer.hasTerminated();
+    }
+
+    public boolean reschedule(ZonedDateTime newTime) {
+        return timer.reschedule(newTime);
+    }
 }

@@ -10,14 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.script.internal.actions;
+package org.openhab.core.automation.module.script.internal.action;
 
 import java.time.ZonedDateTime;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.model.script.actions.Timer;
+import org.openhab.core.automation.module.script.action.Timer;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.openhab.core.scheduler.Scheduler;
 import org.openhab.core.scheduler.SchedulerRunnable;
@@ -64,7 +63,7 @@ public class TimerImpl implements Timer {
 
     @Override
     public @Nullable ZonedDateTime getExecutionTime() {
-        return future.isCancelled() ? null : ZonedDateTime.now().plusNanos(future.getDelay(TimeUnit.NANOSECONDS));
+        return future.isCancelled() ? null : future.getScheduledTime();
     }
 
     @Override

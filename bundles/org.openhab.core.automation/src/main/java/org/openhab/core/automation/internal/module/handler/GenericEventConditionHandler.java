@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is the implementation of a event condition which checks if inputs matches configured values.
+ * This is the implementation of an event condition which checks if inputs matches configured values.
  *
  * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - refactored and simplified customized module handling

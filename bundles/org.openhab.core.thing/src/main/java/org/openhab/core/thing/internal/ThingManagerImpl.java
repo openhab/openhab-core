@@ -610,6 +610,7 @@ public class ThingManagerImpl
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public void thingUpdated(Thing oldThing, Thing newThing, ThingTrackerEvent thingTrackerEvent) {
         ThingUID thingUID = newThing.getUID();
+        normalizeThingConfiguration(oldThing);
         normalizeThingConfiguration(newThing);
         if (thingUpdatedLock.contains(thingUID)) {
             // called from the thing handler itself, therefore

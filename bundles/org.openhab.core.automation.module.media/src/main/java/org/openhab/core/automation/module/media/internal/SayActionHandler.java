@@ -23,7 +23,7 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.voice.VoiceManager;
 
 /**
- * This is an ModuleHandler implementation for Actions that trigger a TTS output through "say".
+ * This is a ModuleHandler implementation for Actions that trigger a TTS output through "say".
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Christoph Weitkamp - Added parameter volume

@@ -76,7 +76,7 @@ public class Audio {
         }
     }
 
-    @ActionDoc(text = "plays an audio stream from an url to the default sink")
+    @ActionDoc(text = "plays an audio stream from a url to the default sink")
     public static synchronized void playStream(
             @ParamDoc(name = "url", text = "the url of the audio stream") String url) {
         try {
@@ -86,7 +86,7 @@ public class Audio {
         }
     }
 
-    @ActionDoc(text = "plays an audio stream from an url to the given sink(s)")
+    @ActionDoc(text = "plays an audio stream from a url to the given sink(s)")
     public static synchronized void playStream(@ParamDoc(name = "sink", text = "the id of the sink") String sink,
             @ParamDoc(name = "url", text = "the url of the audio stream") String url) {
         try {

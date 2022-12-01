@@ -31,11 +31,12 @@ import javax.script.SimpleScriptContext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.module.script.ScriptDependencyListener;
+import org.openhab.core.automation.module.script.ScriptDependencyTracker;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.automation.module.script.ScriptExtensionManagerWrapper;
+import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -54,9 +55,14 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(service = ScriptEngineManager.class)
 public class ScriptEngineManagerImpl implements ScriptEngineManager {
+    /**
+     * Timeout for scripts in milliseconds.
+     */
+    static private final long TIMEOUT = TimeUnit.SECONDS.toMillis(30);
 
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
+    private final SafeCaller safeCaller;
 
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineManagerImpl.class);
     private final Map<String, ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
@@ -66,8 +72,10 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     private final Set<FactoryChangeListener> listeners = new HashSet<>();
 
     @Activate
-    public ScriptEngineManagerImpl(final @Reference ScriptExtensionManager scriptExtensionManager) {
+    public ScriptEngineManagerImpl(final @Reference ScriptExtensionManager scriptExtensionManager,
+            final @Reference SafeCaller safeCaller) {
         this.scriptExtensionManager = scriptExtensionManager;
+        this.safeCaller = safeCaller;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -155,6 +163,12 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
                     addAttributeToScriptContext(engine, CONTEXT_KEY_ENGINE_IDENTIFIER, engineIdentifier);
                     addAttributeToScriptContext(engine, CONTEXT_KEY_EXTENSION_ACCESSOR, scriptExtensionManager);
+
+                    ScriptDependencyTracker tracker = engineFactory.getDependencyTracker();
+                    if (tracker != null) {
+                        addAttributeToScriptContext(engine, CONTEXT_KEY_DEPENDENCY_LISTENER,
+                                tracker.getTracker(engineIdentifier));
+                    }
                 } else {
                     logger.error("ScriptEngine for language '{}' could not be created for identifier: {}", scriptType,
                             engineIdentifier);
@@ -169,37 +183,21 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
     @Override
     public void loadScript(String engineIdentifier, InputStreamReader scriptData) {
-        loadScript(engineIdentifier, scriptData, null);
-    }
-
-    @Override
-    public void loadScript(String engineIdentifier, InputStreamReader scriptData,
-            @Nullable ScriptDependencyListener dependencyListener) {
         ScriptEngineContainer container = loadedScriptEngineInstances.get(engineIdentifier);
         if (container == null) {
             logger.error("Could not load script, as no ScriptEngine has been created");
         } else {
             ScriptEngine engine = container.getScriptEngine();
 
-            if (dependencyListener != null) {
-                addAttributeToScriptContext(engine, CONTEXT_KEY_DEPENDENCY_LISTENER, dependencyListener);
-            }
-
-            try {
-                engine.eval(scriptData);
-                if (engine instanceof Invocable) {
-                    Invocable inv = (Invocable) engine;
-                    try {
-                        inv.invokeFunction("scriptLoaded", engineIdentifier);
-                    } catch (NoSuchMethodException e) {
-                        logger.trace("scriptLoaded() is not defined in the script: {}", engineIdentifier);
-                    }
-                } else {
-                    logger.trace("ScriptEngine does not support Invocable interface");
+            safeCall(engineIdentifier, () -> {
+                try {
+                    engine.eval(scriptData);
+                } catch (Exception ex) {
+                    logger.error("Error during evaluation of script '{}': {}", engineIdentifier, ex.getMessage());
+                    logger.debug("", ex);
                 }
-            } catch (Exception ex) {
-                logger.error("Error during evaluation of script '{}': {}", engineIdentifier, ex.getMessage());
-            }
+            }, true);
+            callHook(engineIdentifier, engine, "scriptLoaded", true, engineIdentifier);
         }
     }
 
@@ -207,22 +205,15 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     public void removeEngine(String engineIdentifier) {
         ScriptEngineContainer container = loadedScriptEngineInstances.remove(engineIdentifier);
         if (container != null) {
-            ScriptEngine scriptEngine = container.getScriptEngine();
-            if (scriptEngine instanceof Invocable) {
-                Invocable inv = (Invocable) scriptEngine;
-                try {
-                    inv.invokeFunction("scriptUnloaded");
-                } catch (NoSuchMethodException e) {
-                    logger.trace("scriptUnloaded() is not defined in the script");
-                } catch (ScriptException ex) {
-                    logger.error("Error while executing script", ex);
-                }
-            } else {
-                logger.trace("ScriptEngine does not support Invocable interface");
+            ScriptDependencyTracker tracker = container.getFactory().getDependencyTracker();
+            if (tracker != null) {
+                tracker.removeTracking(engineIdentifier);
             }
+            ScriptEngine scriptEngine = container.getScriptEngine();
+            callHook(engineIdentifier, scriptEngine, "scriptUnloaded", false);
 
             if (scriptEngine instanceof AutoCloseable) {
-                // we cannot not use ScheduledExecutorService.execute here as it might execute the task in the calling
+                // we cannot use ScheduledExecutorService.execute here as it might execute the task in the calling
                 // thread (calling ScriptEngine.close in the same thread may result in a deadlock if the ScriptEngine
                 // tries to Thread.join)
                 scheduler.schedule(() -> {
@@ -292,5 +283,34 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     @Override
     public void removeFactoryChangeListener(FactoryChangeListener listener) {
         listeners.remove(listener);
+    }
+
+    private void safeCall(String engineIdentifier, Runnable r, boolean unloadOnTimeout) {
+        safeCaller.create(r, Runnable.class).withTimeout(TIMEOUT).onTimeout(() -> {
+            logger.warn("Script evaluation of '{}' takes more than {}ms", engineIdentifier, TIMEOUT);
+            if (unloadOnTimeout) {
+                removeEngine(engineIdentifier);
+            }
+        }).build().run();
+    }
+
+    private void callHook(String engineIdentifier, ScriptEngine engine, String hook, boolean unloadOnTimeout,
+            Object... args) {
+        if (!(engine instanceof Invocable)) {
+            logger.trace("ScriptEngine does not support Invocable interface");
+            return;
+        }
+
+        safeCall(engineIdentifier, () -> {
+            Invocable inv = (Invocable) engine;
+            try {
+                inv.invokeFunction(hook, args);
+            } catch (NoSuchMethodException e) {
+                logger.trace("{}() is not defined in the script '{}'", hook, engineIdentifier);
+            } catch (ScriptException ex) {
+                logger.error("Error while executing script '{}': {}", engineIdentifier, ex.getMessage());
+                logger.debug("", ex);
+            }
+        }, unloadOnTimeout);
     }
 }

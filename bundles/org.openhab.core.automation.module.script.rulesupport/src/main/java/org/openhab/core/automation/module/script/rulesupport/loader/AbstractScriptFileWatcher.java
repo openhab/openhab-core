@@ -39,6 +39,7 @@ import javax.script.ScriptEngine;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
+import org.openhab.core.automation.module.script.ScriptDependencyTracker;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.common.NamedThreadFactory;
@@ -51,23 +52,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link ScriptFileWatcher} watches a directory for files. If a new/modified file is detected, the script
- * is read and passed to the {@link ScriptEngineManager}.
+ * The {@link AbstractScriptFileWatcher} is default implementation for watching a directory for files. If a new/modified
+ * file is detected, the script
+ * is read and passed to the {@link ScriptEngineManager}. It needs to be sub-classed for actual use.
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Kai Kreuzer - improved logging and removed thread pool
  * @author Jonathan Gilbert - added dependency tracking & per-script start levels; made reusable
+ * @author Jan N. Klug - Refactored dependy tracking to script engine factories
  */
 @NonNullByDefault
-public class ScriptFileWatcher extends AbstractWatchService implements ReadyService.ReadyTracker,
-        DependencyTracker.DependencyChangeListener, ScriptEngineManager.FactoryChangeListener {
+public abstract class AbstractScriptFileWatcher extends AbstractWatchService implements ReadyService.ReadyTracker,
+        ScriptDependencyTracker.Listener, ScriptEngineManager.FactoryChangeListener {
 
     private static final long RECHECK_INTERVAL = 20;
 
-    private final Logger logger = LoggerFactory.getLogger(ScriptFileWatcher.class);
+    private final Logger logger = LoggerFactory.getLogger(AbstractScriptFileWatcher.class);
 
     private final ScriptEngineManager manager;
-    private final Optional<DependencyTracker> dependencyTracker;
     private final ReadyService readyService;
 
     private @Nullable ScheduledExecutorService scheduler;
@@ -78,11 +80,10 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyServ
 
     private volatile int currentStartLevel = 0;
 
-    public ScriptFileWatcher(final ScriptEngineManager manager, @Nullable final DependencyTracker dependencyTracker,
-            final ReadyService readyService, final String fileDirectory) {
+    public AbstractScriptFileWatcher(final ScriptEngineManager manager, final ReadyService readyService,
+            final String fileDirectory) {
         super(OpenHAB.getConfigFolder() + File.separator + fileDirectory);
         this.manager = manager;
-        this.dependencyTracker = Optional.ofNullable(dependencyTracker);
         this.readyService = readyService;
         this.executorFactory = () -> Executors
                 .newSingleThreadScheduledExecutor(new NamedThreadFactory("scriptwatcher"));
@@ -206,7 +207,7 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyServ
     private void removeFile(ScriptFileReference ref) {
         dequeueUrl(ref);
         String scriptIdentifier = ref.getScriptIdentifier();
-        dependencyTracker.ifPresent(tracker -> tracker.removeScript(scriptIdentifier));
+
         manager.removeEngine(scriptIdentifier);
         loaded.remove(ref);
     }
@@ -248,8 +249,7 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyServ
 
             if (container != null) {
                 container.getScriptEngine().put(ScriptEngine.FILENAME, fileName);
-                manager.loadScript(container.getIdentifier(), reader, dependency -> dependencyTracker
-                        .ifPresent((it) -> it.addLibForScript(scriptIdentifier, dependency)));
+                manager.loadScript(container.getIdentifier(), reader);
 
                 logger.debug("Script loaded: {}", fileName);
                 return true;
@@ -318,13 +318,16 @@ public class ScriptFileWatcher extends AbstractWatchService implements ReadyServ
     }
 
     @Override
-    public void onDependencyChange(@Nullable String scriptPath) {
-        logger.debug("Reimporting {}...", scriptPath);
+    public void onDependencyChange(@Nullable String scriptId) {
+        logger.debug("Reimporting {}...", scriptId);
         try {
-            importFileWhenReady(new ScriptFileReference(new URL(scriptPath)));
-        } catch (MalformedURLException e) {
-            logger.warn("Failed to reimport {} as it cannot be parsed as a URL", scriptPath);
+            ScriptFileReference scriptFileReference = new ScriptFileReference(new URL(scriptId));
+            if (loaded.contains(scriptFileReference)) {
+                importFileWhenReady(scriptFileReference);
+            }
+        } catch (MalformedURLException ignored) {
         }
+        logger.debug("Ignoring dependency change for {} as it is no file or not loaded by this file watcher", scriptId);
     }
 
     @Override

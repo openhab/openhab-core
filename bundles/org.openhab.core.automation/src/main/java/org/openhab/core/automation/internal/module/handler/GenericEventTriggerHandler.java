@@ -33,9 +33,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is an ModuleHandler implementation for Triggers which trigger the rule
+ * This is a ModuleHandler implementation for Triggers which trigger the rule
  * if an event occurs. The eventType, eventSource and topic can be set with the
- * configuration. It is an generic approach which makes it easier to specify
+ * configuration. It is a generic approach which makes it easier to specify
  * more concrete event based triggers with the composite module approach of the
  * automation component. Each GenericTriggerHandler instance registers as
  * EventSubscriber, so the dispose method must be called for unregistering the

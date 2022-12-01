@@ -20,6 +20,7 @@ Export-Package: org.openhab.core.model.script,\
 Import-Package: \
  org.openhab.core.audio,\
  org.openhab.core.common.registry,\
+ org.openhab.core.automation.module.script.action,\
  org.openhab.core.ephemeris,\
  org.openhab.core.events,\
  org.openhab.core.items,\
@@ -34,6 +35,7 @@ Import-Package: \
  org.openhab.core.thing,\
  org.openhab.core.thing.binding,\
  org.openhab.core.thing.events,\
+ org.openhab.core.transform,\
  org.openhab.core.transform.actions,\
  org.openhab.core.types,\
  org.openhab.core.voice,\

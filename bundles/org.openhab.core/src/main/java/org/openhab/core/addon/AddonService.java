@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * Classes implementing this interface can be registered as an OSGi service in order to provide functionality for
  * managing add-ons, such as listing, installing and uninstalling them.
- * The REST API offers an uri that exposes this functionality.
+ * The REST API offers a uri that exposes this functionality.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Yannick Schaus - Add id, name and refreshSource

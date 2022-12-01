@@ -55,7 +55,7 @@ public class SerialPortIdentifierImpl implements SerialPortIdentifier {
                 return new RxTxSerialPort((gnu.io.SerialPort) cp);
             } else {
                 throw new IllegalStateException(
-                        String.format("We expect an serial port instead of '%s'", cp.getClass()));
+                        String.format("We expect a serial port instead of '%s'", cp.getClass()));
             }
         } catch (gnu.io.PortInUseException e) {
             String message = e.getMessage();

@@ -32,7 +32,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
 /**
  * The {@link EventDescriptionConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface
- * used to convert a event description within an XML document into a {@link EventDescription} object.
+ * used to convert a event description within an XML document into an {@link EventDescription} object.
  * <p>
  * This converter converts {@code state} XML tags.
  *

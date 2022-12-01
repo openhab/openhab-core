@@ -23,7 +23,7 @@ public final class EventOption {
     private String label;
 
     /**
-     * Creates a {@link EventOption} object.
+     * Creates an {@link EventOption} object.
      *
      * @param value value of the event
      * @param label label
