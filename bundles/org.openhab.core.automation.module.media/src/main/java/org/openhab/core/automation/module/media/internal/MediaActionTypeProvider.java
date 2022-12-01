@@ -99,7 +99,7 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
     private List<ConfigDescriptionParameter> getConfigPlayDesc(@Nullable Locale locale) {
         return List.of(
                 ConfigDescriptionParameterBuilder.create(PlayActionHandler.PARAM_SOUND, Type.TEXT).withRequired(true)
-                        .withLabel("Tone").withDescription("the sound to play").withOptions(getSoundOptions())
+                        .withLabel("Sound").withDescription("the sound to play").withOptions(getSoundOptions())
                         .withLimitToOptions(true).build(),
                 getAudioSinkConfigDescParam(locale), getVolumeConfigDescParam(locale));
     }
