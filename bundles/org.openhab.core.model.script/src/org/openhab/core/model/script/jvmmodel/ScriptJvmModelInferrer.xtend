@@ -74,6 +74,8 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     /** Variable name for the new status of the triggering thing in a "thing status trigger" rule */
     public static final String VAR_NEW_STATUS = "newThingStatus";
 
+    /** Variable name for the cache */
+    public static final String VAR_PRIVATE_CACHE = "privateCache";
     public static final String VAR_SHARED_CACHE = "sharedCache";
 
     /**
@@ -149,8 +151,10 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
                 parameters += script.toParameter(VAR_NEW_STATUS, newThingStatusRef)
                 val stateTypeRef2 = script.newTypeRef(State)
                 parameters += script.toParameter(VAR_NEW_STATE, stateTypeRef2)
-                val cacheTypeRef = script.newTypeRef(ValueCache)
-                parameters += script.toParameter(VAR_SHARED_CACHE, cacheTypeRef)
+                val privateCacheTypeRef = script.newTypeRef(ValueCache)
+                parameters += script.toParameter(VAR_PRIVATE_CACHE, privateCacheTypeRef)
+                val sharedCacheTypeRef = script.newTypeRef(ValueCache)
+                parameters += script.toParameter(VAR_SHARED_CACHE, sharedCacheTypeRef)
                 body = script
             ]
         ]
