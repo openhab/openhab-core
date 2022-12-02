@@ -31,6 +31,7 @@ import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationContext;
+import org.openhab.core.automation.module.script.ScriptExtensionAccessor;
 import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.model.script.engine.Script;
 import org.openhab.core.model.script.engine.ScriptExecutionException;
@@ -69,13 +70,15 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
     private final org.openhab.core.model.script.engine.ScriptEngine scriptEngine;
     private final @Nullable DSLScriptContextProvider contextProvider;
     private final ScriptContext context = new SimpleScriptContext();
+    private final ScriptExtensionAccessor scriptExtensionAccessor;
 
     private @Nullable Script parsedScript;
 
     public DSLScriptEngine(org.openhab.core.model.script.engine.ScriptEngine scriptEngine,
-            @Nullable DSLScriptContextProvider contextProvider) {
+            @Nullable DSLScriptContextProvider contextProvider, ScriptExtensionAccessor scriptExtensionAccessor) {
         this.scriptEngine = scriptEngine;
         this.contextProvider = contextProvider;
+        this.scriptExtensionAccessor = scriptExtensionAccessor;
     }
 
     @Override
@@ -161,6 +164,10 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
                 }
             }
         }
+
+        Map<String, Object> cachePreset = scriptExtensionAccessor.findPreset("cache", (String) context.getAttribute("oh.engine-identifier", ScriptContext.ENGINE_SCOPE));
+        evalContext.newValue(QualifiedName.create("sharedCache"), cachePreset.get("sharedCache"));
+        evalContext.newValue(QualifiedName.create("privateCache"), cachePreset.get("privateCache"));
         // now add specific implicit vars, where we have to map the right content
         Object value = context.getAttribute(OUTPUT_EVENT);
         if (value instanceof ChannelTriggeredEvent) {
