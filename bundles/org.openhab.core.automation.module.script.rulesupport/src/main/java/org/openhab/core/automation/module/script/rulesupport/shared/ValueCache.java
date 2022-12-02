@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * The {@link ValueCache} can be used by scripts to share information between subsequent runs of the same script or
  * between scripts (depending on implementation).
  *
- *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
