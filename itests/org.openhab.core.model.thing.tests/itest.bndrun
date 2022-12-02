@@ -120,4 +120,6 @@ Fragment-Host: org.openhab.core.model.thing
 	org.openhab.core.thing;version='[3.4.0,3.4.1)',\
 	org.openhab.core.thing.xml;version='[3.4.0,3.4.1)',\
 	org.openhab.core.transform;version='[3.4.0,3.4.1)',\
-	org.openhab.core.voice;version='[3.4.0,3.4.1)'
+	org.openhab.core.voice;version='[3.4.0,3.4.1)',\
+	org.openhab.core.automation.module.script.rulesupport;version='[3.4.0,3.4.1)',\
+	org.openhab.core.model.sitemap.runtime;version='[3.4.0,3.4.1)'

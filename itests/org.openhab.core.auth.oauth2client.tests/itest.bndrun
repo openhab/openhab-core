@@ -61,4 +61,5 @@ Fragment-Host: org.openhab.core.auth.oauth2client
 	org.openhab.core.auth.oauth2client.tests;version='[3.4.0,3.4.1)',\
 	org.openhab.core.io.console;version='[3.4.0,3.4.1)',\
 	org.openhab.core.io.net;version='[3.4.0,3.4.1)',\
-	org.openhab.core.test;version='[3.4.0,3.4.1)'
+	org.openhab.core.test;version='[3.4.0,3.4.1)',\
+	org.osgi.service.cm;version='[1.6.0,1.6.1)'
