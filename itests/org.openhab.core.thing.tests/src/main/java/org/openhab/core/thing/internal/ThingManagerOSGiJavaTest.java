@@ -41,6 +41,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.xml.ConfigXmlConfigDescriptionProvider;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.service.ReadyMarker;
@@ -169,8 +170,16 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         waitForAssert(() -> {
             try {
                 assertThat(
-                        bundleContext.getServiceReferences(ReadyMarker.class,
-                                "(openhab.xmlThingTypes=" + bundleContext.getBundle().getSymbolicName() + ")"),
+                        bundleContext
+                                .getServiceReferences(ReadyMarker.class,
+                                        "(" + ThingManagerImpl.XML_THING_TYPE + "="
+                                                + bundleContext.getBundle().getSymbolicName() + ")"),
+                        is(notNullValue()));
+                assertThat(
+                        bundleContext
+                                .getServiceReferences(ReadyMarker.class,
+                                        "(" + ConfigXmlConfigDescriptionProvider.READY_MARKER + "="
+                                                + bundleContext.getBundle().getSymbolicName() + ")"),
                         is(notNullValue()));
             } catch (InvalidSyntaxException e) {
                 throw new IllegalArgumentException(e);

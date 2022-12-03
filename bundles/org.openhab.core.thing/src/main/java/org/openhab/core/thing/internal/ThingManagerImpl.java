@@ -48,6 +48,7 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
 import org.openhab.core.config.core.validation.ConfigValidationException;
+import org.openhab.core.config.xml.ConfigXmlConfigDescriptionProvider;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
@@ -152,6 +153,7 @@ public class ThingManagerImpl
     private final Map<ThingUID, Lock> thingLocks = new HashMap<>();
     private final Set<ThingUID> thingUpdatedLock = new HashSet<>();
     private final Set<String> loadedXmlThingTypes = new CopyOnWriteArraySet<>();
+    private final Set<String> loadedXmlConfigDescriptions = new CopyOnWriteArraySet<>();
 
     private BundleResolver bundleResolver;
 
@@ -434,7 +436,7 @@ public class ThingManagerImpl
 
         storage = storageService.getStorage(THING_STATUS_STORAGE_NAME, this.getClass().getClassLoader());
 
-        readyService.registerTracker(this, new ReadyMarkerFilter().withType(XML_THING_TYPE));
+        readyService.registerTracker(this, new ReadyMarkerFilter());
         this.thingRegistry.addThingTracker(this);
         initializeStartLevelSetter();
     }
@@ -869,6 +871,11 @@ public class ThingManagerImpl
     private <T extends Identifiable<?>> void normalizeConfiguration(@Nullable T prototype, UID targetUID,
             Function<T, @Nullable URI> configDescriptionURIFunction, Configuration configuration)
             throws ConfigValidationException {
+        if (configuration.keySet().isEmpty()) {
+            // if we have no configuration, there is nothing to normalize
+            return;
+        }
+
         if (prototype == null) {
             logger.debug("Prototype for '{}' is not known, assuming it is already normalized", targetUID);
             return;
@@ -1137,14 +1144,24 @@ public class ThingManagerImpl
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
         String identifier = readyMarker.getIdentifier();
-        loadedXmlThingTypes.add(identifier);
+        if (XML_THING_TYPE.equals(readyMarker.getType())) {
+            loadedXmlThingTypes.add(identifier);
+        }
+        if (ConfigXmlConfigDescriptionProvider.READY_MARKER.equals(readyMarker.getType())) {
+            loadedXmlConfigDescriptions.add(identifier);
+        }
         handleThingHandlerFactoryAddition(identifier);
     }
 
     @Override
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
         String identifier = readyMarker.getIdentifier();
-        loadedXmlThingTypes.remove(identifier);
+        if (XML_THING_TYPE.equals(readyMarker.getType())) {
+            loadedXmlThingTypes.remove(identifier);
+        }
+        if (ConfigXmlConfigDescriptionProvider.READY_MARKER.equals(readyMarker.getType())) {
+            loadedXmlConfigDescriptions.remove(identifier);
+        }
     }
 
     private void handleThingHandlerFactoryAddition(String bundleIdentifier) {
@@ -1173,13 +1190,13 @@ public class ThingManagerImpl
             if (thingHandlerFactory != null) {
                 final String identifier = getBundleIdentifier(thingHandlerFactory);
 
-                if (loadedXmlThingTypes.contains(identifier)) {
+                if (loadedXmlThingTypes.contains(identifier) && loadedXmlConfigDescriptions.contains(identifier)) {
                     normalizeThingConfiguration(thing);
                     registerHandler(thing, thingHandlerFactory);
                     initializeHandler(thing);
                 } else {
                     logger.debug(
-                            "Not registering a handler at this point. The thing types of bundle '{}' are not fully loaded yet.",
+                            "Not registering a handler at this point. The thing types or config descriptions of bundle '{}' are not fully loaded yet.",
                             identifier);
                 }
             } else {

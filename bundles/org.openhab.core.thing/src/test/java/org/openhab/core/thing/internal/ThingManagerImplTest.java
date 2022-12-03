@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.service.ReadyService;
@@ -82,6 +83,7 @@ public class ThingManagerImplTest extends JavaTest {
         when(thingMock.getUID()).thenReturn(new ThingUID("test", "thing"));
         when(thingMock.getStatusInfo())
                 .thenReturn(new ThingStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE, null));
+        when(thingMock.getConfiguration()).thenReturn(new Configuration());
     }
 
     private ThingManagerImpl createThingManager() {
@@ -194,6 +196,7 @@ public class ThingManagerImplTest extends JavaTest {
         when(thingMock2.getUID()).thenReturn(new ThingUID("test", "thing2"));
         when(thingMock2.getStatusInfo())
                 .thenReturn(new ThingStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE, null));
+        when(thingMock2.getConfiguration()).thenReturn(new Configuration());
 
         setupInterceptedLogger(ThingManagerImpl.class, LogLevel.DEBUG);
 

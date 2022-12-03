@@ -43,6 +43,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.xml.ConfigXmlConfigDescriptionProvider;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventPublisher;
@@ -175,6 +176,12 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
                         bundleContext
                                 .getServiceReferences(ReadyMarker.class,
                                         "(" + ThingManagerImpl.XML_THING_TYPE + "="
+                                                + bundleContext.getBundle().getSymbolicName() + ")"),
+                        is(notNullValue()));
+                assertThat(
+                        bundleContext
+                                .getServiceReferences(ReadyMarker.class,
+                                        "(" + ConfigXmlConfigDescriptionProvider.READY_MARKER + "="
                                                 + bundleContext.getBundle().getSymbolicName() + ")"),
                         is(notNullValue()));
             } catch (InvalidSyntaxException e) {
