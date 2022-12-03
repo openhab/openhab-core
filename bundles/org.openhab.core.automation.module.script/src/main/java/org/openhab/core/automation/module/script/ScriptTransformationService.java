@@ -14,6 +14,7 @@ package org.openhab.core.automation.module.script;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -60,7 +61,7 @@ public class ScriptTransformationService implements TransformationService, Regis
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
-    private final Map<String, ScriptEngineContainer> scriptEngineContainers = new HashMap<>();
+    private final Map<String, ScriptEngineContainer> scriptEngineContainers = new ConcurrentHashMap<>();
     private final Map<String, CompiledScript> compiledScripts = new HashMap<>();
     private final Map<String, String> scriptCache = new HashMap<>();
 
