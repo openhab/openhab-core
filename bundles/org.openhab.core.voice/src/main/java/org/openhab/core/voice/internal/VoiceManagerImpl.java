@@ -538,6 +538,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         if (tts != null) {
             context = context.withTTS(tts);
         }
+        if (voice != null) {
+            context = context.withVoice(voice);
+        }
         if (!hlis.isEmpty()) {
             context = context.withHLIs(hlis);
         }
