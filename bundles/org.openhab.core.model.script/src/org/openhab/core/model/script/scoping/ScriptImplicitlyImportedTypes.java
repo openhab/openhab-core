@@ -84,6 +84,8 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(Transformation.class);
         result.add(ScriptExecution.class);
         result.add(URLEncoder.class);
+
+        result.addAll(getActionClasses());
         return result;
     }
 
