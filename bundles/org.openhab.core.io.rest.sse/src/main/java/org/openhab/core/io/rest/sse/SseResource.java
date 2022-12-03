@@ -115,16 +115,19 @@ public class SseResource implements RESTResource, SsePublisher {
 
     private ExecutorService executorService;
 
+    @SuppressWarnings("null")
     @Activate
     public SseResource(@Reference SseItemStatesEventBuilder itemStatesEventBuilder) {
         this.executorService = Executors.newSingleThreadExecutor();
         this.itemStatesEventBuilder = itemStatesEventBuilder;
 
         cleanSubscriptionsJob = scheduler.scheduleWithFixedDelay(() -> {
-            logger.debug("Run clean SSE subscriptions job");
-            OutboundSseEvent outboundSseEvent = sse.newEventBuilder().name("event")
-                    .mediaType(MediaType.APPLICATION_JSON_TYPE).data(new ServerAliveEvent()).build();
-            topicBroadcaster.send(outboundSseEvent);
+            if (topicBroadcaster != null) {
+                logger.debug("Run clean SSE subscriptions job");
+                OutboundSseEvent outboundSseEvent = sse.newEventBuilder().name("event")
+                        .mediaType(MediaType.APPLICATION_JSON_TYPE).data(new ServerAliveEvent()).build();
+                topicBroadcaster.send(outboundSseEvent);
+            }
         }, 1, 2, TimeUnit.MINUTES);
     }
 
