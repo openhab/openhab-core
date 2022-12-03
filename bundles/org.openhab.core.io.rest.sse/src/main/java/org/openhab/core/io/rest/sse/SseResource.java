@@ -123,11 +123,13 @@ public class SseResource implements RESTResource, SsePublisher {
         this.itemStatesEventBuilder = itemStatesEventBuilder;
 
         aliveEventJob = scheduler.scheduleWithFixedDelay(() -> {
-            logger.debug("Sending alive event to SSE connections");
-            OutboundSseEvent aliveEvent = sse.newEventBuilder().name("alive").mediaType(MediaType.APPLICATION_JSON_TYPE)
-                    .data(new AliveEvent()).build();
-            itemStatesBroadcaster.send(aliveEvent);
-            topicBroadcaster.send(aliveEvent);
+            if (sse != null) {
+                logger.debug("Sending alive event to SSE connections");
+                OutboundSseEvent aliveEvent = sse.newEventBuilder().name("alive")
+                        .mediaType(MediaType.APPLICATION_JSON_TYPE).data(new AliveEvent()).build();
+                itemStatesBroadcaster.send(aliveEvent);
+                topicBroadcaster.send(aliveEvent);
+            }
         }, 1, ALIVE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
