@@ -12,10 +12,12 @@
  */
 package org.openhab.core.automation.module.script;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,9 +62,7 @@ public class ScriptTransformationService implements TransformationService, Regis
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
-    private final Map<String, ScriptEngineContainer> scriptEngineContainers = new HashMap<>();
-    private final Map<String, CompiledScript> compiledScripts = new HashMap<>();
-    private final Map<String, String> scriptCache = new HashMap<>();
+    private final Map<String, ScriptRecord> scriptCache = new ConcurrentHashMap<>();
 
     private final TransformationRegistry transformationRegistry;
     private final ScriptEngineManager scriptEngineManager;
@@ -80,9 +80,7 @@ public class ScriptTransformationService implements TransformationService, Regis
         transformationRegistry.removeRegistryChangeListener(this);
 
         // cleanup script engines
-        scriptEngineContainers.values().stream().map(ScriptEngineContainer::getScriptEngine)
-                .forEach(this::disposeScriptEngine);
-        compiledScripts.values().stream().map(CompiledScript::getEngine).forEach(this::disposeScriptEngine);
+        scriptCache.values().forEach(this::disposeScriptRecord);
     }
 
     @Override
@@ -94,69 +92,79 @@ public class ScriptTransformationService implements TransformationService, Regis
         String scriptType = configMatcher.group("scriptType");
         String scriptUid = configMatcher.group("scriptUid");
 
-        String script = scriptCache.get(scriptUid);
-        if (script == null) {
-            Transformation transformation = transformationRegistry.get(scriptUid);
-            if (transformation != null) {
-                if (!SUPPORTED_CONFIGURATION_TYPE.equals(transformation.getType())) {
-                    throw new TransformationException("Configuration does not have correct type 'script' but '"
-                            + transformation.getType() + "'.");
-                }
-                script = transformation.getConfiguration().get(Transformation.FUNCTION);
-            }
-            if (script == null) {
-                throw new TransformationException("Could not get script for UID '" + scriptUid + "'.");
-            }
-            scriptCache.put(scriptUid, script);
-        }
-
-        if (!scriptEngineManager.isSupported(scriptType)) {
-            // language has been removed, clear container and compiled scripts if found
-            if (scriptEngineContainers.containsKey(scriptUid)) {
-                scriptEngineManager.removeEngine(OPENHAB_TRANSFORMATION_SCRIPT + scriptUid);
-            }
-            clearCache(scriptUid);
-            throw new TransformationException(
-                    "Script type '" + scriptType + "' is not supported by any available script engine.");
-        }
-
-        ScriptEngineContainer scriptEngineContainer = scriptEngineContainers.computeIfAbsent(scriptUid,
-                k -> scriptEngineManager.createScriptEngine(scriptType, OPENHAB_TRANSFORMATION_SCRIPT + k));
-
-        if (scriptEngineContainer == null) {
-            throw new TransformationException("Failed to create script engine container for '" + function + "'.");
-        }
+        ScriptRecord scriptRecord = scriptCache.computeIfAbsent(scriptUid, k -> new ScriptRecord());
+        scriptRecord.lock.lock();
         try {
-            CompiledScript compiledScript = this.compiledScripts.get(scriptUid);
-
-            if (compiledScript == null && scriptEngineContainer.getScriptEngine() instanceof Compilable) {
-                // no compiled script available but compiling is supported
-                compiledScript = ((Compilable) scriptEngineContainer.getScriptEngine()).compile(script);
-                this.compiledScripts.put(scriptUid, compiledScript);
+            if (scriptRecord.script.isBlank()) {
+                Transformation transformation = transformationRegistry.get(scriptUid);
+                if (transformation != null) {
+                    if (!SUPPORTED_CONFIGURATION_TYPE.equals(transformation.getType())) {
+                        throw new TransformationException("Configuration does not have correct type 'script' but '"
+                                + transformation.getType() + "'.");
+                    }
+                    scriptRecord.script = transformation.getConfiguration().getOrDefault(Transformation.FUNCTION, "");
+                }
+                if (scriptRecord.script.isBlank()) {
+                    throw new TransformationException("Could not get script for UID '" + scriptUid + "'.");
+                }
+                scriptCache.put(scriptUid, scriptRecord);
             }
 
-            ScriptEngine engine = compiledScript != null ? compiledScript.getEngine()
-                    : scriptEngineContainer.getScriptEngine();
-            ScriptContext executionContext = engine.getContext();
-            executionContext.setAttribute("input", source, ScriptContext.ENGINE_SCOPE);
+            if (!scriptEngineManager.isSupported(scriptType)) {
+                // language has been removed, clear container and compiled scripts if found
+                if (scriptRecord.scriptEngineContainer != null) {
+                    scriptEngineManager.removeEngine(OPENHAB_TRANSFORMATION_SCRIPT + scriptUid);
+                }
+                clearCache(scriptUid);
+                throw new TransformationException(
+                        "Script type '" + scriptType + "' is not supported by any available script engine.");
+            }
 
-            String params = configMatcher.group("params");
-            if (params != null) {
-                for (String param : params.split("&")) {
-                    String[] splitString = param.split("=");
-                    if (splitString.length != 2) {
-                        logger.warn("Parameter '{}' does not consist of two parts for configuration UID {}, skipping.",
-                                param, scriptUid);
-                    } else {
-                        executionContext.setAttribute(splitString[0], splitString[1], ScriptContext.ENGINE_SCOPE);
+            if (scriptRecord.scriptEngineContainer == null) {
+                scriptRecord.scriptEngineContainer = scriptEngineManager.createScriptEngine(scriptType,
+                        OPENHAB_TRANSFORMATION_SCRIPT + scriptUid);
+            }
+            ScriptEngineContainer scriptEngineContainer = scriptRecord.scriptEngineContainer;
+
+            if (scriptEngineContainer == null) {
+                throw new TransformationException("Failed to create script engine container for '" + function + "'.");
+            }
+            try {
+                CompiledScript compiledScript = scriptRecord.compiledScript;
+
+                if (compiledScript == null && scriptEngineContainer.getScriptEngine() instanceof Compilable) {
+                    // no compiled script available but compiling is supported
+                    compiledScript = ((Compilable) scriptEngineContainer.getScriptEngine())
+                            .compile(scriptRecord.script);
+                    scriptRecord.compiledScript = compiledScript;
+                }
+
+                ScriptEngine engine = compiledScript != null ? compiledScript.getEngine()
+                        : scriptEngineContainer.getScriptEngine();
+                ScriptContext executionContext = engine.getContext();
+                executionContext.setAttribute("input", source, ScriptContext.ENGINE_SCOPE);
+
+                String params = configMatcher.group("params");
+                if (params != null) {
+                    for (String param : params.split("&")) {
+                        String[] splitString = param.split("=");
+                        if (splitString.length != 2) {
+                            logger.warn(
+                                    "Parameter '{}' does not consist of two parts for configuration UID {}, skipping.",
+                                    param, scriptUid);
+                        } else {
+                            executionContext.setAttribute(splitString[0], splitString[1], ScriptContext.ENGINE_SCOPE);
+                        }
                     }
                 }
-            }
 
-            Object result = compiledScript != null ? compiledScript.eval() : engine.eval(script);
-            return result == null ? null : result.toString();
-        } catch (ScriptException e) {
-            throw new TransformationException("Failed to execute script.", e);
+                Object result = compiledScript != null ? compiledScript.eval() : engine.eval(scriptRecord.script);
+                return result == null ? null : result.toString();
+            } catch (ScriptException e) {
+                throw new TransformationException("Failed to execute script.", e);
+            }
+        } finally {
+            scriptRecord.lock.unlock();
         }
     }
 
@@ -176,15 +184,21 @@ public class ScriptTransformationService implements TransformationService, Regis
     }
 
     private void clearCache(String uid) {
-        CompiledScript compiledScript = compiledScripts.remove(uid);
+        ScriptRecord scriptRecord = scriptCache.remove(uid);
+        if (scriptRecord != null) {
+            disposeScriptRecord(scriptRecord);
+        }
+    }
+
+    private void disposeScriptRecord(ScriptRecord scriptRecord) {
+        ScriptEngineContainer scriptEngineContainer = scriptRecord.scriptEngineContainer;
+        if (scriptEngineContainer != null) {
+            disposeScriptEngine(scriptEngineContainer.getScriptEngine());
+        }
+        CompiledScript compiledScript = scriptRecord.compiledScript;
         if (compiledScript != null) {
             disposeScriptEngine(compiledScript.getEngine());
         }
-        ScriptEngineContainer container = scriptEngineContainers.remove(uid);
-        if (container != null) {
-            disposeScriptEngine(container.getScriptEngine());
-        }
-        scriptCache.remove(uid);
     }
 
     private void disposeScriptEngine(ScriptEngine scriptEngine) {
@@ -203,5 +217,13 @@ public class ScriptTransformationService implements TransformationService, Regis
         } else {
             logger.trace("ScriptEngine does not support AutoCloseable interface");
         }
+    }
+
+    private static class ScriptRecord {
+        public String script = "";
+        public @Nullable ScriptEngineContainer scriptEngineContainer;
+        public @Nullable CompiledScript compiledScript;
+
+        public final Lock lock = new ReentrantLock();
     }
 }
