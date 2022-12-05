@@ -295,7 +295,7 @@
 
 	<feature name="openhab-core-model-script" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature>openhab-core-automation-module-script</feature>
+		<feature>openhab-core-automation-module-script-rulesupport</feature>
 		<feature>openhab-core-model-persistence</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.script/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.script.runtime/${project.version}</bundle>
