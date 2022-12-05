@@ -124,11 +124,11 @@ public interface VoiceManager {
     Voice getPreferredVoice(Set<Voice> voices);
 
     /**
-     * Returns an object with the default required services and configurations for dialog processing
+     * Returns a dialog context builder with the default required services and configurations for dialog processing
      *
      * @throws IllegalStateException if some required service is not available
      */
-    DialogContext getDefaultDialogContext() throws IllegalStateException;
+    DialogContext.Builder getDialogContextBuilder();
 
     /**
      * Returns an object with the services and configurations last used for dialog processing if any.
@@ -211,11 +211,11 @@ public interface VoiceManager {
      *
      * Only one dialog can be started for an audio source.
      *
-     * @param context the record describing the configured services and options for the dialog
+     * @param contextBuilder describing the configured services and options for the dialog
      * @throws IllegalStateException if required services are not compatible or the provided locale is not supported
      *             by all these services or a dialog is already started for this audio source
      */
-    void startDialog(DialogContext context) throws IllegalStateException;
+    void startDialog(DialogContext.Builder contextBuilder) throws IllegalStateException;
 
     /**
      * Stop the dialog associated to an audio source
@@ -229,10 +229,10 @@ public interface VoiceManager {
     /**
      * Stop the dialog associated to the audio source
      *
-     * @param context the record describing the configured services and options for the dialog
+     * @param contextBuilder describing the configured services and options for the dialog
      * @throws IllegalStateException if no dialog is started for the audio source
      */
-    void stopDialog(DialogContext context) throws IllegalStateException;
+    void stopDialog(DialogContext.Builder contextBuilder) throws IllegalStateException;
 
     /**
      * Executes a simple dialog sequence without keyword spotting using all default services: default audio source
@@ -279,11 +279,11 @@ public interface VoiceManager {
      *
      * Only possible if no dialog processor is already started for the audio source.
      *
-     * @param context the record describing the configured services and options for the dialog
+     * @param contextBuilder describing the configured services and options for the dialog
      * @throws IllegalStateException the provided locale is not supported by all these services or a dialog is already
      *             started for this audio source
      */
-    void listenAndAnswer(DialogContext context) throws IllegalStateException;
+    void listenAndAnswer(DialogContext.Builder contextBuilder) throws IllegalStateException;
 
     /**
      * Retrieves a TTS service.

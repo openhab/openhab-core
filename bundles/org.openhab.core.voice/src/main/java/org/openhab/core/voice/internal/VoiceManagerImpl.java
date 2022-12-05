@@ -483,19 +483,64 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public DialogContext getDefaultDialogContext() throws IllegalStateException {
-        KSService ksService = getKS();
-        STTService sttService = getSTT();
-        TTSService ttsService = getTTS();
-        Voice prefVoice = getDefaultVoice();
-        HumanLanguageInterpreter hli = getHLI();
-        AudioSource audioSource = audioManager.getSource();
-        AudioSink audioSink = audioManager.getSink();
-        if (sttService == null || ttsService == null || hli == null || audioSource == null || audioSink == null) {
-            throw new IllegalStateException("Cannot load default dialog context as services are missing.");
+    public DialogContext.Builder getDialogContextBuilder() {
+        var builder = new DialogContext.Builder(keyword, localeProvider.getLocale());
+        var sinkId = audioManager.getSinkId();
+        if (sinkId != null) {
+            builder.withSink(sinkId, audioManager::getSink);
         }
-        return new DialogContext(ksService, keyword, sttService, ttsService, prefVoice, List.of(hli), audioSource,
-                audioSink, localeProvider.getLocale(), listeningItem);
+        var sourceId = audioManager.getSourceId();
+        if (sourceId != null) {
+            builder.withSource(sourceId, audioManager::getSource);
+        }
+        var defaultKS = this.defaultKS;
+        if (defaultKS != null) {
+            builder.withKS(defaultKS, this::getKS);
+        } else {
+            var ks = this.getKS();
+            if (ks != null) {
+                builder.withKS(ks);
+            }
+        }
+        var defaultSTT = this.defaultSTT;
+        if (defaultSTT != null) {
+            builder.withSTT(defaultSTT, this::getSTT);
+        } else {
+            var stt = this.getSTT();
+            if (stt != null) {
+                builder.withSTT(stt);
+            }
+        }
+        var defaultTTS = this.defaultTTS;
+        if (defaultTTS != null) {
+            builder.withTTS(defaultTTS, this::getTTS);
+        } else {
+            var tts = this.getTTS();
+            if (tts != null) {
+                builder.withTTS(tts);
+            }
+        }
+        var defaultHLI = this.defaultHLI;
+        if (defaultHLI != null) {
+            builder.withHLIs(List.of(defaultHLI), () -> {
+                var hli = this.getHLI();
+                return hli != null ? List.of(hli) : List.of();
+            });
+        } else {
+            var hli = this.getHLI();
+            if (hli != null) {
+                builder.withHLIs(List.of(hli));
+            }
+        }
+        var voice = this.getDefaultVoice();
+        if (voice != null) {
+            builder.withVoice(voice);
+        }
+        var listeningItem = this.listeningItem;
+        if (listeningItem != null) {
+            builder.withListeningItem(listeningItem);
+        }
+        return builder;
     }
 
     @Override
@@ -525,43 +570,44 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source,
             @Nullable AudioSink sink, @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
             throws IllegalStateException {
-        var context = getDefaultDialogContext();
+        var builder = getDialogContextBuilder();
         if (ks != null) {
-            context = context.withKS(ks);
+            builder.withKS(ks);
         }
         if (keyword != null) {
-            context = context.withKeyword(keyword);
+            builder.withKeyword(keyword);
         }
         if (stt != null) {
-            context = context.withSTT(stt);
+            builder.withSTT(stt);
         }
         if (tts != null) {
-            context = context.withTTS(tts);
+            builder.withTTS(tts);
         }
         if (voice != null) {
-            context = context.withVoice(voice);
+            builder.withVoice(voice);
         }
         if (!hlis.isEmpty()) {
-            context = context.withHLIs(hlis);
+            builder.withHLIs(hlis);
         }
         if (source != null) {
-            context = context.withSource(source);
+            builder.withSource(source);
         }
         if (sink != null) {
-            context = context.withSink(sink);
+            builder.withSink(sink);
         }
         if (locale != null) {
-            context = context.withLocale(locale);
+            builder.withLocale(locale);
         }
         if (listeningItem != null) {
-            context = context.withListeningItem(listeningItem);
+            builder.withListeningItem(listeningItem);
         }
-        startDialog(context);
+        startDialog(builder);
     }
 
     @Override
-    public void startDialog(DialogContext context) throws IllegalStateException {
+    public void startDialog(DialogContext.Builder contextBuilder) throws IllegalStateException {
         // use defaults, if null
+        DialogContext context = contextBuilder.build();
         var ksService = context.ks();
         var ksKeyword = context.keyword();
         if (ksService == null || ksKeyword == null) {
@@ -592,16 +638,16 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Override
     @Deprecated
     public void stopDialog(@Nullable AudioSource source) throws IllegalStateException {
-        var context = getDefaultDialogContext();
+        var builder = getDialogContextBuilder();
         if (source != null) {
-            context = context.withSource(source);
+            builder.withSource(source);
         }
-        stopDialog(context);
+        stopDialog(builder);
     }
 
     @Override
-    public void stopDialog(DialogContext context) throws IllegalStateException {
-        AudioSource audioSource = context.source();
+    public void stopDialog(DialogContext.Builder contextBuilder) throws IllegalStateException {
+        AudioSource audioSource = contextBuilder.build().source();
         DialogProcessor processor = dialogProcessors.remove(audioSource.getId());
         singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
         if (processor == null) {
@@ -632,33 +678,34 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, @Nullable Voice voice,
             List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException {
-        var context = getDefaultDialogContext();
+        var builder = getDialogContextBuilder();
         if (stt != null) {
-            context = context.withSTT(stt);
+            builder.withSTT(stt);
         }
         if (tts != null) {
-            context = context.withTTS(tts);
+            builder.withTTS(tts);
         }
         if (!hlis.isEmpty()) {
-            context = context.withHLIs(hlis);
+            builder.withHLIs(hlis);
         }
         if (source != null) {
-            context = context.withSource(source);
+            builder.withSource(source);
         }
         if (sink != null) {
-            context = context.withSink(sink);
+            builder.withSink(sink);
         }
         if (locale != null) {
-            context = context.withLocale(locale);
+            builder.withLocale(locale);
         }
         if (listeningItem != null) {
-            context = context.withListeningItem(listeningItem);
+            builder.withListeningItem(listeningItem);
         }
-        listenAndAnswer(context);
+        listenAndAnswer(builder);
     }
 
     @Override
-    public void listenAndAnswer(DialogContext context) throws IllegalStateException {
+    public void listenAndAnswer(DialogContext.Builder contextBuilder) throws IllegalStateException {
+        DialogContext context = contextBuilder.build();
         Bundle b = bundle;
         if (b == null) {
             throw new IllegalStateException("Cannot execute a simple dialog as services are missing.");
