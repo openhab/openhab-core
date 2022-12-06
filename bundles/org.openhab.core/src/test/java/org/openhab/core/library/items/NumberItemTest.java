@@ -13,6 +13,7 @@
 package org.openhab.core.library.items;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -208,5 +209,62 @@ public class NumberItemTest {
         item.setState(new QuantityType<>("2700 K"));
 
         assertThat(item.getState().format("%.0f mired"), is("370 mired"));
+    }
+
+    @Test
+    public void stateDescriptionUnitUsedWhenStateDescriptionPresent() {
+        UnitProvider unitProviderMock = mock(UnitProvider.class);
+        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+        when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null)).thenReturn(
+                StateDescriptionFragmentBuilder.create().withPattern("%.0f °F").build().toStateDescription());
+
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
+        item.setStateDescriptionService(stateDescriptionServiceMock);
+        item.setUnitProvider(unitProviderMock);
+
+        assertThat(item.getUnit(), is(ImperialUnits.FAHRENHEIT));
+
+        item.setState(new QuantityType<>("429 °F"));
+        assertThat(item.getState(), is(new QuantityType<>("429 °F")));
+
+        item.setState(new QuantityType<>("165 °C"));
+        assertThat(item.getState(), is(new QuantityType<>("329 °F")));
+    }
+
+    @Test
+    public void unitPreservedWhenStateDescriptionContainsWildCard() {
+        UnitProvider unitProviderMock = mock(UnitProvider.class);
+        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+        when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null)).thenReturn(
+                StateDescriptionFragmentBuilder.create().withPattern("%.0f %unit%").build().toStateDescription());
+
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
+        item.setStateDescriptionService(stateDescriptionServiceMock);
+        item.setUnitProvider(unitProviderMock);
+
+        assertThat(item.getUnit(), is(nullValue()));
+
+        item.setState(new QuantityType<>("329 °F"));
+        assertThat(item.getState(), is(new QuantityType<>("329 °F")));
+
+        item.setState(new QuantityType<>("100 °C"));
+        assertThat(item.getState(), is(new QuantityType<>("100 °C")));
+    }
+
+    @Test
+    public void defaultUnitUsedWhenStateDescriptionEmpty() {
+        UnitProvider unitProviderMock = mock(UnitProvider.class);
+        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
+        item.setUnitProvider(unitProviderMock);
+
+        assertThat(item.getUnit(), is(SIUnits.CELSIUS));
+
+        item.setState(new QuantityType<>("329 °F"));
+        assertThat(item.getState(), is(new QuantityType<>("165 °C")));
+
+        item.setState(new QuantityType<>("100 °C"));
+        assertThat(item.getState(), is(new QuantityType<>("100 °C")));
     }
 }
