@@ -146,7 +146,7 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
                         resources.addAll(collectResources(f));
                     }
                 }
-                importResources(resources);
+                resources.forEach(this::importFileWhenReady);
             }
         }
     }
@@ -188,29 +188,6 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
         return resources;
     }
 
-    /**
-     * Imports a collect of resources
-     *
-     * @param resources the resources to be imported
-     */
-
-    private void importResources(Collection<ScriptFileReference> resources) {
-        for (ScriptFileReference ref : resources) {
-            importFileWhenReady(ref);
-        }
-    }
-
-    /**
-     * Imports resources from the specified file or directory.
-     *
-     * All resources will be collected and sorted before importing.
-     *
-     * @param file the file or directory to import resources from
-     */
-    private void importResources(File file) {
-        importResources(collectResources(file));
-    }
-
     @Override
     protected boolean watchSubDirectories() {
         return true;
@@ -243,7 +220,7 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
                 }
 
                 if (file.canRead() && (ENTRY_CREATE.equals(kind) || ENTRY_MODIFY.equals(kind))) {
-                    importResources(file);
+                    collectResources(file).forEach(this::importFileWhenReady);
                 }
             } catch (MalformedURLException e) {
                 logger.error("malformed", e);
@@ -336,7 +313,7 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
             pending.removeAll(newlySupported);
         }
 
-        importResources(newlySupported);
+        newlySupported.forEach(this::importFileWhenReady);
     }
 
     private synchronized void onStartLevelChanged(int newLevel) {
