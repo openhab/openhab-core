@@ -24,9 +24,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -138,41 +140,52 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
         if (rootDirectory.exists()) {
             File[] files = rootDirectory.listFiles();
             if (files != null) {
+                Collection<ScriptFileReference> resources = new TreeSet<>();
                 for (File f : files) {
                     if (!f.isHidden()) {
-                        importResources(f);
+                        resources.addAll(collectResources(f));
                     }
                 }
+                resources.forEach(this::importFileWhenReady);
             }
         }
     }
 
     /**
-     * Imports resources from the specified file or directory.
+     * Collects all resources from the specified file or directory,
+     * possibly including subdirectories.
+     *
+     * The results will be sorted.
      *
      * @param file the file or directory to import resources from
      */
-    private void importResources(File file) {
-        if (file.exists()) {
-            File[] files = file.listFiles();
-            if (files != null) {
-                if (watchSubDirectories()) {
+    private Collection<ScriptFileReference> collectResources(File file) {
+        Collection<ScriptFileReference> resources = new TreeSet<>();
+        if (!file.exists()) {
+            return resources;
+        }
+
+        if (file.isDirectory()) {
+            if (watchSubDirectories()) {
+                File[] files = file.listFiles();
+                if (files != null) {
                     for (File f : files) {
                         if (!f.isHidden()) {
-                            importResources(f);
+                            resources.addAll(collectResources(f));
                         }
                     }
                 }
-            } else {
-                try {
-                    URL url = file.toURI().toURL();
-                    importFileWhenReady(new ScriptFileReference(url));
-                } catch (MalformedURLException e) {
-                    // can't happen for the 'file' protocol handler with a correctly formatted URI
-                    logger.debug("Can't create a URL", e);
-                }
+            }
+        } else {
+            try {
+                URL url = file.toURI().toURL();
+                resources.add(new ScriptFileReference(url));
+            } catch (MalformedURLException e) {
+                // can't happen for the 'file' protocol handler with a correctly formatted URI
+                logger.debug("Can't create a URL", e);
             }
         }
+        return resources;
     }
 
     @Override
@@ -190,13 +203,24 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
         File file = path.toFile();
         if (!file.isHidden()) {
             try {
-                URL fileUrl = file.toURI().toURL();
                 if (ENTRY_DELETE.equals(kind)) {
-                    removeFile(new ScriptFileReference(fileUrl));
+                    if (file.isDirectory()) {
+                        if (watchSubDirectories()) {
+                            synchronized (this) {
+                                String prefix = file.toString() + File.separator;
+                                var toRemove = loaded.stream()
+                                        .filter(f -> f.getScriptFileURL().getFile().startsWith(prefix))
+                                        .collect(Collectors.toList());
+                                toRemove.forEach(this::removeFile);
+                            }
+                        }
+                    } else {
+                        removeFile(new ScriptFileReference(file.toURI().toURL()));
+                    }
                 }
 
                 if (file.canRead() && (ENTRY_CREATE.equals(kind) || ENTRY_MODIFY.equals(kind))) {
-                    importFileWhenReady(new ScriptFileReference(fileUrl));
+                    collectResources(file).forEach(this::importFileWhenReady);
                 }
             } catch (MalformedURLException e) {
                 logger.error("malformed", e);
@@ -289,9 +313,7 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
             pending.removeAll(newlySupported);
         }
 
-        for (ScriptFileReference ref : newlySupported) {
-            importFileWhenReady(ref);
-        }
+        newlySupported.forEach(this::importFileWhenReady);
     }
 
     private synchronized void onStartLevelChanged(int newLevel) {
