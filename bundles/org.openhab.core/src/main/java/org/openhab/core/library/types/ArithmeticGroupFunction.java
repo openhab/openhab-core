@@ -13,7 +13,7 @@
 package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.math.MathContext;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -231,7 +231,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
                 }
             }
             if (count > 0) {
-                return new DecimalType(sum.divide(BigDecimal.valueOf(count), RoundingMode.HALF_UP));
+                return new DecimalType(sum.divide(BigDecimal.valueOf(count), MathContext.DECIMAL128));
             } else {
                 return UnDefType.UNDEF;
             }

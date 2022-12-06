@@ -13,7 +13,7 @@
 package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.math.MathContext;
 import java.util.Set;
 
 import javax.measure.Quantity;
@@ -103,7 +103,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             }
 
             if (sum != null && count > 0) {
-                BigDecimal result = sum.toBigDecimal().divide(BigDecimal.valueOf(count), RoundingMode.HALF_UP);
+                BigDecimal result = sum.toBigDecimal().divide(BigDecimal.valueOf(count), MathContext.DECIMAL128);
                 return new QuantityType(result, sum.getUnit());
             }
 

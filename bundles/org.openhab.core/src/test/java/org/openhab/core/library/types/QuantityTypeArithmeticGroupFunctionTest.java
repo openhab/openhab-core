@@ -130,6 +130,14 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("200 °C"), state);
+
+        items = new LinkedHashSet<>();
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("19.5 °C")));
+        items.add(createNumberItem("TestItem2", Temperature.class, new QuantityType<>("19.5 °C")));
+
+        state = function.calculate(items);
+
+        assertEquals(new QuantityType<>("19.5 °C"), state);
     }
 
     @ParameterizedTest
