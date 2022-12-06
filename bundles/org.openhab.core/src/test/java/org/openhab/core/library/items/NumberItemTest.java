@@ -15,9 +15,11 @@ package org.openhab.core.library.items;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+import javax.measure.quantity.Energy;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -38,6 +40,7 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.service.StateDescriptionService;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
@@ -212,7 +215,7 @@ public class NumberItemTest {
     }
 
     @Test
-    public void stateDescriptionUnitUsedWhenStateDescriptionPresent() {
+    void testStateDescriptionUnitUsedWhenStateDescriptionPresent() {
         UnitProvider unitProviderMock = mock(UnitProvider.class);
         when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
         when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null)).thenReturn(
@@ -232,11 +235,12 @@ public class NumberItemTest {
     }
 
     @Test
-    public void unitPreservedWhenStateDescriptionContainsWildCard() {
+    void testPreservedWhenStateDescriptionContainsWildCard() {
         UnitProvider unitProviderMock = mock(UnitProvider.class);
         when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
-        when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null)).thenReturn(
-                StateDescriptionFragmentBuilder.create().withPattern("%.0f %unit%").build().toStateDescription());
+        when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null))
+                .thenReturn(StateDescriptionFragmentBuilder.create().withPattern("%.0f " + UnitUtils.UNIT_PLACEHOLDER)
+                        .build().toStateDescription());
 
         NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
         item.setStateDescriptionService(stateDescriptionServiceMock);
@@ -252,7 +256,7 @@ public class NumberItemTest {
     }
 
     @Test
-    public void defaultUnitUsedWhenStateDescriptionEmpty() {
+    void testDefaultUnitUsedWhenStateDescriptionEmpty() {
         UnitProvider unitProviderMock = mock(UnitProvider.class);
         when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
 
@@ -266,5 +270,22 @@ public class NumberItemTest {
 
         item.setState(new QuantityType<>("100 °C"));
         assertThat(item.getState(), is(new QuantityType<>("100 °C")));
+    }
+
+    @Test
+    void testNoUnitWhenUnitPlaceholderUsed() {
+        final UnitProvider unitProviderMock = mock(UnitProvider.class);
+        when(unitProviderMock.getUnit(Energy.class)).thenReturn(Units.JOULE);
+
+        final NumberItem item = new NumberItem("Number:Energy", ITEM_NAME);
+        item.setUnitProvider(unitProviderMock);
+
+        assertThat(item.getUnit(), is(Units.JOULE));
+
+        item.setStateDescriptionService(stateDescriptionServiceMock);
+        item.setState(new QuantityType<>("329 kWh"));
+
+        assertThat(item.getState(), is(new QuantityType<>("329 kWh")));
+        assertThat(item.getUnit(), is(nullValue()));
     }
 }

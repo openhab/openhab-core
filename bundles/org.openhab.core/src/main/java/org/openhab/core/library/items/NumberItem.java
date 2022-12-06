@@ -221,7 +221,7 @@ public class NumberItem extends GenericItem {
         if (stateDescription != null) {
             String pattern = stateDescription.getPattern();
             if (pattern != null) {
-                if (hasUnit && pattern.contains("%unit%")) {
+                if (hasUnit && pattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
                     // use provided unit if present
                     return null;
                 }
