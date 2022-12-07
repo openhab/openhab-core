@@ -449,6 +449,11 @@ public class ThingManagerImpl
 
     private void thingUpdated(final Thing thing) {
         thingUpdatedLock.add(thing.getUID());
+        final Thing oldThing = thingRegistry.get(thing.getUID());
+        if (oldThing == null) {
+            throw new IllegalArgumentException(MessageFormat.format(
+                    "Cannot update thing {0} because it is not known to the registry", thing.getUID().getAsString()));
+        }
         AccessController.doPrivileged((PrivilegedAction<@Nullable Void>) () -> {
             final Provider<Thing> provider = thingRegistry.getProvider(thing);
             if (provider == null) {
@@ -457,18 +462,11 @@ public class ThingManagerImpl
                         thing.getUID().getAsString()));
             }
             if (provider instanceof ManagedProvider) {
-                @SuppressWarnings("unchecked")
                 final ManagedProvider<Thing, ThingUID> managedProvider = (ManagedProvider<Thing, ThingUID>) provider;
                 managedProvider.update(thing);
             } else {
                 logger.debug("Only updating thing {} in the registry because provider {} is not managed.",
                         thing.getUID().getAsString(), provider);
-                final Thing oldThing = thingRegistry.get(thing.getUID());
-                if (oldThing == null) {
-                    throw new IllegalArgumentException(
-                            MessageFormat.format("Cannot update thing {0} because it is not known to the registry",
-                                    thing.getUID().getAsString()));
-                }
                 thingRegistry.updated(provider, oldThing, thing);
             }
             return null;
@@ -482,7 +480,7 @@ public class ThingManagerImpl
         final ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
         if (thingType == null) {
             throw new IllegalStateException(
-                    MessageFormat.format("No thing type {0} registered, cannot change thing type for thing {1}",
+                    MessageFormat.format("No thing type {0} registered, cannot change thing type for thing {1}",
                             thingTypeUID.getAsString(), thing.getUID().getAsString()));
         }
         scheduler.schedule(new Runnable() {
@@ -523,11 +521,15 @@ public class ThingManagerImpl
                         thing.setProperty(entry.getKey(), entry.getValue());
                     }
 
-                    // Change the ThingType
+                    // set the new ThingTypeUID
                     ((ThingImpl) thing).setThingTypeUID(thingTypeUID);
 
-                    // Register the new Handler - ThingManager.updateThing() is going to take care of that
+                    // update the thing and register a new handler
                     thingUpdated(thing);
+                    final ThingHandlerFactory newThingHandlerFactory = findThingHandlerFactory(thing.getThingTypeUID());
+                    if (newThingHandlerFactory != null) {
+                        registerAndInitializeHandler(thing, newThingHandlerFactory);
+                    }
 
                     ThingHandler handler = thing.getHandler();
                     logger.debug("Changed ThingType of Thing {} to {}. New ThingHandler is {}.", thingUID,
