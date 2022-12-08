@@ -19,7 +19,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -131,17 +130,24 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
     }
 
     /**
-     * Check if object is {@link ScheduledFuture} or {@link Timer} and schedule cancellation of those jobs
+     * Check if object is {@link ScheduledFuture}, {@link java.util.Timer} or {@link org.openhab.core.automation.module.script.action.Timer} and schedule cancellation of those jobs
      *
      * @param o the {@link Object} to check
      */
     private void asyncCancelJob(@Nullable Object o) {
+        Runnable cancelJob = null;
         if (o instanceof ScheduledFuture) {
-            scheduler.execute(() -> ((ScheduledFuture<?>) o).cancel(true));
-        } else if (o instanceof Timer) {
-            // not using execute so ensure this operates in another thread and we don't block here
-            scheduler.schedule(() -> ((Timer) o).cancel(), 0, TimeUnit.SECONDS);
+            cancelJob = () -> ((ScheduledFuture<?>) o).cancel(true);
+        } else if (o instanceof java.util.Timer) {
+            cancelJob = () -> ((java.util.Timer) o).cancel();
+        } else if (o instanceof org.openhab.core.automation.module.script.action.Timer) {
+            cancelJob =  () -> ((org.openhab.core.automation.module.script.action.Timer) o).cancel();
         }
+        if (cancelJob != null) {
+            // not using execute so ensure this operates in another thread and we don't block here
+            scheduler.schedule(cancelJob, 0, TimeUnit.SECONDS);
+        }
+
     }
 
     private static class ValueCacheImpl implements ValueCache {
