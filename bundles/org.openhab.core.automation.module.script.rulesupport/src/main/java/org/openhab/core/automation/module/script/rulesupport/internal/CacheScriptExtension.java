@@ -130,7 +130,8 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
     }
 
     /**
-     * Check if object is {@link ScheduledFuture}, {@link java.util.Timer} or {@link org.openhab.core.automation.module.script.action.Timer} and schedule cancellation of those jobs
+     * Check if object is {@link ScheduledFuture}, {@link java.util.Timer} or
+     * {@link org.openhab.core.automation.module.script.action.Timer} and schedule cancellation of those jobs
      *
      * @param o the {@link Object} to check
      */
@@ -141,13 +142,12 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         } else if (o instanceof java.util.Timer) {
             cancelJob = () -> ((java.util.Timer) o).cancel();
         } else if (o instanceof org.openhab.core.automation.module.script.action.Timer) {
-            cancelJob =  () -> ((org.openhab.core.automation.module.script.action.Timer) o).cancel();
+            cancelJob = () -> ((org.openhab.core.automation.module.script.action.Timer) o).cancel();
         }
         if (cancelJob != null) {
             // not using execute so ensure this operates in another thread and we don't block here
             scheduler.schedule(cancelJob, 0, TimeUnit.SECONDS);
         }
-
     }
 
     private static class ValueCacheImpl implements ValueCache {
