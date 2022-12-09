@@ -78,7 +78,7 @@
     <sat.version>0.13.0</sat.version>
     <slf4j.version>1.7.32</slf4j.version>
     <xtext.version>2.26.0</xtext.version>
-    <spotless.version>2.22.5</spotless.version>
+    <spotless.version>2.28.0</spotless.version>
     <spotless.eclipse.version>4.21.0</spotless.eclipse.version>
   </properties>
 
@@ -294,12 +294,12 @@ Import-Package: \\
             <dependency>
               <groupId>org.codehaus.plexus</groupId>
               <artifactId>plexus-compiler-eclipse</artifactId>
-              <version>2.12.0</version>
+              <version>2.12.1</version>
             </dependency>
             <dependency>
               <groupId>org.eclipse.jdt</groupId>
               <artifactId>ecj</artifactId>
-              <version>3.29.0</version>
+              <version>3.32.0</version>
             </dependency>
           </dependencies>
         </plugin>
