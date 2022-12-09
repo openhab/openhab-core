@@ -211,11 +211,11 @@ public interface VoiceManager {
      *
      * Only one dialog can be started for an audio source.
      *
-     * @param contextBuilder describing the configured services and options for the dialog
+     * @param context with the configured services and options for the dialog
      * @throws IllegalStateException if required services are not compatible or the provided locale is not supported
      *             by all these services or a dialog is already started for this audio source
      */
-    void startDialog(DialogContext.Builder contextBuilder) throws IllegalStateException;
+    void startDialog(DialogContext context) throws IllegalStateException;
 
     /**
      * Stop the dialog associated to an audio source
@@ -229,10 +229,10 @@ public interface VoiceManager {
     /**
      * Stop the dialog associated to the audio source
      *
-     * @param contextBuilder describing the configured services and options for the dialog
+     * @param context with the configured services and options for the dialog
      * @throws IllegalStateException if no dialog is started for the audio source
      */
-    void stopDialog(DialogContext.Builder contextBuilder) throws IllegalStateException;
+    void stopDialog(DialogContext context) throws IllegalStateException;
 
     /**
      * Executes a simple dialog sequence without keyword spotting using all default services: default audio source
@@ -279,11 +279,11 @@ public interface VoiceManager {
      *
      * Only possible if no dialog processor is already started for the audio source.
      *
-     * @param contextBuilder describing the configured services and options for the dialog
+     * @param context with the configured services and options for the dialog
      * @throws IllegalStateException the provided locale is not supported by all these services or a dialog is already
      *             started for this audio source
      */
-    void listenAndAnswer(DialogContext.Builder contextBuilder) throws IllegalStateException;
+    void listenAndAnswer(DialogContext context) throws IllegalStateException;
 
     /**
      * Retrieves a TTS service.

@@ -309,7 +309,7 @@ public class VoiceResource implements RESTResource {
             dialogContextBuilder.withKeyword(keyword);
         }
         try {
-            voiceManager.startDialog(dialogContextBuilder.withLocale(localeService.getLocale(language)));
+            voiceManager.startDialog(dialogContextBuilder.withLocale(localeService.getLocale(language)).build());
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
@@ -334,7 +334,7 @@ public class VoiceResource implements RESTResource {
             dialogContextBuilder.withSource(source);
         }
         try {
-            voiceManager.stopDialog(dialogContextBuilder);
+            voiceManager.stopDialog(dialogContextBuilder.build());
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
@@ -401,7 +401,7 @@ public class VoiceResource implements RESTResource {
             dialogContextBuilder.withSink(sink);
         }
         try {
-            voiceManager.listenAndAnswer(dialogContextBuilder.withLocale(localeService.getLocale(language)));
+            voiceManager.listenAndAnswer(dialogContextBuilder.withLocale(localeService.getLocale(language)).build());
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());

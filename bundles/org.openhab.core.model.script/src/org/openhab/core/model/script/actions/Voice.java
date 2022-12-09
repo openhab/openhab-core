@@ -313,7 +313,7 @@ public class Voice {
         }
 
         try {
-            VoiceActionService.voiceManager.startDialog(dialogContextBuilder);
+            VoiceActionService.voiceManager.startDialog(dialogContextBuilder.build());
         } catch (IllegalStateException e) {
             logger.warn("Failed starting dialog processing: {}", e.getMessage());
         }
@@ -336,7 +336,7 @@ public class Voice {
                 }
                 dialogContextBuilder.withSource(audioSource);
             }
-            VoiceActionService.voiceManager.stopDialog(dialogContextBuilder);
+            VoiceActionService.voiceManager.stopDialog(dialogContextBuilder.build());
         } catch (IllegalStateException e) {
             logger.warn("Failed stopping dialog processing: {}", e.getMessage());
         }
@@ -440,7 +440,7 @@ public class Voice {
                 }
                 dialogContextBuilder.withLocale(loc);
             }
-            VoiceActionService.voiceManager.listenAndAnswer(dialogContextBuilder);
+            VoiceActionService.voiceManager.listenAndAnswer(dialogContextBuilder.build());
         } catch (IllegalStateException e) {
             logger.warn("Failed executing simple dialog: {}", e.getMessage());
         }

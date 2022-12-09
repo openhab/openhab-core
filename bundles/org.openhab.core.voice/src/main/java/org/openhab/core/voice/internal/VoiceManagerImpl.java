@@ -601,13 +601,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         if (listeningItem != null) {
             builder.withListeningItem(listeningItem);
         }
-        startDialog(builder);
+        startDialog(builder.build());
     }
 
     @Override
-    public void startDialog(DialogContext.Builder contextBuilder) throws IllegalStateException {
-        // use defaults, if null
-        DialogContext context = contextBuilder.build();
+    public void startDialog(DialogContext context) throws IllegalStateException {
         var ksService = context.ks();
         var ksKeyword = context.keyword();
         if (ksService == null || ksKeyword == null) {
@@ -642,12 +640,12 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         if (source != null) {
             builder.withSource(source);
         }
-        stopDialog(builder);
+        stopDialog(builder.build());
     }
 
     @Override
-    public void stopDialog(DialogContext.Builder contextBuilder) throws IllegalStateException {
-        AudioSource audioSource = contextBuilder.build().source();
+    public void stopDialog(DialogContext context) throws IllegalStateException {
+        AudioSource audioSource = context.source();
         DialogProcessor processor = dialogProcessors.remove(audioSource.getId());
         singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
         if (processor == null) {
@@ -700,12 +698,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         if (listeningItem != null) {
             builder.withListeningItem(listeningItem);
         }
-        listenAndAnswer(builder);
+        listenAndAnswer(builder.build());
     }
 
     @Override
-    public void listenAndAnswer(DialogContext.Builder contextBuilder) throws IllegalStateException {
-        DialogContext context = contextBuilder.build();
+    public void listenAndAnswer(DialogContext context) throws IllegalStateException {
         Bundle b = bundle;
         if (b == null) {
             throw new IllegalStateException("Cannot execute a simple dialog as services are missing.");
