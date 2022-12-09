@@ -23,7 +23,7 @@ If you have not worked with Maven yet, just follow the instructions and everythi
 
 What you need before you start:
 
-- Java SE Development Kit 11
+- Java SE Development Kit 17
 - Maven 3 from https://maven.apache.org/download.html
 
 Make sure that the `mvn` command is available on your path
