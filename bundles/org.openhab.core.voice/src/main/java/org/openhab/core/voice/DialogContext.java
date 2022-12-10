@@ -105,15 +105,15 @@ public class DialogContext {
     public static class Builder {
         private final Logger logger = LoggerFactory.getLogger(Builder.class);
         // services
-        private @Nullable AudioSource source = null;
-        private @Nullable AudioSink sink = null;
-        private @Nullable KSService ks = null;
-        private @Nullable STTService stt = null;
-        private @Nullable TTSService tts = null;
-        private @Nullable Voice voice = null;
+        private @Nullable AudioSource source;
+        private @Nullable AudioSink sink;
+        private @Nullable KSService ks;
+        private @Nullable STTService stt;
+        private @Nullable TTSService tts;
+        private @Nullable Voice voice;
         private List<HumanLanguageInterpreter> hlis = List.of();
         // options
-        private @Nullable String listeningItem = null;
+        private @Nullable String listeningItem;
         private String keyword;
         private Locale locale;
 
