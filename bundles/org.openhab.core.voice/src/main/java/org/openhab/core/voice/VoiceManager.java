@@ -223,7 +223,6 @@ public interface VoiceManager {
      * @param source the audio source or null to consider the default audio source
      * @throws IllegalStateException if no dialog is started for the audio source
      */
-    @Deprecated
     void stopDialog(@Nullable AudioSource source) throws IllegalStateException;
 
     /**

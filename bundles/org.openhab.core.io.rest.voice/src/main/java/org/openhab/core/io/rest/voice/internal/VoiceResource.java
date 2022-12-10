@@ -325,16 +325,15 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "400", description = "No dialog processing is started for the audio source.") })
     public Response stopDialog(
             @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId) {
-        var dialogContextBuilder = voiceManager.getDialogContextBuilder();
+        AudioSource source = null;
         if (sourceId != null) {
-            AudioSource source = audioManager.getSource(sourceId);
+            source = audioManager.getSource(sourceId);
             if (source == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
             }
-            dialogContextBuilder.withSource(source);
         }
         try {
-            voiceManager.stopDialog(dialogContextBuilder.build());
+            voiceManager.stopDialog(source);
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
