@@ -363,4 +363,69 @@ class AbstractScriptFileWatcherTest {
         verify(scriptEngineManagerMock, timeout(10000).times(2)).createScriptEngine("js",
                 p.toFile().toURI().toString());
     }
+
+    @Test
+    public void testDirectoryAdded() {
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
+        ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
+        when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+
+        updateStartLevel(100);
+
+        Path p1 = getFile("dir/script.js");
+        Path p2 = getFile("dir/script2.js");
+        Path d = p1.getParent();
+
+        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, d);
+
+        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p1.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p2.toFile().toURI().toString());
+    }
+
+    @Test
+    public void testSortsAllFilesInNewDirectory() {
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
+        ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
+        when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+
+        updateStartLevel(100);
+
+        Path p20 = getFile("dir/script.sl20.js");
+        Path p10 = getFile("dir/script2.sl10.js");
+        Path d = p10.getParent();
+
+        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, d);
+
+        InOrder inOrder = inOrder(scriptEngineManagerMock);
+
+        inOrder.verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
+                p10.toFile().toURI().toString());
+        inOrder.verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js",
+                p20.toFile().toURI().toString());
+    }
+
+    @Test
+    public void testDirectoryRemoved() {
+        when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
+        ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
+        when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
+        when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
+
+        updateStartLevel(100);
+
+        Path p1 = getFile("dir/script.js");
+        Path p2 = getFile("dir/script2.js");
+        Path d = p1.getParent();
+
+        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p1);
+        scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p2);
+        scriptFileWatcher.processWatchEvent(null, ENTRY_DELETE, d);
+
+        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p1.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p2.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, timeout(10000)).removeEngine(p1.toFile().toURI().toString());
+        verify(scriptEngineManagerMock, timeout(10000)).removeEngine(p2.toFile().toURI().toString());
+    }
 }

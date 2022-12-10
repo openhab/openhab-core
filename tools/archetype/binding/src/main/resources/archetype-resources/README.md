@@ -71,6 +71,24 @@ _Provide a full usage example based on textual configuration files._
 _*.things, *.items examples are mandatory as textual configuration is well used by many users._
 _*.sitemap examples are optional._
 
+#[[###]]# Thing Configuration
+
+```java
+Example thing configuration goes here.
+```
+#[[###]]# Item Configuration
+
+```java
+Example item configuration goes here.
+```
+
+#[[###]]# Sitemap Configuration
+
+```perl
+Optional Sitemap configuration goes here.
+Remove this section, if not needed.
+```
+
 #[[##]]# Any custom content here!
 
 _Feel free to add additional sections for whatever you think should also be mentioned about your binding!_

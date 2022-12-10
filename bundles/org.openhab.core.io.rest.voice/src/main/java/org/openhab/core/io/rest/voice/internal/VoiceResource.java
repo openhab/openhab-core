@@ -252,59 +252,64 @@ public class VoiceResource implements RESTResource {
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("keyword") @Parameter(description = "keyword") @Nullable String keyword,
             @QueryParam("listeningItem") @Parameter(description = "listening item") @Nullable String listeningItem) {
-        AudioSource source = null;
+        var dialogContextBuilder = voiceManager.getDialogContextBuilder();
         if (sourceId != null) {
-            source = audioManager.getSource(sourceId);
+            AudioSource source = audioManager.getSource(sourceId);
             if (source == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
             }
+            dialogContextBuilder.withSource(source);
         }
-        KSService ks = null;
         if (ksId != null) {
-            ks = voiceManager.getKS(ksId);
+            KSService ks = voiceManager.getKS(ksId);
             if (ks == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Keyword spotter not found");
             }
+            dialogContextBuilder.withKS(ks);
         }
-        STTService stt = null;
         if (sttId != null) {
-            stt = voiceManager.getSTT(sttId);
+            STTService stt = voiceManager.getSTT(sttId);
             if (stt == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Speech-to-Text not found");
             }
+            dialogContextBuilder.withSTT(stt);
         }
-        TTSService tts = null;
         if (ttsId != null) {
-            tts = voiceManager.getTTS(ttsId);
+            TTSService tts = voiceManager.getTTS(ttsId);
             if (tts == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Text-to-Speech not found");
             }
+            dialogContextBuilder.withTTS(tts);
         }
-        Voice voice = null;
         if (voiceId != null) {
-            voice = getVoice(voiceId);
+            Voice voice = getVoice(voiceId);
             if (voice == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Voice not found");
             }
+            dialogContextBuilder.withVoice(voice);
         }
-        List<HumanLanguageInterpreter> interpreters = List.of();
         if (hliIds != null) {
-            interpreters = voiceManager.getHLIsByIds(hliIds);
+            List<HumanLanguageInterpreter> interpreters = voiceManager.getHLIsByIds(hliIds);
             if (interpreters.isEmpty()) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
             }
+            dialogContextBuilder.withHLIs(interpreters);
         }
-        AudioSink sink = null;
         if (sinkId != null) {
-            sink = audioManager.getSink(sinkId);
+            AudioSink sink = audioManager.getSink(sinkId);
             if (sink == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio sink not found");
             }
+            dialogContextBuilder.withSink(sink);
         }
-        final Locale locale = localeService.getLocale(language);
-
+        if (listeningItem != null) {
+            dialogContextBuilder.withListeningItem(listeningItem);
+        }
+        if (keyword != null) {
+            dialogContextBuilder.withKeyword(keyword);
+        }
         try {
-            voiceManager.startDialog(ks, stt, tts, voice, interpreters, source, sink, locale, keyword, listeningItem);
+            voiceManager.startDialog(dialogContextBuilder.withLocale(localeService.getLocale(language)).build());
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
@@ -320,16 +325,16 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "400", description = "No dialog processing is started for the audio source.") })
     public Response stopDialog(
             @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId) {
-        AudioSource source = null;
+        var dialogContextBuilder = voiceManager.getDialogContextBuilder();
         if (sourceId != null) {
-            source = audioManager.getSource(sourceId);
+            AudioSource source = audioManager.getSource(sourceId);
             if (source == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
             }
+            dialogContextBuilder.withSource(source);
         }
-
         try {
-            voiceManager.stopDialog(source);
+            voiceManager.stopDialog(dialogContextBuilder.build());
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
@@ -352,52 +357,51 @@ public class VoiceResource implements RESTResource {
             @QueryParam("hliIds") @Parameter(description = "interpreter IDs") @Nullable List<String> hliIds,
             @QueryParam("sinkId") @Parameter(description = "audio sink ID") @Nullable String sinkId,
             @QueryParam("listeningItem") @Parameter(description = "listening item") @Nullable String listeningItem) {
-        AudioSource source = null;
+        var dialogContextBuilder = voiceManager.getDialogContextBuilder();
         if (sourceId != null) {
-            source = audioManager.getSource(sourceId);
+            AudioSource source = audioManager.getSource(sourceId);
             if (source == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio source not found");
             }
+            dialogContextBuilder.withSource(source);
         }
-        STTService stt = null;
         if (sttId != null) {
-            stt = voiceManager.getSTT(sttId);
+            STTService stt = voiceManager.getSTT(sttId);
             if (stt == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Speech-to-Text not found");
             }
+            dialogContextBuilder.withSTT(stt);
         }
-        TTSService tts = null;
         if (ttsId != null) {
-            tts = voiceManager.getTTS(ttsId);
+            TTSService tts = voiceManager.getTTS(ttsId);
             if (tts == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Text-to-Speech not found");
             }
+            dialogContextBuilder.withTTS(tts);
         }
-        Voice voice = null;
         if (voiceId != null) {
-            voice = getVoice(voiceId);
+            Voice voice = getVoice(voiceId);
             if (voice == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Voice not found");
             }
+            dialogContextBuilder.withVoice(voice);
         }
-        List<HumanLanguageInterpreter> interpreters = List.of();
         if (hliIds != null) {
-            interpreters = voiceManager.getHLIsByIds(hliIds);
+            List<HumanLanguageInterpreter> interpreters = voiceManager.getHLIsByIds(hliIds);
             if (interpreters.isEmpty()) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
             }
+            dialogContextBuilder.withHLIs(interpreters);
         }
-        AudioSink sink = null;
         if (sinkId != null) {
-            sink = audioManager.getSink(sinkId);
+            AudioSink sink = audioManager.getSink(sinkId);
             if (sink == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Audio sink not found");
             }
+            dialogContextBuilder.withSink(sink);
         }
-        final Locale locale = localeService.getLocale(language);
-
         try {
-            voiceManager.listenAndAnswer(stt, tts, voice, interpreters, source, sink, locale, listeningItem);
+            voiceManager.listenAndAnswer(dialogContextBuilder.withLocale(localeService.getLocale(language)).build());
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (IllegalStateException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());

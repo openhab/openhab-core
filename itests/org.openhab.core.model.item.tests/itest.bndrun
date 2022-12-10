@@ -82,7 +82,6 @@ Fragment-Host: org.openhab.core.model.item
 	org.ops4j.pax.web.pax-web-spi;version='[7.3.25,7.3.26)',\
 	ch.qos.logback.classic;version='[1.2.11,1.2.12)',\
 	ch.qos.logback.core;version='[1.2.11,1.2.12)',\
-	biz.aQute.tester.junit-platform;version='[6.3.0,6.3.1)',\
 	org.openhab.core;version='[3.4.0,3.4.1)',\
 	org.openhab.core.audio;version='[3.4.0,3.4.1)',\
 	org.openhab.core.automation;version='[3.4.0,3.4.1)',\
@@ -102,10 +101,11 @@ Fragment-Host: org.openhab.core.model.item
 	org.openhab.core.model.script.runtime;version='[3.4.0,3.4.1)',\
 	org.openhab.core.model.sitemap;version='[3.4.0,3.4.1)',\
 	org.openhab.core.model.thing;version='[3.4.0,3.4.1)',\
-	org.openhab.core.model.thing.runtime;version='[3.4.0,3.4.1)',\
 	org.openhab.core.persistence;version='[3.4.0,3.4.1)',\
 	org.openhab.core.semantics;version='[3.4.0,3.4.1)',\
 	org.openhab.core.test;version='[3.4.0,3.4.1)',\
 	org.openhab.core.thing;version='[3.4.0,3.4.1)',\
 	org.openhab.core.transform;version='[3.4.0,3.4.1)',\
-	org.openhab.core.voice;version='[3.4.0,3.4.1)'
+	org.openhab.core.voice;version='[3.4.0,3.4.1)',\
+	org.openhab.core.automation.module.script.rulesupport;version='[3.4.0,3.4.1)',\
+	biz.aQute.tester.junit-platform;version='[6.4.0,6.4.1)'

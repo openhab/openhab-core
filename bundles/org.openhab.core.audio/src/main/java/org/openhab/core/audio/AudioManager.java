@@ -170,6 +170,12 @@ public interface AudioManager {
     void setVolume(PercentType volume, @Nullable String sinkId) throws IOException;
 
     /**
+     * Retrieves the default AudioSource id if any.
+     */
+    @Nullable
+    String getSourceId();
+
+    /**
      * Retrieves an AudioSource.
      * If a default name is configured and the service available, this is returned. If no default name is configured,
      * the first available service is returned, if one exists. If no service with the default name is found, null is
@@ -204,6 +210,12 @@ public interface AudioManager {
      * @return ids of matching sources
      */
     Set<String> getSourceIds(String pattern);
+
+    /**
+     * Retrieves the default AudioSink id if any.
+     */
+    @Nullable
+    String getSinkId();
 
     /**
      * Retrieves an AudioSink.

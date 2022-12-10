@@ -36,7 +36,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Simon Merschjohann - Initial contribution
  */
-@Component(service = ScriptExtensionManager.class)
+@Component(service = { ScriptExtensionManager.class, ScriptExtensionAccessor.class })
 @NonNullByDefault
 public class ScriptExtensionManager implements ScriptExtensionAccessor {
 
