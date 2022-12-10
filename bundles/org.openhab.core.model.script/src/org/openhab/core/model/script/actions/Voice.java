@@ -327,16 +327,15 @@ public class Voice {
     @ActionDoc(text = "stops dialog processing for a given audio source")
     public static void stopDialog(@ParamDoc(name = "source") @Nullable String source) {
         try {
-            var dialogContextBuilder = VoiceActionService.voiceManager.getDialogContextBuilder();
+            AudioSource audioSource = null;
             if (source != null) {
-                AudioSource audioSource = VoiceActionService.audioManager.getSource(source);
+                audioSource = VoiceActionService.audioManager.getSource(source);
                 if (audioSource == null) {
                     logger.warn("Failed stopping dialog processing: audio source '{}' not found", source);
                     return;
                 }
-                dialogContextBuilder.withSource(audioSource);
             }
-            VoiceActionService.voiceManager.stopDialog(dialogContextBuilder.build());
+            VoiceActionService.voiceManager.stopDialog(audioSource);
         } catch (IllegalStateException e) {
             logger.warn("Failed stopping dialog processing: {}", e.getMessage());
         }

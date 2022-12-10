@@ -586,30 +586,30 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    @Deprecated
     public void stopDialog(@Nullable AudioSource source) throws IllegalStateException {
-        var builder = getDialogContextBuilder();
-        if (source != null) {
-            builder.withSource(source);
+        AudioSource audioSource = (source == null) ? audioManager.getSource() : source;
+        if (audioSource != null) {
+            DialogProcessor processor = dialogProcessors.remove(audioSource.getId());
+            singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
+            if (processor == null) {
+                processor = singleDialogProcessors.get(audioSource.getId());
+            }
+            if (processor != null) {
+                processor.stop();
+                logger.debug("Dialog stopped for source {} ({})", audioSource.getLabel(null), audioSource.getId());
+            } else {
+                throw new IllegalStateException(
+                        String.format("Cannot stop dialog as no dialog is started for audio source '%s'.",
+                                audioSource.getLabel(null)));
+            }
+        } else {
+            throw new IllegalStateException("Cannot stop dialog as audio source is missing.");
         }
-        stopDialog(builder.build());
     }
 
     @Override
     public void stopDialog(DialogContext context) throws IllegalStateException {
-        AudioSource audioSource = context.source();
-        DialogProcessor processor = dialogProcessors.remove(audioSource.getId());
-        singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
-        if (processor == null) {
-            processor = singleDialogProcessors.get(audioSource.getId());
-        }
-        if (processor != null) {
-            processor.stop();
-            logger.debug("Dialog stopped for source {} ({})", audioSource.getLabel(null), audioSource.getId());
-        } else {
-            throw new IllegalStateException(String.format(
-                    "Cannot stop dialog as no dialog is started for audio source '%s'.", audioSource.getLabel(null)));
-        }
+        stopDialog(context.source());
     }
 
     private void stopAllDialogs() {
