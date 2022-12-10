@@ -22,8 +22,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Describes dialog configured services and options.
@@ -103,7 +101,6 @@ public class DialogContext {
      * Allows to describe a dialog context without requiring the involved services to be loaded
      */
     public static class Builder {
-        private final Logger logger = LoggerFactory.getLogger(Builder.class);
         // services
         private @Nullable AudioSource source;
         private @Nullable AudioSink sink;
@@ -176,6 +173,12 @@ public class DialogContext {
             return this;
         }
 
+        /**
+         * Creates a new {@link DialogContext}
+         * 
+         * @return a {@link DialogContext} with the configured components and options
+         * @throws IllegalStateException if a required dialog component is missing
+         */
         public DialogContext build() throws IllegalStateException {
             KSService ksService = ks;
             STTService sttService = stt;
@@ -185,23 +188,22 @@ public class DialogContext {
             AudioSink audioSink = sink;
             List<String> errors = new ArrayList<>();
             if (sttService == null) {
-                errors.add("Missing stt service");
+                errors.add("missing stt service");
             }
             if (ttsService == null) {
-                errors.add("Missing tts service");
+                errors.add("missing tts service");
             }
             if (hliServices.isEmpty()) {
-                errors.add("Missing interpreters");
+                errors.add("missing interpreters");
             }
             if (audioSource == null) {
-                errors.add("Missing audio source");
+                errors.add("missing audio source");
             }
             if (audioSink == null) {
-                errors.add("Missing audio sink");
+                errors.add("missing audio sink");
             }
             if (!errors.isEmpty()) {
-                errors.forEach(logger::warn);
-                throw new IllegalStateException("Cannot build dialog context, services are missing");
+                throw new IllegalStateException("Cannot build dialog context: " + String.join(", ", errors) + ".");
             }
             return new DialogContext(ksService, keyword, sttService, ttsService, voice, hliServices, audioSource,
                     audioSink, locale, listeningItem);
