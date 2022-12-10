@@ -345,6 +345,15 @@ public class JavaOSGiTest extends JavaTest {
     }
 
     /**
+     * Get the OSGi {@link BundleContext}
+     *
+     * @return the bundle context
+     */
+    protected BundleContext getBundleContext() {
+        return bundleContext;
+    }
+
+    /**
      * Registers a volatile storage service.
      */
     protected void registerVolatileStorageService() {
