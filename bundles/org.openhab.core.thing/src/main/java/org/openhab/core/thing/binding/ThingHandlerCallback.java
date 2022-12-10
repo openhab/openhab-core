@@ -77,7 +77,7 @@ public interface ThingHandlerCallback {
      * Informs about an update of the whole thing.
      *
      * @param thing thing that was updated (must not be null)
-     * @throws IllegalStateException if the {@link Thing} is read-only.
+     * @throws IllegalStateException if the {@link Thing} is can't be found
      */
     void thingUpdated(Thing thing);
 

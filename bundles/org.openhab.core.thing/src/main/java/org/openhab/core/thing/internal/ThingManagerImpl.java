@@ -262,32 +262,7 @@ public class ThingManagerImpl
 
         @Override
         public void thingUpdated(final Thing thing) {
-            thingUpdatedLock.add(thing.getUID());
-            AccessController.doPrivileged((PrivilegedAction<@Nullable Void>) () -> {
-                Provider<Thing> provider = thingRegistry.getProvider(thing);
-                if (provider == null) {
-                    throw new IllegalArgumentException(MessageFormat.format(
-                            "Provider for thing {0} cannot be determined because it is not known to the registry",
-                            thing.getUID().getAsString()));
-                }
-                if (provider instanceof ManagedProvider) {
-                    @SuppressWarnings("unchecked")
-                    ManagedProvider<Thing, ThingUID> managedProvider = (ManagedProvider<Thing, ThingUID>) provider;
-                    managedProvider.update(thing);
-                } else {
-                    logger.debug("Only updating thing {} in the registry because provider {} is not managed.",
-                            thing.getUID().getAsString(), provider);
-                    Thing oldThing = thingRegistry.get(thing.getUID());
-                    if (oldThing == null) {
-                        throw new IllegalArgumentException(
-                                MessageFormat.format("Cannot update thing {0} because it is not known to the registry",
-                                        thing.getUID().getAsString()));
-                    }
-                    thingRegistry.updated(provider, oldThing, thing);
-                }
-                return null;
-            });
-            thingUpdatedLock.remove(thing.getUID());
+            ThingManagerImpl.this.thingUpdated(thing);
         }
 
         @Override
@@ -472,13 +447,40 @@ public class ThingManagerImpl
         readyService.unregisterTracker(this);
     }
 
+    private void thingUpdated(final Thing thing) {
+        thingUpdatedLock.add(thing.getUID());
+        final Thing oldThing = thingRegistry.get(thing.getUID());
+        if (oldThing == null) {
+            throw new IllegalArgumentException(MessageFormat.format(
+                    "Cannot update thing {0} because it is not known to the registry", thing.getUID().getAsString()));
+        }
+        AccessController.doPrivileged((PrivilegedAction<@Nullable Void>) () -> {
+            final Provider<Thing> provider = thingRegistry.getProvider(thing);
+            if (provider == null) {
+                throw new IllegalArgumentException(MessageFormat.format(
+                        "Provider for thing {0} cannot be determined because it is not known to the registry",
+                        thing.getUID().getAsString()));
+            }
+            if (provider instanceof ManagedProvider) {
+                final ManagedProvider<Thing, ThingUID> managedProvider = (ManagedProvider<Thing, ThingUID>) provider;
+                managedProvider.update(thing);
+            } else {
+                logger.debug("Only updating thing {} in the registry because provider {} is not managed.",
+                        thing.getUID().getAsString(), provider);
+                thingRegistry.updated(provider, oldThing, thing);
+            }
+            return null;
+        });
+        thingUpdatedLock.remove(thing.getUID());
+    }
+
     @Override
     public void migrateThingType(final Thing thing, final ThingTypeUID thingTypeUID,
             final @Nullable Configuration configuration) {
         final ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
         if (thingType == null) {
             throw new IllegalStateException(
-                    MessageFormat.format("No thing type {0} registered, cannot change thing type for thing {1}",
+                    MessageFormat.format("No thing type {0} registered, cannot change thing type for thing {1}",
                             thingTypeUID.getAsString(), thing.getUID().getAsString()));
         }
         scheduler.schedule(new Runnable() {
@@ -519,11 +521,15 @@ public class ThingManagerImpl
                         thing.setProperty(entry.getKey(), entry.getValue());
                     }
 
-                    // Change the ThingType
+                    // set the new ThingTypeUID
                     ((ThingImpl) thing).setThingTypeUID(thingTypeUID);
 
-                    // Register the new Handler - ThingManager.updateThing() is going to take care of that
-                    thingRegistry.update(thing);
+                    // update the thing and register a new handler
+                    thingUpdated(thing);
+                    final ThingHandlerFactory newThingHandlerFactory = findThingHandlerFactory(thing.getThingTypeUID());
+                    if (newThingHandlerFactory != null) {
+                        registerAndInitializeHandler(thing, newThingHandlerFactory);
+                    }
 
                     ThingHandler handler = thing.getHandler();
                     logger.debug("Changed ThingType of Thing {} to {}. New ThingHandler is {}.", thingUID,
