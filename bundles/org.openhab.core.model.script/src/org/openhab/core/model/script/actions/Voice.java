@@ -238,75 +238,82 @@ public class Voice {
             @ParamDoc(name = "source") @Nullable String source, @ParamDoc(name = "sink") @Nullable String sink,
             @ParamDoc(name = "locale") @Nullable String locale, @ParamDoc(name = "keyword") @Nullable String keyword,
             @ParamDoc(name = "listening item") @Nullable String listeningItem) {
-        AudioSource audioSource = null;
+        var dialogContextBuilder = VoiceActionService.voiceManager.getDialogContextBuilder();
         if (source != null) {
-            audioSource = VoiceActionService.audioManager.getSource(source);
+            AudioSource audioSource = VoiceActionService.audioManager.getSource(source);
             if (audioSource == null) {
                 logger.warn("Failed starting dialog processing: audio source '{}' not found", source);
                 return;
             }
+            dialogContextBuilder.withSource(audioSource);
         }
-        KSService ksService = null;
         if (ks != null) {
-            ksService = VoiceActionService.voiceManager.getKS(ks);
+            KSService ksService = VoiceActionService.voiceManager.getKS(ks);
             if (ksService == null) {
                 logger.warn("Failed starting dialog processing: keyword spotting service '{}' not found", ks);
                 return;
             }
+            dialogContextBuilder.withKS(ksService);
         }
-        STTService sttService = null;
+        if (keyword != null) {
+            dialogContextBuilder.withKeyword(keyword);
+        }
         if (stt != null) {
-            sttService = VoiceActionService.voiceManager.getSTT(stt);
+            STTService sttService = VoiceActionService.voiceManager.getSTT(stt);
             if (sttService == null) {
                 logger.warn("Failed starting dialog processing: speech-to-text service '{}' not found", stt);
                 return;
             }
+            dialogContextBuilder.withSTT(sttService);
         }
-        TTSService ttsService = null;
         if (tts != null) {
-            ttsService = VoiceActionService.voiceManager.getTTS(tts);
+            TTSService ttsService = VoiceActionService.voiceManager.getTTS(tts);
             if (ttsService == null) {
                 logger.warn("Failed starting dialog processing: text-to-speech service '{}' not found", tts);
                 return;
             }
+            dialogContextBuilder.withTTS(ttsService);
         }
-        org.openhab.core.voice.Voice prefVoice = null;
         if (voice != null) {
-            prefVoice = getVoice(voice);
+            org.openhab.core.voice.Voice prefVoice = getVoice(voice);
             if (prefVoice == null) {
                 logger.warn("Failed starting dialog processing: voice '{}' not found", voice);
                 return;
             }
+            dialogContextBuilder.withVoice(prefVoice);
         }
-        List<HumanLanguageInterpreter> hliServices = List.of();
         if (interpreters != null) {
-            hliServices = VoiceActionService.voiceManager.getHLIsByIds(interpreters);
+            List<HumanLanguageInterpreter> hliServices = VoiceActionService.voiceManager.getHLIsByIds(interpreters);
             if (hliServices.isEmpty()) {
                 logger.warn("Failed starting dialog processing: interpreters '{}' not found", interpreters);
                 return;
             }
+            dialogContextBuilder.withHLIs(hliServices);
         }
-        AudioSink audioSink = null;
         if (sink != null) {
-            audioSink = VoiceActionService.audioManager.getSink(sink);
+            AudioSink audioSink = VoiceActionService.audioManager.getSink(sink);
             if (audioSink == null) {
                 logger.warn("Failed starting dialog processing: audio sink '{}' not found", sink);
                 return;
             }
+            dialogContextBuilder.withSink(audioSink);
         }
-        Locale loc = null;
+        if (listeningItem != null) {
+            dialogContextBuilder.withListeningItem(listeningItem);
+        }
         if (locale != null) {
             String[] split = locale.split("-");
+            Locale loc = null;
             if (split.length == 2) {
                 loc = new Locale(split[0], split[1]);
             } else {
                 loc = new Locale(split[0]);
             }
+            dialogContextBuilder.withLocale(loc);
         }
 
         try {
-            VoiceActionService.voiceManager.startDialog(ksService, sttService, ttsService, prefVoice, hliServices,
-                    audioSource, audioSink, loc, keyword, listeningItem);
+            VoiceActionService.voiceManager.startDialog(dialogContextBuilder.build());
         } catch (IllegalStateException e) {
             logger.warn("Failed starting dialog processing: {}", e.getMessage());
         }
@@ -319,16 +326,17 @@ public class Voice {
      */
     @ActionDoc(text = "stops dialog processing for a given audio source")
     public static void stopDialog(@ParamDoc(name = "source") @Nullable String source) {
-        AudioSource audioSource = null;
-        if (source != null) {
-            audioSource = VoiceActionService.audioManager.getSource(source);
-            if (audioSource == null) {
-                logger.warn("Failed stopping dialog processing: audio source '{}' not found", source);
-                return;
-            }
-        }
         try {
-            VoiceActionService.voiceManager.stopDialog(audioSource);
+            var dialogContextBuilder = VoiceActionService.voiceManager.getDialogContextBuilder();
+            if (source != null) {
+                AudioSource audioSource = VoiceActionService.audioManager.getSource(source);
+                if (audioSource == null) {
+                    logger.warn("Failed stopping dialog processing: audio source '{}' not found", source);
+                    return;
+                }
+                dialogContextBuilder.withSource(audioSource);
+            }
+            VoiceActionService.voiceManager.stopDialog(dialogContextBuilder.build());
         } catch (IllegalStateException e) {
             logger.warn("Failed stopping dialog processing: {}", e.getMessage());
         }
@@ -369,67 +377,70 @@ public class Voice {
             @ParamDoc(name = "source") @Nullable String source, @ParamDoc(name = "sink") @Nullable String sink,
             @ParamDoc(name = "locale") @Nullable String locale,
             @ParamDoc(name = "listening item") @Nullable String listeningItem) {
-        AudioSource audioSource = null;
-        if (source != null) {
-            audioSource = VoiceActionService.audioManager.getSource(source);
-            if (audioSource == null) {
-                logger.warn("Failed executing simple dialog: audio source '{}' not found", source);
-                return;
-            }
-        }
-        STTService sttService = null;
-        if (stt != null) {
-            sttService = VoiceActionService.voiceManager.getSTT(stt);
-            if (sttService == null) {
-                logger.warn("Failed executing simple dialog: speech-to-text service '{}' not found", stt);
-                return;
-            }
-        }
-        TTSService ttsService = null;
-        if (tts != null) {
-            ttsService = VoiceActionService.voiceManager.getTTS(tts);
-            if (ttsService == null) {
-                logger.warn("Failed executing simple dialog: text-to-speech service '{}' not found", tts);
-                return;
-            }
-        }
-        org.openhab.core.voice.Voice prefVoice = null;
-        if (voice != null) {
-            prefVoice = getVoice(voice);
-            if (prefVoice == null) {
-                logger.warn("Failed executing simple dialog: voice '{}' not found", voice);
-                return;
-            }
-        }
-        List<HumanLanguageInterpreter> hliServices = List.of();
-        if (interpreters != null) {
-            hliServices = VoiceActionService.voiceManager.getHLIsByIds(interpreters);
-            if (hliServices.isEmpty()) {
-                logger.warn("Failed executing simple dialog: interpreters '{}' not found", interpreters);
-                return;
-            }
-        }
-        AudioSink audioSink = null;
-        if (sink != null) {
-            audioSink = VoiceActionService.audioManager.getSink(sink);
-            if (audioSink == null) {
-                logger.warn("Failed executing simple dialog: audio sink '{}' not found", sink);
-                return;
-            }
-        }
-        Locale loc = null;
-        if (locale != null) {
-            String[] split = locale.split("-");
-            if (split.length == 2) {
-                loc = new Locale(split[0], split[1]);
-            } else {
-                loc = new Locale(split[0]);
-            }
-        }
-
         try {
-            VoiceActionService.voiceManager.listenAndAnswer(sttService, ttsService, prefVoice, hliServices, audioSource,
-                    audioSink, loc, listeningItem);
+            var dialogContextBuilder = VoiceActionService.voiceManager.getDialogContextBuilder();
+            if (source != null) {
+                AudioSource audioSource = VoiceActionService.audioManager.getSource(source);
+                if (audioSource == null) {
+                    logger.warn("Failed executing simple dialog: audio source '{}' not found", source);
+                    return;
+                }
+                dialogContextBuilder.withSource(audioSource);
+            }
+            if (stt != null) {
+                STTService sttService = VoiceActionService.voiceManager.getSTT(stt);
+                if (sttService == null) {
+                    logger.warn("Failed executing simple dialog: speech-to-text service '{}' not found", stt);
+                    return;
+                }
+                dialogContextBuilder.withSTT(sttService);
+            }
+            if (tts != null) {
+                TTSService ttsService = VoiceActionService.voiceManager.getTTS(tts);
+                if (ttsService == null) {
+                    logger.warn("Failed executing simple dialog: text-to-speech service '{}' not found", tts);
+                    return;
+                }
+                dialogContextBuilder.withTTS(ttsService);
+            }
+            if (voice != null) {
+                org.openhab.core.voice.Voice prefVoice = getVoice(voice);
+                if (prefVoice == null) {
+                    logger.warn("Failed executing simple dialog: voice '{}' not found", voice);
+                    return;
+                }
+                dialogContextBuilder.withVoice(prefVoice);
+            }
+            if (interpreters != null) {
+                List<HumanLanguageInterpreter> hliServices = VoiceActionService.voiceManager.getHLIsByIds(interpreters);
+                if (hliServices.isEmpty()) {
+                    logger.warn("Failed executing simple dialog: interpreters '{}' not found", interpreters);
+                    return;
+                }
+                dialogContextBuilder.withHLIs(hliServices);
+            }
+            if (sink != null) {
+                AudioSink audioSink = VoiceActionService.audioManager.getSink(sink);
+                if (audioSink == null) {
+                    logger.warn("Failed executing simple dialog: audio sink '{}' not found", sink);
+                    return;
+                }
+                dialogContextBuilder.withSink(audioSink);
+            }
+            if (listeningItem != null) {
+                dialogContextBuilder.withListeningItem(listeningItem);
+            }
+            if (locale != null) {
+                Locale loc = null;
+                String[] split = locale.split("-");
+                if (split.length == 2) {
+                    loc = new Locale(split[0], split[1]);
+                } else {
+                    loc = new Locale(split[0]);
+                }
+                dialogContextBuilder.withLocale(loc);
+            }
+            VoiceActionService.voiceManager.listenAndAnswer(dialogContextBuilder.build());
         } catch (IllegalStateException e) {
             logger.warn("Failed executing simple dialog: {}", e.getMessage());
         }

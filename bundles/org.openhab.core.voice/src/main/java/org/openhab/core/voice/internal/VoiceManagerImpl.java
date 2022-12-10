@@ -483,19 +483,16 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public DialogContext getDefaultDialogContext() throws IllegalStateException {
-        KSService ksService = getKS();
-        STTService sttService = getSTT();
-        TTSService ttsService = getTTS();
-        Voice prefVoice = getDefaultVoice();
-        HumanLanguageInterpreter hli = getHLI();
-        AudioSource audioSource = audioManager.getSource();
-        AudioSink audioSink = audioManager.getSink();
-        if (sttService == null || ttsService == null || hli == null || audioSource == null || audioSink == null) {
-            throw new IllegalStateException("Cannot load default dialog context as services are missing.");
-        }
-        return new DialogContext(ksService, keyword, sttService, ttsService, prefVoice, List.of(hli), audioSource,
-                audioSink, localeProvider.getLocale(), listeningItem);
+    public DialogContext.Builder getDialogContextBuilder() {
+        return new DialogContext.Builder(keyword, localeProvider.getLocale()) //
+                .withSink(audioManager.getSink()) //
+                .withSource(audioManager.getSource()) //
+                .withKS(this.getKS()) //
+                .withSTT(this.getSTT()) //
+                .withTTS(this.getTTS()) //
+                .withHLIs(this.getHLIs()) //
+                .withVoice(this.getDefaultVoice()) //
+                .withListeningItem(listeningItem);
     }
 
     @Override
@@ -525,43 +522,42 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source,
             @Nullable AudioSink sink, @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
             throws IllegalStateException {
-        var context = getDefaultDialogContext();
+        var builder = getDialogContextBuilder();
         if (ks != null) {
-            context = context.withKS(ks);
+            builder.withKS(ks);
         }
         if (keyword != null) {
-            context = context.withKeyword(keyword);
+            builder.withKeyword(keyword);
         }
         if (stt != null) {
-            context = context.withSTT(stt);
+            builder.withSTT(stt);
         }
         if (tts != null) {
-            context = context.withTTS(tts);
+            builder.withTTS(tts);
         }
         if (voice != null) {
-            context = context.withVoice(voice);
+            builder.withVoice(voice);
         }
         if (!hlis.isEmpty()) {
-            context = context.withHLIs(hlis);
+            builder.withHLIs(hlis);
         }
         if (source != null) {
-            context = context.withSource(source);
+            builder.withSource(source);
         }
         if (sink != null) {
-            context = context.withSink(sink);
+            builder.withSink(sink);
         }
         if (locale != null) {
-            context = context.withLocale(locale);
+            builder.withLocale(locale);
         }
         if (listeningItem != null) {
-            context = context.withListeningItem(listeningItem);
+            builder.withListeningItem(listeningItem);
         }
-        startDialog(context);
+        startDialog(builder.build());
     }
 
     @Override
     public void startDialog(DialogContext context) throws IllegalStateException {
-        // use defaults, if null
         var ksService = context.ks();
         var ksKeyword = context.keyword();
         if (ksService == null || ksKeyword == null) {
@@ -592,11 +588,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Override
     @Deprecated
     public void stopDialog(@Nullable AudioSource source) throws IllegalStateException {
-        var context = getDefaultDialogContext();
+        var builder = getDialogContextBuilder();
         if (source != null) {
-            context = context.withSource(source);
+            builder.withSource(source);
         }
-        stopDialog(context);
+        stopDialog(builder.build());
     }
 
     @Override
@@ -632,29 +628,29 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, @Nullable Voice voice,
             List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
             @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException {
-        var context = getDefaultDialogContext();
+        var builder = getDialogContextBuilder();
         if (stt != null) {
-            context = context.withSTT(stt);
+            builder.withSTT(stt);
         }
         if (tts != null) {
-            context = context.withTTS(tts);
+            builder.withTTS(tts);
         }
         if (!hlis.isEmpty()) {
-            context = context.withHLIs(hlis);
+            builder.withHLIs(hlis);
         }
         if (source != null) {
-            context = context.withSource(source);
+            builder.withSource(source);
         }
         if (sink != null) {
-            context = context.withSink(sink);
+            builder.withSink(sink);
         }
         if (locale != null) {
-            context = context.withLocale(locale);
+            builder.withLocale(locale);
         }
         if (listeningItem != null) {
-            context = context.withListeningItem(listeningItem);
+            builder.withListeningItem(listeningItem);
         }
-        listenAndAnswer(context);
+        listenAndAnswer(builder.build());
     }
 
     @Override

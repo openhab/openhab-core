@@ -12,6 +12,8 @@
  */
 package org.openhab.core.voice;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -95,72 +97,116 @@ public class DialogContext {
     }
 
     /**
-     * @return a new DialogContext instance with the provided source
+     * Builder for {@link DialogContext}
+     * Allows to describe a dialog context without requiring the involved services to be loaded
      */
-    public DialogContext withSource(AudioSource source) {
-        return new DialogContext(ks, keyword, stt, tts, voice, hlis, source, sink, locale, listeningItem);
-    }
+    public static class Builder {
+        // services
+        private @Nullable AudioSource source;
+        private @Nullable AudioSink sink;
+        private @Nullable KSService ks;
+        private @Nullable STTService stt;
+        private @Nullable TTSService tts;
+        private @Nullable Voice voice;
+        private List<HumanLanguageInterpreter> hlis = List.of();
+        // options
+        private @Nullable String listeningItem;
+        private String keyword;
+        private Locale locale;
 
-    /**
-     * @return a new DialogContext instance with the provided sink
-     */
-    public DialogContext withSink(AudioSink sink) {
-        return new DialogContext(ks, keyword, stt, tts, voice, hlis, source, sink, locale, listeningItem);
-    }
+        public Builder(String keyword, Locale locale) {
+            this.keyword = keyword;
+            this.locale = locale;
+        }
 
-    /**
-     * @return a new DialogContext instance with the provided stt
-     */
-    public DialogContext withSTT(STTService stt) {
-        return new DialogContext(ks, keyword, stt, tts, voice, hlis, source, sink, locale, listeningItem);
-    }
+        public Builder withSource(@Nullable AudioSource source) {
+            this.source = source;
+            return this;
+        }
 
-    /**
-     * @return a new DialogContext instance with the provided tts
-     */
-    public DialogContext withTTS(TTSService tts) {
-        return new DialogContext(ks, keyword, stt, tts, voice, hlis, source, sink, locale, listeningItem);
-    }
+        public Builder withSink(@Nullable AudioSink sink) {
+            this.sink = sink;
+            return this;
+        }
 
-    /**
-     * @return a new DialogContext instance with the provided voice
-     */
-    public DialogContext withVoice(Voice voice) {
-        return new DialogContext(ks, keyword, stt, tts, voice, hlis, source, sink, locale, listeningItem);
-    }
+        public Builder withKS(@Nullable KSService service) {
+            this.ks = service;
+            return this;
+        }
 
-    /**
-     * @return a new DialogContext instance with the provided list of interpreters
-     */
-    public DialogContext withHLIs(List<HumanLanguageInterpreter> hlis) {
-        return new DialogContext(ks, keyword, stt, tts, voice, hlis, source, sink, locale, listeningItem);
-    }
+        public Builder withSTT(@Nullable STTService service) {
+            this.stt = service;
+            return this;
+        }
 
-    /**
-     * @return a new DialogContext instance with the provided locale
-     */
-    public DialogContext withLocale(Locale locale) {
-        return new DialogContext(ks, keyword, stt, tts, voice, hlis, source, sink, locale, listeningItem);
-    }
+        public Builder withTTS(@Nullable TTSService service) {
+            this.tts = service;
+            return this;
+        }
 
-    /**
-     * @return a new DialogContext instance with the provided listening item
-     */
-    public DialogContext withListeningItem(String listeningItem) {
-        return new DialogContext(ks, keyword, stt, tts, voice, hlis, source, sink, locale, listeningItem);
-    }
+        public Builder withHLIs(Collection<HumanLanguageInterpreter> services) {
+            return withHLIs(new ArrayList<>(services));
+        }
 
-    /**
-     * @return a new DialogContext instance with the provided ks
-     */
-    public DialogContext withKS(@Nullable KSService ks) {
-        return new DialogContext(ks, keyword, stt, tts, voice, hlis, source, sink, locale, listeningItem);
-    }
+        public Builder withHLIs(List<HumanLanguageInterpreter> services) {
+            this.hlis = services;
+            return this;
+        }
 
-    /**
-     * @return a new DialogContext instance with the provided keyword
-     */
-    public DialogContext withKeyword(@Nullable String keyword) {
-        return new DialogContext(ks, keyword, stt, tts, voice, hlis, source, sink, locale, listeningItem);
+        public Builder withKeyword(String keyword) {
+            this.keyword = keyword;
+            return this;
+        }
+
+        public Builder withVoice(@Nullable Voice voice) {
+            this.voice = voice;
+            return this;
+        }
+
+        public Builder withListeningItem(@Nullable String listeningItem) {
+            this.listeningItem = listeningItem;
+            return this;
+        }
+
+        public Builder withLocale(Locale locale) {
+            this.locale = locale;
+            return this;
+        }
+
+        /**
+         * Creates a new {@link DialogContext}
+         * 
+         * @return a {@link DialogContext} with the configured components and options
+         * @throws IllegalStateException if a required dialog component is missing
+         */
+        public DialogContext build() throws IllegalStateException {
+            KSService ksService = ks;
+            STTService sttService = stt;
+            TTSService ttsService = tts;
+            List<HumanLanguageInterpreter> hliServices = hlis;
+            AudioSource audioSource = source;
+            AudioSink audioSink = sink;
+            List<String> errors = new ArrayList<>();
+            if (sttService == null) {
+                errors.add("missing stt service");
+            }
+            if (ttsService == null) {
+                errors.add("missing tts service");
+            }
+            if (hliServices.isEmpty()) {
+                errors.add("missing interpreters");
+            }
+            if (audioSource == null) {
+                errors.add("missing audio source");
+            }
+            if (audioSink == null) {
+                errors.add("missing audio sink");
+            }
+            if (!errors.isEmpty()) {
+                throw new IllegalStateException("Cannot build dialog context: " + String.join(", ", errors) + ".");
+            }
+            return new DialogContext(ksService, keyword, sttService, ttsService, voice, hliServices, audioSource,
+                    audioSink, locale, listeningItem);
+        }
     }
 }

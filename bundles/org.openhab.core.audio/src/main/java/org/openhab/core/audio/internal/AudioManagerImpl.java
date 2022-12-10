@@ -211,6 +211,11 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Override
+    public @Nullable String getSourceId() {
+        return defaultSource;
+    }
+
+    @Override
     public @Nullable AudioSource getSource() {
         AudioSource source = null;
         if (defaultSource != null) {
@@ -248,6 +253,11 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
         }
 
         return matchedSources;
+    }
+
+    @Override
+    public @Nullable String getSinkId() {
+        return defaultSink;
     }
 
     @Override
