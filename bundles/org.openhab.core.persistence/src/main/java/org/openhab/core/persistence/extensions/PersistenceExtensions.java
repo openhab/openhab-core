@@ -16,8 +16,10 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
@@ -1089,6 +1091,63 @@ public class PersistenceExtensions {
             }
         }
         return null;
+    }
+
+    /**
+     * Gets the number of available historic data points of a given {@link Item} from a point in time until now.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to query
+     * @param begin the beginning point in time
+     * @return the number of values persisted for this item
+     */
+    public static long countSince(Item item, ZonedDateTime begin) {
+        return countSince(item, begin, getDefaultServiceId());
+    }
+
+    /**
+     * Gets the number of available historic data points of a given {@link Item} from a point in time until now.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to query
+     * @param begin the beginning point in time
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the number of values persisted for this item
+     */
+    public static long countSince(Item item, ZonedDateTime begin, String serviceId) {
+        return countBetween(item, begin, null, serviceId);
+    }
+
+    /**
+     * Gets the number of available historic data points of a given {@link Item} between two points in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to query
+     * @param begin the beginning point in time
+     * @param end the end point in time
+     * @return the number of values persisted for this item
+     */
+    public static long countBetween(Item item, ZonedDateTime begin, @Nullable ZonedDateTime end) {
+        return countBetween(item, begin, end, getDefaultServiceId());
+    }
+
+    /**
+     * Gets the number of available historic data points of a given {@link Item} between two points in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to query
+     * @param begin the beginning point in time
+     * @param end the end point in time
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the number of values persisted for this item
+     */
+    public static long countBetween(Item item, ZonedDateTime begin, @Nullable ZonedDateTime end, String serviceId) {
+        Iterable<HistoricItem> historicItems = getAllStatesBetween(item, begin, end, serviceId);
+        if (historicItems instanceof Collection<?>) {
+            return ((Collection<?>) historicItems).size();
+        } else {
+            return StreamSupport.stream(historicItems.spliterator(), false).count();
+        }
     }
 
     private static @Nullable PersistenceService getService(String serviceId) {
