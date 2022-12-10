@@ -13,10 +13,9 @@
 package org.openhab.core.voice;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -106,19 +105,13 @@ public class DialogContext {
     public static class Builder {
         private final Logger logger = LoggerFactory.getLogger(Builder.class);
         // services
-        private @Nullable String sourceId = null;
-        private Supplier<@Nullable AudioSource> source = () -> null;
-        private @Nullable String sinkId = null;
-        private Supplier<@Nullable AudioSink> sink = () -> null;
-        private @Nullable String ksId = null;
-        private Supplier<@Nullable KSService> ks = () -> null;
-        private @Nullable String sttId = null;
-        private Supplier<@Nullable STTService> stt = () -> null;
-        private @Nullable String ttsId = null;
-        private Supplier<@Nullable TTSService> tts = () -> null;
+        private @Nullable AudioSource source = null;
+        private @Nullable AudioSink sink = null;
+        private @Nullable KSService ks = null;
+        private @Nullable STTService stt = null;
+        private @Nullable TTSService tts = null;
         private @Nullable Voice voice = null;
-        private List<String> hliIds = List.of();
-        private Supplier<List<HumanLanguageInterpreter>> hlis = List::of;
+        private List<HumanLanguageInterpreter> hlis = List.of();
         // options
         private @Nullable String listeningItem = null;
         private String keyword;
@@ -129,70 +122,37 @@ public class DialogContext {
             this.locale = locale;
         }
 
-        public Builder withSource(AudioSource service) {
-            withSource(service.getId(), () -> service);
+        public Builder withSource(@Nullable AudioSource source) {
+            this.source = source;
             return this;
         }
 
-        public Builder withSource(String id, Supplier<@Nullable AudioSource> serviceResolver) {
-            sourceId = id;
-            source = serviceResolver;
+        public Builder withSink(@Nullable AudioSink sink) {
+            this.sink = sink;
             return this;
         }
 
-        public Builder withSink(AudioSink service) {
-            withSink(service.getId(), () -> service);
+        public Builder withKS(@Nullable KSService service) {
+            this.ks = service;
             return this;
         }
 
-        public Builder withSink(String id, Supplier<@Nullable AudioSink> serviceResolver) {
-            sinkId = id;
-            sink = serviceResolver;
+        public Builder withSTT(@Nullable STTService service) {
+            this.stt = service;
             return this;
         }
 
-        public Builder withKS(KSService service) {
-            withKS(service.getId(), () -> service);
+        public Builder withTTS(@Nullable TTSService service) {
+            this.tts = service;
             return this;
         }
 
-        public Builder withKS(String id, Supplier<@Nullable KSService> serviceResolver) {
-            ksId = id;
-            ks = serviceResolver;
-            return this;
-        }
-
-        public Builder withSTT(STTService service) {
-            withSTT(service.getId(), () -> service);
-            return this;
-        }
-
-        public Builder withSTT(String id, Supplier<@Nullable STTService> serviceResolver) {
-            sttId = id;
-            stt = serviceResolver;
-            return this;
-        }
-
-        public Builder withTTS(TTSService service) {
-            withTTS(service.getId(), () -> service);
-            return this;
-        }
-
-        public Builder withTTS(String id, Supplier<@Nullable TTSService> serviceResolver) {
-            ttsId = id;
-            tts = serviceResolver;
-            return this;
+        public Builder withHLIs(Collection<HumanLanguageInterpreter> services) {
+            return withHLIs(new ArrayList<>(services));
         }
 
         public Builder withHLIs(List<HumanLanguageInterpreter> services) {
-            withHLIs(services.stream().map(HumanLanguageInterpreter::getId).collect(Collectors.toList()),
-                    () -> services);
-            return this;
-        }
-
-        public Builder withHLIs(List<String> ids, Supplier<List<HumanLanguageInterpreter>> serviceResolver) {
-            hliIds = ids;
-            hlis = serviceResolver;
+            this.hlis = services;
             return this;
         }
 
@@ -201,12 +161,12 @@ public class DialogContext {
             return this;
         }
 
-        public Builder withVoice(Voice voice) {
+        public Builder withVoice(@Nullable Voice voice) {
             this.voice = voice;
             return this;
         }
 
-        public Builder withListeningItem(String listeningItem) {
+        public Builder withListeningItem(@Nullable String listeningItem) {
             this.listeningItem = listeningItem;
             return this;
         }
@@ -217,29 +177,27 @@ public class DialogContext {
         }
 
         public DialogContext build() throws IllegalStateException {
-            KSService ksService = ks.get();
-            STTService sttService = stt.get();
-            TTSService ttsService = tts.get();
-            List<HumanLanguageInterpreter> hliServices = hlis.get();
-            AudioSource audioSource = source.get();
-            AudioSink audioSink = sink.get();
+            KSService ksService = ks;
+            STTService sttService = stt;
+            TTSService ttsService = tts;
+            List<HumanLanguageInterpreter> hliServices = hlis;
+            AudioSource audioSource = source;
+            AudioSink audioSink = sink;
             List<String> errors = new ArrayList<>();
             if (sttService == null) {
-                errors.add("Missing stt service: " + sttId);
+                errors.add("Missing stt service");
             }
             if (ttsService == null) {
-                errors.add("Missing tts service: " + ttsId);
+                errors.add("Missing tts service");
             }
-            if (hliServices.isEmpty() || hliIds.size() != hliServices.size()) {
-                var serviceIds = hliServices.stream().map(HumanLanguageInterpreter::getId).collect(Collectors.toList());
-                errors.add("Missing interpreters: "
-                        + hliIds.stream().filter(s -> !serviceIds.contains(s)).collect(Collectors.joining(", ")));
+            if (hliServices.isEmpty()) {
+                errors.add("Missing interpreters");
             }
             if (audioSource == null) {
-                errors.add("Missing audio source: " + sourceId);
+                errors.add("Missing audio source");
             }
             if (audioSink == null) {
-                errors.add("Missing audio sink: " + sinkId);
+                errors.add("Missing audio sink");
             }
             if (!errors.isEmpty()) {
                 errors.forEach(logger::warn);

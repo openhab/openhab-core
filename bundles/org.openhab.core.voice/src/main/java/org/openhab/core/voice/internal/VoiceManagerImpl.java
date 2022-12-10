@@ -484,63 +484,15 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public DialogContext.Builder getDialogContextBuilder() {
-        var builder = new DialogContext.Builder(keyword, localeProvider.getLocale());
-        var sinkId = audioManager.getSinkId();
-        if (sinkId != null) {
-            builder.withSink(sinkId, audioManager::getSink);
-        }
-        var sourceId = audioManager.getSourceId();
-        if (sourceId != null) {
-            builder.withSource(sourceId, audioManager::getSource);
-        }
-        var defaultKS = this.defaultKS;
-        if (defaultKS != null) {
-            builder.withKS(defaultKS, this::getKS);
-        } else {
-            var ks = this.getKS();
-            if (ks != null) {
-                builder.withKS(ks);
-            }
-        }
-        var defaultSTT = this.defaultSTT;
-        if (defaultSTT != null) {
-            builder.withSTT(defaultSTT, this::getSTT);
-        } else {
-            var stt = this.getSTT();
-            if (stt != null) {
-                builder.withSTT(stt);
-            }
-        }
-        var defaultTTS = this.defaultTTS;
-        if (defaultTTS != null) {
-            builder.withTTS(defaultTTS, this::getTTS);
-        } else {
-            var tts = this.getTTS();
-            if (tts != null) {
-                builder.withTTS(tts);
-            }
-        }
-        var defaultHLI = this.defaultHLI;
-        if (defaultHLI != null) {
-            builder.withHLIs(List.of(defaultHLI), () -> {
-                var hli = this.getHLI();
-                return hli != null ? List.of(hli) : List.of();
-            });
-        } else {
-            var hli = this.getHLI();
-            if (hli != null) {
-                builder.withHLIs(List.of(hli));
-            }
-        }
-        var voice = this.getDefaultVoice();
-        if (voice != null) {
-            builder.withVoice(voice);
-        }
-        var listeningItem = this.listeningItem;
-        if (listeningItem != null) {
-            builder.withListeningItem(listeningItem);
-        }
-        return builder;
+        return new DialogContext.Builder(keyword, localeProvider.getLocale()) //
+                .withSink(audioManager.getSink()) //
+                .withSource(audioManager.getSource()) //
+                .withKS(this.getKS()) //
+                .withSTT(this.getSTT()) //
+                .withTTS(this.getTTS()) //
+                .withHLIs(this.getHLIs()) //
+                .withVoice(this.getDefaultVoice()) //
+                .withListeningItem(listeningItem);
     }
 
     @Override
