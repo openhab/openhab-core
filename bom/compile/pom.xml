@@ -166,6 +166,8 @@
     </dependency>
 
     <!-- Measurement -->
+    <!-- Attention: before upgrading this dependencies check that the dimension X is still not used, otherwise change the
+      dimension label for org.openhab.core.library.unit.Units.BIT -->
     <dependency>
       <groupId>javax.measure</groupId>
       <artifactId>unit-api</artifactId>
