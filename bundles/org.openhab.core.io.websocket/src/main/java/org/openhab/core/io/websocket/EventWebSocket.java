@@ -37,7 +37,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * The {@link EventWebSocket} is a
+ * The {@link EventWebSocket} is the WebSocket implementation that extends the event bus
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -178,7 +178,7 @@ public class EventWebSocket {
             session.close();
         }
         String message = error == null ? "<null>" : error.getMessage();
-        logger.info("Web Socket error: {}", message);
+        logger.info("WebSocket error: {}", message);
         onClose(StatusCode.NO_CODE, message);
     }
 
@@ -190,7 +190,7 @@ public class EventWebSocket {
                 sendMessage(gson.toJson(new EventDTO(event)));
             }
         } catch (IOException e) {
-            logger.warn("Failed to send event {} to {}: {}", event, remoteIdentifier, e.getMessage());
+            logger.debug("Failed to send event {} to {}: {}", event, remoteIdentifier, e.getMessage());
         }
     }
 

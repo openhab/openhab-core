@@ -14,6 +14,7 @@ package org.openhab.core.io.websocket;
 
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 
@@ -22,6 +23,7 @@ import org.openhab.core.events.Event;
  *
  * @author Jan N. Klug - Initial contribution
  */
+@NonNullByDefault
 public class EventDTO {
     public @Nullable String type;
     public @Nullable String topic;
@@ -33,7 +35,8 @@ public class EventDTO {
     public EventDTO() {
     }
 
-    public EventDTO(String type, String topic, String payload, @Nullable String source, @Nullable String eventId) {
+    public EventDTO(String type, String topic, @Nullable String payload, @Nullable String source,
+            @Nullable String eventId) {
         this.type = type;
         this.topic = topic;
         this.payload = payload;
@@ -49,7 +52,7 @@ public class EventDTO {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())

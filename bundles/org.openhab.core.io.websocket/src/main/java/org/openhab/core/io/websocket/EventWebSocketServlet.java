@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 /**
- * The {@link EventWebSocketServlet} is a
+ * The {@link EventWebSocketServlet} provides the servlet for WebSocket connections
  *
  * @author Jan N. Klug - Initial contribution
  */

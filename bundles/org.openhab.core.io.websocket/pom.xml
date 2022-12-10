@@ -12,7 +12,7 @@
 
   <artifactId>org.openhab.core.io.websocket</artifactId>
 
-  <name>openHAB Core :: Bundles :: Websocket</name>
+  <name>openHAB Core :: Bundles :: WebSocket</name>
 
   <dependencies>
     <dependency>
