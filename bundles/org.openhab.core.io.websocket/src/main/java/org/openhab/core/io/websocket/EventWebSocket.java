@@ -167,7 +167,7 @@ public class EventWebSocket {
         try {
             sendMessage(gson.toJson(responseEvent));
         } catch (IOException e) {
-            logger.warn("Failed to send WebSocketResponseEvent event {} to {}: {}", responseEvent, remoteIdentifier,
+            logger.debug("Failed to send WebSocketResponseEvent event {} to {}: {}", responseEvent, remoteIdentifier,
                     e.getMessage());
         }
     }
