@@ -38,6 +38,17 @@
 			<description>If provided, the item will be switched on during the period when the dialog processor has spotted the
 				keyword and is listening for commands.</description>
 		</parameter>
+		<parameter name="listeningMelody" type="text">
+			<options>
+				<option value="Bb">Bb</option>
+				<option value="F#">F#</option>
+				<option value="E">E</option>
+			</options>
+			<limitToOptions>false</limitToOptions>
+			<label>Listening Melody</label>
+			<description>A melody to be played to advertise the user the dialog processing is going to start, leave empty to
+				disable it. (Spaced separated list of notes. Example: "A O:100 A':50")</description>
+		</parameter>
 	</config-description>
 
 </config-description:config-descriptions>

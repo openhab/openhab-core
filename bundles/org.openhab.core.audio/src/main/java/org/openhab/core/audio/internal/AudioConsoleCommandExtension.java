@@ -49,6 +49,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     static final String SUBCMD_PLAY = "play";
     static final String SUBCMD_STREAM = "stream";
+    static final String SUBCMD_SYNTHESIZE = "synthesize";
     static final String SUBCMD_SOURCES = "sources";
     static final String SUBCMD_SINKS = "sinks";
 
@@ -72,6 +73,11 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         "plays a sound file from the sounds folder through the specified audio sink(s) with the specified volume"),
                 buildCommandUsage(SUBCMD_STREAM + " [<sink>] <url>",
                         "streams the sound from the url through the optionally specified audio sink(s)"),
+                buildCommandUsage(SUBCMD_SYNTHESIZE + " [<sink>] \"<melody>\"",
+                        "synthesize a tone melody and play it through the optionally specified audio sink(s) ("
+                                + SUBCMD_SYNTHESIZE + " \"A O A O A\")"),
+                buildCommandUsage(SUBCMD_SYNTHESIZE + " <sink> \"<melody>\" <volume>",
+                        "synthesize a tone melody and play it through the optionally specified audio sink(s) with the specified volume"),
                 buildCommandUsage(SUBCMD_SOURCES, "lists the audio sources"),
                 buildCommandUsage(SUBCMD_SINKS, "lists the audio sinks") });
     }
@@ -94,6 +100,14 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         stream(Arrays.copyOfRange(args, 1, args.length), console);
                     } else {
                         console.println("Specify url to stream from, and optionally the sink(s) to use");
+                    }
+                    return;
+                case SUBCMD_SYNTHESIZE:
+                    if (args.length > 1) {
+                        synthesizeMelody(Arrays.copyOfRange(args, 1, args.length), console);
+                    } else {
+                        console.println(
+                                "Specify file to play, and optionally the sink(s) to use (e.g. 'play javasound A B C:1000')");
                     }
                     return;
                 case SUBCMD_SOURCES:
@@ -159,6 +173,40 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
             default:
                 break;
         }
+    }
+
+    private void synthesizeMelody(String[] args, Console console) {
+        switch (args.length) {
+            case 1:
+                playMelodyOnSink(null, args[0], null, console);
+                break;
+            case 2:
+                playMelodyOnSinks(args[0], args[1], null, console);
+                break;
+            case 3:
+                PercentType volume = null;
+                try {
+                    volume = PercentType.valueOf(args[2]);
+                } catch (Exception e) {
+                    console.println("Specify volume as percentage between 0 and 100");
+                    break;
+                }
+                playMelodyOnSink(args[0], args[1], volume, console);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void playMelodyOnSinks(String pattern, String melody, @Nullable PercentType volume, Console console) {
+        for (String sinkId : audioManager.getSinkIds(pattern)) {
+            playMelodyOnSink(sinkId, melody, volume, console);
+        }
+    }
+
+    private void playMelodyOnSink(@Nullable String sinkId, String melody, @Nullable PercentType volume,
+            Console console) {
+        audioManager.playMelody(melody, sinkId, volume);
     }
 
     private void playOnSinks(String pattern, String fileName, @Nullable PercentType volume, Console console) {

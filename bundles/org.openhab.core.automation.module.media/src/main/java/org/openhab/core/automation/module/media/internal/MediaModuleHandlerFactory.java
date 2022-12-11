@@ -68,6 +68,8 @@ public class MediaModuleHandlerFactory extends BaseModuleHandlerFactory {
                     return new SayActionHandler((Action) module, voiceManager);
                 case PlayActionHandler.TYPE_ID:
                     return new PlayActionHandler((Action) module, audioManager);
+                case SynthesizeActionHandler.TYPE_ID:
+                    return new SynthesizeActionHandler((Action) module, audioManager);
                 default:
                     break;
             }

@@ -13,8 +13,12 @@
 package org.openhab.core.voice.internal;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -23,6 +27,7 @@ import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.audio.utils.ToneSynthesizer;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.items.ItemUtil;
@@ -63,6 +68,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Added stop() + null annotations + resources releasing
  * @author Miguel Álvarez - Close audio streams + use RecognitionStartEvent
  * @author Miguel Álvarez - Use dialog context
+ * @author Miguel Álvarez - Add sounds
  *
  */
 @NonNullByDefault
@@ -71,6 +77,7 @@ public class DialogProcessor implements KSListener, STTListener {
     private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
 
     private final DialogContext dialogContext;
+    private @Nullable List<ToneSynthesizer.Tone> listeningMelody;
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
     private final Bundle bundle;
@@ -95,6 +102,7 @@ public class DialogProcessor implements KSListener, STTListener {
 
     private @Nullable AudioStream streamKS;
     private @Nullable AudioStream streamSTT;
+    private @Nullable ToneSynthesizer toneSynthesizer;
 
     public DialogProcessor(DialogContext context, DialogEventListener eventListener, EventPublisher eventPublisher,
             TranslationProvider i18nProvider, Bundle bundle) {
@@ -111,6 +119,30 @@ public class DialogProcessor implements KSListener, STTListener {
                 context.stt().getSupportedFormats());
         this.ttsFormat = VoiceManagerImpl.getBestMatch(context.tts().getSupportedFormats(),
                 context.sink().getSupportedFormats());
+        initToneSynthesizer(context.listeningMelody());
+    }
+
+    private void initToneSynthesizer(@Nullable String listeningMelodyText) {
+        @Nullable
+        List<ToneSynthesizer.Tone> listeningMelody = null;
+        ToneSynthesizer toneSynthesizer = null;
+        if (listeningMelodyText != null && !listeningMelodyText.isBlank()) {
+            try {
+                listeningMelody = ToneSynthesizer.parseMelody(listeningMelodyText);
+                var synthesizerFormat = VoiceManagerImpl.getBestMatch(ToneSynthesizer.getSupportedFormats(),
+                        dialogContext.sink().getSupportedFormats());
+                if (synthesizerFormat != null) {
+                    toneSynthesizer = new ToneSynthesizer(synthesizerFormat);
+                    logger.debug("Sounds enabled");
+                } else {
+                    logger.warn("Sounds disabled, synthesizer is not compatible with this sink");
+                }
+            } catch (ParseException e) {
+                logger.warn("Sounds disabled, unable to parse 'listening' melody: {}", e.getMessage());
+            }
+        }
+        this.toneSynthesizer = toneSynthesizer;
+        this.listeningMelody = listeningMelody;
     }
 
     /**
@@ -134,6 +166,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 AudioStream stream = dialogContext.source().getInputStream(fmt);
                 streamKS = stream;
                 ksServiceHandle = ksService.spot(this, stream, dialogContext.locale(), keyword);
+                playStartSound();
             } catch (AudioException e) {
                 logger.warn("Encountered audio error: {}", e.getMessage());
             } catch (KSException e) {
@@ -158,6 +191,7 @@ public class DialogProcessor implements KSListener, STTListener {
                     dialogContext.source().getId());
             return;
         }
+        playOnListeningSound();
         try {
             AudioStream stream = dialogContext.source().getInputStream(fmt);
             streamSTT = stream;
@@ -185,6 +219,7 @@ public class DialogProcessor implements KSListener, STTListener {
         abortKS();
         closeStreamKS();
         toggleProcessing(false);
+        playStopSound();
     }
 
     /**
@@ -362,6 +397,39 @@ public class DialogProcessor implements KSListener, STTListener {
                 logger.debug("Error saying '{}': {}", text, e.getMessage(), e);
             } else {
                 logger.warn("Error saying '{}': {}", text, e.getMessage());
+            }
+        }
+    }
+
+    private void playStartSound() {
+        playNotes(Stream.of(ToneSynthesizer.Note.G, ToneSynthesizer.Note.A, ToneSynthesizer.Note.B)
+                .map(note -> ToneSynthesizer.noteTone(note, 100L)).collect(Collectors.toList()));
+    }
+
+    private void playStopSound() {
+        playNotes(Stream.of(ToneSynthesizer.Note.B, ToneSynthesizer.Note.A, ToneSynthesizer.Note.G)
+                .map(note -> ToneSynthesizer.noteTone(note, 100L)).collect(Collectors.toList()));
+    }
+
+    private void playOnListeningSound() {
+        var listeningMelody = this.listeningMelody;
+        if (listeningMelody != null) {
+            playNotes(listeningMelody);
+        }
+    }
+
+    private void playNotes(List<ToneSynthesizer.Tone> notes) {
+        var toneSynthesizer = this.toneSynthesizer;
+        if (toneSynthesizer != null) {
+            try (AudioStream stream = toneSynthesizer.getStream(notes)) {
+                var sink = dialogContext.sink();
+                if (sink.getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(stream))) {
+                    sink.process(stream);
+                } else {
+                    logger.warn("Failed playing synthesizer sound as audio sink doesn't support it.");
+                }
+            } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException | IOException e) {
+                logger.warn("{} playing synthesizer sound: {}", e.getClass().getName(), e.getMessage());
             }
         }
     }

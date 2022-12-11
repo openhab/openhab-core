@@ -18,6 +18,7 @@ import static java.util.stream.Collectors.toList;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
@@ -30,6 +31,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.audio.AudioException;
+import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
@@ -38,6 +40,7 @@ import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.audio.utils.ToneSynthesizer;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ParameterOption;
@@ -189,6 +192,37 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     public void stream(@Nullable String url, @Nullable String sinkId) throws AudioException {
         AudioStream audioStream = url != null ? new URLAudioStream(url) : null;
         play(audioStream, sinkId, null);
+    }
+
+    @Override
+    public void playMelody(String melody) {
+        playMelody(melody, null);
+    }
+
+    @Override
+    public void playMelody(String melody, @Nullable String sinkId) {
+        playMelody(melody, sinkId, null);
+    }
+
+    @Override
+    public void playMelody(String melody, @Nullable String sinkId, @Nullable PercentType volume) {
+        AudioSink sink = getSink(sinkId);
+        if (sink == null) {
+            logger.warn("Failed playing melody as no audio sink {} was found.", sinkId);
+            return;
+        }
+        var synthesizerFormat = AudioFormat.getBestMatch(ToneSynthesizer.getSupportedFormats(),
+                sink.getSupportedFormats());
+        if (synthesizerFormat == null) {
+            logger.warn("Failed playing melody as sink {} does not support wav.", sinkId);
+            return;
+        }
+        try {
+            var audioStream = new ToneSynthesizer(synthesizerFormat).getStream(ToneSynthesizer.parseMelody(melody));
+            play(audioStream, sinkId, volume);
+        } catch (IOException | ParseException e) {
+            logger.warn("Failed playing melody: {}", e.getMessage());
+        }
     }
 
     @Override

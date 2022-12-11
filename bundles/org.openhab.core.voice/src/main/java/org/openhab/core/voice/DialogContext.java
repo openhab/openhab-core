@@ -40,10 +40,11 @@ public class DialogContext {
     private final AudioSink sink;
     private final Locale locale;
     private final @Nullable String listeningItem;
+    private final @Nullable String listeningMelody;
 
     public DialogContext(@Nullable KSService ks, @Nullable String keyword, STTService stt, TTSService tts,
             @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, AudioSource source, AudioSink sink,
-            Locale locale, @Nullable String listeningItem) {
+            Locale locale, @Nullable String listeningItem, @Nullable String listeningMelody) {
         this.ks = ks;
         this.keyword = keyword;
         this.stt = stt;
@@ -54,6 +55,7 @@ public class DialogContext {
         this.sink = sink;
         this.locale = locale;
         this.listeningItem = listeningItem;
+        this.listeningMelody = listeningMelody;
     }
 
     public @Nullable KSService ks() {
@@ -96,6 +98,10 @@ public class DialogContext {
         return listeningItem;
     }
 
+    public @Nullable String listeningMelody() {
+        return listeningMelody;
+    }
+
     /**
      * Builder for {@link DialogContext}
      * Allows to describe a dialog context without requiring the involved services to be loaded
@@ -111,6 +117,7 @@ public class DialogContext {
         private List<HumanLanguageInterpreter> hlis = List.of();
         // options
         private @Nullable String listeningItem;
+        private @Nullable String listeningMelody;
         private String keyword;
         private Locale locale;
 
@@ -168,6 +175,11 @@ public class DialogContext {
             return this;
         }
 
+        public Builder withMelody(@Nullable String listeningMelody) {
+            this.listeningMelody = listeningMelody;
+            return this;
+        }
+
         public Builder withLocale(Locale locale) {
             this.locale = locale;
             return this;
@@ -206,7 +218,7 @@ public class DialogContext {
                 throw new IllegalStateException("Cannot build dialog context: " + String.join(", ", errors) + ".");
             }
             return new DialogContext(ksService, keyword, sttService, ttsService, voice, hliServices, audioSource,
-                    audioSink, locale, listeningItem);
+                    audioSink, locale, listeningItem, listeningMelody);
         }
     }
 }

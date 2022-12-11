@@ -94,6 +94,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     protected static final String CONFIG_URI = "system:voice";
     private static final String CONFIG_KEYWORD = "keyword";
     private static final String CONFIG_LISTENING_ITEM = "listeningItem";
+    private static final String CONFIG_LISTENING_MELODY = "listeningMelody";
     private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
     private static final String CONFIG_DEFAULT_KS = "defaultKS";
     private static final String CONFIG_DEFAULT_STT = "defaultSTT";
@@ -121,6 +122,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
      */
     private String keyword = DEFAULT_KEYWORD;
     private @Nullable String listeningItem;
+    private @Nullable String listeningMelody;
     private @Nullable String defaultTTS;
     private @Nullable String defaultSTT;
     private @Nullable String defaultKS;
@@ -159,6 +161,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             this.keyword = config.containsKey(CONFIG_KEYWORD) ? config.get(CONFIG_KEYWORD).toString() : DEFAULT_KEYWORD;
             this.listeningItem = config.containsKey(CONFIG_LISTENING_ITEM)
                     ? config.get(CONFIG_LISTENING_ITEM).toString()
+                    : null;
+            this.listeningMelody = config.containsKey(CONFIG_LISTENING_MELODY)
+                    ? config.get(CONFIG_LISTENING_MELODY).toString()
                     : null;
             this.defaultTTS = config.containsKey(CONFIG_DEFAULT_TTS) ? config.get(CONFIG_DEFAULT_TTS).toString() : null;
             this.defaultSTT = config.containsKey(CONFIG_DEFAULT_STT) ? config.get(CONFIG_DEFAULT_STT).toString() : null;
@@ -494,6 +499,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 .withTTS(this.getTTS()) //
                 .withHLIs(this.getHLIs()) //
                 .withVoice(this.getDefaultVoice()) //
+                .withMelody(listeningMelody) //
                 .withListeningItem(listeningItem);
     }
 

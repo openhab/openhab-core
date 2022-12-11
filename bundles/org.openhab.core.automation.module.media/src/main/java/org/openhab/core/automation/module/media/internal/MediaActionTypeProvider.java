@@ -41,7 +41,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * This class dynamically provides the Play and Say action types.
+ * This class dynamically provides the Play, Say and Synthesize action types.
  * This is necessary since there is no other way to provide dynamic config param options for module types.
  *
  * @author Kai Kreuzer - Initial contribution
@@ -67,6 +67,8 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
                 return getPlayActionType(locale);
             case SayActionHandler.TYPE_ID:
                 return getSayActionType(locale);
+            case SynthesizeActionHandler.TYPE_ID:
+                return getSynthesizeActionType(locale);
             default:
                 return null;
         }
@@ -88,6 +90,12 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
                 null, null);
     }
 
+    private ModuleType getSynthesizeActionType(@Nullable Locale locale) {
+        return new ActionType(SynthesizeActionHandler.TYPE_ID, getConfigSynthesizeDesc(locale),
+                "synthesize a tone melody", "Synthesize the given melody text and play it. Optionally sets the volume.",
+                null, Visibility.VISIBLE, null, null);
+    }
+
     private List<ConfigDescriptionParameter> getConfigPlayDesc(@Nullable Locale locale) {
         return List.of(
                 ConfigDescriptionParameterBuilder.create(PlayActionHandler.PARAM_SOUND, Type.TEXT).withRequired(true)
@@ -100,6 +108,14 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
         return List.of(
                 ConfigDescriptionParameterBuilder.create(SayActionHandler.PARAM_TEXT, Type.TEXT).withRequired(true)
                         .withLabel("Text").withDescription("the text to speak").build(),
+                getAudioSinkConfigDescParam(locale), getVolumeConfigDescParam(locale));
+    }
+
+    private List<ConfigDescriptionParameter> getConfigSynthesizeDesc(@Nullable Locale locale) {
+        return List.of(
+                ConfigDescriptionParameterBuilder.create(SynthesizeActionHandler.PARAM_MELODY, Type.TEXT)
+                        .withRequired(true).withLabel("Melody")
+                        .withDescription("the melody as spaced separated note names").build(),
                 getAudioSinkConfigDescParam(locale), getVolumeConfigDescParam(locale));
     }
 
