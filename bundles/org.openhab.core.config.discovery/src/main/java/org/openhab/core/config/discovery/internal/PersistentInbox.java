@@ -483,6 +483,8 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
             resultImpl.setFlag((flag == null) ? DiscoveryResultFlag.NEW : flag);
             discoveryResultStorage.put(resultImpl.getThingUID().toString(), resultImpl);
             notifyListeners(resultImpl, EventType.UPDATED);
+        } else if (result == null) {
+            logger.warn("Cannot set flag for result '{}' because it can't be found in storage", thingUID);
         } else {
             logger.warn("Cannot set flag for result of instance type '{}'", result.getClass().getName());
         }
