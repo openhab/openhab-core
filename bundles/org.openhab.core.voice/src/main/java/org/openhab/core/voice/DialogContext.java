@@ -187,7 +187,7 @@ public class DialogContext {
 
         /**
          * Creates a new {@link DialogContext}
-         * 
+         *
          * @return a {@link DialogContext} with the configured components and options
          * @throws IllegalStateException if a required dialog component is missing
          */
@@ -198,27 +198,29 @@ public class DialogContext {
             List<HumanLanguageInterpreter> hliServices = hlis;
             AudioSource audioSource = source;
             AudioSink audioSink = sink;
-            List<String> errors = new ArrayList<>();
-            if (sttService == null) {
-                errors.add("missing stt service");
-            }
-            if (ttsService == null) {
-                errors.add("missing tts service");
-            }
-            if (hliServices.isEmpty()) {
-                errors.add("missing interpreters");
-            }
-            if (audioSource == null) {
-                errors.add("missing audio source");
-            }
-            if (audioSink == null) {
-                errors.add("missing audio sink");
-            }
-            if (!errors.isEmpty()) {
+            if (sttService == null || ttsService == null || hliServices.isEmpty() || audioSource == null
+                    || audioSink == null) {
+                List<String> errors = new ArrayList<>();
+                if (sttService == null) {
+                    errors.add("missing stt service");
+                }
+                if (ttsService == null) {
+                    errors.add("missing tts service");
+                }
+                if (hliServices.isEmpty()) {
+                    errors.add("missing interpreters");
+                }
+                if (audioSource == null) {
+                    errors.add("missing audio source");
+                }
+                if (audioSink == null) {
+                    errors.add("missing audio sink");
+                }
                 throw new IllegalStateException("Cannot build dialog context: " + String.join(", ", errors) + ".");
+            } else {
+                return new DialogContext(ksService, keyword, sttService, ttsService, voice, hliServices, audioSource,
+                        audioSink, locale, listeningItem, listeningMelody);
             }
-            return new DialogContext(ksService, keyword, sttService, ttsService, voice, hliServices, audioSource,
-                    audioSink, locale, listeningItem, listeningMelody);
         }
     }
 }
