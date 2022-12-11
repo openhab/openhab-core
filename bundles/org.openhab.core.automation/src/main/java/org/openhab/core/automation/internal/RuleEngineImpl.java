@@ -1093,6 +1093,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      */
     private Map<String, Object> getContext(String ruleUID, @Nullable Set<Connection> connections) {
         Map<String, Object> context = contextMap.computeIfAbsent(ruleUID, k -> new HashMap<>());
+        if (context == null) {
+            throw new IllegalStateException("context cannot be null at that point - please report a bug.");
+        }
         if (connections != null) {
             StringBuffer sb = new StringBuffer();
             for (Connection c : connections) {
