@@ -13,6 +13,7 @@
 package org.openhab.core.thing.profiles;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 
@@ -23,6 +24,13 @@ import org.openhab.core.types.State;
  */
 @NonNullByDefault
 public interface ProfileCallback {
+
+    /**
+     * Get the link that this profile is associated with.
+     * 
+     * @return The ItemChannelLink
+     */
+    ItemChannelLink getItemChannelLink();
 
     /**
      * Forward the given command to the respective thing handler.
