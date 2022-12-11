@@ -318,7 +318,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                     exception = e;
                 }
             }
-            throw exception;
+            if (exception != null) { // this should always be the case here
+                throw exception;
+            }
         }
 
         if (hliIdList == null) {
@@ -565,6 +567,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                     "Invalid dialog context for persistent dialog: missing keyword spot configuration");
         }
         Bundle b = bundle;
+        if (b == null) {
+            throw new IllegalStateException("Bundle is not (yet?) set.");
+        }
         if (!checkLocales(ksService.getSupportedLocales(), context.locale())
                 || !checkLocales(context.stt().getSupportedLocales(), context.locale()) || !context.hlis().stream()
                         .allMatch(interpreter -> checkLocales(interpreter.getSupportedLocales(), context.locale()))) {
