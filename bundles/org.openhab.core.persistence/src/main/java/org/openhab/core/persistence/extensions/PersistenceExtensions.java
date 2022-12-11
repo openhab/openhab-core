@@ -1150,6 +1150,76 @@ public class PersistenceExtensions {
         }
     }
 
+    /**
+     * Gets the number of changes in historic data points of a given {@link Item} from a point in time until now.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to query
+     * @param begin the beginning point in time
+     * @return the number of state changes for this item
+     */
+    public static long countStateChangesSince(Item item, ZonedDateTime begin) {
+        return countStateChangesSince(item, begin, getDefaultServiceId());
+    }
+
+    /**
+     * Gets the number of changes in historic data points of a given {@link Item} from a point in time until now.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to query
+     * @param begin the beginning point in time
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the number of state changes for this item
+     */
+    public static long countStateChangesSince(Item item, ZonedDateTime begin, String serviceId) {
+        return countStateChangesBetween(item, begin, null, serviceId);
+    }
+
+    /**
+     * Gets the number of changes in historic data points of a given {@link Item} between two points in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to query
+     * @param begin the beginning point in time
+     * @param end the end point in time
+     * @return the number of state changes for this item
+     */
+    public static long countStateChangesBetween(Item item, ZonedDateTime begin, @Nullable ZonedDateTime end) {
+        return countStateChangesBetween(item, begin, end, getDefaultServiceId());
+    }
+
+    /**
+     * Gets the number of changes in historic data points of a given {@link Item} between two points in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to query
+     * @param begin the beginning point in time
+     * @param end the end point in time
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the number of state changes for this item
+     */
+    public static long countStateChangesBetween(Item item, ZonedDateTime begin, @Nullable ZonedDateTime end,
+            String serviceId) {
+        Iterable<HistoricItem> result = getAllStatesBetween(item, begin, end, serviceId);
+        Iterator<HistoricItem> it = result.iterator();
+
+        if (!it.hasNext()) {
+            return 0;
+        }
+
+        long count = 0;
+        State previousState = it.next().getState();
+        while (it.hasNext()) {
+            HistoricItem historicItem = it.next();
+            State state = historicItem.getState();
+            if (!state.equals(previousState)) {
+                previousState = state;
+                count++;
+            }
+        }
+        return count;
+    }
+
     private static @Nullable PersistenceService getService(String serviceId) {
         PersistenceService service = null;
         if (registry != null) {
