@@ -395,7 +395,7 @@ public class I18nProviderImpl
         addDefaultUnit(ElectricInductance.class, Units.HENRY);
         addDefaultUnit(ElectricPotential.class, Units.VOLT);
         addDefaultUnit(ElectricResistance.class, Units.OHM);
-        addDefaultUnit(Energy.class, Units.JOULE);
+        addDefaultUnit(Energy.class, Units.KILOWATT_HOUR);
         addDefaultUnit(Force.class, Units.NEWTON);
         addDefaultUnit(Frequency.class, Units.HERTZ);
         addDefaultUnit(Illuminance.class, Units.LUX);
