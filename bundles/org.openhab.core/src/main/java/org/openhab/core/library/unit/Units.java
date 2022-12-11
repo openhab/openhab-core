@@ -254,7 +254,7 @@ public final class Units extends CustomUnits {
         // "KiB" is wrong, but we keep it for backward compatibility
         SimpleUnitFormat.getInstance().alias(KIBIBYTE, "KiB");
         SimpleUnitFormat.getInstance().alias(KIBIBYTE, "kio");
-        // "KiO" is wrong, but we keep it for backward compatibility
+        // "Kio" is wrong, but we keep it for backward compatibility
         SimpleUnitFormat.getInstance().alias(KIBIBYTE, "Kio");
         SimpleUnitFormat.getInstance().label(KILOBIT, "kbit");
         SimpleUnitFormat.getInstance().label(KILOBIT_PER_SECOND, "kbit/s");
