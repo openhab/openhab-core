@@ -64,8 +64,10 @@ import tech.units.indriya.function.ExpConverter;
 import tech.units.indriya.function.LogConverter;
 import tech.units.indriya.function.MultiplyConverter;
 import tech.units.indriya.unit.AlternateUnit;
+import tech.units.indriya.unit.BaseUnit;
 import tech.units.indriya.unit.ProductUnit;
 import tech.units.indriya.unit.TransformedUnit;
+import tech.units.indriya.unit.UnitDimension;
 
 /**
  * Delegate common units to {@link Units} to hide this dependency from the rest of openHAB.
@@ -188,7 +190,7 @@ public final class Units extends CustomUnits {
             tech.units.indriya.unit.Units.CUBIC_METRE.divide(tech.units.indriya.unit.Units.HOUR)));
     public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_DAY = addUnit(new ProductUnit<VolumetricFlowRate>(
             tech.units.indriya.unit.Units.CUBIC_METRE.divide(tech.units.indriya.unit.Units.DAY)));
-    public static final Unit<DataAmount> BIT = addUnit(new AlternateUnit<>(ONE, "bit"));
+    public static final Unit<DataAmount> BIT = addUnit(new BaseUnit<>("bit", UnitDimension.parse('X')));
     public static final Unit<DataAmount> KILOBIT = addUnit(MetricPrefix.KILO(BIT));
     public static final Unit<DataAmount> MEGABIT = addUnit(MetricPrefix.MEGA(BIT));
     public static final Unit<DataAmount> GIGABIT = addUnit(MetricPrefix.GIGA(BIT));
@@ -245,8 +247,14 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(GIGABIT, "Gbit");
         SimpleUnitFormat.getInstance().label(GIGABIT_PER_SECOND, "Gbit/s");
         SimpleUnitFormat.getInstance().label(IRRADIANCE, "W/m²");
-        SimpleUnitFormat.getInstance().label(KILOBYTE, "KB");
-        SimpleUnitFormat.getInstance().label(KIBIBYTE, "KiB");
+        SimpleUnitFormat.getInstance().label(KILOBYTE, "kB");
+        // "KB" is wrong, but we keep it for backward compatibility
+        SimpleUnitFormat.getInstance().alias(KILOBYTE, "KB");
+        SimpleUnitFormat.getInstance().label(KIBIBYTE, "kiB");
+        // "KiB" is wrong, but we keep it for backward compatibility
+        SimpleUnitFormat.getInstance().alias(KIBIBYTE, "KiB");
+        SimpleUnitFormat.getInstance().alias(KIBIBYTE, "kio");
+        // "Kio" is wrong, but we keep it for backward compatibility
         SimpleUnitFormat.getInstance().alias(KIBIBYTE, "Kio");
         SimpleUnitFormat.getInstance().label(KILOBIT, "kbit");
         SimpleUnitFormat.getInstance().label(KILOBIT_PER_SECOND, "kbit/s");
