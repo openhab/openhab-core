@@ -207,10 +207,10 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
                     if (file.isDirectory()) {
                         if (watchSubDirectories()) {
                             synchronized (this) {
-                                String prefix = file.toString() + File.separator;
-                                var toRemove = loaded.stream()
+                                String prefix = file.toURI().toURL().getPath();
+                                Set<ScriptFileReference> toRemove = loaded.stream()
                                         .filter(f -> f.getScriptFileURL().getFile().startsWith(prefix))
-                                        .collect(Collectors.toList());
+                                        .collect(Collectors.toSet());
                                 toRemove.forEach(this::removeFile);
                             }
                         }
