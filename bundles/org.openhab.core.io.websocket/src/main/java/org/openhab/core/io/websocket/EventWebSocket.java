@@ -113,32 +113,32 @@ public class EventWebSocket {
                     case "ItemCommandEvent":
                         Event itemCommandEvent = itemEventUtility.createCommandEvent(eventDTO);
                         eventPublisher.post(itemCommandEvent);
-                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/success", "", null,
+                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/response/success", "", null,
                                 eventDTO.eventId);
                         break;
                     case "ItemStateEvent":
                         Event itemStateEvent = itemEventUtility.createStateEvent(eventDTO);
                         eventPublisher.post(itemStateEvent);
-                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/success", "", null,
+                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/response/success", "", null,
                                 eventDTO.eventId);
                         break;
                     case WEBSOCKET_EVENT_TYPE:
-                        if ("/heartbeat".equals(eventDTO.topic) && "PING".equals(eventDTO.payload)) {
-                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/heartbeat", "PONG", null,
+                        if ("openhab/websocket//heartbeat".equals(eventDTO.topic) && "PING".equals(eventDTO.payload)) {
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/heartbeat", "PONG", null,
                                     eventDTO.eventId);
-                        } else if ("/filter/type".equals(eventDTO.topic)) {
+                        } else if ("openhab/websocket//filter/type".equals(eventDTO.topic)) {
                             typeFilter = Objects.requireNonNullElse(gson.fromJson(eventDTO.payload, STRING_LIST_TYPE),
                                     List.of());
                             logger.debug("Setting type filter for connection to {}: {}",
                                     remoteEndpoint.getInetSocketAddress(), typeFilter);
-                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/filter/type", eventDTO.payload, null,
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/filter/type", eventDTO.payload, null,
                                     eventDTO.eventId);
-                        } else if ("/filter/source".equals(eventDTO.topic)) {
+                        } else if ("openhab/websocket/filter/source".equals(eventDTO.topic)) {
                             sourceFilter = Objects.requireNonNullElse(gson.fromJson(eventDTO.payload, STRING_LIST_TYPE),
                                     List.of());
                             logger.debug("Setting source filter for connection to {}: {}",
                                     remoteEndpoint.getInetSocketAddress(), typeFilter);
-                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/filter/source", eventDTO.payload, null,
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/filter/source", eventDTO.payload, null,
                                     eventDTO.eventId);
                         } else {
                             throw new EventProcessingException("Invalid topic or payload in WebSocketEvent");
@@ -154,13 +154,13 @@ public class EventWebSocket {
                 }
             } catch (EventProcessingException | JsonParseException e) {
                 logger.warn("Failed to process deserialized event '{}': {}", message, e.getMessage());
-                responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/failed",
+                responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/response/failed",
                         "Processing error: " + e.getMessage(), null, eventDTO != null ? eventDTO.eventId : "");
 
             }
         } catch (JsonParseException e) {
             logger.warn("Could not deserialize '{}'", message);
-            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/failed",
+            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/response/failed",
                     "Deserialization error: " + e.getMessage(), null, null);
         }
 
