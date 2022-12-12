@@ -46,6 +46,7 @@ import com.google.gson.reflect.TypeToken;
 @SuppressWarnings("unused")
 public class EventWebSocket {
     public static final String WEBSOCKET_EVENT_TYPE = "WebSocketEvent";
+    public static final String WEBSOCKET_TOPIC_PREFIX = "openhab/websocket/";
 
     private static final Type STRING_LIST_TYPE = TypeToken.getParameterized(List.class, String.class).getType();
 
@@ -113,33 +114,34 @@ public class EventWebSocket {
                     case "ItemCommandEvent":
                         Event itemCommandEvent = itemEventUtility.createCommandEvent(eventDTO);
                         eventPublisher.post(itemCommandEvent);
-                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/success", "", null,
-                                eventDTO.eventId);
+                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/success",
+                                "", null, eventDTO.eventId);
                         break;
                     case "ItemStateEvent":
                         Event itemStateEvent = itemEventUtility.createStateEvent(eventDTO);
                         eventPublisher.post(itemStateEvent);
-                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/success", "", null,
-                                eventDTO.eventId);
+                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/success",
+                                "", null, eventDTO.eventId);
                         break;
                     case WEBSOCKET_EVENT_TYPE:
-                        if ("/heartbeat".equals(eventDTO.topic) && "PING".equals(eventDTO.payload)) {
-                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/heartbeat", "PONG", null,
-                                    eventDTO.eventId);
-                        } else if ("/filter/type".equals(eventDTO.topic)) {
+                        if ((WEBSOCKET_TOPIC_PREFIX + "heartbeat").equals(eventDTO.topic)
+                                && "PING".equals(eventDTO.payload)) {
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "heartbeat",
+                                    "PONG", null, eventDTO.eventId);
+                        } else if ((WEBSOCKET_TOPIC_PREFIX + "filter/type").equals(eventDTO.topic)) {
                             typeFilter = Objects.requireNonNullElse(gson.fromJson(eventDTO.payload, STRING_LIST_TYPE),
                                     List.of());
                             logger.debug("Setting type filter for connection to {}: {}",
                                     remoteEndpoint.getInetSocketAddress(), typeFilter);
-                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/filter/type", eventDTO.payload, null,
-                                    eventDTO.eventId);
-                        } else if ("/filter/source".equals(eventDTO.topic)) {
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/type",
+                                    eventDTO.payload, null, eventDTO.eventId);
+                        } else if ((WEBSOCKET_TOPIC_PREFIX + "filter/source").equals(eventDTO.topic)) {
                             sourceFilter = Objects.requireNonNullElse(gson.fromJson(eventDTO.payload, STRING_LIST_TYPE),
                                     List.of());
                             logger.debug("Setting source filter for connection to {}: {}",
                                     remoteEndpoint.getInetSocketAddress(), typeFilter);
-                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/filter/source", eventDTO.payload, null,
-                                    eventDTO.eventId);
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/source",
+                                    eventDTO.payload, null, eventDTO.eventId);
                         } else {
                             throw new EventProcessingException("Invalid topic or payload in WebSocketEvent");
                         }
@@ -154,13 +156,13 @@ public class EventWebSocket {
                 }
             } catch (EventProcessingException | JsonParseException e) {
                 logger.warn("Failed to process deserialized event '{}': {}", message, e.getMessage());
-                responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/failed",
+                responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/failed",
                         "Processing error: " + e.getMessage(), null, eventDTO != null ? eventDTO.eventId : "");
 
             }
         } catch (JsonParseException e) {
             logger.warn("Could not deserialize '{}'", message);
-            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/failed",
+            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/failed",
                     "Deserialization error: " + e.getMessage(), null, null);
         }
 

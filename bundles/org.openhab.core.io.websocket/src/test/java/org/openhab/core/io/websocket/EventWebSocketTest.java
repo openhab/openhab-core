@@ -19,6 +19,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openhab.core.io.websocket.EventWebSocket.WEBSOCKET_EVENT_TYPE;
+import static org.openhab.core.io.websocket.EventWebSocket.WEBSOCKET_TOPIC_PREFIX;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -106,7 +107,8 @@ public class EventWebSocketTest {
                 REMOTE_WEBSOCKET_IMPLEMENTATION);
         EventDTO eventDTO = new EventDTO(expectedEvent);
         eventDTO.eventId = "id-1";
-        EventDTO expectedResponse = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/success", "", null, eventDTO.eventId);
+        EventDTO expectedResponse = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/success", "",
+                null, eventDTO.eventId);
 
         assertEventProcessing(eventDTO, expectedEvent, expectedResponse);
     }
@@ -127,7 +129,8 @@ public class EventWebSocketTest {
 
         EventDTO eventDTO = new EventDTO(expectedEvent);
         eventDTO.eventId = "id-1";
-        EventDTO expectedResponse = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/success", "", null, eventDTO.eventId);
+        EventDTO expectedResponse = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/success", "",
+                null, eventDTO.eventId);
 
         assertEventProcessing(eventDTO, expectedEvent, expectedResponse);
     }
@@ -149,7 +152,7 @@ public class EventWebSocketTest {
         EventDTO eventDTO = new EventDTO(expectedEvent);
         eventDTO.payload = "";
 
-        EventDTO expectedResponse = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/failed",
+        EventDTO expectedResponse = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/failed",
                 "Processing error: Failed to deserialize payload \u0027\u0027.", null, null);
 
         assertEventProcessing(eventDTO, null, expectedResponse);
@@ -164,7 +167,7 @@ public class EventWebSocketTest {
         eventDTO.eventId = "id-1";
         eventDTO.topic = "";
 
-        EventDTO expectedResponse = new EventDTO(WEBSOCKET_EVENT_TYPE, "/response/failed",
+        EventDTO expectedResponse = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/failed",
                 "Processing error: Topic must follow the format {namespace}/{entityType}/{entity}/{action}.", null,
                 eventDTO.eventId);
 
@@ -173,8 +176,10 @@ public class EventWebSocketTest {
 
     @Test
     public void heartBeat() throws IOException {
-        EventDTO eventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, "/heartbeat", "PING", null, null);
-        EventDTO expectedResponse = new EventDTO(WEBSOCKET_EVENT_TYPE, "/heartbeat", "PONG", null, null);
+        EventDTO eventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "heartbeat", "PING", null,
+                null);
+        EventDTO expectedResponse = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "heartbeat", "PONG",
+                null, null);
 
         assertEventProcessing(eventDTO, null, expectedResponse);
     }
@@ -192,8 +197,10 @@ public class EventWebSocketTest {
 
     @Test
     public void eventFromBusFilterType() throws IOException {
-        EventDTO eventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, "/filter/type", "[\"ItemCommandEvent\"]", null, null);
-        EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, "/filter/type", eventDTO.payload, null, null);
+        EventDTO eventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/type",
+                "[\"ItemCommandEvent\"]", null, null);
+        EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/type",
+                eventDTO.payload, null, null);
         eventWebSocket.onText(gson.toJson(eventDTO));
         verify(remoteEndpoint).sendString(gson.toJson(responseEventDTO));
 
@@ -211,9 +218,10 @@ public class EventWebSocketTest {
 
     @Test
     public void eventFromBusFilterSource() throws IOException {
-        EventDTO eventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, "/filter/source",
+        EventDTO eventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/source",
                 "[\"" + REMOTE_WEBSOCKET_IMPLEMENTATION + "\"]", null, null);
-        EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, "/filter/source", eventDTO.payload, null, null);
+        EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/source",
+                eventDTO.payload, null, null);
         eventWebSocket.onText(gson.toJson(eventDTO));
         verify(remoteEndpoint).sendString(gson.toJson(responseEventDTO));
 
