@@ -113,33 +113,33 @@ public class EventWebSocket {
                     case "ItemCommandEvent":
                         Event itemCommandEvent = itemEventUtility.createCommandEvent(eventDTO);
                         eventPublisher.post(itemCommandEvent);
-                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/response/success", "", null,
-                                eventDTO.eventId);
+                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/response/success", "",
+                                null, eventDTO.eventId);
                         break;
                     case "ItemStateEvent":
                         Event itemStateEvent = itemEventUtility.createStateEvent(eventDTO);
                         eventPublisher.post(itemStateEvent);
-                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/response/success", "", null,
-                                eventDTO.eventId);
+                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/response/success", "",
+                                null, eventDTO.eventId);
                         break;
                     case WEBSOCKET_EVENT_TYPE:
                         if ("openhab/websocket/heartbeat".equals(eventDTO.topic) && "PING".equals(eventDTO.payload)) {
-                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/heartbeat", "PONG", null,
-                                    eventDTO.eventId);
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/heartbeat", "PONG",
+                                    null, eventDTO.eventId);
                         } else if ("openhab/websocket/filter/type".equals(eventDTO.topic)) {
                             typeFilter = Objects.requireNonNullElse(gson.fromJson(eventDTO.payload, STRING_LIST_TYPE),
                                     List.of());
                             logger.debug("Setting type filter for connection to {}: {}",
                                     remoteEndpoint.getInetSocketAddress(), typeFilter);
-                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/filter/type", eventDTO.payload, null,
-                                    eventDTO.eventId);
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/filter/type",
+                                    eventDTO.payload, null, eventDTO.eventId);
                         } else if ("openhab/websocket/filter/source".equals(eventDTO.topic)) {
                             sourceFilter = Objects.requireNonNullElse(gson.fromJson(eventDTO.payload, STRING_LIST_TYPE),
                                     List.of());
                             logger.debug("Setting source filter for connection to {}: {}",
                                     remoteEndpoint.getInetSocketAddress(), typeFilter);
-                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/filter/source", eventDTO.payload, null,
-                                    eventDTO.eventId);
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/filter/source",
+                                    eventDTO.payload, null, eventDTO.eventId);
                         } else {
                             throw new EventProcessingException("Invalid topic or payload in WebSocketEvent");
                         }
