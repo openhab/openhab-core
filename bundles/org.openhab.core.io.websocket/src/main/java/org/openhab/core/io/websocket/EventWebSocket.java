@@ -123,10 +123,10 @@ public class EventWebSocket {
                                 eventDTO.eventId);
                         break;
                     case WEBSOCKET_EVENT_TYPE:
-                        if ("openhab/websocket//heartbeat".equals(eventDTO.topic) && "PING".equals(eventDTO.payload)) {
+                        if ("openhab/websocket/heartbeat".equals(eventDTO.topic) && "PING".equals(eventDTO.payload)) {
                             responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, "openhab/websocket/heartbeat", "PONG", null,
                                     eventDTO.eventId);
-                        } else if ("openhab/websocket//filter/type".equals(eventDTO.topic)) {
+                        } else if ("openhab/websocket/filter/type".equals(eventDTO.topic)) {
                             typeFilter = Objects.requireNonNullElse(gson.fromJson(eventDTO.payload, STRING_LIST_TYPE),
                                     List.of());
                             logger.debug("Setting type filter for connection to {}: {}",
