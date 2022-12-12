@@ -146,7 +146,7 @@ public class EventWebSocketServlet extends WebSocketServlet implements EventSubs
                 credentials = new UserApiTokenCredentials(token);
             } else {
                 // try BasicAuthentication
-                String[] decodedParts = Base64.getDecoder().decode(token).toString().split(":");
+                String[] decodedParts = new String(Base64.getDecoder().decode(token)).split(":");
                 if (decodedParts.length == 2) {
                     credentials = new UsernamePasswordCredentials(decodedParts[0], decodedParts[1]);
                 }
