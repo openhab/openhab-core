@@ -58,7 +58,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     /**
      * Timeout for scripts in milliseconds.
      */
-    static private final long TIMEOUT = TimeUnit.SECONDS.toMillis(30);
+    static private final long TIMEOUT = TimeUnit.SECONDS.toMillis(120);
 
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
