@@ -317,7 +317,7 @@ public class RuleResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
     public Response runNow(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
-            @Nullable @Parameter(description = "the context for running this rule") Map<String, Object> context)
+            @Nullable @Parameter(description = "the context for running this rule", allowEmptyValue = true) Map<String, Object> context)
             throws IOException {
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule == null) {
@@ -328,6 +328,18 @@ public class RuleResource implements RESTResource {
             ruleManager.runNow(ruleUID, false, context);
             return Response.ok().build();
         }
+    }
+
+    @POST
+    @RolesAllowed({ Role.USER, Role.ADMIN })
+    @Path("/{ruleUID}/runnow")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Operation(deprecated = true, operationId = "runRuleNow", summary = "Executes actions of the rule.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
+    public Response runNow(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID)
+            throws IOException {
+        return runNow(ruleUID, null);
     }
 
     @GET
