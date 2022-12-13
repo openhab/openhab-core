@@ -40,7 +40,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.automation.module.script.ScriptDependencyTracker;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
-import org.openhab.core.internal.common.SafeCallerImpl;
 
 /**
  * The {@link ScriptEngineManagerImplTest} is a test class for the {@link ScriptEngineManagerImpl}
@@ -74,7 +73,7 @@ public class ScriptEngineManagerImplTest {
         when(scriptEngineFactoryMock.getDependencyTracker()).thenReturn(scriptDependencyTrackerMock);
         when(scriptDependencyTrackerMock.getTracker(any())).thenReturn(dependencyListenerMock);
 
-        scriptEngineManager = new ScriptEngineManagerImpl(scriptExtensionManagerMock, new SafeCallerImpl(null));
+        scriptEngineManager = new ScriptEngineManagerImpl(scriptExtensionManagerMock);
         scriptEngineManager.addScriptEngineFactory(scriptEngineFactoryMock);
     }
 
