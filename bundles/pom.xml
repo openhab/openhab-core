@@ -192,11 +192,6 @@
           <exists>model.profile-marker</exists>
         </file>
       </activation>
-      <properties>
-        <maven.compiler.source>${oh.model.java.version}</maven.compiler.source>
-        <maven.compiler.target>${oh.model.java.version}</maven.compiler.target>
-        <maven.compiler.compilerVersion>${oh.model.java.version}</maven.compiler.compilerVersion>
-      </properties>
       <dependencies>
         <dependency>
           <groupId>org.openhab.core.bom</groupId>

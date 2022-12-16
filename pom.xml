@@ -65,7 +65,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <oh.java.version>17</oh.java.version>
-    <oh.model.java.version>11</oh.model.java.version>
     <maven.compiler.source>${oh.java.version}</maven.compiler.source>
     <maven.compiler.target>${oh.java.version}</maven.compiler.target>
     <maven.compiler.compilerVersion>${oh.java.version}</maven.compiler.compilerVersion>
@@ -77,7 +76,7 @@
     <karaf.tooling.version>4.3.7</karaf.tooling.version>
     <sat.version>0.13.0</sat.version>
     <slf4j.version>1.7.32</slf4j.version>
-    <xtext.version>2.26.0</xtext.version>
+    <xtext.version>2.29.0</xtext.version>
     <spotless.version>2.28.0</spotless.version>
     <spotless.eclipse.version>4.21.0</spotless.eclipse.version>
   </properties>
