@@ -100,7 +100,7 @@ public class StateUtil {
     }
 
     public static void testAcceptedStates(GenericItem item) {
-        Set<Class<? extends State>> successfullStates = new HashSet<>();
+        Set<Class<? extends State>> successfulStates = new HashSet<>();
 
         for (State s : getAllStates()) {
             item.setState(s);
@@ -111,7 +111,7 @@ public class StateUtil {
                 } else {
                     // the state should be set on the item now
                     assertNotEquals(UnDefType.NULL, item.getState());
-                    successfullStates.add(s.getClass());
+                    successfulStates.add(s.getClass());
                 }
                 // reset item
                 item.setState(UnDefType.NULL);
@@ -122,7 +122,7 @@ public class StateUtil {
 
         // test if the item accepts a state that is not in our test state list
         for (Class<? extends State> acceptedState : item.getAcceptedDataTypes()) {
-            if (!successfullStates.contains(acceptedState)) {
+            if (!successfulStates.contains(acceptedState)) {
                 fail("Item '" + item.getType() + "' accepts untested state: " + acceptedState);
             }
         }

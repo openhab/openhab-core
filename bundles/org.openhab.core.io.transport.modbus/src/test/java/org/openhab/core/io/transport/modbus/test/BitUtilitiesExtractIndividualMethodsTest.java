@@ -82,7 +82,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
             streamBuilder.add(new Object[] { expectedResult, type, bytesOffsetted, byteIndex });
 
             // offsetted, with no extra bytes following
-            // (this is only done for successfull cases to avoid copyOfRange padding with zeros
+            // (this is only done for successful cases to avoid copyOfRange padding with zeros
             if (!(expectedResult instanceof Class)) {
                 byte[] bytesOffsettedCutExtra = Arrays.copyOfRange(bytesOffsetted, 0, byteIndex + type.getBits() / 8);
                 if (bytesOffsettedCutExtra.length != bytesOffsetted.length) {
