@@ -64,7 +64,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <oh.java.version>11</oh.java.version>
+    <oh.java.version>17</oh.java.version>
     <maven.compiler.source>${oh.java.version}</maven.compiler.source>
     <maven.compiler.target>${oh.java.version}</maven.compiler.target>
     <maven.compiler.compilerVersion>${oh.java.version}</maven.compiler.compilerVersion>
@@ -76,8 +76,9 @@
     <karaf.tooling.version>4.3.7</karaf.tooling.version>
     <sat.version>0.13.0</sat.version>
     <slf4j.version>1.7.32</slf4j.version>
-    <xtext.version>2.26.0</xtext.version>
-    <spotless.version>2.0.3</spotless.version>
+    <xtext.version>2.29.0</xtext.version>
+    <spotless.version>2.28.0</spotless.version>
+    <spotless.eclipse.version>4.21.0</spotless.eclipse.version>
   </properties>
 
   <dependencyManagement>
@@ -292,12 +293,12 @@ Import-Package: \\
             <dependency>
               <groupId>org.codehaus.plexus</groupId>
               <artifactId>plexus-compiler-eclipse</artifactId>
-              <version>2.11.1</version>
+              <version>2.12.1</version>
             </dependency>
             <dependency>
               <groupId>org.eclipse.jdt</groupId>
               <artifactId>ecj</artifactId>
-              <version>3.28.0</version>
+              <version>3.30.0</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -387,7 +388,7 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.0.0-M5</version>
+          <version>3.0.0-M7</version>
           <configuration>
             <argLine>
               --add-opens java.base/java.net=ALL-UNNAMED
@@ -537,7 +538,7 @@ Import-Package: \\
             <java>
               <eclipse>
                 <file>openhab_codestyle.xml</file>
-                <version>4.13.0</version>
+                <version>${spotless.eclipse.version}</version>
               </eclipse>
               <removeUnusedImports/>
               <importOrder>
@@ -560,7 +561,7 @@ Import-Package: \\
                   <files>
                     <file>openhab_wst_xml_files.prefs</file>
                   </files>
-                  <version>4.13.0</version>
+                  <version>${spotless.eclipse.version}</version>
                 </eclipseWtp>
                 <trimTrailingWhitespace/>
                 <endWithNewline/>
@@ -575,7 +576,7 @@ Import-Package: \\
                   <files>
                     <file>openhab_wst_feature_file.prefs</file>
                   </files>
-                  <version>4.13.0</version>
+                  <version>${spotless.eclipse.version}</version>
                 </eclipseWtp>
                 <trimTrailingWhitespace/>
                 <endWithNewline/>
@@ -590,7 +591,7 @@ Import-Package: \\
                   <files>
                     <file>openhab_wst_pom_file.prefs</file>
                   </files>
-                  <version>4.13.0</version>
+                  <version>${spotless.eclipse.version}</version>
                 </eclipseWtp>
                 <trimTrailingWhitespace/>
                 <endWithNewline/>
@@ -647,7 +648,7 @@ Import-Package: \\
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>[11.0,18.0)</version>
+                  <version>[17.0,18.0)</version>
                 </requireJavaVersion>
               </rules>
             </configuration>

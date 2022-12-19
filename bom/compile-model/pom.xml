@@ -140,7 +140,7 @@
     <dependency>
       <groupId>org.eclipse.orbit.bundles</groupId>
       <artifactId>io.github.classgraph</artifactId>
-      <version>4.8.138.v20211212-1642 </version>
+      <version>4.8.149.v20220915-0556</version>
       <scope>compile</scope>
     </dependency>
 
