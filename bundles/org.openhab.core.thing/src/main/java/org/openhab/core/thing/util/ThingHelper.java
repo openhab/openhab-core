@@ -97,7 +97,7 @@ public class ThingHelper {
             strings.add(channel.getUID().toString() + '#' + channel.getAcceptedItemType() + '#' + channel.getKind());
         }
         Collections.sort(strings);
-        return strings.stream().collect(Collectors.joining(","));
+        return String.join(",", strings);
     }
 
     public static void addChannelsToThing(Thing thing, Collection<Channel> channels) {

@@ -12,8 +12,6 @@
  */
 package org.openhab.core.thing.internal;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,15 +47,11 @@ import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
 @NonNullByDefault
 public class ThingImpl implements Thing {
 
-    /*
-     * !!! DO NOT CHANGE - We are not allowed to change the members of the ThingImpl implementation as the storage for
-     * things uses this implementation itself to store and restore the data.
-     */
     private @Nullable String label;
 
     private @Nullable ThingUID bridgeUID;
 
-    private List<Channel> channels = new ArrayList<>();
+    private final Map<ChannelUID, Channel> channels = new HashMap<>();
 
     private Configuration configuration = new Configuration();
 
@@ -85,19 +79,17 @@ public class ThingImpl implements Thing {
     /**
      * @param thingTypeUID thing type UID
      * @param thingId thing ID
-     * @throws IllegalArgumentException
      */
-    public ThingImpl(ThingTypeUID thingTypeUID, String thingId) throws IllegalArgumentException {
+    public ThingImpl(ThingTypeUID thingTypeUID, String thingId) {
         this.uid = new ThingUID(thingTypeUID.getBindingId(), thingTypeUID.getId(), thingId);
         this.thingTypeUID = thingTypeUID;
     }
 
     /**
      * @param thingTypeUID thing type UID
-     * @param thingUID
-     * @throws IllegalArgumentException
+     * @param thingUID thing UID
      */
-    public ThingImpl(ThingTypeUID thingTypeUID, ThingUID thingUID) throws IllegalArgumentException {
+    public ThingImpl(ThingTypeUID thingTypeUID, ThingUID thingUID) {
         this.uid = thingUID;
         this.thingTypeUID = thingTypeUID;
     }
@@ -119,33 +111,23 @@ public class ThingImpl implements Thing {
 
     @Override
     public List<Channel> getChannels() {
-        return Collections.unmodifiableList(new ArrayList<>(this.channels));
+        return this.channels.values().stream().toList();
     }
 
     @Override
     public List<Channel> getChannelsOfGroup(String channelGroupId) {
-        List<Channel> channels = new ArrayList<>();
-        for (Channel channel : this.channels) {
-            if (channelGroupId.equals(channel.getUID().getGroupId())) {
-                channels.add(channel);
-            }
-        }
-        return Collections.unmodifiableList(channels);
+       return this.channels.entrySet().stream().filter(c -> channelGroupId.equals(c.getKey().getGroupId())).map(
+                Map.Entry::getValue).toList();
     }
 
     @Override
     public @Nullable Channel getChannel(String channelId) {
-        for (Channel channel : this.channels) {
-            if (channel.getUID().getId().equals(channelId)) {
-                return channel;
-            }
-        }
-        return null;
+       return getChannel(new ChannelUID(uid, channelId));
     }
 
     @Override
     public @Nullable Channel getChannel(ChannelUID channelUID) {
-        return getChannel(channelUID.getId());
+        return this.channels.get(channelUID);
     }
 
     @Override
@@ -179,14 +161,12 @@ public class ThingImpl implements Thing {
     }
 
     public void addChannel(Channel channel) {
-        this.channels.add(channel);
+        this.channels.put(channel.getUID(), channel);
     }
 
     public void setChannels(List<Channel> channels) {
         this.channels.clear();
-        for (Channel channel : channels) {
-            addChannel(channel);
-        }
+        channels.forEach(this::addChannel);
     }
 
     public void setConfiguration(@Nullable Configuration configuration) {
@@ -219,14 +199,14 @@ public class ThingImpl implements Thing {
     @Override
     public Map<String, String> getProperties() {
         synchronized (this) {
-            return Collections.unmodifiableMap(new HashMap<>(properties));
+            return Map.copyOf(properties);
         }
     }
 
     @Override
     public @Nullable String setProperty(String name, @Nullable String value) {
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("Property name must not be null or empty");
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("Property name must not be empty");
         }
         synchronized (this) {
             if (value == null) {
@@ -260,7 +240,7 @@ public class ThingImpl implements Thing {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((uid == null) ? 0 : uid.hashCode());
+        result = prime * result + uid.hashCode();
         return result;
     }
 
@@ -276,13 +256,6 @@ public class ThingImpl implements Thing {
             return false;
         }
         ThingImpl other = (ThingImpl) obj;
-        if (uid == null) {
-            if (other.uid != null) {
-                return false;
-            }
-        } else if (!uid.equals(other.uid)) {
-            return false;
-        }
-        return true;
+        return uid.equals(other.uid);
     }
 }
