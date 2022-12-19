@@ -45,41 +45,26 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         this(BigDecimal.ZERO);
     }
 
+    /**
+     * Creates a new {@link DecimalType} with the given value.
+     *
+     * @param value a number
+     */
     public DecimalType(Number value) {
-        this(bigDecimal(value));
-    }
-
-    // TODO: Remove these constructors. They are still in place to maintain binary compatibility and will be removed
-    // once another change breaking binary compatibility is merged
-    public DecimalType(BigDecimal value) {
-        this.value = value;
-    }
-
-    public DecimalType(long value) {
-        this(bigDecimal(value));
-    }
-
-    public DecimalType(double value) {
-        this(bigDecimal(value));
-    }
-
-    private static BigDecimal bigDecimal(Number value) {
         if (value instanceof QuantityType) {
-            return ((QuantityType<?>) value).toBigDecimal();
+            this.value = ((QuantityType<?>) value).toBigDecimal();
+        } else if (value instanceof HSBType) {
+            this.value = ((HSBType) value).toBigDecimal();
+        } else {
+            this.value = new BigDecimal(value.toString());
         }
-
-        if (value instanceof HSBType) {
-            return ((HSBType) value).toBigDecimal();
-        }
-
-        return new BigDecimal(value.toString());
     }
 
     /**
      * Creates a new {@link DecimalType} with the given value.
      * The English locale is used to determine (decimal/grouping) separator characters.
      *
-     * @param value the non null value representing a number
+     * @param value the value representing a number
      * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
      */
     public DecimalType(String value) {
@@ -89,7 +74,7 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
     /**
      * Creates a new {@link DecimalType} with the given value.
      *
-     * @param value the non null value representing a number
+     * @param value the value representing a number
      * @param locale the locale used to determine (decimal/grouping) separator characters
      * @throws NumberFormatException when the number could not be parsed to a {@link BigDecimal}
      */
