@@ -116,13 +116,13 @@ public class ThingImpl implements Thing {
 
     @Override
     public List<Channel> getChannelsOfGroup(String channelGroupId) {
-       return this.channels.entrySet().stream().filter(c -> channelGroupId.equals(c.getKey().getGroupId())).map(
-                Map.Entry::getValue).toList();
+        return this.channels.entrySet().stream().filter(c -> channelGroupId.equals(c.getKey().getGroupId()))
+                .map(Map.Entry::getValue).toList();
     }
 
     @Override
     public @Nullable Channel getChannel(String channelId) {
-       return getChannel(new ChannelUID(uid, channelId));
+        return getChannel(new ChannelUID(uid, channelId));
     }
 
     @Override
@@ -205,8 +205,8 @@ public class ThingImpl implements Thing {
 
     @Override
     public @Nullable String setProperty(String name, @Nullable String value) {
-        if (name.isEmpty()) {
-            throw new IllegalArgumentException("Property name must not be empty");
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Property name must not be null or empty");
         }
         synchronized (this) {
             if (value == null) {

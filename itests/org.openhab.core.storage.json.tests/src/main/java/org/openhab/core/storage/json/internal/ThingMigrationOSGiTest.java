@@ -22,10 +22,8 @@ import java.util.Collection;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.OpenHAB;
-import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ManagedThingProvider;
@@ -56,15 +54,6 @@ public class ThingMigrationOSGiTest extends JavaOSGiTest {
         ManagedThingProvider managedThingProvider = new ManagedThingProvider(storageService);
         Collection<Thing> things = managedThingProvider.getAll();
         assertThat(things.size(), is(2));
-
-        // remove this block when ThingImpl/BridgeImpl changes
-        Files.copy(bundleContext.getBundle().getResource(DB_NAME + ".json").openStream(),
-                DB_DIR.resolve(DB_OLD_NAME + ".json"));
-        Storage<Thing> oldStorage = storageService.getStorage(DB_OLD_NAME, Thing.class.getClassLoader());
-        Collection<@Nullable Thing> oldThings = oldStorage.getValues();
-        assertThat(oldThings.size(), is(things.size()));
-
-        assertThat(things, hasItems(oldThings.toArray(Thing[]::new)));
 
         unregisterService(storageService);
     }
