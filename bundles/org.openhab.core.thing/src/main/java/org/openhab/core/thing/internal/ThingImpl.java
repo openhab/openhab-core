@@ -111,7 +111,7 @@ public class ThingImpl implements Thing {
 
     @Override
     public List<Channel> getChannels() {
-        return this.channels.values().stream().toList();
+        return List.copyOf(this.channels.values());
     }
 
     @Override
