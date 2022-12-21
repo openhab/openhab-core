@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.automation.module.script.rulesupport.loader.AbstractScriptFileWatcher;
 import org.openhab.core.service.ReadyService;
+import org.openhab.core.service.StartLevelService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -37,8 +38,8 @@ public class DefaultScriptFileWatcher extends AbstractScriptFileWatcher {
 
     @Activate
     public DefaultScriptFileWatcher(final @Reference ScriptEngineManager manager,
-            final @Reference ReadyService readyService) {
-        super(manager, readyService, FILE_DIRECTORY);
+            final @Reference ReadyService readyService, final @Reference StartLevelService startLevelService) {
+        super(manager, readyService, startLevelService, FILE_DIRECTORY);
     }
 
     @Activate
