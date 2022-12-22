@@ -82,12 +82,12 @@ public class ThingStatusInfoEvent extends AbstractEvent {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass() || !super.equals(o)) {
             return false;
-        if (!super.equals(o))
-            return false;
+        }
         ThingStatusInfoEvent that = (ThingStatusInfoEvent) o;
         return thingUID.equals(that.thingUID) && thingStatusInfo.equals(that.thingStatusInfo);
     }

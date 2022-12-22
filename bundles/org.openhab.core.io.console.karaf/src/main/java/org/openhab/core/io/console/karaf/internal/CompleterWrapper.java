@@ -62,16 +62,19 @@ public class CompleterWrapper implements Completer {
 
         if (commandLine.getArguments().length > 1) {
             String arg = commandLine.getArguments()[0];
-            if (!arg.equals(command) && !arg.equals(localGlobalCommand))
+            if (!arg.equals(command) && !arg.equals(localGlobalCommand)) {
                 return -1;
+            }
         }
 
-        if (commandLine.getCursorArgumentIndex() < 0)
+        if (commandLine.getCursorArgumentIndex() < 0) {
             return -1;
+        }
 
         var localCompleter = completer;
-        if (localCompleter == null)
+        if (localCompleter == null) {
             return -1;
+        }
 
         String[] args = commandLine.getArguments();
         boolean result = localCompleter.complete(Arrays.copyOfRange(args, 1, args.length),
@@ -86,12 +89,14 @@ public class CompleterWrapper implements Completer {
             String arg = commandLine.getArguments()[0];
             arg = arg.substring(0, commandLine.getArgumentPosition());
 
-            if (command.startsWith(arg))
+            if (command.startsWith(arg)) {
                 candidates.add(new Candidate(command, command, null, commandDescription, null, null, true));
+            }
             String localGlobalCommand = globalCommand;
-            if (localGlobalCommand != null && localGlobalCommand.startsWith(arg))
+            if (localGlobalCommand != null && localGlobalCommand.startsWith(arg)) {
                 candidates.add(new Candidate(localGlobalCommand, localGlobalCommand, null, commandDescription, null,
                         null, true));
+            }
 
             return;
         }

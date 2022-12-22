@@ -17,8 +17,6 @@ import java.util.function.Consumer;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.RuleManager;
-import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.module.script.action.ScriptExecution;
 import org.openhab.core.automation.module.script.action.Timer;
 import org.openhab.core.scheduler.Scheduler;
@@ -37,15 +35,10 @@ import org.osgi.service.component.annotations.Reference;
 public class ScriptExecutionImpl implements ScriptExecution {
 
     private final Scheduler scheduler;
-    private final RuleManager ruleManager;
-    private final RuleRegistry ruleRegistry;
 
     @Activate
-    public ScriptExecutionImpl(@Reference RuleRegistry ruleRegistry, @Reference RuleManager ruleManager,
-            @Reference Scheduler scheduler) {
-        this.ruleRegistry = ruleRegistry;
+    public ScriptExecutionImpl(@Reference Scheduler scheduler) {
         this.scheduler = scheduler;
-        this.ruleManager = ruleManager;
     }
 
     @Override

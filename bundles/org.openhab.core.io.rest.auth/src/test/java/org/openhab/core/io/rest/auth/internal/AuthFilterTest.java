@@ -13,9 +13,7 @@
 package org.openhab.core.io.rest.auth.internal;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -48,16 +46,16 @@ public class AuthFilterTest {
     @InjectMocks
     private @NonNullByDefault({}) AuthFilter authFilter;
 
-    private @Mock @NonNullByDefault({}) JwtHelper jwtHelperMock;
-    private @Mock @NonNullByDefault({}) UserRegistry userRegistryMock;
+    // These mocks are inject into authFilter during setup
+    public @Mock @NonNullByDefault({}) JwtHelper jwtHelperMock;
+    public @Mock @NonNullByDefault({}) UserRegistry userRegistryMock;
 
     private @Mock @NonNullByDefault({}) ContainerRequestContext containerRequestContext;
-
     private @Mock @NonNullByDefault({}) HttpServletRequest servletRequest;
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         when(servletRequest.getRemoteAddr()).thenReturn("192.168.0.100");
     }
 

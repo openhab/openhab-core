@@ -21,8 +21,6 @@ import org.openhab.core.audio.AudioManager;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.openhab.core.library.types.PercentType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is an ModuleHandler implementation for Actions that synthesize a tone melody.
@@ -36,8 +34,6 @@ public class SynthesizeActionHandler extends BaseActionModuleHandler {
     public static final String PARAM_MELODY = "melody";
     public static final String PARAM_SINK = "sink";
     public static final String PARAM_VOLUME = "volume";
-
-    private final Logger logger = LoggerFactory.getLogger(SynthesizeActionHandler.class);
 
     private final AudioManager audioManager;
     private final String melody;

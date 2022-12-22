@@ -12,8 +12,7 @@
  */
 package org.openhab.core.library.items;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -147,13 +146,13 @@ public class NumberItemTest {
         item.setEventPublisher(eventPublisher);
 
         QuantityType<?> command = new QuantityType<>("15 °C");
-        item.send(new QuantityType<>("15 °C"));
+        item.send(command);
 
         ArgumentCaptor<ItemCommandEvent> captor = ArgumentCaptor.forClass(ItemCommandEvent.class);
         verify(eventPublisher).post(captor.capture());
 
         ItemCommandEvent event = captor.getValue();
-        assertThat(event.getItemCommand(), is(new QuantityType<>("15 °C")));
+        assertThat(event.getItemCommand(), is(command));
     }
 
     @Test

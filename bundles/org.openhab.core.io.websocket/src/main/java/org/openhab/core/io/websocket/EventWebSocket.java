@@ -179,7 +179,8 @@ public class EventWebSocket {
         if (session != null) {
             session.close();
         }
-        String message = error == null ? "<null>" : error.getMessage();
+
+        String message = error == null ? "<null>" : Objects.requireNonNullElse(error.getMessage(), "<null>");
         logger.info("WebSocket error: {}", message);
         onClose(StatusCode.NO_CODE, message);
     }
