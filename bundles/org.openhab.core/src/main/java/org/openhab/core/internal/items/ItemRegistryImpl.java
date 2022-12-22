@@ -23,8 +23,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.common.registry.Provider;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -35,6 +35,8 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemStateConverter;
 import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.ManagedItemProvider;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataAwareItem;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.RegistryHook;
 import org.openhab.core.items.events.ItemEventFactory;
@@ -55,14 +57,15 @@ import org.slf4j.LoggerFactory;
  * This is the main implementing class of the {@link ItemRegistry} interface. It
  * keeps track of all declared items of all item providers and keeps their
  * current state in memory. This is the central point where states are kept and
- * thus it is a core part for all stateful services.
+ * thus is a core part for all stateful services.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Stefan Bußweiler - Migration to new event mechanism
  */
 @NonNullByDefault
 @Component(immediate = true)
-public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvider> implements ItemRegistry {
+public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvider>
+        implements ItemRegistry, RegistryChangeListener<Metadata> {
 
     private final Logger logger = LoggerFactory.getLogger(ItemRegistryImpl.class);
 
@@ -70,13 +73,26 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     private @Nullable StateDescriptionService stateDescriptionService;
     private @Nullable CommandDescriptionService commandDescriptionService;
     private final MetadataRegistry metadataRegistry;
-    private @Nullable UnitProvider unitProvider;
+
     private @Nullable ItemStateConverter itemStateConverter;
 
     @Activate
     public ItemRegistryImpl(final @Reference MetadataRegistry metadataRegistry) {
         super(ItemProvider.class);
         this.metadataRegistry = metadataRegistry;
+    }
+
+    @Activate
+    protected void activate(final ComponentContext componentContext) {
+        super.activate(componentContext.getBundleContext());
+        metadataRegistry.addRegistryChangeListener(this);
+    }
+
+    @Override
+    @Deactivate
+    protected void deactivate() {
+        metadataRegistry.removeRegistryChangeListener(this);
+        super.deactivate();
     }
 
     @Override
@@ -101,13 +117,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             throw new ItemNotUniqueException(name, items);
         }
 
-        Item item = items.iterator().next();
-
-        if (item == null) {
-            throw new ItemNotFoundException(name);
-        } else {
-            return item;
-        }
+        return items.iterator().next();
     }
 
     @Override
@@ -146,9 +156,8 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         for (String groupName : groupItemNames) {
             if (groupName != null) {
                 try {
-                    Item groupItem = getItem(groupName);
-                    if (groupItem instanceof GroupItem groupItem1) {
-                        groupItem1.addMember(item);
+                    if (getItem(groupName) instanceof GroupItem groupItem) {
+                        groupItem.addMember(item);
                     }
                 } catch (ItemNotFoundException e) {
                     // the group might not yet be registered, let's ignore this
@@ -161,9 +170,8 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         for (String groupName : groupItemNames) {
             if (groupName != null) {
                 try {
-                    Item groupItem = getItem(groupName);
-                    if (groupItem instanceof GroupItem item) {
-                        item.replaceMember(oldItem, newItem);
+                    if (getItem(groupName) instanceof GroupItem groupItem) {
+                        groupItem.replaceMember(oldItem, newItem);
                     }
                 } catch (ItemNotFoundException e) {
                     // the group might not yet be registered, let's ignore this
@@ -199,8 +207,11 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             genericItem.setEventPublisher(getEventPublisher());
             genericItem.setStateDescriptionService(stateDescriptionService);
             genericItem.setCommandDescriptionService(commandDescriptionService);
-            genericItem.setUnitProvider(unitProvider);
             genericItem.setItemStateConverter(itemStateConverter);
+        }
+        if (item instanceof MetadataAwareItem metadataAwareItem) {
+            metadataRegistry.stream().filter(m -> m.getUID().getItemName().equals(item.getName()))
+                    .forEach(metadataAwareItem::addedMetadata);
         }
     }
 
@@ -216,9 +227,8 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         for (String groupName : groupItemNames) {
             if (groupName != null) {
                 try {
-                    Item groupItem = getItem(groupName);
-                    if (groupItem instanceof GroupItem groupItem1) {
-                        groupItem1.removeMember(item);
+                    if (getItem(groupName) instanceof GroupItem groupItem) {
+                        groupItem.removeMember(item);
                     }
                 } catch (ItemNotFoundException e) {
                     // the group might not yet be registered, let's ignore this
@@ -234,16 +244,16 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     @Override
     protected void onRemoveElement(Item element) {
-        if (element instanceof GenericItem item) {
-            item.dispose();
+        if (element instanceof GenericItem genericItem) {
+            genericItem.dispose();
         }
         removeFromGroupItems(element, element.getGroupNames());
     }
 
     @Override
     protected void beforeUpdateElement(Item existingElement) {
-        if (existingElement instanceof GenericItem item) {
-            item.dispose();
+        if (existingElement instanceof GenericItem genericItem) {
+            genericItem.dispose();
         }
     }
 
@@ -289,21 +299,6 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     @Override
     protected void unsetReadyService(ReadyService readyService) {
         super.unsetReadyService(readyService);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setUnitProvider(UnitProvider unitProvider) {
-        this.unitProvider = unitProvider;
-        for (Item item : getItems()) {
-            ((GenericItem) item).setUnitProvider(unitProvider);
-        }
-    }
-
-    public void unsetUnitProvider(UnitProvider unitProvider) {
-        this.unitProvider = null;
-        for (Item item : getItems()) {
-            ((GenericItem) item).setUnitProvider(null);
-        }
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
@@ -442,17 +437,6 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         registryHooks.remove(hook);
     }
 
-    @Activate
-    protected void activate(final ComponentContext componentContext) {
-        super.activate(componentContext.getBundleContext());
-    }
-
-    @Override
-    @Deactivate
-    protected void deactivate() {
-        super.deactivate();
-    }
-
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     public void setStateDescriptionService(StateDescriptionService stateDescriptionService) {
         this.stateDescriptionService = stateDescriptionService;
@@ -494,5 +478,32 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     protected void unsetManagedProvider(ManagedItemProvider provider) {
         super.unsetManagedProvider(provider);
+    }
+
+    @Override
+    public void added(Metadata element) {
+        String itemName = element.getUID().getItemName();
+        Item item = get(itemName);
+        if (item instanceof MetadataAwareItem metadataAwareItem) {
+            metadataAwareItem.addedMetadata(element);
+        }
+    }
+
+    @Override
+    public void removed(Metadata element) {
+        String itemName = element.getUID().getItemName();
+        Item item = get(itemName);
+        if (item instanceof MetadataAwareItem metadataAwareItem) {
+            metadataAwareItem.removedMetadata(element);
+        }
+    }
+
+    @Override
+    public void updated(Metadata oldElement, Metadata element) {
+        String itemName = element.getUID().getItemName();
+        Item item = get(itemName);
+        if (item instanceof MetadataAwareItem metadataAwareItem) {
+            metadataAwareItem.updatedMetadata(oldElement, element);
+        }
     }
 }

@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import static org.openhab.core.library.unit.Units.ONE;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -64,6 +65,7 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
@@ -796,7 +798,6 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         gfDTO.name = "sum";
         GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, baseItem);
         GroupItem groupItem = new GroupItem("number", baseItem, function);
-        groupItem.setUnitProvider(unitProviderMock);
 
         NumberItem celsius = createNumberItem("C", Temperature.class, new QuantityType<>("23 °C"));
         groupItem.addMember(celsius);
@@ -820,12 +821,14 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertThatNumberGroupItemWithDifferentDimensionsCalculatesCorrectState() {
+        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+        when(unitProviderMock.getUnit(Pressure.class)).thenReturn(SIUnits.PASCAL);
+        when(unitProviderMock.getUnit(Dimensionless.class)).thenReturn(ONE);
         NumberItem baseItem = createNumberItem("baseItem", Temperature.class, UnDefType.NULL);
         GroupFunctionDTO gfDTO = new GroupFunctionDTO();
         gfDTO.name = "sum";
         GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, baseItem);
         GroupItem groupItem = new GroupItem("number", baseItem, function);
-        groupItem.setUnitProvider(unitProviderMock);
         groupItem.setItemStateConverter(itemStateConverter);
 
         NumberItem celsius = createNumberItem("C", Temperature.class, new QuantityType<>("23 °C"));
@@ -844,8 +847,8 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     }
 
     private NumberItem createNumberItem(String name, Class<? extends Quantity<?>> dimension, State state) {
-        NumberItem item = new NumberItem(CoreItemFactory.NUMBER + ":" + dimension.getSimpleName(), name);
-        item.setUnitProvider(unitProviderMock);
+        NumberItem item = new NumberItem(CoreItemFactory.NUMBER + ":" + dimension.getSimpleName(), name,
+                unitProviderMock);
         item.setState(state);
 
         return item;
