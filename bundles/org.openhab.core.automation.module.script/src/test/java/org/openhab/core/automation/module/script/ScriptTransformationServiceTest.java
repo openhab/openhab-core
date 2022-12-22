@@ -51,6 +51,8 @@ public class ScriptTransformationServiceTest {
     private static final String SCRIPT_UID = "scriptUid";
     private static final String INVALID_SCRIPT_UID = "invalidScriptUid";
 
+    private static final String INLINE_SCRIPT = "|inlineScript";
+
     private static final String SCRIPT = "script";
     private static final String SCRIPT_OUTPUT = "output";
 
@@ -175,5 +177,12 @@ public class ScriptTransformationServiceTest {
                 () -> service.transform(SCRIPT_LANGUAGE + ":" + INVALID_SCRIPT_UID, "input"));
 
         assertThat(e.getMessage(), is("Configuration does not have correct type 'script' but 'invalid'."));
+    }
+
+    @Test
+    public void inlineScriptProperlyProcessed() throws TransformationException, ScriptException {
+        service.transform(SCRIPT_LANGUAGE + ":" + INLINE_SCRIPT, "input");
+
+        verify(scriptEngine).eval(INLINE_SCRIPT.substring(1));
     }
 }
