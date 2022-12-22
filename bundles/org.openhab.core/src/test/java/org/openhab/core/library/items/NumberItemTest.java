@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import javax.measure.quantity.Energy;
+import javax.measure.quantity.Mass;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -37,6 +38,7 @@ import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.ImperialUnits;
+import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.service.StateDescriptionService;
@@ -285,5 +287,20 @@ public class NumberItemTest {
 
         assertThat(item.getState(), is(new QuantityType<>("329 kWh")));
         assertThat(item.getUnit(), is(nullValue()));
+    }
+
+    @Test
+    void testSetDefaultUnitIsUsedFirst() {
+        final UnitProvider unitProviderMock = mock(UnitProvider.class);
+        when(unitProviderMock.getUnit(Mass.class)).thenReturn(SIUnits.KILOGRAM);
+        when(stateDescriptionServiceMock.getStateDescription(any(), any())).thenReturn(
+                StateDescriptionFragmentBuilder.create().withPattern("%.0f mg").build().toStateDescription());
+
+        final NumberItem item = new NumberItem("Number:Mass", ITEM_NAME);
+        item.setUnitProvider(unitProviderMock);
+        item.setItemDefaultUnitProvider(() -> MetricPrefix.MEGA(SIUnits.GRAM));
+        item.setStateDescriptionService(stateDescriptionServiceMock);
+
+        assertThat(item.getUnit(), is(MetricPrefix.MEGA(SIUnits.GRAM)));
     }
 }

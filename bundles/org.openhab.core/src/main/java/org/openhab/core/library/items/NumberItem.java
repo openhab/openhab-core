@@ -14,6 +14,7 @@ package org.openhab.core.library.items;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Supplier;
 
 import javax.measure.Dimension;
 import javax.measure.Quantity;
@@ -45,6 +46,7 @@ import org.openhab.core.types.util.UnitUtils;
 @NonNullByDefault
 public class NumberItem extends GenericItem {
 
+    public static final String TYPE = "Number";
     private static final List<Class<? extends State>> ACCEPTED_DATA_TYPES = List.of(DecimalType.class,
             QuantityType.class, UnDefType.class);
     private static final List<Class<? extends Command>> ACCEPTED_COMMAND_TYPES = List.of(DecimalType.class,
@@ -52,6 +54,8 @@ public class NumberItem extends GenericItem {
 
     @Nullable
     private Class<? extends Quantity<?>> dimension;
+
+    private Supplier<@Nullable Unit<? extends Quantity<?>>> itemDefaultUnitProvider = () -> null;
 
     public NumberItem(String name) {
         this(CoreItemFactory.NUMBER, name);
@@ -165,8 +169,19 @@ public class NumberItem extends GenericItem {
     }
 
     /**
+     * Set a provider for retrieving the default unit from metadata
+     *
+     * @param defaultUnitProvider a {@link Supplier} that supplies the default unit from metadata (or <code>null</code>
+     *            if not set>
+     */
+    public void setItemDefaultUnitProvider(Supplier<@Nullable Unit<? extends Quantity<?>>> defaultUnitProvider) {
+        this.itemDefaultUnitProvider = defaultUnitProvider;
+    }
+
+    /**
      * Derive the unit for this item by the following priority:
      * <ul>
+     * <li>the unit retrieved from the <code>defaultUnit</code> in the item's metadata</li>
      * <li>the unit parsed from the state description</li>
      * <li>no unit if state description contains <code>%unit%</code></li>
      * <li>the default system unit from the item's dimension</li>
@@ -200,6 +215,7 @@ public class NumberItem extends GenericItem {
     /**
      * Derive the unit for this item by the following priority:
      * <ul>
+     * <li>the unit retrieved from the <code>defaultUnit</code> in the item's metadata</li>
      * <li>the unit parsed from the state description</li>
      * <li>the unit from the value if <code>hasUnit = true</code> and state description has unit
      * <code>%unit%</code></li>
@@ -217,6 +233,12 @@ public class NumberItem extends GenericItem {
             // if it is a plain number without dimension, we do not have a unit.
             return null;
         }
+
+        Unit<?> itemDefaultUnit = itemDefaultUnitProvider.get();
+        if (itemDefaultUnit != null) {
+            return itemDefaultUnit;
+        }
+
         StateDescription stateDescription = getStateDescription();
         if (stateDescription != null) {
             String pattern = stateDescription.getPattern();
