@@ -13,10 +13,7 @@
 package org.openhab.core.thing.link;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -54,9 +51,9 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
 
     private static final String BULK_BASE_THING_UID = "binding:type:thing";
     private static final String BULK_BASE_ITEM_NAME = "item";
-    private static int BULK_ITEM_COUNT = 3;
-    private static int BULK_THING_COUNT = 3;
-    private static int BULK_CHANNEL_COUNT = 3;
+    private static final int BULK_ITEM_COUNT = 3;
+    private static final int BULK_THING_COUNT = 3;
+    private static final int BULK_CHANNEL_COUNT = 3;
 
     private static final String ITEM = "item";
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding:thing");

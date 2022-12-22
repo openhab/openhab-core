@@ -53,10 +53,12 @@ public class EventDTO {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
         EventDTO eventDTO = (EventDTO) o;
         return Objects.equals(type, eventDTO.type) && Objects.equals(topic, eventDTO.topic)
                 && Objects.equals(payload, eventDTO.payload) && Objects.equals(source, eventDTO.source)

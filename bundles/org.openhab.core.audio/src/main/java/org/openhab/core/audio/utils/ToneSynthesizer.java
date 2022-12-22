@@ -59,7 +59,7 @@ public class ToneSynthesizer {
      * You can optionally add the character "'" to increase the note one octave.
      * You can optionally add ":ms" where ms is an int value to customize the note/silence milliseconds duration
      * (defaults to 200ms).
-     * 
+     *
      * @param melody to be parsed.
      * @return list of {@link Tone} instances.
      * @throws ParseException if melody can not be played.
@@ -87,7 +87,7 @@ public class ToneSynthesizer {
                     if (noteObj.isPresent()) {
                         melodySounds.add(noteTone(noteObj.get(), soundMillis, octaves));
                         break;
-                    } else if (note.equals("O") || note.equals("0")) {
+                    } else if ("O".equals(note) || "0".equals(note)) {
                         melodySounds.add(silenceTone(soundMillis));
                         break;
                     }
@@ -127,21 +127,20 @@ public class ToneSynthesizer {
 
     /**
      * Synthesize a list of {@link Tone} into a wav audio stream
-     * 
+     *
      * @param tones the list of {@link Tone}
      * @return an audio stream with the synthesized tones
      * @throws IOException in case of problems writing the audio stream
      */
     public AudioStream getStream(List<Tone> tones) throws IOException {
         int byteRate = (int) (sampleRate * bitDepth * channels / 8);
-        byte[] audioBuffer = new byte[0];
+        byte[] audioBuffer = {};
         var fixedTones = new ArrayList<>(tones);
         fixedTones.add(silenceTone(100));
         for (var sound : fixedTones) {
             var frequency = sound.frequency;
             var millis = sound.millis;
             int samplesPerChannel = (int) Math.ceil(sampleRate * (((double) millis) / 1000));
-            int byteSize = (int) Math.ceil(byteRate * ((double) millis / 1000));
             byte[] audioPart = getAudioBytes(frequency, samplesPerChannel);
             audioBuffer = ByteBuffer.allocate(audioBuffer.length + audioPart.length).put(audioBuffer).put(audioPart)
                     .array();
@@ -193,10 +192,10 @@ public class ToneSynthesizer {
                         audioBuffer.putShort(sample);
                         break;
                     case 24:
-                        putInt24Bits(audioBuffer, ((int) sample) << 8);
+                        putInt24Bits(audioBuffer, (sample) << 8);
                         break;
                     case 32:
-                        audioBuffer.putInt(((int) sample) << 16);
+                        audioBuffer.putInt((sample) << 16);
                         break;
                 }
             }

@@ -957,7 +957,6 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     @SuppressWarnings("null")
     public void assertThatApproveSetsTheDiscoveredLabelIfNoOtherIsGiven() {
-
         inbox.add(testDiscoveryResult);
         Thing approvedThing = inbox.approve(testThing.getUID(), null, null);
         Thing addedThing = registry.get(testThing.getUID());
