@@ -16,6 +16,7 @@ import static java.util.Comparator.comparing;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -23,8 +24,6 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioManager;
-import org.openhab.core.audio.AudioSink;
-import org.openhab.core.audio.AudioSource;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
@@ -33,6 +32,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemNotUniqueException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.voice.DialogContext;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
@@ -87,14 +87,13 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         return List.of(buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"),
                 buildCommandUsage(SUBCMD_INTERPRET + " <command>", "interprets a human language command"),
                 buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services"),
-                buildCommandUsage(
-                        SUBCMD_START_DIALOG
-                                + " [<source> [<sink> [<interpreters> [<tts> [<stt> [<ks> {<voice> [<keyword>]]]]]]]]",
+                buildCommandUsage(SUBCMD_START_DIALOG
+                        + " [--source <source>] [--sink <sink>] [--interpreters <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--ks ks [--keyword <ks>]] [--listening-item <listeningItem>]",
                         "start a new dialog processing using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_STOP_DIALOG + " [<source>]",
                         "stop the dialog processing for the default audio source or the audio source identified with provided argument"),
-                buildCommandUsage(
-                        SUBCMD_LISTEN_ANSWER + " [<source> [<sink> [<interpreters> [<tts> [<stt> [<voice]]]]]]",
+                buildCommandUsage(SUBCMD_LISTEN_ANSWER
+                        + " [--source <source>] [--sink <sink>] [--interpreters <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--listening-item <listeningItem>]",
                         "Execute a simple dialog sequence without keyword spotting using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_INTERPRETERS, "lists the interpreters"),
                 buildCommandUsage(SUBCMD_KEYWORD_SPOTTERS, "lists the keyword spotters"),
@@ -133,23 +132,23 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         }
                     }
                     return;
-                case SUBCMD_START_DIALOG:
+                case SUBCMD_START_DIALOG: {
+                    DialogContext.Builder dialogContextBuilder;
                     try {
-                        AudioSource source = args.length < 2 ? null : audioManager.getSource(args[1]);
-                        AudioSink sink = args.length < 3 ? null : audioManager.getSink(args[2]);
-                        List<HumanLanguageInterpreter> hlis = args.length < 4 ? List.of()
-                                : voiceManager.getHLIsByIds(args[3]);
-                        TTSService tts = args.length < 5 ? null : voiceManager.getTTS(args[4]);
-                        STTService stt = args.length < 6 ? null : voiceManager.getSTT(args[5]);
-                        KSService ks = args.length < 7 ? null : voiceManager.getKS(args[6]);
-                        Voice voice = args.length < 8 ? null : getVoice(args[7]);
-                        String keyword = args.length < 9 ? null : args[8];
-                        voiceManager.startDialog(ks, stt, tts, voice, hlis, source, sink, null, keyword, null);
+                        dialogContextBuilder = parseDialogParameters(args);
+                    } catch (IllegalStateException e) {
+                        console.println(Objects.requireNonNullElse(e.getMessage(),
+                                "An error occurred while parsing the dialog options"));
+                        break;
+                    }
+                    try {
+                        voiceManager.startDialog(dialogContextBuilder.build());
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while starting the dialog"));
                     }
-                    break;
+                    return;
+                }
                 case SUBCMD_STOP_DIALOG:
                     try {
                         voiceManager.stopDialog(args.length < 2 ? null : audioManager.getSource(args[1]));
@@ -157,22 +156,24 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while stopping the dialog"));
                     }
-                    break;
-                case SUBCMD_LISTEN_ANSWER:
+                    return;
+                case SUBCMD_LISTEN_ANSWER: {
+                    DialogContext.Builder dialogContextBuilder;
                     try {
-                        AudioSource source = args.length < 2 ? null : audioManager.getSource(args[1]);
-                        AudioSink sink = args.length < 3 ? null : audioManager.getSink(args[2]);
-                        List<HumanLanguageInterpreter> hlis = args.length < 4 ? List.of()
-                                : voiceManager.getHLIsByIds(args[3]);
-                        TTSService tts = args.length < 5 ? null : voiceManager.getTTS(args[4]);
-                        STTService stt = args.length < 6 ? null : voiceManager.getSTT(args[5]);
-                        Voice voice = args.length < 7 ? null : getVoice(args[6]);
-                        voiceManager.listenAndAnswer(stt, tts, voice, hlis, source, sink, null, null);
+                        dialogContextBuilder = parseDialogParameters(args);
+                    } catch (IllegalStateException e) {
+                        console.println(Objects.requireNonNullElse(e.getMessage(),
+                                "An error occurred while parsing the dialog options"));
+                        break;
+                    }
+                    try {
+                        voiceManager.listenAndAnswer(dialogContextBuilder.build());
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while executing the simple dialog sequence"));
                     }
-                    break;
+                    return;
+                }
                 case SUBCMD_INTERPRETERS:
                     listInterpreters(console);
                     return;
@@ -188,9 +189,8 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 default:
                     break;
             }
-        } else {
-            printUsage(console);
         }
+        printUsage(console);
     }
 
     private @Nullable Voice getDefaultVoice() {
@@ -304,5 +304,95 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     private @Nullable Voice getVoice(String id) {
         return voiceManager.getAllVoices().stream().filter(voice -> voice.getUID().equals(id)).findAny().orElse(null);
+    }
+
+    private DialogContext.Builder parseDialogParameters(String[] args) {
+        var dialogContextBuilder = voiceManager.getDialogContextBuilder();
+        if (args.length < 2) {
+            return dialogContextBuilder;
+        }
+        var parameters = new HashMap<String, String>();
+        for (int i = 1; i < args.length; i++) {
+            var arg = args[i].trim();
+            if (arg.startsWith("--")) {
+                i++;
+                if (i < args.length) {
+                    parameters.put(arg.replace("--", ""), args[i].trim());
+                } else {
+                    throw new IllegalStateException("Missing value for argument " + arg);
+                }
+            } else {
+                throw new IllegalStateException("Argument name should start by -- " + arg);
+            }
+        }
+        String sourceId = parameters.remove("source");
+        if (sourceId != null) {
+            var source = audioManager.getSource(sourceId);
+            if (source == null) {
+                throw new IllegalStateException("Audio source not found");
+            }
+            dialogContextBuilder.withSource(source);
+        }
+        String sinkId = parameters.remove("sink");
+        if (sinkId != null) {
+            var sink = audioManager.getSink(sinkId);
+            if (sink == null) {
+                throw new IllegalStateException("Audio sink not found");
+            }
+            dialogContextBuilder.withSink(sink);
+        }
+        String sttId = parameters.remove("stt");
+        if (sttId != null) {
+            var stt = voiceManager.getSTT(sttId);
+            if (stt == null) {
+                throw new IllegalStateException("Service stt not found");
+            }
+            dialogContextBuilder.withSTT(stt);
+        }
+        String ttsId = parameters.remove("tts");
+        if (ttsId != null) {
+            var tts = voiceManager.getTTS(ttsId);
+            if (tts == null) {
+                throw new IllegalStateException("Service tts not found");
+            }
+            dialogContextBuilder.withTTS(tts);
+        }
+        String voiceId = parameters.remove("voice");
+        if (voiceId != null) {
+            var voice = getVoice(voiceId);
+            if (voice == null) {
+                throw new IllegalStateException("Tts voice not found");
+            }
+            dialogContextBuilder.withVoice(voice);
+        }
+        String hliIds = parameters.remove("hlis");
+        if (hliIds != null) {
+            var hlis = voiceManager.getHLIsByIds(hliIds);
+            if (hlis.isEmpty()) {
+                throw new IllegalStateException("No interpreters found");
+            }
+            dialogContextBuilder.withHLIs(hlis);
+        }
+        String ksId = parameters.remove("ks");
+        if (ksId != null) {
+            var ks = voiceManager.getKS(ksId);
+            if (ks == null) {
+                throw new IllegalStateException("Service ks not found");
+            }
+            dialogContextBuilder.withKS(ks);
+        }
+        String listeningItem = parameters.remove("listening-item");
+        if (listeningItem != null) {
+            dialogContextBuilder.withListeningItem(listeningItem);
+        }
+        String keyword = parameters.remove("keyword");
+        if (keyword != null) {
+            dialogContextBuilder.withKeyword(keyword);
+        }
+        if (!parameters.isEmpty()) {
+            throw new IllegalStateException(
+                    "Argument" + parameters.keySet().stream().findAny().orElse("") + "is not supported");
+        }
+        return dialogContextBuilder;
     }
 }
