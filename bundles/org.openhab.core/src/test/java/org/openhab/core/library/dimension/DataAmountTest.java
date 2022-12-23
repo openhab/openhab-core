@@ -13,8 +13,7 @@
 package org.openhab.core.library.dimension;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -47,7 +46,7 @@ public class DataAmountTest {
 
     @Test
     public void testInvertibleUnit() {
-        QuantityType<DataAmount> quantityType = new QuantityType("1000 KB");
+        QuantityType<DataAmount> quantityType = new QuantityType("1000 kB");
         QuantityType<?> inverted = quantityType.toInvertibleUnit(Units.MEGABYTE);
 
         assertThat(quantityType, is(equalTo(inverted)));

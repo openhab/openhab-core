@@ -248,14 +248,8 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(GIGABIT_PER_SECOND, "Gbit/s");
         SimpleUnitFormat.getInstance().label(IRRADIANCE, "W/m²");
         SimpleUnitFormat.getInstance().label(KILOBYTE, "kB");
-        // "KB" is wrong, but we keep it for backward compatibility
-        SimpleUnitFormat.getInstance().alias(KILOBYTE, "KB");
         SimpleUnitFormat.getInstance().label(KIBIBYTE, "kiB");
-        // "KiB" is wrong, but we keep it for backward compatibility
-        SimpleUnitFormat.getInstance().alias(KIBIBYTE, "KiB");
         SimpleUnitFormat.getInstance().alias(KIBIBYTE, "kio");
-        // "Kio" is wrong, but we keep it for backward compatibility
-        SimpleUnitFormat.getInstance().alias(KIBIBYTE, "Kio");
         SimpleUnitFormat.getInstance().label(KILOBIT, "kbit");
         SimpleUnitFormat.getInstance().label(KILOBIT_PER_SECOND, "kbit/s");
         SimpleUnitFormat.getInstance().label(KILOVAR, "kvar");
