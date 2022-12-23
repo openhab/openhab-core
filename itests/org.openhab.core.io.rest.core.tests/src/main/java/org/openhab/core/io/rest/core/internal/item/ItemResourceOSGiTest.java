@@ -230,7 +230,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     @Test
     public void addMultipleItems() throws IOException {
         List<GroupItemDTO> itemList = new ArrayList<>();
-        GroupItemDTO[] items = new GroupItemDTO[] {};
+        GroupItemDTO[] items = {};
 
         GroupItemDTO item1DTO = new GroupItemDTO();
         item1DTO.name = "item1";
@@ -353,7 +353,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
     @ParameterizedTest
     @MethodSource("findTagTestSource")
-    public void findTagTest(String itemName, String semanticClassName, @Nullable Matcher<Iterable> matcher)
+    public void findTagTest(String itemName, String semanticClassName, @Nullable Matcher<Iterable<String>> matcher)
             throws IOException {
         // setup test: item1 has the location, item2 the equipment, item3 is the point
         item1.addTag("Office");
