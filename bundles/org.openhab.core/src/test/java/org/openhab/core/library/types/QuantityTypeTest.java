@@ -456,7 +456,7 @@ public class QuantityTypeTest {
         assertEquals("1 GiB", bytes.toString());
         bytes = new QuantityType<DataAmount>(1, BinaryPrefix.GIBI(Units.BYTE));
         assertEquals("1 GiB", bytes.toString());
-        QuantityType<DataAmount> bigAmount = new QuantityType<>("1 Kio");
+        QuantityType<DataAmount> bigAmount = new QuantityType<>("1 kio");
         QuantityType<DataAmount> octets = bigAmount.toUnit(Units.OCTET);
         assertEquals(1024, octets.intValue());
         QuantityType<DataAmount> hugeAmount = new QuantityType<>("1024Gio");
