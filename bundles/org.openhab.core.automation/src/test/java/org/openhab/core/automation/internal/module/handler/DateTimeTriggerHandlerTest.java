@@ -13,7 +13,7 @@
 package org.openhab.core.automation.internal.module.handler;
 
 import static java.util.Map.entry;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.time.ZoneId;

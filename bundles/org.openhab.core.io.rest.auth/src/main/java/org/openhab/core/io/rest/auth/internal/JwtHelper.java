@@ -143,7 +143,7 @@ public class JwtHelper {
         JwtConsumer jwtConsumer = new JwtConsumerBuilder().setRequireExpirationTime().setAllowedClockSkewInSeconds(30)
                 .setRequireSubject().setExpectedIssuer(ISSUER_NAME).setExpectedAudience(AUDIENCE)
                 .setVerificationKey(jwtWebKey.getKey())
-                .setJwsAlgorithmConstraints(ConstraintType.WHITELIST, AlgorithmIdentifiers.RSA_USING_SHA256).build();
+                .setJwsAlgorithmConstraints(ConstraintType.PERMIT, AlgorithmIdentifiers.RSA_USING_SHA256).build();
 
         try {
             JwtClaims jwtClaims = jwtConsumer.processToClaims(jwt);

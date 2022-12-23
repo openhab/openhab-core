@@ -1077,7 +1077,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         // reduce time between retries to ensure the test does not time out
         inbox.setDiscoveryResultAddRetryInterval(1);
 
-        CompletableFuture future = inbox.add(discoveryResult);
+        CompletableFuture<Boolean> future = inbox.add(discoveryResult);
 
         waitForAssert(() -> future.isDone(), 30, 5);
 
@@ -1093,7 +1093,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         // reduce time between retries to ensure the test does not time out
         inbox.setDiscoveryResultAddRetryInterval(1);
 
-        CompletableFuture future = inbox.add(discoveryResult);
+        CompletableFuture<Boolean> future = inbox.add(discoveryResult);
 
         dummyThingTypeProvider.add(thingTypeUID, ThingTypeBuilder.instance(thingTypeUID, "label").build());
 
