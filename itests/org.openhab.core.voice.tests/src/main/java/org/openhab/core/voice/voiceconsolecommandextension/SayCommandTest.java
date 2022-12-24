@@ -61,6 +61,7 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
 
     @BeforeEach
     public void setUp() {
+        registerVolatileStorageService();
         sink = new SinkStub();
         voice = new VoiceStub();
 

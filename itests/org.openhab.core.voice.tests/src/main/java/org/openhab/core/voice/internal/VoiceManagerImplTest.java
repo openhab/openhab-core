@@ -14,7 +14,11 @@ package org.openhab.core.voice.internal;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
@@ -34,6 +38,7 @@ import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.voice.DialogRegistration;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.text.InterpretationException;
@@ -74,16 +79,15 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
 
     @BeforeEach
     public void setUp() throws IOException {
+        registerVolatileStorageService();
         BundleContext context = bundleContext;
         ttsService = new TTSServiceStub(context);
         sink = new SinkStub();
         voice = new VoiceStub();
         source = new AudioSourceStub();
-
         registerService(sink);
         registerService(voice);
         registerService(source);
-
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
 
         audioManager = getService(AudioManager.class);
@@ -581,5 +585,48 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     public void getPreferredVoiceOfEmptySet() {
         Voice voice = voiceManager.getPreferredVoice(Set.of());
         assertNull(voice);
+    }
+
+    @Test
+    public void registerDialog() throws IOException, InterruptedException {
+        sttService = new STTServiceStub();
+        ksService = new KSServiceStub();
+        hliStub = new HumanLanguageInterpreterStub();
+
+        registerService(sttService);
+        registerService(ksService);
+        registerService(ttsService);
+        registerService(hliStub);
+
+        Dictionary<String, Object> config = new Hashtable<>();
+        config.put(CONFIG_KEYWORD, "word");
+        config.put(CONFIG_DEFAULT_STT, sttService.getId());
+        config.put(CONFIG_DEFAULT_KS, ksService.getId());
+        config.put(CONFIG_DEFAULT_HLI, hliStub.getId());
+        config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
+
+        ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
+        Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
+        configuration.update(config);
+
+        // Wait some time to be sure that the configuration will be updated
+        Thread.sleep(2000);
+
+        voiceManager.registerDialog(new DialogRegistration(source.getId(), sink.getId()));
+        // Storage<DialogRegistration> storage = VOLATILE_STORAGE_SERVICE.getStorage(DialogRegistration.class.getName(),
+        // VoiceManagerImpl.class.getClassLoader());
+        // assertThat("dialog has been registered", storage.getKeys().size(), is(storage.getKeys().size()));
+        // Wait some time to be sure dialog build has been fired
+        Thread.sleep(6000);
+        assertTrue(ksService.isWordSpotted());
+        assertTrue(sttService.isRecognized());
+        assertThat(hliStub.getQuestion(), is("Recognized text"));
+        assertThat(hliStub.getAnswer(), is("Interpreted text"));
+        assertThat(ttsService.getSynthesized(), is("Interpreted text"));
+        assertTrue(sink.getIsStreamProcessed());
+
+        voiceManager.unregisterDialog(source.getId());
+
+        assertTrue(ksService.isAborted());
     }
 }

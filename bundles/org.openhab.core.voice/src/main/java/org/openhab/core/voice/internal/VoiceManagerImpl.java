@@ -147,12 +147,12 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
             final @Reference EventPublisher eventPublisher, final @Reference TranslationProvider i18nProvider,
-            final @Reference StorageService StorageService) {
+            final @Reference StorageService storageService) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
-        this.dialogRegistrationStorage = StorageService.getStorage(DialogRegistration.class.getName(),
+        this.dialogRegistrationStorage = storageService.getStorage(DialogRegistration.class.getName(),
                 this.getClass().getClassLoader());
     }
 

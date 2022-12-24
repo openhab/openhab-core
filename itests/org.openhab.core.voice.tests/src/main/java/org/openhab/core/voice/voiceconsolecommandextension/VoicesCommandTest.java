@@ -50,6 +50,7 @@ public class VoicesCommandTest extends VoiceConsoleCommandExtensionTest {
 
     @BeforeEach
     public void setUp() throws IOException {
+        registerVolatileStorageService();
         localeProvider = getService(LocaleProvider.class);
         assertNotNull(localeProvider);
 
