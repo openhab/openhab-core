@@ -83,8 +83,6 @@ public abstract class GenericItem implements ActiveItem {
 
     private @Nullable CommandDescriptionService commandDescriptionService;
 
-    protected @Nullable UnitProvider unitProvider;
-
     protected @Nullable ItemStateConverter itemStateConverter;
 
     public GenericItem(String type, String name) {
@@ -176,7 +174,6 @@ public abstract class GenericItem implements ActiveItem {
         this.eventPublisher = null;
         this.stateDescriptionService = null;
         this.commandDescriptionService = null;
-        this.unitProvider = null;
         this.itemStateConverter = null;
     }
 
@@ -190,10 +187,6 @@ public abstract class GenericItem implements ActiveItem {
 
     public void setCommandDescriptionService(@Nullable CommandDescriptionService commandDescriptionService) {
         this.commandDescriptionService = commandDescriptionService;
-    }
-
-    public void setUnitProvider(@Nullable UnitProvider unitProvider) {
-        this.unitProvider = unitProvider;
     }
 
     public void setItemStateConverter(@Nullable ItemStateConverter itemStateConverter) {

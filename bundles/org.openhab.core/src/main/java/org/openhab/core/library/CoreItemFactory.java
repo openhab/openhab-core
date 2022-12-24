@@ -14,6 +14,7 @@ package org.openhab.core.library;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemUtil;
@@ -29,7 +30,9 @@ import org.openhab.core.library.items.PlayerItem;
 import org.openhab.core.library.items.RollershutterItem;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * {@link CoreItemFactory}-Implementation for the core ItemTypes
@@ -54,6 +57,12 @@ public class CoreItemFactory implements ItemFactory {
     public static final String ROLLERSHUTTER = "Rollershutter";
     public static final String STRING = "String";
     public static final String SWITCH = "Switch";
+    private final UnitProvider unitProvider;
+
+    @Activate
+    public CoreItemFactory(final @Reference UnitProvider unitProvider) {
+        this.unitProvider = unitProvider;
+    }
 
     @Override
     public @Nullable GenericItem createItem(@Nullable String itemTypeName, String itemName) {
@@ -78,7 +87,7 @@ public class CoreItemFactory implements ItemFactory {
             case LOCATION:
                 return new LocationItem(itemName);
             case NUMBER:
-                return new NumberItem(itemTypeName, itemName);
+                return new NumberItem(itemTypeName, itemName, unitProvider);
             case PLAYER:
                 return new PlayerItem(itemName);
             case ROLLERSHUTTER:

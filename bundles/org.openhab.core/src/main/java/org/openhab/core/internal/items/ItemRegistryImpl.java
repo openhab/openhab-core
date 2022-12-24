@@ -78,7 +78,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     private @Nullable StateDescriptionService stateDescriptionService;
     private @Nullable CommandDescriptionService commandDescriptionService;
     private final MetadataRegistry metadataRegistry;
-    private @Nullable UnitProvider unitProvider;
+
     private @Nullable ItemStateConverter itemStateConverter;
 
     @Activate
@@ -199,7 +199,6 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             genericItem.setEventPublisher(getEventPublisher());
             genericItem.setStateDescriptionService(stateDescriptionService);
             genericItem.setCommandDescriptionService(commandDescriptionService);
-            genericItem.setUnitProvider(unitProvider);
             genericItem.setItemStateConverter(itemStateConverter);
         }
         if (item instanceof NumberItem numberItem) {
@@ -301,21 +300,6 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     @Override
     protected void unsetReadyService(ReadyService readyService) {
         super.unsetReadyService(readyService);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setUnitProvider(UnitProvider unitProvider) {
-        this.unitProvider = unitProvider;
-        for (Item item : getItems()) {
-            ((GenericItem) item).setUnitProvider(unitProvider);
-        }
-    }
-
-    public void unsetUnitProvider(UnitProvider unitProvider) {
-        this.unitProvider = null;
-        for (Item item : getItems()) {
-            ((GenericItem) item).setUnitProvider(null);
-        }
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
