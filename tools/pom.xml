@@ -19,6 +19,7 @@
   <modules>
     <module>archetype</module>
     <module>i18n-plugin</module>
+    <module>upgradetool</module>
   </modules>
 
 </project>
