@@ -615,9 +615,9 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         // Wait some time to be sure dialog build has been fired and check dialog has been started
         Thread.sleep(6000);
         // Assert registration is available and running
-        var registrations  = voiceManager.getDialogRegistrations();
+        var registrations = voiceManager.getDialogRegistrations();
         assertThat(registrations.size(), is(1));
-        assertTrue(registrations.stream().findAny().map(r->r.running).orElse(false));
+        assertTrue(registrations.stream().findAny().map(r -> r.running).orElse(false));
         // Assert dialog has been stated
         assertTrue(ksService.isWordSpotted());
         assertTrue(sttService.isRecognized());
