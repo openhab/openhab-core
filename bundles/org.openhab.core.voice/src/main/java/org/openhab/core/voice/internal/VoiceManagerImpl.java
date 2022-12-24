@@ -719,7 +719,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             throw new IllegalStateException(String.format(
                     "Cannot register dialog as a dialog is registered for audio source '%s'.", registration.sourceId));
         }
-        registration.running = false;
         synchronized (dialogRegistrationStorage) {
             dialogRegistrationStorage.put(registration.sourceId, registration);
         }
@@ -748,9 +747,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Override
     public List<DialogRegistration> getDialogRegistrations() {
         var list = new ArrayList<DialogRegistration>();
-        dialogRegistrationStorage.getValues().forEach(value -> {
-            if (value != null) {
-                list.add(value);
+        dialogRegistrationStorage.getValues().forEach(dr -> {
+            if (dr != null) {
+                // update running state
+                dr.running = dialogProcessors.containsKey(dr.sourceId);
+                list.add(dr);
             }
         });
         return list;
@@ -1059,12 +1060,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     private void buildDialogRegistrations() {
         synchronized (dialogRegistrationStorage) {
-            dialogRegistrationStorage.getValues().stream() //
-                    .forEach(dr -> {
-                        if (dr != null && !dr.running) {
-                            this.tryBuildDialogRegistration(dr);
-                        }
-                    });
+            dialogRegistrationStorage.getValues().stream().forEach(dr -> {
+                if (dr != null && !dialogProcessors.containsKey(dr.sourceId)) {
+                    this.tryBuildDialogRegistration(dr);
+                }
+            });
         }
     }
 
@@ -1108,7 +1108,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         }
         try {
             startDialog(builder.build());
-            dialogRegistration.running = true;
         } catch (IllegalStateException e) {
             logger.debug("Unable to start dialog registration: {}", e.getMessage());
         }
@@ -1123,7 +1122,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     public void onDialogStopped(DialogContext context) {
         var registration = dialogRegistrationStorage.get(context.source().getId());
         if (registration != null) {
-            registration.running = false;
             // try to rebuild in case it was manually stopped
             debounceBuildDialogRegistrations();
         }

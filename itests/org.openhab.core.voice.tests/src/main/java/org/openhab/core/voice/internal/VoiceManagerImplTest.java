@@ -589,44 +589,45 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
 
     @Test
     public void registerDialog() throws IOException, InterruptedException {
+        // register services
         sttService = new STTServiceStub();
         ksService = new KSServiceStub();
         hliStub = new HumanLanguageInterpreterStub();
-
         registerService(sttService);
         registerService(ksService);
         registerService(ttsService);
         registerService(hliStub);
-
+        // configure
         Dictionary<String, Object> config = new Hashtable<>();
         config.put(CONFIG_KEYWORD, "word");
         config.put(CONFIG_DEFAULT_STT, sttService.getId());
         config.put(CONFIG_DEFAULT_KS, ksService.getId());
         config.put(CONFIG_DEFAULT_HLI, hliStub.getId());
         config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
-
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
         Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
         configuration.update(config);
-
         // Wait some time to be sure that the configuration will be updated
         Thread.sleep(2000);
-
-        voiceManager.registerDialog(new DialogRegistration(source.getId(), sink.getId()));
-        // Storage<DialogRegistration> storage = VOLATILE_STORAGE_SERVICE.getStorage(DialogRegistration.class.getName(),
-        // VoiceManagerImpl.class.getClassLoader());
-        // assertThat("dialog has been registered", storage.getKeys().size(), is(storage.getKeys().size()));
-        // Wait some time to be sure dialog build has been fired
+        // Add a dialog registration
+        var dialogRegistration = new DialogRegistration(source.getId(), sink.getId());
+        voiceManager.registerDialog(dialogRegistration);
+        // Wait some time to be sure dialog build has been fired and check dialog has been started
         Thread.sleep(6000);
+        // Assert registration is available and running
+        var registrations  = voiceManager.getDialogRegistrations();
+        assertThat(registrations.size(), is(1));
+        assertTrue(registrations.stream().findAny().map(r->r.running).orElse(false));
+        // Assert dialog has been stated
         assertTrue(ksService.isWordSpotted());
         assertTrue(sttService.isRecognized());
         assertThat(hliStub.getQuestion(), is("Recognized text"));
         assertThat(hliStub.getAnswer(), is("Interpreted text"));
         assertThat(ttsService.getSynthesized(), is("Interpreted text"));
         assertTrue(sink.getIsStreamProcessed());
-
-        voiceManager.unregisterDialog(source.getId());
-
+        // Remove the dialog registration
+        voiceManager.unregisterDialog(dialogRegistration);
+        // Assert dialog has been stopped
         assertTrue(ksService.isAborted());
     }
 }
