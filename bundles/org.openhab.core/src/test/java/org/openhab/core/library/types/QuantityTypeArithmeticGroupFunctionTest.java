@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.internal.i18n.TestUnitProvider;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -39,6 +40,7 @@ import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
+import org.osgi.service.component.ComponentContext;
 
 /**
  * @author Henning Treu - Initial contribution
@@ -47,7 +49,8 @@ import org.openhab.core.types.UnDefType;
 @NonNullByDefault
 public class QuantityTypeArithmeticGroupFunctionTest {
 
-    private @NonNullByDefault({}) @Mock UnitProvider unitProvider;
+    private @Mock @NonNullByDefault({}) ComponentContext componentContext;
+    private final UnitProvider unitProvider = new TestUnitProvider();
 
     /**
      * Locales having a different decimal and grouping separators to test string parsing and generation.
@@ -313,16 +316,14 @@ public class QuantityTypeArithmeticGroupFunctionTest {
     }
 
     private NumberItem createNumberItem(String name, Class<? extends Quantity<?>> dimension, State state) {
-        NumberItem item = new NumberItem(CoreItemFactory.NUMBER + ":" + dimension.getSimpleName(), name);
-        item.setUnitProvider(unitProvider);
+        NumberItem item = new NumberItem(CoreItemFactory.NUMBER + ":" + dimension.getSimpleName(), name, unitProvider);
         item.setState(state);
         return item;
     }
 
     private GroupItem createGroupItem(String name, Class<? extends Quantity<?>> dimension, State state) {
         GroupItem item = new GroupItem(name,
-                new NumberItem(CoreItemFactory.NUMBER + ":" + dimension.getSimpleName(), name));
-        item.setUnitProvider(unitProvider);
+                new NumberItem(CoreItemFactory.NUMBER + ":" + dimension.getSimpleName(), name, unitProvider));
         item.setState(state);
         return item;
     }

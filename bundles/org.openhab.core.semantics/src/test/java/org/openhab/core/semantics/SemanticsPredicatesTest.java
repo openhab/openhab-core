@@ -13,10 +13,12 @@
 package org.openhab.core.semantics;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
@@ -24,7 +26,7 @@ import org.openhab.core.semantics.model.property.Humidity;
 import org.openhab.core.semantics.model.property.Temperature;
 
 /**
- * This are tests for {@link SemanticsPredicates}.
+ * These are tests for {@link SemanticsPredicates}.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
@@ -37,7 +39,7 @@ public class SemanticsPredicatesTest {
 
     @BeforeEach
     public void setup() {
-        CoreItemFactory itemFactory = new CoreItemFactory();
+        CoreItemFactory itemFactory = new CoreItemFactory(mock(UnitProvider.class));
 
         locationItem = new GroupItem("TestBathRoom");
         locationItem.addTag("Bathroom");

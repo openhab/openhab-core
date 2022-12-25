@@ -149,6 +149,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private @Mock @NonNullByDefault({}) ThingHandler thingHandlerMock;
     private @Mock @NonNullByDefault({}) ThingRegistry thingRegistryMock;
     private @Mock @NonNullByDefault({}) TriggerProfile triggerProfileMock;
+    private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
 
     private @NonNullByDefault({}) CommunicationManager manager;
     private @NonNullByDefault({}) SafeCaller safeCaller;
@@ -225,12 +226,10 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         THING.setHandler(thingHandlerMock);
 
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(THING);
-        manager.addItemFactory(new CoreItemFactory());
 
-        UnitProvider unitProvider = mock(UnitProvider.class);
-        when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
-        ITEM_3.setUnitProvider(unitProvider);
-        ITEM_4.setUnitProvider(unitProvider);
+        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+
+        manager.addItemFactory(new CoreItemFactory(unitProviderMock));
     }
 
     @Test

@@ -112,4 +112,9 @@ Fragment-Host: org.openhab.core.model.script
 	org.eclipse.xtext.xbase;version='[2.29.0,2.29.1)',\
 	org.eclipse.xtext.xbase.lib;version='[2.29.0,2.29.1)',\
 	org.objectweb.asm;version='[9.4.0,9.4.1)',\
-	org.openhab.core.model.sitemap.runtime;version='[4.0.0,4.0.1)'
+	net.bytebuddy.byte-buddy;version='[1.12.1,1.12.2)',\
+	net.bytebuddy.byte-buddy-agent;version='[1.12.1,1.12.2)',\
+	org.mockito.junit-jupiter;version='[4.1.0,4.1.1)',\
+	org.mockito.mockito-core;version='[4.1.0,4.1.1)',\
+	org.objenesis;version='[3.2.0,3.2.1)',\
+	org.openhab.core.model.thing.runtime;version='[4.0.0,4.0.1)'

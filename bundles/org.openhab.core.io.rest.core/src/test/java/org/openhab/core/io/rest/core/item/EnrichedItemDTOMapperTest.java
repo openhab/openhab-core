@@ -15,10 +15,12 @@ package org.openhab.core.io.rest.core.item;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.mock;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
@@ -38,7 +40,7 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
 
     @Test
     public void testFiltering() {
-        CoreItemFactory itemFactory = new CoreItemFactory();
+        CoreItemFactory itemFactory = new CoreItemFactory(mock(UnitProvider.class));
 
         GroupItem group = new GroupItem("TestGroup");
         GroupItem subGroup = new GroupItem("TestSubGroup");

@@ -17,10 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-import javax.measure.quantity.Energy;
-import javax.measure.quantity.Mass;
-import javax.measure.quantity.Temperature;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.internal.i18n.TestUnitProvider;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
@@ -60,7 +57,10 @@ public class NumberItemTest {
 
     private @Mock @NonNullByDefault({}) StateDescriptionService stateDescriptionServiceMock;
 
+    private final UnitProvider unitProvider = new TestUnitProvider();
+
     @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setup() {
         when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null))
                 .thenReturn(StateDescriptionFragmentBuilder.create().withPattern("%.1f " + UnitUtils.UNIT_PLACEHOLDER)
@@ -105,7 +105,7 @@ public class NumberItemTest {
 
     @Test
     public void testSetQuantityTypeAccepted() {
-        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME, unitProvider);
         item.setState(new QuantityType<>("20 °C"));
 
         assertThat(item.getState(), is(new QuantityType<>("20 °C")));
@@ -121,7 +121,7 @@ public class NumberItemTest {
 
     @Test
     public void testSetQuantityTypeConverted() {
-        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME, unitProvider);
         item.setState(new QuantityType<>(68, ImperialUnits.FAHRENHEIT));
 
         assertThat(item.getState(), is(new QuantityType<>("20 °C")));
@@ -129,10 +129,7 @@ public class NumberItemTest {
 
     @Test
     public void testSetQuantityTypeUnconverted() {
-        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
-        UnitProvider unitProvider = mock(UnitProvider.class);
-        when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
-        item.setUnitProvider(unitProvider);
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME, unitProvider);
         item.setState(new QuantityType<>("10 A")); // should not be accepted as valid state
 
         assertThat(item.getState(), is(UnDefType.NULL));
@@ -140,10 +137,7 @@ public class NumberItemTest {
 
     @Test
     public void testCommandUnitIsPassedForDimensionItem() {
-        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
-        UnitProvider unitProvider = mock(UnitProvider.class);
-        when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
-        item.setUnitProvider(unitProvider);
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME, unitProvider);
         EventPublisher eventPublisher = mock(EventPublisher.class);
         item.setEventPublisher(eventPublisher);
 
@@ -159,7 +153,7 @@ public class NumberItemTest {
 
     @Test
     public void testCommandUnitIsStrippedForDimensionlessItem() {
-        NumberItem item = new NumberItem("Number", ITEM_NAME);
+        NumberItem item = new NumberItem("Number", ITEM_NAME, unitProvider);
         EventPublisher eventPublisher = mock(EventPublisher.class);
         item.setEventPublisher(eventPublisher);
 
@@ -175,7 +169,7 @@ public class NumberItemTest {
     @SuppressWarnings("null")
     @Test
     public void testStripUnitPlaceholderFromPlainNumberItem() {
-        NumberItem item = new NumberItem("Number", ITEM_NAME);
+        NumberItem item = new NumberItem(ITEM_NAME);
         item.setStateDescriptionService(stateDescriptionServiceMock);
 
         assertThat(item.getStateDescription().getPattern(), is("%.1f"));
@@ -184,7 +178,7 @@ public class NumberItemTest {
     @SuppressWarnings("null")
     @Test
     public void testLeaveUnitPlaceholderOnDimensionNumberItem() {
-        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME, unitProvider);
         item.setStateDescriptionService(stateDescriptionServiceMock);
 
         assertThat(item.getStateDescription().getPattern(), is("%.1f " + UnitUtils.UNIT_PLACEHOLDER));
@@ -193,10 +187,8 @@ public class NumberItemTest {
     @SuppressWarnings("null")
     @Test
     public void testMiredToKelvin() {
-        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
-        when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null)).thenReturn(
-                StateDescriptionFragmentBuilder.create().withPattern("%.0f K").build().toStateDescription());
-        item.setStateDescriptionService(stateDescriptionServiceMock);
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME, unitProvider);
+        item.setItemDefaultUnitProvider(() -> Units.KELVIN);
         item.setState(new QuantityType<>("370 mired"));
 
         assertThat(item.getState().format("%.0f K"), is("2703 K"));
@@ -205,102 +197,17 @@ public class NumberItemTest {
     @SuppressWarnings("null")
     @Test
     public void testKelvinToMired() {
-        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
-        when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null)).thenReturn(
-                StateDescriptionFragmentBuilder.create().withPattern("%.0f mired").build().toStateDescription());
-        item.setStateDescriptionService(stateDescriptionServiceMock);
+        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME, unitProvider);
+        item.setItemDefaultUnitProvider(() -> Units.MIRED);
         item.setState(new QuantityType<>("2700 K"));
 
         assertThat(item.getState().format("%.0f mired"), is("370 mired"));
     }
 
     @Test
-    void testStateDescriptionUnitUsedWhenStateDescriptionPresent() {
-        UnitProvider unitProviderMock = mock(UnitProvider.class);
-        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
-        when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null)).thenReturn(
-                StateDescriptionFragmentBuilder.create().withPattern("%.0f °F").build().toStateDescription());
-
-        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
-        item.setStateDescriptionService(stateDescriptionServiceMock);
-        item.setUnitProvider(unitProviderMock);
-
-        assertThat(item.getUnit(), is(ImperialUnits.FAHRENHEIT));
-
-        item.setState(new QuantityType<>("429 °F"));
-        assertThat(item.getState(), is(new QuantityType<>("429 °F")));
-
-        item.setState(new QuantityType<>("165 °C"));
-        assertThat(item.getState(), is(new QuantityType<>("329 °F")));
-    }
-
-    @Test
-    void testPreservedWhenStateDescriptionContainsWildCard() {
-        UnitProvider unitProviderMock = mock(UnitProvider.class);
-        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
-        when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null))
-                .thenReturn(StateDescriptionFragmentBuilder.create().withPattern("%.0f " + UnitUtils.UNIT_PLACEHOLDER)
-                        .build().toStateDescription());
-
-        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
-        item.setStateDescriptionService(stateDescriptionServiceMock);
-        item.setUnitProvider(unitProviderMock);
-
-        assertThat(item.getUnit(), is(nullValue()));
-
-        item.setState(new QuantityType<>("329 °F"));
-        assertThat(item.getState(), is(new QuantityType<>("329 °F")));
-
-        item.setState(new QuantityType<>("100 °C"));
-        assertThat(item.getState(), is(new QuantityType<>("100 °C")));
-    }
-
-    @Test
-    void testDefaultUnitUsedWhenStateDescriptionEmpty() {
-        UnitProvider unitProviderMock = mock(UnitProvider.class);
-        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
-
-        NumberItem item = new NumberItem("Number:Temperature", ITEM_NAME);
-        item.setUnitProvider(unitProviderMock);
-
-        assertThat(item.getUnit(), is(SIUnits.CELSIUS));
-
-        item.setState(new QuantityType<>("329 °F"));
-        assertThat(item.getState(), is(new QuantityType<>("165 °C")));
-
-        item.setState(new QuantityType<>("100 °C"));
-        assertThat(item.getState(), is(new QuantityType<>("100 °C")));
-    }
-
-    @Test
-    void testNoUnitWhenUnitPlaceholderUsed() {
-        final UnitProvider unitProviderMock = mock(UnitProvider.class);
-        when(unitProviderMock.getUnit(Energy.class)).thenReturn(Units.JOULE);
-
-        final NumberItem item = new NumberItem("Number:Energy", ITEM_NAME);
-        item.setUnitProvider(unitProviderMock);
-
-        assertThat(item.getUnit(), is(Units.JOULE));
-
-        item.setStateDescriptionService(stateDescriptionServiceMock);
-        item.setState(new QuantityType<>("329 kWh"));
-
-        assertThat(item.getState(), is(new QuantityType<>("329 kWh")));
-        assertThat(item.getUnit(), is(nullValue()));
-    }
-
-    @Test
     void testSetDefaultUnitIsUsedFirst() {
-        final UnitProvider unitProviderMock = mock(UnitProvider.class);
-        when(unitProviderMock.getUnit(Mass.class)).thenReturn(SIUnits.KILOGRAM);
-        when(stateDescriptionServiceMock.getStateDescription(any(), any())).thenReturn(
-                StateDescriptionFragmentBuilder.create().withPattern("%.0f mg").build().toStateDescription());
-
-        final NumberItem item = new NumberItem("Number:Mass", ITEM_NAME);
-        item.setUnitProvider(unitProviderMock);
+        final NumberItem item = new NumberItem("Number:Mass", ITEM_NAME, unitProvider);
         item.setItemDefaultUnitProvider(() -> MetricPrefix.MEGA(SIUnits.GRAM));
-        item.setStateDescriptionService(stateDescriptionServiceMock);
-
         assertThat(item.getUnit(), is(MetricPrefix.MEGA(SIUnits.GRAM)));
     }
 }

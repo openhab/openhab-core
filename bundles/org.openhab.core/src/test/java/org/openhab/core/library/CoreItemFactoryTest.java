@@ -22,6 +22,12 @@ import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.items.NumberItem;
 
@@ -29,11 +35,15 @@ import org.openhab.core.library.items.NumberItem;
  * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class CoreItemFactoryTest {
+
+    private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
 
     @Test
     public void shouldCreateItems() {
-        CoreItemFactory coreItemFactory = new CoreItemFactory();
+        CoreItemFactory coreItemFactory = new CoreItemFactory(unitProviderMock);
         List<String> itemTypeNames = List.of(coreItemFactory.getSupportedItemTypes());
         for (String itemTypeName : itemTypeNames) {
             GenericItem item = coreItemFactory.createItem(itemTypeName, itemTypeName.toLowerCase());
@@ -45,7 +55,7 @@ public class CoreItemFactoryTest {
 
     @Test
     public void createNumberItemWithDimension() {
-        CoreItemFactory coreItemFactory = new CoreItemFactory();
+        CoreItemFactory coreItemFactory = new CoreItemFactory(unitProviderMock);
         NumberItem numberItem = (NumberItem) coreItemFactory.createItem(CoreItemFactory.NUMBER + ":Temperature",
                 "myNumberItem");
 
@@ -54,7 +64,7 @@ public class CoreItemFactoryTest {
 
     @Test
     public void shouldReturnNullForUnsupportedItemTypeName() {
-        CoreItemFactory coreItemFactory = new CoreItemFactory();
+        CoreItemFactory coreItemFactory = new CoreItemFactory(unitProviderMock);
         GenericItem item = coreItemFactory.createItem("NoValidItemTypeName", "IWantMyItem");
 
         assertThat(item, is(nullValue()));
