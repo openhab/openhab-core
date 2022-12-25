@@ -29,7 +29,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.service.CommandDescriptionService;
 import org.openhab.core.service.StateDescriptionService;

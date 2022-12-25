@@ -14,6 +14,7 @@ package org.openhab.core.library.items;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.measure.Dimension;
@@ -58,17 +59,13 @@ public class NumberItem extends GenericItem {
     private final Logger logger = LoggerFactory.getLogger(NumberItem.class);
 
     @Nullable
-    private Class<? extends Quantity<?>> dimension;
+    private final Class<? extends Quantity<?>> dimension;
 
     private final @Nullable UnitProvider unitProvider;
     private Supplier<@Nullable Unit<? extends Quantity<?>>> itemDefaultUnitProvider = () -> null;
 
     public NumberItem(String name) {
-        this(CoreItemFactory.NUMBER, name);
-    }
-
-    public NumberItem(String type, String name) {
-        this(type, name, null);
+        this(CoreItemFactory.NUMBER, name, null);
     }
 
     public NumberItem(String type, String name, @Nullable UnitProvider unitProvider) {
@@ -77,13 +74,15 @@ public class NumberItem extends GenericItem {
 
         String itemTypeExtension = ItemUtil.getItemTypeExtension(getType());
         if (itemTypeExtension != null) {
-
             dimension = UnitUtils.parseDimension(itemTypeExtension);
             if (dimension == null) {
-                logger.warn("Dimension '{}' defined for item '{}' is not known. Creating a plain Number item instead.", itemTypeExtension, name);
+                logger.warn("Dimension '{}' defined for item '{}' is not known. Creating a plain Number item instead.",
+                        itemTypeExtension, name);
             } else if (unitProvider == null) {
                 throw new IllegalArgumentException("A unit provider is required for items with a dimension.");
             }
+        } else {
+            dimension = null;
         }
     }
 
@@ -143,23 +142,24 @@ public class NumberItem extends GenericItem {
 
         // DecimalType update for a NumberItem with dimension, convert to QuantityType:
         if (dimension != null && state instanceof DecimalType decimalType) {
-            Unit<?> unit = getUnit(dimension);
-                super.setState(new QuantityType<>(decimalType.toBigDecimal(), unit));
+            Unit<?> unit = getUnit(Objects.requireNonNull(dimension));
+            super.setState(new QuantityType<>(decimalType.toBigDecimal(), unit));
         }
 
         // QuantityType update, check unit and convert if necessary:
-        if (state instanceof QuantityType<?> quantityState) {
-            Unit<?> itemUnit = getUnit(dimension);
+        if (dimension != null && state instanceof QuantityType<?> quantityState) {
+            Unit<?> itemUnit = getUnit(Objects.requireNonNull(dimension));
             Unit<?> stateUnit = quantityState.getUnit();
 
-            if (!itemUnit.isCompatible(stateUnit)) {
-                logger.warn("Tried to set state '{}' on item '{}' but the unit is not compatible with dimension '{}', ignoring it", state,
-                        getName(), dimension);
+            if (!itemUnit.isCompatible(stateUnit) && !itemUnit.inverse().isCompatible(stateUnit)) {
+                logger.warn(
+                        "Tried to set state '{}' on item '{}' but the unit is not compatible with dimension '{}', ignoring it",
+                        state, getName(), dimension);
                 return;
             }
 
-            if (!stateUnit.getSystemUnit().equals(itemUnit.getSystemUnit()) || UnitUtils.isDifferentMeasurementSystem(
-                    itemUnit, stateUnit)) {
+            if (!stateUnit.getSystemUnit().equals(itemUnit.getSystemUnit())
+                    || UnitUtils.isDifferentMeasurementSystem(itemUnit, stateUnit)) {
                 QuantityType<?> convertedState = quantityState.toInvertibleUnit(itemUnit);
                 if (convertedState != null) {
                     super.setState(convertedState);
@@ -167,8 +167,8 @@ public class NumberItem extends GenericItem {
                 }
 
                 // the state could not be converted to an accepted unit.
-                logger.warn("Tried to set state '{}' on item '{}' but it can't be converted to unit '{}', ignoring it", state,
-                        getName(), itemUnit);
+                logger.warn("Tried to set state '{}' on item '{}' but it can't be converted to unit '{}', ignoring it",
+                        state, getName(), itemUnit);
                 return;
             }
         }
@@ -186,7 +186,7 @@ public class NumberItem extends GenericItem {
      * @return the optional unit symbol for this {@link NumberItem}.
      */
     public @Nullable String getUnitSymbol() {
-        return (dimension != null) ? getUnit(dimension).toString() : null;
+        return (dimension != null) ? getUnit(Objects.requireNonNull(dimension)).toString() : null;
     }
 
     /**
@@ -209,21 +209,20 @@ public class NumberItem extends GenericItem {
      * @return the {@link Unit} for this item if available, {@code null} otherwise.
      */
     public @Nullable Unit<? extends Quantity<?>> getUnit() {
-        return  (dimension != null) ? getUnit(dimension) : null;
+        return (dimension != null) ? getUnit(Objects.requireNonNull(dimension)) : null;
     }
 
     /**
-     * Try to convert a {@link DecimalType} into a new {@link QuantityType}. The unit is derived from the metadata <code>defaultUnit</code> or from the system default unit of the given dimension.
+     * Try to convert a {@link DecimalType} into a new {@link QuantityType}. The unit is derived from the metadata
+     * <code>defaultUnit</code> or from the system default unit of the given dimension.
      *
      * @param originalType the source {@link DecimalType}.
      * @param dimension the dimension to which the new {@link QuantityType} should adhere.
      * @return the new {@link QuantityType} from the given originalType
      */
-    public @Nullable QuantityType<?> toQuantityType(DecimalType originalType,
-            Class<? extends Quantity<?>> dimension) {
+    public @Nullable QuantityType<?> toQuantityType(DecimalType originalType, Class<? extends Quantity<?>> dimension) {
         Unit<? extends Quantity<?>> itemUnit = getUnit(dimension);
         return new QuantityType<>(originalType.toBigDecimal(), itemUnit);
-
     }
 
     /**
@@ -243,18 +242,22 @@ public class NumberItem extends GenericItem {
 
         Unit<?> systemDefaultUnit = unitProvider.getUnit((Class<? extends Quantity>) dimension);
         if (systemDefaultUnit == null) {
-            throw new IllegalStateException("BUG! Could not determine system default unit for dimension " + dimension.getName());
+            throw new IllegalStateException(
+                    "BUG! Could not determine system default unit for dimension " + dimension.getName());
         }
 
         Unit<?> itemDefaultUnit = itemDefaultUnitProvider.get();
         if (itemDefaultUnit != null) {
-            if (itemDefaultUnit.isCompatible(systemDefaultUnit)) {
+            if (itemDefaultUnit.isCompatible(systemDefaultUnit)
+                    || itemDefaultUnit.inverse().isCompatible(systemDefaultUnit)) {
                 return itemDefaultUnit;
             } else {
-                logger.warn("Metadata 'defaultUnit' for item '{}' is set to '{}' which is incompatible with the dimension '{}'. Using system default '{}' instead.", itemDefaultUnit, getName(), ItemUtil.getItemTypeExtension(type), systemDefaultUnit);
+                logger.warn(
+                        "Metadata 'defaultUnit' for item '{}' is set to '{}' which is incompatible with the dimension '{}'. Using system default '{}' instead.",
+                        getName(), itemDefaultUnit, ItemUtil.getItemTypeExtension(type), systemDefaultUnit);
             }
         }
 
         return systemDefaultUnit;
-        }
+    }
 }

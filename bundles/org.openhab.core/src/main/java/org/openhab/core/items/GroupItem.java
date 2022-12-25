@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.service.CommandDescriptionService;
 import org.openhab.core.service.StateDescriptionService;
@@ -402,14 +401,6 @@ public class GroupItem extends GenericItem implements StateChangeListener {
         super.setCommandDescriptionService(commandDescriptionService);
         if (baseItem instanceof GenericItem) {
             ((GenericItem) baseItem).setCommandDescriptionService(commandDescriptionService);
-        }
-    }
-
-    @Override
-    public void setUnitProvider(@Nullable UnitProvider unitProvider) {
-        super.setUnitProvider(unitProvider);
-        if (baseItem instanceof GenericItem) {
-            ((GenericItem) baseItem).setUnitProvider(unitProvider);
         }
     }
 

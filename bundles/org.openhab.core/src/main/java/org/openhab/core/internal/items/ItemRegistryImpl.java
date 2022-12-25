@@ -28,7 +28,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
