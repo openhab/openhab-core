@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.measure.Quantity;
+import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -36,6 +37,7 @@ import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemRegistry;
@@ -129,6 +131,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     private final EventPublisher eventPublisher;
     private final SafeCaller safeCaller;
     private final ThingRegistry thingRegistry;
+    private final UnitProvider unitProvider;
 
     private final ExpiringCacheMap<Integer, Profile> profileSafeCallCache = new ExpiringCacheMap<>(CACHE_EXPIRATION);
 
@@ -141,7 +144,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             final @Reference ItemStateConverter itemStateConverter, //
             final @Reference EventPublisher eventPublisher, //
             final @Reference SafeCaller safeCaller, //
-            final @Reference ThingRegistry thingRegistry) {
+            final @Reference ThingRegistry thingRegistry, final @Reference UnitProvider unitProvider) {
         this.autoUpdateManager = autoUpdateManager;
         this.channelTypeRegistry = channelTypeRegistry;
         this.defaultProfileFactory = defaultProfileFactory;
@@ -151,6 +154,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         this.eventPublisher = eventPublisher;
         this.safeCaller = safeCaller;
         this.thingRegistry = thingRegistry;
+        this.unitProvider = unitProvider;
 
         itemChannelLinkRegistry.addRegistryChangeListener(this);
     }
@@ -509,22 +513,24 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                 || getDimension(acceptedItemType) != null;
     }
 
+    @SuppressWarnings("unchecked")
     private @Nullable QuantityType<?> convertToQuantityType(DecimalType originalType, Item item,
             @Nullable String acceptedItemType) {
         NumberItem numberItem = (NumberItem) item;
 
         // DecimalType command sent via a NumberItem with dimension:
-        Class<? extends Quantity<?>> dimension = numberItem.getDimension();
+        Unit<? extends Quantity<?>> unit = numberItem.getUnit();
 
-        if (dimension == null) {
+        if (unit == null) {
             // DecimalType command sent via a plain NumberItem w/o dimension.
             // We try to guess the correct unit from the channel-type's expected item dimension
             // or from the item's state description.
-            dimension = getDimension(acceptedItemType);
+            Class<? extends Quantity<?>> dimension = getDimension(acceptedItemType);
+            unit = unitProvider.getUnit((Class<? extends Quantity>) dimension);
         }
 
-        if (dimension != null) {
-            return numberItem.toQuantityType(originalType, dimension);
+        if (unit != null) {
+            return new QuantityType<>(originalType.toBigDecimal(), unit);
         }
 
         return null;
