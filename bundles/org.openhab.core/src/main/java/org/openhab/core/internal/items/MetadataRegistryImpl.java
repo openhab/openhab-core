@@ -43,8 +43,9 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey, MetadataProvider>
         implements MetadataRegistry {
 
-    public MetadataRegistryImpl() {
+    public MetadataRegistryImpl(final @Reference ReadyService readyService) {
         super(MetadataProvider.class);
+        super.setReadyService(readyService);
     }
 
     @Override

@@ -30,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.items.ManagedMetadataProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandOption;
 import org.osgi.framework.BundleContext;
@@ -52,6 +53,7 @@ public class MetadataCommandDescriptionProviderTest {
     private @Mock @NonNullByDefault({}) ManagedMetadataProvider managedProviderMock;
 
     private @Mock @NonNullByDefault({}) MetadataRegistryImpl metadataRegistryMock;
+    private @Mock@NonNullByDefault({}) ReadyService readyServiceMock;
     private @NonNullByDefault({}) MetadataCommandDescriptionProvider commandDescriptionProvider;
 
     private @NonNullByDefault({}) ServiceListener providerTracker;
@@ -61,7 +63,7 @@ public class MetadataCommandDescriptionProviderTest {
     public void setup() throws Exception {
         when(bundleContextMock.getService(same(managedProviderRefMock))).thenReturn(managedProviderMock);
 
-        metadataRegistryMock = new MetadataRegistryImpl();
+        metadataRegistryMock = new MetadataRegistryImpl(readyServiceMock);
         metadataRegistryMock.setManagedProvider(managedProviderMock);
         metadataRegistryMock.activate(bundleContextMock);
         metadataRegistryMock.waitForCompletedAsyncActivationTasks();
