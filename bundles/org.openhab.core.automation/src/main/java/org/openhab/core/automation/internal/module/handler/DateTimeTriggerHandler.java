@@ -30,9 +30,7 @@ import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.events.TopicPrefixEventFilter;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.items.events.ItemCommandEvent;
-import org.openhab.core.items.events.ItemEvent;
-import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.scheduler.CronAdjuster;
 import org.openhab.core.scheduler.CronScheduler;
@@ -115,8 +113,8 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
     @Override
     public void run() {
         ModuleHandlerCallback callback = this.callback;
-        if (callback instanceof TriggerHandlerCallback) {
-            ((TriggerHandlerCallback) callback).triggered(module);
+        if (callback instanceof TriggerHandlerCallback triggerHandlerCallback) {
+            triggerHandlerCallback.triggered(module);
         } else {
             logger.debug("Tried to trigger, but callback isn't available!");
         }
@@ -129,7 +127,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
 
     @Override
     public Set<String> getSubscribedEventTypes() {
-        return Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE);
+        return Set.of(ItemStateChangedEvent.TYPE);
     }
 
     @Override
@@ -139,14 +137,9 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ItemEvent && (((ItemEvent) event).getItemName().equals(itemName))) {
-            if (event instanceof ItemStateEvent) {
-                process(((ItemStateEvent) event).getItemState());
-            } else if (event instanceof ItemCommandEvent) {
-                process(((ItemCommandEvent) event).getItemCommand());
-            } else {
-                logger.debug("Don't know how to process event {}, discarding", event);
-            }
+        if (event instanceof ItemStateChangedEvent itemStateChangedEvent
+                && (itemStateChangedEvent.getItemName().equals(itemName))) {
+            process(itemStateChangedEvent.getItemState());
         }
     }
 
@@ -172,9 +165,9 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
         cancelScheduler();
         if (value instanceof UnDefType) {
             cronExpression = CronAdjuster.REBOOT;
-        } else if (value instanceof DateTimeType) {
-            boolean itemIsTimeOnly = ((DateTimeType) value).toString().startsWith("1970-01-01T");
-            cronExpression = ((DateTimeType) value).getZonedDateTime().withZoneSameInstant(ZoneId.systemDefault())
+        } else if (value instanceof DateTimeType dateTimeType) {
+            boolean itemIsTimeOnly = dateTimeType.toString().startsWith("1970-01-01T");
+            cronExpression = dateTimeType.getZonedDateTime().withZoneSameInstant(ZoneId.systemDefault())
                     .format(timeOnly || itemIsTimeOnly ? CRON_TIMEONLY_FORMATTER : CRON_FORMATTER);
             startScheduler();
         } else {
