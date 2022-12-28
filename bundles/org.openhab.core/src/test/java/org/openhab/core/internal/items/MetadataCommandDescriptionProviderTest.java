@@ -53,7 +53,7 @@ public class MetadataCommandDescriptionProviderTest {
     private @Mock @NonNullByDefault({}) ManagedMetadataProvider managedProviderMock;
 
     private @Mock @NonNullByDefault({}) MetadataRegistryImpl metadataRegistryMock;
-    private @Mock@NonNullByDefault({}) ReadyService readyServiceMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
     private @NonNullByDefault({}) MetadataCommandDescriptionProvider commandDescriptionProvider;
 
     private @NonNullByDefault({}) ServiceListener providerTracker;

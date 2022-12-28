@@ -47,7 +47,6 @@ public class MetadataRegistryImplTest {
     private @Mock @NonNullByDefault({}) ManagedMetadataProvider managedProviderMock;
     private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
 
-
     private @NonNullByDefault({}) MetadataRegistryImpl registry;
     private @NonNullByDefault({}) ServiceListener providerTracker;
 
