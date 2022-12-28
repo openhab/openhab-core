@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 public class ScriptEngineFactoryBundleTracker extends BundleTracker<Bundle> implements ReadyService.ReadyTracker {
     private static final int STATE_MASK = Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE | Bundle.STARTING
             | Bundle.STOPPING | Bundle.UNINSTALLED;
-    public static final ReadyMarker READY_MARKER = new ReadyMarker("automation", "scriptEngineFactoriesReady");
+    public static final ReadyMarker READY_MARKER = new ReadyMarker("automation", "scriptEngineFactories");
 
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineFactoryBundleTracker.class);
 
