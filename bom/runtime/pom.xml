@@ -19,7 +19,7 @@
     <californium.version>2.7.4</californium.version>
     <cxf.version>3.4.5</cxf.version>
     <!-- revert version of jackson-databind to ${jackson.version} when versions are in-line again -->
-    <jackson.version>2.12.7</jackson.version>
+    <jackson.version>2.14.1</jackson.version>
     <jetty.version>9.4.46.v20220331</jetty.version>
     <pax.logging.version>2.0.16</pax.logging.version>
     <pax.web.version>7.3.25</pax.web.version>
@@ -962,8 +962,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <!-- revert to ${jackson.version} when versions are in-line again -->
-      <version>2.12.7.1</version>
+      <version>${jackson.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

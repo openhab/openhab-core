@@ -102,7 +102,6 @@ Fragment-Host: org.openhab.core.model.script
 	org.openhab.core.voice;version='[4.0.0,4.0.1)',\
 	com.google.gson;version='[2.9.1,2.9.2)',\
 	io.github.classgraph;version='[4.8.149,4.8.150)',\
-	org.apache.log4j;version='[1.2.19,1.2.20)',\
 	org.eclipse.equinox.common;version='[3.16.200,3.16.201)',\
 	org.eclipse.xtend.lib;version='[2.29.0,2.29.1)',\
 	org.eclipse.xtend.lib.macro;version='[2.29.0,2.29.1)',\
@@ -111,5 +110,4 @@ Fragment-Host: org.openhab.core.model.script
 	org.eclipse.xtext.util;version='[2.29.0,2.29.1)',\
 	org.eclipse.xtext.xbase;version='[2.29.0,2.29.1)',\
 	org.eclipse.xtext.xbase.lib;version='[2.29.0,2.29.1)',\
-	org.objectweb.asm;version='[9.4.0,9.4.1)',\
-	org.openhab.core.model.sitemap.runtime;version='[4.0.0,4.0.1)'
+	org.objectweb.asm;version='[9.4.0,9.4.1)'
