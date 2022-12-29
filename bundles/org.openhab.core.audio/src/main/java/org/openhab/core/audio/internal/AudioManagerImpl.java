@@ -123,17 +123,18 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
         AudioSink sink = getSink(sinkId);
         if (sink != null) {
             PercentType oldVolume = null;
-            try {
-                // get current volume
-                oldVolume = getVolume(sinkId);
-            } catch (IOException e) {
-                logger.debug("An exception occurred while getting the volume of sink '{}' : {}", sink.getId(),
-                        e.getMessage(), e);
-            }
             // set notification sound volume
             if (volume != null) {
                 try {
-                    setVolume(volume, sinkId);
+                    // get current volume
+                    oldVolume = sink.getVolume();
+                } catch (IOException e) {
+                    logger.debug("An exception occurred while getting the volume of sink '{}' : {}", sink.getId(),
+                            e.getMessage(), e);
+                }
+
+                try {
+                    sink.setVolume(volume);
                 } catch (IOException e) {
                     logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
                             e.getMessage(), e);
@@ -147,7 +148,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
                 if (volume != null && oldVolume != null) {
                     // restore volume only if it was set before
                     try {
-                        setVolume(oldVolume, sinkId);
+                        sink.setVolume(oldVolume);
                     } catch (IOException e) {
                         logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
                                 e.getMessage(), e);
