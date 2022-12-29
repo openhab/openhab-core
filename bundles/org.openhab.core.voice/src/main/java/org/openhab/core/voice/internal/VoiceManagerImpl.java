@@ -255,17 +255,18 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             }
 
             PercentType oldVolume = null;
-            try {
-                // get current volume
-                oldVolume = audioManager.getVolume(sinkId);
-            } catch (IOException e) {
-                logger.debug("An exception occurred while getting the volume of sink '{}' : {}", sink.getId(),
-                        e.getMessage(), e);
-            }
             // set notification sound volume
             if (volume != null) {
                 try {
-                    audioManager.setVolume(volume, sinkId);
+                    // get current volume
+                    oldVolume = sink.getVolume();
+                } catch (IOException e) {
+                    logger.debug("An exception occurred while getting the volume of sink '{}' : {}", sink.getId(),
+                            e.getMessage(), e);
+                }
+
+                try {
+                    sink.setVolume(volume);
                 } catch (IOException e) {
                     logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
                             e.getMessage(), e);
@@ -277,7 +278,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 if (volume != null && oldVolume != null) {
                     // restore volume only if it was set before
                     try {
-                        audioManager.setVolume(oldVolume, sinkId);
+                        sink.setVolume(oldVolume);
                     } catch (IOException e) {
                         logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
                                 e.getMessage(), e);
