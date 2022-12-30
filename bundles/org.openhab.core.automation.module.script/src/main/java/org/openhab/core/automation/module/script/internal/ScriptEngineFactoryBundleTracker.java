@@ -56,13 +56,18 @@ public class ScriptEngineFactoryBundleTracker extends BundleTracker<Bundle> impl
     private boolean startLevelReached = false;
 
     @Activate
-    public ScriptEngineFactoryBundleTracker(final @Reference ReadyService readyService, BundleContext bc) {
+    public ScriptEngineFactoryBundleTracker(final @Reference ReadyService readyService,
+            final @Reference StartLevelService startLevelService, BundleContext bc) {
         super(bc, STATE_MASK, null);
         this.readyService = readyService;
         this.open();
 
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
                 .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_OSGI)));
+
+        if (startLevelService.getStartLevel() >= StartLevelService.STARTLEVEL_OSGI) {
+            startLevelReached = true;
+        }
     }
 
     @Deactivate
