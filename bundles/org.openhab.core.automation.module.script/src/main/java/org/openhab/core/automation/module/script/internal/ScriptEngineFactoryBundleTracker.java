@@ -50,31 +50,28 @@ public class ScriptEngineFactoryBundleTracker extends BundleTracker<Bundle> impl
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineFactoryBundleTracker.class);
 
     private final ReadyService readyService;
+    private final StartLevelService startLevelService;
 
     private final Map<String, Integer> bundles = new ConcurrentHashMap<>();
     private boolean ready = false;
-    private boolean startLevelReached = false;
 
     @Activate
     public ScriptEngineFactoryBundleTracker(final @Reference ReadyService readyService,
             final @Reference StartLevelService startLevelService, BundleContext bc) {
         super(bc, STATE_MASK, null);
         this.readyService = readyService;
+        this.startLevelService = startLevelService;
+
         this.open();
 
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
                 .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_OSGI)));
-
-        if (startLevelService.getStartLevel() >= StartLevelService.STARTLEVEL_OSGI) {
-            startLevelReached = true;
-        }
     }
 
     @Deactivate
     public void deactivate() throws Exception {
         this.close();
         ready = false;
-        startLevelReached = false;
     }
 
     private boolean allBundlesActive() {
@@ -119,19 +116,17 @@ public class ScriptEngineFactoryBundleTracker extends BundleTracker<Bundle> impl
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-        startLevelReached = true;
         checkReady();
     }
 
     @Override
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
-        startLevelReached = false;
         ready = false;
         readyService.unmarkReady(READY_MARKER);
     }
 
     private void checkReady() {
-        if (startLevelReached && !ready && allBundlesActive()) {
+        if (!ready && startLevelService.getStartLevel() > StartLevelService.STARTLEVEL_OSGI && allBundlesActive()) {
             logger.info("All automation bundles ready.");
             readyService.markReady(READY_MARKER);
             ready = true;
