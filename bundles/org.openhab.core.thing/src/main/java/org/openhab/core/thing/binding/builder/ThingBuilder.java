@@ -179,7 +179,7 @@ public class ThingBuilder {
     }
 
     /**
-     * Set (or replace) the configuration if the thing
+     * Set (or replace) the configuration of the thing
      *
      * @param configuration a {@link Configuration} for this thing
      * @return the {@link ThingBuilder} itself
