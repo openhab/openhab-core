@@ -119,6 +119,15 @@ public class DateTimeType implements PrimitiveType, State, Command {
         return zonedDateTime;
     }
 
+    /**
+     * Get curent object represented as an {@link Instant}
+     *
+     * @return an {@link Instant} representation of the current object
+     */
+    public Instant getInstant() {
+        return zonedDateTime.toInstant();
+    }
+
     public static DateTimeType valueOf(String value) {
         return new DateTimeType(value);
     }
