@@ -31,6 +31,7 @@ public class BundleVersion {
     public static final Pattern RANGE_PATTERN = Pattern.compile(
             "\\[(?<start>\\d+\\.\\d+(?<startmicro>\\.\\d+(\\.\\w+)?)?);(?<end>\\d+\\.\\d+(?<endmicro>\\.\\d+(\\.\\w+)?)?)(?<endtype>[)\\]])");
 
+    private final String version;
     private final int major;
     private final int minor;
     private final int micro;
@@ -39,6 +40,7 @@ public class BundleVersion {
     public BundleVersion(String version) {
         Matcher matcher = VERSION_PATTERN.matcher(version);
         if (matcher.matches()) {
+            this.version = version;
             this.major = Integer.parseInt(matcher.group("major"));
             this.minor = Integer.parseInt(matcher.group("minor"));
             this.micro = Integer.parseInt(matcher.group("micro"));
@@ -147,5 +149,10 @@ public class BundleVersion {
 
         // both versions are milestones, we can compare them
         return Long.compare(qualifier, other.qualifier);
+    }
+
+    @Override
+    public String toString() {
+        return version;
     }
 }

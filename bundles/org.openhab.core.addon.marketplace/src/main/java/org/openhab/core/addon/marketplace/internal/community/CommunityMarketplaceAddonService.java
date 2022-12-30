@@ -296,6 +296,8 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
                 try {
                     compatible = coreVersion.inRange(potentialRange);
                     title = topic.title.substring(0, compatibilityStart).trim();
+                    logger.debug("{} is {}compatible with core version {}", topic.title, compatible ? "" : "NOT ",
+                            coreVersion);
                 } catch (IllegalArgumentException e) {
                     logger.debug("Failed to determine compatibility for addon {}: {}", topic.title, e.getMessage());
                     compatible = true;
