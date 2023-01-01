@@ -20,7 +20,9 @@ import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.voice.TTSException;
 
@@ -30,7 +32,10 @@ import org.openhab.core.voice.TTSException;
  * @author Gwendal Roulleau - Initial contribution
  */
 @NonNullByDefault
+@ExtendWith(MockitoExtension.class)
 public class AudioStreamCacheWrapperTest {
+
+    TTSResult mockedTTSResult = Mockito.mock(TTSResult.class);
 
     /**
      * Test the read() method
@@ -39,7 +44,6 @@ public class AudioStreamCacheWrapperTest {
      */
     @Test
     public void cacheWrapperStreamTest() throws IOException {
-        TTSResult mockedTTSResult = Mockito.mock(TTSResult.class);
         AudioStreamSupplier mockedAudioStreamSupplier = Mockito.mock(AudioStreamSupplier.class);
         when(mockedTTSResult.read(0, 1)).thenReturn(new byte[] { 1 });
         when(mockedTTSResult.read(1, 1)).thenReturn(new byte[] { 2 });
@@ -66,7 +70,6 @@ public class AudioStreamCacheWrapperTest {
      */
     @Test
     public void cacheWrapperStreamReadBunchTest() throws IOException {
-        TTSResult mockedTTSResult = Mockito.mock(TTSResult.class);
         when(mockedTTSResult.read(anyInt(), anyInt())).thenReturn(new byte[] { 1 }, new byte[] { 2, 3 }, new byte[0]);
 
         AudioStreamSupplier mockedAudioStreamSupplier = Mockito.mock(AudioStreamSupplier.class);
@@ -89,7 +92,6 @@ public class AudioStreamCacheWrapperTest {
     public void fallbackTest() throws IOException, TTSException {
         // the TTS result will be the first stream read
         // it will read two byte then fail with IOException
-        TTSResult mockedTTSResult = Mockito.mock(TTSResult.class);
         when(mockedTTSResult.read(anyInt(), anyInt())).thenReturn(new byte[] { 1 }, new byte[] { 2 })
                 .thenThrow(new IOException());
 

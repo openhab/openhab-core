@@ -68,8 +68,7 @@ public class TTSLRUCacheImpl implements TTSCache {
     /**
      * The most recently used {@link TTSResult}
      */
-    @Nullable
-    private TTSResult head;
+    private @Nullable TTSResult head;
 
     /**
      * The least recently used {@link TTSResult}. Could be evicted soon.
@@ -80,15 +79,15 @@ public class TTSLRUCacheImpl implements TTSCache {
     /**
      * Lock the cache to handle concurrency
      */
-    private ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
 
     /**
      * The size limit, in bytes. The size is not a hard one, because the final size of the
      * current request is not known and may or may not exceed the limit.
      */
-    private long limitSize;
+    private final long limitSize;
 
-    private File cacheFolder;
+    private final File cacheFolder;
 
     /**
      * Check free disk space and construct a cache system for TTS result.
@@ -185,7 +184,7 @@ public class TTSLRUCacheImpl implements TTSCache {
 
         // initialize the supplier stream from the TTS service :
         AudioStreamSupplier ttsSynthetizerSupplier = new AudioStreamSupplier(tts, text, voice, requestedFormat);
-        this.lock.lock(); // (a get operation also need the lock as it will update the head of the cache)
+        lock.lock(); // (a get operation also need the lock as it will update the head of the cache)
         try {
             String key = tts.getClass().getSimpleName() + "_" + tts.getCacheKey(text, voice, requestedFormat);
             // try to get from cache
@@ -200,7 +199,7 @@ public class TTSLRUCacheImpl implements TTSCache {
             }
             return ttsResult.getAudioStreamClient(ttsSynthetizerSupplier);
         } finally {
-            this.lock.unlock();
+            lock.unlock();
         }
     }
 
@@ -215,7 +214,7 @@ public class TTSLRUCacheImpl implements TTSCache {
             List<@Nullable TTSResult> ttsResultOrderedList = stream
                     .filter(path -> path.getFileName().toString().endsWith(INFO_EXT)).map(Path::toFile)
                     .sorted((file1, file2) -> Long.valueOf(file1.lastModified() - file2.lastModified()).intValue())
-                    .map(this::buildFromFile).filter(Objects::nonNull).collect(Collectors.toList());
+                    .map(this::buildFromFile).filter(Objects::nonNull).toList();
 
             // Now create links between ordered entries in the list :
             TTSResult previous = null;

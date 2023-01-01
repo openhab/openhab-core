@@ -64,7 +64,7 @@ public class TTSResult {
     /**
      * Take count of the number of {@link AudioStreamCacheWrapper} currently using this {@link TTSResult}
      */
-    private Integer countAudioStreamClient = 0;
+    private int countAudioStreamClient = 0;
 
     /**
      * A unique key to identify the result
@@ -72,33 +72,28 @@ public class TTSResult {
      */
     private final String key;
 
-    private String text;
+    private final String text;
 
     // The inner AudioStream, with a supplier
-    @Nullable
-    private AudioStreamSupplier ttsAudioStreamSupplier;
-    @Nullable
-    private AudioStream ttsAudioStream;
-    @Nullable
-    private AudioFormat audioFormat;
+    private @Nullable AudioStreamSupplier ttsAudioStreamSupplier;
+    private @Nullable AudioStream ttsAudioStream;
+    private @Nullable AudioFormat audioFormat;
 
     // The cache files where the sound and its info are stored :
-    private File soundFile;
-    private File infoFile;
+    private final File soundFile;
+    private final File infoFile;
     private long currentSize = 0;
     private boolean completed;
 
     @NonNullByDefault({}) // file channel could not be null when we read or write from the wrapper
     private FileChannel fileChannel;
-    private Lock fileOperationLock = new ReentrantLock();
+    private final Lock fileOperationLock = new ReentrantLock();
 
     /**
      * These references link {@link TTSResult} between each other, allowing LRU cache to work.
      */
-    @Nullable
-    private TTSResult next = null;
-    @Nullable
-    private TTSResult prev = null;
+    private @Nullable TTSResult next = null;
+    private @Nullable TTSResult prev = null;
 
     /**
      * This constructor is used when the file is fully cached on disk.
@@ -220,8 +215,9 @@ public class TTSResult {
         } else {
             // first try to check if the inner stream has the information
             AudioStream ttsAudioStreamFinal = ttsAudioStream;
-            if (ttsAudioStreamFinal != null && ttsAudioStreamFinal instanceof FixedLengthAudioStream) {
-                return ((FixedLengthAudioStream) ttsAudioStreamFinal).length();
+            if (ttsAudioStreamFinal != null
+                    && ttsAudioStreamFinal instanceof FixedLengthAudioStream fixedLengthAudioStream) {
+                return fixedLengthAudioStream.length();
             }
             // else, we must force-read all the stream to get the real size
             try {

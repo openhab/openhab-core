@@ -30,10 +30,10 @@ import org.openhab.core.voice.Voice;
 @NonNullByDefault
 public class AudioStreamSupplier {
 
-    private TTSService tts;
-    private String text;
-    private Voice voice;
-    private AudioFormat requestedAudioFormat;
+    private final TTSService tts;
+    private final String text;
+    private final Voice voice;
+    private final AudioFormat requestedAudioFormat;
     private boolean resolved = false;
 
     public AudioStreamSupplier(TTSService tts, String text, Voice voice, AudioFormat requestedAudioFormat) {

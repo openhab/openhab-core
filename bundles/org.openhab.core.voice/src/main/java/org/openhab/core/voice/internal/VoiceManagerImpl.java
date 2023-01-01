@@ -45,6 +45,7 @@ import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigOptionProvider;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.events.EventPublisher;
@@ -99,7 +100,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     public static final String CONFIGURATION_PID = "org.openhab.voice";
 
     // a small default cache size for all the TTS services (in kB)
-    public static final Integer DEFAULT_CACHE_SIZE_TTS = 10240;
+    public static final int DEFAULT_CACHE_SIZE_TTS = 10240;
 
     // the default keyword to use if no other is configured
     private static final String DEFAULT_KEYWORD = "Wakeup";
@@ -146,8 +147,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private @Nullable String defaultKS;
     private @Nullable String defaultHLI;
     private @Nullable String defaultVoice;
-    private Integer cacheSizeTTS = DEFAULT_CACHE_SIZE_TTS;
-    private Boolean enableCacheTTS = true;
+    private int cacheSizeTTS = DEFAULT_CACHE_SIZE_TTS;
+    private boolean enableCacheTTS = true;
 
     private final Map<String, String> defaultVoices = new HashMap<>();
     private final Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
@@ -205,13 +206,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             this.defaultVoice = config.containsKey(CONFIG_DEFAULT_VOICE) ? config.get(CONFIG_DEFAULT_VOICE).toString()
                     : null;
             this.enableCacheTTS = Boolean.parseBoolean(config.getOrDefault(CONFIG_ENABLE_CACHE_TTS, "true").toString());
-            try {
-                this.cacheSizeTTS = Integer
-                        .parseInt(config.getOrDefault(CONFIG_CACHE_SIZE_TTS, DEFAULT_CACHE_SIZE_TTS).toString());
-            } catch (NumberFormatException e) {
-                logger.warn("Cannot parse TTS cache size. Using 10240kB default size.");
-                this.cacheSizeTTS = DEFAULT_CACHE_SIZE_TTS;
-            }
+            this.cacheSizeTTS = ConfigParser.valueAsOrElse(config.get(CONFIG_CACHE_SIZE_TTS), Integer.class,
+                    DEFAULT_CACHE_SIZE_TTS);
+
             if (enableCacheTTS) {
                 try {
                     this.ttsCache = new TTSLRUCacheImpl(cacheSizeTTS * 1024);

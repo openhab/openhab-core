@@ -48,8 +48,7 @@ public class AudioStreamCacheWrapper extends FixedLengthAudioStream {
     // A fallback mechanism : if reading from the cache fails,
     // It will therefore try to fallback to a direct tts stream
     private AudioStreamSupplier fallbackDirectSupplier;
-    @Nullable
-    private AudioStream fallbackDirectAudioStream;
+    private @Nullable AudioStream fallbackDirectAudioStream;
 
     /***
      * Construct a transparent AudioStream wrapper around the data from the cache.
@@ -58,7 +57,6 @@ public class AudioStreamCacheWrapper extends FixedLengthAudioStream {
      * @param supplier A fallback {@link AudioStreamSupplier}, if something goes wrong with the cache mechanism
      */
     public AudioStreamCacheWrapper(TTSResult ttsResult, AudioStreamSupplier supplier) {
-        super();
         this.ttsResult = ttsResult;
         this.fallbackDirectSupplier = supplier;
     }
@@ -173,8 +171,8 @@ public class AudioStreamCacheWrapper extends FixedLengthAudioStream {
             enableFallback();
 
             AudioStream fallbackDirectAudioStreamFinal = this.fallbackDirectAudioStream;
-            if (fallbackDirectAudioStreamFinal instanceof FixedLengthAudioStream) {
-                return ((FixedLengthAudioStream) fallbackDirectAudioStreamFinal).length();
+            if (fallbackDirectAudioStreamFinal instanceof FixedLengthAudioStream fixedLengthAudioStream) {
+                return fixedLengthAudioStream.length();
             }
         } catch (IOException e) {
             logger.debug("Cannot get the length of the AudioStream");

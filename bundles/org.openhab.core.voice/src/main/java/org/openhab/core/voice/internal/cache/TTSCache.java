@@ -43,6 +43,6 @@ public interface TTSCache {
      *             are not supported or another error occurs while creating an
      *             {@link AudioStream}
      */
-    public AudioStream getOrSynthetize(TTSService tts, String text, Voice voice, AudioFormat requestedFormat)
+    AudioStream getOrSynthetize(TTSService tts, String text, Voice voice, AudioFormat requestedFormat)
             throws TTSException;
 }
