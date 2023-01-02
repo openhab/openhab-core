@@ -9,26 +9,34 @@
 				{
 					"name": "topic",
 					"type": "TEXT",
-					"description": "topic should match",
-					"required": false
-				},
-				{
-					"name": "eventType",
-					"type": "TEXT",
-					"description": "eventType should match",
-					"required": false
+					"label": "Topic",
+					"description": "the topic, as a file-system style glob (*, ** and {} operators). will match all events if empty",
+					"required": true,
+					"default": ""
 				},
 				{
 					"name": "source",
 					"type": "TEXT",
-					"description": "source should match",
-					"required": false
+					"label": "Source",
+					"description": "the source of the event (e.g. org.openhab.core.expire, etc.). will match all events if empty",
+					"required": true,
+					"default": ""
+				},
+				{
+					"name": "types",
+					"type": "TEXT",
+					"label": "Event Type",
+					"description": "the event type the trigger should listen to. multiple types can be specified comma-separated. will match all events if empty",
+					"required": true,
+					"default": ""
 				},
 				{
 					"name": "payload",
 					"type": "TEXT",
-					"description": "payload should match",
-					"required": false
+					"label": "Event Payload",
+					"description": "A regex to match the event's serialized payload. will match all events if empty",
+					"required": true,
+					"default": ""
 				}
 			],
 			"inputs": [
@@ -36,7 +44,7 @@
 					"name": "event",
 					"type": "org.openhab.core.events.Event",
 					"label": "Event",
-					"description": "The events which was sent.",
+					"description": "The event which was sent.",
 					"required": true
 				}
 			]

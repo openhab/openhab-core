@@ -8,9 +8,8 @@
 				"id": "trigger",
 				"type": "core.GenericEventTrigger",
 				"configuration": {
-					"eventSource": "MyTrigger",
-					"eventTopic": "openhab/items/MyTrigger/state",
-					"eventTypes": "ItemStateEvent"
+					"topic": "openhab/items/MyTrigger/state",
+					"types": "ItemStateEvent"
 				}
 			}
 		],
