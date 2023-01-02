@@ -15,7 +15,6 @@ package org.openhab.core.events;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The {@link AbstractTypedEventSubscriber} is an abstract implementation of the {@link EventSubscriber} interface which
@@ -44,11 +43,6 @@ public abstract class AbstractTypedEventSubscriber<T extends Event> implements E
     @Override
     public Set<String> getSubscribedEventTypes() {
         return subscribedEventTypes;
-    }
-
-    @Override
-    public @Nullable EventFilter getEventFilter() {
-        return null;
     }
 
     @SuppressWarnings("unchecked")

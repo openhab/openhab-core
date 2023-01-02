@@ -14,8 +14,6 @@ package org.openhab.core.automation.internal.module.handler;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -84,9 +82,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
         }
         this.timeOnly = ConfigParser.valueAsOrElse(module.getConfiguration().get(CONFIG_TIME_ONLY), Boolean.class,
                 false);
-        Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("event.topics", "openhab/items/" + itemName + "/*");
-        eventSubscriberRegistration = bundleContext.registerService(EventSubscriber.class.getName(), this, properties);
+        eventSubscriberRegistration = bundleContext.registerService(EventSubscriber.class.getName(), this, null);
         try {
             process(itemRegistry.getItem(itemName).getState());
         } catch (ItemNotFoundException e) {
@@ -153,7 +149,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
     @Override
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
-        return event.getTopic().contains("openhab/items/" + itemName + "/");
+        return event.getTopic().startsWith("openhab/items/" + itemName + "/");
     }
 
     private synchronized void startScheduler() {

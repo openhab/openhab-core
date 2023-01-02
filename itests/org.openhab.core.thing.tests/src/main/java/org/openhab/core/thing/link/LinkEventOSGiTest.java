@@ -24,7 +24,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
-import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ChannelUID;
@@ -51,11 +50,6 @@ public class LinkEventOSGiTest extends JavaOSGiTest {
         public Set<String> getSubscribedEventTypes() {
             return Stream.of(ItemChannelLinkAddedEvent.TYPE, ItemChannelLinkRemovedEvent.TYPE)
                     .collect(Collectors.toSet());
-        }
-
-        @Override
-        public @Nullable EventFilter getEventFilter() {
-            return null;
         }
 
         @Override

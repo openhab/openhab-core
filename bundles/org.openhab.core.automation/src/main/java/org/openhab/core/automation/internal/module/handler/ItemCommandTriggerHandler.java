@@ -56,7 +56,6 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
 
     private final String itemName;
     private final @Nullable String command;
-    private final String topic;
 
     private final Set<String> types;
     private final BundleContext bundleContext;
@@ -73,10 +72,7 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
         this.ruleUID = ruleUID;
         this.types = Set.of(ItemCommandEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         Dictionary<String, Object> properties = new Hashtable<>();
-        this.topic = "openhab/items/" + itemName + "/*";
-        properties.put("event.topics", topic);
-        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
-                properties);
+        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
         if (itemRegistry.get(itemName) == null) {
             logger.warn("Item '{}' needed for rule '{}' is missing. Trigger '{}' will not work.", itemName, ruleUID,
                     module.getId());
@@ -138,6 +134,6 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
     @Override
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
-        return event.getTopic().contains("openhab/items/" + itemName + "/");
+        return event.getTopic().startsWith("openhab/items/" + itemName + "/");
     }
 }

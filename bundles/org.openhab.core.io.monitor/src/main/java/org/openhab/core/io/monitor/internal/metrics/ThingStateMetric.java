@@ -13,9 +13,7 @@
 package org.openhab.core.io.monitor.internal.metrics;
 
 import java.util.Collection;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
-import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingStatus;
@@ -74,10 +71,7 @@ public class ThingStateMetric implements OpenhabCoreMeterBinder, EventSubscriber
         this.meterRegistry = meterRegistry;
         thingRegistry.getAll().forEach(
                 thing -> createOrUpdateMetricForBundleState(thing.getUID().getId(), thing.getStatus().ordinal()));
-        Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("event.topics", "openhab/things/*");
-        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
-                properties);
+        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
     }
 
     private void createOrUpdateMetricForBundleState(String thingUid, int thingStatus) {
@@ -113,11 +107,6 @@ public class ThingStateMetric implements OpenhabCoreMeterBinder, EventSubscriber
     @Override
     public Set<String> getSubscribedEventTypes() {
         return Set.of(ThingStatusInfoEvent.TYPE);
-    }
-
-    @Override
-    public @Nullable EventFilter getEventFilter() {
-        return null;
     }
 
     @Override

@@ -15,9 +15,7 @@ package org.openhab.core.io.rest.sse.internal.listeners;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
-import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.io.rest.sse.internal.SsePublisher;
 import org.osgi.service.component.annotations.Activate;
@@ -47,11 +45,6 @@ public class SseEventSubscriber implements EventSubscriber {
     @Override
     public Set<String> getSubscribedEventTypes() {
         return subscribedEventTypes;
-    }
-
-    @Override
-    public @Nullable EventFilter getEventFilter() {
-        return null;
     }
 
     @Override

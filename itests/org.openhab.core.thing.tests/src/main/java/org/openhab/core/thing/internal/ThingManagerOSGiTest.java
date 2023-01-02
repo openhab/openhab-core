@@ -1228,11 +1228,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             }
 
             @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
-            }
-
-            @Override
             public void receive(Event event) {
                 receivedEvents.add(event);
             }
@@ -1320,11 +1315,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             }
 
             @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
-            }
-
-            @Override
             public void receive(Event event) {
                 infoChangedEvents.add((ThingStatusInfoChangedEvent) event);
             }
@@ -1403,11 +1393,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             }
 
             @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
-            }
-
-            @Override
             public void receive(Event event) {
                 infoEvents.add((ThingStatusInfoEvent) event);
             }
@@ -1420,11 +1405,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Set.of(ThingStatusInfoChangedEvent.TYPE);
-            }
-
-            @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
             }
 
             @Override

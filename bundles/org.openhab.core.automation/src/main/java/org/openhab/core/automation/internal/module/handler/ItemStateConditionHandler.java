@@ -17,8 +17,6 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
@@ -85,10 +83,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         this.types = Set.of(ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         this.ruleUID = ruleUID;
 
-        Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("event.topics", "openhab/items/" + itemName + "/*");
-        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
-                properties);
+        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
 
         if (itemRegistry.get(itemName) == null) {
             logger.warn("Item '{}' needed for rule '{}' is missing. Condition '{}' will not work.", itemName, ruleUID,
@@ -264,7 +259,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
     @Override
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
-        return event.getTopic().contains("openhab/items/" + itemName + "/");
+        return event.getTopic().startsWith("openhab/items/" + itemName + "/");
     }
 
     private ZonedDateTime getCompareTime(String input) {

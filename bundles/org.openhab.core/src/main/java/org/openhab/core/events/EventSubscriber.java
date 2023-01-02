@@ -45,8 +45,9 @@ public interface EventSubscriber {
      *
      * @return the event filter, or null
      */
-    @Nullable
-    EventFilter getEventFilter();
+    default @Nullable EventFilter getEventFilter() {
+        return null;
+    }
 
     /**
      * Callback method for receiving {@link Event}s from the openHAB event bus. This method is called for

@@ -29,7 +29,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.Event;
-import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.Item;
@@ -225,11 +224,6 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
     @Override
     public Set<String> getSubscribedEventTypes() {
         return SUBSCRIBED_EVENT_TYPES;
-    }
-
-    @Override
-    public @Nullable EventFilter getEventFilter() {
-        return null;
     }
 
     @Override

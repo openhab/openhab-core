@@ -58,6 +58,7 @@ import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.events.TopicEventFilter;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.library.CoreItemFactory;
@@ -277,13 +278,8 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
         @Override
         public @Nullable EventFilter getEventFilter() {
-            return new EventFilter() {
-                @Override
-                public boolean apply(Event event) {
-                    return event.getTopic().equals(
-                            "openhab/things/{thingUID}/config/status".replace("{thingUID}", thingUID.getAsString()));
-                };
-            };
+            return new TopicEventFilter(
+                    "openhab/things/{thingUID}/config/status".replace("{thingUID}", thingUID.getAsString()));
         }
 
         @Override
