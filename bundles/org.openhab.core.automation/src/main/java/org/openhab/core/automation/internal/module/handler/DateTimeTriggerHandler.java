@@ -15,7 +15,6 @@ package org.openhab.core.automation.internal.module.handler;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -28,7 +27,7 @@ import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
-import org.openhab.core.events.TopicEventFilter;
+import org.openhab.core.events.TopicPrefixEventFilter;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemCommandEvent;
@@ -84,7 +83,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
             eventFilter = null;
             return;
         }
-        this.eventFilter = new TopicEventFilter("openhab/items/" + Pattern.quote(itemName) + "/.*");
+        this.eventFilter = new TopicPrefixEventFilter("openhab/items/" + itemName + "/");
         this.timeOnly = ConfigParser.valueAsOrElse(module.getConfiguration().get(CONFIG_TIME_ONLY), Boolean.class,
                 false);
         eventSubscriberRegistration = bundleContext.registerService(EventSubscriber.class.getName(), this, null);

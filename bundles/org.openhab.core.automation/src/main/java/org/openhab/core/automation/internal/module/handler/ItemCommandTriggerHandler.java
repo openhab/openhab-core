@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -28,7 +27,7 @@ import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
-import org.openhab.core.events.TopicEventFilter;
+import org.openhab.core.events.TopicPrefixEventFilter;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
@@ -70,7 +69,7 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
             ItemRegistry itemRegistry) {
         super(module);
         this.itemName = (String) module.getConfiguration().get(CFG_ITEMNAME);
-        this.eventFilter = new TopicEventFilter("openhab/items/" + Pattern.quote(itemName) + "/.*");
+        this.eventFilter = new TopicPrefixEventFilter("openhab/items/" + itemName + "/");
         this.command = (String) module.getConfiguration().get(CFG_COMMAND);
         this.bundleContext = bundleContext;
         this.ruleUID = ruleUID;

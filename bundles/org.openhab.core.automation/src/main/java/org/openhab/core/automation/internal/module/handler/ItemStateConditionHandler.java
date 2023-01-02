@@ -19,7 +19,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -28,7 +27,7 @@ import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
-import org.openhab.core.events.TopicEventFilter;
+import org.openhab.core.events.TopicPrefixEventFilter;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -83,7 +82,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         this.bundleContext = bundleContext;
         this.timeZoneProvider = timeZoneProvider;
         this.itemName = (String) module.getConfiguration().get(ITEM_NAME);
-        this.eventFilter = new TopicEventFilter("openhab/items/" + Pattern.quote(itemName) + "/.*");
+        this.eventFilter = new TopicPrefixEventFilter("openhab/items/" + itemName + "/");
         this.types = Set.of(ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         this.ruleUID = ruleUID;
 
