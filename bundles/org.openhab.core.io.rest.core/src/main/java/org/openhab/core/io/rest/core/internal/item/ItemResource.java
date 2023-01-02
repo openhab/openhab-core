@@ -293,6 +293,36 @@ public class ItemResource implements RESTResource {
      */
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
+    @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/namespaces")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "getItemNamespaces", summary = "Gets the namespace of an item.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = "Item not found") })
+    public Response getItemNamespaces(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (suppressed if no value given)") @Nullable String namespaceSelector) {
+        Item item = getItem(itemname);
+        final Locale locale = localeService.getLocale(language);
+        final Set<String> excludedNamespaces = splitAndFilterNamespaces(namespaceSelector, locale);
+
+        if (item != null) {
+            Set<String> allItemMetadataNamespaces = metadataRegistry.getAll().stream()
+                    .filter(n -> !excludedNamespaces.contains(n.getUID().getNamespace()))
+                    .filter(n -> n.getUID().getItemName().equals(itemname)).map(n -> n.getUID().getNamespace())
+                    .collect(Collectors.toSet());
+            return Response.ok(allItemMetadataNamespaces.toString()).build();
+        } else {
+            return getItemNotFoundResponse(itemname);
+        }
+    }
+
+    /**
+     *
+     * @param itemname
+     * @return
+     */
+    @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/state")
     @Operation(operationId = "getItemState", summary = "Gets the state of an item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -831,7 +861,7 @@ public class ItemResource implements RESTResource {
     /**
      * helper: Response to be sent to client if a Thing cannot be found
      *
-     * @param thingUID
+     * @param itemname
      * @return Response configured for 'item not found'
      */
     private static Response getItemNotFoundResponse(String itemname) {
