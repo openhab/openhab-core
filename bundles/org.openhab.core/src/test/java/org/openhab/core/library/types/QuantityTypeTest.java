@@ -307,6 +307,10 @@ public class QuantityTypeTest {
 
         assertEquals(PercentType.HUNDRED, new QuantityType<>("100 %").as(PercentType.class));
         assertEquals(PercentType.ZERO, new QuantityType<>("0 %").as(PercentType.class));
+        assertEquals(new PercentType(BigDecimal.valueOf(10)), new QuantityType<>("10 %").as(PercentType.class));
+        assertEquals(new PercentType(BigDecimal.valueOf(10)), new QuantityType<>("0.1").as(PercentType.class));
+        assertEquals(new PercentType(BigDecimal.valueOf(10)), new QuantityType<>("100 %/10").as(PercentType.class));
+        assertEquals(new PercentType(BigDecimal.valueOf(10)), new QuantityType<>("100000 ppm").as(PercentType.class));
     }
 
     @ParameterizedTest

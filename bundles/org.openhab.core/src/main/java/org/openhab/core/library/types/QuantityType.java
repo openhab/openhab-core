@@ -306,7 +306,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     @SuppressWarnings("unchecked")
     public @Nullable QuantityType<?> toInvertibleUnit(String targetUnit) {
-        Unit<?> unit = (Unit<?>) AbstractUnit.parse(targetUnit);
+        Unit<?> unit = AbstractUnit.parse(targetUnit);
         if (unit != null) {
             return toInvertibleUnit(unit);
         }
@@ -336,7 +336,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
         }
         Quantity<?> result = quantity.to(targetUnit);
 
-        return new QuantityType<T>(result.getValue(), (Unit<T>) targetUnit);
+        return new QuantityType<T>(result.getValue(), targetUnit);
     }
 
     public BigDecimal toBigDecimal() {
@@ -457,6 +457,11 @@ public class QuantityType<T extends Quantity<T>> extends Number
         } else if (target == PercentType.class) {
             if (Units.PERCENT.equals(getUnit())) {
                 return target.cast(new PercentType(toBigDecimal()));
+            } else {
+                QuantityType<T> inPercent = toUnit(Units.PERCENT);
+                if (inPercent != null) {
+                    return inPercent.as(target);
+                }
             }
             return target.cast(new PercentType(toBigDecimal().multiply(BIG_DECIMAL_HUNDRED)));
         } else if (target == DecimalType.class) {
