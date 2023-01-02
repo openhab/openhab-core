@@ -15,6 +15,7 @@ package org.openhab.core.automation.internal.module.handler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -25,6 +26,7 @@ import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.events.TopicEventFilter;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.GroupItemStateChangedEvent;
 import org.openhab.core.items.events.ItemAddedEvent;
@@ -46,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * @author Simon Merschjohann - Initial contribution
  */
 @NonNullByDefault
-public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
+public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber {
 
     public static final String UPDATE_MODULE_TYPE_ID = "core.ItemStateUpdateTrigger";
     public static final String CHANGE_MODULE_TYPE_ID = "core.ItemStateChangeTrigger";
@@ -63,6 +65,7 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
     private final String ruleUID;
     private Set<String> types;
     private final BundleContext bundleContext;
+    private final EventFilter eventFilter;
 
     private @Nullable ServiceRegistration<?> eventSubscriberRegistration;
 
@@ -70,6 +73,7 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
             ItemRegistry itemRegistry) {
         super(module);
         this.itemName = (String) module.getConfiguration().get(CFG_ITEMNAME);
+        this.eventFilter = new TopicEventFilter("openhab/items/" + Pattern.quote(itemName) + "/.*");
         this.state = (String) module.getConfiguration().get(CFG_STATE);
         this.previousState = (String) module.getConfiguration().get(CFG_PREVIOUS_STATE);
         this.ruleUID = ruleUID;
@@ -95,7 +99,7 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
 
     @Override
     public @Nullable EventFilter getEventFilter() {
-        return this;
+        return eventFilter;
     }
 
     @Override
@@ -160,11 +164,5 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
             eventSubscriberRegistration.unregister();
             eventSubscriberRegistration = null;
         }
-    }
-
-    @Override
-    public boolean apply(Event event) {
-        logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
-        return event.getTopic().startsWith("openhab/items/" + itemName + "/");
     }
 }

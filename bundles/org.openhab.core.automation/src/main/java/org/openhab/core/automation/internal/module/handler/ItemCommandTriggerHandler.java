@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -27,6 +28,7 @@ import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.events.TopicEventFilter;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
@@ -45,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
+public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber {
 
     public static final String MODULE_TYPE_ID = "core.ItemCommandTrigger";
 
@@ -60,6 +62,7 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
     private final Set<String> types;
     private final BundleContext bundleContext;
     private final String ruleUID;
+    private final EventFilter eventFilter;
 
     private final ServiceRegistration<?> eventSubscriberRegistration;
 
@@ -67,6 +70,7 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
             ItemRegistry itemRegistry) {
         super(module);
         this.itemName = (String) module.getConfiguration().get(CFG_ITEMNAME);
+        this.eventFilter = new TopicEventFilter("openhab/items/" + Pattern.quote(itemName) + "/.*");
         this.command = (String) module.getConfiguration().get(CFG_COMMAND);
         this.bundleContext = bundleContext;
         this.ruleUID = ruleUID;
@@ -86,7 +90,7 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
 
     @Override
     public @Nullable EventFilter getEventFilter() {
-        return this;
+        return eventFilter;
     }
 
     @Override
@@ -129,11 +133,5 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
     public void dispose() {
         super.dispose();
         eventSubscriberRegistration.unregister();
-    }
-
-    @Override
-    public boolean apply(Event event) {
-        logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
-        return event.getTopic().startsWith("openhab/items/" + itemName + "/");
     }
 }

@@ -15,6 +15,7 @@ package org.openhab.core.automation.internal.module.handler;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -27,6 +28,7 @@ import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.events.TopicEventFilter;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemCommandEvent;
@@ -52,7 +54,7 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
-        implements SchedulerRunnable, TimeBasedTriggerHandler, EventSubscriber, EventFilter {
+        implements SchedulerRunnable, TimeBasedTriggerHandler, EventSubscriber {
 
     public static final String MODULE_TYPE_ID = "timer.DateTimeTrigger";
     public static final String CONFIG_ITEM_NAME = "itemName";
@@ -65,6 +67,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
 
     private final CronScheduler scheduler;
     private final String itemName;
+    private final @Nullable EventFilter eventFilter;
     private String cronExpression = CronAdjuster.REBOOT;
     private Boolean timeOnly = false;
 
@@ -78,8 +81,10 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
         this.itemName = ConfigParser.valueAsOrElse(module.getConfiguration().get(CONFIG_ITEM_NAME), String.class, "");
         if (this.itemName.isBlank()) {
             logger.warn("itemName is blank in module '{}', trigger will not work", module.getId());
+            eventFilter = null;
             return;
         }
+        this.eventFilter = new TopicEventFilter("openhab/items/" + Pattern.quote(itemName) + "/.*");
         this.timeOnly = ConfigParser.valueAsOrElse(module.getConfiguration().get(CONFIG_TIME_ONLY), Boolean.class,
                 false);
         eventSubscriberRegistration = bundleContext.registerService(EventSubscriber.class.getName(), this, null);
@@ -130,7 +135,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
 
     @Override
     public @Nullable EventFilter getEventFilter() {
-        return this;
+        return eventFilter;
     }
 
     @Override
@@ -144,12 +149,6 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
                 logger.debug("Don't know how to process event {}, discarding", event);
             }
         }
-    }
-
-    @Override
-    public boolean apply(Event event) {
-        logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
-        return event.getTopic().startsWith("openhab/items/" + itemName + "/");
     }
 
     private synchronized void startScheduler() {

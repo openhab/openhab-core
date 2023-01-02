@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -27,6 +28,7 @@ import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.events.TopicEventFilter;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -52,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - refactored and simplified customized module handling
  */
 @NonNullByDefault
-public class ItemStateConditionHandler extends BaseConditionModuleHandler implements EventSubscriber, EventFilter {
+public class ItemStateConditionHandler extends BaseConditionModuleHandler implements EventSubscriber {
 
     /**
      * Constants for Config-Parameters corresponding to Definition in ItemModuleTypeDefinition.json
@@ -68,6 +70,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
     private final ItemRegistry itemRegistry;
     private final String ruleUID;
     private final String itemName;
+    private final EventFilter eventFilter;
     private final BundleContext bundleContext;
     private final Set<String> types;
     private final ServiceRegistration<?> eventSubscriberRegistration;
@@ -80,6 +83,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         this.bundleContext = bundleContext;
         this.timeZoneProvider = timeZoneProvider;
         this.itemName = (String) module.getConfiguration().get(ITEM_NAME);
+        this.eventFilter = new TopicEventFilter("openhab/items/" + Pattern.quote(itemName) + "/.*");
         this.types = Set.of(ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         this.ruleUID = ruleUID;
 
@@ -98,7 +102,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
 
     @Override
     public @Nullable EventFilter getEventFilter() {
-        return this;
+        return eventFilter;
     }
 
     @Override
@@ -254,12 +258,6 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
     public void dispose() {
         super.dispose();
         eventSubscriberRegistration.unregister();
-    }
-
-    @Override
-    public boolean apply(Event event) {
-        logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
-        return event.getTopic().startsWith("openhab/items/" + itemName + "/");
     }
 
     private ZonedDateTime getCompareTime(String input) {
