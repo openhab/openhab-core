@@ -75,9 +75,9 @@ public class TTSLRUCacheImplTest {
     public void simpleLRUPutAndGetTest() throws IOException {
         TTSLRUCacheImpl voiceLRUCache = new TTSLRUCacheImpl(10);
         TTSResult ttsResult = new TTSResult(tempDir.toFile(), "key1", supplierMock);
-        voiceLRUCache.put("key1", ttsResult);
-        assertEquals(ttsResult, voiceLRUCache.get("key1"));
-        assertEquals(null, voiceLRUCache.get("key2"));
+        voiceLRUCache.put(ttsResult);
+        assertEquals(ttsResult, voiceLRUCache.ttsResultMap.get("key1"));
+        assertEquals(null, voiceLRUCache.ttsResultMap.get("key2"));
     }
 
     /**
@@ -90,27 +90,27 @@ public class TTSLRUCacheImplTest {
         TTSLRUCacheImpl voiceLRUCache = new TTSLRUCacheImpl(10);
         TTSResult ttsResult1 = new TTSResult(tempDir.toFile(), "key1", supplierMock);
         ttsResult1.setSize(4);
-        voiceLRUCache.put("key1", ttsResult1);
+        voiceLRUCache.put(ttsResult1);
         TTSResult ttsResult2 = new TTSResult(tempDir.toFile(), "key2", supplierMock);
         ttsResult2.setSize(4);
-        voiceLRUCache.put("key2", ttsResult2);
+        voiceLRUCache.put(ttsResult2);
         TTSResult ttsResult3 = new TTSResult(tempDir.toFile(), "key3", supplierMock);
-        ttsResult3.setSize(4);
-        voiceLRUCache.put("key3", ttsResult3);
+        ttsResult3.setSize(2);
+        voiceLRUCache.put(ttsResult3);
         TTSResult ttsResult4 = new TTSResult(tempDir.toFile(), "key4", supplierMock);
         ttsResult4.setSize(4);
-        voiceLRUCache.put("key4", ttsResult4);
+        voiceLRUCache.put(ttsResult4);
 
         // ttsResult1 should be evicted now (size limit is 10, and effective size is 12 when we try to put the
         // ttsResult4)
-        assertEquals(null, voiceLRUCache.get("key1"));
+        assertEquals(null, voiceLRUCache.ttsResultMap.get("key1"));
 
         // getting ttsResult2 will put it in head, ttsResult3 is now tail
-        assertEquals(ttsResult2, voiceLRUCache.get("key2"));
+        assertEquals(ttsResult2, voiceLRUCache.ttsResultMap.get("key2"));
 
         // putting again ttsResult1 should expel tail, which is ttsResult3
-        voiceLRUCache.put("key1", ttsResult1);
-        assertEquals(null, voiceLRUCache.get("key3"));
+        voiceLRUCache.put(ttsResult1);
+        assertEquals(null, voiceLRUCache.ttsResultMap.get("key3"));
     }
 
     /**
@@ -144,12 +144,12 @@ public class TTSLRUCacheImplTest {
         TTSResult ttsResultToEvict = Mockito.mock(TTSResult.class);
         when(ttsResultToEvict.getCurrentSize()).thenReturn(15L);
         when(ttsResultToEvict.getKey()).thenReturn("ttsResultToEvict");
-        voiceLRUCache.put("ttsResultToEvict", ttsResultToEvict);
+        voiceLRUCache.put(ttsResultToEvict);
 
         // the cache is already full, so the next put will delete ttsResultToEvict
         TTSResult ttsResult2 = new TTSResult(tempDir.toFile(), "key2", supplierMock);
         ttsResult2.setSize(4);
-        voiceLRUCache.put("key2", ttsResult2);
+        voiceLRUCache.put(ttsResult2);
 
         verify(ttsResultToEvict).deleteFiles();
     }
@@ -165,24 +165,24 @@ public class TTSLRUCacheImplTest {
         TTSLRUCacheImpl voiceLRUCache = new TTSLRUCacheImpl(10);
         TTSResult ttsResult1 = new TTSResult(tempDir.toFile(), "key1", supplierMock);
         ttsResult1.setSize(4);
-        voiceLRUCache.put("key1", ttsResult1);
+        voiceLRUCache.put(ttsResult1);
         TTSResult ttsResult2 = new TTSResult(tempDir.toFile(), "key2", supplierMock);
         ttsResult2.setSize(10);
-        voiceLRUCache.put("key2", ttsResult2);
+        voiceLRUCache.put(ttsResult2);
 
         // put again key1 --> key2 is now tail
-        voiceLRUCache.put("key1", ttsResult1);
+        voiceLRUCache.put(ttsResult1);
 
         TTSResult ttsResult3 = new TTSResult(tempDir.toFile(), "key3", supplierMock);
         ttsResult3.setSize(4);
-        voiceLRUCache.put("key3", ttsResult3);
+        voiceLRUCache.put(ttsResult3);
 
         // ttsResult2 should be expelled now
-        assertEquals(null, voiceLRUCache.get("key2"));
+        assertEquals(null, voiceLRUCache.ttsResultMap.get("key2"));
 
         // ttsResult1 and ttsResult3 are a hit
-        assertEquals(ttsResult1, voiceLRUCache.get("key1"));
-        assertEquals(ttsResult3, voiceLRUCache.get("key3"));
+        assertEquals(ttsResult1, voiceLRUCache.ttsResultMap.get("key1"));
+        assertEquals(ttsResult3, voiceLRUCache.ttsResultMap.get("key3"));
     }
 
     /**
@@ -268,24 +268,22 @@ public class TTSLRUCacheImplTest {
         // create a LRU cache that will load the above .info files
         TTSLRUCacheImpl lruCache = new TTSLRUCacheImpl(20);
 
-        TTSResult ttsResult1 = lruCache.get("filesound1");
+        TTSResult ttsResult1 = lruCache.ttsResultMap.get("filesound1");
         assertNotEquals(null, ttsResult1);
 
-        TTSResult ttsResult2 = lruCache.get("filesound2");
+        TTSResult ttsResult2 = lruCache.ttsResultMap.get("filesound2");
         assertNotEquals(null, ttsResult2);
 
-        TTSResult ttsResult3 = lruCache.get("filesound3");
+        TTSResult ttsResult3 = lruCache.ttsResultMap.get("filesound3");
         assertEquals(null, ttsResult3);
     }
 
     @Test
-    public void enoughFreeDiskSpaceTest() {
-        try {
-            new TTSLRUCacheImpl(Long.MAX_VALUE / 10); // arbitrary long value, should throw exception because no disk of
-                                                      // this size exists
-            fail();
-        } catch (IOException e) {
-        }
+    public void enoughFreeDiskSpaceTest() throws IOException {
+        IOException exception = assertThrows(IOException.class, () ->
+        // arbitrary long value, should throw exception because no disk of
+        new TTSLRUCacheImpl(Long.MAX_VALUE / 10));
+        assertEquals(exception.getMessage(), "Not enough space for the TTS cache");
     }
 
     @Test

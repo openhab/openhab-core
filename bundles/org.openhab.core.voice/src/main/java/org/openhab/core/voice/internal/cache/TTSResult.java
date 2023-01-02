@@ -90,12 +90,6 @@ public class TTSResult {
     private final Lock fileOperationLock = new ReentrantLock();
 
     /**
-     * These references link {@link TTSResult} between each other, allowing LRU cache to work.
-     */
-    private @Nullable TTSResult next = null;
-    private @Nullable TTSResult prev = null;
-
-    /**
      * This constructor is used when the file is fully cached on disk.
      * The file on disk will provide the data, and the .info file will
      * provide metadata about the format.
@@ -180,26 +174,6 @@ public class TTSResult {
         this.infoFile = new File(cacheDirectory, key + TTSLRUCacheImpl.INFO_EXT);
         this.ttsAudioStreamSupplier = ttsSynthetizerSupplier;
         this.completed = false;
-    }
-
-    public TTSResult setPrevious(@Nullable TTSResult prev) {
-        this.prev = prev;
-        return this;
-    }
-
-    public TTSResult setNext(@Nullable TTSResult next) {
-        this.next = next;
-        return this;
-    }
-
-    @Nullable
-    public TTSResult getPrevious() {
-        return this.prev;
-    }
-
-    @Nullable
-    public TTSResult getNext() {
-        return this.next;
     }
 
     /**
@@ -380,7 +354,7 @@ public class TTSResult {
             }
             audioFormatFinal = audioFormat;
             if (audioFormatFinal == null) { // should't happen : resolve and synthetise MUST fill it
-                logger.warn("Cannot get audio format for TTS sound file {}. Returning WAV", soundFile.getName());
+                logger.warn("Cannot get audio format for TTS sound file {}. Assuming WAV", soundFile.getName());
                 return AudioFormat.WAV;
             }
             return audioFormatFinal;
