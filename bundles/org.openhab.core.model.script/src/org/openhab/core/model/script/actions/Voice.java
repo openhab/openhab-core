@@ -53,22 +53,7 @@ public class Voice {
      */
     @ActionDoc(text = "says a given text with the default voice")
     public static void say(@ParamDoc(name = "text") Object text) {
-        say(text, null, null, null, null);
-    }
-
-    /**
-     * Says the given text, with or without cache.
-     *
-     * This method uses the default voice and the default audio sink to play the audio.
-     * You can enable or disable the TTS cache for this sentence.
-     *
-     *
-     * @param text The text to speak
-     * @param enableCache Enable or disable the cache
-     */
-    @ActionDoc(text = "says a given text with the default voice with or without cache")
-    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "enableCache") Boolean enableCache) {
-        say(text, null, null, null, enableCache);
+        say(text, null, null, null);
     }
 
     /**
@@ -86,23 +71,6 @@ public class Voice {
     }
 
     /**
-     * Says the given text with the given volume, with or without cache.
-     *
-     * This method uses the default voice and the default audio sink to play the audio.
-     * You can enable or disable the TTS cache for this sentence.
-     *
-     * @param text The text to speak
-     * @param volume The volume to be used
-     * @param enableCache Enable or disable the cache
-     */
-    @ActionDoc(text = "says a given text with the default voice and the given volume with or without cache")
-    public static void say(@ParamDoc(name = "text") Object text,
-            @ParamDoc(name = "volume", text = "the volume to be used") @Nullable PercentType volume,
-            @ParamDoc(name = "enableCache") Boolean enableCache) {
-        say(text, null, null, volume, enableCache);
-    }
-
-    /**
      * Says the given text with a given voice.
      *
      * This method uses the default audio sink to play the audio.
@@ -114,25 +82,7 @@ public class Voice {
      */
     @ActionDoc(text = "says a given text with a given voice")
     public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice) {
-        say(text, voice, null, null, null);
-    }
-
-    /**
-     * Says the given text with a given voice, with or without cache.
-     *
-     * This method uses the default audio sink to play the audio.
-     * You can enable or disable the TTS cache for this sentence.
-     *
-     * @param text The text to speak
-     * @param voice The name of the voice to use or null, if the default voice should be used. If the voiceId is fully
-     *            qualified (i.e. with a tts prefix), the according TTS service will be used, otherwise the
-     *            voiceId is assumed to be available on the default TTS service.
-     * @param enableCache Enable or disable the cache
-     */
-    @ActionDoc(text = "says a given text with a given voice")
-    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
-            @ParamDoc(name = "enableCache") Boolean enableCache) {
-        say(text, voice, null, null, enableCache);
+        say(text, voice, null, null);
     }
 
     /**
@@ -153,26 +103,6 @@ public class Voice {
     }
 
     /**
-     * Says the given text with a given voice and the given volume, with or without cache.
-     *
-     * This method uses the default audio sink to play the audio.
-     * You can enable or disable the TTS cache for this sentence.
-     *
-     * @param text The text to speak
-     * @param voice The name of the voice to use or null, if the default voice should be used. If the voiceId is fully
-     *            qualified (i.e. with a tts prefix), the according TTS service will be used, otherwise the
-     *            voiceId is assumed to be available on the default TTS service.
-     * @param volume The volume to be used
-     * @param enableCache Enable or disable the cache
-     */
-    @ActionDoc(text = "says a given text with a given voice and the given volume")
-    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
-            @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume,
-            @ParamDoc(name = "enableCache") Boolean enableCache) {
-        say(text, voice, null, volume, enableCache);
-    }
-
-    /**
      * Says the given text with a given voice through the given sink.
      *
      * @param text The text to speak
@@ -185,25 +115,7 @@ public class Voice {
     @ActionDoc(text = "says a given text with a given voice through the given sink")
     public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
             @ParamDoc(name = "sink") @Nullable String sink) {
-        say(text, voice, sink, null, null);
-    }
-
-    /**
-     * Says the given text with a given voice through the given sink, with or without cache.
-     * You can enable or disable the TTS cache for this sentence.
-     *
-     * @param text The text to speak
-     * @param voice The name of the voice to use or null, if the default voice should be used. If the voiceId is fully
-     *            qualified (i.e. with a tts prefix), the according TTS service will be used, otherwise the
-     *            voiceId is assumed to be available on the default TTS service.
-     * @param sink The name of audio sink to be used to play the audio or null, if the default sink should
-     *            be used
-     * @param enableCache Enable or disable the cache
-     */
-    @ActionDoc(text = "says a given text with a given voice through the given sink")
-    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
-            @ParamDoc(name = "sink") @Nullable String sink, @ParamDoc(name = "enableCache") Boolean enableCache) {
-        say(text, voice, sink, null, enableCache);
+        say(text, voice, sink, null);
     }
 
     /**
@@ -221,29 +133,9 @@ public class Voice {
     public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
             @ParamDoc(name = "sink") @Nullable String sink,
             @ParamDoc(name = "volume", text = "the volume to be used") @Nullable PercentType volume) {
-        say(text, voice, sink, volume, null);
-    }
-
-    /**
-     * Says the given text with a given voice and the given volume through the given sink, with or without cache
-     *
-     * @param text The text to speak
-     * @param voice The name of the voice to use or null, if the default voice should be used. If the voiceId is fully
-     *            qualified (i.e. with a tts prefix), the according TTS service will be used, otherwise the
-     *            voiceId is assumed to be available on the default TTS service.
-     * @param sink The name of audio sink to be used to play the audio or null, if the default sink should
-     *            be used
-     * @param volume The volume to be used
-     * @param enableCache Enable or disable the TTS cache
-     */
-    @ActionDoc(text = "says a given text with a given voice and the given volume through the given sink, with or without cache")
-    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
-            @ParamDoc(name = "sink") @Nullable String sink,
-            @ParamDoc(name = "volume", text = "the volume to be used") @Nullable PercentType volume,
-            @ParamDoc(name = "enableCache", text = "Enable or disable the cache") @Nullable Boolean enableCache) {
         String output = text.toString();
         if (!output.isBlank()) {
-            VoiceActionService.voiceManager.say(output, voice, sink, volume, enableCache);
+            VoiceActionService.voiceManager.say(output, voice, sink, volume);
         }
     }
 

@@ -51,7 +51,7 @@
 		</parameter>
 		<parameter name="enableCacheTTS" type="boolean">
 			<label>Enable TTS caching</label>
-			<description>true to enable caching files produced by the TTS services on disk.</description>
+			<description>true to allow TTS services to cache audio files on disk.</description>
 			<default>true</default>
 		</parameter>
 		<parameter name="cacheSizeTTS" type="integer">

@@ -86,8 +86,8 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
 
     private ModuleType getSayActionType(@Nullable Locale locale) {
         return new ActionType(SayActionHandler.TYPE_ID, getConfigSayDesc(locale), "say something",
-                "Speaks a given text through a natural voice. Optionally sets the volume and use the cache.", null,
-                Visibility.VISIBLE, null, null);
+                "Speaks a given text through a natural voice. Optionally sets the volume.", null, Visibility.VISIBLE,
+                null, null);
     }
 
     private ModuleType getSynthesizeActionType(@Nullable Locale locale) {
@@ -105,14 +105,10 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
     }
 
     private List<ConfigDescriptionParameter> getConfigSayDesc(@Nullable Locale locale) {
-        ConfigDescriptionParameter textConfigDescriptionParameter = ConfigDescriptionParameterBuilder
-                .create(SayActionHandler.PARAM_TEXT, Type.TEXT).withRequired(true).withLabel("Text")
-                .withDescription("the text to speak").build();
-        ConfigDescriptionParameter enabledCacheConfigDescriptionParameter = ConfigDescriptionParameterBuilder
-                .create(SayActionHandler.PARAM_ENABLECACHE, Type.BOOLEAN).withDefault("true").withRequired(false)
-                .withLabel("Enable Cache").withDescription("Enable the TTS cache for this sentence").build();
-        return List.of(textConfigDescriptionParameter, getAudioSinkConfigDescParam(locale),
-                getVolumeConfigDescParam(locale), enabledCacheConfigDescriptionParameter);
+        return List.of(
+                ConfigDescriptionParameterBuilder.create(SayActionHandler.PARAM_TEXT, Type.TEXT).withRequired(true)
+                        .withLabel("Text").withDescription("the text to speak").build(),
+                getAudioSinkConfigDescParam(locale), getVolumeConfigDescParam(locale));
     }
 
     private List<ConfigDescriptionParameter> getConfigSynthesizeDesc(@Nullable Locale locale) {

@@ -153,8 +153,9 @@ public class AudioStreamCacheWrapper extends FixedLengthAudioStream {
     private void enableFallback() throws IOException {
         if (fallbackDirectAudioStream == null) {
             try {
-                this.fallbackDirectAudioStream = fallbackDirectSupplier.fallBackDirectResolution();
-                this.fallbackDirectAudioStream.skip(offset);
+                AudioStream fallBackDirectResolutionFinal = fallbackDirectSupplier.fallBackDirectResolution();
+                this.fallbackDirectAudioStream = fallBackDirectResolutionFinal;
+                fallBackDirectResolutionFinal.skip(offset);
             } catch (TTSException e) {
                 throw new IOException("Cannot read from TTS service", e);
             }

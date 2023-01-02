@@ -231,13 +231,12 @@ public class VoiceResource implements RESTResource {
     public Response say(@Parameter(description = "text to speak", required = true) String text,
             @QueryParam("voiceid") @Parameter(description = "voice id") @Nullable String voiceId,
             @QueryParam("sinkid") @Parameter(description = "audio sink id") @Nullable String sinkId,
-            @QueryParam("volume") @Parameter(description = "volume level") @Nullable String volume,
-            @QueryParam("enableCache") @Parameter(description = "enable TTS cache") Boolean enableCache) {
+            @QueryParam("volume") @Parameter(description = "volume level") @Nullable String volume) {
         PercentType volumePercent = null;
         if (volume != null && !volume.isEmpty()) {
             volumePercent = new PercentType(volume);
         }
-        voiceManager.say(text, voiceId, sinkId, volumePercent, enableCache);
+        voiceManager.say(text, voiceId, sinkId, volumePercent);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 

@@ -20,21 +20,30 @@ import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 
 /**
- * Cache system to avoid requesting {@link TTSService} for the same utterances.
  *
  * @author Gwendal Roulleau - Initial contribution
  */
 @NonNullByDefault
-public interface TTSCache {
+public interface TTSCachedService extends TTSService {
+
+    /**
+     * Construct a uniquely identifying string for the request. Could be overridden by the TTS service if
+     * it uses some unique external parameter and wants to identify variability in the cache.
+     *
+     * @param text The text to convert to speech
+     * @param voice The voice to use for speech
+     * @param requestedFormat The audio format to return the results in
+     * @return A likely unique key identifying the combination of parameters and/or internal state,
+     *         as a string suitable to be part of a filename. This will be used in the cache system to store the result.
+     */
+    String getCacheKey(String text, Voice voice, AudioFormat requestedFormat);
 
     /**
      * Returns an {@link AudioStream} containing the TTS results. Note, one
      * can only request a supported {@code Voice} and {@link AudioStream} or
      * an exception is thrown.
-     * The AudioStream is requested from the cache, or, if not found, from
-     * the underlying TTS service
+     * The result will be cached if the TTSCacheService is activated.
      *
-     * @param tts the TTS service
      * @param text The text to convert to speech
      * @param voice The voice to use for speech
      * @param requestedFormat The audio format to return the results in
@@ -43,6 +52,5 @@ public interface TTSCache {
      *             are not supported or another error occurs while creating an
      *             {@link AudioStream}
      */
-    AudioStream getOrSynthetize(TTSService tts, String text, Voice voice, AudioFormat requestedFormat)
-            throws TTSException;
+    AudioStream synthesizeForCache(String text, Voice voice, AudioFormat requestedFormat) throws TTSException;
 }

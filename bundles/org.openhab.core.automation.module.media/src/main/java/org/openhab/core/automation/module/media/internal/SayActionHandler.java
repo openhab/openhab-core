@@ -27,7 +27,6 @@ import org.openhab.core.voice.VoiceManager;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Christoph Weitkamp - Added parameter volume
- * @author Gwendal Roulleau - Added parameter enableCache
  */
 @NonNullByDefault
 public class SayActionHandler extends BaseActionModuleHandler {
@@ -36,14 +35,12 @@ public class SayActionHandler extends BaseActionModuleHandler {
     public static final String PARAM_TEXT = "text";
     public static final String PARAM_SINK = "sink";
     public static final String PARAM_VOLUME = "volume";
-    public static final String PARAM_ENABLECACHE = "enableCache";
 
     private final VoiceManager voiceManager;
 
     private final String text;
     private final @Nullable String sink;
     private final @Nullable PercentType volume;
-    private final @Nullable Boolean enableCache;
 
     public SayActionHandler(Action module, VoiceManager voiceManager) {
         super(module);
@@ -56,14 +53,11 @@ public class SayActionHandler extends BaseActionModuleHandler {
 
         Object volumeParam = module.getConfiguration().get(PARAM_VOLUME);
         this.volume = volumeParam instanceof BigDecimal ? new PercentType((BigDecimal) volumeParam) : null;
-
-        Object enableCacheParam = module.getConfiguration().get(PARAM_ENABLECACHE);
-        this.enableCache = enableCacheParam instanceof Boolean ? (Boolean) enableCacheParam : null;
     }
 
     @Override
     public @Nullable Map<String, Object> execute(Map<String, Object> context) {
-        voiceManager.say(text, null, sink, volume, enableCache);
+        voiceManager.say(text, null, sink, volume);
         return null;
     }
 }

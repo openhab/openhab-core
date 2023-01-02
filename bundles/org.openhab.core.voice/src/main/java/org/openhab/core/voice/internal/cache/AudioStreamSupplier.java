@@ -30,13 +30,13 @@ import org.openhab.core.voice.Voice;
 @NonNullByDefault
 public class AudioStreamSupplier {
 
-    private final TTSService tts;
+    private final TTSCachedService tts;
     private final String text;
     private final Voice voice;
     private final AudioFormat requestedAudioFormat;
     private boolean resolved = false;
 
-    public AudioStreamSupplier(TTSService tts, String text, Voice voice, AudioFormat requestedAudioFormat) {
+    public AudioStreamSupplier(TTSCachedService tts, String text, Voice voice, AudioFormat requestedAudioFormat) {
         super();
         this.tts = tts;
         this.text = text;
@@ -62,7 +62,7 @@ public class AudioStreamSupplier {
         if (resolved) {
             throw new TTSException("This TTS request result have already been supplied");
         }
-        AudioStream audioStream = tts.synthesize(text, voice, requestedAudioFormat);
+        AudioStream audioStream = tts.synthesizeForCache(text, voice, requestedAudioFormat);
         resolved = true;
         return audioStream;
     }
@@ -74,6 +74,6 @@ public class AudioStreamSupplier {
      * @throws TTSException
      */
     public AudioStream fallBackDirectResolution() throws TTSException {
-        return tts.synthesize(text, voice, requestedAudioFormat);
+        return tts.synthesizeForCache(text, voice, requestedAudioFormat);
     }
 }
