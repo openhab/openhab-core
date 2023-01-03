@@ -68,18 +68,18 @@ public class GenericEventTriggerHandler extends BaseTriggerModuleHandler impleme
         super(module);
         this.source = (String) module.getConfiguration().get(CFG_SOURCE);
         String topic = (String) module.getConfiguration().get(CFG_TOPIC);
-        if (!topic.isEmpty()) {
+        if (!topic.isBlank()) {
             topicFilter = new TopicGlobEventFilter(topic);
         } else {
             topicFilter = null;
         }
-        if (module.getConfiguration().get(CFG_TOPIC) != null) {
-            this.types = Set.of(((String) module.getConfiguration().get(CFG_TOPIC)).split(","));
+        if (module.getConfiguration().get(CFG_TYPES) != null) {
+            this.types = Set.of(((String) module.getConfiguration().get(CFG_TYPES)).split(","));
         } else {
             this.types = Set.of();
         }
         String payload = (String) module.getConfiguration().get(CFG_PAYLOAD);
-        if (!payload.isEmpty()) {
+        if (!payload.isBlank()) {
             payloadPattern = Pattern.compile(payload);
         } else {
             payloadPattern = null;
