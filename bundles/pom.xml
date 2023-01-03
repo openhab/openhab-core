@@ -39,6 +39,7 @@
     <module>org.openhab.core</module>
     <module>org.openhab.core.audio</module>
     <module>org.openhab.core.binding.xml</module>
+    <module>org.openhab.core.crypto.cryptostore</module>
     <module>org.openhab.core.ephemeris</module>
     <module>org.openhab.core.addon.sample</module>
     <module>org.openhab.core.id</module>
