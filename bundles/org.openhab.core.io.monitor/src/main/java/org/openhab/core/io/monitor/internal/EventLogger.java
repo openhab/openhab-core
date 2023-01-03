@@ -17,9 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
-import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
@@ -62,12 +60,6 @@ public class EventLogger implements EventSubscriber, ReadyTracker {
     @Override
     public Set<String> getSubscribedEventTypes() {
         return subscribedEventTypes;
-    }
-
-    @Override
-    @Nullable
-    public EventFilter getEventFilter() {
-        return null;
     }
 
     @Override

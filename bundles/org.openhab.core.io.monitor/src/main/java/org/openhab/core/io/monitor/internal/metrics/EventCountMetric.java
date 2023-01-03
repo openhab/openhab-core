@@ -13,15 +13,12 @@
 package org.openhab.core.io.monitor.internal.metrics;
 
 import java.util.Collection;
-import java.util.Dictionary;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
-import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemStateEvent;
@@ -63,10 +60,8 @@ public class EventCountMetric implements OpenhabCoreMeterBinder, EventSubscriber
         unbind();
         logger.debug("EventCountMetric is being bound...");
         this.meterRegistry = meterRegistry;
-        Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("event.topics", "openhab/*");
         this.eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
-                properties);
+                null);
     }
 
     @Override
@@ -92,11 +87,6 @@ public class EventCountMetric implements OpenhabCoreMeterBinder, EventSubscriber
     @Override
     public Set<String> getSubscribedEventTypes() {
         return Set.of(ItemCommandEvent.TYPE, ItemStateEvent.TYPE);
-    }
-
-    @Override
-    public @Nullable EventFilter getEventFilter() {
-        return null;
     }
 
     @Override

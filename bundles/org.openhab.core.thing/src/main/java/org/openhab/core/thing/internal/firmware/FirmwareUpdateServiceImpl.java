@@ -34,7 +34,6 @@ import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
 import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.events.Event;
-import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.i18n.LocaleProvider;
@@ -262,11 +261,6 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
     @Override
     public Set<String> getSubscribedEventTypes() {
         return subscribedEventTypes;
-    }
-
-    @Override
-    public @Nullable EventFilter getEventFilter() {
-        return null;
     }
 
     @Override

@@ -31,12 +31,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
-import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupFunction;
@@ -137,11 +135,6 @@ public class GenericItemProviderTest extends JavaOSGiTest {
                 @Override
                 public Set<String> getSubscribedEventTypes() {
                     return Set.of(ItemRemovedEvent.TYPE);
-                }
-
-                @Override
-                public @Nullable EventFilter getEventFilter() {
-                    return null;
                 }
             };
 
@@ -271,11 +264,6 @@ public class GenericItemProviderTest extends JavaOSGiTest {
             public Set<String> getSubscribedEventTypes() {
                 return Stream.of(ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE, ItemRemovedEvent.TYPE).collect(toSet());
             }
-
-            @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
-            }
         };
 
         registerService(itemEventSubscriber);
@@ -337,11 +325,6 @@ public class GenericItemProviderTest extends JavaOSGiTest {
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Stream.of(ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE, ItemRemovedEvent.TYPE).collect(toSet());
-            }
-
-            @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
             }
         };
 
@@ -607,11 +590,6 @@ public class GenericItemProviderTest extends JavaOSGiTest {
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Stream.of(ItemRemovedEvent.TYPE).collect(toSet());
-            }
-
-            @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
             }
         };
 

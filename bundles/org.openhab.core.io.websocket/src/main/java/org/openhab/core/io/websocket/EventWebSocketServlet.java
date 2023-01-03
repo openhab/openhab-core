@@ -36,7 +36,6 @@ import org.openhab.core.auth.UserApiTokenCredentials;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.openhab.core.events.Event;
-import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.ItemRegistry;
@@ -96,11 +95,6 @@ public class EventWebSocketServlet extends WebSocketServlet implements EventSubs
     @Override
     public Set<String> getSubscribedEventTypes() {
         return Set.of(EventSubscriber.ALL_EVENT_TYPES);
-    }
-
-    @Override
-    public @Nullable EventFilter getEventFilter() {
-        return null;
     }
 
     @Override
