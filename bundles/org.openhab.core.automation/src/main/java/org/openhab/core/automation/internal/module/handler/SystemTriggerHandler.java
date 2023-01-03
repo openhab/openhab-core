@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,20 +13,16 @@
 package org.openhab.core.automation.internal.module.handler;
 
 import java.math.BigDecimal;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.events.Event;
-import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.events.system.StartlevelEvent;
 import org.openhab.core.service.StartLevelService;
@@ -41,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-public class SystemTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
+public class SystemTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber {
 
     public static final String STARTLEVEL_MODULE_TYPE_ID = "core.SystemStartlevelTrigger";
     public static final String CFG_STARTLEVEL = "startlevel";
@@ -67,20 +63,12 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
             throw new IllegalArgumentException(module.getTypeUID() + " is no valid module type.");
         }
         this.bundleContext = bundleContext;
-        Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("event.topics", "openhab/system/*");
-        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
-                properties);
+        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
     }
 
     @Override
     public Set<String> getSubscribedEventTypes() {
         return types;
-    }
-
-    @Override
-    public @Nullable EventFilter getEventFilter() {
-        return this;
     }
 
     @Override
@@ -108,11 +96,6 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
     public void dispose() {
         eventSubscriberRegistration.unregister();
         super.dispose();
-    }
-
-    @Override
-    public boolean apply(Event event) {
-        return true;
     }
 
     public void trigger() {
