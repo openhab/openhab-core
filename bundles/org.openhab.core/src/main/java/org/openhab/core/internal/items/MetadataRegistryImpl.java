@@ -12,6 +12,9 @@
  */
 package org.openhab.core.internal.items;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.events.EventPublisher;
@@ -59,6 +62,18 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
     @Override
     public boolean isInternalNamespace(String namespace) {
         return namespace.startsWith(INTERNAL_NAMESPACE_PREFIX);
+    }
+
+    /**
+     * Provides all namespaces of a particular item
+     *
+     * @param itemname the name of the item for which the namespaces should be searched.
+     */
+    @Override
+    public Set<String> getAllNamespaces(String itemname) {
+        return getAll().stream().filter(n -> {
+            return n.getUID().getItemName().equals(itemname);
+        }).map(n -> n.getUID().getNamespace()).collect(Collectors.toSet());
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
