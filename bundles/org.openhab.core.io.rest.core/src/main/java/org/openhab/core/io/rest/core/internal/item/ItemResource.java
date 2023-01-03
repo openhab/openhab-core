@@ -226,6 +226,30 @@ public class ItemResource implements RESTResource {
         return Response.ok(new Stream2JSONInputStream(itemStream)).build();
     }
 
+    /**
+     *
+     * @param itemname name of the item
+     * @return the namesspace of that item
+     */
+    @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
+    @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/namespaces")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getItemNamespaces", summary = "Gets the namespace of an item.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = "Item not found") })
+    public Response getItemNamespaces(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
+        final Item item = getItem(itemname);
+
+        if (item != null) {
+            final Collection<String> namespaces = metadataRegistry.getAllNamespaces(itemname);
+            return Response.ok(new Stream2JSONInputStream(namespaces.stream())).build();
+        } else {
+            return getItemNotFoundResponse(itemname);
+        }
+    }
+
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}")
@@ -262,8 +286,8 @@ public class ItemResource implements RESTResource {
 
     /**
      *
-     * @param itemname
-     * @return
+     * @param itemname item name to get the state from
+     * @return the state of the item as mime-type text/plain
      */
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
@@ -288,8 +312,8 @@ public class ItemResource implements RESTResource {
 
     /**
      *
-     * @param itemname
-     * @return
+     * @param itemname the item from which to get the binary state
+     * @return the binary state of the item
      */
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
@@ -302,8 +326,8 @@ public class ItemResource implements RESTResource {
     public Response getBinaryItemState(@HeaderParam("Accept") @Nullable String mediaType,
             @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         List<String> acceptedMediaTypes = Arrays.stream(Objects.requireNonNullElse(mediaType, "").split(","))
-                .peek(String::trim).collect(Collectors.toList());
-        // get item
+                .map(String::trim).collect(Collectors.toList());
+
         Item item = getItem(itemname);
 
         // if it exists
@@ -635,9 +659,9 @@ public class ItemResource implements RESTResource {
     /**
      * Create or Update an item by supplying an item bean.
      *
-     * @param itemname
+     * @param itemname the item name
      * @param item the item bean.
-     * @return
+     * @return Response configured to represent the Item in depending on the status
      */
     @PUT
     @RolesAllowed({ Role.ADMIN })
@@ -829,9 +853,9 @@ public class ItemResource implements RESTResource {
     }
 
     /**
-     * helper: Response to be sent to client if a Thing cannot be found
+     * helper: Response to be sent to client if an item cannot be found
      *
-     * @param thingUID
+     * @param itemname item name that could not be found
      * @return Response configured for 'item not found'
      */
     private static Response getItemNotFoundResponse(String itemname) {
@@ -840,10 +864,10 @@ public class ItemResource implements RESTResource {
     }
 
     /**
-     * Prepare a response representing the Item depending in the status.
+     * Prepare a response representing the Item depending on the status.
      *
      * @param uriBuilder the URI builder
-     * @param status
+     * @param status http status
      * @param item can be null
      * @param locale the locale
      * @param errormessage optional message in case of error
@@ -858,7 +882,7 @@ public class ItemResource implements RESTResource {
     /**
      * convenience shortcut
      *
-     * @param itemname
+     * @param itemname the name of the item to be retrieved
      * @return Item addressed by itemname
      */
     private @Nullable Item getItem(String itemname) {

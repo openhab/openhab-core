@@ -12,6 +12,8 @@
  */
 package org.openhab.core.items;
 
+import java.util.Collection;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Registry;
 
@@ -37,9 +39,16 @@ public interface MetadataRegistry extends Registry<Metadata, MetadataKey> {
     boolean isInternalNamespace(String namespace);
 
     /**
+     * Provides all namespaces of a particular item
+     *
+     * @param itemname the name of the item for which the namespaces should be searched.
+     */
+    public Collection<String> getAllNamespaces(String itemname);
+
+    /**
      * Remove all metadata of a given item
      *
      * @param itemname the name of the item for which the metadata is to be removed.
      */
-    void removeItemMetadata(String name);
+    void removeItemMetadata(String itemname);
 }
