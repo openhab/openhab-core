@@ -71,9 +71,8 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
      */
     @Override
     public Set<String> getAllNamespaces(String itemname) {
-        return getAll().stream().filter(n -> {
-            return n.getUID().getItemName().equals(itemname);
-        }).map(n -> n.getUID().getNamespace()).collect(Collectors.toSet());
+        return getAll().stream().filter(n -> n.getUID().getItemName().equals(itemname))
+                .map(n -> n.getUID().getNamespace()).collect(Collectors.toSet());
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)

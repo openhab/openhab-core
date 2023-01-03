@@ -12,7 +12,7 @@
  */
 package org.openhab.core.items;
 
-import java.util.Set;
+import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Registry;
@@ -43,7 +43,7 @@ public interface MetadataRegistry extends Registry<Metadata, MetadataKey> {
      *
      * @param itemname the name of the item for which the namespaces should be searched.
      */
-    public Set<String> getAllNamespaces(String itemname);
+    public Collection<String> getAllNamespaces(String itemname);
 
     /**
      * Remove all metadata of a given item
