@@ -128,7 +128,7 @@ public class RuleEventTest extends JavaOSGiTest {
 
         // Creation of RULE
         Configuration triggerConfig = new Configuration(
-                Map.ofEntries(entry("topic", "openhab/items/myMotionItem2/*"), entry("eventTypes", "ItemStateEvent")));
+                Map.ofEntries(entry("topic", "openhab/items/myMotionItem2/*"), entry("types", "ItemStateEvent")));
 
         Configuration actionConfig = new Configuration(
                 Map.ofEntries(entry("itemName", "myLampItem2"), entry("command", "ON")));
