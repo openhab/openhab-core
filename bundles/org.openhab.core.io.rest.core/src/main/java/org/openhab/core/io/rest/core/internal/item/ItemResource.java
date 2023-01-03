@@ -234,21 +234,17 @@ public class ItemResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/namespaces")
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getItemNamespaces", summary = "Gets the namespace of an item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
     public Response getItemNamespaces(@PathParam("itemname") @Parameter(description = "item name") String itemname,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @QueryParam("exclude") @Parameter(description = "exclude the given namespaces") @Nullable String excludeNamespaces) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Item item = getItem(itemname);
-        final Locale locale = localeService.getLocale(language);
-        final Set<String> excludedNamespaces = splitAndFilterNamespaces(excludeNamespaces, locale);
 
         if (item != null) {
-            final String allItemMetadataNamespaces = metadataRegistry.getAllNamespaces(itemname).stream()
-                    .filter(n -> !excludedNamespaces.contains(n)).collect(Collectors.joining(","));
-            return Response.ok(allItemMetadataNamespaces).build();
+            final Collection<String> namespaces = metadataRegistry.getAllNamespaces(itemname);
+            return Response.ok(new Stream2JSONInputStream(namespaces.stream())).build();
         } else {
             return getItemNotFoundResponse(itemname);
         }

@@ -12,7 +12,7 @@
  */
 package org.openhab.core.internal.items;
 
-import java.util.Set;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -70,10 +70,9 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
      * @param itemname the name of the item for which the namespaces should be searched.
      */
     @Override
-    public Set<String> getAllNamespaces(String itemname) {
-        return stream().map(Metadata::getUID).
-            filter(key -> key.getItemName().equals(itemname)).
-            map(MetadataKey::getNamespace).collect(Collectors.toSet());
+    public Collection getAllNamespaces(String itemname) {
+        return stream().map(Metadata::getUID).filter(key -> key.getItemName().equals(itemname))
+                .map(MetadataKey::getNamespace).collect(Collectors.toSet());
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
