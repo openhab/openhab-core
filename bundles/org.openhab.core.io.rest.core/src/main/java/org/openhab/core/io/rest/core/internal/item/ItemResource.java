@@ -330,8 +330,8 @@ public class ItemResource implements RESTResource {
     public Response getBinaryItemState(@HeaderParam("Accept") @Nullable String mediaType,
             @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         List<String> acceptedMediaTypes = Arrays.stream(Objects.requireNonNullElse(mediaType, "").split(","))
-                .peek(String::trim).collect(Collectors.toList());
-        // get item
+                .map(String::trim).collect(Collectors.toList());
+
         Item item = getItem(itemname);
 
         // if it exists
