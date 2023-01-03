@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,8 +17,6 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,6 +27,7 @@ import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.events.TopicPrefixEventFilter;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -54,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - refactored and simplified customized module handling
  */
 @NonNullByDefault
-public class ItemStateConditionHandler extends BaseConditionModuleHandler implements EventSubscriber, EventFilter {
+public class ItemStateConditionHandler extends BaseConditionModuleHandler implements EventSubscriber {
 
     /**
      * Constants for Config-Parameters corresponding to Definition in ItemModuleTypeDefinition.json
@@ -70,6 +69,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
     private final ItemRegistry itemRegistry;
     private final String ruleUID;
     private final String itemName;
+    private final EventFilter eventFilter;
     private final BundleContext bundleContext;
     private final Set<String> types;
     private final ServiceRegistration<?> eventSubscriberRegistration;
@@ -82,13 +82,11 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         this.bundleContext = bundleContext;
         this.timeZoneProvider = timeZoneProvider;
         this.itemName = (String) module.getConfiguration().get(ITEM_NAME);
+        this.eventFilter = new TopicPrefixEventFilter("openhab/items/" + itemName + "/");
         this.types = Set.of(ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         this.ruleUID = ruleUID;
 
-        Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("event.topics", "openhab/items/" + itemName + "/*");
-        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
-                properties);
+        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
 
         if (itemRegistry.get(itemName) == null) {
             logger.warn("Item '{}' needed for rule '{}' is missing. Condition '{}' will not work.", itemName, ruleUID,
@@ -103,7 +101,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
 
     @Override
     public @Nullable EventFilter getEventFilter() {
-        return this;
+        return eventFilter;
     }
 
     @Override
@@ -259,12 +257,6 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
     public void dispose() {
         super.dispose();
         eventSubscriberRegistration.unregister();
-    }
-
-    @Override
-    public boolean apply(Event event) {
-        logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
-        return event.getTopic().contains("openhab/items/" + itemName + "/");
     }
 
     private ZonedDateTime getCompareTime(String input) {

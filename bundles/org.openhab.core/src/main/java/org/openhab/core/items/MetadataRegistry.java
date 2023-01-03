@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -11,6 +11,8 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.core.items;
+
+import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Registry;
@@ -37,9 +39,16 @@ public interface MetadataRegistry extends Registry<Metadata, MetadataKey> {
     boolean isInternalNamespace(String namespace);
 
     /**
+     * Provides all namespaces of a particular item
+     *
+     * @param itemname the name of the item for which the namespaces should be searched.
+     */
+    public Collection<String> getAllNamespaces(String itemname);
+
+    /**
      * Remove all metadata of a given item
      *
      * @param itemname the name of the item for which the metadata is to be removed.
      */
-    void removeItemMetadata(String name);
+    void removeItemMetadata(String itemname);
 }

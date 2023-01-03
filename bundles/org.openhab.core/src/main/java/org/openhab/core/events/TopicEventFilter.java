@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,8 @@
  */
 package org.openhab.core.events;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -23,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class TopicEventFilter implements EventFilter {
 
-    private final String topicRegex;
+    private final Pattern topicRegex;
 
     /**
      * Constructs a new topic event filter.
@@ -32,11 +34,11 @@ public class TopicEventFilter implements EventFilter {
      * @see <a href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html">Java Regex</a>
      */
     public TopicEventFilter(String topicRegex) {
-        this.topicRegex = topicRegex;
+        this.topicRegex = Pattern.compile(topicRegex);
     }
 
     @Override
     public boolean apply(Event event) {
-        return event.getTopic().matches(topicRegex);
+        return topicRegex.matcher(event.getTopic()).matches();
     }
 }
