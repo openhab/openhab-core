@@ -166,9 +166,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     protected void deactivate() {
         dialogProcessors.values().forEach(DialogProcessor::stop);
         dialogProcessors.clear();
+        var dialogRegistrationFuture = this.dialogRegistrationFuture;
         if (dialogRegistrationFuture != null) {
             dialogRegistrationFuture.cancel(true);
-            dialogRegistrationFuture = null;
+            this.dialogRegistrationFuture = null;
         }
     }
 
