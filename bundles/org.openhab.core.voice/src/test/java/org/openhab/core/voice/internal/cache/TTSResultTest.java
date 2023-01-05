@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -51,17 +51,11 @@ import com.google.gson.GsonBuilder;
 @NonNullByDefault
 public class TTSResultTest {
 
-    @TempDir
-    @NonNullByDefault({})
-    Path tempDir;
+    private @TempDir @NonNullByDefault({}) Path tempDir;
 
-    @Mock
-    @NonNullByDefault({})
-    TTSCachedService ttsServiceMock;
+    private @Mock @NonNullByDefault({}) TTSCachedService ttsServiceMock;
 
-    @Mock
-    @NonNullByDefault({})
-    Voice voiceMock;
+    private @Mock @NonNullByDefault({}) Voice voiceMock;
 
     @BeforeEach
     public void init() {
@@ -117,14 +111,14 @@ public class TTSResultTest {
         TTSResult ttsResult = new TTSResult(tempDir, "key1", supplier);
 
         // get audiostream wrapped by the cache system
-        AudioStream actualAudioStream = ttsResult.getAudioStreamClient(fallbackSupplierBroken);
+        AudioStream actualAudioStream = ttsResult.getAudioStream(fallbackSupplierBroken);
         String actuallyRead = new String(actualAudioStream.readAllBytes(), StandardCharsets.UTF_8);
         actualAudioStream.close();
         // ensure that the data are not corrupted
         assertEquals("This is a false string to simulate some data", actuallyRead);
 
         // get again the audiostream wrapped by the cache system
-        actualAudioStream = ttsResult.getAudioStreamClient(fallbackSupplierBroken);
+        actualAudioStream = ttsResult.getAudioStream(fallbackSupplierBroken);
         actuallyRead = new String(actualAudioStream.readAllBytes(), StandardCharsets.UTF_8);
         actualAudioStream.close();
         // ensure that the data are not corrupted
@@ -166,7 +160,7 @@ public class TTSResultTest {
         assertEquals("text", ttsResultBuildByFile.getText());
 
         // Test the fake AudioStream as string data
-        AudioStream audioStreamClient = ttsResultBuildByFile.getAudioStreamClient(fallbackSupplierBroken);
+        AudioStream audioStreamClient = ttsResultBuildByFile.getAudioStream(fallbackSupplierBroken);
         String readFromFile = new String(audioStreamClient.readAllBytes());
         audioStreamClient.close();
         assertEquals("Fake data", readFromFile);
@@ -200,10 +194,10 @@ public class TTSResultTest {
         TTSResult ttsResult = new TTSResult(tempDir, "key1", supplier);
 
         // get a first audiostream wrapped by the cache system
-        AudioStream actualAudioStream1 = ttsResult.getAudioStreamClient(fallbackSupplierBroken);
+        AudioStream actualAudioStream1 = ttsResult.getAudioStream(fallbackSupplierBroken);
 
         // get a second, concurrent, audiostream wrapped by the cache system
-        AudioStream actualAudioStream2 = ttsResult.getAudioStreamClient(fallbackSupplierBroken);
+        AudioStream actualAudioStream2 = ttsResult.getAudioStream(fallbackSupplierBroken);
 
         // read bytes from the two stream concurrently
         byte[] byteReadFromStream1 = actualAudioStream1.readNBytes(4);
@@ -250,10 +244,10 @@ public class TTSResultTest {
         TTSResult ttsResult = new TTSResult(tempDir, "key1", supplier);
 
         // get a first audiostream wrapped by the cache system
-        AudioStream actualAudioStream1 = ttsResult.getAudioStreamClient(fallbackSupplierBroken);
+        AudioStream actualAudioStream1 = ttsResult.getAudioStream(fallbackSupplierBroken);
 
         // get a second, concurrent, audiostream wrapped by the cache system
-        AudioStream actualAudioStream2 = ttsResult.getAudioStreamClient(fallbackSupplierBroken);
+        AudioStream actualAudioStream2 = ttsResult.getAudioStream(fallbackSupplierBroken);
 
         // read bytes from the two stream concurrently
         List<AudioStream> parallelAudioStreamList = Arrays.asList(actualAudioStream1, actualAudioStream2);
@@ -302,7 +296,7 @@ public class TTSResultTest {
 
         TTSResult ttsResult = new TTSResult(tempDir, "key1", supplier);
 
-        AudioStream audioStreamClient = ttsResult.getAudioStreamClient(fallbackSupplierBroken);
+        AudioStream audioStreamClient = ttsResult.getAudioStream(fallbackSupplierBroken);
         byte[] bytesRead = audioStreamClient.readAllBytes();
         audioStreamClient.close();
         assertTrue(fakeAudioStream.isClosed());
@@ -329,7 +323,7 @@ public class TTSResultTest {
         when(ttsServiceMock.synthesizeForCache("text", voiceMock, AudioFormat.MP3)).thenReturn(fakeAudioStream);
 
         TTSResult ttsResult = new TTSResult(tempDir, "key1", supplier);
-        AudioStream audioStreamClient = ttsResult.getAudioStreamClient(fallbackSupplierBroken);
+        AudioStream audioStreamClient = ttsResult.getAudioStream(fallbackSupplierBroken);
         Long totalSize = ttsResult.getTotalSize();
         audioStreamClient.close();
         assertEquals(2 * 10240, totalSize);

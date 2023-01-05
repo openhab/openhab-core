@@ -79,8 +79,7 @@ public class TTSResult {
     private long currentSize = 0;
     private boolean completed;
 
-    @NonNullByDefault({}) // file channel could not be null when we read or write from the wrapper
-    private FileChannel fileChannel;
+    private @Nullable FileChannel fileChannel;
     private final Lock fileOperationLock = new ReentrantLock();
 
     private Gson gson = new GsonBuilder().create();
@@ -120,15 +119,15 @@ public class TTSResult {
      *
      * @param cacheDirectory The cache folder
      * @param key A unique key to identify the produced TTS sound
-     * @param ttsSynthetizerSupplier The {@link AudioStreamSupplier} for the result we want to cache, from the TTS
+     * @param ttsSynthesizerSupplier The {@link AudioStreamSupplier} for the result we want to cache, from the TTS
      *            service
      */
-    public TTSResult(Path cacheDirectory, String key, AudioStreamSupplier ttsSynthetizerSupplier) {
+    public TTSResult(Path cacheDirectory, String key, AudioStreamSupplier ttsSynthesizerSupplier) {
         this.key = key;
-        this.text = ttsSynthetizerSupplier.getText();
+        this.text = ttsSynthesizerSupplier.getText();
         this.soundFile = cacheDirectory.resolve(key + TTSLRUCacheImpl.SOUND_EXT).toFile();
         this.infoFile = cacheDirectory.resolve(key + TTSLRUCacheImpl.INFO_EXT).toFile();
-        this.ttsAudioStreamSupplier = ttsSynthetizerSupplier;
+        this.ttsAudioStreamSupplier = ttsSynthesizerSupplier;
         this.completed = false;
     }
 
@@ -144,9 +143,9 @@ public class TTSResult {
             return currentSize;
         } else {
             // first try to check if the inner stream has the information
-            AudioStream ttsAudioStreamFinal = ttsAudioStream;
-            if (ttsAudioStreamFinal != null
-                    && ttsAudioStreamFinal instanceof FixedLengthAudioStream fixedLengthAudioStream) {
+            AudioStream ttsAudioStreamLocal = ttsAudioStream;
+            if (ttsAudioStreamLocal != null
+                    && ttsAudioStreamLocal instanceof FixedLengthAudioStream fixedLengthAudioStream) {
                 return fixedLengthAudioStream.length();
             }
             // else, we must force-read all the stream to get the real size
@@ -187,9 +186,9 @@ public class TTSResult {
      * @param fallbackAudioStreamSupplier If something goes wrong with the cache, this supplier will provide the
      *            AudioStream directly from the TTS service
      *
-     * @return An @AudioStream that can be used to play sound
+     * @return An {@link AudioStream} that can be used to play sound
      */
-    protected AudioStream getAudioStreamClient(AudioStreamSupplier fallbackAudioStreamSupplier) {
+    protected AudioStream getAudioStream(AudioStreamSupplier fallbackAudioStreamSupplier) {
         logger.debug("Trying to open a cache audiostream client for {}", soundFile.getName());
 
         // if this TTSResult was loaded from file, take the opportunity to record the supplier :
@@ -201,14 +200,15 @@ public class TTSResult {
         try {
             countAudioStreamClient++;
             // we could have to open the fileChannel
-            FileChannel fileChannelFinal = fileChannel;
-            if (fileChannelFinal == null || !soundFile.exists()) {
+            FileChannel fileChannelLocal = fileChannel;
+            if (fileChannelLocal == null || !soundFile.exists()) {
                 try {
-                    fileChannel = FileChannel.open(soundFile.toPath(),
+                    fileChannelLocal = FileChannel.open(soundFile.toPath(),
                             EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE));
+                    fileChannel = fileChannelLocal;
                     // if the file size is 0 but the completed boolean is true, THEN it means the file have
                     // been deleted. We must mark the file as to be recreated by reseting everything :
-                    if (completed && fileChannel.size() == 0) {
+                    if (completed && fileChannelLocal.size() == 0) {
                         logger.debug("The cached sound file {} is not present anymore. We have to recreate it",
                                 soundFile.getName());
                         resetStream(fallbackAudioStreamSupplier);
@@ -244,19 +244,19 @@ public class TTSResult {
             if (countAudioStreamClient <= 0) {// no more client reading or writing : closing the
                                               // filechannel
                 try {
-                    FileChannel fileChannelFinal = fileChannel;
-                    if (fileChannelFinal != null) {
+                    FileChannel fileChannelLocal = fileChannel;
+                    if (fileChannelLocal != null) {
                         try {
                             logger.debug("Effectively close the TTS cache filechannel for {}", soundFile.getName());
-                            fileChannelFinal.close();
+                            fileChannelLocal.close();
                         } finally {
                             fileChannel = null;
                         }
                     }
                 } finally {
-                    AudioStream ttsAudioStreamFinal = ttsAudioStream;
-                    if (ttsAudioStreamFinal != null) {
-                        ttsAudioStreamFinal.close();
+                    AudioStream ttsAudioStreamLocal = ttsAudioStream;
+                    if (ttsAudioStreamLocal != null) {
+                        ttsAudioStreamLocal.close();
                     }
                 }
             }
@@ -272,13 +272,13 @@ public class TTSResult {
      * @throws TTSException
      */
     private void resolveAudioStreamSupplier() throws TTSException {
-        AudioStreamSupplier audioStreamSupplierFinal = ttsAudioStreamSupplier;
-        if (ttsAudioStream == null && audioStreamSupplierFinal != null && !audioStreamSupplierFinal.isResolved()) {
+        AudioStreamSupplier audioStreamSupplierLocal = ttsAudioStreamSupplier;
+        if (ttsAudioStream == null && audioStreamSupplierLocal != null && !audioStreamSupplierLocal.isResolved()) {
             logger.trace("Trying to synchronize for resolving supplier");
-            synchronized (audioStreamSupplierFinal) {
-                if (!audioStreamSupplierFinal.isResolved()) { // test again after getting the lock
+            synchronized (audioStreamSupplierLocal) {
+                if (!audioStreamSupplierLocal.isResolved()) { // test again after getting the lock
                     try {
-                        AudioStream audioStreamResolved = audioStreamSupplierFinal.resolve();
+                        AudioStream audioStreamResolved = audioStreamSupplierLocal.resolve();
                         ttsAudioStream = audioStreamResolved;
                         AudioFormat audioFormatFromTTSAudioStream = audioStreamResolved.getFormat();
                         this.audioFormat = audioFormatFromTTSAudioStream;
@@ -299,21 +299,21 @@ public class TTSResult {
      * @return
      */
     protected AudioFormat getAudioFormat() {
-        AudioFormat audioFormatFinal = this.audioFormat;
-        if (audioFormatFinal != null) {
-            return audioFormatFinal;
+        AudioFormat audioFormatLocal = this.audioFormat;
+        if (audioFormatLocal != null) {
+            return audioFormatLocal;
         } else {
             try {
                 resolveAudioStreamSupplier();
             } catch (TTSException e) {
                 logger.warn("Cannot get or store audio format from the TTS audio service: {}", e.getMessage());
             }
-            audioFormatFinal = audioFormat;
-            if (audioFormatFinal == null) { // should't happen : resolve and synthetise MUST fill it
+            audioFormatLocal = audioFormat;
+            if (audioFormatLocal == null) { // should't happen : resolve and synthezise MUST fill it
                 logger.warn("Cannot get audio format for TTS sound file {}. Assuming WAV", soundFile.getName());
                 return AudioFormat.WAV;
             }
-            return audioFormatFinal;
+            return audioFormatLocal;
         }
     }
 
@@ -327,29 +327,30 @@ public class TTSResult {
      * @throws IOException
      */
     protected byte[] read(int start, int sizeToRead) throws IOException {
-        if (fileChannel == null) {
+        FileChannel fileChannelLocal = fileChannel;
+        if (fileChannelLocal == null) {
             throw new IOException("Cannot read TTS cache from null file channel. Shouldn't happen");
         }
         try {
             // check if we need to get data from the inner stream. Note : if completeSize != null, then the end of
             // stream has already been reached :
-            if (start + sizeToRead > fileChannel.size() && !completed) {
+            if (start + sizeToRead > fileChannelLocal.size() && !completed) {
                 logger.trace("Maybe need to get data from inner stream");
                 resolveAudioStreamSupplier();
                 // try to get new bytes from the inner stream
-                AudioStream ttsAudioStreamFinal = ttsAudioStream;
-                if (ttsAudioStreamFinal != null) {
+                AudioStream ttsAudioStreamLocal = ttsAudioStream;
+                if (ttsAudioStreamLocal != null) {
                     logger.trace("Trying to synchronize for reading inner audiostream");
-                    synchronized (ttsAudioStreamFinal) {
+                    synchronized (ttsAudioStreamLocal) {
                         // now that we really have the lock, test again if we really need data from the stream
-                        while (start + sizeToRead > fileChannel.size() && !completed) {
+                        while (start + sizeToRead > fileChannelLocal.size() && !completed) {
                             logger.trace("Really need to get data from inner stream");
-                            byte[] readFromTTS = ttsAudioStreamFinal.readNBytes(CHUNK_SIZE);
+                            byte[] readFromTTS = ttsAudioStreamLocal.readNBytes(CHUNK_SIZE);
                             if (readFromTTS.length == 0) { // we read all the stream
                                 logger.trace("End of the stream reached");
                                 completed = true;
                             } else {
-                                fileChannel.write(ByteBuffer.wrap(readFromTTS), currentSize);
+                                fileChannelLocal.write(ByteBuffer.wrap(readFromTTS), currentSize);
                                 logger.trace("writing {} bytes to {}", readFromTTS.length, soundFile.getName());
                                 currentSize += readFromTTS.length;
                             }
@@ -360,7 +361,7 @@ public class TTSResult {
             // the cache file is now filled, get bytes from it.
             long maxToRead = Math.min(currentSize, sizeToRead);
             ByteBuffer byteBufferFromChannelFile = ByteBuffer.allocate((int) maxToRead);
-            int byteReadNumber = fileChannel.read(byteBufferFromChannelFile, Integer.valueOf(start).longValue());
+            int byteReadNumber = fileChannelLocal.read(byteBufferFromChannelFile, Integer.valueOf(start).longValue());
             logger.debug("Read {} bytes from the filechannel", byteReadNumber);
             if (byteReadNumber > 0) {
                 byte[] resultByteArray = new byte[byteReadNumber];
@@ -383,8 +384,12 @@ public class TTSResult {
      * @return
      */
     protected int availableFrom(int offset) {
+        FileChannel fileChannelLocal = fileChannel;
+        if (fileChannelLocal == null) {
+            return 0;
+        }
         try {
-            return Long.valueOf(fileChannel.size() - offset).intValue();
+            return Math.max(0, Long.valueOf(fileChannelLocal.size() - offset).intValue());
         } catch (IOException e) {
             logger.debug("Cannot get file length for TTS sound file {}", soundFile.getName());
             return 0;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,8 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Each {@link TTSResult} instance can handle several AudioStream.
- * This class is a wrapper for such functionality, and can
+ * Each {@link TTSResult} instance can handle several {@link AudioStream}s.
+ * This class is a wrapper for such functionality and can
  * ask the cached TTSResult for data, allowing concurrent access to
  * the audio stream even if it is currently actively read from the TTS service.
  * If the cached TTSResult is faulty, then it can take data from the
@@ -89,9 +89,9 @@ public class AudioStreamCacheWrapper extends FixedLengthAudioStream {
 
         // beyond this point, we failed, so the fallback must be active :
         enableFallback();
-        AudioStream fallbackDirectAudioStreamFinal = fallbackDirectAudioStream;
-        if (fallbackDirectAudioStreamFinal != null) {
-            return fallbackDirectAudioStreamFinal.read();
+        AudioStream fallbackDirectAudioStreamLocal = fallbackDirectAudioStream;
+        if (fallbackDirectAudioStreamLocal != null) {
+            return fallbackDirectAudioStreamLocal.read();
         }
 
         throw new IOException("Neither TTS cache nor TTS fallback method succeed");
@@ -127,9 +127,9 @@ public class AudioStreamCacheWrapper extends FixedLengthAudioStream {
 
         // beyond this point, we failed, so fallback must be active :
         enableFallback();
-        AudioStream fallbackDirectAudioStreamFinal = fallbackDirectAudioStream;
-        if (fallbackDirectAudioStreamFinal != null) {
-            return fallbackDirectAudioStreamFinal.read(b, off, len);
+        AudioStream fallbackDirectAudioStreamLocal = fallbackDirectAudioStream;
+        if (fallbackDirectAudioStreamLocal != null) {
+            return fallbackDirectAudioStreamLocal.read(b, off, len);
         }
 
         throw new IOException("Neither TTS cache nor TTS fallback method succeed");
@@ -153,9 +153,9 @@ public class AudioStreamCacheWrapper extends FixedLengthAudioStream {
     private void enableFallback() throws IOException {
         if (fallbackDirectAudioStream == null) {
             try {
-                AudioStream fallBackDirectResolutionFinal = fallbackDirectSupplier.fallBackDirectResolution();
-                this.fallbackDirectAudioStream = fallBackDirectResolutionFinal;
-                fallBackDirectResolutionFinal.skip(offset);
+                AudioStream fallBackDirectResolutionLocal = fallbackDirectSupplier.fallBackDirectResolution();
+                this.fallbackDirectAudioStream = fallBackDirectResolutionLocal;
+                fallBackDirectResolutionLocal.skip(offset);
             } catch (TTSException e) {
                 throw new IOException("Cannot read from TTS service", e);
             }
@@ -171,8 +171,8 @@ public class AudioStreamCacheWrapper extends FixedLengthAudioStream {
         try {
             enableFallback();
 
-            AudioStream fallbackDirectAudioStreamFinal = this.fallbackDirectAudioStream;
-            if (fallbackDirectAudioStreamFinal instanceof FixedLengthAudioStream fixedLengthAudioStream) {
+            AudioStream fallbackDirectAudioStreamLocal = this.fallbackDirectAudioStream;
+            if (fallbackDirectAudioStreamLocal instanceof FixedLengthAudioStream fixedLengthAudioStream) {
                 return fixedLengthAudioStream.length();
             }
         } catch (IOException e) {
@@ -183,6 +183,6 @@ public class AudioStreamCacheWrapper extends FixedLengthAudioStream {
 
     @Override
     public InputStream getClonedStream() throws AudioException {
-        return ttsResult.getAudioStreamClient(fallbackDirectSupplier);
+        return ttsResult.getAudioStream(fallbackDirectSupplier);
     }
 }

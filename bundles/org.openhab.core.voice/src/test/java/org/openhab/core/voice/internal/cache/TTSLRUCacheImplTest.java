@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -50,21 +50,15 @@ import com.google.gson.GsonBuilder;
 @NonNullByDefault
 public class TTSLRUCacheImplTest {
 
-    @TempDir
-    @NonNullByDefault({})
-    Path tempDir;
+    private @TempDir @NonNullByDefault({}) Path tempDir;
 
-    @NonNullByDefault({})
-    private @Mock Voice voiceMock;
+    private @NonNullByDefault({}) @Mock Voice voiceMock;
 
-    @NonNullByDefault({})
-    private @Mock TTSCachedService ttsServiceMock;
+    private @Mock @NonNullByDefault({}) TTSCachedService ttsServiceMock;
 
-    @NonNullByDefault({})
-    private @Mock AudioStreamSupplier supplierMock;
+    private @Mock @NonNullByDefault({}) AudioStreamSupplier supplierMock;
 
-    @NonNullByDefault({})
-    private @Mock AudioStream audioStreamMock;
+    private @Mock @NonNullByDefault({}) AudioStream audioStreamMock;
 
     @BeforeEach
     public void init() {
@@ -207,7 +201,7 @@ public class TTSLRUCacheImplTest {
      * @throws IOException
      */
     @Test
-    public void getOrSynthetizeCacheMissAndHit() throws TTSException, IOException {
+    public void getCacheMissAndHit() throws TTSException, IOException {
         when(ttsServiceMock.getCacheKey("text", voiceMock, AudioFormat.MP3)).thenReturn("filename1");
         when(ttsServiceMock.synthesizeForCache("text", voiceMock, AudioFormat.MP3)).thenReturn(audioStreamMock);
         when(audioStreamMock.getFormat()).thenReturn(AudioFormat.MP3);
@@ -217,27 +211,27 @@ public class TTSLRUCacheImplTest {
         TTSLRUCacheImpl voiceLRUCache = createTTSCache(1000);
 
         // first cache miss
-        AudioStream ttsResultStream = voiceLRUCache.getOrSynthetize(ttsServiceMock, "text", voiceMock, AudioFormat.MP3);
+        AudioStream ttsResultStream = voiceLRUCache.get(ttsServiceMock, "text", voiceMock, AudioFormat.MP3);
         // force supplier resolution with a "getFormat":
         ttsResultStream.getFormat();
         ttsResultStream.readAllBytes();
         ttsResultStream.close();
 
         // then cache hit
-        ttsResultStream = voiceLRUCache.getOrSynthetize(ttsServiceMock, "text", voiceMock, AudioFormat.MP3);
+        ttsResultStream = voiceLRUCache.get(ttsServiceMock, "text", voiceMock, AudioFormat.MP3);
         // force supplier resolution with a "getFormat" --> won't be called
         ttsResultStream.getFormat();
         ttsResultStream.readAllBytes();
         ttsResultStream.close();
 
         // then cache hit
-        ttsResultStream = voiceLRUCache.getOrSynthetize(ttsServiceMock, "text", voiceMock, AudioFormat.MP3);
+        ttsResultStream = voiceLRUCache.get(ttsServiceMock, "text", voiceMock, AudioFormat.MP3);
         // force supplier resolution with a "getFormat" --> won't be called
         ttsResultStream.getFormat();
         ttsResultStream.readAllBytes();
         ttsResultStream.close();
 
-        // even with three call to getOrSynthetize and getFormat, the TTS service and the underlying stream were called
+        // even with three call to get and getFormat, the TTS service and the underlying stream were called
         // only once :
         verify(ttsServiceMock, times(1)).synthesizeForCache("text", voiceMock, AudioFormat.MP3);
         verify(audioStreamMock, times(1)).getFormat();

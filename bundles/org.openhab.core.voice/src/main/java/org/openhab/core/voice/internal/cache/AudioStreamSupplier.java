@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,8 +20,8 @@ import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 
 /**
- * Custom supplier class to defer synthetizing with a TTS service
- * This allow calling the {@link TTSService} by the client reading the stream, only when needed,
+ * Custom supplier class to defer synthesizing with a TTS service
+ * This allows calling the {@link TTSService} by the client reading the stream only when needed
  * and thus not blocking the caching service during its standard operation get/push
  *
  * @author Gwendal Roulleau - Initial Contribution

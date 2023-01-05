@@ -185,14 +185,14 @@ public class TTSLRUCacheImpl implements TTSCache {
     }
 
     @Override
-    public AudioStream getOrSynthetize(TTSCachedService tts, String text, Voice voice, AudioFormat requestedFormat)
+    public AudioStream get(TTSCachedService tts, String text, Voice voice, AudioFormat requestedFormat)
             throws TTSException {
         if (!enableCacheTTS) {
             return tts.synthesizeForCache(text, voice, requestedFormat);
         }
 
         // initialize the supplier stream from the TTS service tts
-        AudioStreamSupplier ttsSynthetizerSupplier = new AudioStreamSupplier(tts, text, voice, requestedFormat);
+        AudioStreamSupplier ttsSynthesizerSupplier = new AudioStreamSupplier(tts, text, voice, requestedFormat);
         lock.lock(); // (a get operation also need the lock as it will update the head of the cache)
         try {
             String key = tts.getClass().getSimpleName() + "_" + tts.getCacheKey(text, voice, requestedFormat);
@@ -201,12 +201,12 @@ public class TTSLRUCacheImpl implements TTSCache {
             if (ttsResult == null || !ttsResult.getText().equals(text)) { // it's a cache miss or a false positive, we
                 // must (re)create it
                 logger.debug("Cache miss {}", key);
-                ttsResult = new TTSResult(cacheFolder, key, ttsSynthetizerSupplier);
+                ttsResult = new TTSResult(cacheFolder, key, ttsSynthesizerSupplier);
                 ttsResultMap.put(key, ttsResult);
             } else {
                 logger.debug("Cache hit {}", key);
             }
-            return ttsResult.getAudioStreamClient(ttsSynthetizerSupplier);
+            return ttsResult.getAudioStream(ttsSynthesizerSupplier);
         } finally {
             lock.unlock();
         }
