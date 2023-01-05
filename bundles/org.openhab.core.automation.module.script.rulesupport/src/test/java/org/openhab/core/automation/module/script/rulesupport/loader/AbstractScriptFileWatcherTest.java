@@ -417,18 +417,17 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         Path p = getFile("script.js");
 
+        InOrder inOrder = inOrder(scriptEngineManagerMock);
+        String scriptIdentifier = ScriptFileReference.getScriptIdentifier(p);
+
         scriptFileWatcher.processWatchEvent(null, ENTRY_CREATE, p);
 
         awaitEmptyQueue();
+        inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", scriptIdentifier);
 
         scriptFileWatcher.processWatchEvent(null, ENTRY_MODIFY, p);
 
         awaitEmptyQueue();
-
-        String scriptIdentifier = ScriptFileReference.getScriptIdentifier(p);
-
-        InOrder inOrder = inOrder(scriptEngineManagerMock);
-        inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", scriptIdentifier);
         inOrder.verify(scriptEngineManagerMock, timeout(10000)).removeEngine(scriptIdentifier);
         inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", scriptIdentifier);
     }
