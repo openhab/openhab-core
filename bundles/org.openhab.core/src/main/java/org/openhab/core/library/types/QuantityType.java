@@ -290,7 +290,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     /**
      * Convert this QuantityType to a new {@link QuantityType} using the given target unit.
-     * 
+     *
      * Implicit conversions using inverse units are allowed (i.e. mired <=> Kelvin). This may
      * change the dimension.
      *
@@ -455,15 +455,13 @@ public class QuantityType<T extends Quantity<T>> extends Number
             return target.cast(new HSBType(DecimalType.ZERO, PercentType.ZERO,
                     new PercentType(toBigDecimal().multiply(BIG_DECIMAL_HUNDRED))));
         } else if (target == PercentType.class) {
-            if (Units.PERCENT.equals(getUnit())) {
-                return target.cast(new PercentType(toBigDecimal()));
+            QuantityType<T> inPercent = toUnit(Units.PERCENT);
+            if (inPercent == null) {
+                // incompatible unit
+                return null;
             } else {
-                QuantityType<T> inPercent = toUnit(Units.PERCENT);
-                if (inPercent != null) {
-                    return inPercent.as(target);
-                }
+                return target.cast(new PercentType(inPercent.toBigDecimal()));
             }
-            return target.cast(new PercentType(toBigDecimal().multiply(BIG_DECIMAL_HUNDRED)));
         } else if (target == DecimalType.class) {
             return target.cast(new DecimalType(toBigDecimal()));
         } else {

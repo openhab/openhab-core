@@ -307,10 +307,19 @@ public class QuantityTypeTest {
 
         assertEquals(PercentType.HUNDRED, new QuantityType<>("100 %").as(PercentType.class));
         assertEquals(PercentType.ZERO, new QuantityType<>("0 %").as(PercentType.class));
+
+        // Test QuantityType (different ways to refer to 10%) conversion to PercentType
         assertEquals(new PercentType(BigDecimal.valueOf(10)), new QuantityType<>("10 %").as(PercentType.class));
         assertEquals(new PercentType(BigDecimal.valueOf(10)), new QuantityType<>("0.1").as(PercentType.class));
         assertEquals(new PercentType(BigDecimal.valueOf(10)), new QuantityType<>("100 %/10").as(PercentType.class));
         assertEquals(new PercentType(BigDecimal.valueOf(10)), new QuantityType<>("100000 ppm").as(PercentType.class));
+
+        // Known caveat: bare unit, different dimension. Still gets converted to %
+        assertEquals(new PercentType(BigDecimal.valueOf(10)),
+                new QuantityType<>(0.1, Units.RADIAN).as(PercentType.class));
+
+        // incompatible units
+        assertEquals(null, new QuantityType<>("0.5 m").as(PercentType.class));
     }
 
     @ParameterizedTest
