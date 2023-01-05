@@ -35,11 +35,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.StorageService;
+import org.openhab.core.test.storage.VolatileStorageService;
 import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.Voice;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import org.openhab.core.voice.internal.cache.TTSResult.AudioFormatInfo;
 
 /**
  * Test the cache system
@@ -54,23 +55,27 @@ public class TTSLRUCacheImplTest {
 
     private @NonNullByDefault({}) @Mock Voice voiceMock;
 
-    private @Mock @NonNullByDefault({}) TTSCachedService ttsServiceMock;
+    private @Mock @NonNullByDefault({}) CachedTTSService ttsServiceMock;
 
     private @Mock @NonNullByDefault({}) AudioStreamSupplier supplierMock;
 
     private @Mock @NonNullByDefault({}) AudioStream audioStreamMock;
 
+    private @NonNullByDefault({}) Storage<AudioFormatInfo> storage;
+    private @NonNullByDefault({}) StorageService storageService;
+
     @BeforeEach
     public void init() {
         System.setProperty(OpenHAB.USERDATA_DIR_PROG_ARGUMENT, tempDir.toString());
+        storageService = new VolatileStorageService();
+        this.storage = storageService.getStorage(TTSLRUCacheImpl.VOICE_TTS_CACHE_PID);
     }
 
     private TTSLRUCacheImpl createTTSCache(long size) throws IOException {
-        TTSLRUCacheImpl voiceLRUCache = new TTSLRUCacheImpl();
         Map<String, Object> config = new HashMap<>();
         config.put(TTSLRUCacheImpl.CONFIG_CACHE_SIZE_TTS, size);
         config.put(TTSLRUCacheImpl.CONFIG_ENABLE_CACHE_TTS, true);
-        voiceLRUCache.activate(config);
+        TTSLRUCacheImpl voiceLRUCache = new TTSLRUCacheImpl(storageService, config);
         return voiceLRUCache;
     }
 
@@ -82,7 +87,7 @@ public class TTSLRUCacheImplTest {
     @Test
     public void simpleLRUPutAndGetTest() throws IOException {
         TTSLRUCacheImpl voiceLRUCache = createTTSCache(10);
-        TTSResult ttsResult = new TTSResult(tempDir, "key1", supplierMock);
+        TTSResult ttsResult = new TTSResult(tempDir, "key1", storage, supplierMock);
         voiceLRUCache.put(ttsResult);
         assertEquals(ttsResult, voiceLRUCache.ttsResultMap.get("key1"));
         assertEquals(null, voiceLRUCache.ttsResultMap.get("key2"));
@@ -96,16 +101,16 @@ public class TTSLRUCacheImplTest {
     @Test
     public void putAndGetAndEvictionOrderLRUTest() throws IOException {
         TTSLRUCacheImpl voiceLRUCache = createTTSCache(10);
-        TTSResult ttsResult1 = new TTSResult(tempDir, "key1", supplierMock);
+        TTSResult ttsResult1 = new TTSResult(tempDir, "key1", storage, supplierMock);
         ttsResult1.setSize(4 * 1024);
         voiceLRUCache.put(ttsResult1);
-        TTSResult ttsResult2 = new TTSResult(tempDir, "key2", supplierMock);
+        TTSResult ttsResult2 = new TTSResult(tempDir, "key2", storage, supplierMock);
         ttsResult2.setSize(4 * 1024);
         voiceLRUCache.put(ttsResult2);
-        TTSResult ttsResult3 = new TTSResult(tempDir, "key3", supplierMock);
+        TTSResult ttsResult3 = new TTSResult(tempDir, "key3", storage, supplierMock);
         ttsResult3.setSize(2 * 1024);
         voiceLRUCache.put(ttsResult3);
-        TTSResult ttsResult4 = new TTSResult(tempDir, "key4", supplierMock);
+        TTSResult ttsResult4 = new TTSResult(tempDir, "key4", storage, supplierMock);
         ttsResult4.setSize(4 * 1024);
         voiceLRUCache.put(ttsResult4);
 
@@ -128,16 +133,16 @@ public class TTSLRUCacheImplTest {
      */
     @Test
     public void fileDeletionTest() throws IOException {
-        TTSResult ttsResult1 = new TTSResult(tempDir, "key1", supplierMock);
+        TTSResult ttsResult1 = new TTSResult(tempDir, "key1", storage, supplierMock);
         File ttsResult1File = tempDir.resolve(ttsResult1.getKey() + TTSLRUCacheImpl.SOUND_EXT).toFile();
         ttsResult1File.createNewFile();
-        File ttsResult1InfoFile = tempDir.resolve(ttsResult1.getKey() + TTSLRUCacheImpl.INFO_EXT).toFile();
-        ttsResult1InfoFile.createNewFile();
+        AudioFormatInfo audioFormatInfo = new AudioFormatInfo("text", false, 1, 1, 1L, 1, "wav", "wav");
+        storage.put("key1", audioFormatInfo);
 
         ttsResult1.deleteFiles();
 
         assertFalse(ttsResult1File.exists());
-        assertFalse(ttsResult1InfoFile.exists());
+        assertNull(storage.get("key1"));
     }
 
     /**
@@ -155,7 +160,7 @@ public class TTSLRUCacheImplTest {
         voiceLRUCache.put(ttsResultToEvict);
 
         // the cache is already full, so the next put will delete ttsResultToEvict
-        TTSResult ttsResult2 = new TTSResult(tempDir, "key2", supplierMock);
+        TTSResult ttsResult2 = new TTSResult(tempDir, "key2", storage, supplierMock);
         ttsResult2.setSize(4 * 1024);
         voiceLRUCache.put(ttsResult2);
 
@@ -171,17 +176,17 @@ public class TTSLRUCacheImplTest {
     @Test
     public void putExistingResultLRUTest() throws IOException {
         TTSLRUCacheImpl voiceLRUCache = createTTSCache(10);
-        TTSResult ttsResult1 = new TTSResult(tempDir, "key1", supplierMock);
+        TTSResult ttsResult1 = new TTSResult(tempDir, "key1", storage, supplierMock);
         ttsResult1.setSize(4 * 1024);
         voiceLRUCache.put(ttsResult1);
-        TTSResult ttsResult2 = new TTSResult(tempDir, "key2", supplierMock);
+        TTSResult ttsResult2 = new TTSResult(tempDir, "key2", storage, supplierMock);
         ttsResult2.setSize(10 * 1024);
         voiceLRUCache.put(ttsResult2);
 
         // put again key1 --> key2 is now tail
         voiceLRUCache.put(ttsResult1);
 
-        TTSResult ttsResult3 = new TTSResult(tempDir, "key3", supplierMock);
+        TTSResult ttsResult3 = new TTSResult(tempDir, "key3", storage, supplierMock);
         ttsResult3.setSize(4 * 1024);
         voiceLRUCache.put(ttsResult3);
 
@@ -251,31 +256,22 @@ public class TTSLRUCacheImplTest {
         // prepare cache directory
         Path cacheDirectory = tempDir.resolve("cache/org.openhab.voice.tts/");
         Files.createDirectories(cacheDirectory);
-        Gson gson = new GsonBuilder().create();
 
         // prepare some files
-        File soundFileInfo1 = cacheDirectory.resolve("filesound1.info").toFile();
         File soundFile1 = cacheDirectory.resolve("filesound1.snd").toFile();
-        try (FileWriter soundfileInfo1Writer = new FileWriter(soundFileInfo1);
-                FileWriter soundFile1Writer = new FileWriter(soundFile1)) {
-            TTSResult.AudioFormatInfoFile audioFormatInfoFile = new TTSResult.AudioFormatInfoFile("text", null, 42, 16,
-                    16000L, 1, "MP3", null);
-            gson.toJson(audioFormatInfoFile, soundfileInfo1Writer);
+        storage.put("filesound1", new TTSResult.AudioFormatInfo("text", null, 42, 16, 16000L, 1, "MP3", null));
+        try (FileWriter soundFile1Writer = new FileWriter(soundFile1)) {
             soundFile1Writer.write("falsedata");
         }
 
         // prepare some files
-        File soundFile2Info = cacheDirectory.resolve("filesound2.info").toFile();
         File soundFile2 = cacheDirectory.resolve("filesound2.snd").toFile();
-        try (FileWriter soundFileInfo2Writer = new FileWriter(soundFile2Info);
-                FileWriter soundFile2Writer = new FileWriter(soundFile2)) {
-            TTSResult.AudioFormatInfoFile audioFormatInfoFile = new TTSResult.AudioFormatInfoFile("text", null, 42, 16,
-                    16000L, 2, "MP3", null);
-            gson.toJson(audioFormatInfoFile, soundFileInfo2Writer);
+        storage.put("filesound2", new TTSResult.AudioFormatInfo("text", null, 42, 16, 16000L, 2, "MP3", null));
+        try (FileWriter soundFile2Writer = new FileWriter(soundFile2)) {
             soundFile2Writer.write("falsedata");
         }
 
-        // create a LRU cache that will load the above .info files
+        // create a LRU cache that will use the above data
         TTSLRUCacheImpl lruCache = createTTSCache(20);
 
         TTSResult ttsResult1 = lruCache.ttsResultMap.get("filesound1");
@@ -302,26 +298,16 @@ public class TTSLRUCacheImplTest {
         // prepare cache directory
         Path cacheDirectory = tempDir.resolve("cache/org.openhab.voice.tts/");
         Files.createDirectories(cacheDirectory);
-        Gson gson = new GsonBuilder().create();
 
         // prepare some files : normal entry
-        File soundFileInfo1 = cacheDirectory.resolve("filesound1.info").toFile();
         File soundFile1 = cacheDirectory.resolve("filesound1.snd").toFile();
-        try (FileWriter soundfileInfo1Writer = new FileWriter(soundFileInfo1);
-                FileWriter soundFile1Writer = new FileWriter(soundFile1)) {
-            TTSResult.AudioFormatInfoFile audioFormatInfoFile = new TTSResult.AudioFormatInfoFile("text", null, 42, 16,
-                    16000L, 1, "MP3", null);
-            gson.toJson(audioFormatInfoFile, soundfileInfo1Writer);
+        storage.put("filesound1", new TTSResult.AudioFormatInfo("text", null, 42, 16, 16000L, 1, "MP3", null));
+        try (FileWriter soundFile1Writer = new FileWriter(soundFile1)) {
             soundFile1Writer.write("falsedata");
         }
 
-        // prepare some files : orphan info file
-        File soundFile2Info = cacheDirectory.resolve("filesound2.info").toFile();
-        try (FileWriter soundFileInfo2Writer = new FileWriter(soundFile2Info)) {
-            TTSResult.AudioFormatInfoFile audioFormatInfoFile = new TTSResult.AudioFormatInfoFile("text", null, 42, 16,
-                    16000L, 1, "MP3", null);
-            gson.toJson(audioFormatInfoFile, soundFileInfo2Writer);
-        }
+        // prepare some files : orphan info
+        storage.put("filesound2", new TTSResult.AudioFormatInfo("text", null, 42, 16, 16000L, 1, "MP3", null));
 
         // prepare some files : orphan sound file
         File soundFile3 = cacheDirectory.resolve("filesound3.snd").toFile();
@@ -329,15 +315,15 @@ public class TTSLRUCacheImplTest {
             soundFile3Writer.write("fake non empty data");
         }
 
-        // create a LRU cache that will load the above .info files
+        // create a LRU cache that will use the above data
         createTTSCache(20);
 
         // the file for entry 1 still exists :
         assertTrue(soundFile1.exists());
-        assertTrue(soundFileInfo1.exists());
+        assertNotNull(storage.get("filesound1"));
 
         // the file for entry 2 should have been deleted :
-        assertFalse(soundFile2Info.exists());
+        assertNull(storage.get("filesound2"));
 
         // the file for entry 3 should have been deleted :
         assertFalse(soundFile3.exists());
@@ -350,30 +336,27 @@ public class TTSLRUCacheImplTest {
         Files.createDirectories(cacheDirectory);
 
         // prepare some files : normal entry
-        File soundFileInfo1 = cacheDirectory.resolve("filesound1.info").toFile();
         File soundFile1 = cacheDirectory.resolve("filesound1.snd").toFile();
-        try (FileWriter soundfileInfo1Writer = new FileWriter(soundFileInfo1);
-                FileWriter soundFile1Writer = new FileWriter(soundFile1)) {
-            TTSResult.AudioFormatInfoFile audioFormatInfoFile = new TTSResult.AudioFormatInfoFile("text", null, 42, 16,
-                    16000L, 1, "MP3", null);
-            Gson gson = new GsonBuilder().create();
-            gson.toJson(audioFormatInfoFile, soundfileInfo1Writer);
+        storage.put("filesound1", new TTSResult.AudioFormatInfo("text", null, 42, 16, 16000L, 1, "MP3", null));
+        try (FileWriter soundFile1Writer = new FileWriter(soundFile1)) {
             soundFile1Writer.write("falsedata");
         }
 
         // prepare some files : empty file
-        File soundFile2Info = cacheDirectory.resolve("filesound2.info").toFile();
-        soundFile2Info.createNewFile();
-        assertTrue(soundFile2Info.exists());
+        File soundFile2 = cacheDirectory.resolve("filesound2.snd").toFile();
+        soundFile2.createNewFile();
+        storage.put("filesound2", new TTSResult.AudioFormatInfo("text", null, 42, 16, 16000L, 1, "MP3", null));
+        assertTrue(soundFile2.exists());
 
-        // create a LRU cache that will load the above .info files
+        // create a LRU cache that will load the above data
         createTTSCache(20);
 
         // the file for entry 1 still exists :
         assertTrue(soundFile1.exists());
-        assertTrue(soundFileInfo1.exists());
+        assertNotNull(storage.get("filesound1"));
 
         // the file for entry 2 should have been deleted :
-        assertFalse(soundFile2Info.exists());
+        assertNull(storage.get("filesound2"));
+        assertFalse(soundFile2.exists());
     }
 }

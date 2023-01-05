@@ -15,7 +15,7 @@ package org.openhab.core.voice;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.voice.internal.cache.TTSCachedService;
+import org.openhab.core.voice.internal.cache.CachedTTSService;
 
 /**
  * Cache system to avoid requesting {@link TTSService} for the same utterances.
@@ -41,6 +41,6 @@ public interface TTSCache {
      *             are not supported or another error occurs while creating an
      *             {@link AudioStream}
      */
-    AudioStream get(TTSCachedService tts, String text, Voice voice, AudioFormat requestedFormat)
+    AudioStream get(CachedTTSService tts, String text, Voice voice, AudioFormat requestedFormat)
             throws TTSException;
 }

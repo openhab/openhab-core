@@ -24,7 +24,7 @@ import org.openhab.core.voice.Voice;
  * @author Gwendal Roulleau - Initial contribution
  */
 @NonNullByDefault
-public interface TTSCachedService extends TTSService {
+public interface CachedTTSService extends TTSService {
 
     /**
      * Construct a uniquely identifying string for the request. Could be overridden by the TTS service if

@@ -36,11 +36,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.storage.Storage;
+import org.openhab.core.test.storage.VolatileStorageService;
 import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.Voice;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import org.openhab.core.voice.internal.cache.TTSResult.AudioFormatInfo;
 
 /**
  * Test the cache system
@@ -53,13 +53,16 @@ public class TTSResultTest {
 
     private @TempDir @NonNullByDefault({}) Path tempDir;
 
-    private @Mock @NonNullByDefault({}) TTSCachedService ttsServiceMock;
+    private @Mock @NonNullByDefault({}) CachedTTSService ttsServiceMock;
 
     private @Mock @NonNullByDefault({}) Voice voiceMock;
+
+    private @NonNullByDefault({}) Storage<AudioFormatInfo> storage;
 
     @BeforeEach
     public void init() {
         System.setProperty(OpenHAB.USERDATA_DIR_PROG_ARGUMENT, tempDir.toString());
+        this.storage = new VolatileStorageService().getStorage(TTSLRUCacheImpl.VOICE_TTS_CACHE_PID);
     }
 
     public static class FakeAudioStream extends AudioStream {
@@ -108,7 +111,7 @@ public class TTSResultTest {
         AudioStreamSupplier fallbackSupplierBroken = new AudioStreamSupplier(ttsServiceMock, "WRONG DATA", voiceMock,
                 AudioFormat.MP3);
 
-        TTSResult ttsResult = new TTSResult(tempDir, "key1", supplier);
+        TTSResult ttsResult = new TTSResult(tempDir, "key1", storage, supplier);
 
         // get audiostream wrapped by the cache system
         AudioStream actualAudioStream = ttsResult.getAudioStream(fallbackSupplierBroken);
@@ -140,13 +143,9 @@ public class TTSResultTest {
                 AudioFormat.MP3);
 
         // prepare an info file
-        File soundFile1Info = tempDir.resolve("filesound1.info").toFile();
-        TTSResult.AudioFormatInfoFile audioFormatInfoFile = new TTSResult.AudioFormatInfoFile("text", null, 42, 16,
-                16000L, 1, "MP3", null);
-        try (FileWriter sound1fileInfoWriter1 = new FileWriter(soundFile1Info)) {
-            Gson gson = new GsonBuilder().create();
-            gson.toJson(audioFormatInfoFile, sound1fileInfoWriter1);
-        }
+        TTSResult.AudioFormatInfo audioFormatInfoFile = new TTSResult.AudioFormatInfo("text", null, 42, 16, 16000L, 1,
+                "MP3", null);
+        storage.put("filesound1", audioFormatInfoFile);
 
         // prepare the related sound file
         File soundFile1Snd = tempDir.resolve("filesound1.snd").toFile();
@@ -155,7 +154,7 @@ public class TTSResultTest {
         }
 
         // Build the TTSResult that will load the info file
-        TTSResult ttsResultBuildByFile = new TTSResult(tempDir, "filesound1");
+        TTSResult ttsResultBuildByFile = new TTSResult(tempDir, "filesound1", storage);
 
         assertEquals("text", ttsResultBuildByFile.getText());
 
@@ -191,7 +190,7 @@ public class TTSResultTest {
         AudioStreamSupplier supplier = new AudioStreamSupplier(ttsServiceMock, "text", voiceMock, AudioFormat.MP3);
         when(ttsServiceMock.synthesizeForCache("text", voiceMock, AudioFormat.MP3)).thenReturn(fakeAudioStream);
 
-        TTSResult ttsResult = new TTSResult(tempDir, "key1", supplier);
+        TTSResult ttsResult = new TTSResult(tempDir, "key1", storage, supplier);
 
         // get a first audiostream wrapped by the cache system
         AudioStream actualAudioStream1 = ttsResult.getAudioStream(fallbackSupplierBroken);
@@ -241,7 +240,7 @@ public class TTSResultTest {
         AudioStreamSupplier supplier = new AudioStreamSupplier(ttsServiceMock, "text", voiceMock, AudioFormat.MP3);
         when(ttsServiceMock.synthesizeForCache("text", voiceMock, AudioFormat.MP3)).thenReturn(fakeAudioStream);
 
-        TTSResult ttsResult = new TTSResult(tempDir, "key1", supplier);
+        TTSResult ttsResult = new TTSResult(tempDir, "key1", storage, supplier);
 
         // get a first audiostream wrapped by the cache system
         AudioStream actualAudioStream1 = ttsResult.getAudioStream(fallbackSupplierBroken);
@@ -294,7 +293,7 @@ public class TTSResultTest {
         AudioStreamSupplier supplier = new AudioStreamSupplier(ttsServiceMock, "text", voiceMock, AudioFormat.MP3);
         when(ttsServiceMock.synthesizeForCache("text", voiceMock, AudioFormat.MP3)).thenReturn(fakeAudioStream);
 
-        TTSResult ttsResult = new TTSResult(tempDir, "key1", supplier);
+        TTSResult ttsResult = new TTSResult(tempDir, "key1", storage, supplier);
 
         AudioStream audioStreamClient = ttsResult.getAudioStream(fallbackSupplierBroken);
         byte[] bytesRead = audioStreamClient.readAllBytes();
@@ -322,7 +321,7 @@ public class TTSResultTest {
         AudioStreamSupplier supplier = new AudioStreamSupplier(ttsServiceMock, "text", voiceMock, AudioFormat.MP3);
         when(ttsServiceMock.synthesizeForCache("text", voiceMock, AudioFormat.MP3)).thenReturn(fakeAudioStream);
 
-        TTSResult ttsResult = new TTSResult(tempDir, "key1", supplier);
+        TTSResult ttsResult = new TTSResult(tempDir, "key1", storage, supplier);
         AudioStream audioStreamClient = ttsResult.getAudioStream(fallbackSupplierBroken);
         Long totalSize = ttsResult.getTotalSize();
         audioStreamClient.close();

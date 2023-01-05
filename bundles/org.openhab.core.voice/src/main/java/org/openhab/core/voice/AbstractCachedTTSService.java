@@ -19,7 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.voice.internal.cache.TTSCachedService;
+import org.openhab.core.voice.internal.cache.CachedTTSService;
 import org.osgi.service.component.annotations.Reference;
 
 /**
@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Gwendal Roulleau - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractCachedTTSService implements TTSCachedService {
+public abstract class AbstractCachedTTSService implements CachedTTSService {
 
     private TTSCache ttsCache;
 

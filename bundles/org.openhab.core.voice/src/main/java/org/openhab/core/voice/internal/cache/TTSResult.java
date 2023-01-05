@@ -13,8 +13,6 @@
 package org.openhab.core.voice.internal.cache;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -29,17 +27,13 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.FixedLengthAudioStream;
+import org.openhab.core.storage.Storage;
 import org.openhab.core.voice.TTSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 /**
  * A cached sound resulting from a call to a TTSService
- * All objects from this class form a linked list,
- * next and previous value allow navigation through it.
  * This class adds also the capability to serve multiple sinks concurrently
  * without asking already retrieved data to the wrapped stream.
  *
@@ -75,42 +69,37 @@ public class TTSResult {
 
     // The cache files where the sound and its info are stored :
     private final File soundFile;
-    private final File infoFile;
+    private final Storage<AudioFormatInfo> storage;
     private long currentSize = 0;
     private boolean completed;
 
     private @Nullable FileChannel fileChannel;
     private final Lock fileOperationLock = new ReentrantLock();
 
-    private Gson gson = new GsonBuilder().create();
-
     /**
      * This constructor is used when the file is fully cached on disk.
-     * The file on disk will provide the data, and the .info file will
-     * provide metadata about the format.
+     * The file on disk will provide the data, and the additional file will
+     * provide metadata.
      *
      * @param cacheDirectory Where are the cached file stored
      * @param key a unique key
+     * @param storate a storage backend to store metadata
      */
-    public TTSResult(Path cacheDirectory, String key) throws IOException {
+    public TTSResult(Path cacheDirectory, String key, Storage<AudioFormatInfo> storage) {
         this.key = key;
         this.soundFile = cacheDirectory.resolve(key + TTSLRUCacheImpl.SOUND_EXT).toFile();
-        this.infoFile = cacheDirectory.resolve(key + TTSLRUCacheImpl.INFO_EXT).toFile();
+        this.storage = storage;
         this.ttsAudioStreamSupplier = null;
         this.completed = true;
-        if (soundFile.length() == 0) {
-            throw new IOException("Sound cache file is empty. Throwing it");
+        AudioFormatInfo audioFormatInfo = storage.get(key);
+        if (soundFile.length() == 0 || audioFormatInfo == null) {
+            this.text = "";
+            return;
         }
         this.currentSize = soundFile.length();
-
-        try (FileReader infoFileReader = new FileReader(infoFile)) {
-            AudioFormatInfoFile audioFormatInfoFile = gson.fromJson(infoFileReader, AudioFormatInfoFile.class);
-
-            this.text = audioFormatInfoFile.text;
-            this.audioFormat = new AudioFormat(audioFormatInfoFile.container, audioFormatInfoFile.codec,
-                    audioFormatInfoFile.bigEndian, audioFormatInfoFile.bitDepth, audioFormatInfoFile.bitRate,
-                    audioFormatInfoFile.frequency, audioFormatInfoFile.channels);
-        }
+        this.text = audioFormatInfo.text;
+        this.audioFormat = new AudioFormat(audioFormatInfo.container, audioFormatInfo.codec, audioFormatInfo.bigEndian,
+                audioFormatInfo.bitDepth, audioFormatInfo.bitRate, audioFormatInfo.frequency, audioFormatInfo.channels);
     }
 
     /***
@@ -122,11 +111,12 @@ public class TTSResult {
      * @param ttsSynthesizerSupplier The {@link AudioStreamSupplier} for the result we want to cache, from the TTS
      *            service
      */
-    public TTSResult(Path cacheDirectory, String key, AudioStreamSupplier ttsSynthesizerSupplier) {
+    public TTSResult(Path cacheDirectory, String key, Storage<AudioFormatInfo> storage,
+            AudioStreamSupplier ttsSynthesizerSupplier) {
         this.key = key;
         this.text = ttsSynthesizerSupplier.getText();
         this.soundFile = cacheDirectory.resolve(key + TTSLRUCacheImpl.SOUND_EXT).toFile();
-        this.infoFile = cacheDirectory.resolve(key + TTSLRUCacheImpl.INFO_EXT).toFile();
+        this.storage = storage;
         this.ttsAudioStreamSupplier = ttsSynthesizerSupplier;
         this.completed = false;
     }
@@ -282,8 +272,8 @@ public class TTSResult {
                         ttsAudioStream = audioStreamResolved;
                         AudioFormat audioFormatFromTTSAudioStream = audioStreamResolved.getFormat();
                         this.audioFormat = audioFormatFromTTSAudioStream;
-                        // now that we get the real response format, we can create the .info file
-                        createInfoFile(audioFormatFromTTSAudioStream);
+                        // now that we get the real response format, we can store the metadata
+                        storeInfo(audioFormatFromTTSAudioStream);
                     } catch (IOException e) {
                         throw new TTSException("Cannot create TTS cache file", e);
                     }
@@ -397,23 +387,17 @@ public class TTSResult {
     }
 
     /**
-     * Create the .info file alongside
+     * Create the metadata file alongside
      *
      * @param responseFormat The audio format effectively produced by the TTS
      * @throws IOException
      */
-    private void createInfoFile(AudioFormat responseFormat) throws IOException {
-        if (!soundFile.canWrite() || !infoFile.createNewFile()) {
-            throw new IOException("Cannot write sound cache file " + soundFile.getAbsolutePath() + ". Check rights");
-        }
-
-        AudioFormatInfoFile audioFormatInfoFile = new AudioFormatInfoFile(text, responseFormat.isBigEndian(),
+    private void storeInfo(AudioFormat responseFormat) throws IOException {
+        AudioFormatInfo audioFormatInfo = new AudioFormatInfo(text, responseFormat.isBigEndian(),
                 responseFormat.getBitDepth(), responseFormat.getBitRate(), responseFormat.getFrequency(),
                 responseFormat.getChannels(), responseFormat.getCodec(), responseFormat.getContainer());
+        storage.put(key, audioFormatInfo);
 
-        try (FileWriter infoFileWriter = new FileWriter(infoFile)) {
-            gson.toJson(audioFormatInfoFile, infoFileWriter);
-        }
     }
 
     public void deleteFiles() {
@@ -423,10 +407,10 @@ public class TTSResult {
             // check if a client is actually reading the file
             if (countAudioStreamClient <= 0) {
                 logger.debug("Effectively deleting the audio file {}", soundFile.getName());
-                // delete the .info file :
+                // delete the sound file :
                 soundFile.delete();
-                // and the associated file
-                infoFile.delete();
+                // and the associated info
+                storage.remove(key);
             }
         } finally {
             fileOperationLock.unlock();
@@ -434,7 +418,7 @@ public class TTSResult {
     }
 
     // We cannot use a record yet (requires Gson v2.10)
-    public static class AudioFormatInfoFile {
+    public static class AudioFormatInfo {
         public final String text;
         public final @Nullable Boolean bigEndian;
         public final @Nullable Integer bitDepth;
@@ -444,7 +428,7 @@ public class TTSResult {
         public final @Nullable String codec;
         public final @Nullable String container;
 
-        public AudioFormatInfoFile(String text, @Nullable Boolean bigEndian, @Nullable Integer bitDepth,
+        public AudioFormatInfo(String text, @Nullable Boolean bigEndian, @Nullable Integer bitDepth,
                 @Nullable Integer bitRate, @Nullable Long frequency, @Nullable Integer channels, @Nullable String codec,
                 @Nullable String container) {
             super();
