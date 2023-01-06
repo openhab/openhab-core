@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,8 @@
  */
 package org.openhab.core.crypto.cryptostore;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.NonNull;
-
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -53,96 +51,138 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ben Rosenblum - Initial contribution
  */
-@NonNullByDefault
+// @NonNullByDefault
 public class CryptoStore {
 
     private final Logger logger = LoggerFactory.getLogger(CryptoStore.class);
 
-
-    private String privKey = "";
-    private String cert = "";
+    private Key privKey;
+    private Certificate cert;
     private String keystoreFileName = "";
-    private String keystorePassword = "";
+    private String keystoreAlgorithm = "RSA";
+    private int keyLength = 2048;
+    private String alias = "openhab";
+    private String distName = "CN=openHAB, O=openHAB, L=None, ST=None, C=None";
 
     public CryptoStore() {
     }
 
-    public void setKeystore(String keystoreFileName, String keystorePassword) {
-        this.keystoreFileName = keystoreFileName;
-        this.keystorePassword = keystorePassword;
+    public void setPrivKey(String privKey) throws GeneralSecurityException {
+        byte[] pkcs8EncodedBytes = Base64.getDecoder().decode(privKey);
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8EncodedBytes);
+        KeyFactory kf = KeyFactory.getInstance(this.keystoreAlgorithm);
+        this.privKey = kf.generatePrivate(keySpec);
     }
 
-    public void setKeys(String privKey, String cert) {
+    public void setPrivKey(Key privKey) {
+        this.privKey = privKey;
+    }
+
+    public Key getPrivKey() {
+        return this.privKey;
+    }
+
+    public void setCert(String cert) throws GeneralSecurityException {
+        this.cert = CertificateFactory.getInstance("X.509")
+                .generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(cert)));
+    }
+
+    public void setCert(Certificate cert) throws GeneralSecurityException {
+        this.cert = cert;
+    }
+
+    public Certificate getCert() {
+        return this.cert;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getAlias() {
+        return this.alias;
+    }
+
+    public void setAlgorithm(String keystoreAlgorithm) {
+        this.keystoreAlgorithm = keystoreAlgorithm;
+    }
+
+    public String getAlgorithm() {
+        return this.keystoreAlgorithm;
+    }
+
+    public void setKeyLength(int keyLength) {
+        this.keyLength = keyLength;
+    }
+
+    public int getKeyLength() {
+        return this.keyLength;
+    }
+
+    public void setDistName(String distName) {
+        this.distName = distName;
+    }
+
+    public String getDistName() {
+        return this.distName;
+    }
+
+    public void setKeys(String privKey, String cert) throws GeneralSecurityException {
+        setPrivKey(privKey);
+        setCert(cert);
+    }
+
+    public void setKeys(Key privKey, Certificate cert) {
         this.privKey = privKey;
         this.cert = cert;
     }
 
-    public void saveKeys() {
-        try {
-            KeyStore keystore = KeyStore.getInstance("JKS");
-            keystore.load(null, null);
-            logger.trace("PrivKey to store: {}", this.privKey);
-            byte[] pkcs8EncodedBytes = Base64.getDecoder().decode(this.privKey);
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8EncodedBytes);
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            Key key = kf.generatePrivate(keySpec);
-
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            logger.trace("Cert to store: {}", this.cert);
-            Certificate crt = cf.generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(this.cert)));
-
-            keystore.setKeyEntry("nvidia", key, keystorePassword.toCharArray(),
-                    new java.security.cert.Certificate[] { crt });
-            logger.debug("Writing to {}", keystoreFileName);
-            FileOutputStream keystoreStream = new FileOutputStream(keystoreFileName);
-            keystore.store(keystoreStream, keystorePassword.toCharArray());
-        } catch (GeneralSecurityException | IOException e) {
-            logger.debug("createKeystore Exception", e);
-            return;
-        }
+    public void setKeyStore(String keystoreFileName) {
+        this.keystoreFileName = keystoreFileName;
     }
 
-    private X509Certificate generateClientCertificate(KeyPair keyPair)
+    public void loadFromKeyStore(String keystorePassword) throws GeneralSecurityException, IOException {
+        KeyStore keystore = KeyStore.getInstance("JKS");
+        FileInputStream keystoreInputStream = new FileInputStream(this.keystoreFileName);
+        keystore.load(keystoreInputStream, keystorePassword.toCharArray());
+        this.privKey = keystore.getKey(this.alias, keystorePassword.toCharArray());
+        this.cert = keystore.getCertificate(this.alias);
+    }
+
+    public void saveKeyStore(String keystorePassword) throws GeneralSecurityException, IOException {
+        KeyStore keystore = KeyStore.getInstance("JKS");
+        keystore.load(null, null);
+        keystore.setKeyEntry(this.alias, this.privKey, keystorePassword.toCharArray(),
+                new java.security.cert.Certificate[] { this.cert });
+        FileOutputStream keystoreStream = new FileOutputStream(keystoreFileName);
+        keystore.store(keystoreStream, keystorePassword.toCharArray());
+    }
+
+    private X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String distName)
             throws GeneralSecurityException, OperatorCreationException {
-        final String dirName = "CN=openHAB, O=openHAB, L=None, ST=None, C=None";
         final Instant now = Instant.now();
         final Date notBefore = Date.from(now);
         final Date notAfter = Date.from(now.plus(Duration.ofDays(365 * 10)));
-        X500Name name = new X500Name(dirName);
-
-        // create the certificate
-        X509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(name, // Issuer
-                BigInteger.valueOf(now.toEpochMilli()), notBefore, notAfter, name, // Subject
-                keyPair.getPublic() // Public key to be associated with the certificate
-        );
-        // and sign it
+        X500Name name = new X500Name(distName);
+        X509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(name,
+                BigInteger.valueOf(now.toEpochMilli()), notBefore, notAfter, name, keyPair.getPublic());
         ContentSigner contentSigner = new JcaContentSignerBuilder("SHA256WithRSA").build(keyPair.getPrivate());
         return new JcaX509CertificateConverter().setProvider(new BouncyCastleProvider())
                 .getCertificate(certificateBuilder.build(contentSigner));
     }
 
-    public void createKeystore() {
-        try {
-            KeyStore keystore = KeyStore.getInstance("JKS");
-            keystore.load(null, null);
-            // KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(keystorePassword.toCharArray());
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-            kpg.initialize(2048);
-            KeyPair kp = kpg.generateKeyPair();
-            Security.addProvider(new BouncyCastleProvider());
-            Signature signer = Signature.getInstance("SHA256withRSA", "BC");
-            signer.initSign(kp.getPrivate());
-            signer.update("Hello openHAB".getBytes(StandardCharsets.UTF_8));
-            signer.sign();
-            X509Certificate signedcert = generateClientCertificate(kp);
-            keystore.setKeyEntry("nvidia", kp.getPrivate(), keystorePassword.toCharArray(),
-                    new java.security.cert.Certificate[] { signedcert });
-            logger.debug("Writing to {}", keystoreFileName);
-            FileOutputStream keystoreStream = new FileOutputStream(keystoreFileName);
-            keystore.store(keystoreStream, keystorePassword.toCharArray());
-        } catch (GeneralSecurityException | OperatorCreationException | IOException e) {
-            logger.debug("createKeystore Exception", e);
-            return;
-        }
+    public void generateNewKeyPair(String keystorePassword)
+            throws GeneralSecurityException, OperatorCreationException, IOException {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance(this.keystoreAlgorithm);
+        kpg.initialize(this.keyLength);
+        KeyPair kp = kpg.generateKeyPair();
+        Security.addProvider(new BouncyCastleProvider());
+        Signature signer = Signature.getInstance("SHA256withRSA", "BC");
+        signer.initSign(kp.getPrivate());
+        signer.update("openhab".getBytes(StandardCharsets.UTF_8));
+        signer.sign();
+        X509Certificate signedcert = generateSelfSignedCertificate(kp, this.distName);
+        this.privKey = kp.getPrivate();
+        this.cert = signedcert;
     }
 }
