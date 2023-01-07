@@ -72,6 +72,7 @@ public class CryptoStore {
     private int keyLength = 2048;
     private String alias = "openhab";
     private String distName = "CN=openHAB, O=openHAB, L=None, ST=None, C=None";
+    private String cipher = "AES/GCM/NoPadding";
 
     public CryptoStore() {
     }
@@ -83,16 +84,24 @@ public class CryptoStore {
     }
 
     public String encrypt(String data, Key key) throws Exception {
+        return encrypt(data, key, this.cipher);
+    }
+
+    public String encrypt(String data, Key key, String cipher) throws Exception {
         byte[] dataInBytes = data.getBytes();
-        encryptionCipher = Cipher.getInstance("AES/GCM/NoPadding");
+        encryptionCipher = Cipher.getInstance(cipher);
         encryptionCipher.init(Cipher.ENCRYPT_MODE, key);
         byte[] encryptedBytes = encryptionCipher.doFinal(dataInBytes);
         return Base64.getEncoder().encodeToString(encryptedBytes);
     }
 
     public String decrypt(String encryptedData, Key key) throws Exception {
+        return decrypt(encryptedData, key, this.cipher);
+    }
+
+    public String decrypt(String encryptedData, Key key, String cipher) throws Exception {
         byte[] dataInBytes = Base64.getDecoder().decode(encryptedData);
-        Cipher decryptionCipher = Cipher.getInstance("AES/GCM/NoPadding");
+        Cipher decryptionCipher = Cipher.getInstance(cipher);
         GCMParameterSpec spec = new GCMParameterSpec(DATA_LENGTH, encryptionCipher.getIV());
         decryptionCipher.init(Cipher.DECRYPT_MODE, key, spec);
         byte[] decryptedBytes = decryptionCipher.doFinal(dataInBytes);
@@ -177,7 +186,8 @@ public class CryptoStore {
         this.cert = keystore.getCertificate(this.alias);
     }
 
-    public void saveKeyStore(String keystorePassword, Key key) throws GeneralSecurityException, IOException, Exception {
+    public KeyStore getKeyStore(String keystorePassword, Key key)
+            throws GeneralSecurityException, IOException, Exception {
         KeyStore keystore = KeyStore.getInstance("JKS");
         keystore.load(null, null);
         byte[] pkcs8EncodedBytes = Base64.getDecoder().decode(getPrivKey(key));
@@ -185,8 +195,17 @@ public class CryptoStore {
         KeyFactory kf = KeyFactory.getInstance(this.keystoreAlgorithm);
         keystore.setKeyEntry(this.alias, kf.generatePrivate(keySpec), keystorePassword.toCharArray(),
                 new java.security.cert.Certificate[] { this.cert });
+        return keystore;
+    }
+
+    public void saveKeyStore(String keystorePassword, Key key) throws GeneralSecurityException, IOException, Exception {
+        saveKeyStore(this.keystoreFileName, keystorePassword, key);
+    }
+
+    public void saveKeyStore(String keystoreFileName, String keystorePassword, Key key)
+            throws GeneralSecurityException, IOException, Exception {
         FileOutputStream keystoreStream = new FileOutputStream(keystoreFileName);
-        keystore.store(keystoreStream, keystorePassword.toCharArray());
+        getKeyStore(keystorePassword, key).store(keystoreStream, keystorePassword.toCharArray());
     }
 
     private X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String distName)
@@ -202,7 +221,7 @@ public class CryptoStore {
                 .getCertificate(certificateBuilder.build(contentSigner));
     }
 
-    public void generateNewKeyPair(String keystorePassword, Key key)
+    public void generateNewKeyPair(Key key)
             throws GeneralSecurityException, OperatorCreationException, IOException, Exception {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance(this.keystoreAlgorithm);
         kpg.initialize(this.keyLength);
