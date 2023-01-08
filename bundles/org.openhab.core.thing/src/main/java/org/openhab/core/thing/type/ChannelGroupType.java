@@ -38,15 +38,15 @@ public class ChannelGroupType extends AbstractDescriptionType {
      * Creates a new instance of this class with the specified parameters.
      *
      * @param uid the unique identifier which identifies this channel group type within the
-     * @param label the human readable label for the according type
-     * @param description the human readable description for the according type
+     * @param label the human-readable label for the according type
+     * @param description the human-readable description for the according type
      * @param category the category of this channel group type, e.g. Temperature
      * @param channelDefinitions the channel definitions this channel group forms
      * @throws IllegalArgumentException if the UID is null, or the label is null or empty
      */
     ChannelGroupType(ChannelGroupTypeUID uid, String label, @Nullable String description, @Nullable String category,
             @Nullable List<ChannelDefinition> channelDefinitions) throws IllegalArgumentException {
-        super(uid, label, description);
+        super(uid, label, description, null);
 
         this.category = category;
         this.channelDefinitions = channelDefinitions == null ? Collections.emptyList()

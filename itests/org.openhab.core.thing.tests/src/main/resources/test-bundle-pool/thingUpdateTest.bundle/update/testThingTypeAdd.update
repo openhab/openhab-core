@@ -1,0 +1,5 @@
+# simple instruction to add a channel, without label and description, with label and without description and with both
+1;ADD_CHANNEL;testChannel1,testBinding:testChannelTypeId
+1;ADD_CHANNEL;testChannel2,testBinding:testChannelTypeId,Test Label
+1;ADD_CHANNEL;testChannel3,testBinding:testChannelTypeId,Test Label,Test Description
+

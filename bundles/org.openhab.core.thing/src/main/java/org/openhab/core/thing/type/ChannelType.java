@@ -17,14 +17,13 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.StateDescription;
 
 /**
- * The {@link ChannelType} describes a concrete type of a {@link Channel}.
+ * The {@link ChannelType} describes a concrete type of {@link Channel}.
  * <p>
  * This description is used as template definition for the creation of the according concrete {@link Channel} object.
  * Use the {@link ChannelTypeBuilder} for building channel types.
@@ -45,7 +44,6 @@ public class ChannelType extends AbstractDescriptionType {
     private final @Nullable StateDescription state;
     private final @Nullable CommandDescription commandDescription;
     private final @Nullable EventDescription event;
-    private final @Nullable URI configDescriptionURI;
     private final @Nullable AutoUpdatePolicy autoUpdatePolicy;
 
     /**
@@ -56,15 +54,15 @@ public class ChannelType extends AbstractDescriptionType {
      * @param advanced true if this channel type contains advanced features, otherwise false
      * @param itemType the item type of this Channel type, e.g. {@code ColorItem}
      * @param kind the channel kind.
-     * @param label the human readable label for the according type
+     * @param label the human-readable label for the according type
      *            (must neither be null nor empty)
-     * @param description the human readable description for the according type
+     * @param description the human-readable description for the according type
      *            (could be null or empty)
      * @param category the category of this Channel type, e.g. {@code TEMPERATURE} (could be null or empty)
      * @param tags all tags of this {@link ChannelType}, e.g. {@code Alarm} (could be null or empty)
      * @param state a {@link StateDescription} of an items state which gives information how to interpret it.
      * @param commandDescription a {@link CommandDescription} which should be rendered as push-buttons. The command
-     *            values will be send to the channel from this {@link ChannelType}.
+     *            values will be sent to the channel from this {@link ChannelType}.
      * @param configDescriptionURI the link to the concrete ConfigDescription (could be null)
      * @param autoUpdatePolicy the {@link AutoUpdatePolicy} to use.
      * @throws IllegalArgumentException if the UID or the item type is null or empty,
@@ -75,7 +73,7 @@ public class ChannelType extends AbstractDescriptionType {
             @Nullable StateDescription state, @Nullable CommandDescription commandDescription,
             @Nullable EventDescription event, @Nullable URI configDescriptionURI,
             @Nullable AutoUpdatePolicy autoUpdatePolicy) throws IllegalArgumentException {
-        super(uid, label, description);
+        super(uid, label, description, configDescriptionURI);
 
         if (kind == ChannelKind.STATE && (itemType == null || itemType.isBlank())) {
             throw new IllegalArgumentException("If the kind is 'state', the item type must be set!");
@@ -86,7 +84,6 @@ public class ChannelType extends AbstractDescriptionType {
 
         this.itemType = itemType;
         this.kind = kind;
-        this.configDescriptionURI = configDescriptionURI;
 
         this.tags = tags == null ? Set.of() : Set.copyOf(tags);
         this.advanced = advanced;
@@ -136,15 +133,6 @@ public class ChannelType extends AbstractDescriptionType {
     }
 
     /**
-     * Returns the link to a concrete {@link ConfigDescription}.
-     *
-     * @return the link to a concrete ConfigDescription
-     */
-    public @Nullable URI getConfigDescriptionURI() {
-        return this.configDescriptionURI;
-    }
-
-    /**
      * Returns the {@link StateDescription} of an items state which gives information how to interpret it.
      *
      * @return the {@link StateDescription}
@@ -154,7 +142,7 @@ public class ChannelType extends AbstractDescriptionType {
     }
 
     /**
-     * Returns informations about the supported events.
+     * Returns information about the supported events.
      *
      * @return the event information. Can be null if the channel is a state channel.
      */

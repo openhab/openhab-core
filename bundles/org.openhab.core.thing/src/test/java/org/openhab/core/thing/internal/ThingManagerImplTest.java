@@ -28,6 +28,7 @@ import org.openhab.core.common.SafeCaller;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
@@ -45,7 +46,7 @@ import org.openhab.core.thing.type.ChannelGroupTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.openhab.core.util.BundleResolver;
-import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 /**
  * @author Simon Kaufmann - Initial contribution
@@ -55,8 +56,6 @@ import org.osgi.framework.Bundle;
 @NonNullByDefault
 public class ThingManagerImplTest extends JavaTest {
 
-    private @Mock @NonNullByDefault({}) Bundle bundleMock;
-    private @Mock @NonNullByDefault({}) BundleResolver bundleResolverMock;
     private @Mock @NonNullByDefault({}) ChannelGroupTypeRegistry channelGroupTypeRegistryMock;
     private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistryMock;
     private @Mock @NonNullByDefault({}) CommunicationManager communicationManagerMock;
@@ -71,24 +70,26 @@ public class ThingManagerImplTest extends JavaTest {
     private @Mock @NonNullByDefault({}) StorageService storageServiceMock;
     private @Mock @NonNullByDefault({}) Thing thingMock;
     private @Mock @NonNullByDefault({}) ThingRegistryImpl thingRegistryMock;
+    private @Mock @NonNullByDefault({}) BundleResolver bundleResolverMock;
+    private @Mock @NonNullByDefault({}) TranslationProvider translationProviderMock;
+    private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
 
     // This class is final so it cannot be mocked
     private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService = new ThingStatusInfoI18nLocalizationService();
 
     @BeforeEach
     public void setup() {
-        when(bundleMock.getSymbolicName()).thenReturn("test");
-        when(bundleResolverMock.resolveBundle(any())).thenReturn(bundleMock);
         when(thingMock.getUID()).thenReturn(new ThingUID("test", "thing"));
         when(thingMock.getStatusInfo())
                 .thenReturn(new ThingStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE, null));
     }
 
     private ThingManagerImpl createThingManager() {
-        return new ThingManagerImpl(bundleResolverMock, channelGroupTypeRegistryMock, channelTypeRegistryMock,
-                communicationManagerMock, configDescriptionRegistryMock, configDescriptionValidatorMock,
-                eventPublisherMock, itemChannelLinkRegistryMock, readyServiceMock, safeCallerMock, storageServiceMock,
-                thingRegistryMock, thingStatusInfoI18nLocalizationService, thingTypeRegistryMock);
+        return new ThingManagerImpl(channelGroupTypeRegistryMock, channelTypeRegistryMock, communicationManagerMock,
+                configDescriptionRegistryMock, configDescriptionValidatorMock, eventPublisherMock,
+                itemChannelLinkRegistryMock, readyServiceMock, safeCallerMock, storageServiceMock, thingRegistryMock,
+                thingStatusInfoI18nLocalizationService, thingTypeRegistryMock, bundleResolverMock,
+                translationProviderMock, bundleContextMock);
     }
 
     @Test
