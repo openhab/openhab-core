@@ -84,7 +84,6 @@ import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeBuilder;
 import org.openhab.core.thing.type.ChannelTypeProvider;
 import org.openhab.core.thing.type.ChannelTypeUID;
-import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeBuilder;
 import org.openhab.core.types.Command;
 import org.osgi.framework.InvalidSyntaxException;
@@ -188,7 +187,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
     @Test
     public void testInitializeCallsThingUpdated() throws Exception {
-        registerThingTypeProvider();
+        registerThingTypeProvider(false);
         AtomicReference<ThingHandlerCallback> thc = new AtomicReference<>();
         AtomicReference<Boolean> initializeRunning = new AtomicReference<>(false);
         registerThingHandlerFactory(THING_TYPE_UID, thing -> {
@@ -326,7 +325,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
     @Test
     public void testInitializeOnlyIfInitializable() throws Exception {
-        registerThingTypeProvider();
+        registerThingTypeProvider(false);
         registerChannelTypeProvider();
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
             @Override
@@ -359,6 +358,68 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         // verify a satisfied config does not prevent it from getting initialized anymore
         assertThingStatus(Map.of(CONFIG_PARAM_NAME, "value"), Map.of(CONFIG_PARAM_NAME, "value"), ThingStatus.ONLINE,
                 ThingStatusDetail.NONE);
+    }
+
+    @Test
+    public void testMissingBridgePreventsInitialization() throws Exception {
+        registerThingTypeProvider(true);
+        registerChannelTypeProvider();
+        registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
+            @Override
+            public void handleCommand(ChannelUID channelUID, Command command) {
+            }
+
+            @Override
+            public void initialize() {
+                updateStatus(ThingStatus.ONLINE);
+            }
+        });
+
+        ConfigDescriptionProvider mockConfigDescriptionProvider = mock(ConfigDescriptionProvider.class);
+        registerService(mockConfigDescriptionProvider, ConfigDescriptionProvider.class.getName());
+        when(mockConfigDescriptionProvider.getConfigDescription(eq(configDescriptionChannel), any()))
+                .thenReturn(ConfigDescriptionBuilder.create(configDescriptionThing).build());
+
+        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).build();
+        managedThingProvider.add(thing);
+
+        waitForAssert(() -> {
+            assertEquals(ThingStatus.UNINITIALIZED, thing.getStatus());
+            assertEquals(ThingStatusDetail.HANDLER_CONFIGURATION_PENDING, thing.getStatusInfo().getStatusDetail());
+        });
+
+        managedThingProvider.remove(thing.getUID());
+    }
+
+    @Test
+    public void testExistingBridgeAllowsInitialization() throws Exception {
+        registerThingTypeProvider(true);
+        registerChannelTypeProvider();
+        registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
+            @Override
+            public void handleCommand(ChannelUID channelUID, Command command) {
+            }
+
+            @Override
+            public void initialize() {
+                updateStatus(ThingStatus.ONLINE);
+            }
+        });
+
+        ConfigDescriptionProvider mockConfigDescriptionProvider = mock(ConfigDescriptionProvider.class);
+        registerService(mockConfigDescriptionProvider, ConfigDescriptionProvider.class.getName());
+        when(mockConfigDescriptionProvider.getConfigDescription(eq(configDescriptionChannel), any()))
+                .thenReturn(ConfigDescriptionBuilder.create(configDescriptionThing).build());
+
+        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withBridge(BRIDGE_UID).build();
+        managedThingProvider.add(thing);
+
+        waitForAssert(() -> {
+            assertEquals(ThingStatus.UNINITIALIZED, thing.getStatus());
+            assertEquals(ThingStatusDetail.HANDLER_CONFIGURATION_PENDING, thing.getStatusInfo().getStatusDetail());
+        });
+
+        managedThingProvider.remove(thing.getUID());
     }
 
     @Test
@@ -564,7 +625,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
     @Test
     public void testSetEnabledWithHandler() throws Exception {
-        registerThingTypeProvider();
+        registerThingTypeProvider(false);
 
         AtomicReference<ThingHandlerCallback> thingHandlerCallback = new AtomicReference<>();
         AtomicReference<Boolean> initializeInvoked = new AtomicReference<>(false);
@@ -640,7 +701,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
     @Test
     public void testSetEnabledWithoutHandlerFactory() throws Exception {
-        registerThingTypeProvider();
+        registerThingTypeProvider(false);
 
         ThingStatusInfo thingStatusInfo = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
@@ -733,7 +794,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
     @Test
     public void testDisposeNotInvokedOnAlreadyDisabledThing() throws Exception {
-        registerThingTypeProvider();
+        registerThingTypeProvider(false);
 
         AtomicReference<ThingHandlerCallback> thingHandlerCallback = new AtomicReference<>();
         AtomicReference<Boolean> initializeInvoked = new AtomicReference<>(false);
@@ -810,7 +871,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
     @Test
     public void testUpdateThing() throws Exception {
-        registerThingTypeProvider();
+        registerThingTypeProvider(false);
 
         AtomicReference<ThingHandlerCallback> thingHandlerCallback = new AtomicReference<>();
         AtomicReference<Boolean> initializeInvoked = new AtomicReference<>(false);
@@ -898,7 +959,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
     @Test
     public void testStorageEntryRetainedOnThingRemoval() throws Exception {
-        registerThingTypeProvider();
+        registerThingTypeProvider(false);
 
         AtomicReference<ThingHandlerCallback> thingHandlerCallback = new AtomicReference<>();
         AtomicReference<Boolean> initializeInvoked = new AtomicReference<>(false);
@@ -1002,14 +1063,16 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         registerService(mockThingHandlerFactory, ThingHandlerFactory.class.getName());
     }
 
-    private void registerThingTypeProvider() throws Exception {
-        ThingType thingType = ThingTypeBuilder.instance(THING_TYPE_UID, "label")
+    private void registerThingTypeProvider(boolean withBridge) throws Exception {
+        ThingTypeBuilder thingTypeBuilder = ThingTypeBuilder.instance(THING_TYPE_UID, "label")
                 .withConfigDescriptionURI(configDescriptionThing)
-                .withChannelDefinitions(List.of(new ChannelDefinitionBuilder(CHANNEL_ID, CHANNEL_TYPE_UID).build()))
-                .build();
+                .withChannelDefinitions(List.of(new ChannelDefinitionBuilder(CHANNEL_ID, CHANNEL_TYPE_UID).build()));
+        if (withBridge) {
+            thingTypeBuilder.withSupportedBridgeTypeUIDs(List.of(BRIDGE_TYPE_UID.getId()));
+        }
 
         ThingTypeProvider mockThingTypeProvider = mock(ThingTypeProvider.class);
-        when(mockThingTypeProvider.getThingType(eq(THING_TYPE_UID), any())).thenReturn(thingType);
+        when(mockThingTypeProvider.getThingType(eq(THING_TYPE_UID), any())).thenReturn(thingTypeBuilder.build());
         registerService(mockThingTypeProvider);
     }
 
@@ -1064,7 +1127,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     };
 
     private AtomicReference<ThingHandlerCallback> initializeThingHandlerCallback() throws Exception {
-        registerThingTypeProvider();
+        registerThingTypeProvider(false);
         registerChannelTypeProvider();
         registerChannelGroupTypeProvider();
         AtomicReference<ThingHandlerCallback> thc = new AtomicReference<>();

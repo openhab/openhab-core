@@ -46,7 +46,9 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
 import org.openhab.core.config.core.validation.ConfigValidationException;
+import org.openhab.core.config.core.validation.ConfigValidationMessage;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
 import org.openhab.core.service.ReadyMarkerUtils;
@@ -91,6 +93,7 @@ import org.openhab.core.thing.util.ThingHandlerHelper;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.util.BundleResolver;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -166,6 +169,8 @@ public class ThingManagerImpl
     private final Storage<String> storage;
     private final ThingRegistryImpl thingRegistry;
     private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
+    private final TranslationProvider translationProvider;
+    private final BundleContext bundleContext;
 
     private @Nullable ScheduledFuture<?> startLevelSetterJob = null;
 
@@ -390,7 +395,8 @@ public class ThingManagerImpl
             final @Reference StorageService storageService, //
             final @Reference ThingRegistry thingRegistry,
             final @Reference ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService,
-            final @Reference ThingTypeRegistry thingTypeRegistry) {
+            final @Reference ThingTypeRegistry thingTypeRegistry,
+            final @Reference TranslationProvider translationProvider, BundleContext bundleContext) {
         this.bundleResolver = bundleResolver;
         this.channelGroupTypeRegistry = channelGroupTypeRegistry;
         this.channelTypeRegistry = channelTypeRegistry;
@@ -404,6 +410,8 @@ public class ThingManagerImpl
         this.thingRegistry = (ThingRegistryImpl) thingRegistry;
         this.thingStatusInfoI18nLocalizationService = thingStatusInfoI18nLocalizationService;
         this.thingTypeRegistry = thingTypeRegistry;
+        this.translationProvider = translationProvider;
+        this.bundleContext = bundleContext;
 
         storage = storageService.getStorage(THING_STATUS_STORAGE_NAME, this.getClass().getClassLoader());
 
@@ -821,6 +829,14 @@ public class ThingManagerImpl
 
     private void validate(Thing thing, @Nullable ThingType thingType) throws ConfigValidationException {
         validate(thingType, thing.getUID(), ThingType::getConfigDescriptionURI, thing.getConfiguration());
+
+        // validate a bridge is set when it is mandatory
+        if (thingType != null && thing.getBridgeUID() == null && !thingType.getSupportedBridgeTypeUIDs().isEmpty()) {
+            ConfigValidationMessage message = new ConfigValidationMessage("bridge",
+                    "Configuring a bridge is mandatory.", "bridge_not_configured");
+
+            throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
+        }
 
         for (Channel channel : thing.getChannels()) {
             ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
