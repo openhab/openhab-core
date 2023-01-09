@@ -416,7 +416,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
         waitForAssert(() -> {
             assertEquals(ThingStatus.UNINITIALIZED, thing.getStatus());
-            assertEquals(ThingStatusDetail.HANDLER_CONFIGURATION_PENDING, thing.getStatusInfo().getStatusDetail());
+            assertEquals(ThingStatusDetail.BRIDGE_UNINITIALIZED, thing.getStatusInfo().getStatusDetail());
         });
 
         managedThingProvider.remove(thing.getUID());
