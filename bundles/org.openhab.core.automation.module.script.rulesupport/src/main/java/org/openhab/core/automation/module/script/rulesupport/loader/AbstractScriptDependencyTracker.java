@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptDependencyTracker;
-import org.openhab.core.automation.module.script.rulesupport.internal.loader.collection.BidiSetBag;
+import org.openhab.core.automation.module.script.rulesupport.internal.loader.BidiSetBag;
 import org.openhab.core.service.AbstractWatchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

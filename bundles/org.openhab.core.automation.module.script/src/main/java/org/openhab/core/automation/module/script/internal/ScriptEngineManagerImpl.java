@@ -174,13 +174,12 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     }
 
     @Override
-    public void loadScript(String engineIdentifier, InputStreamReader scriptData) {
+    public boolean loadScript(String engineIdentifier, InputStreamReader scriptData) {
         ScriptEngineContainer container = loadedScriptEngineInstances.get(engineIdentifier);
         if (container == null) {
             logger.error("Could not load script, as no ScriptEngine has been created");
         } else {
             ScriptEngine engine = container.getScriptEngine();
-
             try {
                 engine.eval(scriptData);
                 if (engine instanceof Invocable) {
@@ -193,11 +192,13 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 } else {
                     logger.trace("ScriptEngine does not support Invocable interface");
                 }
+                return true;
             } catch (Exception ex) {
                 logger.error("Error during evaluation of script '{}': {}", engineIdentifier, ex.getMessage());
                 logger.debug("", ex);
             }
         }
+        return false;
     }
 
     @Override
