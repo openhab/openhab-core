@@ -257,10 +257,10 @@ public class FeatureInstaller implements ConfigurationListener {
                 Dictionary<String, Object> felixProperties = configurations[0].getProperties();
                 String addonsDirectory = (String) felixProperties.get("felix.fileinstall.dir");
                 if (addonsDirectory != null) {
-                    return Files.list(Path.of(addonsDirectory)).map(Path::getFileName).map(Path::toString)
-                            .filter(file -> file.endsWith(".kar"))
-                            .map(karFileName -> karFileName.substring(0, karFileName.lastIndexOf(".")))
-                            .allMatch(karRepos::contains);
+                    try (Stream<Path> files = Files.list(Path.of(addonsDirectory))) {
+                        return files.map(Path::getFileName).map(Path::toString).filter(file -> file.endsWith(".kar")).map(karFileName -> karFileName.substring(0, karFileName.lastIndexOf(".")))
+                                .allMatch(karRepos::contains);
+                    }
                 }
             }
         } catch (Exception ignored) {

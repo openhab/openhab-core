@@ -167,25 +167,15 @@ public class KarafAddonService implements AddonService {
         return null;
     }
 
-    private String substringAfter(String str, String separator) {
-        int index = str.indexOf(separator);
-        return index == -1 ? "" : str.substring(index + separator.length());
-    }
-
-    private String substringBefore(String str, String separator) {
-        int index = str.indexOf(separator);
+    private String getType(String name) {
+        String str = name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name;
+        int index = str.indexOf(Addon.ADDON_SEPARATOR);
         return index == -1 ? str : str.substring(0, index);
     }
 
-    private String getType(String name) {
-        return substringBefore(
-                name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name,
-                Addon.ADDON_SEPARATOR);
-    }
-
     private String getName(String name) {
-        return substringAfter(
-                name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name,
-                Addon.ADDON_SEPARATOR);
+        String str = name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name;
+        int index = str.indexOf(Addon.ADDON_SEPARATOR);
+        return index == -1 ? "" : str.substring(index + Addon.ADDON_SEPARATOR.length());
     }
 }
