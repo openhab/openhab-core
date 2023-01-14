@@ -258,7 +258,8 @@ public class FeatureInstaller implements ConfigurationListener {
                 String addonsDirectory = (String) felixProperties.get("felix.fileinstall.dir");
                 if (addonsDirectory != null) {
                     try (Stream<Path> files = Files.list(Path.of(addonsDirectory))) {
-                        return files.map(Path::getFileName).map(Path::toString).filter(file -> file.endsWith(".kar")).map(karFileName -> karFileName.substring(0, karFileName.lastIndexOf(".")))
+                        return files.map(Path::getFileName).map(Path::toString).filter(file -> file.endsWith(".kar"))
+                                .map(karFileName -> karFileName.substring(0, karFileName.lastIndexOf(".")))
                                 .allMatch(karRepos::contains);
                     }
                 }
