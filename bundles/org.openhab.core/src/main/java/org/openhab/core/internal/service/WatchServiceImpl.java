@@ -64,14 +64,15 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
     private final List<Listener> subDirPathListeners = new CopyOnWriteArrayList<>();
     private final ExecutorService executor;
     private final String name;
+    private final BundleContext bundleContext;
 
     private @Nullable Path basePath;
     private @Nullable DirectoryWatcher dirWatcher;
     private @Nullable ServiceRegistration<WatchService> reg;
 
     @Activate
-    public WatchServiceImpl(WatchServiceConfiguration config, BundleContext bc) throws IOException {
-
+    public WatchServiceImpl(WatchServiceConfiguration config, BundleContext bundleContext) throws IOException {
+        this.bundleContext = bundleContext;
         if (config.name().isBlank()) {
             throw new IllegalArgumentException("service name must not be blank");
         }
@@ -79,11 +80,11 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
         this.name = config.name();
         executor = Executors.newSingleThreadExecutor(r -> new Thread(r, name));
 
-        modified(config, bc);
+        modified(config);
     }
 
     @Modified
-    public void modified(WatchServiceConfiguration config, BundleContext bc) throws IOException {
+    public void modified(WatchServiceConfiguration config) throws IOException {
         logger.trace("Trying to setup WatchService '{}' with path '{}'", config.name(), config.path());
 
         Path basePath = Path.of(config.path()).toAbsolutePath();
@@ -108,13 +109,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
                             () -> newDirWatcher.watchAsync(executor)
                                     .thenRun(() -> logger.debug("WatchService '{}' has been shut down.", name)),
                             ThreadPoolManager.getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON))
-                    .thenRun(() -> {
-                        Dictionary<String, Object> properties = new Hashtable<>();
-                        properties.put(WatchService.SERVICE_PROPERTY_NAME, name);
-                        this.reg = bc.registerService(WatchService.class, this, properties);
-                        logger.debug("WatchService '{}' completed initialization and registered itself as service.",
-                                name);
-                    });
+                    .thenRun(this::registerWatchService);
             this.dirWatcher = newDirWatcher;
         } catch (NoSuchFileException e) {
             // log message here, otherwise it'll be swallowed by the call to newInstance in the factory
@@ -137,6 +132,13 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
         } catch (IOException e) {
             logger.warn("Failed to shutdown WatchService '{}'", name, e);
         }
+    }
+
+    private void registerWatchService() {
+        Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put(WatchService.SERVICE_PROPERTY_NAME, name);
+        this.reg = bundleContext.registerService(WatchService.class, this, properties);
+        logger.debug("WatchService '{}' completed initialization and registered itself as service.", name);
     }
 
     private void closeWatcherAndUnregister() throws IOException {
