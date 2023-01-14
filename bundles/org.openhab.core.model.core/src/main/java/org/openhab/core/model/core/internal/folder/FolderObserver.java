@@ -133,8 +133,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
             }
         }
 
-        watchService.registerListener(this,
-                folderFileExtMap.keySet().stream().map(Path::of).toList());
+        watchService.registerListener(this, folderFileExtMap.keySet().stream().map(Path::of).toList());
         addModelsToRepo();
         this.activated = true;
     }
