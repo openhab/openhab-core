@@ -31,7 +31,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
 /**
  * The {@link AddonInfoConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface used
- * to convert binding information within an XML document into a {@link AddonInfoXmlResult} object.
+ * to convert add-on information within an XML document into a {@link AddonInfoXmlResult} object.
  * This converter converts {@code addon} XML tags.
  *
  * @author Michael Grammling - Initial contribution
@@ -68,7 +68,7 @@ public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> 
         // read attributes
         Map<String, String> attributes = attributeMapValidator.readValidatedAttributes(reader);
 
-        String id = requireNonEmpty(attributes.get("id"), "Binding id attribute is null or empty");
+        String id = requireNonEmpty(attributes.get("id"), "Add-on id attribute is null or empty");
 
         // set automatically extracted URI for a possible 'config-description' section
         context.put("config-description.uri", CONFIG_DESCRIPTION_URI_PLACEHOLDER);

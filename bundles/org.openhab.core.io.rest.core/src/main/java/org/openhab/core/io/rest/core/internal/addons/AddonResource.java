@@ -294,7 +294,7 @@ public class AddonResource implements RESTResource {
     @GET
     @Path("/{addonId: [a-zA-Z_0-9-:]+}/config")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "getAddonConfiguration", summary = "Get add-onconfiguration for given binding ID.", responses = {
+    @Operation(operationId = "getAddonConfiguration", summary = "Get add-on configuration for given add-on ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Add-on does not exist"),
             @ApiResponse(responseCode = "500", description = "Configuration can not be read due to internal error") })

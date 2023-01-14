@@ -24,7 +24,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * This OSGi service could be used to localize the binding info using the I18N mechanism of the openHAB
+ * This OSGi service could be used to localize the add-on info using the I18N mechanism of the openHAB
  * framework.
  *
  * @author Christoph Weitkamp - Initial contribution
@@ -41,12 +41,12 @@ public class AddonI18nLocalizationService {
     }
 
     /**
-     * Localizes a binding info.
+     * Localizes an add-on info.
      *
      * @param bundle the bundle the i18n resources are located
-     * @param addonInfo the binding info that should be localized
+     * @param addonInfo the add-on info that should be localized
      * @param locale the locale it should be localized to
-     * @return a localized binding info on success, a non-localized one on error (e.g. no translation is found).
+     * @return a localized add-on info on success, a non-localized one on error (e.g. no translation is found).
      */
     public AddonInfo createLocalizedAddonInfo(Bundle bundle, AddonInfo addonInfo, @Nullable Locale locale) {
         String addonInfoUID = addonInfo.getId();
