@@ -38,10 +38,11 @@ public class DefaultScriptFileWatcher extends AbstractScriptFileWatcher {
     private static final String FILE_DIRECTORY = "automation" + File.separator + "jsr223";
 
     @Activate
-    public DefaultScriptFileWatcher(final @Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService
-            , final @Reference ScriptEngineManager manager,
-            final @Reference ReadyService readyService, final @Reference StartLevelService startLevelService) {
-         super(watchService, manager, readyService, startLevelService, FILE_DIRECTORY, true);
+    public DefaultScriptFileWatcher(
+            final @Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService,
+            final @Reference ScriptEngineManager manager, final @Reference ReadyService readyService,
+            final @Reference StartLevelService startLevelService) {
+        super(watchService, manager, readyService, startLevelService, FILE_DIRECTORY, true);
     }
 
     @Activate

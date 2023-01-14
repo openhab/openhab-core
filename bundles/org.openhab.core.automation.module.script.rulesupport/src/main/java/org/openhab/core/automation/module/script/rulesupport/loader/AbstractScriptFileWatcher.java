@@ -94,8 +94,9 @@ public class AbstractScriptFileWatcher implements WatchService.WatchEventListene
 
     private volatile int currentStartLevel;
 
-    public AbstractScriptFileWatcher(final WatchService watchService, final ScriptEngineManager manager, final ReadyService readyService,
-            final StartLevelService startLevelService, final String fileDirectory, boolean watchSubDirectories) {
+    public AbstractScriptFileWatcher(final WatchService watchService, final ScriptEngineManager manager,
+            final ReadyService readyService, final StartLevelService startLevelService, final String fileDirectory,
+            boolean watchSubDirectories) {
         this.watchService = watchService;
         this.manager = manager;
         this.readyService = readyService;
@@ -141,7 +142,7 @@ public class AbstractScriptFileWatcher implements WatchService.WatchEventListene
         readyService.unregisterTracker(this);
 
         CompletableFuture.allOf(
-                        Set.copyOf(scriptMap.keySet()).stream().map(this::removeFile).toArray(CompletableFuture<?>[]::new))
+                Set.copyOf(scriptMap.keySet()).stream().map(this::removeFile).toArray(CompletableFuture<?>[]::new))
                 .thenRun(scheduler::shutdownNow);
     }
 

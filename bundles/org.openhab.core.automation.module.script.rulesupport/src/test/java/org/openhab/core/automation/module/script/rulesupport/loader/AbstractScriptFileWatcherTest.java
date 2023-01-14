@@ -649,7 +649,8 @@ class AbstractScriptFileWatcherTest extends JavaTest {
     }
 
     private AbstractScriptFileWatcher createScriptFileWatcher(boolean watchSubDirectories) {
-        return new AbstractScriptFileWatcher(watchServiceMock, scriptEngineManagerMock, readyServiceMock, startLevelServiceMock, "", watchSubDirectories) {
+        return new AbstractScriptFileWatcher(watchServiceMock, scriptEngineManagerMock, readyServiceMock,
+                startLevelServiceMock, "", watchSubDirectories) {
 
             @Override
             protected ScheduledExecutorService getScheduler() {
