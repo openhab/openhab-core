@@ -205,7 +205,8 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         File file = new File(EXISTING_SUBDIR_PATH, "MockFileForModification." + validExtension);
         Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
-
+        Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
+        
         waitForAssert(() -> assertThat(file.exists(), is(true)));
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(true)), DFL_TIMEOUT * 2,
                 DFL_SLEEP_TIME);

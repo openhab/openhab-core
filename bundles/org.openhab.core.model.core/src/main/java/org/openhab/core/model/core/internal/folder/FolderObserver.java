@@ -13,6 +13,8 @@
 package org.openhab.core.model.core.internal.folder;
 
 import static java.nio.file.StandardWatchEventKinds.*;
+import static org.openhab.core.service.WatchService.Kind.CREATE;
+import static org.openhab.core.service.WatchService.Kind.MODIFY;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -132,7 +134,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
         }
 
         watchService.registerListener(this,
-                folderFileExtMap.keySet().stream().map(Path::of).collect(Collectors.toList()));
+                folderFileExtMap.keySet().stream().map(Path::of).toList());
         addModelsToRepo();
         this.activated = true;
     }
@@ -152,7 +154,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
         Set<File> clonedSet = new HashSet<>(this.ignoredFiles);
         for (File file : clonedSet) {
             if (extension.equals(getExtension(file.getPath()))) {
-                checkFile(modelRepository, file, WatchService.Kind.CREATE);
+                checkFile(modelRepository, file, CREATE);
                 this.ignoredFiles.remove(file);
             }
         }
@@ -170,7 +172,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
                         for (File file : files) {
                             // we omit parsing of hidden files possibly created by editors or operating systems
                             if (!file.isHidden()) {
-                                checkFile(modelRepository, file, WatchService.Kind.CREATE);
+                                checkFile(modelRepository, file, CREATE);
                             }
                         }
                     }
@@ -216,7 +218,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
     private void checkFile(final ModelRepository modelRepository, final File file, final WatchService.Kind kind) {
         try {
             synchronized (FolderObserver.class) {
-                if ((kind == WatchService.Kind.CREATE || kind == WatchService.Kind.MODIFY)) {
+                if ((kind == CREATE || kind == MODIFY)) {
                     if (parsers.contains(getExtension(file.getName()))) {
                         try (InputStream inputStream = Files.newInputStream(file.toPath())) {
                             nameFileMap.put(file.getName(), file);
