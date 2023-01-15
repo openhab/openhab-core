@@ -16,7 +16,6 @@ import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -37,6 +36,7 @@ import org.openhab.core.types.State;
  * @author Wouter Born - increase parsing and formatting precision
  * @author Laurent Garnier - added methods toLocaleZone and toZone
  * @author Gaël L'hopital - added ability to use second and milliseconds unix time
+ * @author Jacob Laursen - Refactored to use {@link Instant} internally
  */
 @NonNullByDefault
 public class DateTimeType implements PrimitiveType, State, Command {
@@ -66,44 +66,61 @@ public class DateTimeType implements PrimitiveType, State, Command {
     private static final DateTimeFormatter FORMATTER_TZ_RFC = DateTimeFormatter
             .ofPattern(DATE_FORMAT_PATTERN_WITH_TZ_RFC);
 
-    private ZonedDateTime zonedDateTime;
+    private Instant instant;
 
+    /**
+     * Creates a new {@link DateTimeType} representing the current
+     * instant from the system clock.
+     */
     public DateTimeType() {
-        this(ZonedDateTime.now());
+        this(Instant.now());
     }
 
+    /**
+     * Creates a new {@link DateTimeType} with the given value.
+     *
+     * @param instant
+     */
+    public DateTimeType(Instant instant) {
+        this.instant = instant;
+    }
+
+    /**
+     * Creates a new {@link DateTimeType} with the given value.
+     * The time-zone information will be discarded, only the
+     * resulting {@link Instant} is preserved.
+     *
+     * @param zoned
+     */
     public DateTimeType(ZonedDateTime zoned) {
-        this.zonedDateTime = ZonedDateTime.from(zoned).withFixedOffsetZone();
+        instant = zoned.toInstant();
     }
 
     public DateTimeType(String zonedValue) {
-        ZonedDateTime date = null;
         try {
             // direct parsing (date and time)
             try {
-                date = parse(zonedValue);
+                instant = parse(zonedValue);
             } catch (DateTimeParseException fullDtException) {
                 // time only
                 try {
-                    date = parse("1970-01-01T" + zonedValue);
+                    instant = parse("1970-01-01T" + zonedValue);
                 } catch (DateTimeParseException timeOnlyException) {
                     try {
                         long epoch = Double.valueOf(zonedValue).longValue();
                         int length = (int) (Math.log10(epoch >= 0 ? epoch : epoch * -1) + 1);
-                        Instant i;
                         // Assume that below 12 digits we're in seconds
                         if (length < 12) {
-                            i = Instant.ofEpochSecond(epoch);
+                            instant = Instant.ofEpochSecond(epoch);
                         } else {
-                            i = Instant.ofEpochMilli(epoch);
+                            instant = Instant.ofEpochMilli(epoch);
                         }
-                        date = ZonedDateTime.ofInstant(i, ZoneOffset.UTC);
                     } catch (NumberFormatException notANumberException) {
                         // date only
                         if (zonedValue.length() == 10) {
-                            date = parse(zonedValue + "T00:00:00");
+                            instant = parse(zonedValue + "T00:00:00");
                         } else {
-                            date = parse(zonedValue.substring(0, 10) + "T00:00:00" + zonedValue.substring(10));
+                            instant = parse(zonedValue.substring(0, 10) + "T00:00:00" + zonedValue.substring(10));
                         }
                     }
                 }
@@ -111,12 +128,10 @@ public class DateTimeType implements PrimitiveType, State, Command {
         } catch (DateTimeParseException invalidFormatException) {
             throw new IllegalArgumentException(zonedValue + " is not in a valid format.", invalidFormatException);
         }
-
-        zonedDateTime = date.withFixedOffsetZone();
     }
 
     public ZonedDateTime getZonedDateTime() {
-        return zonedDateTime;
+        return instant.atZone(ZoneId.systemDefault());
     }
 
     /**
@@ -125,7 +140,7 @@ public class DateTimeType implements PrimitiveType, State, Command {
      * @return an {@link Instant} representation of the current object
      */
     public Instant getInstant() {
-        return zonedDateTime.toInstant();
+        return instant;
     }
 
     public static DateTimeType valueOf(String value) {
@@ -135,49 +150,55 @@ public class DateTimeType implements PrimitiveType, State, Command {
     @Override
     public String format(@Nullable String pattern) {
         if (pattern == null) {
-            return DateTimeFormatter.ofPattern(DATE_PATTERN).format(zonedDateTime);
+            return DateTimeFormatter.ofPattern(DATE_PATTERN).format(instant.atZone(ZoneId.systemDefault()));
         }
 
-        return String.format(pattern, zonedDateTime);
+        return String.format(pattern, instant.atZone(ZoneId.systemDefault()));
     }
 
     public String format(Locale locale, String pattern) {
-        return String.format(locale, pattern, zonedDateTime);
+        return String.format(locale, pattern, instant.atZone(ZoneId.systemDefault()));
     }
 
     /**
-     * Create a {@link DateTimeType} being the translation of the current object to the locale time zone
+     * @deprecated
+     *             Create a {@link DateTimeType} being the translation of the current object to the locale time zone
      *
      * @return a {@link DateTimeType} translated to the locale time zone
      * @throws DateTimeException if the converted zone ID has an invalid format or the result exceeds the supported date
      *             range
      * @throws ZoneRulesException if the converted zone region ID cannot be found
      */
+    @Deprecated
     public DateTimeType toLocaleZone() throws DateTimeException, ZoneRulesException {
-        return toZone(ZoneId.systemDefault());
+        return new DateTimeType(instant);
     }
 
     /**
-     * Create a {@link DateTimeType} being the translation of the current object to a given zone
+     * @deprecated
+     *             Create a {@link DateTimeType} being the translation of the current object to a given zone
      *
      * @param zone the target zone as a string
      * @return a {@link DateTimeType} translated to the given zone
      * @throws DateTimeException if the zone has an invalid format or the result exceeds the supported date range
      * @throws ZoneRulesException if the zone is a region ID that cannot be found
      */
+    @Deprecated
     public DateTimeType toZone(String zone) throws DateTimeException, ZoneRulesException {
-        return toZone(ZoneId.of(zone));
+        return new DateTimeType(instant);
     }
 
     /**
-     * Create a {@link DateTimeType} being the translation of the current object to a given zone
+     * @deprecated
+     *             Create a {@link DateTimeType} being the translation of the current object to a given zone
      *
      * @param zoneId the target {@link ZoneId}
      * @return a {@link DateTimeType} translated to the given zone
      * @throws DateTimeException if the result exceeds the supported date range
      */
+    @Deprecated
     public DateTimeType toZone(ZoneId zoneId) throws DateTimeException {
-        return new DateTimeType(zonedDateTime.withZoneSameInstant(zoneId));
+        return new DateTimeType(instant);
     }
 
     @Override
@@ -187,7 +208,7 @@ public class DateTimeType implements PrimitiveType, State, Command {
 
     @Override
     public String toFullString() {
-        String formatted = zonedDateTime.format(FORMATTER_TZ_RFC);
+        String formatted = instant.atZone(ZoneId.systemDefault()).format(FORMATTER_TZ_RFC);
         if (formatted.contains(".")) {
             String sign = "";
             if (formatted.contains("+")) {
@@ -208,7 +229,7 @@ public class DateTimeType implements PrimitiveType, State, Command {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + getZonedDateTime().hashCode();
+        result = prime * result + instant.hashCode();
         return result;
     }
 
@@ -224,10 +245,10 @@ public class DateTimeType implements PrimitiveType, State, Command {
             return false;
         }
         DateTimeType other = (DateTimeType) obj;
-        return zonedDateTime.compareTo(other.zonedDateTime) == 0;
+        return instant.compareTo(other.instant) == 0;
     }
 
-    private ZonedDateTime parse(String value) throws DateTimeParseException {
+    private Instant parse(String value) throws DateTimeParseException {
         ZonedDateTime date = null;
         try {
             date = ZonedDateTime.parse(value, PARSER_TZ_RFC);
@@ -244,6 +265,6 @@ public class DateTimeType implements PrimitiveType, State, Command {
             }
         }
 
-        return date;
+        return date.toInstant();
     }
 }
