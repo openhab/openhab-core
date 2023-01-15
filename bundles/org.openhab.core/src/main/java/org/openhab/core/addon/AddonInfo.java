@@ -95,9 +95,9 @@ public class AddonInfo implements Identifiable<String> {
     }
 
     /**
-     * Returns a human-readable name for the binding (e.g. "HUE Binding").
+     * Returns a human-readable name for the add-on (e.g. "HUE Binding").
      *
-     * @return a human-readable name for the binding (neither null, nor empty)
+     * @return a human-readable name for the add-on (neither null, nor empty)
      */
     public String getName() {
         return name;
@@ -112,19 +112,19 @@ public class AddonInfo implements Identifiable<String> {
     }
 
     /**
-     * Returns a human-readable description for the binding
+     * Returns a human-readable description for the add-on
      * (e.g. "Discovers and controls HUE bulbs").
      *
-     * @return a human-readable description for the binding
+     * @return a human-readable description for the add-on
      */
     public String getDescription() {
         return description;
     }
 
     /**
-     * Returns the author of the binding (e.g. "Max Mustermann").
+     * Returns the author of the add-on (e.g. "Max Mustermann").
      *
-     * @return the author of the binding (could be null or empty)
+     * @return the author of the add-on (could be null or empty)
      */
     public @Nullable String getAuthor() {
         return author;
