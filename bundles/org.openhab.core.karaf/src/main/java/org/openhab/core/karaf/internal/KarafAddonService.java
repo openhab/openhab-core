@@ -13,20 +13,20 @@
 package org.openhab.core.karaf.internal;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.AddonInfo;
+import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
-import org.openhab.core.binding.BindingInfo;
-import org.openhab.core.binding.BindingInfoRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -40,34 +40,32 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @Component(name = "org.openhab.core.karafaddons")
+@NonNullByDefault
 public class KarafAddonService implements AddonService {
-    private static final String ADDONS_CONTENTTYPE = "application/vnd.openhab.feature;type=karaf";
+    private static final String ADDONS_CONTENT_TYPE = "application/vnd.openhab.feature;type=karaf";
     private static final String ADDONS_AUTHOR = "openHAB";
+    private static final List<AddonType> ADDON_TYPES = List.of( //
+            new AddonType(FeatureInstaller.EXTENSION_TYPE_AUTOMATION, "Automation"), //
+            new AddonType(FeatureInstaller.EXTENSION_TYPE_BINDING, "Bindings"), //
+            new AddonType(FeatureInstaller.EXTENSION_TYPE_MISC, "Misc"), //
+            new AddonType(FeatureInstaller.EXTENSION_TYPE_VOICE, "Voice"), //
+            new AddonType(FeatureInstaller.EXTENSION_TYPE_PERSISTENCE, "Persistence"), //
+            new AddonType(FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION, "Transformations"), //
+            new AddonType(FeatureInstaller.EXTENSION_TYPE_UI, "User Interfaces"));
 
     private final Logger logger = LoggerFactory.getLogger(KarafAddonService.class);
 
-    private final List<AddonType> typeList = new ArrayList<>(FeatureInstaller.EXTENSION_TYPES.size());
-
     private final FeaturesService featuresService;
     private final FeatureInstaller featureInstaller;
-    private final BindingInfoRegistry bindingInfoRegistry;
+
+    private final AddonInfoRegistry addonInfoRegistry;
 
     @Activate
     public KarafAddonService(final @Reference FeatureInstaller featureInstaller,
-            final @Reference FeaturesService featuresService,
-            final @Reference BindingInfoRegistry bindingInfoRegistry) {
+            final @Reference FeaturesService featuresService, @Reference AddonInfoRegistry addonInfoRegistry) {
         this.featureInstaller = featureInstaller;
         this.featuresService = featuresService;
-        this.bindingInfoRegistry = bindingInfoRegistry;
-        typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_AUTOMATION, "Automation"));
-        typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_BINDING, "Bindings"));
-        typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_MISC, "Misc"));
-        typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_VOICE, "Voice"));
-        if (!FeatureInstaller.SIMPLE_PACKAGE.equals(featureInstaller.getCurrentPackage())) {
-            typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_PERSISTENCE, "Persistence"));
-            typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION, "Transformations"));
-            typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_UI, "User Interfaces"));
-        }
+        this.addonInfoRegistry = addonInfoRegistry;
     }
 
     @Override
@@ -85,10 +83,10 @@ public class KarafAddonService implements AddonService {
     }
 
     @Override
-    public List<Addon> getAddons(Locale locale) {
+    public List<Addon> getAddons(@Nullable Locale locale) {
         try {
             return Arrays.stream(featuresService.listFeatures()).filter(this::isAddon).map(this::getAddon)
-                    .sorted(Comparator.comparing(Addon::getLabel)).collect(Collectors.toList());
+                    .sorted(Comparator.comparing(Addon::getLabel)).toList();
         } catch (Exception e) {
             logger.error("Exception while retrieving features: {}", e.getMessage());
             return List.of();
@@ -101,7 +99,7 @@ public class KarafAddonService implements AddonService {
     }
 
     @Override
-    public Addon getAddon(String id, Locale locale) {
+    public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
         Feature feature;
         try {
             feature = featuresService.getFeature(FeatureInstaller.PREFIX + id);
@@ -112,62 +110,46 @@ public class KarafAddonService implements AddonService {
         }
     }
 
+    private @Nullable String getDefaultDocumentationLink(String type, String name) {
+        return switch (type) {
+            case FeatureInstaller.EXTENSION_TYPE_AUTOMATION -> "https://www.openhab.org/addons/automation/" + name
+                    + "/";
+            case FeatureInstaller.EXTENSION_TYPE_BINDING -> "https://www.openhab.org/addons/bindings/" + name + "/";
+            case FeatureInstaller.EXTENSION_TYPE_PERSISTENCE -> "https://www.openhab.org/addons/persistence/" + name
+                    + "/";
+            case FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION -> "https://www.openhab.org/addons/transformations/"
+                    + name + "/";
+            case FeatureInstaller.EXTENSION_TYPE_VOICE -> "https://www.openhab.org/addons/voice/" + name + "/";
+            default -> null;
+        };
+    }
+
     private Addon getAddon(Feature feature) {
         String name = getName(feature.getName());
         String type = getType(feature.getName());
-        String link = null;
-        String configDescriptionURI = "";
-        switch (type) {
-            case FeatureInstaller.EXTENSION_TYPE_AUTOMATION:
-                link = "https://www.openhab.org/addons/automation/" + name + "/";
-                break;
-            case FeatureInstaller.EXTENSION_TYPE_BINDING:
-                link = "https://www.openhab.org/addons/bindings/" + name + "/";
-                BindingInfo bindingInfo = bindingInfoRegistry.getBindingInfo(name);
-                if (bindingInfo != null) {
-                    URI uri = bindingInfo.getConfigDescriptionURI();
-                    if (uri != null) {
-                        configDescriptionURI = uri.toString();
-                    }
-                }
-                break;
-            case FeatureInstaller.EXTENSION_TYPE_MISC:
-                // Not possible to define URL
-                break;
-            case FeatureInstaller.EXTENSION_TYPE_PERSISTENCE:
-                link = "https://www.openhab.org/addons/persistence/" + name + "/";
-                break;
-            case FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION:
-                link = "https://www.openhab.org/addons/transformations/" + name + "/";
-                break;
-            case FeatureInstaller.EXTENSION_TYPE_UI:
-                // Not possible to define URL
-                break;
-            case FeatureInstaller.EXTENSION_TYPE_VOICE:
-                link = "https://www.openhab.org/addons/voice/" + name + "/";
-                break;
-            default:
-                break;
+        String id = type + Addon.ADDON_SEPARATOR + name;
+        boolean isInstalled = featuresService.isInstalled(feature);
+
+        Addon.Builder addon = Addon.create(id).withContentType(ADDONS_CONTENT_TYPE).withType(type)
+                .withVersion(feature.getVersion()).withAuthor(ADDONS_AUTHOR, true).withInstalled(isInstalled);
+
+        AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(id);
+
+        if (isInstalled && addonInfo != null) {
+            // only enrich if this add-on is installed, otherwise wrong data might be added
+            addon = addon.withLabel(addonInfo.getName()).withDescription(addonInfo.getDescription())
+                    .withCountries(addonInfo.getCountries()).withLink(getDefaultDocumentationLink(type, name))
+                    .withConfigDescriptionURI(addonInfo.getConfigDescriptionURI());
+        } else {
+            addon = addon.withLabel(feature.getDescription()).withLink(getDefaultDocumentationLink(type, name));
         }
 
-        // for openHAB add-on bundles the package is the same as the bundle name
-        List<String> packages = feature.getBundles().stream().filter(bundle -> !bundle.isDependency()).map(bundle -> {
-            String location = bundle.getLocation();
-            location = location.substring(0, location.lastIndexOf("/")); // strip version
-            location = location.substring(location.lastIndexOf("/") + 1); // strip groupId and protocol
-            return location;
-        }).collect(Collectors.toList());
-
-        return Addon.create(type + "-" + name).withType(type).withLabel(feature.getDescription())
-                .withVersion(feature.getVersion()).withContentType(ADDONS_CONTENTTYPE).withLink(link)
-                .withLoggerPackages(packages).withAuthor(ADDONS_AUTHOR, true)
-                .withConfigDescriptionURI(configDescriptionURI).withInstalled(featuresService.isInstalled(feature))
-                .build();
+        return addon.build();
     }
 
     @Override
-    public List<AddonType> getTypes(Locale locale) {
-        return typeList;
+    public List<AddonType> getTypes(@Nullable Locale locale) {
+        return ADDON_TYPES;
     }
 
     @Override
@@ -181,29 +163,19 @@ public class KarafAddonService implements AddonService {
     }
 
     @Override
-    public String getAddonId(URI addonURI) {
+    public @Nullable String getAddonId(URI addonURI) {
         return null;
     }
 
-    private String substringAfter(String str, String separator) {
-        int index = str.indexOf(separator);
-        return index == -1 ? "" : str.substring(index + separator.length());
-    }
-
-    private String substringBefore(String str, String separator) {
-        int index = str.indexOf(separator);
+    private String getType(String name) {
+        String str = name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name;
+        int index = str.indexOf(Addon.ADDON_SEPARATOR);
         return index == -1 ? str : str.substring(0, index);
     }
 
-    private String getType(String name) {
-        return substringBefore(
-                name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name,
-                "-");
-    }
-
     private String getName(String name) {
-        return substringAfter(
-                name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name,
-                "-");
+        String str = name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name;
+        int index = str.indexOf(Addon.ADDON_SEPARATOR);
+        return index == -1 ? "" : str.substring(index + Addon.ADDON_SEPARATOR.length());
     }
 }

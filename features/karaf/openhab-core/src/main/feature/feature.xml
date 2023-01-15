@@ -47,7 +47,7 @@
 		<bundle start-level="75">mvn:org.openhab.core.bundles/org.openhab.core.config.xml/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
 		<feature dependency="true">openhab-core-storage-json</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.binding.xml/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.addon.xml/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.id/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.persistence/${project.version}</bundle>

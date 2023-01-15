@@ -19,7 +19,7 @@ import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.binding.xml.internal.BindingInfoXmlResult;
+import org.openhab.core.addon.xml.internal.AddonInfoXmlResult;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.thing.xml.internal.ChannelGroupTypeXmlResult;
 import org.openhab.core.thing.xml.internal.ChannelTypeXmlResult;
@@ -35,8 +35,8 @@ import com.google.gson.JsonObject;
 @NonNullByDefault
 public class BundleInfo {
 
-    private String bindingId = "";
-    private @Nullable BindingInfoXmlResult bindingInfoXml;
+    private String addonId = "";
+    private @Nullable AddonInfoXmlResult addonInfoXml;
     private List<ConfigDescription> configDescriptions = new ArrayList<>(5);
     private List<ChannelGroupTypeXmlResult> channelGroupTypesXml = new ArrayList<>(5);
     private List<ChannelTypeXmlResult> channelTypesXml = new ArrayList<>(5);
@@ -44,20 +44,20 @@ public class BundleInfo {
     private List<JsonObject> moduleTypesJson = new ArrayList<>(5);
     private List<JsonObject> ruleTemplateJson = new ArrayList<>(5);
 
-    public String getBindingId() {
-        return bindingId;
+    public String getAddonId() {
+        return addonId;
     }
 
-    public void setBindingId(String bindingId) {
-        this.bindingId = bindingId;
+    public void setAddonId(String addonId) {
+        this.addonId = addonId;
     }
 
-    public @Nullable BindingInfoXmlResult getBindingInfoXml() {
-        return bindingInfoXml;
+    public @Nullable AddonInfoXmlResult getAddonInfoXml() {
+        return addonInfoXml;
     }
 
-    public void setBindingInfoXml(BindingInfoXmlResult bindingInfo) {
-        this.bindingInfoXml = bindingInfo;
+    public void setAddonInfoXml(AddonInfoXmlResult addonInfo) {
+        this.addonInfoXml = addonInfo;
     }
 
     public List<ConfigDescription> getConfigDescriptions() {
