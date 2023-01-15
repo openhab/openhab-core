@@ -5,7 +5,7 @@ Fragment-Host: org.openhab.core.thing.xml
 
 -runrequires: \
 	bnd.identity;id='org.openhab.core.thing.xml.tests',\
-	bnd.identity;id='org.openhab.core.binding.xml'
+	bnd.identity;id='org.openhab.core.addon.xml'
 
 #
 # done
@@ -51,7 +51,6 @@ Fragment-Host: org.openhab.core.thing.xml
 	biz.aQute.tester.junit-platform;version='[6.4.0,6.4.1)',\
 	com.google.gson;version='[2.9.1,2.9.2)',\
 	org.openhab.core;version='[4.0.0,4.0.1)',\
-	org.openhab.core.binding.xml;version='[4.0.0,4.0.1)',\
 	org.openhab.core.config.core;version='[4.0.0,4.0.1)',\
 	org.openhab.core.config.xml;version='[4.0.0,4.0.1)',\
 	org.openhab.core.io.console;version='[4.0.0,4.0.1)',\
@@ -62,4 +61,5 @@ Fragment-Host: org.openhab.core.thing.xml
 	io.methvin.directory-watcher;version='[0.17.1,0.17.2)',\
 	com.sun.jna;version='[5.12.1,5.12.2)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
-	org.osgi.service.cm;version='[1.6.0,1.6.1)'
+	org.osgi.service.cm;version='[1.6.0,1.6.1)',\
+	org.openhab.core.addon.xml;version='[4.0.0,4.0.1)'
