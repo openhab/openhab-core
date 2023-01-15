@@ -36,15 +36,16 @@ public class AddonI18nUtil {
         this.i18nProvider = i18nProvider;
     }
 
-    public @Nullable String getDescription(Bundle bundle, String bindingId, @Nullable String defaultDescription,
-            @Nullable Locale locale) {
-        String key = I18nUtil.stripConstantOr(defaultDescription, () -> inferKey(bindingId, "description"));
-        return i18nProvider.getText(bundle, key, defaultDescription, locale);
+    public String getDescription(Bundle bundle, String addonId, String defaultDescription, @Nullable Locale locale) {
+        String key = I18nUtil.stripConstantOr(defaultDescription, () -> inferKey(addonId, "description"));
+        String localizedText = i18nProvider.getText(bundle, key, defaultDescription, locale);
+        return localizedText != null ? localizedText : defaultDescription;
     }
 
-    public @Nullable String getName(Bundle bundle, String bindingId, String defaultLabel, @Nullable Locale locale) {
-        String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferKey(bindingId, "name"));
-        return i18nProvider.getText(bundle, key, defaultLabel, locale);
+    public String getName(Bundle bundle, String addonId, String defaultLabel, @Nullable Locale locale) {
+        String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferKey(addonId, "name"));
+        String localizedText = i18nProvider.getText(bundle, key, defaultLabel, locale);
+        return localizedText != null ? localizedText : defaultLabel;
     }
 
     private String inferKey(String bindingId, String lastSegment) {
