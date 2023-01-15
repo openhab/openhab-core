@@ -15,7 +15,6 @@ package org.openhab.core.thing.internal.profiles;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -95,8 +94,7 @@ public class TimestampOffsetProfileTest {
         DateTimeType updateResult = (DateTimeType) result;
         DateTimeType expectedResult = new DateTimeType(
                 ((DateTimeType) cmd).getZonedDateTime().minusSeconds(parameterSet.seconds));
-        assertEquals(ZoneOffset.UTC, updateResult.getZonedDateTime().getOffset());
-        assertEquals(expectedResult.getZonedDateTime(), updateResult.getZonedDateTime());
+        assertEquals(expectedResult.getInstant(), updateResult.getInstant());
     }
 
     @ParameterizedTest
@@ -116,11 +114,7 @@ public class TimestampOffsetProfileTest {
         DateTimeType updateResult = (DateTimeType) result;
         DateTimeType expectedResult = new DateTimeType(
                 ((DateTimeType) cmd).getZonedDateTime().plusSeconds(parameterSet.seconds));
-        String timeZone = parameterSet.timeZone;
-        if (timeZone != null) {
-            expectedResult = expectedResult.toZone(timeZone);
-        }
-        assertEquals(expectedResult.getZonedDateTime(), updateResult.getZonedDateTime());
+        assertEquals(expectedResult.getInstant(), updateResult.getInstant());
     }
 
     @ParameterizedTest
@@ -140,11 +134,7 @@ public class TimestampOffsetProfileTest {
         DateTimeType updateResult = (DateTimeType) result;
         DateTimeType expectedResult = new DateTimeType(
                 ((DateTimeType) state).getZonedDateTime().plusSeconds(parameterSet.seconds));
-        String timeZone = parameterSet.timeZone;
-        if (timeZone != null) {
-            expectedResult = expectedResult.toZone(timeZone);
-        }
-        assertEquals(expectedResult.getZonedDateTime(), updateResult.getZonedDateTime());
+        assertEquals(expectedResult.getInstant(), updateResult.getInstant());
     }
 
     private TimestampOffsetProfile createProfile(ProfileCallback callback, String offset, @Nullable String timeZone) {

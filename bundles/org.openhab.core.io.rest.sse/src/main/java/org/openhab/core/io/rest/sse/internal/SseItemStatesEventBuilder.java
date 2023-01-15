@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.rest.sse.internal;
 
-import java.time.DateTimeException;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.Locale;
@@ -33,7 +32,6 @@ import org.openhab.core.io.rest.sse.internal.dto.StateDTO;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.service.StartLevelService;
@@ -186,12 +184,6 @@ public class SseItemStatesEventBuilder {
 
                         if (quantityState != null) {
                             state = quantityState;
-                        }
-                    } else if (state instanceof DateTimeType type) {
-                        // Translate a DateTimeType state to the local time zone
-                        try {
-                            state = type.toLocaleZone();
-                        } catch (DateTimeException e) {
                         }
                     }
 

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.ui.internal.items;
 
-import java.time.DateTimeException;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -454,12 +453,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         if (quantityState != null) {
                             quantityState = convertStateToWidgetUnit(quantityState, w);
                             state = quantityState;
-                        }
-                    } else if (state instanceof DateTimeType type) {
-                        // Translate a DateTimeType state to the local time zone
-                        try {
-                            state = type.toLocaleZone();
-                        } catch (DateTimeException ignored) {
                         }
                     }
 

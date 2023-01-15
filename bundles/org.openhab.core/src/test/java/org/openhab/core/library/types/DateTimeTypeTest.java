@@ -183,19 +183,19 @@ public class DateTimeTypeTest {
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("UTC"),
                         "2014-03-30T10:58:47.033+0000", "2014-03-30T10:58:47.033+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("CET"),
-                        "2014-03-30T10:58:47.033+0200", "2014-03-30T08:58:47.033+0000") },
+                        "2014-03-30T08:58:47.033+0000", "2014-03-30T08:58:47.033+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), "2014-03-30T10:58:47.23",
                         "2014-03-30T10:58:47.230+0000", "2014-03-30T10:58:47.230+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), "2014-03-30T10:58:47UTC",
                         "2014-03-30T10:58:47.000+0000", "2014-03-30T10:58:47.000+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("CET"), initTimeMap(), TimeZone.getTimeZone("UTC"),
-                        "2014-03-30T10:58:47.033+0000", "2014-03-30T12:58:47.033+0200") },
+                        "2014-03-30T12:58:47.033+0200", "2014-03-30T12:58:47.033+0200") },
                 { new ParameterSet(TimeZone.getTimeZone("CET"), initTimeMap(), TimeZone.getTimeZone("CET"),
                         "2014-03-30T10:58:47.033+0200", "2014-03-30T10:58:47.033+0200") },
                 { new ParameterSet(TimeZone.getTimeZone("CET"), "2014-03-30T10:58:47CET",
                         "2014-03-30T10:58:47.000+0200", "2014-03-30T10:58:47.000+0200") },
                 { new ParameterSet(TimeZone.getTimeZone("GMT+5"), "2014-03-30T10:58:47.000Z",
-                        "2014-03-30T10:58:47.000+0000", "2014-03-30T15:58:47.000+0500") },
+                        "2014-03-30T15:58:47.000+0500", "2014-03-30T15:58:47.000+0500") },
                 { new ParameterSet(TimeZone.getTimeZone("GMT+2"), null, null, "2014-03-30T10:58:47",
                         "2014-03-30T10:58:47.000+0200", "2014-03-30T10:58:47.000+0200", null,
                         "%1$td.%1$tm.%1$tY %1$tH:%1$tM", "30.03.2014 10:58") },
@@ -203,15 +203,15 @@ public class DateTimeTypeTest {
                         "2014-03-30T10:58:47.033+0000", "2014-03-30T10:58:47.033+0000") },
                 // Parameter set with an invalid time zone id as input, leading to GMT being considered
                 { new ParameterSet(TimeZone.getTimeZone("CET"), initTimeMap(), TimeZone.getTimeZone("+02:00"),
-                        "2014-03-30T10:58:47.033+0000", "2014-03-30T12:58:47.033+0200") },
+                        "2014-03-30T12:58:47.033+0200", "2014-03-30T12:58:47.033+0200") },
                 // Parameter set with an invalid time zone id as input, leading to GMT being considered
                 { new ParameterSet(TimeZone.getTimeZone("GMT+2"), initTimeMap(), TimeZone.getTimeZone("GML"),
-                        "2014-03-30T10:58:47.033+0000", "2014-03-30T12:58:47.033+0200") },
+                        "2014-03-30T12:58:47.033+0200", "2014-03-30T12:58:47.033+0200") },
                 { new ParameterSet(TimeZone.getTimeZone("GMT-2"), initTimeMap(), TimeZone.getTimeZone("GMT+3"), null,
-                        "2014-03-30T10:58:47.033+0300", "2014-03-30T05:58:47.033-0200", Locale.GERMAN,
-                        "%1$tA %1$td.%1$tm.%1$tY %1$tH:%1$tM", "Sonntag 30.03.2014 10:58") },
+                        "2014-03-30T05:58:47.033-0200", "2014-03-30T05:58:47.033-0200", Locale.GERMAN,
+                        "%1$tA %1$td.%1$tm.%1$tY %1$tH:%1$tM", "Sonntag 30.03.2014 05:58") },
                 { new ParameterSet(TimeZone.getTimeZone("GMT-2"), initTimeMap(), TimeZone.getTimeZone("GMT-4"),
-                        "2014-03-30T10:58:47.033-0400", "2014-03-30T12:58:47.033-0200") },
+                        "2014-03-30T12:58:47.033-0200", "2014-03-30T12:58:47.033-0200") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), "10:58:47", "1970-01-01T10:58:47.000+0000",
                         "1970-01-01T10:58:47.000+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), "10:58", "1970-01-01T10:58:00.000+0000",
@@ -295,16 +295,21 @@ public class DateTimeTypeTest {
 
     @Test
     public void instantParsingTest() {
-        DateTimeType dt1 = new DateTimeType("2019-06-12T17:30:00Z");
-        DateTimeType dt2 = new DateTimeType("2019-06-12T17:30:00+0000");
-        DateTimeType dt3 = new DateTimeType("2019-06-12T19:30:00+0200");
+        DateTimeType dt1 = new DateTimeType(Instant.parse("2019-06-12T17:30:00Z"));
+        DateTimeType dt2 = new DateTimeType("2019-06-12T17:30:00Z");
+        DateTimeType dt3 = new DateTimeType("2019-06-12T17:30:00+0000");
+        DateTimeType dt4 = new DateTimeType("2019-06-12T19:30:00+0200");
         assertThat(dt1, is(dt2));
+        assertThat(dt2, is(dt3));
+        assertThat(dt3, is(dt4));
 
         Instant i1 = dt1.getInstant();
         Instant i2 = dt2.getInstant();
         Instant i3 = dt3.getInstant();
+        Instant i4 = dt4.getInstant();
         assertThat(i1, is(i2));
-        assertThat(i1, is(i3));
+        assertThat(i2, is(i3));
+        assertThat(i3, is(i4));
     }
 
     @Test
@@ -367,25 +372,6 @@ public class DateTimeTypeTest {
         } else {
             assertEquals(parameterSet.expectedFormattedResult, dt.format(pattern));
         }
-    }
-
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void changingZoneTest(ParameterSet parameterSet) {
-        TimeZone.setDefault(parameterSet.defaultTimeZone);
-        DateTimeType dt = createDateTimeType(parameterSet);
-        DateTimeType dt2 = dt.toLocaleZone();
-        assertEquals(parameterSet.expectedResultLocalTZ, dt2.toFullString());
-        dt2 = dt.toZone(parameterSet.defaultTimeZone.toZoneId());
-        assertEquals(parameterSet.expectedResultLocalTZ, dt2.toFullString());
-    }
-
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void changingZoneThrowsExceptionTest(ParameterSet parameterSet) {
-        TimeZone.setDefault(parameterSet.defaultTimeZone);
-        DateTimeType dt = createDateTimeType(parameterSet);
-        assertThrows(DateTimeException.class, () -> dt.toZone("XXX"));
     }
 
     private DateTimeType createDateTimeType(ParameterSet parameterSet) throws DateTimeException {

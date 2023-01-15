@@ -30,6 +30,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.sitemap.internal.SitemapEvent;
 import org.openhab.core.io.rest.sitemap.internal.WidgetsChangeListener;
 import org.openhab.core.items.GroupItem;
@@ -87,6 +88,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     }
 
     private final ItemUIRegistry itemUIRegistry;
+    private final TimeZoneProvider timeZoneProvider;
 
     private final List<SitemapProvider> sitemapProviders = new ArrayList<>();
 
@@ -107,8 +109,9 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
 
     @Activate
     public SitemapSubscriptionService(Map<String, Object> config, final @Reference ItemUIRegistry itemUIRegistry,
-            BundleContext bundleContext) {
+            final @Reference TimeZoneProvider timeZoneProvider, BundleContext bundleContext) {
         this.itemUIRegistry = itemUIRegistry;
+        this.timeZoneProvider = timeZoneProvider;
         this.bundleContext = bundleContext;
         applyConfig(config);
     }
@@ -264,7 +267,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
         String sitemapWithPageId = getScopeIdentifier(sitemapName, pageId);
         ListenerRecord listener = pageChangeListeners.computeIfAbsent(sitemapWithPageId, v -> {
             WidgetsChangeListener newListener = new WidgetsChangeListener(sitemapName, pageId, itemUIRegistry,
-                    collectWidgets(sitemapName, pageId));
+                    timeZoneProvider, collectWidgets(sitemapName, pageId));
             ServiceRegistration<?> registration = bundleContext.registerService(EventSubscriber.class.getName(),
                     newListener, null);
             return new ListenerRecord(newListener, registration);
