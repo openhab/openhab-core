@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Refactored dependency tracking to script engine factories
  */
 @NonNullByDefault
-public class AbstractScriptFileWatcher implements WatchService.WatchEventListener, ReadyService.ReadyTracker,
+public abstract class AbstractScriptFileWatcher implements WatchService.WatchEventListener, ReadyService.ReadyTracker,
         ScriptDependencyTracker.Listener, ScriptEngineManager.FactoryChangeListener, ScriptFileWatcher {
 
     private static final Set<String> EXCLUDED_FILE_EXTENSIONS = Set.of("txt", "old", "example", "backup", "md", "swp",
@@ -214,7 +214,7 @@ public class AbstractScriptFileWatcher implements WatchService.WatchEventListene
     public void processWatchEvent(WatchService.Kind kind, Path path) {
         File file = path.toFile();
         if (!file.isHidden()) {
-            if (DELETE.equals(kind)) {
+            if (kind == DELETE) {
                 if (file.isDirectory()) {
                     if (watchSubDirectories) {
                         synchronized (this) {
@@ -229,7 +229,7 @@ public class AbstractScriptFileWatcher implements WatchService.WatchEventListene
                 }
             }
 
-            if (file.canRead() && (CREATE.equals(kind) || MODIFY.equals(kind))) {
+            if (file.canRead() && (kind==CREATE ||kind == MODIFY)) {
                 addFiles(listFiles(file.toPath(), watchSubDirectories));
             }
         }
