@@ -22,7 +22,6 @@ import org.openhab.core.service.StartLevelService;
 import org.openhab.core.service.WatchService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
@@ -43,15 +42,5 @@ public class DefaultScriptFileWatcher extends AbstractScriptFileWatcher {
             final @Reference ScriptEngineManager manager, final @Reference ReadyService readyService,
             final @Reference StartLevelService startLevelService) {
         super(watchService, manager, readyService, startLevelService, FILE_DIRECTORY, true);
-    }
-
-    @Activate
-    public void activate() {
-        super.activate();
-    }
-
-    @Deactivate
-    public void deactivate() {
-        super.deactivate();
     }
 }

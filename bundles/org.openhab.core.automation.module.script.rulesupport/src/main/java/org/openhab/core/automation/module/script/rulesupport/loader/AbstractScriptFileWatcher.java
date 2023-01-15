@@ -229,7 +229,7 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
                 }
             }
 
-            if (file.canRead() && (kind==CREATE ||kind == MODIFY)) {
+            if (file.canRead() && (kind == CREATE || kind == MODIFY)) {
                 addFiles(listFiles(file.toPath(), watchSubDirectories));
             }
         }
