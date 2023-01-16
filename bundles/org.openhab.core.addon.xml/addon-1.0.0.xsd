@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:addon="https://openhab.org/schemas/addon/v1.0.0"
            xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
            targetNamespace="https://openhab.org/schemas/addon/v1.0.0">
 
@@ -9,7 +10,7 @@
     <xs:element name="addon">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="type" type="addonType"/>
+                <xs:element name="type" type="addon:addonType"/>
                 <xs:element name="name" type="xs:string"/>
                 <xs:element name="description" type="xs:string"/>
                 <xs:element name="author" type="xs:string" minOccurs="0">
@@ -17,8 +18,8 @@
                         <xs:documentation>The organization maintaining the add-on (e.g. openHAB). Individual developer names should be avoided.</xs:documentation>
                     </xs:annotation>
                 </xs:element>
-                <xs:element name="connection" type="connectionType" minOccurs="0"/>
-                <xs:element name="countries" type="countryType" minOccurs="0">
+                <xs:element name="connection" type="addon:connectionType" minOccurs="0"/>
+                <xs:element name="countries" type="addon:countryType" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>Comma-separated list of two-letter ISO country codes.</xs:documentation>
                     </xs:annotation>
