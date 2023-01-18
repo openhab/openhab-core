@@ -151,11 +151,14 @@ public class JsonAddonService extends AbstractRemoteAddonService {
         boolean installed = addonHandlers.stream().anyMatch(
                 handler -> handler.supports(addonEntry.type, addonEntry.contentType) && handler.isInstalled(fullId));
 
+        String technicalId = null;
         Map<String, Object> properties = new HashMap<>();
         if (addonEntry.url.endsWith(".jar")) {
             properties.put("jar_download_url", addonEntry.url);
+            technicalId = determineTechnicalIdFromUrl(addonEntry.url);
         } else if (addonEntry.url.endsWith(".kar")) {
             properties.put("kar_download_url", addonEntry.url);
+            technicalId = determineTechnicalIdFromUrl(addonEntry.url);
         } else if (addonEntry.url.endsWith(".json")) {
             properties.put("json_download_url", addonEntry.url);
         } else if (addonEntry.url.endsWith(".yaml")) {
@@ -169,12 +172,18 @@ public class JsonAddonService extends AbstractRemoteAddonService {
             logger.debug("Failed to determine compatibility for addon {}: {}", addonEntry.id, e.getMessage());
         }
 
-        return Addon.create(fullId).withType(addonEntry.type).withInstalled(installed)
+        Addon.Builder addon = Addon.create(fullId).withType(addonEntry.type).withInstalled(installed)
                 .withDetailedDescription(addonEntry.description).withContentType(addonEntry.contentType)
                 .withAuthor(addonEntry.author).withVersion(addonEntry.version).withLabel(addonEntry.title)
                 .withCompatible(compatible).withMaturity(addonEntry.maturity).withProperties(properties)
                 .withLink(addonEntry.link).withImageLink(addonEntry.imageUrl)
-                .withConfigDescriptionURI(addonEntry.configDescriptionURI).withLoggerPackages(addonEntry.loggerPackages)
-                .build();
+                .withConfigDescriptionURI(addonEntry.configDescriptionURI)
+                .withLoggerPackages(addonEntry.loggerPackages);
+
+        if (technicalId != null) {
+            addon.withTechnicalName(technicalId);
+        }
+
+        return addon.build();
     }
 }

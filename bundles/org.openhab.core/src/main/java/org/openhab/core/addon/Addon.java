@@ -30,6 +30,8 @@ public class Addon {
     public static final String ADDON_SEPARATOR = "-";
 
     private final String id;
+
+    private final @Nullable String technicalName;
     private final String label;
     private final String version;
     private final @Nullable String maturity;
@@ -55,8 +57,9 @@ public class Addon {
     /**
      * Creates a new Addon instance
      *
-     * @param id the id of the add-on
-     * @param type the type id of the add-on
+     * @param id the id of the add-on (e.g. "binding-dmx", "json:transform-format" or "marketplace:123456")
+     * @param type the type id of the add-on (e.g. "automation")
+     * @param technicalName the technical name of the add-on (e.g. "influxdb")
      * @param label the label of the add-on
      * @param version the version of the add-on
      * @param maturity the maturity level of this version
@@ -79,13 +82,14 @@ public class Addon {
      * @param properties a {@link Map} containing addition information
      * @param loggerPackages a {@link List} containing the package names belonging to this add-on
      */
-    private Addon(String id, String type, String label, String version, @Nullable String maturity, boolean compatible,
-            String contentType, @Nullable String link, String author, boolean verifiedAuthor, boolean installed,
-            @Nullable String description, @Nullable String detailedDescription, String configDescriptionURI,
-            String keywords, List<String> countries, @Nullable String license, String connection,
-            @Nullable String backgroundColor, @Nullable String imageLink, @Nullable Map<String, Object> properties,
-            List<String> loggerPackages) {
+    private Addon(String id, String type, @Nullable String technicalName, String label, String version,
+            @Nullable String maturity, boolean compatible, String contentType, @Nullable String link, String author,
+            boolean verifiedAuthor, boolean installed, @Nullable String description,
+            @Nullable String detailedDescription, String configDescriptionURI, String keywords, List<String> countries,
+            @Nullable String license, String connection, @Nullable String backgroundColor, @Nullable String imageLink,
+            @Nullable Map<String, Object> properties, List<String> loggerPackages) {
         this.id = id;
+        this.technicalName = technicalName;
         this.label = label;
         this.version = version;
         this.maturity = maturity;
@@ -117,14 +121,17 @@ public class Addon {
     }
 
     /**
-     * The id of the add-on
+     * The id of the add-on (e.g. "binding-dmx", "json:transform-format" or "marketplace:123456")
      */
     public String getId() {
         return id;
     }
 
-    public String getUID() {
-        return type + ADDON_SEPARATOR + id;
+    /**
+     * The technical name of the add-on (e.g. "influxdb")
+     */
+    public String getTechnicalName() {
+        return technicalName;
     }
 
     /**
@@ -280,6 +287,7 @@ public class Addon {
 
     public static class Builder {
         private String id;
+        private @Nullable String technicalName;
         private String label;
         private String version = "";
         private @Nullable String maturity;
@@ -304,6 +312,11 @@ public class Addon {
 
         private Builder(String id) {
             this.id = id;
+        }
+
+        public Builder withTechnicalName(String technicalName) {
+            this.technicalName = technicalName;
+            return this;
         }
 
         public Builder withLabel(String label) {
@@ -418,9 +431,10 @@ public class Addon {
         }
 
         public Addon build() {
-            return new Addon(id, type, label, version, maturity, compatible, contentType, link, author, verifiedAuthor,
-                    installed, description, detailedDescription, configDescriptionURI, keywords, countries, license,
-                    connection, backgroundColor, imageLink, properties.isEmpty() ? null : properties, loggerPackages);
+            return new Addon(id, type, technicalName, label, version, maturity, compatible, contentType, link, author,
+                    verifiedAuthor, installed, description, detailedDescription, configDescriptionURI, keywords,
+                    countries, license, connection, backgroundColor, imageLink,
+                    properties.isEmpty() ? null : properties, loggerPackages);
         }
     }
 }

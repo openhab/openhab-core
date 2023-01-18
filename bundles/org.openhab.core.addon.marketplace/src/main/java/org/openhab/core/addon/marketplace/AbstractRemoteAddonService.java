@@ -23,6 +23,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -56,6 +58,8 @@ import com.google.gson.GsonBuilder;
 public abstract class AbstractRemoteAddonService implements AddonService {
     static final String CONFIG_REMOTE_ENABLED = "remote";
     static final String CONFIG_INCLUDE_INCOMPATIBLE = "includeIncompatible";
+
+    protected static final Pattern BUNDLE_NAME_PATTERN = Pattern.compile(".*/(.*)-\\d+\\.\\d+\\.\\d+.*");
 
     protected static final Map<String, AddonType> TAG_ADDON_TYPE_MAP = Map.of( //
             "automation", new AddonType("automation", "Automation"), //
@@ -250,6 +254,15 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    protected @Nullable String determineTechnicalIdFromUrl(String url) {
+        Matcher matcher = BUNDLE_NAME_PATTERN.matcher(url);
+        if (matcher.matches()) {
+            String bundleName = matcher.group(1);
+            return bundleName.substring(bundleName.lastIndexOf(".") + 1);
+        }
+        return null;
     }
 
     private void postInstalledEvent(String extensionId) {

@@ -380,15 +380,18 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         properties.put("tags", tags.toArray(String[]::new));
 
         String detailedDescription = topic.postStream.posts[0].cooked;
+        String technicalId = null;
 
         // try to extract contents or links
         if (topic.postStream.posts[0].linkCounts != null) {
             for (DiscoursePostLink postLink : topic.postStream.posts[0].linkCounts) {
                 if (postLink.url.endsWith(".jar")) {
                     properties.put("jar_download_url", postLink.url);
+                    technicalId = determineTechnicalIdFromUrl(postLink.url);
                 }
                 if (postLink.url.endsWith(".kar")) {
                     properties.put("kar_download_url", postLink.url);
+                    technicalId = determineTechnicalIdFromUrl(postLink.url);
                 }
                 if (postLink.url.endsWith(".json")) {
                     properties.put("json_download_url", postLink.url);
@@ -415,10 +418,15 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         boolean installed = addonHandlers.stream()
                 .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(id));
 
-        return Addon.create(id).withType(type).withContentType(contentType).withLabel(topic.title)
+        Addon.Builder addon = Addon.create(id).withType(type).withContentType(contentType).withLabel(topic.title)
                 .withImageLink(topic.imageUrl).withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
                 .withAuthor(topic.postStream.posts[0].displayUsername).withMaturity(maturity)
-                .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties)
-                .build();
+                .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties);
+
+        if (technicalId != null) {
+            addon.withTechnicalName(technicalId);
+        }
+        ;
+        return addon.build();
     }
 }

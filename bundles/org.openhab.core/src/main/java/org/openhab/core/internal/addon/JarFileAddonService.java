@@ -152,8 +152,8 @@ public class JarFileAddonService extends BundleTracker<Bundle> implements AddonS
 
     private Addon toAddon(Bundle bundle, AddonInfo addonInfo) {
         String fullId = ADDON_ID_PREFIX + addonInfo.getUID();
-        Addon.Builder addon = Addon.create(fullId).withType(addonInfo.getType()).withInstalled(true)
-                .withVersion(bundle.getVersion().toString()).withLabel(addonInfo.getName())
+        Addon.Builder addon = Addon.create(fullId).withTechnicalName(addonInfo.getId()).withType(addonInfo.getType())
+                .withInstalled(true).withVersion(bundle.getVersion().toString()).withLabel(addonInfo.getName())
                 .withDescription(Objects.requireNonNullElse(addonInfo.getDescription(), bundle.getSymbolicName()));
         String author = addonInfo.getAuthor();
         if (author != null) {
@@ -169,6 +169,9 @@ public class JarFileAddonService extends BundleTracker<Bundle> implements AddonS
 
     @Override
     public List<Addon> getAddons(@Nullable Locale locale) {
+        if (trackedBundles.size() != addons.size()) {
+            refreshSource();
+        }
         return List.copyOf(addons.values());
     }
 
