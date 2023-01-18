@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,36 +12,25 @@
  */
 package org.openhab.core.voice.internal.cache;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.FileStore;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.io.InputStream;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.OpenHAB;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.cache.lru.DataRetrievalException;
+import org.openhab.core.cache.lru.InputStreamCacheWrapper;
+import org.openhab.core.cache.lru.LRUMediaCache;
+import org.openhab.core.cache.lru.LRUMediaCacheEntry;
 import org.openhab.core.config.core.ConfigParser;
-import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.voice.TTSCache;
 import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.internal.VoiceManagerImpl;
-import org.openhab.core.voice.internal.cache.TTSResult.AudioFormatInfo;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -69,17 +58,9 @@ public class TTSLRUCacheImpl implements TTSCache {
     static final String CONFIG_CACHE_SIZE_TTS = "cacheSizeTTS";
     static final String CONFIG_ENABLE_CACHE_TTS = "enableCacheTTS";
 
-    public static final String SOUND_EXT = ".snd";
-
     static final String VOICE_TTS_CACHE_PID = "org.openhab.voice.tts";
-    private static final String CACHE_FOLDER_NAME = "cache";
 
-    final LinkedHashMap<String, @Nullable TTSResult> ttsResultMap;
-
-    /**
-     * Lock the cache to handle concurrency
-     */
-    private final ReentrantLock lock = new ReentrantLock();
+    private @Nullable LRUMediaCache<AudioFormatInfo> lruMediaCache;
 
     /**
      * The size limit, in bytes. The size is not a hard one, because the final size of the
@@ -88,18 +69,14 @@ public class TTSLRUCacheImpl implements TTSCache {
     protected long cacheSizeTTS = DEFAULT_CACHE_SIZE_TTS * 1024;
     protected boolean enableCacheTTS = true;
 
-    private final Path cacheFolder;
-
-    private Storage<AudioFormatInfo> storage;
+    private StorageService storageService;
 
     /**
      * Constructs a cache system for TTS result.
      */
     @Activate
     public TTSLRUCacheImpl(@Reference StorageService storageService, Map<String, Object> config) {
-        this.storage = storageService.getStorage(VOICE_TTS_CACHE_PID, this.getClass().getClassLoader());
-        this.ttsResultMap = new LinkedHashMap<>(20, .75f, true);
-        cacheFolder = Path.of(OpenHAB.getUserDataFolder(), CACHE_FOLDER_NAME, VOICE_TTS_CACHE_PID);
+        this.storageService = storageService;
         activate(config);
     }
 
@@ -115,144 +92,56 @@ public class TTSLRUCacheImpl implements TTSCache {
                 DEFAULT_CACHE_SIZE_TTS) * 1024;
 
         if (enableCacheTTS) {
-            try {
-                // creating directory if needed :
-                logger.debug("Creating TTS cache folder '{}'", cacheFolder);
-                Files.createDirectories(cacheFolder);
-
-                // check if we have enough space :
-                if (getFreeSpace() < (cacheSizeTTS * 2)) {
-                    enableCacheTTS = false;
-                    logger.warn("Not enough space for the TTS cache");
-                }
-                logger.debug("Using TTS cache folder '{}'", cacheFolder);
-
-                cleanCacheDirectory();
-                loadAll();
-            } catch (IOException | SecurityException e) {
-                logger.error("Cannot initialize the TTS cache folder. Reason: {}", e.getMessage());
-                enableCacheTTS = false;
-            }
-        }
-    }
-
-    private void cleanCacheDirectory() throws IOException {
-        try {
-            List<@Nullable Path> filesInCacheFolder = Files.list(cacheFolder).collect(Collectors.toList());
-
-            // 1 delete empty files
-            for (Path path : filesInCacheFolder) {
-                if (path != null) {
-                    File file = path.toFile();
-                    if (file.length() == 0) {
-                        file.delete();
-                    }
-                }
-            }
-
-            // 2 clean orphan (part of a pair (sound + info files) without a corresponding partner)
-            // 2-a delete sound files without AudioFormatInfo
-            for (Path path : filesInCacheFolder) {
-                if (path != null) {
-                    String fileName = path.getFileName().toString();
-                    if (fileName.endsWith(SOUND_EXT)) {
-                        String fileNameWithoutExtension = fileName.replaceAll("\\.\\w+$", "");
-                        ;
-                        // check corresponding AudioFormatInfo in storage
-                        AudioFormatInfo audioFormatInfo = storage.get(fileNameWithoutExtension);
-                        if (audioFormatInfo == null) {
-                            Files.delete(path);
-                        }
-                    }
-                }
-            }
-            // 2-b delete AudioFormatInfo without corresponding sound file
-            for (Entry<String, @Nullable AudioFormatInfo> entry : storage.stream().toList()) {
-                Path correspondingAudioFile = cacheFolder.resolve(entry.getKey() + SOUND_EXT);
-                if (!Files.exists(correspondingAudioFile)) {
-                    storage.remove(entry.getKey());
-                }
-            }
-        } catch (
-
-        IOException e) {
-            logger.warn("Cannot load the TTS cache directory : {}", e.getMessage());
-            return;
-        }
-    }
-
-    private long getFreeSpace() {
-        try {
-            URI rootURI = new URI("file:///");
-            Path rootPath = Paths.get(rootURI);
-            Path dirPath = rootPath.resolve(cacheFolder.getParent());
-            FileStore dirFileStore = Files.getFileStore(dirPath);
-            return dirFileStore.getUsableSpace();
-        } catch (URISyntaxException | IOException e) {
-            logger.error("Cannot compute free disk space for the TTS cache. Reason: {}", e.getMessage());
-            return 0;
+            this.lruMediaCache = new LRUMediaCache<>(storageService, cacheSizeTTS, VOICE_TTS_CACHE_PID,
+                    this.getClass().getClassLoader());
         }
     }
 
     @Override
     public AudioStream get(CachedTTSService tts, String text, Voice voice, AudioFormat requestedFormat)
             throws TTSException {
-        if (!enableCacheTTS) {
+
+        LRUMediaCache<AudioFormatInfo> lruMediaCacheLocal = lruMediaCache;
+        if (!enableCacheTTS || lruMediaCacheLocal == null) {
             return tts.synthesizeForCache(text, voice, requestedFormat);
         }
 
-        // initialize the supplier stream from the TTS service tts
-        AudioStreamSupplier ttsSynthesizerSupplier = new AudioStreamSupplier(tts, text, voice, requestedFormat);
-        lock.lock(); // (a get operation also need the lock as it will update the head of the cache)
+        String key = tts.getClass().getSimpleName() + "_" + tts.getCacheKey(text, voice, requestedFormat);
+        LRUMediaCacheEntry<AudioFormatInfo> fileAndMetadata = lruMediaCacheLocal.get(key, () -> {
+            AudioStream audioInputStream;
+            try {
+                audioInputStream = tts.synthesizeForCache(text, voice, requestedFormat);
+            } catch (TTSException e) {
+                throw new DataRetrievalException("Cannot compute TTS", e);
+            }
+            return new LRUMediaCacheEntry<AudioFormatInfo>(key, audioInputStream,
+                    new AudioFormatInfo(audioInputStream.getFormat()));
+        });
+
         try {
-            String key = tts.getClass().getSimpleName() + "_" + tts.getCacheKey(text, voice, requestedFormat);
-            // try to get from cache
-            TTSResult ttsResult = ttsResultMap.get(key);
-            if (ttsResult == null || !ttsResult.getText().equals(text)) { // it's a cache miss or a false positive, we
-                // must (re)create it
-                logger.debug("Cache miss {}", key);
-                ttsResult = new TTSResult(cacheFolder, key, storage, ttsSynthesizerSupplier);
-                ttsResultMap.put(key, ttsResult);
+            InputStream inputStream = fileAndMetadata.getInputStream();
+            AudioFormatInfo metadata = fileAndMetadata.getMetadata();
+            if (metadata == null) {
+                throw new IllegalStateException("Cannot have an audio input stream without audio format information");
+            }
+            if (inputStream instanceof InputStreamCacheWrapper inputStreamCacheWrapper) {
+                // we are sure that the cache is used, and so we can use an AudioStream
+                // implementation that use convenient methods for some client, like getClonedStream()
+                // or mark /reset
+                return new AudioStreamFromCache(inputStreamCacheWrapper, metadata);
             } else {
-                logger.debug("Cache hit {}", key);
+                // the cache is not used, we can use the original response AudioStream
+                return (AudioStream) fileAndMetadata.getInputStream();
             }
-            return ttsResult.getAudioStream(ttsSynthesizerSupplier);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    void put(@Nullable TTSResult ttsResult) {
-        if (ttsResult != null) {
-            ttsResultMap.put(ttsResult.getKey(), ttsResult);
-        }
-        makeSpace();
-    }
-
-    /**
-     * Load all {@link TTSResult} cached to the disk.
-     */
-    private void loadAll() throws IOException {
-        ttsResultMap.clear();
-        storage.stream().map(entry -> new TTSResult(cacheFolder, entry.getKey(), storage))
-                .filter(ttsR -> !ttsR.getText().isBlank()).forEach(this::put);
-    }
-
-    /**
-     * Check if the cache is not already full and make space if needed.
-     * We don't use the removeEldestEntry test method from the linkedHashMap because it can only remove one element.
-     */
-    private void makeSpace() {
-        Iterator<@Nullable TTSResult> iterator = ttsResultMap.values().iterator();
-        Long cacheSize = ttsResultMap.values().stream().map(ttsR -> ttsR == null ? 0 : ttsR.getCurrentSize()).reduce(0L,
-                (Long::sum));
-        while (cacheSize > cacheSizeTTS && ttsResultMap.size() > 1) {
-            TTSResult oldestEntry = iterator.next();
-            if (oldestEntry != null) {
-                oldestEntry.deleteFiles();
-                cacheSize -= oldestEntry.getTotalSize();
+        } catch (IOException e) {
+            logger.warn("Cannot get audio from cache, fallback to TTS service");
+            return tts.synthesizeForCache(text, voice, requestedFormat);
+        } catch (DataRetrievalException de) {
+            if (de.getCause()instanceof TTSException ttsException) {
+                throw ttsException;
+            } else {
+                throw de;
             }
-            iterator.remove();
         }
     }
 }

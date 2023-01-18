@@ -41,6 +41,5 @@ public interface TTSCache {
      *             are not supported or another error occurs while creating an
      *             {@link AudioStream}
      */
-    AudioStream get(CachedTTSService tts, String text, Voice voice, AudioFormat requestedFormat)
-            throws TTSException;
+    AudioStream get(CachedTTSService tts, String text, Voice voice, AudioFormat requestedFormat) throws TTSException;
 }
