@@ -144,6 +144,14 @@ public class KarafAddonService implements AddonService {
             addon = addon.withLabel(feature.getDescription()).withLink(getDefaultDocumentationLink(type, name));
         }
 
+        List<String> packages = feature.getBundles().stream().filter(bundle -> !bundle.isDependency()).map(bundle -> {
+            String location = bundle.getLocation();
+            location = location.substring(0, location.lastIndexOf("/")); // strip version
+            location = location.substring(location.lastIndexOf("/") + 1); // strip groupId and protocol
+            return location;
+        }).toList();
+        addon.withLoggerPackages(packages);
+
         return addon.build();
     }
 
