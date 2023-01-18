@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.core.internal.addon;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -44,17 +43,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link BundleAddonService} is a
+ * The {@link JarFileAddonService} is an add-on service that provides add-ons that are placed a .jar files in the
+ * openHAB
+ * addons folder
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = AddonService.class, name = BundleAddonService.SERVICE_NAME)
-public class BundleAddonService extends BundleTracker<Bundle> implements AddonService {
-    public static final String SERVICE_ID = "file";
-    public static final String SERVICE_NAME = "File based add-on service";
+@Component(immediate = true, service = AddonService.class, name = JarFileAddonService.SERVICE_NAME)
+public class JarFileAddonService extends BundleTracker<Bundle> implements AddonService {
+    public static final String SERVICE_ID = "jar";
+    public static final String SERVICE_NAME = "JAR-File add-on service";
 
-    private static final Map<String, AddonType> TAG_ADDON_TYPE_MAP = Map.of( //
+    private static final Map<String, AddonType> ADDON_TYPE_MAP = Map.of( //
             "automation", new AddonType("automation", "Automation"), //
             "binding", new AddonType("binding", "Bindings"), //
             "misc", new AddonType("misc", "Misc"), //
@@ -63,7 +64,7 @@ public class BundleAddonService extends BundleTracker<Bundle> implements AddonSe
             "ui", new AddonType("ui", "User Interfaces"), //
             "voice", new AddonType("voice", "Voice"));
     private static final String ADDON_ID_PREFIX = SERVICE_ID + ":";
-    private final Logger logger = LoggerFactory.getLogger(BundleAddonService.class);
+    private final Logger logger = LoggerFactory.getLogger(JarFileAddonService.class);
 
     private final AddonInfoRegistry addonInfoRegistry;
     private final ScheduledExecutorService scheduler;
@@ -72,7 +73,7 @@ public class BundleAddonService extends BundleTracker<Bundle> implements AddonSe
     private Map<String, Addon> addons = Map.of();
 
     @Activate
-    public BundleAddonService(final @Reference AddonInfoRegistry addonInfoRegistry, BundleContext context) {
+    public JarFileAddonService(final @Reference AddonInfoRegistry addonInfoRegistry, BundleContext context) {
         super(context, Bundle.ACTIVE, null);
 
         this.addonInfoRegistry = addonInfoRegistry;
@@ -90,13 +91,13 @@ public class BundleAddonService extends BundleTracker<Bundle> implements AddonSe
     }
 
     /**
-     * Checks if a bundle is loaded from a file and if add-on information is available
+     * Checks if a bundle is loaded from a file and add-on information is available
      *
      * @param bundle the bundle to check
      * @return <code>true</code> if bundle is considered, <code>false</code> otherwise
      */
     public boolean isRelevant(Bundle bundle) {
-        return bundle.getLocation().startsWith("file:") && bundle.getEntry("OH-INF/binding/binding.xml") != null;
+        return bundle.getLocation().startsWith("file:") && bundle.getEntry("OH-INF/addon/addon.xml") != null;
     }
 
     @Override
@@ -151,7 +152,7 @@ public class BundleAddonService extends BundleTracker<Bundle> implements AddonSe
 
     private Addon toAddon(Bundle bundle, AddonInfo addonInfo) {
         String fullId = ADDON_ID_PREFIX + addonInfo.getUID();
-        Addon.Builder addon = Addon.create(fullId).withType("binding").withInstalled(true)
+        Addon.Builder addon = Addon.create(fullId).withType(addonInfo.getType()).withInstalled(true)
                 .withVersion(bundle.getVersion().toString()).withLabel(addonInfo.getName())
                 .withDescription(Objects.requireNonNullElse(addonInfo.getDescription(), bundle.getSymbolicName()));
         String author = addonInfo.getAuthor();
@@ -168,7 +169,7 @@ public class BundleAddonService extends BundleTracker<Bundle> implements AddonSe
 
     @Override
     public List<Addon> getAddons(@Nullable Locale locale) {
-        return new ArrayList<>(addons.values());
+        return List.copyOf(addons.values());
     }
 
     @Override
@@ -178,7 +179,7 @@ public class BundleAddonService extends BundleTracker<Bundle> implements AddonSe
 
     @Override
     public List<AddonType> getTypes(@Nullable Locale locale) {
-        return new ArrayList<>(TAG_ADDON_TYPE_MAP.values());
+        return List.copyOf(ADDON_TYPE_MAP.values());
     }
 
     @Override

@@ -76,7 +76,8 @@ public class AddonInfoXmlProvider implements XmlDocumentProvider<AddonInfoXmlRes
             }
         }
 
-        AddonInfo addonInfo = AddonInfo.builder(addonInfoXmlResult.addonInfo()).withSourceBundle(bundle.getSymbolicName()).build();
+        AddonInfo addonInfo = AddonInfo.builder(addonInfoXmlResult.addonInfo())
+                .withSourceBundle(bundle.getSymbolicName()).build();
         addonInfoProvider.add(bundle, addonInfo);
     }
 

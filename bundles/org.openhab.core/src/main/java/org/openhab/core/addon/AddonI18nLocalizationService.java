@@ -53,6 +53,7 @@ public class AddonI18nLocalizationService {
         String name = addonI18NUtil.getName(bundle, addonInfoUID, addonInfo.getName(), locale);
         String description = addonI18NUtil.getDescription(bundle, addonInfoUID, addonInfo.getDescription(), locale);
 
-        return AddonInfo.builder(addonInfo).withName(name).withDescription(description).withSourceBundle(addonInfo.getSourceBundle()).build();
+        return AddonInfo.builder(addonInfo).withName(name).withDescription(description)
+                .withSourceBundle(addonInfo.getSourceBundle()).build();
     }
 }
