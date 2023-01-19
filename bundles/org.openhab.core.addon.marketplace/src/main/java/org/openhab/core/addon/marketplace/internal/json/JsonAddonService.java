@@ -137,8 +137,7 @@ public class JsonAddonService extends AbstractRemoteAddonService {
 
     @Override
     public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
-        String fullId = ADDON_ID_PREFIX + id;
-        return cachedAddons.stream().filter(e -> fullId.equals(e.getId())).findAny().orElse(null);
+        return cachedAddons.stream().filter(e -> id.equals(e.getUid())).findAny().orElse(null);
     }
 
     @Override
@@ -147,18 +146,19 @@ public class JsonAddonService extends AbstractRemoteAddonService {
     }
 
     private Addon fromAddonEntry(AddonEntryDTO addonEntry) {
-        String fullId = ADDON_ID_PREFIX + addonEntry.id;
+        String uid = ADDON_ID_PREFIX + addonEntry.id;
         boolean installed = addonHandlers.stream().anyMatch(
-                handler -> handler.supports(addonEntry.type, addonEntry.contentType) && handler.isInstalled(fullId));
+                handler -> handler.supports(addonEntry.type, addonEntry.contentType) && handler.isInstalled(uid));
 
-        String technicalId = null;
+        String id = addonEntry.id; // this is a fallback if we don't find a better name later on
+
         Map<String, Object> properties = new HashMap<>();
         if (addonEntry.url.endsWith(".jar")) {
             properties.put("jar_download_url", addonEntry.url);
-            technicalId = determineTechnicalIdFromUrl(addonEntry.url);
+            id = determineTechnicalIdFromUrl(addonEntry.url);
         } else if (addonEntry.url.endsWith(".kar")) {
             properties.put("kar_download_url", addonEntry.url);
-            technicalId = determineTechnicalIdFromUrl(addonEntry.url);
+            id = determineTechnicalIdFromUrl(addonEntry.url);
         } else if (addonEntry.url.endsWith(".json")) {
             properties.put("json_download_url", addonEntry.url);
         } else if (addonEntry.url.endsWith(".yaml")) {
@@ -172,18 +172,12 @@ public class JsonAddonService extends AbstractRemoteAddonService {
             logger.debug("Failed to determine compatibility for addon {}: {}", addonEntry.id, e.getMessage());
         }
 
-        Addon.Builder addon = Addon.create(fullId).withType(addonEntry.type).withInstalled(installed)
+        return Addon.create(uid).withType(addonEntry.type).withId(id).withInstalled(installed)
                 .withDetailedDescription(addonEntry.description).withContentType(addonEntry.contentType)
                 .withAuthor(addonEntry.author).withVersion(addonEntry.version).withLabel(addonEntry.title)
                 .withCompatible(compatible).withMaturity(addonEntry.maturity).withProperties(properties)
                 .withLink(addonEntry.link).withImageLink(addonEntry.imageUrl)
-                .withConfigDescriptionURI(addonEntry.configDescriptionURI)
-                .withLoggerPackages(addonEntry.loggerPackages);
-
-        if (technicalId != null) {
-            addon.withTechnicalName(technicalId);
-        }
-
-        return addon.build();
+                .withConfigDescriptionURI(addonEntry.configDescriptionURI).withLoggerPackages(addonEntry.loggerPackages)
+                .build();
     }
 }

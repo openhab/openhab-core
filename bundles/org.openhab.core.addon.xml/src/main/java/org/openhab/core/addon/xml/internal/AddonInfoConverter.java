@@ -105,6 +105,7 @@ public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> 
                 }
             }
         }
+
         addonInfo.withConfigDescriptionURI(configDescriptionURI);
 
         nodeIterator.assertEndOfType();

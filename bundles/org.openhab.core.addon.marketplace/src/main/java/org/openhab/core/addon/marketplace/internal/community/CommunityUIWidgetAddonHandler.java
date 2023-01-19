@@ -79,9 +79,9 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
             String yamlContent = (String) addon.getProperties().get(YAML_CONTENT_PROPERTY);
 
             if (yamlDownloadUrl != null) {
-                addWidgetAsYAML(addon.getId(), getWidgetFromURL(yamlDownloadUrl));
+                addWidgetAsYAML(addon.getUid(), getWidgetFromURL(yamlDownloadUrl));
             } else if (yamlContent != null) {
-                addWidgetAsYAML(addon.getId(), yamlContent);
+                addWidgetAsYAML(addon.getUid(), yamlContent);
             } else {
                 throw new IllegalArgumentException("Couldn't find the widget in the add-on entry");
             }
@@ -96,7 +96,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public void uninstall(Addon addon) throws MarketplaceHandlerException {
-        widgetRegistry.getAll().stream().filter(w -> w.hasTag(addon.getId())).forEach(w -> {
+        widgetRegistry.getAll().stream().filter(w -> w.hasTag(addon.getUid())).forEach(w -> {
             widgetRegistry.remove(w.getUID());
         });
     }

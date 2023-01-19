@@ -127,19 +127,18 @@ public class KarafAddonService implements AddonService {
     private Addon getAddon(Feature feature) {
         String name = getName(feature.getName());
         String type = getType(feature.getName());
-        String id = type + Addon.ADDON_SEPARATOR + name;
+        String uid = type + Addon.ADDON_SEPARATOR + name;
         boolean isInstalled = featuresService.isInstalled(feature);
 
-        Addon.Builder addon = Addon.create(id).withContentType(ADDONS_CONTENT_TYPE).withType(type)
+        Addon.Builder addon = Addon.create(uid).withType(type).withId(name).withContentType(ADDONS_CONTENT_TYPE)
                 .withVersion(feature.getVersion()).withAuthor(ADDONS_AUTHOR, true).withInstalled(isInstalled);
 
-        AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(id);
+        AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(uid);
 
         if (isInstalled && addonInfo != null) {
             // only enrich if this add-on is installed, otherwise wrong data might be added
-            addon = addon.withTechnicalName(addonInfo.getId()).withLabel(addonInfo.getName())
-                    .withDescription(addonInfo.getDescription()).withCountries(addonInfo.getCountries())
-                    .withLink(getDefaultDocumentationLink(type, name))
+            addon = addon.withLabel(addonInfo.getName()).withDescription(addonInfo.getDescription())
+                    .withCountries(addonInfo.getCountries()).withLink(getDefaultDocumentationLink(type, name))
                     .withConfigDescriptionURI(addonInfo.getConfigDescriptionURI());
         } else {
             addon = addon.withLabel(feature.getDescription()).withLink(getDefaultDocumentationLink(type, name));

@@ -141,7 +141,7 @@ public class JarFileAddonService extends BundleTracker<Bundle> implements AddonS
     @Override
     public synchronized void refreshSource() {
         addons = trackedBundles.stream().map(this::toAddon).filter(Objects::nonNull).map(Objects::requireNonNull)
-                .collect(Collectors.toMap(Addon::getId, addon -> addon));
+                .collect(Collectors.toMap(Addon::getUid, addon -> addon));
     }
 
     private @Nullable Addon toAddon(Bundle bundle) {
@@ -151,20 +151,12 @@ public class JarFileAddonService extends BundleTracker<Bundle> implements AddonS
     }
 
     private Addon toAddon(Bundle bundle, AddonInfo addonInfo) {
-        String fullId = ADDON_ID_PREFIX + addonInfo.getUID();
-        Addon.Builder addon = Addon.create(fullId).withTechnicalName(addonInfo.getId()).withType(addonInfo.getType())
-                .withInstalled(true).withVersion(bundle.getVersion().toString()).withLabel(addonInfo.getName())
-                .withDescription(Objects.requireNonNullElse(addonInfo.getDescription(), bundle.getSymbolicName()));
-        String author = addonInfo.getAuthor();
-        if (author != null) {
-            addon = addon.withAuthor(author);
-        }
-        String configDescriptionURI = addonInfo.getConfigDescriptionURI();
-        if (configDescriptionURI != null) {
-            addon = addon.withConfigDescriptionURI(configDescriptionURI);
-        }
-
-        return addon.build();
+        String uid = ADDON_ID_PREFIX + addonInfo.getUID();
+        return Addon.create(uid).withId(addonInfo.getId()).withType(addonInfo.getType())
+                .withAuthor(addonInfo.getAuthor()).withInstalled(true).withVersion(bundle.getVersion().toString())
+                .withLabel(addonInfo.getName()).withConfigDescriptionURI(addonInfo.getConfigDescriptionURI())
+                .withDescription(Objects.requireNonNullElse(addonInfo.getDescription(), bundle.getSymbolicName()))
+                .build();
     }
 
     @Override
