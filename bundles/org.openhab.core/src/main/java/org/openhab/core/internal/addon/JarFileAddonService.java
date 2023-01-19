@@ -169,7 +169,7 @@ public class JarFileAddonService extends BundleTracker<Bundle> implements AddonS
 
     @Override
     public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
-        return addons.get(ADDON_ID_PREFIX + id);
+        return addons.get(id);
     }
 
     @Override
