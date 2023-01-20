@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -88,6 +89,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     private static final String COMMUNITY_BASE_URL = "https://community.openhab.org";
     private static final String COMMUNITY_MARKETPLACE_URL = COMMUNITY_BASE_URL + "/c/marketplace/69/l/latest";
     private static final String COMMUNITY_TOPIC_URL = COMMUNITY_BASE_URL + "/t/";
+    private static final Pattern BUNDLE_NAME_PATTERN = Pattern.compile(".*/(.*)-\\d+\\.\\d+\\.\\d+.*");
 
     private static final String SERVICE_ID = "marketplace";
     private static final String ADDON_ID_PREFIX = SERVICE_ID + ":";
@@ -387,11 +389,11 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
             for (DiscoursePostLink postLink : topic.postStream.posts[0].linkCounts) {
                 if (postLink.url.endsWith(".jar")) {
                     properties.put("jar_download_url", postLink.url);
-                    id = determineTechnicalIdFromUrl(postLink.url);
+                    id = determineIdFromUrl(postLink.url);
                 }
                 if (postLink.url.endsWith(".kar")) {
                     properties.put("kar_download_url", postLink.url);
-                    id = determineTechnicalIdFromUrl(postLink.url);
+                    id = determineIdFromUrl(postLink.url);
                 }
                 if (postLink.url.endsWith(".json")) {
                     properties.put("json_download_url", postLink.url);
@@ -428,5 +430,16 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
                 .withAuthor(topic.postStream.posts[0].displayUsername).withMaturity(maturity)
                 .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties)
                 .build();
+    }
+
+    private @Nullable String determineIdFromUrl(String url) {
+        Matcher matcher = BUNDLE_NAME_PATTERN.matcher(url);
+        if (matcher.matches()) {
+            String bundleName = matcher.group(1);
+            return bundleName.substring(bundleName.lastIndexOf(".") + 1);
+        } else {
+            logger.warn("Could not determine bundle name from url: {}", url);
+        }
+        return null;
     }
 }
