@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.Collator;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -376,18 +376,13 @@ public class AddonResource implements RESTResource {
     }
 
     private Stream<Addon> getAllAddons(Locale locale) {
-        return addonServices.stream().map(s -> s.getAddons(locale)).flatMap(l -> l.stream());
+        return addonServices.stream().map(s -> s.getAddons(locale)).flatMap(Collection::stream);
     }
 
     private Set<AddonType> getAllAddonTypes(Locale locale) {
         final Collator coll = Collator.getInstance(locale);
         coll.setStrength(Collator.PRIMARY);
-        Set<AddonType> ret = new TreeSet<>(new Comparator<AddonType>() {
-            @Override
-            public int compare(AddonType o1, AddonType o2) {
-                return coll.compare(o1.getLabel(), o2.getLabel());
-            }
-        });
+        Set<AddonType> ret = new TreeSet<>((o1, o2) -> coll.compare(o1.getLabel(), o2.getLabel()));
         for (AddonService addonService : addonServices) {
             ret.addAll(addonService.getTypes(locale));
         }

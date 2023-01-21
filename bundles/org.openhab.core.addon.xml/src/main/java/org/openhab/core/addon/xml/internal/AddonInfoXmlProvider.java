@@ -13,6 +13,7 @@
 package org.openhab.core.addon.xml.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.xml.AbstractXmlConfigDescriptionProvider;
 import org.openhab.core.config.xml.osgi.XmlDocumentProvider;
@@ -75,7 +76,9 @@ public class AddonInfoXmlProvider implements XmlDocumentProvider<AddonInfoXmlRes
             }
         }
 
-        addonInfoProvider.add(bundle, addonInfoXmlResult.addonInfo());
+        AddonInfo addonInfo = AddonInfo.builder(addonInfoXmlResult.addonInfo())
+                .withSourceBundle(bundle.getSymbolicName()).build();
+        addonInfoProvider.add(bundle, addonInfo);
     }
 
     @Override

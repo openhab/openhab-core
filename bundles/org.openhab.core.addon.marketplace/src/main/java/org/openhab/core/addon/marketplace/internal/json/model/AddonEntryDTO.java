@@ -22,6 +22,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Jan N. Klug - Initial contribution
  */
 public class AddonEntryDTO {
+    public String uid = "";
     public String id = "";
     public String type = "";
     public String description = "";

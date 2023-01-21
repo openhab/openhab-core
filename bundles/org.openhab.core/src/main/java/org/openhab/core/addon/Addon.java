@@ -15,6 +15,7 @@ package org.openhab.core.addon;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -28,6 +29,8 @@ import org.eclipse.jdt.annotation.Nullable;
 public class Addon {
     public static final Set<String> CODE_MATURITY_LEVELS = Set.of("alpha", "beta", "mature", "stable");
     public static final String ADDON_SEPARATOR = "-";
+
+    private final String uid;
 
     private final String id;
     private final String label;
@@ -55,8 +58,9 @@ public class Addon {
     /**
      * Creates a new Addon instance
      *
-     * @param id the id of the add-on
-     * @param type the type id of the add-on
+     * @param uid the id of the add-on (e.g. "binding-dmx", "json:transform-format" or "marketplace:123456")
+     * @param type the type id of the add-on (e.g. "automation")
+     * @param uid the technical name of the add-on (e.g. "influxdb")
      * @param label the label of the add-on
      * @param version the version of the add-on
      * @param maturity the maturity level of this version
@@ -78,14 +82,28 @@ public class Addon {
      * @param imageLink the link to an image (png/svg) (may be null)
      * @param properties a {@link Map} containing addition information
      * @param loggerPackages a {@link List} containing the package names belonging to this add-on
+     * @throws IllegalArgumentException when a mandatory parameter is invalid
      */
-    private Addon(String id, String type, String label, String version, @Nullable String maturity, boolean compatible,
-            String contentType, @Nullable String link, String author, boolean verifiedAuthor, boolean installed,
-            @Nullable String description, @Nullable String detailedDescription, String configDescriptionURI,
-            String keywords, List<String> countries, @Nullable String license, String connection,
-            @Nullable String backgroundColor, @Nullable String imageLink, @Nullable Map<String, Object> properties,
-            List<String> loggerPackages) {
+    private Addon(String uid, String type, String id, String label, String version, @Nullable String maturity,
+            boolean compatible, String contentType, @Nullable String link, String author, boolean verifiedAuthor,
+            boolean installed, @Nullable String description, @Nullable String detailedDescription,
+            String configDescriptionURI, String keywords, List<String> countries, @Nullable String license,
+            String connection, @Nullable String backgroundColor, @Nullable String imageLink,
+            @Nullable Map<String, Object> properties, List<String> loggerPackages) {
+        if (uid.isBlank()) {
+            throw new IllegalArgumentException("uid must not be empty");
+        }
+        if (type.isBlank()) {
+            throw new IllegalArgumentException("type must not be empty");
+        }
+        if (id.isBlank()) {
+            throw new IllegalArgumentException("id must not be empty");
+        }
+
+        this.uid = uid;
+        this.type = type;
         this.id = id;
+
         this.label = label;
         this.version = version;
         this.maturity = maturity;
@@ -104,27 +122,29 @@ public class Addon {
         this.author = author;
         this.verifiedAuthor = verifiedAuthor;
         this.installed = installed;
-        this.type = type;
         this.properties = properties == null ? Map.of() : properties;
         this.loggerPackages = loggerPackages;
     }
 
     /**
-     * The id of the {@AddonType} of the add-on
+     * The type of the addon (same as id of {@link AddonType})
      */
     public String getType() {
         return type;
     }
 
     /**
-     * The id of the add-on
+     * The uid of the add-on (e.g. "binding-dmx", "json:transform-format" or "marketplace:123456")
+     */
+    public String getUid() {
+        return uid;
+    }
+
+    /**
+     * The id of the add-on (e.g. "influxdb")
      */
     public String getId() {
         return id;
-    }
-
-    public String getUID() {
-        return type + ADDON_SEPARATOR + id;
     }
 
     /**
@@ -274,11 +294,19 @@ public class Addon {
         return loggerPackages;
     }
 
-    public static Builder create(String id) {
-        return new Builder(id);
+    /**
+     * Create a builder for an {@link Addon}
+     *
+     * @param uid the UID of the add-on (e.g. "binding-dmx", "json:transform-format" or "marketplace:123456")
+     *
+     * @return
+     */
+    public static Builder create(String uid) {
+        return new Builder(uid);
     }
 
     public static class Builder {
+        private final String uid;
         private String id;
         private String label;
         private String version = "";
@@ -302,8 +330,18 @@ public class Addon {
         private Map<String, Object> properties = new HashMap<>();
         private List<String> loggerPackages = List.of();
 
-        private Builder(String id) {
+        private Builder(String uid) {
+            this.uid = uid;
+        }
+
+        public Builder withType(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder withId(String id) {
             this.id = id;
+            return this;
         }
 
         public Builder withLabel(String label) {
@@ -336,8 +374,8 @@ public class Addon {
             return this;
         }
 
-        public Builder withAuthor(String author) {
-            this.author = author;
+        public Builder withAuthor(@Nullable String author) {
+            this.author = Objects.requireNonNullElse(author, "");
             return this;
         }
 
@@ -352,11 +390,6 @@ public class Addon {
             return this;
         }
 
-        public Builder withType(String type) {
-            this.type = type;
-            return this;
-        }
-
         public Builder withDescription(String description) {
             this.description = description;
             return this;
@@ -367,8 +400,8 @@ public class Addon {
             return this;
         }
 
-        public Builder withConfigDescriptionURI(String configDescriptionURI) {
-            this.configDescriptionURI = configDescriptionURI;
+        public Builder withConfigDescriptionURI(@Nullable String configDescriptionURI) {
+            this.configDescriptionURI = Objects.requireNonNullElse(configDescriptionURI, "");
             return this;
         }
 
@@ -418,9 +451,10 @@ public class Addon {
         }
 
         public Addon build() {
-            return new Addon(id, type, label, version, maturity, compatible, contentType, link, author, verifiedAuthor,
-                    installed, description, detailedDescription, configDescriptionURI, keywords, countries, license,
-                    connection, backgroundColor, imageLink, properties.isEmpty() ? null : properties, loggerPackages);
+            return new Addon(uid, type, id, label, version, maturity, compatible, contentType, link, author,
+                    verifiedAuthor, installed, description, detailedDescription, configDescriptionURI, keywords,
+                    countries, license, connection, backgroundColor, imageLink,
+                    properties.isEmpty() ? null : properties, loggerPackages);
         }
     }
 }

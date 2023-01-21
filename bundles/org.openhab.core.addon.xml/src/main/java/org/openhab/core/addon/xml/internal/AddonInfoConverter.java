@@ -87,7 +87,7 @@ public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> 
         AddonInfo.Builder addonInfo = AddonInfo.builder(id, type).withName(name).withDescription(description);
         addonInfo.withAuthor((String) nodeIterator.nextValue("author", false));
         addonInfo.withConnection((String) nodeIterator.nextValue("connection", false));
-
+        addonInfo.withCountries((String) nodeIterator.nextValue("countries", false));
         addonInfo.withServiceId((String) nodeIterator.nextValue("service-id", false));
 
         String configDescriptionURI = nodeIterator.nextAttribute("config-description-ref", "uri", false);
@@ -105,6 +105,7 @@ public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> 
                 }
             }
         }
+
         addonInfo.withConfigDescriptionURI(configDescriptionURI);
 
         nodeIterator.assertEndOfType();

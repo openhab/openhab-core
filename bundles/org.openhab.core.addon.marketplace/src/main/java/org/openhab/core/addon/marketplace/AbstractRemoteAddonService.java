@@ -104,15 +104,16 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                 .forEach(addons::add);
 
         // create lookup list to make sure installed addons take precedence
-        List<String> installedAddons = addons.stream().map(Addon::getId).collect(Collectors.toList());
+        List<String> installedAddons = addons.stream().map(Addon::getUid).collect(Collectors.toList());
 
         if (remoteEnabled()) {
             List<Addon> remoteAddons = Objects.requireNonNullElse(cachedRemoteAddons.getValue(), List.of());
-            remoteAddons.stream().filter(a -> !installedAddons.contains(a.getId())).forEach(addons::add);
+            remoteAddons.stream().filter(a -> !installedAddons.contains(a.getUid())).forEach(addons::add);
         }
 
         // check real installation status based on handlers
-        addons.forEach(addon -> addon.setInstalled(addonHandlers.stream().anyMatch(h -> h.isInstalled(addon.getId()))));
+        addons.forEach(
+                addon -> addon.setInstalled(addonHandlers.stream().anyMatch(h -> h.isInstalled(addon.getUid()))));
 
         // remove incompatible add-ons if not enabled
         boolean showIncompatible = includeIncompatible();
@@ -171,17 +172,17 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         if (addon != null) {
             for (MarketplaceAddonHandler handler : addonHandlers) {
                 if (handler.supports(addon.getType(), addon.getContentType())) {
-                    if (!handler.isInstalled(addon.getId())) {
+                    if (!handler.isInstalled(addon.getUid())) {
                         try {
                             handler.install(addon);
                             installedAddonStorage.put(id, gson.toJson(addon));
                             refreshSource();
-                            postInstalledEvent(addon.getId());
+                            postInstalledEvent(addon.getUid());
                         } catch (MarketplaceHandlerException e) {
-                            postFailureEvent(addon.getId(), e.getMessage());
+                            postFailureEvent(addon.getUid(), e.getMessage());
                         }
                     } else {
-                        postFailureEvent(addon.getId(), "Add-on is already installed.");
+                        postFailureEvent(addon.getUid(), "Add-on is already installed.");
                     }
                     return;
                 }
@@ -196,18 +197,18 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         if (addon != null) {
             for (MarketplaceAddonHandler handler : addonHandlers) {
                 if (handler.supports(addon.getType(), addon.getContentType())) {
-                    if (handler.isInstalled(addon.getId())) {
+                    if (handler.isInstalled(addon.getUid())) {
                         try {
                             handler.uninstall(addon);
                             installedAddonStorage.remove(id);
                             refreshSource();
-                            postUninstalledEvent(addon.getId());
+                            postUninstalledEvent(addon.getUid());
                         } catch (MarketplaceHandlerException e) {
-                            postFailureEvent(addon.getId(), e.getMessage());
+                            postFailureEvent(addon.getUid(), e.getMessage());
                         }
                     } else {
                         installedAddonStorage.remove(id);
-                        postFailureEvent(addon.getId(), "Add-on is not installed.");
+                        postFailureEvent(addon.getUid(), "Add-on is not installed.");
                     }
                     return;
                 }

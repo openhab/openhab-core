@@ -71,11 +71,9 @@ public class TestAddonService extends AbstractRemoteAddonService {
     @Override
     protected List<Addon> getRemoteAddons() {
         remoteCalls++;
-        return REMOTE_ADDONS.stream()
-                .map(id -> Addon.create(SERVICE_PID + ":" + id).withType("binding")
-                        .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE)
-                        .withCompatible(!id.equals(INCOMPATIBLE_VERSION)).build())
-                .collect(Collectors.toList());
+        return REMOTE_ADDONS.stream().map(id -> Addon.create(SERVICE_PID + ":" + id).withType("binding")
+                .withId(id.substring("binding-".length())).withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE)
+                .withCompatible(!id.equals(INCOMPATIBLE_VERSION)).build()).collect(Collectors.toList());
     }
 
     @Override
@@ -91,7 +89,7 @@ public class TestAddonService extends AbstractRemoteAddonService {
     @Override
     public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
         String remoteId = SERVICE_PID + ":" + id;
-        return cachedAddons.stream().filter(a -> remoteId.equals(a.getId())).findAny().orElse(null);
+        return cachedAddons.stream().filter(a -> remoteId.equals(a.getUid())).findAny().orElse(null);
     }
 
     @Override
@@ -114,7 +112,7 @@ public class TestAddonService extends AbstractRemoteAddonService {
      * @param id id of the addon to install
      */
     public void setInstalled(String id) {
-        Addon addon = Addon.create(SERVICE_PID + ":" + id).withType("binding")
+        Addon addon = Addon.create(SERVICE_PID + ":" + id).withType("binding").withId(id.substring("binding-".length()))
                 .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE).build();
 
         addonHandlers.forEach(addonHandler -> {
@@ -132,7 +130,7 @@ public class TestAddonService extends AbstractRemoteAddonService {
      * @param id id of the addon to add
      */
     public void addToStorage(String id) {
-        Addon addon = Addon.create(SERVICE_PID + ":" + id).withType("binding")
+        Addon addon = Addon.create(SERVICE_PID + ":" + id).withType("binding").withId(id.substring("binding-".length()))
                 .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE).build();
 
         addon.setInstalled(true);

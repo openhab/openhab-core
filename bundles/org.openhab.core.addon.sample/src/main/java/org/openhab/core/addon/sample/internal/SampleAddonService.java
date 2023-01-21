@@ -82,7 +82,7 @@ public class SampleAddonService implements AddonService {
                         .withMaturity("stable").withContentType("example/vnd.openhab.addon").withLink(link)
                         .withAuthor("John Doe", false).withInstalled(installed).withDescription(description)
                         .withBackgroundColor(backgroundColor).build();
-                extensions.put(extension.getId(), extension);
+                extensions.put(extension.getUid(), extension);
             }
         }
     }
