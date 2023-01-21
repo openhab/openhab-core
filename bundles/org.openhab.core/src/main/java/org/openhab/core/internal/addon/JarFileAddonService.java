@@ -44,8 +44,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The {@link JarFileAddonService} is an add-on service that provides add-ons that are placed a .jar files in the
- * openHAB
- * addons folder
+ * openHAB addons folder
  *
  * @author Jan N. Klug - Initial contribution
  */
