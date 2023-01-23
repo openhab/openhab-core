@@ -17,7 +17,7 @@ import java.util.List;
 
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonAlias;
 
 /**
  * This is a data transfer object that is used to serialize parameter of a configuration description.
@@ -30,7 +30,7 @@ import com.google.gson.annotations.SerializedName;
 public class ConfigDescriptionParameterDTO {
 
     public String context;
-    @SerializedName(value = "default", alternate = "defaultValue")
+    @JsonAlias({ "default" })
     public String defaultValue;
     public String description;
     public String label;
