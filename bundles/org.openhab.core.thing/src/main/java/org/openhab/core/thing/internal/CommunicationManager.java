@@ -505,6 +505,14 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private @Nullable QuantityType<?> convertToQuantityType(DecimalType originalType, Item item,
             @Nullable String acceptedItemType) {
+        if (!(item instanceof NumberItem)) {
+            // PercentType command sent via DimmerItem to a channel that's dimensioned
+            // (such as Number:Dimensionless, expecting a %).
+            // We can't know the proper units to add, so just pass it through and assume
+            // The binding can deal with it.
+            return null;
+        }
+
         NumberItem numberItem = (NumberItem) item;
 
         // DecimalType command sent via a NumberItem with dimension:
