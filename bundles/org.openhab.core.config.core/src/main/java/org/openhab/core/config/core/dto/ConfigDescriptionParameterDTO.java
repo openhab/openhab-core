@@ -31,7 +31,7 @@ import com.google.gson.annotations.SerializedName;
 public class ConfigDescriptionParameterDTO {
 
     public String context;
-    @JsonAlias(value = "default", alternate = "defaultValue")
+    @SerializedName(value = "default", alternate = "defaultValue")
     @JsonAlias({ "default" })
     public String defaultValue;
     public String description;
