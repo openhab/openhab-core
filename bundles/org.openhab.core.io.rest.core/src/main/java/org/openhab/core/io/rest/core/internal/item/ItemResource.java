@@ -265,7 +265,6 @@ public class ItemResource implements RESTResource {
             CacheControl cc = new CacheControl();
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
-            cc.setNoStore(true);
             return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate).cacheControl(cc)
                     .build();
         }

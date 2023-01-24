@@ -182,7 +182,6 @@ public class RuleResource implements RESTResource {
             CacheControl cc = new CacheControl();
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
-            cc.setNoStore(true);
             rules = dtoMapper.limitToFields(rules, "uid,templateUID,name,visibility,description,tags,editable");
             return Response.ok(new Stream2JSONInputStream(rules)).lastModified(cacheableListLastModified)
                     .cacheControl(cc).build();
