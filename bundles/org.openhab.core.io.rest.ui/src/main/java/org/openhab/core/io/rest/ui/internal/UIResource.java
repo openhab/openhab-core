@@ -31,6 +31,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -166,7 +167,11 @@ public class UIResource implements RESTResource {
                 lastModifiedDates.put(namespace, lastModifiedDate);
             }
 
-            return Response.ok(new Stream2JSONInputStream(components)).lastModified(lastModifiedDate).build();
+            CacheControl cc = new CacheControl();
+            cc.setMustRevalidate(true);
+            cc.setPrivate(true);
+            return Response.ok(new Stream2JSONInputStream(components)).lastModified(lastModifiedDate).cacheControl(cc)
+                    .build();
         }
     }
 

@@ -42,6 +42,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -326,8 +327,13 @@ public class ThingResource implements RESTResource {
                 cacheableListLastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
             }
 
+            CacheControl cc = new CacheControl();
+            cc.setMustRevalidate(true);
+            cc.setPrivate(true);
+            cc.setNoStore(true);
             thingStream = dtoMapper.limitToFields(thingStream, "UID,label,bridgeUID,thingTypeUID,location,editable");
-            return Response.ok(new Stream2JSONInputStream(thingStream)).lastModified(cacheableListLastModified).build();
+            return Response.ok(new Stream2JSONInputStream(thingStream)).lastModified(cacheableListLastModified)
+                    .cacheControl(cc).build();
         }
 
         if (summary != null && summary) {

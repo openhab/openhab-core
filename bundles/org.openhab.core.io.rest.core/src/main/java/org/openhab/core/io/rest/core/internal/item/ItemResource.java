@@ -43,6 +43,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -260,7 +261,13 @@ public class ItemResource implements RESTResource {
                     .peek(dto -> dto.editable = isEditable(dto.name));
             itemStream = dtoMapper.limitToFields(itemStream,
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata");
-            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate).build();
+
+            CacheControl cc = new CacheControl();
+            cc.setMustRevalidate(true);
+            cc.setPrivate(true);
+            cc.setNoStore(true);
+            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate).cacheControl(cc)
+                    .build();
         }
 
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //

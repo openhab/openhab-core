@@ -39,6 +39,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -178,8 +179,13 @@ public class RuleResource implements RESTResource {
             Stream<EnrichedRuleDTO> rules = ruleRegistry.stream()
                     .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider));
 
+            CacheControl cc = new CacheControl();
+            cc.setMustRevalidate(true);
+            cc.setPrivate(true);
+            cc.setNoStore(true);
             rules = dtoMapper.limitToFields(rules, "uid,templateUID,name,visibility,description,tags,editable");
-            return Response.ok(new Stream2JSONInputStream(rules)).lastModified(cacheableListLastModified).build();
+            return Response.ok(new Stream2JSONInputStream(rules)).lastModified(cacheableListLastModified)
+                    .cacheControl(cc).build();
         }
 
         // match all
