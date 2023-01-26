@@ -12,9 +12,8 @@
  */
 package org.openhab.core.thing.internal.update;
 
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.thing.internal.ThingManagerImpl.PROPERTY_THING_TYPE_VERSION;
@@ -127,7 +126,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testChannelIsAdded() {
+    public void testSingleChannelAddition() {
         registerThingType(ADD_CHANNEL_THING_TYPE_UID);
 
         ChannelTypeUID channelTypeUID = new ChannelTypeUID(BINDING_ID, "testChannelTypeId");
@@ -152,7 +151,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testChannelIsUpdated() {
+    public void testSingleChannelUpdate() {
         registerThingType(UPDATE_CHANNEL_THING_TYPE_UID);
 
         ChannelTypeUID channelTypeOldUID = new ChannelTypeUID(BINDING_ID, "testChannelOldTypeId");
@@ -175,7 +174,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testChannelIsRemoved() {
+    public void testSingleChannelRemoval() {
         registerThingType(REMOVE_CHANNEL_THING_TYPE_UID);
 
         ChannelTypeUID channelTypeUID = new ChannelTypeUID(BINDING_ID, "testChannelTypeId");
@@ -194,7 +193,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testMultipleChannelUpdats() {
+    public void testMultipleChannelUpdates() {
         registerThingType(MULTIPLE_CHANNEL_THING_TYPE_UID);
 
         ChannelTypeUID channelTypeOldUID = new ChannelTypeUID(BINDING_ID, "testChannelOldTypeId");
@@ -214,14 +213,53 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         Thing updatedThing = assertThing(thing, 3);
         assertThat(updatedThing.getChannels(), hasSize(2));
 
-        Channel channel0 = updatedThing.getChannel("testChannel0");
-        assertThat(channel0, is(nullValue()));
-
         Channel channel1 = updatedThing.getChannel("testChannel1");
         assertChannel(channel1, channelTypeNewUID, "Test Label", null);
 
         Channel channel2 = updatedThing.getChannel("testChannel2");
         assertChannel(channel2, channelTypeOldUID, "TestLabel", null);
+    }
+
+    @Test
+    public void testOnlyMatchingInstructionsUpdate() {
+        registerThingType(MULTIPLE_CHANNEL_THING_TYPE_UID);
+
+        ChannelTypeUID channelTypeOldUID = new ChannelTypeUID(BINDING_ID, "testChannelOldTypeId");
+        registerChannelTypes(channelTypeOldUID);
+
+        ThingUID thingUID = new ThingUID(MULTIPLE_CHANNEL_THING_TYPE_UID, THING_ID);
+        ChannelUID channelUID0 = new ChannelUID(thingUID, "testChannel0");
+        ChannelUID channelUID1 = new ChannelUID(thingUID, "testChannel1");
+
+        Thing thing = ThingBuilder.create(MULTIPLE_CHANNEL_THING_TYPE_UID, thingUID)
+                .withChannel(ChannelBuilder.create(channelUID0).withType(channelTypeOldUID).build())
+                .withChannel(ChannelBuilder.create(channelUID1).withType(channelTypeOldUID).build())
+                .withProperty(PROPERTY_THING_TYPE_VERSION, "2").build();
+
+        managedThingProvider.add(thing);
+
+        Thing updatedThing = assertThing(thing, 3);
+        assertThat(updatedThing.getChannels(), hasSize(1));
+
+        Channel channel1 = updatedThing.getChannel("testChannel1");
+        assertChannel(channel1, channelTypeOldUID, null, null);
+    }
+
+    @Test
+    public void testNotModifiedIfHigherVersion() {
+        registerThingType(ADD_CHANNEL_THING_TYPE_UID);
+
+        ChannelTypeUID channelTypeUID = new ChannelTypeUID(BINDING_ID, "testChannelTypeId");
+        registerChannelTypes(channelTypeUID);
+
+        ThingUID thingUID = new ThingUID(ADD_CHANNEL_THING_TYPE_UID, THING_ID);
+        Thing thing = ThingBuilder.create(ADD_CHANNEL_THING_TYPE_UID, thingUID)
+                .withProperty(PROPERTY_THING_TYPE_VERSION, "1").build();
+        managedThingProvider.add(thing);
+
+        waitForAssert(() -> assertThat(thing.getStatus(), is(ThingStatus.ONLINE)));
+        assertThat(thingRegistry.get(thingUID), is(sameInstance(thing)));
+        assertThat(thing.getChannels(), is(emptyCollectionOf(Channel.class)));
     }
 
     private Thing assertThing(Thing oldThing, int expectedNewThingTypeVersion) {
