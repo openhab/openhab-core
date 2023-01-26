@@ -397,8 +397,18 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public void thingUpdated(Thing oldThing, Thing newThing, ThingTrackerEvent thingTrackerEvent) {
         ThingUID thingUID = newThing.getUID();
-        normalizeThingConfiguration(oldThing);
-        normalizeThingConfiguration(newThing);
+        try {
+            normalizeThingConfiguration(oldThing);
+        } catch (ConfigValidationException e) {
+            logger.warn("Failed to normalize configuration for thing '{}': {}", oldThing.getUID(),
+                    e.getValidationMessages(null));
+        }
+        try {
+            normalizeThingConfiguration(newThing);
+        } catch (ConfigValidationException e) {
+            logger.warn("Failed to normalize configuration´for thing '{}': {}", newThing.getUID(),
+                    e.getValidationMessages(null));
+        }
         if (thingUpdatedLock.contains(thingUID)) {
             // called from the thing handler itself or during thing structure update, therefore it exists
             // and either is initializing/initialized and must not be informed (in order to prevent infinite loops)
@@ -417,7 +427,6 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
 
                         try {
                             validate(newThing, thingTypeRegistry.getThingType(newThing.getThingTypeUID()));
-
                             safeCaller.create(thingHandler, ThingHandler.class).build().thingUpdated(newThing);
                         } catch (ConfigValidationException e) {
                             final ThingHandlerFactory thingHandlerFactory = findThingHandlerFactory(
@@ -607,7 +616,6 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         if (thingType != null && thing.getBridgeUID() == null && !thingType.getSupportedBridgeTypeUIDs().isEmpty()) {
             ConfigValidationMessage message = new ConfigValidationMessage("bridge",
                     "Configuring a bridge is mandatory.", "bridge_not_configured");
-
             throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
 
@@ -647,16 +655,21 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         normalizeConfiguration(thingType, thing.getUID(), thing.getConfiguration());
 
         for (Channel channel : thing.getChannels()) {
-            ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
-            normalizeConfiguration(channelType, channel.getUID(), channel.getConfiguration());
+            ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
+            if (channelTypeUID != null) {
+                ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID);
+                normalizeConfiguration(channelType, channel.getUID(), channel.getConfiguration());
+            }
         }
     }
 
     private void normalizeConfiguration(@Nullable AbstractDescriptionType prototype, UID targetUID,
             Configuration configuration) throws ConfigValidationException {
         if (prototype == null) {
-            logger.debug("Prototype for '{}' is not known, assuming it is already normalized", targetUID);
-            return;
+            ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
+                    "Type description for '{0}' not found also we checked the presence before.",
+                    "type_description_missing", targetUID);
+            throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
 
         URI configDescriptionURI = prototype.getConfigDescriptionURI();
@@ -668,10 +681,10 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
 
         ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
         if (configDescription == null) {
-            logger.warn(
-                    "No config description for '{}' found when normalizing configuration for '{}'. This is probably a bug.",
-                    configDescriptionURI, targetUID);
-            return;
+            ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
+                    "Config description for '{0}' not found also we checked the presence before.",
+                    "config_description_missing", targetUID);
+            throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
 
         Objects.requireNonNull(ConfigUtil.normalizeTypes(configuration.getProperties(), List.of(configDescription)))

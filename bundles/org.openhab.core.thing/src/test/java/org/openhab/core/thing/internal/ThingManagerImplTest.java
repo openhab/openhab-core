@@ -44,6 +44,7 @@ import org.openhab.core.thing.internal.ThingTracker.ThingTrackerEvent;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.type.ChannelGroupTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.openhab.core.util.BundleResolver;
 import org.osgi.framework.BundleContext;
@@ -73,6 +74,7 @@ public class ThingManagerImplTest extends JavaTest {
     private @Mock @NonNullByDefault({}) BundleResolver bundleResolverMock;
     private @Mock @NonNullByDefault({}) TranslationProvider translationProviderMock;
     private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
+    private @Mock @NonNullByDefault({}) ThingType thingTypeMock;
 
     // This class is final so it cannot be mocked
     private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService = new ThingStatusInfoI18nLocalizationService();
@@ -82,6 +84,8 @@ public class ThingManagerImplTest extends JavaTest {
         when(thingMock.getUID()).thenReturn(new ThingUID("test", "thing"));
         when(thingMock.getStatusInfo())
                 .thenReturn(new ThingStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE, null));
+        when(thingTypeMock.getConfigDescriptionURI()).thenReturn(null);
+        when(thingTypeRegistryMock.getThingType(any())).thenReturn(thingTypeMock);
     }
 
     private ThingManagerImpl createThingManager() {
