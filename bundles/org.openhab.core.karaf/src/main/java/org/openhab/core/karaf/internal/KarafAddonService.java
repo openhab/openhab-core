@@ -85,7 +85,7 @@ public class KarafAddonService implements AddonService {
     @Override
     public List<Addon> getAddons(@Nullable Locale locale) {
         try {
-            return Arrays.stream(featuresService.listFeatures()).filter(this::isAddon).map(this::getAddon)
+            return Arrays.stream(featuresService.listFeatures()).filter(this::isAddon).map(f -> getAddon(f, locale))
                     .sorted(Comparator.comparing(Addon::getLabel)).toList();
         } catch (Exception e) {
             logger.error("Exception while retrieving features: {}", e.getMessage());
@@ -103,7 +103,7 @@ public class KarafAddonService implements AddonService {
         Feature feature;
         try {
             feature = featuresService.getFeature(FeatureInstaller.PREFIX + id);
-            return getAddon(feature);
+            return getAddon(feature, locale);
         } catch (Exception e) {
             logger.error("Exception while querying feature '{}'", id);
             return null;
@@ -124,7 +124,7 @@ public class KarafAddonService implements AddonService {
         };
     }
 
-    private Addon getAddon(Feature feature) {
+    private Addon getAddon(Feature feature, @Nullable Locale locale) {
         String name = getName(feature.getName());
         String type = getType(feature.getName());
         String uid = type + Addon.ADDON_SEPARATOR + name;
@@ -133,7 +133,7 @@ public class KarafAddonService implements AddonService {
         Addon.Builder addon = Addon.create(uid).withType(type).withId(name).withContentType(ADDONS_CONTENT_TYPE)
                 .withVersion(feature.getVersion()).withAuthor(ADDONS_AUTHOR, true).withInstalled(isInstalled);
 
-        AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(uid);
+        AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(uid, locale);
 
         if (isInstalled && addonInfo != null) {
             // only enrich if this add-on is installed, otherwise wrong data might be added
