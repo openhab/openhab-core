@@ -115,11 +115,13 @@ public class KarafAddonService implements AddonService {
             case FeatureInstaller.EXTENSION_TYPE_AUTOMATION -> "https://www.openhab.org/addons/automation/" + name
                     + "/";
             case FeatureInstaller.EXTENSION_TYPE_BINDING -> "https://www.openhab.org/addons/bindings/" + name + "/";
+            case FeatureInstaller.EXTENSION_TYPE_MISC -> "https://www.openhab.org/addons/integrations/" + name + "/";
             case FeatureInstaller.EXTENSION_TYPE_PERSISTENCE -> "https://www.openhab.org/addons/persistence/" + name
                     + "/";
             case FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION -> "https://www.openhab.org/addons/transformations/"
                     + name + "/";
             case FeatureInstaller.EXTENSION_TYPE_VOICE -> "https://www.openhab.org/addons/voice/" + name + "/";
+            case FeatureInstaller.EXTENSION_TYPE_UI -> "https://www.openhab.org/addons/ui/" + name + "/";
             default -> null;
         };
     }
