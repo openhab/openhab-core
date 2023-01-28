@@ -42,26 +42,103 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class GroupFunctionHelper {
 
-    private final Logger logger = LoggerFactory.getLogger(GroupFunctionHelper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GroupFunctionHelper.class);
+
+    private GroupFunctionHelper() {
+        // prevent initialization
+    }
 
     /**
      * Creates a {@link GroupFunction} according to the given parameters. In case dimension is given the resulting
      * arithmetic group function will take unit conversion into account.
      *
-     * @param function the {@link GroupFunctionDTO} describing the group function.
-     * @param args a list of {@link State}s as arguments for the resulting group function.
-     * @param dimension an optional interface class from {@link Quantity} defining the dimension for unit conversion.
+     * @param functionName the {@link GroupFunctionDTO} describing the group function.
+     * @param baseItem the {@link Item} that represents the base-item of the group.
      * @return a {@link GroupFunction} according to the given parameters.
      */
-    public GroupFunction createGroupFunction(GroupFunctionDTO function, @Nullable Item baseItem) {
-        Class<? extends Quantity<?>> dimension = getDimension(baseItem);
-        if (dimension != null) {
-            return createDimensionGroupFunction(function, baseItem, dimension);
+    public static @Nullable GroupFunction createGroupFunction(@Nullable String functionName, String @Nullable [] params,
+            @Nullable Item baseItem) {
+        if (functionName == null) {
+            return null;
         }
-        return createDefaultGroupFunction(function, baseItem);
+
+        Class<? extends Quantity<?>> dimension = (baseItem instanceof NumberItem)
+                ? ((NumberItem) baseItem).getDimension()
+                : null;
+
+        final List<State> args;
+        switch (functionName.toUpperCase()) {
+            case "AND" -> {
+                args = parseStates(baseItem, params);
+                if (args.size() == 2) {
+                    return new ArithmeticGroupFunction.And(args.get(0), args.get(1));
+                } else {
+                    LOGGER.error("Group function 'AND' requires two arguments. Using Equality instead.");
+                }
+            }
+            case "OR" -> {
+                args = parseStates(baseItem, params);
+                if (args.size() == 2) {
+                    return new ArithmeticGroupFunction.Or(args.get(0), args.get(1));
+                } else {
+                    LOGGER.error("Group function 'OR' requires two arguments. Using Equality instead.");
+                }
+            }
+            case "NAND" -> {
+                args = parseStates(baseItem, params);
+                if (args.size() == 2) {
+                    return new ArithmeticGroupFunction.NAnd(args.get(0), args.get(1));
+                } else {
+                    LOGGER.error("Group function 'NOT AND' requires two arguments. Using Equality instead.");
+                }
+            }
+            case "NOR" -> {
+                args = parseStates(baseItem, params);
+                if (args.size() == 2) {
+                    return new ArithmeticGroupFunction.NOr(args.get(0), args.get(1));
+                } else {
+                    LOGGER.error("Group function 'NOT OR' requires two arguments. Using Equality instead.");
+                }
+            }
+            case "COUNT" -> {
+                if (params != null && params.length == 1) {
+                    State countParam = new StringType(params[0]);
+                    return new ArithmeticGroupFunction.Count(countParam);
+                } else {
+                    LOGGER.error("Group function 'COUNT' requires one argument. Using Equality instead.");
+                }
+            }
+            case "AVG" -> {
+                return dimension == null ? new ArithmeticGroupFunction.Avg()
+                        : new QuantityTypeArithmeticGroupFunction.Avg(dimension);
+            }
+            case "SUM" -> {
+                return dimension == null ? new ArithmeticGroupFunction.Sum()
+                        : new QuantityTypeArithmeticGroupFunction.Sum(dimension);
+            }
+            case "MIN" -> {
+                return dimension == null ? new ArithmeticGroupFunction.Min()
+                        : new QuantityTypeArithmeticGroupFunction.Min(dimension);
+            }
+            case "MAX" -> {
+                return dimension == null ? new ArithmeticGroupFunction.Max()
+                        : new QuantityTypeArithmeticGroupFunction.Max(dimension);
+            }
+            case "LATEST" -> {
+                return new DateTimeGroupFunction.Latest();
+            }
+            case "EARLIEST" -> {
+                return new DateTimeGroupFunction.Earliest();
+            }
+            case "EQUALITY" -> {
+                return new GroupFunction.Equality();
+            }
+            default -> LOGGER.error("Unknown group function '{}'. Using Equality instead.", functionName);
+        }
+        return new GroupFunction.Equality();
     }
 
-    private List<State> parseStates(@Nullable Item baseItem, String @Nullable [] params) {
+    private static List<State> parseStates(@Nullable Item baseItem, String @Nullable [] params) {
         if (params == null || baseItem == null) {
             return Collections.emptyList();
         }
@@ -70,7 +147,7 @@ public class GroupFunctionHelper {
         for (String param : params) {
             State state = TypeParser.parseState(baseItem.getAcceptedDataTypes(), param);
             if (state == null) {
-                logger.warn("State '{}' is not valid for a group item with base type '{}'", param, baseItem.getType());
+                LOGGER.warn("State '{}' is not valid for a group item with base type '{}'", param, baseItem.getType());
                 states.clear();
                 break;
             } else {
@@ -78,93 +155,5 @@ public class GroupFunctionHelper {
             }
         }
         return states;
-    }
-
-    private @Nullable Class<? extends Quantity<?>> getDimension(@Nullable Item baseItem) {
-        if (baseItem instanceof NumberItem) {
-            return ((NumberItem) baseItem).getDimension();
-        }
-        return null;
-    }
-
-    private GroupFunction createDimensionGroupFunction(GroupFunctionDTO function, @Nullable Item baseItem,
-            Class<? extends Quantity<?>> dimension) {
-        final String functionName = function.name;
-        switch (functionName.toUpperCase()) {
-            case "AVG":
-                return new QuantityTypeArithmeticGroupFunction.Avg(dimension);
-            case "SUM":
-                return new QuantityTypeArithmeticGroupFunction.Sum(dimension);
-            case "MIN":
-                return new QuantityTypeArithmeticGroupFunction.Min(dimension);
-            case "MAX":
-                return new QuantityTypeArithmeticGroupFunction.Max(dimension);
-            default:
-                return createDefaultGroupFunction(function, baseItem);
-        }
-    }
-
-    private GroupFunction createDefaultGroupFunction(GroupFunctionDTO function, @Nullable Item baseItem) {
-        final String functionName = function.name;
-        final List<State> args;
-        switch (functionName.toUpperCase()) {
-            case "AND":
-                args = parseStates(baseItem, function.params);
-                if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.And(args.get(0), args.get(1));
-                } else {
-                    logger.error("Group function 'AND' requires two arguments. Using Equality instead.");
-                }
-                break;
-            case "OR":
-                args = parseStates(baseItem, function.params);
-                if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.Or(args.get(0), args.get(1));
-                } else {
-                    logger.error("Group function 'OR' requires two arguments. Using Equality instead.");
-                }
-                break;
-            case "NAND":
-                args = parseStates(baseItem, function.params);
-                if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.NAnd(args.get(0), args.get(1));
-                } else {
-                    logger.error("Group function 'NOT AND' requires two arguments. Using Equality instead.");
-                }
-                break;
-            case "NOR":
-                args = parseStates(baseItem, function.params);
-                if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.NOr(args.get(0), args.get(1));
-                } else {
-                    logger.error("Group function 'NOT OR' requires two arguments. Using Equality instead.");
-                }
-                break;
-            case "COUNT":
-                if (function.params != null && function.params.length == 1) {
-                    State countParam = new StringType(function.params[0]);
-                    return new ArithmeticGroupFunction.Count(countParam);
-                } else {
-                    logger.error("Group function 'COUNT' requires one argument. Using Equality instead.");
-                }
-                break;
-            case "AVG":
-                return new ArithmeticGroupFunction.Avg();
-            case "SUM":
-                return new ArithmeticGroupFunction.Sum();
-            case "MIN":
-                return new ArithmeticGroupFunction.Min();
-            case "MAX":
-                return new ArithmeticGroupFunction.Max();
-            case "LATEST":
-                return new DateTimeGroupFunction.Latest();
-            case "EARLIEST":
-                return new DateTimeGroupFunction.Earliest();
-            case "EQUALITY":
-                return new GroupFunction.Equality();
-            default:
-                logger.error("Unknown group function '{}'. Using Equality instead.", functionName);
-        }
-        return new GroupFunction.Equality();
     }
 }

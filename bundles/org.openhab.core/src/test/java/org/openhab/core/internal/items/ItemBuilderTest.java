@@ -97,14 +97,13 @@ public class ItemBuilderTest {
     @Test
     public void testFullGroupItem() {
         Item baseItem = mock(Item.class);
-        GroupFunction mockFunction = mock(GroupFunction.class);
 
         Item resItem = itemBuilderFactory.newItemBuilder("Group", "test") //
                 .withCategory("category") //
                 .withGroups(List.of("a", "b")) //
                 .withLabel("label") //
                 .withBaseItem(baseItem)//
-                .withGroupFunction(mockFunction) //
+                .withGroupFunction("fcn", new String[] { "param" }) //
                 .build();
 
         assertEquals(GroupItem.class, resItem.getClass());
@@ -113,7 +112,9 @@ public class ItemBuilderTest {
         assertEquals("category", res.getCategory());
         assertEquals(List.of("a", "b"), res.getGroupNames());
         assertEquals("label", res.getLabel());
-        assertSame(mockFunction, res.getFunction());
+        assertEquals("fcn", res.getFunction());
+        assertEquals(1, res.getFunctionParams().length);
+        assertEquals("param", res.getFunctionParams()[0]);
         assertSame(baseItem, res.getBaseItem());
     }
 
@@ -139,8 +140,7 @@ public class ItemBuilderTest {
     @Test
     public void testCloneGroupItem() {
         Item baseItem = mock(Item.class);
-        GroupFunction mockFunction = mock(GroupFunction.class);
-        GroupItem originalItem = new GroupItem("name", baseItem, mockFunction);
+        GroupItem originalItem = new GroupItem("name", baseItem, "sum", null);
         originalItem.setCategory("category");
         originalItem.setLabel("label");
         originalItem.addGroupNames("a", "b");
@@ -153,7 +153,9 @@ public class ItemBuilderTest {
         assertEquals("category", res.getCategory());
         assertEquals(List.of("a", "b"), res.getGroupNames());
         assertEquals("label", res.getLabel());
-        assertSame(mockFunction, res.getFunction());
+
+        assertEquals("sum", res.getFunction());
+        assertNull(res.getFunctionParams());
         assertSame(baseItem, res.getBaseItem());
     }
 
@@ -167,8 +169,8 @@ public class ItemBuilderTest {
     @Test
     public void testFunctionOnNonGroupItem() {
         GroupFunction mockFunction = mock(GroupFunction.class);
-        assertThrows(IllegalArgumentException.class, () -> itemBuilderFactory
-                .newItemBuilder(CoreItemFactory.STRING, "test").withGroupFunction(mockFunction));
+        assertThrows(IllegalArgumentException.class,
+                () -> itemBuilderFactory.newItemBuilder(CoreItemFactory.STRING, "test").withGroupFunction("avg", null));
     }
 
     @Test

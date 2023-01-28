@@ -75,6 +75,14 @@ public interface ChannelTypeBuilder<T extends ChannelTypeBuilder<T>> {
     T withConfigDescriptionURI(URI configDescriptionURI);
 
     /**
+     * Sets the proposed unit for this channel type
+     *
+     * @param unit the unit
+     * @return this Builder
+     */
+    T withUnit(String unit);
+
+    /**
      * Build the ChannelType with the given values
      *
      * @return the created ChannelType

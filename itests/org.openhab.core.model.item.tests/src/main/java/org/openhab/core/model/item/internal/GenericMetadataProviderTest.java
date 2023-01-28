@@ -37,7 +37,7 @@ public class GenericMetadataProviderTest {
     @Test
     public void testAddMetadata() {
         GenericMetadataProvider provider = new GenericMetadataProvider();
-        provider.addMetadata("binding", "item", "value", null);
+        provider.addMetadata("unit", "item", "value", null);
         Collection<Metadata> res = provider.getAll();
         assertEquals(1, res.size());
         assertEquals("value", res.iterator().next().getValue());

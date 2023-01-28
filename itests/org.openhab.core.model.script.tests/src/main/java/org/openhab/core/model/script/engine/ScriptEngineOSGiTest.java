@@ -19,9 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Collection;
 import java.util.List;
 
-import javax.measure.quantity.Length;
-import javax.measure.quantity.Temperature;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +28,8 @@ import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemProvider;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.DecimalType;
@@ -78,8 +77,8 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                return List.of(new SwitchItem(ITEM_NAME), createNumberItem(NUMBER_ITEM_TEMPERATURE, Temperature.class),
-                        createNumberItem(NUMBER_ITEM_LENGTH, Length.class), new NumberItem(NUMBER_ITEM_DECIMAL));
+                return List.of(new SwitchItem(ITEM_NAME), createNumberItem(NUMBER_ITEM_TEMPERATURE, "°C"),
+                        createNumberItem(NUMBER_ITEM_LENGTH, "m"), new NumberItem(NUMBER_ITEM_DECIMAL));
             }
 
             @Override
@@ -350,8 +349,10 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         assertEquals("\\", runScript("return \"\\\\\""));
     }
 
-    private Item createNumberItem(String numberItemName, Class<?> dimension) {
-        return new NumberItem("Number:" + dimension.getSimpleName(), numberItemName);
+    private Item createNumberItem(String numberItemName, String unit) {
+        NumberItem numberItem = new NumberItem(numberItemName);
+        numberItem.addedMetadata(new Metadata(new MetadataKey("unit", numberItemName), unit, null));
+        return numberItem;
     }
 
     @SuppressWarnings("unchecked")

@@ -15,6 +15,8 @@ package org.openhab.core.thing.type;
 import java.net.URI;
 import java.util.Set;
 
+import javax.measure.Unit;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.Channel;
@@ -38,6 +40,7 @@ public class ChannelType extends AbstractDescriptionType {
 
     private final boolean advanced;
     private final @Nullable String itemType;
+    private final @Nullable Unit<?> unit;
     private final ChannelKind kind;
     private final Set<String> tags;
     private final @Nullable String category;
@@ -53,6 +56,7 @@ public class ChannelType extends AbstractDescriptionType {
      *            the overall system (must neither be null, nor empty)
      * @param advanced true if this channel type contains advanced features, otherwise false
      * @param itemType the item type of this Channel type, e.g. {@code ColorItem}
+     * @param unit the proposed unit for this channel (only applicable for <code>Number</code> items
      * @param kind the channel kind.
      * @param label the human-readable label for the according type
      *            (must neither be null nor empty)
@@ -68,11 +72,12 @@ public class ChannelType extends AbstractDescriptionType {
      * @throws IllegalArgumentException if the UID or the item type is null or empty,
      *             or the meta information is null
      */
-    protected ChannelType(ChannelTypeUID uid, boolean advanced, @Nullable String itemType, ChannelKind kind,
-            String label, @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
-            @Nullable StateDescription state, @Nullable CommandDescription commandDescription,
-            @Nullable EventDescription event, @Nullable URI configDescriptionURI,
-            @Nullable AutoUpdatePolicy autoUpdatePolicy) throws IllegalArgumentException {
+    protected ChannelType(ChannelTypeUID uid, boolean advanced, @Nullable String itemType, @Nullable Unit<?> unit,
+            ChannelKind kind, String label, @Nullable String description, @Nullable String category,
+            @Nullable Set<String> tags, @Nullable StateDescription state,
+            @Nullable CommandDescription commandDescription, @Nullable EventDescription event,
+            @Nullable URI configDescriptionURI, @Nullable AutoUpdatePolicy autoUpdatePolicy)
+            throws IllegalArgumentException {
         super(uid, label, description, configDescriptionURI);
 
         if (kind == ChannelKind.STATE && (itemType == null || itemType.isBlank())) {
@@ -81,8 +86,12 @@ public class ChannelType extends AbstractDescriptionType {
         if (kind == ChannelKind.TRIGGER && itemType != null) {
             throw new IllegalArgumentException("If the kind is 'trigger', the item type must not be set!");
         }
+        if (!"Number".equals(itemType) && unit != null) {
+            throw new IllegalArgumentException("'unit' can only be used wit 'Number' items!");
+        }
 
         this.itemType = itemType;
+        this.unit = unit;
         this.kind = kind;
 
         this.tags = tags == null ? Set.of() : Set.copyOf(tags);
@@ -107,6 +116,15 @@ public class ChannelType extends AbstractDescriptionType {
      */
     public @Nullable String getItemType() {
         return this.itemType;
+    }
+
+    /**
+     * Returns the proposed unit of this {@link ChannelType}
+     *
+     * @return the unit for this channel (<code>null</code> if not set)
+     */
+    public @Nullable Unit<?> getUnit() {
+        return this.unit;
     }
 
     /**

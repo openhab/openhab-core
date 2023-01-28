@@ -27,8 +27,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractManagedProvider;
 import org.openhab.core.items.ManagedItemProvider.PersistedItem;
-import org.openhab.core.items.dto.GroupFunctionDTO;
-import org.openhab.core.items.dto.ItemDTOMapper;
 import org.openhab.core.storage.StorageService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -39,9 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link ManagedItemProvider} is an OSGi service, that allows to add or remove
- * items at runtime by calling {@link ManagedItemProvider#addItem(Item)} or {@link ManagedItemProvider#removeItem(Item)}
- * . An added item is automatically
+ * {@link ManagedItemProvider} is an OSGi service, that allows to add or remove items at runtime by calling
+ * {@link ManagedItemProvider#add(Item)} or {@link ManagedItemProvider#remove(String)}. An added item is automatically
  * exposed to the {@link ItemRegistry}. Persistence of added Items is handled by
  * a {@link StorageService}. Items are being restored using the given {@link ItemFactory}s.
  *
@@ -148,8 +145,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
 
     private @Nullable Item createItem(String itemType, String itemName) {
         try {
-            Item item = itemBuilderFactory.newItemBuilder(itemType, itemName).build();
-            return item;
+            return itemBuilderFactory.newItemBuilder(itemType, itemName).build();
         } catch (IllegalStateException e) {
             logger.debug("Couldn't create item '{}' of type '{}'", itemName, itemType);
             return null;
@@ -187,10 +183,10 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
                 String itemName = entry.getKey();
                 PersistedItem persistedItem = entry.getValue();
                 Item item = itemFactory.createItem(persistedItem.itemType, itemName);
-                if (item != null && item instanceof GenericItem) {
+                if (item instanceof GenericItem genericItem) {
                     iterator.remove();
-                    configureItem(persistedItem, (GenericItem) item);
-                    notifyListenersAboutAddedElement(item);
+                    configureItem(persistedItem, genericItem);
+                    notifyListenersAboutAddedElement(genericItem);
                 } else {
                     logger.debug("The added item factory '{}' still could not instantiate item '{}'.", itemFactory,
                             itemName);
@@ -225,10 +221,11 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
             if (baseItemType != null) {
                 Item baseItem = createItem(baseItemType, itemName);
                 if (persistedItem.functionName != null) {
-                    GroupFunction function = getGroupFunction(persistedItem, baseItem);
-                    item = new GroupItem(itemName, baseItem, function);
+                    List<String> functionParams = persistedItem.functionParams;
+                    item = new GroupItem(itemName, baseItem, persistedItem.functionName,
+                            functionParams != null ? functionParams.toArray(new String[0]) : null);
                 } else {
-                    item = new GroupItem(itemName, baseItem, new GroupFunction.Equality());
+                    item = new GroupItem(itemName, baseItem, "equality", null);
                 }
             } else {
                 item = new GroupItem(itemName);
@@ -237,8 +234,8 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
             item = createItem(persistedItem.itemType, itemName);
         }
 
-        if (item != null && item instanceof GenericItem) {
-            configureItem(persistedItem, (GenericItem) item);
+        if (item instanceof GenericItem genericItem) {
+            configureItem(persistedItem, genericItem);
         }
 
         if (item == null) {
@@ -248,15 +245,6 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         }
 
         return item;
-    }
-
-    private GroupFunction getGroupFunction(PersistedItem persistedItem, @Nullable Item baseItem) {
-        GroupFunctionDTO functionDTO = new GroupFunctionDTO();
-        functionDTO.name = persistedItem.functionName;
-        if (persistedItem.functionParams != null) {
-            functionDTO.params = persistedItem.functionParams.toArray(new String[persistedItem.functionParams.size()]);
-        }
-        return ItemDTOMapper.mapFunction(baseItem, functionDTO);
     }
 
     private void configureItem(PersistedItem persistedItem, GenericItem item) {
@@ -283,8 +271,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         PersistedItem persistedItem = new PersistedItem(
                 item instanceof GroupItem ? GroupItem.TYPE : toItemFactoryName(item));
 
-        if (item instanceof GroupItem) {
-            GroupItem groupItem = (GroupItem) item;
+        if (item instanceof GroupItem groupItem) {
             String baseItemType = null;
             Item baseItem = groupItem.getBaseItem();
             if (baseItem != null) {
@@ -292,7 +279,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
             }
             persistedItem.baseItemType = baseItemType;
 
-            addFunctionToPersisedItem(persistedItem, groupItem);
+            addFunctionToPersistedItem(persistedItem, groupItem);
         }
 
         persistedItem.label = item.getLabel();
@@ -303,15 +290,11 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         return persistedItem;
     }
 
-    private void addFunctionToPersisedItem(PersistedItem persistedItem, GroupItem groupItem) {
+    private void addFunctionToPersistedItem(PersistedItem persistedItem, GroupItem groupItem) {
         if (groupItem.getFunction() != null) {
-            GroupFunctionDTO functionDTO = ItemDTOMapper.mapFunction(groupItem.getFunction());
-            if (functionDTO != null) {
-                persistedItem.functionName = functionDTO.name;
-                if (functionDTO.params != null) {
-                    persistedItem.functionParams = Arrays.asList(functionDTO.params);
-                }
-            }
+            persistedItem.functionName = groupItem.getFunction();
+            String[] params = groupItem.getFunctionParams();
+            persistedItem.functionParams = params != null ? Arrays.asList(params) : null;
         }
     }
 }

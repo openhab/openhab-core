@@ -76,8 +76,8 @@ public class UnitUtils {
      * @return the {@link Class} instance of the interface or {@code null} if the given dimension is blank.
      * @throws IllegalArgumentException in case no class instance could be parsed from the given dimension.
      */
-    public static @Nullable Class<? extends Quantity<?>> parseDimension(String dimension) {
-        if (dimension.isBlank()) {
+    public static @Nullable Class<? extends Quantity<?>> parseDimension(@Nullable String dimension) {
+        if (dimension == null || dimension.isBlank()) {
             return null;
         }
 
@@ -110,14 +110,17 @@ public class UnitUtils {
      * @param unit The {@link Unit} to get the Dimension's name from.
      * @return The Dimension string or null if the unit can not be found in any of the SystemOfUnits.
      */
-    public static @Nullable String getDimensionName(Unit<?> unit) {
+    public static @Nullable String getDimensionName(@Nullable Unit<?> unit) {
+        if (unit == null) {
+            return null;
+        }
         String compatibleDimension = null;
         for (Class<? extends SystemOfUnits> system : ALL_SYSTEM_OF_UNITS) {
             for (Field field : system.getDeclaredFields()) {
                 if (field.getType().isAssignableFrom(Unit.class) && Modifier.isStatic(field.getModifiers())) {
                     Type genericType = field.getGenericType();
-                    if (genericType instanceof ParameterizedType) {
-                        Type typeParam = ((ParameterizedType) genericType).getActualTypeArguments()[0];
+                    if (genericType instanceof ParameterizedType parameterizedType) {
+                        Type typeParam = parameterizedType.getActualTypeArguments()[0];
                         if (typeParam instanceof WildcardType) {
                             continue;
                         }
@@ -141,7 +144,7 @@ public class UnitUtils {
                 }
             }
         }
-        return compatibleDimension == null ? null : compatibleDimension;
+        return compatibleDimension;
     }
 
     /**
@@ -149,7 +152,7 @@ public class UnitUtils {
      * label). In the latter case, the unit is expected to be the last part of the pattern separated by " " (e.g. "%.2f
      * °C" for °C).
      *
-     * @param stringWithUnit the string to extract the unit symbol from
+     * @param pattern the string to extract the unit symbol from
      * @return the unit symbol extracted from the string or {@code null} if no unit could be parsed
      *
      */

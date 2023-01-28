@@ -73,8 +73,18 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         return defaultValue;
     }
 
-    private @Nullable String readItemType(NodeIterator nodeIterator) throws ConversionException {
-        return (String) nodeIterator.nextValue("item-type", false);
+    private ItemTypeConverter.@Nullable ItemType readItemType(NodeIterator nodeIterator) throws ConversionException {
+        Object nextNode = nodeIterator.next();
+
+        if (nextNode != null) {
+            if (nextNode instanceof ItemTypeConverter.ItemType) {
+                return (ItemTypeConverter.ItemType) nextNode;
+            }
+
+            nodeIterator.revert();
+        }
+
+        return null;
     }
 
     private @Nullable String readKind(NodeIterator nodeIterator) throws ConversionException {
@@ -171,7 +181,10 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         String uid = system ? XmlHelper.getSystemUID(super.getID(attributes)) : super.getUID(attributes, context);
         ChannelTypeUID channelTypeUID = new ChannelTypeUID(uid);
 
-        String itemType = readItemType(nodeIterator);
+        ItemTypeConverter.ItemType itemTypeWrapper = readItemType(nodeIterator);
+        String itemType = itemTypeWrapper != null ? itemTypeWrapper.itemType : null;
+        String unit = itemTypeWrapper != null && "Number".equals(itemType) ? itemTypeWrapper.unit : null;
+
         String kind = readKind(nodeIterator);
         String label = super.readLabel(nodeIterator);
         String description = super.readDescription(nodeIterator);
@@ -213,6 +226,9 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
             }
         } else {
             throw new IllegalArgumentException(String.format("Unknown channel kind: '%s'", cKind));
+        }
+        if (unit != null) {
+            builder.withUnit(unit);
         }
         if (category != null) {
             builder.withCategory(category);

@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.internal.items.GroupFunctionHelper;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.service.CommandDescriptionService;
 import org.openhab.core.service.StateDescriptionService;
@@ -46,8 +46,10 @@ public class GroupItem extends GenericItem implements StateChangeListener {
     private final Logger logger = LoggerFactory.getLogger(GroupItem.class);
 
     protected @Nullable final Item baseItem;
-    protected @Nullable GroupFunction function;
+    protected @Nullable String function;
+    protected String @Nullable [] functionParams;
     protected final CopyOnWriteArrayList<Item> members;
+    protected @Nullable GroupFunction functionImpl;
 
     /**
      * Creates a plain GroupItem
@@ -55,12 +57,12 @@ public class GroupItem extends GenericItem implements StateChangeListener {
      * @param name name of the group
      */
     public GroupItem(String name) {
-        this(name, null, null);
+        this(name, null, null, null);
     }
 
     public GroupItem(String name, @Nullable Item baseItem) {
         // only baseItem but no function set -> use Equality
-        this(name, baseItem, new GroupFunction.Equality());
+        this(name, baseItem, "EQUALITY", null);
     }
 
     /**
@@ -70,16 +72,20 @@ public class GroupItem extends GenericItem implements StateChangeListener {
      * @param baseItem type of items in the group
      * @param function function to calculate group status out of member status
      */
-    public GroupItem(String name, @Nullable Item baseItem, @Nullable GroupFunction function) {
+    public GroupItem(String name, @Nullable Item baseItem, @Nullable String function,
+            String @Nullable [] functionParams) {
         super(TYPE, name);
 
         // we only allow GroupItem with BOTH, baseItem AND function set, or NONE of them set
         if (baseItem == null || function == null) {
             this.baseItem = null;
             this.function = null;
+            this.functionParams = null;
         } else {
             this.baseItem = baseItem;
             this.function = function;
+            this.functionParams = functionParams;
+            this.functionImpl = GroupFunctionHelper.createGroupFunction(function, functionParams, baseItem);
         }
 
         members = new CopyOnWriteArrayList<>();
@@ -107,8 +113,12 @@ public class GroupItem extends GenericItem implements StateChangeListener {
      *
      * @return the function of this GroupItem
      */
-    public @Nullable GroupFunction getFunction() {
+    public @Nullable String getFunction() {
         return function;
+    }
+
+    public String @Nullable [] getFunctionParams() {
+        return functionParams;
     }
 
     /**
@@ -163,38 +173,29 @@ public class GroupItem extends GenericItem implements StateChangeListener {
      * @throws IllegalArgumentException if the given item is null
      */
     public void addMember(Item item) {
-        if (item == null) {
-            throw new IllegalArgumentException("Item must not be null!");
-        }
-
         boolean added = members.addIfAbsent(item);
 
         // in case membership is constructed programmatically this sanitizes
         // the group names on the item:
-        if (added && item instanceof GenericItem) {
-            ((GenericItem) item).addGroupName(getName());
+        if (added && item instanceof GenericItem genericItem) {
+            genericItem.addGroupName(getName());
         }
         registerStateListener(item);
     }
 
     private void registerStateListener(Item item) {
-        if (item instanceof GenericItem) {
-            GenericItem genericItem = (GenericItem) item;
+        if (item instanceof GenericItem genericItem) {
             genericItem.addStateChangeListener(this);
         }
     }
 
     private void unregisterStateListener(Item old) {
-        if (old instanceof GenericItem) {
-            GenericItem genericItem = (GenericItem) old;
+        if (old instanceof GenericItem genericItem) {
             genericItem.removeStateChangeListener(this);
         }
     }
 
     public void replaceMember(Item oldItem, Item newItem) {
-        if (oldItem == null || newItem == null) {
-            throw new IllegalArgumentException("Items must not be null!");
-        }
         int index = members.indexOf(oldItem);
         if (index > -1) {
             Item old = members.set(index, newItem);
@@ -210,9 +211,6 @@ public class GroupItem extends GenericItem implements StateChangeListener {
      * @throws IllegalArgumentException if the given item is null
      */
     public void removeMember(Item item) {
-        if (item == null) {
-            throw new IllegalArgumentException("Item must not be null!");
-        }
         members.remove(item);
         unregisterStateListener(item);
     }
@@ -305,12 +303,12 @@ public class GroupItem extends GenericItem implements StateChangeListener {
         @Nullable
         T newState = null;
         if (function != null) {
-            newState = function.getStateAs(getStateMembers(getMembers()), typeClass);
+            newState = functionImpl.getStateAs(getStateMembers(getMembers()), typeClass);
         }
 
-        if (newState == null && baseItem != null && baseItem instanceof GenericItem) {
+        if (newState == null && baseItem != null && baseItem instanceof GenericItem genericItem) {
             // we use the transformation method from the base item
-            ((GenericItem) baseItem).setState(state);
+            genericItem.setState(state);
             newState = baseItem.getStateAs(typeClass);
         }
         if (newState == null) {
@@ -346,13 +344,13 @@ public class GroupItem extends GenericItem implements StateChangeListener {
         if (!getTags().isEmpty()) {
             sb.append(", ");
             sb.append("Tags=[");
-            sb.append(getTags().stream().collect(Collectors.joining(", ")));
+            sb.append(String.join(", ", getTags()));
             sb.append("]");
         }
         if (!getGroupNames().isEmpty()) {
             sb.append(", ");
             sb.append("Groups=[");
-            sb.append(getGroupNames().stream().collect(Collectors.joining(", ")));
+            sb.append(String.join(", ", getGroupNames()));
             sb.append("]");
         }
         sb.append(")");
@@ -368,7 +366,7 @@ public class GroupItem extends GenericItem implements StateChangeListener {
         State oldState = this.state;
         State newState = oldState;
         if (function != null && baseItem != null && itemStateConverter != null) {
-            State calculatedState = function.calculate(getStateMembers(getMembers()));
+            State calculatedState = functionImpl.calculate(getStateMembers(getMembers()));
             newState = itemStateConverter.convertToAcceptedState(calculatedState, baseItem);
             setState(newState);
         }
@@ -380,9 +378,9 @@ public class GroupItem extends GenericItem implements StateChangeListener {
     @Override
     public void setState(State state) {
         State oldState = this.state;
-        if (baseItem != null && baseItem instanceof GenericItem) {
-            ((GenericItem) baseItem).setState(state);
-            this.state = baseItem.getState();
+        if (baseItem instanceof GenericItem genericItem) {
+            genericItem.setState(state);
+            this.state = genericItem.getState();
         } else {
             this.state = state;
         }
@@ -405,13 +403,15 @@ public class GroupItem extends GenericItem implements StateChangeListener {
         }
     }
 
-    @Override
-    public void setUnitProvider(@Nullable UnitProvider unitProvider) {
-        super.setUnitProvider(unitProvider);
-        if (baseItem instanceof GenericItem) {
-            ((GenericItem) baseItem).setUnitProvider(unitProvider);
-        }
-    }
+    /*
+     * @Override
+     * public void setUnitProvider(@Nullable UnitProvider unitProvider) {
+     * super.setUnitProvider(unitProvider);
+     * if (baseItem instanceof GenericItem) {
+     * ((GenericItem) baseItem).setUnitProvider(unitProvider);
+     * }
+     * }
+     */
 
     private void sendGroupStateChangedEvent(String memberName, State newState, State oldState) {
         if (eventPublisher != null) {
@@ -448,5 +448,29 @@ public class GroupItem extends GenericItem implements StateChangeListener {
 
     private boolean hasOwnState(GroupItem item) {
         return item.getFunction() != null && item.getBaseItem() != null;
+    }
+
+    @Override
+    public void addedMetadata(Metadata metadata) {
+        if (baseItem instanceof GenericItem genericItem) {
+            genericItem.addedMetadata(metadata);
+            functionImpl = GroupFunctionHelper.createGroupFunction(function, functionParams, baseItem);
+        }
+    }
+
+    @Override
+    public void updatedMetadata(Metadata oldMetadata, Metadata newMetadata) {
+        if (baseItem instanceof GenericItem genericItem) {
+            genericItem.updatedMetadata(oldMetadata, newMetadata);
+            functionImpl = GroupFunctionHelper.createGroupFunction(function, functionParams, baseItem);
+        }
+    }
+
+    @Override
+    public void removedMetadata(Metadata metadata) {
+        if (baseItem instanceof GenericItem genericItem) {
+            genericItem.removedMetadata(metadata);
+            functionImpl = GroupFunctionHelper.createGroupFunction(function, functionParams, baseItem);
+        }
     }
 }

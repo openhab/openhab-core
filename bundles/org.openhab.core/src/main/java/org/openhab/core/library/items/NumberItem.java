@@ -22,7 +22,7 @@ import javax.measure.Unit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GenericItem;
-import org.openhab.core.items.ItemUtil;
+import org.openhab.core.items.Metadata;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
@@ -45,25 +45,17 @@ import org.openhab.core.types.util.UnitUtils;
 @NonNullByDefault
 public class NumberItem extends GenericItem {
 
+    public static final String UNIT_METADATA_NAMESPACE = "unit";
     private static final List<Class<? extends State>> ACCEPTED_DATA_TYPES = List.of(DecimalType.class,
             QuantityType.class, UnDefType.class);
     private static final List<Class<? extends Command>> ACCEPTED_COMMAND_TYPES = List.of(DecimalType.class,
             QuantityType.class, RefreshType.class);
 
     @Nullable
-    private Class<? extends Quantity<?>> dimension;
+    private Unit<?> unit;
 
     public NumberItem(String name) {
-        this(CoreItemFactory.NUMBER, name);
-    }
-
-    public NumberItem(String type, String name) {
-        super(type, name);
-
-        String itemTypeExtension = ItemUtil.getItemTypeExtension(getType());
-        if (itemTypeExtension != null) {
-            dimension = UnitUtils.parseDimension(itemTypeExtension);
-        }
+        super(CoreItemFactory.NUMBER, name);
     }
 
     @Override
@@ -77,11 +69,17 @@ public class NumberItem extends GenericItem {
     }
 
     public void send(DecimalType command) {
-        internalSend(command);
+        Unit<?> itemUnit = this.unit;
+        if (itemUnit == null) {
+            internalSend(command);
+        } else {
+            QuantityType<?> enrichedCommand = new QuantityType<>(command.toBigDecimal(), itemUnit);
+            internalSend(enrichedCommand);
+        }
     }
 
     public void send(QuantityType<?> command) {
-        if (dimension == null) {
+        if (this.unit == null) {
             DecimalType strippedCommand = new DecimalType(command.toBigDecimal());
             internalSend(strippedCommand);
         } else {
@@ -92,7 +90,8 @@ public class NumberItem extends GenericItem {
     @Override
     public @Nullable StateDescription getStateDescription(@Nullable Locale locale) {
         StateDescription stateDescription = super.getStateDescription(locale);
-        if (getDimension() == null && stateDescription != null) {
+        if (unit == null && stateDescription != null) {
+            // remove item placeholder when unit has no item
             String pattern = stateDescription.getPattern();
             if (pattern != null && pattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
                 return StateDescriptionFragmentBuilder.create(stateDescription)
@@ -109,45 +108,39 @@ public class NumberItem extends GenericItem {
      * @return the {@link Dimension} associated with this {@link NumberItem}, may be null.
      */
     public @Nullable Class<? extends Quantity<?>> getDimension() {
-        return dimension;
+        return UnitUtils.parseDimension(UnitUtils.getDimensionName(unit));
     }
 
     @Override
     public void setState(State state) {
-        // QuantityType update to a NumberItem without, strip unit
-        if (state instanceof QuantityType && dimension == null) {
-            DecimalType plainState = new DecimalType(((QuantityType<?>) state).toBigDecimal());
-            super.setState(plainState);
-            return;
-        }
-
-        // DecimalType update for a NumberItem with dimension, convert to QuantityType:
-        if (state instanceof DecimalType && dimension != null) {
-            Unit<?> unit = getUnit(dimension, false);
-            if (unit != null) {
-                super.setState(new QuantityType<>(((DecimalType) state).doubleValue(), unit));
-                return;
-            }
-        }
-
-        // QuantityType update, check unit and convert if necessary:
-        if (state instanceof QuantityType) {
-            Unit<?> itemUnit = getUnit(dimension, true);
-            Unit<?> stateUnit = ((QuantityType<?>) state).getUnit();
-            if (itemUnit != null && (!stateUnit.getSystemUnit().equals(itemUnit.getSystemUnit())
-                    || UnitUtils.isDifferentMeasurementSystem(itemUnit, stateUnit))) {
-                QuantityType<?> convertedState = ((QuantityType<?>) state).toInvertibleUnit(itemUnit);
+        Unit<?> itemUnit = unit;
+        if (state instanceof QuantityType<?> quantityType) {
+            if (itemUnit == null) {
+                // QuantityType update to a NumberItem without unit, strip unit
+                DecimalType plainState = new DecimalType(quantityType.toBigDecimal());
+                super.setState(plainState);
+            } else {
+                // QuantityType update to a NumberItem with unit, convert to item unit (if possible)
+                Unit<?> stateUnit = quantityType.getUnit();
+                State convertedState = (stateUnit.isCompatible(itemUnit) || stateUnit.inverse().isCompatible(itemUnit))
+                        ? quantityType.toInvertibleUnit(itemUnit)
+                        : null;
                 if (convertedState != null) {
                     super.setState(convertedState);
-                    return;
+                } else {
+                    // TODO: better logging needed?
+                    logSetTypeError(state);
                 }
-
-                // the state could not be converted to an accepted unit.
-                return;
             }
-        }
-
-        if (isAcceptedState(ACCEPTED_DATA_TYPES, state)) {
+        } else if (state instanceof DecimalType decimalType) {
+            if (itemUnit == null) {
+                // DecimalType update to NumberItem with unit
+                super.setState(decimalType);
+            } else {
+                // DecimalType update for a NumberItem with dimension, convert to QuantityType
+                super.setState(new QuantityType<>(decimalType.doubleValue(), itemUnit));
+            }
+        } else if (state instanceof UnDefType) {
             super.setState(state);
         } else {
             logSetTypeError(state);
@@ -160,83 +153,38 @@ public class NumberItem extends GenericItem {
      * @return the optional unit symbol for this {@link NumberItem}.
      */
     public @Nullable String getUnitSymbol() {
-        Unit<?> unit = getUnit(dimension, true);
-        return unit != null ? unit.toString() : null;
+        Unit<?> itemUnit = unit;
+        return itemUnit != null ? itemUnit.toString() : null;
     }
 
     /**
-     * Derive the unit for this item by the following priority:
-     * <ul>
-     * <li>the unit parsed from the state description</li>
-     * <li>no unit if state description contains <code>%unit%</code></li>
-     * <li>the default system unit from the item's dimension</li>
-     * </ul>
+     * Get the {@link Unit} for this {@link NumberItem}.
      *
      * @return the {@link Unit} for this item if available, {@code null} otherwise.
      */
     public @Nullable Unit<? extends Quantity<?>> getUnit() {
-        return getUnit(dimension, true);
+        return unit;
     }
 
-    /**
-     * Try to convert a {@link DecimalType} into a new {@link QuantityType}. The unit for the new
-     * type is derived either from the state description (which might also give a hint on items w/o dimension) or from
-     * the system default unit of the given dimension.
-     *
-     * @param originalType the source {@link DecimalType}.
-     * @param dimension the dimension to which the new {@link QuantityType} should adhere.
-     * @return the new {@link QuantityType} from the given originalType, {@code null} if a unit could not be calculated.
-     */
-    public @Nullable QuantityType<?> toQuantityType(DecimalType originalType,
-            @Nullable Class<? extends Quantity<?>> dimension) {
-        Unit<? extends Quantity<?>> itemUnit = getUnit(dimension, false);
-        if (itemUnit != null) {
-            return new QuantityType<>(originalType.toBigDecimal(), itemUnit);
-        }
-
-        return null;
-    }
-
-    /**
-     * Derive the unit for this item by the following priority:
-     * <ul>
-     * <li>the unit parsed from the state description</li>
-     * <li>the unit from the value if <code>hasUnit = true</code> and state description has unit
-     * <code>%unit%</code></li>
-     * <li>the default system unit from the (optional) dimension parameter</li>
-     * </ul>
-     *
-     * @param dimension the (optional) dimension
-     * @param hasUnit if the value has a unit
-     * @return the {@link Unit} for this item if available, {@code null} otherwise.
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private @Nullable Unit<? extends Quantity<?>> getUnit(@Nullable Class<? extends Quantity<?>> dimension,
-            boolean hasUnit) {
-        if (dimension == null) {
-            // if it is a plain number without dimension, we do not have a unit.
-            return null;
-        }
-        StateDescription stateDescription = getStateDescription();
-        if (stateDescription != null) {
-            String pattern = stateDescription.getPattern();
-            if (pattern != null) {
-                if (hasUnit && pattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
-                    // use provided unit if present
-                    return null;
-                }
-                Unit<?> stateDescriptionUnit = UnitUtils.parseUnit(pattern);
-                if (stateDescriptionUnit != null) {
-                    return stateDescriptionUnit;
-                }
+    @Override
+    public void addedMetadata(Metadata metadata) {
+        if (UNIT_METADATA_NAMESPACE.equals(metadata.getUID().getNamespace())) {
+            unit = UnitUtils.parseUnit(metadata.getValue());
+            if (unit == null) {
+                // TODO: log error or throw exception?
             }
         }
+    }
 
-        if (unitProvider != null) {
-            // explicit cast to Class<? extends Quantity> as JDK compiler complains
-            return unitProvider.getUnit((Class<? extends Quantity>) dimension);
+    @Override
+    public void updatedMetadata(Metadata oldMetadata, Metadata newMetadata) {
+        addedMetadata(newMetadata);
+    }
+
+    @Override
+    public void removedMetadata(Metadata metadata) {
+        if (UNIT_METADATA_NAMESPACE.equals(metadata.getUID().getNamespace())) {
+            unit = null;
         }
-
-        return null;
     }
 }

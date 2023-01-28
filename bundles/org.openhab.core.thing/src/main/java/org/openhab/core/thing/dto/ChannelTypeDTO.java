@@ -15,6 +15,8 @@ package org.openhab.core.thing.dto;
 import java.util.List;
 import java.util.Set;
 
+import javax.measure.Unit;
+
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
 import org.openhab.core.thing.type.ChannelKind;
@@ -34,6 +36,7 @@ public class ChannelTypeDTO {
     public String label;
     public String category;
     public String itemType;
+    public String unit;
     public String kind;
     public StateDescription stateDescription;
     public Set<String> tags;
@@ -44,7 +47,7 @@ public class ChannelTypeDTO {
     public ChannelTypeDTO() {
     }
 
-    public ChannelTypeDTO(String UID, String label, String description, String category, String itemType,
+    public ChannelTypeDTO(String UID, String label, String description, String category, String itemType, Unit<?> unit,
             ChannelKind kind, List<ConfigDescriptionParameterDTO> parameters,
             List<ConfigDescriptionParameterGroupDTO> parameterGroups, StateDescription stateDescription,
             Set<String> tags, boolean advanced, CommandDescription commandDescription) {
@@ -58,6 +61,7 @@ public class ChannelTypeDTO {
         this.tags = tags;
         this.kind = kind.toString();
         this.itemType = itemType;
+        this.unit = unit == null ? null : unit.toString();
         this.advanced = advanced;
         this.commandDescription = commandDescription;
     }

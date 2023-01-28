@@ -30,9 +30,6 @@ import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
-import org.openhab.core.library.types.ArithmeticGroupFunction.And;
-import org.openhab.core.library.types.ArithmeticGroupFunction.Avg;
-import org.openhab.core.library.types.ArithmeticGroupFunction.Sum;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
@@ -301,7 +298,7 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
     public void assertFunctionsAreStoredAndRetrievedAsWell() {
         assertThat(itemProvider.getAll().size(), is(0));
 
-        GroupItem item1 = new GroupItem("GroupItem", new NumberItem("Number"), new Avg());
+        GroupItem item1 = new GroupItem("GroupItem", new NumberItem("Number"), "avg", null);
         itemProvider.add(item1);
 
         Collection<Item> items = itemProvider.getAll();
@@ -310,7 +307,8 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
         GroupItem result1 = (GroupItem) itemProvider.remove("GroupItem");
 
         assertThat(result1.getName(), is("GroupItem"));
-        assertEquals(result1.getFunction().getClass(), Avg.class);
+        assertThat(result1.getFunction(), is("avg"));
+        assertThat(result1.getFunctionParams(), is(nullValue()));
 
         assertThat(itemProvider.getAll().size(), is(0));
     }
@@ -320,18 +318,17 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
     public void assertGroupFunctionsAreStoredAndRetrievedAsWell() {
         assertThat(itemProvider.getAll().size(), is(0));
 
-        GroupFunction function1 = new And(OnOffType.ON, OnOffType.OFF);
-        GroupFunction function2 = new Sum();
-        GroupItem item1 = new GroupItem("GroupItem1", new SwitchItem("Switch"), function1);
-        GroupItem item2 = new GroupItem("GroupItem2", new NumberItem("Number"), function2);
+        GroupItem item1 = new GroupItem("GroupItem1", new SwitchItem("Switch"), "and",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
+        GroupItem item2 = new GroupItem("GroupItem2", new NumberItem("Number"), "sum", null);
 
         assertThat(item1.getName(), is("GroupItem1"));
-        assertEquals(item1.getFunction().getClass(), And.class);
-        assertThat(item1.getFunction().getParameters(), is(new State[] { OnOffType.ON, OnOffType.OFF }));
+        assertEquals(item1.getFunction(), "and");
+        assertThat(item1.getFunctionParams(), is(new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() }));
 
         assertThat(item2.name, is("GroupItem2"));
-        assertEquals(item2.getFunction().getClass(), Sum.class);
-        assertThat(item2.getFunction().getParameters(), is(new State[0]));
+        assertEquals(item2.getFunction(), "sum");
+        assertThat(item2.getFunctionParams(), is(nullValue()));
 
         itemProvider.add(item1);
         itemProvider.add(item2);
@@ -343,12 +340,12 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
         GroupItem result2 = (GroupItem) itemProvider.remove("GroupItem2");
 
         assertThat(result1.getName(), is("GroupItem1"));
-        assertEquals(result1.getFunction().getClass(), And.class);
-        assertThat(result1.function.getParameters(), is(new State[] { OnOffType.ON, OnOffType.OFF }));
+        assertEquals(result1.getFunction(), "and");
+        assertThat(result1.getFunctionParams(), is(new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() }));
 
         assertThat(result2.getName(), is("GroupItem2"));
-        assertEquals(result2.getFunction().getClass(), Sum.class);
-        assertThat(result2.function.getParameters(), is(new State[0]));
+        assertEquals(result2.getFunction(), "sum");
+        assertThat(result2.getFunctionParams(), is(nullValue()));
 
         assertThat(itemProvider.getAll().size(), is(0));
     }

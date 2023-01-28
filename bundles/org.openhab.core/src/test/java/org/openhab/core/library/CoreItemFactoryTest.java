@@ -14,21 +14,20 @@ package org.openhab.core.library;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsEqual.equalTo;
 
 import java.util.List;
 
-import javax.measure.quantity.Temperature;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.items.GenericItem;
-import org.openhab.core.library.items.NumberItem;
 
 /**
  * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
+@ExtendWith(MockitoExtension.class)
 public class CoreItemFactoryTest {
 
     @Test
@@ -41,15 +40,6 @@ public class CoreItemFactoryTest {
             assertThat(item.getType(), is(itemTypeName));
             assertThat(item.getName(), is(itemTypeName.toLowerCase()));
         }
-    }
-
-    @Test
-    public void createNumberItemWithDimension() {
-        CoreItemFactory coreItemFactory = new CoreItemFactory();
-        NumberItem numberItem = (NumberItem) coreItemFactory.createItem(CoreItemFactory.NUMBER + ":Temperature",
-                "myNumberItem");
-
-        assertThat(numberItem.getDimension(), equalTo(Temperature.class));
     }
 
     @Test

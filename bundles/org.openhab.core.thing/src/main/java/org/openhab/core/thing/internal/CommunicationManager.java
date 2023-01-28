@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.measure.Quantity;
+import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,7 +39,6 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemStateConverter;
-import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.events.AbstractItemRegistryEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemStateEvent;
@@ -67,13 +66,10 @@ import org.openhab.core.thing.profiles.ProfileFactory;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.StateProfile;
 import org.openhab.core.thing.profiles.TriggerProfile;
-import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
-import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
-import org.openhab.core.types.util.UnitUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -338,7 +334,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             autoUpdateManager.receiveCommand(commandEvent, item);
         }
 
-        handleEvent(itemName, command, commandEvent.getSource(), s -> acceptedCommandTypeMap.get(s),
+        handleEvent(itemName, command, commandEvent.getSource(), acceptedCommandTypeMap::get,
                 (profile, thing, convertedCommand) -> {
                     if (profile instanceof StateProfile) {
                         int key = Objects.hash("COMMAND", profile, thing);
@@ -430,31 +426,12 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             Function<@Nullable String, @Nullable List<Class<? extends T>>> acceptedTypesFunction, Item item) {
         String acceptedItemType = channel.getAcceptedItemType();
 
-        // DecimalType command sent to a NumberItem with dimension defined:
-        if (originalType instanceof DecimalType && hasDimension(item, acceptedItemType)) {
-            @Nullable
-            QuantityType<?> quantityType = convertToQuantityType((DecimalType) originalType, item, acceptedItemType);
-            if (quantityType != null) {
-                return (T) quantityType;
-            }
-        }
-
-        // The command is sent to an item w/o dimension defined and the channel is legacy (created from a ThingType
-        // definition before UoM was introduced to the binding). The dimension information might now be defined on the
-        // current ThingType. The binding might expect us to provide a QuantityType so try to convert to the dimension
-        // the ChannelType provides.
-        // This can be removed once a suitable solution for https://github.com/eclipse/smarthome/issues/2555 (Thing
-        // migration) is found.
-        if (originalType instanceof DecimalType && !hasDimension(item, acceptedItemType)
-                && channelTypeDefinesDimension(channel.getChannelTypeUID())) {
-            ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
-
-            String acceptedItemTypeFromChannelType = channelType != null ? channelType.getItemType() : null;
-            @Nullable
-            QuantityType<?> quantityType = convertToQuantityType((DecimalType) originalType, item,
-                    acceptedItemTypeFromChannelType);
-            if (quantityType != null) {
-                return (T) quantityType;
+        if (item instanceof NumberItem numberItem) {
+            Unit<?> unit = numberItem.getUnit();
+            if (unit == null && originalType instanceof QuantityType<?> quantityType) {
+                return (T) new DecimalType(quantityType.toBigDecimal());
+            } else if (unit != null && originalType instanceof DecimalType decimalType) {
+                return (T) new QuantityType<>(decimalType.toBigDecimal(), unit);
             }
         }
 
@@ -487,61 +464,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         logger.debug("Received not accepted type '{}' for channel '{}'", originalType.getClass().getSimpleName(),
                 channel.getUID());
         return null;
-    }
-
-    private boolean channelTypeDefinesDimension(@Nullable ChannelTypeUID channelTypeUID) {
-        if (channelTypeUID == null) {
-            return false;
-        }
-
-        ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID);
-        return channelType != null && getDimension(channelType.getItemType()) != null;
-    }
-
-    private boolean hasDimension(Item item, @Nullable String acceptedItemType) {
-        return (item instanceof NumberItem && ((NumberItem) item).getDimension() != null)
-                || getDimension(acceptedItemType) != null;
-    }
-
-    private @Nullable QuantityType<?> convertToQuantityType(DecimalType originalType, Item item,
-            @Nullable String acceptedItemType) {
-        if (!(item instanceof NumberItem)) {
-            // PercentType command sent via DimmerItem to a channel that's dimensioned
-            // (such as Number:Dimensionless, expecting a %).
-            // We can't know the proper units to add, so just pass it through and assume
-            // The binding can deal with it.
-            return null;
-        }
-
-        NumberItem numberItem = (NumberItem) item;
-
-        // DecimalType command sent via a NumberItem with dimension:
-        Class<? extends Quantity<?>> dimension = numberItem.getDimension();
-
-        if (dimension == null) {
-            // DecimalType command sent via a plain NumberItem w/o dimension.
-            // We try to guess the correct unit from the channel-type's expected item dimension
-            // or from the item's state description.
-            dimension = getDimension(acceptedItemType);
-        }
-
-        if (dimension != null) {
-            return numberItem.toQuantityType(originalType, dimension);
-        }
-
-        return null;
-    }
-
-    private @Nullable Class<? extends Quantity<?>> getDimension(@Nullable String acceptedItemType) {
-        if (acceptedItemType == null || acceptedItemType.isEmpty()) {
-            return null;
-        }
-        String itemTypeExtension = ItemUtil.getItemTypeExtension(acceptedItemType);
-        if (itemTypeExtension == null) {
-            return null;
-        }
-
-        return UnitUtils.parseDimension(itemTypeExtension);
     }
 
     private @Nullable Item getItem(final String itemName) {

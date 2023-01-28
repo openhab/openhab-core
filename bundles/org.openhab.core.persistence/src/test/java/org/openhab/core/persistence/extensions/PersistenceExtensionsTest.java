@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -24,8 +25,6 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.stream.IntStream;
-
-import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -36,11 +35,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.items.ItemUtil;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.QuantityType;
@@ -65,19 +66,20 @@ public class PersistenceExtensionsTest {
     public static final String TEST_SWITCH = "testSwitch";
 
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
-    private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
+    private @Mock @NonNullByDefault({}) MetadataRegistry metadataRegistryMock;
 
     private @NonNullByDefault({}) GenericItem numberItem, quantityItem, switchItem;
 
     @BeforeEach
     public void setUp() {
-        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+        MetadataKey key = new MetadataKey(NumberItem.UNIT_METADATA_NAMESPACE, TEST_QUANTITY_NUMBER);
+        when(metadataRegistryMock.get(eq(key))).thenReturn(new Metadata(key, "°C", null));
 
         CoreItemFactory itemFactory = new CoreItemFactory();
         numberItem = itemFactory.createItem(CoreItemFactory.NUMBER, TEST_NUMBER);
-        quantityItem = itemFactory.createItem(CoreItemFactory.NUMBER + ItemUtil.EXTENSION_SEPARATOR + "Temperature",
-                TEST_QUANTITY_NUMBER);
-        quantityItem.setUnitProvider(unitProviderMock);
+        quantityItem = itemFactory.createItem(CoreItemFactory.NUMBER, TEST_QUANTITY_NUMBER);
+        quantityItem.addedMetadata(
+                new Metadata(new MetadataKey(NumberItem.UNIT_METADATA_NAMESPACE, TEST_QUANTITY_NUMBER), "°C", null));
         switchItem = itemFactory.createItem(CoreItemFactory.SWITCH, TEST_SWITCH);
 
         when(itemRegistryMock.get(TEST_NUMBER)).thenReturn(numberItem);

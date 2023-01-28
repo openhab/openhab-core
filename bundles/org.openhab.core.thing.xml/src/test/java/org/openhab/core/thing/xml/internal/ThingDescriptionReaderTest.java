@@ -28,6 +28,8 @@ import org.openhab.core.thing.type.ChannelGroupType;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 
+import tech.units.indriya.unit.Units;
+
 /**
  * Tests reading thing descriptions from XML using the {@link ThingDescriptionReader}.
  *
@@ -71,7 +73,7 @@ public class ThingDescriptionReaderTest {
         assertThat(channelGroupType.getLabel(), is("Alarm System"));
         assertThat(channelGroupType.getDescription(), is("The alarm system."));
 
-        assertThat(channelTypeXmlResults.size(), is(5));
+        assertThat(channelTypeXmlResults.size(), is(6));
 
         ChannelType channelType = channelTypeXmlResults.get(0).toChannelType();
         assertThat(channelType.getUID().toString(), is("hue:color"));
@@ -114,6 +116,14 @@ public class ThingDescriptionReaderTest {
         assertTrue(channelType.getTags().contains("ColorTemperature"));
 
         channelType = channelTypeXmlResults.get(3).toChannelType();
+        assertThat(channelType.getUID().toString(), is("hue:temperature"));
+        assertThat(channelType.getKind(), is(ChannelKind.STATE));
+        assertThat(channelType.isAdvanced(), is(false));
+        assertThat(channelType.getItemType(), is("Number"));
+        assertThat(channelType.getLabel(), is("Temperature"));
+        assertThat(channelType.getUnit(), is(Units.CELSIUS));
+
+        channelType = channelTypeXmlResults.get(4).toChannelType();
         assertThat(channelType.getUID().toString(), is("hue:alarm"));
         assertThat(channelType.getKind(), is(ChannelKind.STATE));
         assertThat(channelType.isAdvanced(), is(false));
@@ -123,7 +133,7 @@ public class ThingDescriptionReaderTest {
         assertThat(channelType.getCategory(), is(nullValue()));
         assertThat(channelType.getTags().size(), is(0));
 
-        channelType = channelTypeXmlResults.get(4).toChannelType();
+        channelType = channelTypeXmlResults.get(5).toChannelType();
         assertThat(channelType.getUID().toString(), is("hue:motion"));
         assertThat(channelType.getKind(), is(ChannelKind.TRIGGER));
         assertThat(channelType.isAdvanced(), is(true));

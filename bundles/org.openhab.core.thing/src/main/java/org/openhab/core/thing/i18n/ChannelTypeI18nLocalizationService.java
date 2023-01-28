@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import javax.measure.Unit;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.TranslationProvider;
@@ -145,10 +147,13 @@ public class ChannelTypeI18nLocalizationService {
                 if (itemType == null || itemType.isBlank()) {
                     throw new IllegalArgumentException("If the kind is 'state', the item type must be set!");
                 }
-
                 builder = ChannelTypeBuilder.state(channelTypeUID, label == null ? defaultLabel : label, itemType)
                         .withStateDescriptionFragment(stateDescriptionFragment)
                         .withAutoUpdatePolicy(channelType.getAutoUpdatePolicy()).withCommandDescription(command);
+                Unit<?> unit = channelType.getUnit();
+                if (unit != null) {
+                    builder.withUnit(unit.toString());
+                }
                 break;
             case TRIGGER:
                 EventDescription eventDescription = channelType.getEvent();

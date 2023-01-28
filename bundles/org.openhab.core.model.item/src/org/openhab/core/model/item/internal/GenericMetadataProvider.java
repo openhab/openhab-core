@@ -50,13 +50,13 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
     /**
      * Adds metadata to this provider
      *
-     * @param bindingType
+     * @param namespace
      * @param itemName
      * @param configuration
      */
-    public void addMetadata(String bindingType, String itemName, String value,
+    public void addMetadata(String namespace, String itemName, String value,
             @Nullable Map<String, Object> configuration) {
-        MetadataKey key = new MetadataKey(bindingType, itemName);
+        MetadataKey key = new MetadataKey(namespace, itemName);
         Metadata md = new Metadata(key, value, configuration);
         try {
             lock.writeLock().lock();

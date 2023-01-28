@@ -12,19 +12,13 @@
  */
 package org.openhab.core.items.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.internal.items.GroupFunctionHelper;
-import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemBuilder;
 import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemUtil;
-import org.openhab.core.types.State;
 
 /**
  * The {@link ItemDTOMapper} is a utility class to map items into item data transfer objects (DTOs).
@@ -35,9 +29,6 @@ import org.openhab.core.types.State;
  */
 @NonNullByDefault
 public class ItemDTOMapper {
-
-    private static final GroupFunctionHelper GROUP_FUNCTION_HELPER = new GroupFunctionHelper();
-
     /**
      * Maps item DTO into item object.
      *
@@ -46,13 +37,6 @@ public class ItemDTOMapper {
      * @return the item object
      */
     public static @Nullable Item map(ItemDTO itemDTO, ItemBuilderFactory itemBuilderFactory) {
-        if (itemDTO == null) {
-            throw new IllegalArgumentException("The argument 'itemDTO' must no be null.");
-        }
-        if (itemBuilderFactory == null) {
-            throw new IllegalArgumentException("The argument 'itemBuilderFactory' must no be null.");
-        }
-
         if (!ItemUtil.isValidItemName(itemDTO.name)) {
             throw new IllegalArgumentException("The item name '" + itemDTO.name + "' is invalid.");
         }
@@ -60,18 +44,15 @@ public class ItemDTOMapper {
         if (itemDTO.type != null) {
             ItemBuilder builder = itemBuilderFactory.newItemBuilder(itemDTO.type, itemDTO.name);
 
-            if (itemDTO instanceof GroupItemDTO && GroupItem.TYPE.equals(itemDTO.type)) {
-                GroupItemDTO groupItemDTO = (GroupItemDTO) itemDTO;
+            if (itemDTO instanceof GroupItemDTO groupItemDTO && GroupItem.TYPE.equals(itemDTO.type)) {
                 Item baseItem = null;
                 if (groupItemDTO.groupType != null && !groupItemDTO.groupType.isEmpty()) {
                     baseItem = itemBuilderFactory.newItemBuilder(groupItemDTO.groupType, itemDTO.name).build();
                     builder.withBaseItem(baseItem);
                 }
-                GroupFunction function = new GroupFunction.Equality();
                 if (groupItemDTO.function != null) {
-                    function = mapFunction(baseItem, groupItemDTO.function);
+                    builder.withGroupFunction(groupItemDTO.function.name, groupItemDTO.function.params);
                 }
-                builder.withGroupFunction(function);
             }
 
             builder.withLabel(itemDTO.label);
@@ -88,16 +69,10 @@ public class ItemDTOMapper {
         return null;
     }
 
-    public static GroupFunction mapFunction(@Nullable Item baseItem, GroupFunctionDTO function) {
-        return GROUP_FUNCTION_HELPER.createGroupFunction(function, baseItem);
-    }
-
     /**
      * Maps item into item DTO object.
      *
      * @param item the item
-     * @param drillDown the drill down
-     * @param uri the uri
      * @return item DTO object
      */
     public static ItemDTO map(Item item) {
@@ -107,13 +82,15 @@ public class ItemDTOMapper {
     }
 
     private static void fillProperties(ItemDTO itemDTO, Item item) {
-        if (item instanceof GroupItem) {
-            GroupItem groupItem = (GroupItem) item;
+        if (item instanceof GroupItem groupItem) {
             GroupItemDTO groupItemDTO = (GroupItemDTO) itemDTO;
             Item baseItem = groupItem.getBaseItem();
             if (baseItem != null) {
                 groupItemDTO.groupType = baseItem.getType();
-                groupItemDTO.function = mapFunction(groupItem.getFunction());
+                GroupFunctionDTO groupFunctionDTO = new GroupFunctionDTO();
+                groupFunctionDTO.name = groupItem.getFunction();
+                groupFunctionDTO.params = groupItem.getFunctionParams();
+                groupItemDTO.function = groupFunctionDTO;
             }
         }
 
@@ -123,23 +100,5 @@ public class ItemDTOMapper {
         itemDTO.tags = item.getTags();
         itemDTO.category = item.getCategory();
         itemDTO.groupNames = item.getGroupNames();
-    }
-
-    public static @Nullable GroupFunctionDTO mapFunction(@Nullable GroupFunction function) {
-        if (function == null) {
-            return null;
-        }
-
-        GroupFunctionDTO dto = new GroupFunctionDTO();
-        dto.name = function.getClass().getSimpleName().toUpperCase();
-        List<String> params = new ArrayList<>();
-        for (State param : function.getParameters()) {
-            params.add(param.toString());
-        }
-        if (!params.isEmpty()) {
-            dto.params = params.toArray(new String[params.size()]);
-        }
-
-        return dto;
     }
 }

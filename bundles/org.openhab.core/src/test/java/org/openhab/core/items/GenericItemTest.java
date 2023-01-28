@@ -26,7 +26,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
@@ -131,7 +130,6 @@ public class GenericItemTest {
         item.setEventPublisher(mock(EventPublisher.class));
         item.setItemStateConverter(mock(ItemStateConverter.class));
         item.setStateDescriptionService(null);
-        item.setUnitProvider(mock(UnitProvider.class));
 
         item.addStateChangeListener(mock(StateChangeListener.class));
 
@@ -139,9 +137,6 @@ public class GenericItemTest {
 
         assertNull(item.eventPublisher);
         assertNull(item.itemStateConverter);
-        // can not be tested as stateDescriptionProviders is private in GenericItem
-        // assertThat(item.stateDescriptionProviders, is(nullValue()));
-        assertNull(item.unitProvider);
         assertEquals(0, item.listeners.size());
     }
 

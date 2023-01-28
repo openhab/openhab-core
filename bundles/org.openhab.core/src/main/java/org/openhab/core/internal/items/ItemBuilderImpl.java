@@ -22,7 +22,6 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.ActiveItem;
-import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemBuilder;
@@ -44,7 +43,8 @@ public class ItemBuilderImpl implements ItemBuilder {
     private List<String> groups = Collections.emptyList();
     private @Nullable String label;
     private @Nullable Item baseItem;
-    private @Nullable GroupFunction groupFunction;
+    private @Nullable String groupFunction;
+    private String @Nullable [] groupFunctionParams;
     private Set<String> tags = Collections.emptySet();
 
     public ItemBuilderImpl(Set<ItemFactory> itemFactories, Item item) {
@@ -55,9 +55,10 @@ public class ItemBuilderImpl implements ItemBuilder {
         this.groups = item.getGroupNames();
         this.label = item.getLabel();
         this.tags = item.getTags();
-        if (item instanceof GroupItem) {
-            this.baseItem = ((GroupItem) item).getBaseItem();
-            this.groupFunction = ((GroupItem) item).getFunction();
+        if (item instanceof GroupItem groupItem) {
+            this.baseItem = groupItem.getBaseItem();
+            this.groupFunction = groupItem.getFunction();
+            this.groupFunctionParams = groupItem.getFunctionParams();
         }
     }
 
@@ -99,11 +100,12 @@ public class ItemBuilderImpl implements ItemBuilder {
     }
 
     @Override
-    public ItemBuilder withGroupFunction(@Nullable GroupFunction function) {
+    public ItemBuilder withGroupFunction(@Nullable String function, String @Nullable [] params) {
         if (function != null && !GroupItem.TYPE.equals(itemType)) {
             throw new IllegalArgumentException("Only group items can have a base item");
         }
         groupFunction = function;
+        groupFunctionParams = params;
         return this;
     }
 
@@ -117,7 +119,7 @@ public class ItemBuilderImpl implements ItemBuilder {
     public Item build() {
         Item item = null;
         if (GroupItem.TYPE.equals(itemType)) {
-            item = new GroupItem(name, baseItem, groupFunction);
+            item = new GroupItem(name, baseItem, groupFunction, groupFunctionParams);
         } else {
             for (ItemFactory itemFactory : itemFactories) {
                 item = itemFactory.createItem(itemType, name);
@@ -129,8 +131,7 @@ public class ItemBuilderImpl implements ItemBuilder {
         if (item == null) {
             throw new IllegalStateException("No item factory could handle type " + itemType);
         }
-        if (item instanceof ActiveItem) {
-            ActiveItem activeItem = (ActiveItem) item;
+        if (item instanceof ActiveItem activeItem) {
             activeItem.setLabel(label);
             activeItem.setCategory(category);
             activeItem.addGroupNames(groups);

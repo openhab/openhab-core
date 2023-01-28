@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.measure.Quantity;
-import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -42,26 +39,21 @@ import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.i18n.UnitProvider;
-import org.openhab.core.internal.items.GroupFunctionHelper;
 import org.openhab.core.internal.items.ItemStateConverterImpl;
-import org.openhab.core.items.dto.GroupFunctionDTO;
 import org.openhab.core.items.events.GroupItemStateChangedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemUpdatedEvent;
-import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.ColorItem;
 import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.RollershutterItem;
 import org.openhab.core.library.items.SwitchItem;
-import org.openhab.core.library.types.ArithmeticGroupFunction;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.RawType;
-import org.openhab.core.library.types.StringType;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
@@ -81,7 +73,6 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     private static final int WAIT_EVENT_TO_BE_HANDLED = 1000;
 
     private final List<Event> events = new LinkedList<>();
-    private final GroupFunctionHelper groupFunctionHelper = new GroupFunctionHelper();
     private final EventPublisher publisher = event -> events.add(event);
 
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
@@ -330,8 +321,8 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     @Test
     public void testGetStateAsShouldEqualStateUpdate() {
         // Main group uses AND function
-        GroupItem rootGroupItem = new GroupItem("root", new SwitchItem("baseItem"),
-                new ArithmeticGroupFunction.And(OnOffType.ON, OnOffType.OFF));
+        GroupItem rootGroupItem = new GroupItem("root", new SwitchItem("baseItem"), "and",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
         rootGroupItem.setItemStateConverter(itemStateConverter);
 
         TestItem member1 = new TestItem("member1");
@@ -340,8 +331,8 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         rootGroupItem.addMember(member2);
 
         // Sub-group uses NAND function
-        GroupItem subGroup = new GroupItem("subGroup1", new SwitchItem("baseItem"),
-                new ArithmeticGroupFunction.NAnd(OnOffType.ON, OnOffType.OFF));
+        GroupItem subGroup = new GroupItem("subGroup1", new SwitchItem("baseItem"), "nand",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
         TestItem subMember = new TestItem("subGroup member 1");
         subGroup.addMember(subMember);
         rootGroupItem.addMember(subGroup);
@@ -366,8 +357,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertCyclicGroupItemsCalculateState() {
-        GroupFunction countFn = new ArithmeticGroupFunction.Count(new StringType(".*"));
-        GroupItem rootGroup = new GroupItem("rootGroup", new SwitchItem("baseItem"), countFn);
+        GroupItem rootGroup = new GroupItem("rootGroup", new SwitchItem("baseItem"), "count", new String[] { ".*" });
         TestItem rootMember = new TestItem("rootMember");
         rootGroup.addMember(rootMember);
 
@@ -393,13 +383,12 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertCyclicGroupItemsCalculateStateWithSubGroupFunction() {
-        GroupFunction countFn = new ArithmeticGroupFunction.Count(new StringType(".*"));
-        GroupItem rootGroup = new GroupItem("rootGroup", new SwitchItem("baseItem"), countFn);
+        GroupItem rootGroup = new GroupItem("rootGroup", new SwitchItem("baseItem"), "count", new String[] { ".*" });
         TestItem rootMember = new TestItem("rootMember");
         rootGroup.addMember(rootMember);
 
         GroupItem group1 = new GroupItem("group1");
-        GroupItem group2 = new GroupItem("group2", new SwitchItem("baseItem"), new ArithmeticGroupFunction.Sum());
+        GroupItem group2 = new GroupItem("group2", new SwitchItem("baseItem"), "sum", null);
 
         rootGroup.addMember(group1);
         group1.addMember(group2);
@@ -424,7 +413,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         String groupitemStateChangedEventTopic = "openhab/items/{itemName}/{memberName}/statechanged";
 
         events.clear();
-        GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"), new GroupFunction.Equality());
+        GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"), "equality", null);
         groupItem.setItemStateConverter(itemStateConverter);
 
         SwitchItem member = new SwitchItem("member1");
@@ -459,8 +448,8 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGroupItemChangesRespectGroupFunctionOR() throws InterruptedException {
         events.clear();
-        GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"),
-                new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
+        GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"), "or",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
         groupItem.setItemStateConverter(itemStateConverter);
 
         SwitchItem sw1 = new SwitchItem("switch1");
@@ -502,8 +491,8 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatItemCommandEventsAreEmittedFromCommand() {
         events.clear();
-        GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"),
-                new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
+        GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"), "or",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
         groupItem.setItemStateConverter(itemStateConverter);
 
         SwitchItem sw1 = new SwitchItem("switch1");
@@ -532,8 +521,8 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGroupItemChangesRespectGroupFunctionORWithUNDEF() throws InterruptedException {
         events.clear();
-        GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"),
-                new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
+        GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"), "or",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
         groupItem.setItemStateConverter(itemStateConverter);
 
         SwitchItem sw1 = new SwitchItem("switch1");
@@ -579,8 +568,8 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGroupItemChangesRespectGroupFunctionAND() {
         events.clear();
-        GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"),
-                new ArithmeticGroupFunction.And(OnOffType.ON, OnOffType.OFF));
+        GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"), "and",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
         groupItem.setItemStateConverter(itemStateConverter);
 
         SwitchItem sw1 = new SwitchItem("switch1");
@@ -716,7 +705,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGroupItemwithDimmeritemAcceptsGetsPercentTypeStateIfMembersHavePercentTypeStates() {
         events.clear();
-        GroupItem groupItem = new GroupItem("root", new DimmerItem("myDimmer"), new ArithmeticGroupFunction.Avg());
+        GroupItem groupItem = new GroupItem("root", new DimmerItem("myDimmer"), "avg", null);
         groupItem.setItemStateConverter(itemStateConverter);
 
         DimmerItem member1 = new DimmerItem("dimmer1");
@@ -766,18 +755,16 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     @SuppressWarnings("null")
     @Test
     public void assertThatNumberGroupItemWithDimensionCalculatesCorrectState() {
-        NumberItem baseItem = createNumberItem("baseItem", Temperature.class, UnDefType.NULL);
-        GroupFunctionDTO gfDTO = new GroupFunctionDTO();
-        gfDTO.name = "sum";
-        GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, baseItem);
-        GroupItem groupItem = new GroupItem("number", baseItem, function);
-        groupItem.setUnitProvider(unitProviderMock);
+        NumberItem baseItem = createNumberItem("baseItem", "°C", UnDefType.NULL);
+        GroupItem groupItem = new GroupItem("number", baseItem, "sum", null);
+        groupItem
+                .addedMetadata(new Metadata(new MetadataKey(NumberItem.UNIT_METADATA_NAMESPACE, "number"), "°C", null));
 
-        NumberItem celsius = createNumberItem("C", Temperature.class, new QuantityType<>("23 °C"));
+        NumberItem celsius = createNumberItem("C", "°C", new QuantityType<>("23 °C"));
         groupItem.addMember(celsius);
-        NumberItem fahrenheit = createNumberItem("F", Temperature.class, new QuantityType<>("23 °F"));
+        NumberItem fahrenheit = createNumberItem("F", "°C", new QuantityType<>("23 °F"));
         groupItem.addMember(fahrenheit);
-        NumberItem kelvin = createNumberItem("K", Temperature.class, new QuantityType<>("23 K"));
+        NumberItem kelvin = createNumberItem("K", "°C", new QuantityType<>("23 K"));
         groupItem.addMember(kelvin);
 
         QuantityType<?> state = groupItem.getStateAs(QuantityType.class);
@@ -795,19 +782,15 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertThatNumberGroupItemWithDifferentDimensionsCalculatesCorrectState() {
-        NumberItem baseItem = createNumberItem("baseItem", Temperature.class, UnDefType.NULL);
-        GroupFunctionDTO gfDTO = new GroupFunctionDTO();
-        gfDTO.name = "sum";
-        GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, baseItem);
-        GroupItem groupItem = new GroupItem("number", baseItem, function);
-        groupItem.setUnitProvider(unitProviderMock);
+        NumberItem baseItem = createNumberItem("baseItem", "°C", UnDefType.NULL);
+        GroupItem groupItem = new GroupItem("number", baseItem, "sum", null);
         groupItem.setItemStateConverter(itemStateConverter);
 
-        NumberItem celsius = createNumberItem("C", Temperature.class, new QuantityType<>("23 °C"));
+        NumberItem celsius = createNumberItem("C", "°C", new QuantityType<>("23 °C"));
         groupItem.addMember(celsius);
-        NumberItem hectoPascal = createNumberItem("F", Pressure.class, new QuantityType<>("1010 hPa"));
+        NumberItem hectoPascal = createNumberItem("F", "hPa", new QuantityType<>("1010 hPa"));
         groupItem.addMember(hectoPascal);
-        NumberItem percent = createNumberItem("K", Dimensionless.class, new QuantityType<>("110 %"));
+        NumberItem percent = createNumberItem("K", "%", new QuantityType<>("110 %"));
         groupItem.addMember(percent);
 
         QuantityType<?> state = groupItem.getStateAs(QuantityType.class);
@@ -818,9 +801,9 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(groupItem.getState(), is(new QuantityType<>("23 °C")));
     }
 
-    private NumberItem createNumberItem(String name, Class<? extends Quantity<?>> dimension, State state) {
-        NumberItem item = new NumberItem(CoreItemFactory.NUMBER + ":" + dimension.getSimpleName(), name);
-        item.setUnitProvider(unitProviderMock);
+    private NumberItem createNumberItem(String name, String unit, State state) {
+        NumberItem item = new NumberItem(name);
+        item.addedMetadata(new Metadata(new MetadataKey("unit", name), unit, null));
         item.setState(state);
 
         return item;

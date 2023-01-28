@@ -35,10 +35,7 @@ ModelNormalItem:
 ;
 
 ModelItemType:
-	BaseModelItemType | ('Number' (':' ID)?)
-;
-BaseModelItemType:
-	'Switch' | 'Rollershutter' | 'String' | 'Dimmer' | 'Contact' | 'DateTime' | 'Color' | 'Player' | 'Location' | 'Call' | 'Image'
+	'Number' | 'Switch' | 'Rollershutter' | 'String' | 'Dimmer' | 'Contact' | 'DateTime' | 'Color' | 'Player' | 'Location' | 'Call' | 'Image'
 ;
 
 ModelBinding:

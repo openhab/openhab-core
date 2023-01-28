@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.GenericItem;
-import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -52,7 +51,6 @@ import org.openhab.core.items.events.ItemRemovedEvent;
 import org.openhab.core.items.events.ItemUpdatedEvent;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.SwitchItem;
-import org.openhab.core.library.types.ArithmeticGroupFunction;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
@@ -184,7 +182,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
         assertThat(actualItems, hasSize(1));
         GroupItem groupItem = (GroupItem) actualItems.iterator().next();
-        assertThat(groupItem.getFunction(), instanceOf(GroupFunction.Equality.class));
+        assertThat(groupItem.getFunction(), is("EQUALITY"));
     }
 
     @Test
@@ -199,7 +197,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
         assertThat(actualItems, hasSize(1));
         GroupItem groupItem = (GroupItem) actualItems.iterator().next();
-        assertThat(groupItem.getFunction(), instanceOf(GroupFunction.Equality.class));
+        assertThat(groupItem.getFunction(), is("EQUALITY"));
     }
 
     @Test
@@ -497,10 +495,10 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
-        GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
-                new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
-        GroupItem g2 = new GroupItem("testGroup", new SwitchItem("test"),
-                new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
+        GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"), "or",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
+        GroupItem g2 = new GroupItem("testGroup", new SwitchItem("test"), "or",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
 
         assertThat(gip.hasItemChanged(g1, g2), is(false));
     }
@@ -510,10 +508,10 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
-        GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
-                new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
-        GroupItem g2 = new GroupItem("testGroup", new NumberItem("test"),
-                new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
+        GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"), "or",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
+        GroupItem g2 = new GroupItem("testGroup", new NumberItem("test"), "or",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
 
         assertThat(gip.hasItemChanged(g1, g2), is(true));
     }
@@ -523,10 +521,10 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
-        GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
-                new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
-        GroupItem g2 = new GroupItem("testGroup", new SwitchItem("test"),
-                new ArithmeticGroupFunction.Or(OnOffType.ON, UnDefType.UNDEF));
+        GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"), "or",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
+        GroupItem g2 = new GroupItem("testGroup", new SwitchItem("test"), "or",
+                new String[] { OnOffType.ON.toString(), UnDefType.UNDEF.toString() });
 
         assertThat(gip.hasItemChanged(g1, g2), is(true));
     }
@@ -536,9 +534,9 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
-        GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
-                new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
-        GroupItem g2 = new GroupItem("testGroup", new NumberItem("number"), new ArithmeticGroupFunction.Sum());
+        GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"), "or",
+                new String[] { OnOffType.ON.toString(), OnOffType.OFF.toString() });
+        GroupItem g2 = new GroupItem("testGroup", new NumberItem("number"), "sum", null);
 
         assertThat(gip.hasItemChanged(g1, g2), is(true));
     }

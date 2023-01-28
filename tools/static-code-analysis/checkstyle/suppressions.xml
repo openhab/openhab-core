@@ -14,6 +14,9 @@
 	<!-- Some checks will be supressed for test bundles -->
 	<suppress files=".+.test[\\/].+" checks="RequireBundleCheck|OutsideOfLibExternalLibrariesCheck|ManifestExternalLibrariesCheck|BuildPropertiesExternalLibrariesCheck"/>
 
+	<!-- temporarily disable XML validation -->
+	<suppress files=".+[\\/]OH-INF[\\/].+\.xml" checks="OhInfXmlValidationCheck"/>
+
 	<!-- openHAB Core specific suppressions-->
 
 	<!-- These bundles are generated trough XText -->

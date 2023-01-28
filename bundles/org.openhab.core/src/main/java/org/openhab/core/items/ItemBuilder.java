@@ -74,7 +74,7 @@ public interface ItemBuilder {
      * @return the builder itself
      * @throws IllegalArgumentException in case this is not a group item
      */
-    ItemBuilder withGroupFunction(@Nullable GroupFunction function);
+    ItemBuilder withGroupFunction(@Nullable String function, String @Nullable [] params);
 
     /**
      * Set the tags

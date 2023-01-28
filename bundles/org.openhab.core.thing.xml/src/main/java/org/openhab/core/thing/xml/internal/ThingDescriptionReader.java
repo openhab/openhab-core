@@ -80,6 +80,7 @@ public class ThingDescriptionReader extends XmlDocumentReader<List<?>> {
         xstream.registerConverter(new ConfigDescriptionParameterConverter());
         xstream.registerConverter(new ConfigDescriptionParameterGroupConverter());
         xstream.registerConverter(new FilterCriteriaConverter());
+        xstream.registerConverter(new ItemTypeConverter());
     }
 
     @Override
@@ -91,7 +92,7 @@ public class ThingDescriptionReader extends XmlDocumentReader<List<?>> {
         xstream.alias("channel-group-type", ChannelGroupTypeXmlResult.class);
         xstream.alias("supported-bridge-type-refs", NodeList.class);
         xstream.alias("bridge-type-ref", NodeAttributes.class);
-        xstream.alias("item-type", NodeValue.class);
+        xstream.alias("item-type", ItemTypeConverter.ItemType.class);
         xstream.alias("dimension", NodeValue.class);
         xstream.alias("kind", NodeValue.class);
         xstream.alias("label", NodeValue.class);

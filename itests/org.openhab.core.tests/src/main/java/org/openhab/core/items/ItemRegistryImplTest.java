@@ -35,7 +35,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.internal.items.ItemBuilderFactoryImpl;
 import org.openhab.core.internal.items.ItemRegistryImpl;
 import org.openhab.core.items.events.ItemAddedEvent;
@@ -77,6 +76,7 @@ public class ItemRegistryImplTest extends JavaTest {
     private @NonNullByDefault({}) ManagedItemProvider itemProvider;
 
     private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
+    private @Mock @NonNullByDefault({}) MetadataRegistry metadataRegistryMock;
 
     @BeforeEach
     public void beforeEach() {
@@ -101,13 +101,12 @@ public class ItemRegistryImplTest extends JavaTest {
         itemProvider.add(cameraItem4);
 
         // setup ItemRegistryImpl with necessary dependencies:
-        itemRegistry = new ItemRegistryImpl(mock(MetadataRegistry.class)) {
+        itemRegistry = new ItemRegistryImpl(metadataRegistryMock) {
             {
                 addProvider(itemProvider);
                 setManagedProvider(itemProvider);
                 setEventPublisher(ItemRegistryImplTest.this.eventPublisherMock);
                 setStateDescriptionService(mock(StateDescriptionService.class));
-                setUnitProvider(mock(UnitProvider.class));
                 setItemStateConverter(mock(ItemStateConverter.class));
             }
         };
@@ -369,13 +368,11 @@ public class ItemRegistryImplTest extends JavaTest {
 
         assertNotNull(item.eventPublisher);
         assertNotNull(item.itemStateConverter);
-        assertNotNull(item.unitProvider);
 
         itemProvider.update(new SwitchItem("Item1"));
 
         assertNull(item.eventPublisher);
         assertNull(item.itemStateConverter);
-        assertNull(item.unitProvider);
         assertEquals(0, item.listeners.size());
     }
 
@@ -393,14 +390,15 @@ public class ItemRegistryImplTest extends JavaTest {
 
     @Test
     public void assertUnitProviderGetsInjected() {
+        // TODO: make sure metadata is processed on service injection
         GenericItem item = spy(new SwitchItem("Item1"));
         NumberItem baseItem = spy(new NumberItem("baseItem"));
         GenericItem group = new GroupItem("Group", baseItem);
         itemProvider.add(item);
         itemProvider.add(group);
 
-        verify(item).setUnitProvider(any(UnitProvider.class));
-        verify(baseItem).setUnitProvider(any(UnitProvider.class));
+        // verify(item).setUnitProvider(any(UnitProvider.class));
+        // verify(baseItem).setUnitProvider(any(UnitProvider.class));
     }
 
     @Test

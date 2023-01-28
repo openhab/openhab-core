@@ -34,9 +34,12 @@ import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.util.ConditionBuilder;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.items.events.ItemRemovedEvent;
@@ -71,26 +74,20 @@ public class ItemStateConditionHandlerTest extends JavaTest {
         public final boolean expectedResult;
 
         public ParameterSet(String itemType, String comparisonState, State itemState, boolean expectedResult) {
-            switch (itemType) {
-                case "Number":
-                    item = new NumberItem(ITEM_NAME);
-                    ((NumberItem) item).setState(itemState);
-                    break;
-                case "Number:Temperature":
-                    item = new NumberItem("Number:Temperature", ITEM_NAME);
-                    ((NumberItem) item).setState(itemState);
-                    break;
-                case "Dimmer":
-                    item = new DimmerItem(ITEM_NAME);
-                    ((DimmerItem) item).setState(itemState);
-                    break;
-                case "DateTime":
-                    item = new DateTimeItem(ITEM_NAME);
-                    ((DateTimeItem) item).setState(itemState);
-                    break;
-                default:
-                    throw new IllegalArgumentException();
+            GenericItem genericItem = switch (itemType) {
+                case "Number", "NumberUnit" -> new NumberItem(ITEM_NAME);
+                case "Dimmer" -> new DimmerItem(ITEM_NAME);
+                case "DateTime" -> new DateTimeItem(ITEM_NAME);
+                default -> throw new IllegalArgumentException();
+            };
+
+            if ("NumberUnit".equals(itemType)) {
+                genericItem.addedMetadata(
+                        new Metadata(new MetadataKey(NumberItem.UNIT_METADATA_NAMESPACE, ITEM_NAME), "°C", null));
             }
+
+            genericItem.setState(itemState);
+            item = genericItem;
             this.comparisonState = comparisonState;
             this.itemState = itemState;
             this.expectedResult = expectedResult;
@@ -101,16 +98,12 @@ public class ItemStateConditionHandlerTest extends JavaTest {
         return Arrays.asList(new Object[][] { //
                 { new ParameterSet("Number", "5", new DecimalType(23), false) }, //
                 { new ParameterSet("Number", "5", new DecimalType(5), true) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new DecimalType(23), false) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new DecimalType(5), false) }, //
-                { new ParameterSet("Number:Temperature", "0", new QuantityType<>(), true) }, //
-                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number:Temperature", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT),
-                        true) }, //
-                { new ParameterSet("Number:Temperature", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) } });
+                { new ParameterSet("NumberUnit", "5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("NumberUnit", "5", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("NumberUnit", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("NumberUnit", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT), true) }, //
+                { new ParameterSet("NumberUnit", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) } });
     }
 
     public static Collection<Object[]> greaterThanParameters() {
@@ -119,11 +112,10 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 { new ParameterSet("Number", "5", new DecimalType(5), false) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(23), true) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(5), false) }, //
-                { new ParameterSet("Number:Temperature", "0", new QuantityType<>(), false) }, //
-                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("NumberUnit", "5", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("NumberUnit", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), false) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(40), true) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(20), false) }, //
                 { new ParameterSet("DateTime", "-1H", new DateTimeType(), true) }, //
@@ -138,16 +130,14 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 { new ParameterSet("Number", "5 °C", new DecimalType(23), true) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(5), true) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(4), false) }, //
-                { new ParameterSet("Number:Temperature", "0", new QuantityType<>(), true) }, //
-                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(4, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number:Temperature", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT),
-                        true) }, //
-                { new ParameterSet("Number:Temperature", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5", new QuantityType<>(4, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("NumberUnit", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("NumberUnit", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT), true) }, //
+                { new ParameterSet("NumberUnit", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(40), true) }, //
                 { new ParameterSet("Dimmer", "40", new PercentType(20), false) }, //
                 { new ParameterSet("DateTime", "2000-01-01T12:05:00", new DateTimeType(), true) } });
@@ -159,11 +149,10 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 { new ParameterSet("Number", "5", new DecimalType(4), true) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(23), false) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(4), true) }, //
-                { new ParameterSet("Number:Temperature", "0", new QuantityType<>(), false) }, //
-                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("NumberUnit", "5", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("NumberUnit", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("Dimmer", "40", new PercentType(20), true) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(20), false) }, //
                 { new ParameterSet("DateTime", "-1D", new DateTimeType(), false) }, //
@@ -179,16 +168,14 @@ public class ItemStateConditionHandlerTest extends JavaTest {
                 { new ParameterSet("Number", "5 °C", new DecimalType(23), false) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(5), true) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(4), true) }, //
-                { new ParameterSet("Number:Temperature", "0", new QuantityType<>(), true) }, //
-                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number:Temperature", "5", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number:Temperature", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
-                { new ParameterSet("Number:Temperature", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT),
-                        true) }, //
-                { new ParameterSet("Number:Temperature", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("NumberUnit", "5", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5 °C", new QuantityType<>(23, SIUnits.CELSIUS), false) }, //
+                { new ParameterSet("NumberUnit", "5 °C", new QuantityType<>(5, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "5 °C", new QuantityType<>(4, SIUnits.CELSIUS), true) }, //
+                { new ParameterSet("NumberUnit", "0 °C", new QuantityType<>(32, ImperialUnits.FAHRENHEIT), true) }, //
+                { new ParameterSet("NumberUnit", "32 °F", new QuantityType<>(0, SIUnits.CELSIUS), true) }, //
                 { new ParameterSet("Dimmer", "20", new PercentType(40), false) }, //
                 { new ParameterSet("Dimmer", "40", new PercentType(20), true) }, //
                 { new ParameterSet("DateTime", "", new DateTimeType(), true) } });
@@ -233,9 +220,9 @@ public class ItemStateConditionHandlerTest extends JavaTest {
         ItemStateConditionHandler handler = initItemStateConditionHandler("!=", parameterSet.comparisonState);
 
         if (parameterSet.expectedResult) {
-            assertFalse(handler.isSatisfied(Map.of()));
+            assertFalse(handler.isSatisfied(Map.of()), parameterSet.comparisonState + " " + item.getState().toString());
         } else {
-            assertTrue(handler.isSatisfied(Map.of()));
+            assertTrue(handler.isSatisfied(Map.of()), parameterSet.comparisonState + " " + item.getState().toString());
         }
     }
 

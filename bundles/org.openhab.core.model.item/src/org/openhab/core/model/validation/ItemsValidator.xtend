@@ -15,7 +15,6 @@ package org.openhab.core.model.validation
 import org.openhab.core.model.items.ModelItem
 import org.eclipse.xtext.validation.Check
 import org.openhab.core.model.items.ItemsPackage
-import org.openhab.core.types.util.UnitUtils
 
 /**
  * Custom validation rules. 
@@ -32,20 +31,5 @@ class ItemsValidator extends AbstractItemsValidator {
 		if (item.name.contains("-")) {
 			error('Item name must not contain dashes.', ItemsPackage.Literals.MODEL_ITEM__NAME)
 		}
-	}
-	
-	@Check
-	def checkDimension(ModelItem item) {
-	    if (item === null || item.type === null) {
-            return
-        }
-        if (item.type.startsWith("Number:")) {
-            var dimension = item.type.substring(item.type.indexOf(":") + 1)
-            try {
-                UnitUtils.parseDimension(dimension)                
-            } catch (IllegalArgumentException e) {
-                warning("'" + dimension + "' is not a valid dimension.", ItemsPackage.Literals.MODEL_ITEM__TYPE)
-            }
-        }
 	}
 }

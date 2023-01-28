@@ -29,7 +29,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.service.CommandDescriptionService;
 import org.openhab.core.service.StateDescriptionService;
@@ -83,7 +82,7 @@ public abstract class GenericItem implements ActiveItem {
 
     private @Nullable CommandDescriptionService commandDescriptionService;
 
-    protected @Nullable UnitProvider unitProvider;
+    // protected @Nullable UnitProvider unitProvider;
 
     protected @Nullable ItemStateConverter itemStateConverter;
 
@@ -176,7 +175,7 @@ public abstract class GenericItem implements ActiveItem {
         this.eventPublisher = null;
         this.stateDescriptionService = null;
         this.commandDescriptionService = null;
-        this.unitProvider = null;
+        // this.unitProvider = null;
         this.itemStateConverter = null;
     }
 
@@ -192,9 +191,9 @@ public abstract class GenericItem implements ActiveItem {
         this.commandDescriptionService = commandDescriptionService;
     }
 
-    public void setUnitProvider(@Nullable UnitProvider unitProvider) {
-        this.unitProvider = unitProvider;
-    }
+    // public void setUnitProvider(@Nullable UnitProvider unitProvider) {
+    // this.unitProvider = unitProvider;
+    // }
 
     public void setItemStateConverter(@Nullable ItemStateConverter itemStateConverter) {
         this.itemStateConverter = itemStateConverter;
@@ -450,5 +449,31 @@ public abstract class GenericItem implements ActiveItem {
         stateDescription.getOptions()
                 .forEach(so -> builder.withCommandOption(new CommandOption(so.getValue(), so.getLabel())));
         return builder.build();
+    }
+
+    /**
+     * Can be implemented by subclasses to be informed about added metadata
+     *
+     * @param metadata the added {@link Metadata} object for this {@link Item}
+     */
+    public void addedMetadata(Metadata metadata) {
+    }
+
+    /**
+     * Can be implemented by subclasses to be informed about updated metadata
+     *
+     * @param oldMetadata the old {@link Metadata} object for this {@link Item}
+     * @param newMetadata the new {@link Metadata} object for this {@link Item}
+     *
+     */
+    public void updatedMetadata(Metadata oldMetadata, Metadata newMetadata) {
+    }
+
+    /**
+     * Can be implemented by subclasses to be informed about removed metadata
+     *
+     * @param metadata the removed {@link Metadata} object for this {@link Item}
+     */
+    public void removedMetadata(Metadata metadata) {
     }
 }

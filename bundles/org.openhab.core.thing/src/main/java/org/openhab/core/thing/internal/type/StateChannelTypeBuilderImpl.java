@@ -15,6 +15,8 @@ package org.openhab.core.thing.internal.type;
 import java.net.URI;
 import java.util.Set;
 
+import javax.measure.Unit;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.type.AutoUpdatePolicy;
@@ -25,6 +27,7 @@ import org.openhab.core.thing.type.StateChannelTypeBuilder;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
+import org.openhab.core.types.util.UnitUtils;
 
 /**
  * StateChannelTypeBuilder to create {@link ChannelType}s of kind STATE
@@ -36,12 +39,12 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
         implements StateChannelTypeBuilder {
 
     private class StateChannelTypeImpl extends ChannelType {
-        private StateChannelTypeImpl(ChannelTypeUID uid, boolean advanced, String itemType, String label,
-                @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
+        private StateChannelTypeImpl(ChannelTypeUID uid, boolean advanced, String itemType, @Nullable Unit<?> unit,
+                String label, @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
                 @Nullable StateDescription state, @Nullable CommandDescription commandDescription,
                 @Nullable URI configDescriptionURI, @Nullable AutoUpdatePolicy autoUpdatePolicy)
                 throws IllegalArgumentException {
-            super(uid, advanced, itemType, ChannelKind.STATE, label, description, category, tags, state,
+            super(uid, advanced, itemType, unit, ChannelKind.STATE, label, description, category, tags, state,
                     commandDescription, null, configDescriptionURI, autoUpdatePolicy);
         }
     }
@@ -50,6 +53,7 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
     private @Nullable StateDescriptionFragment stateDescriptionFragment;
     private @Nullable AutoUpdatePolicy autoUpdatePolicy;
     private @Nullable CommandDescription commandDescription;
+    private @Nullable Unit<?> unit;
 
     public StateChannelTypeBuilderImpl(ChannelTypeUID channelTypeUID, String label, String itemType) {
         super(channelTypeUID, label);
@@ -59,6 +63,16 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
         }
 
         this.itemType = itemType;
+    }
+
+    @Override
+    public StateChannelTypeBuilder withUnit(String unit) {
+        Unit<?> parsedUnit = UnitUtils.parseUnit(unit);
+        if (parsedUnit == null) {
+            throw new IllegalArgumentException(unit + " is not a valid unit!");
+        }
+        this.unit = parsedUnit;
+        return this;
     }
 
     @Override
@@ -82,7 +96,7 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
 
     @Override
     public ChannelType build() {
-        return new StateChannelTypeImpl(channelTypeUID, advanced, itemType, label, description, category, tags,
+        return new StateChannelTypeImpl(channelTypeUID, advanced, itemType, unit, label, description, category, tags,
                 stateDescriptionFragment != null ? stateDescriptionFragment.toStateDescription() : null,
                 commandDescription, configDescriptionURI, autoUpdatePolicy);
     }

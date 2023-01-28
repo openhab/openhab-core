@@ -286,13 +286,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
     }
 
     private GroupItem applyGroupFunction(Item baseItem, ModelGroupItem modelGroupItem, ModelGroupFunction function) {
-        GroupFunctionDTO dto = new GroupFunctionDTO();
-        dto.name = function.getName();
-        dto.params = modelGroupItem.getArgs().toArray(new String[0]);
-
-        GroupFunction groupFunction = ItemDTOMapper.mapFunction(baseItem, dto);
-
-        return new GroupItem(modelGroupItem.getName(), baseItem, groupFunction);
+        return new GroupItem(modelGroupItem.getName(), baseItem, function.getName(), modelGroupItem.getArgs().toArray(new String[0]));
     }
 
     private void dispatchBindingsPerItemType(String[] itemTypes) {
@@ -462,16 +456,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
         boolean sameBaseItemClass = Objects.equals(gItem1.getBaseItem(), gItem2.getBaseItem());
 
-        boolean sameFunction = false;
-        GroupFunction gf1 = gItem1.getFunction();
-        GroupFunction gf2 = gItem2.getFunction();
-        if (gf1 != null && gf2 != null) {
-            if (Objects.equals(gf1.getClass(), gf2.getClass())) {
-                sameFunction = Arrays.equals(gf1.getParameters(), gf2.getParameters());
-            }
-        } else if (gf1 == null && gf2 == null) {
-            sameFunction = true;
-        }
+        boolean sameFunction = Objects.equals(gItem1.getFunction(), gItem2.getFunction()) && Arrays.equals(gItem1.getFunctionParams(), gItem2.getFunctionParams());
 
         return !(sameBaseItemClass && sameFunction);
     }

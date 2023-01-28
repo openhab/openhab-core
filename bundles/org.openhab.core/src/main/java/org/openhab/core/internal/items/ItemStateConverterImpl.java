@@ -12,7 +12,6 @@
  */
 package org.openhab.core.internal.items;
 
-import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -21,7 +20,6 @@ import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemStateConverter;
 import org.openhab.core.library.items.NumberItem;
-import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
@@ -65,42 +63,6 @@ public class ItemStateConverterImpl implements ItemStateConverter {
                 if (convertedState != null) {
                     logger.debug("Converting {} '{}' to {} '{}' for item '{}'", state.getClass().getSimpleName(), state,
                             convertedState.getClass().getSimpleName(), convertedState, item.getName());
-                    return convertedState;
-                }
-            }
-        }
-
-        if (item instanceof NumberItem && state instanceof QuantityType) {
-            NumberItem numberItem = (NumberItem) item;
-            if (numberItem.getDimension() != null) {
-                QuantityType<?> quantityState = (QuantityType<?>) state;
-
-                // in case the item does define a unit it takes precedence over all other conversions:
-                Unit<?> itemUnit = parseItemUnit(numberItem);
-                if (itemUnit != null) {
-                    if (!itemUnit.equals(quantityState.getUnit())) {
-                        return convertOrUndef(quantityState, itemUnit);
-                    }
-
-                    return quantityState;
-                }
-
-                Class<? extends Quantity<?>> dimension = numberItem.getDimension();
-                @SuppressWarnings({ "unchecked", "rawtypes" })
-                // explicit cast to Class<? extends Quantity> as JDK compiler complains
-                Unit<? extends Quantity<?>> conversionUnit = unitProvider
-                        .getUnit((Class<? extends Quantity>) dimension);
-                if (conversionUnit != null
-                        && UnitUtils.isDifferentMeasurementSystem(conversionUnit, quantityState.getUnit())) {
-                    return convertOrUndef(quantityState, conversionUnit);
-                }
-
-                return state;
-            } else {
-                State convertedState = state.as(DecimalType.class);
-                if (convertedState != null) {
-                    // convertedState is always returned because the state is an instance
-                    // of QuantityType which never returns null for as(DecimalType.class)
                     return convertedState;
                 }
             }

@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.measure.quantity.Temperature;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,10 +34,13 @@ import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemStateConverter;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.CoreItemFactory;
@@ -50,8 +51,6 @@ import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
-import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.service.StateDescriptionService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
@@ -81,7 +80,6 @@ import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
-import org.openhab.core.types.StateDescriptionFragmentBuilder;
 
 /**
  *
@@ -149,6 +147,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private @Mock @NonNullByDefault({}) ThingHandler thingHandlerMock;
     private @Mock @NonNullByDefault({}) ThingRegistry thingRegistryMock;
     private @Mock @NonNullByDefault({}) TriggerProfile triggerProfileMock;
+    private @Mock @NonNullByDefault({}) MetadataRegistry metadataReegistryMock;
 
     private @NonNullByDefault({}) CommunicationManager manager;
     private @NonNullByDefault({}) SafeCaller safeCaller;
@@ -226,11 +225,6 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(THING);
         manager.addItemFactory(new CoreItemFactory());
-
-        UnitProvider unitProvider = mock(UnitProvider.class);
-        when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
-        ITEM_3.setUnitProvider(unitProvider);
-        ITEM_4.setUnitProvider(unitProvider);
     }
 
     @Test
@@ -285,23 +279,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemCommandEventDecimal2Quantity() {
-        // Take unit from accepted item type (see channel built from STATE_CHANNEL_UID_3)
-        manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_3, DecimalType.valueOf("20")));
-        waitForAssert(() -> {
-            verify(stateProfileMock).onCommandFromItem(eq(QuantityType.valueOf("20 °C")));
-        });
-        verifyNoMoreInteractions(stateProfileMock);
-        verifyNoMoreInteractions(triggerProfileMock);
-    }
-
-    @Test
-    public void testItemCommandEventDecimal2Quantity2() {
-        // Take unit from state description
-        StateDescriptionService stateDescriptionService = mock(StateDescriptionService.class);
-        when(stateDescriptionService.getStateDescription(ITEM_NAME_3, null)).thenReturn(
-                StateDescriptionFragmentBuilder.create().withPattern("%.1f °F").build().toStateDescription());
-        ITEM_3.setStateDescriptionService(stateDescriptionService);
+    public void testItemCommandEventDecimal2Quantity2() throws ItemNotFoundException {
+        ITEM_3.addedMetadata(new Metadata(new MetadataKey("unit", ITEM_NAME_3), "°F", null));
 
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_3, DecimalType.valueOf("20")));
         waitForAssert(() -> {
@@ -311,19 +290,6 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         verifyNoMoreInteractions(triggerProfileMock);
 
         ITEM_3.setStateDescriptionService(null);
-    }
-
-    @Test
-    public void testItemCommandEventDecimal2QuantityChannelType() {
-        // The command is sent to an item w/o dimension defined and the channel is legacy (created from a ThingType
-        // definition before UoM was introduced to the binding). The dimension information might now be defined on the
-        // current ThingType.
-        manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_4, DecimalType.valueOf("20")));
-        waitForAssert(() -> {
-            verify(stateProfileMock).onCommandFromItem(eq(QuantityType.valueOf("20 °C")));
-        });
-        verifyNoMoreInteractions(stateProfileMock);
-        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test

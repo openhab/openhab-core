@@ -19,10 +19,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import javax.measure.Quantity;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Power;
-import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -35,7 +33,8 @@ import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
-import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
@@ -68,11 +67,11 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("23.54 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("89 °C")));
-        items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("122.41 °C")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("23.54 °C")));
+        items.add(createNumberItem("TestItem2", "°C", UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", "°C", new QuantityType<>("89 °C")));
+        items.add(createNumberItem("TestItem4", "°C", UnDefType.UNDEF));
+        items.add(createNumberItem("TestItem5", "°C", new QuantityType<>("122.41 °C")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Temperature.class);
         State state = function.calculate(items);
@@ -86,11 +85,11 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("23.54 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("192.2 °F")));
-        items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("395.56 K")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("23.54 °C")));
+        items.add(createNumberItem("TestItem2", "°C", UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", "°C", new QuantityType<>("192.2 °F")));
+        items.add(createNumberItem("TestItem4", "°C", UnDefType.UNDEF));
+        items.add(createNumberItem("TestItem5", "°C", new QuantityType<>("395.56 K")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Temperature.class);
         State state = function.calculate(items);
@@ -104,9 +103,9 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>(); // we need an ordered set to guarantee the Unit of the first entry
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("23.54 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<>("192.2 hPa")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("23.54 °C")));
+        items.add(createNumberItem("TestItem2", "°C", UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", "hPa", new QuantityType<>("192.2 hPa")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Temperature.class);
         State state = function.calculate(items);
@@ -120,11 +119,11 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("200 °C")));
-        items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("300 °C")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("100 °C")));
+        items.add(createNumberItem("TestItem2", "°C", UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", "°C", new QuantityType<>("200 °C")));
+        items.add(createNumberItem("TestItem4", "°C", UnDefType.UNDEF));
+        items.add(createNumberItem("TestItem5", "°C", new QuantityType<>("300 °C")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class);
         State state = function.calculate(items);
@@ -132,8 +131,8 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         assertEquals(new QuantityType<>("200 °C"), state);
 
         items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("19.5 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, new QuantityType<>("19.5 °C")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("19.5 °C")));
+        items.add(createNumberItem("TestItem2", "°C", new QuantityType<>("19.5 °C")));
 
         state = function.calculate(items);
 
@@ -146,11 +145,11 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("113 °F")));
-        items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("294.15 K")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("100 °C")));
+        items.add(createNumberItem("TestItem2", "°C", UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", "°C", new QuantityType<>("113 °F")));
+        items.add(createNumberItem("TestItem4", "°C", UnDefType.UNDEF));
+        items.add(createNumberItem("TestItem5", "°C", new QuantityType<>("294.15 K")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class);
         State state = function.calculate(items);
@@ -164,9 +163,9 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("23.54 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<>("192.2 hPa")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("23.54 °C")));
+        items.add(createNumberItem("TestItem2", "°C", UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", "hPa", new QuantityType<>("192.2 hPa")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class);
         State state = function.calculate(items);
@@ -180,11 +179,11 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("200 °C")));
-        items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("300 °C")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("100 °C")));
+        items.add(createNumberItem("TestItem2", "°C", UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", "°C", new QuantityType<>("200 °C")));
+        items.add(createNumberItem("TestItem4", "°C", UnDefType.UNDEF));
+        items.add(createNumberItem("TestItem5", "°C", new QuantityType<>("300 °C")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Max(Temperature.class);
         State state = function.calculate(items);
@@ -198,11 +197,11 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("113 °F")));
-        items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("294.15 K")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("100 °C")));
+        items.add(createNumberItem("TestItem2", "°C", UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", "°C", new QuantityType<>("113 °F")));
+        items.add(createNumberItem("TestItem4", "°C", UnDefType.UNDEF));
+        items.add(createNumberItem("TestItem5", "°C", new QuantityType<>("294.15 K")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Max(Temperature.class);
         State state = function.calculate(items);
@@ -216,9 +215,9 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("23.54 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<>("192.2 hPa")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("23.54 °C")));
+        items.add(createNumberItem("TestItem2", "°C", UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", "hPa", new QuantityType<>("192.2 hPa")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Max(Temperature.class);
         State state = function.calculate(items);
@@ -232,11 +231,11 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("200 °C")));
-        items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("300 °C")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("100 °C")));
+        items.add(createNumberItem("TestItem2", "°C", UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", "°C", new QuantityType<>("200 °C")));
+        items.add(createNumberItem("TestItem4", "°C", UnDefType.UNDEF));
+        items.add(createNumberItem("TestItem5", "°C", new QuantityType<>("300 °C")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Min(Temperature.class);
         State state = function.calculate(items);
@@ -250,12 +249,12 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Dimensionless.class, new QuantityType<>("48 %")));
-        items.add(createNumberItem("TestItem2", Dimensionless.class, new QuantityType<>("36 %")));
-        items.add(createNumberItem("TestItem3", Dimensionless.class, new QuantityType<>("0 %")));
-        items.add(createNumberItem("TestItem4", Dimensionless.class, new QuantityType<>("48 %")));
-        items.add(createNumberItem("TestItem5", Dimensionless.class, new QuantityType<>("0 %")));
-        items.add(createNumberItem("TestItem6", Dimensionless.class, new QuantityType<>("0 %")));
+        items.add(createNumberItem("TestItem1", "%", new QuantityType<>("48 %")));
+        items.add(createNumberItem("TestItem2", "%", new QuantityType<>("36 %")));
+        items.add(createNumberItem("TestItem3", "%", new QuantityType<>("0 %")));
+        items.add(createNumberItem("TestItem4", "%", new QuantityType<>("48 %")));
+        items.add(createNumberItem("TestItem5", "%", new QuantityType<>("0 %")));
+        items.add(createNumberItem("TestItem6", "%", new QuantityType<>("0 %")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Max(Dimensionless.class);
         State state = function.calculate(items);
@@ -269,11 +268,11 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("113 °F")));
-        items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("294.15 K")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("100 °C")));
+        items.add(createNumberItem("TestItem2", "°C", UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", "°C", new QuantityType<>("113 °F")));
+        items.add(createNumberItem("TestItem4", "°C", UnDefType.UNDEF));
+        items.add(createNumberItem("TestItem5", "°C", new QuantityType<>("294.15 K")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Min(Temperature.class);
         State state = function.calculate(items);
@@ -287,9 +286,9 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("23.54 °C")));
-        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<>("192.2 hPa")));
+        items.add(createNumberItem("TestItem1", "°C", new QuantityType<>("23.54 °C")));
+        items.add(createNumberItem("TestItem2", "°C", UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", "hPa", new QuantityType<>("192.2 hPa")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Min(Temperature.class);
         State state = function.calculate(items);
@@ -303,8 +302,8 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         Locale.setDefault(locale);
 
         Set<Item> items = new LinkedHashSet<>();
-        items.add(createNumberItem("TestItem1", Power.class, new QuantityType<>("5 W")));
-        items.add(createGroupItem("TestGroup1", Power.class, new QuantityType<>("5 W")));
+        items.add(createNumberItem("TestItem1", "W", new QuantityType<>("5 W")));
+        items.add(createGroupItem("TestGroup1", "W", new QuantityType<>("5 W")));
 
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Power.class);
         State state = function.calculate(items);
@@ -312,17 +311,16 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         assertEquals(new QuantityType<>("10 W"), state);
     }
 
-    private NumberItem createNumberItem(String name, Class<? extends Quantity<?>> dimension, State state) {
-        NumberItem item = new NumberItem(CoreItemFactory.NUMBER + ":" + dimension.getSimpleName(), name);
-        item.setUnitProvider(unitProvider);
+    private NumberItem createNumberItem(String name, String unit, State state) {
+        NumberItem item = new NumberItem(name);
+        item.addedMetadata(new Metadata(new MetadataKey("unit", name), unit, null));
         item.setState(state);
         return item;
     }
 
-    private GroupItem createGroupItem(String name, Class<? extends Quantity<?>> dimension, State state) {
-        GroupItem item = new GroupItem(name,
-                new NumberItem(CoreItemFactory.NUMBER + ":" + dimension.getSimpleName(), name));
-        item.setUnitProvider(unitProvider);
+    private GroupItem createGroupItem(String name, String unit, State state) {
+        GroupItem item = new GroupItem(name, new NumberItem(name));
+        item.addedMetadata(new Metadata(new MetadataKey("unit", name), unit, null));
         item.setState(state);
         return item;
     }

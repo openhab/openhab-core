@@ -36,7 +36,7 @@ public class TriggerChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Tr
         TriggerChannelTypeImpl(ChannelTypeUID uid, boolean advanced, String label, @Nullable String description,
                 @Nullable String category, @Nullable Set<String> tags, @Nullable EventDescription event,
                 @Nullable URI configDescriptionURI) throws IllegalArgumentException {
-            super(uid, advanced, null, ChannelKind.TRIGGER, label, description, category, tags, null, null, event,
+            super(uid, advanced, null, null, ChannelKind.TRIGGER, label, description, category, tags, null, null, event,
                     configDescriptionURI, null);
         }
     }
@@ -51,6 +51,11 @@ public class TriggerChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Tr
     public TriggerChannelTypeBuilder withEventDescription(EventDescription eventDescription) {
         this.eventDescription = eventDescription;
         return this;
+    }
+
+    @Override
+    public TriggerChannelTypeBuilder withUnit(String unit) {
+        throw new IllegalArgumentException("'unit' can't be used on trigger channels!");
     }
 
     @Override
