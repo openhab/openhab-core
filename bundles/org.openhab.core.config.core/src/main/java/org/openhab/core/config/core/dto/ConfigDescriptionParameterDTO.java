@@ -17,8 +17,6 @@ import java.util.List;
 
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -33,8 +31,6 @@ public class ConfigDescriptionParameterDTO {
 
     public String context;
     @SerializedName(value = "default", alternate = "defaultValue")
-    @JsonProperty("default")
-    @JsonAlias({ "defaultValue" })
     public String defaultValue;
     public String description;
     public String label;
