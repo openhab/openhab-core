@@ -48,7 +48,7 @@ public class AddonI18nUtil {
         return localizedText != null ? localizedText : defaultLabel;
     }
 
-    private String inferKey(String bindingId, String lastSegment) {
-        return "binding." + bindingId + "." + lastSegment;
+    private String inferKey(String addonId, String lastSegment) {
+        return "addon." + addonId + "." + lastSegment;
     }
 }
