@@ -343,8 +343,8 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
             return Addon.create(uid).withType(type).withId(id).withContentType(contentType)
                     .withImageLink(topic.imageUrl).withAuthor(author).withProperties(properties).withLabel(title)
                     .withInstalled(installed).withMaturity(maturity).withCompatible(compatible).withLink(link).build();
-        } catch (Exception e) {
-            logger.warn("Ignoring marketplace add-on '{}' due: {}", topic.title, e.getMessage());
+        } catch (RuntimeException e) {
+            logger.debug("Ignoring marketplace add-on '{}' due: {}", topic.title, e.getMessage());
             return null;
         }
     }
