@@ -286,7 +286,11 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
             String uid = ADDON_ID_PREFIX + topic.id.toString();
             AddonType addonType = getAddonType(topic.categoryId, tags);
-            String type = (addonType != null) ? addonType.getId() : "";
+            if (addonType == null) {
+                logger.debug("Ignoring topic '{}' because no add-on type could be found", topic.id);
+                return null;
+            }
+            String type = addonType.getId();
             String id = topic.id.toString(); // this will be replaced after installation by the correct id if available
             String contentType = getContentType(topic.categoryId, tags);
 
