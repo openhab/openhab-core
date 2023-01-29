@@ -28,6 +28,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.Signature;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -38,7 +40,9 @@ import java.util.Date;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -48,6 +52,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,24 +68,47 @@ public class CryptoStore {
 
     private final int KEY_SIZE = 128;
     private final int DATA_LENGTH = 128;
-    private Cipher encryptionCipher;
+    private final String CIPHER = "AES/GCM/NoPadding";
 
-    private String privKey;
-    private Certificate cert;
+    private String privKey = "";
+    private String cert = "";
     private String keystoreFileName = "";
     private String keystoreAlgorithm = "RSA";
     private int keyLength = 2048;
     private String alias = "openhab";
     private String distName = "CN=openHAB, O=openHAB, L=None, ST=None, C=None";
     private String cipher = "AES/GCM/NoPadding";
+    private String keyAlgorithm = "";
+
+    private @Nullable Cipher encryptionCipher;
 
     public CryptoStore() {
+        try {
+            encryptionCipher = Cipher.getInstance(CIPHER);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            logger.debug("Could not get cipher instance", e);
+        }
     }
 
-    public Key generateEncryptionKey() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(KEY_SIZE);
-        return keyGenerator.generateKey();
+    public byte[] generateEncryptionKey() {
+        Key key;
+        try {
+            KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+            keyGenerator.init(KEY_SIZE);
+            key = keyGenerator.generateKey();
+            byte[] newKey = key.getEncoded();
+            this.keyAlgorithm = key.getAlgorithm();
+            return newKey;
+        } catch (NoSuchAlgorithmException e) {
+            logger.debug("Could not generate encryption keys", e);
+        }
+        return new byte[0];
+    }
+
+    private Key convertByteToKey(byte[] keyString) {
+        // byte[] encodedKey = Base64.getDecoder().decode(keyString);
+        Key key = new SecretKeySpec(keyString, keyAlgorithm);
+        return key;
     }
 
     public String encrypt(String data, Key key) throws Exception {
@@ -89,7 +117,6 @@ public class CryptoStore {
 
     public String encrypt(String data, Key key, String cipher) throws Exception {
         byte[] dataInBytes = data.getBytes();
-        encryptionCipher = Cipher.getInstance(cipher);
         encryptionCipher.init(Cipher.ENCRYPT_MODE, key);
         byte[] encryptedBytes = encryptionCipher.doFinal(dataInBytes);
         return Base64.getEncoder().encodeToString(encryptedBytes);
@@ -108,25 +135,28 @@ public class CryptoStore {
         return new String(decryptedBytes);
     }
 
-    public void setPrivKey(String privKey, Key key) throws Exception {
+    public void setPrivKey(String privKey, byte[] keyString) throws Exception {
+        Key key = convertByteToKey(keyString);
         this.privKey = encrypt(privKey, key);
     }
 
-    public String getPrivKey(Key key) throws Exception {
+    public String getPrivKey(byte[] keyString) throws Exception {
+        Key key = convertByteToKey(keyString);
         return decrypt(this.privKey, key);
     }
 
-    public void setCert(String cert) throws GeneralSecurityException {
-        this.cert = CertificateFactory.getInstance("X.509")
-                .generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(cert)));
-    }
-
-    public void setCert(Certificate cert) throws GeneralSecurityException {
+    public void setCert(String cert) {
         this.cert = cert;
     }
 
-    public Certificate getCert() {
-        return this.cert;
+    public void setCert(Certificate cert) throws CertificateEncodingException {
+        this.cert = new String(Base64.getEncoder().encode(cert.getEncoded()));
+    }
+
+    public Certificate getCert() throws CertificateException {
+        Certificate cert = CertificateFactory.getInstance("X.509")
+                .generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(this.cert.getBytes())));
+        return cert;
     }
 
     public void setAlias(String alias) {
@@ -161,8 +191,16 @@ public class CryptoStore {
         return this.distName;
     }
 
-    public void setKeys(String privKey, Key key, String cert) throws GeneralSecurityException, Exception {
-        setPrivKey(privKey, key);
+    public void setKeystoreFileName(String keystoreFileName) {
+        this.keystoreFileName = keystoreFileName;
+    }
+
+    public String getKeystoreFileName() {
+        return this.keystoreFileName;
+    }
+
+    public void setKeys(String privKey, byte[] keyString, String cert) throws GeneralSecurityException, Exception {
+        setPrivKey(privKey, keyString);
         setCert(cert);
     }
 
@@ -170,42 +208,45 @@ public class CryptoStore {
         this.keystoreFileName = keystoreFileName;
     }
 
-    public void loadFromKeyStore(String keystoreFileName, String keystorePassword, Key key)
+    public void loadFromKeyStore(String keystoreFileName, String keystorePassword, byte[] keyString)
             throws GeneralSecurityException, IOException, Exception {
         this.keystoreFileName = keystoreFileName;
-        loadFromKeyStore(keystorePassword, key);
+        loadFromKeyStore(keystorePassword, keyString);
     }
 
-    public void loadFromKeyStore(String keystorePassword, Key key)
+    public void loadFromKeyStore(String keystorePassword, byte[] keyString)
             throws GeneralSecurityException, IOException, Exception {
+        Key key = convertByteToKey(keyString);
         KeyStore keystore = KeyStore.getInstance("JKS");
         FileInputStream keystoreInputStream = new FileInputStream(this.keystoreFileName);
         keystore.load(keystoreInputStream, keystorePassword.toCharArray());
-        this.privKey = encrypt(new String(keystore.getKey(this.alias, keystorePassword.toCharArray()).getEncoded()),
-                key);
-        this.cert = keystore.getCertificate(this.alias);
+        byte[] byteKey = keystore.getKey(this.alias, keystorePassword.toCharArray()).getEncoded();
+        this.privKey = encrypt(new String(Base64.getEncoder().encode(byteKey)), key);
+        setCert(keystore.getCertificate(this.alias));
     }
 
-    public KeyStore getKeyStore(String keystorePassword, Key key)
+    public KeyStore getKeyStore(String keystorePassword, byte[] keyString)
             throws GeneralSecurityException, IOException, Exception {
         KeyStore keystore = KeyStore.getInstance("JKS");
         keystore.load(null, null);
-        byte[] pkcs8EncodedBytes = Base64.getDecoder().decode(getPrivKey(key));
+        byte[] pkcs8EncodedBytes = Base64.getDecoder().decode(getPrivKey(keyString));
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8EncodedBytes);
         KeyFactory kf = KeyFactory.getInstance(this.keystoreAlgorithm);
         keystore.setKeyEntry(this.alias, kf.generatePrivate(keySpec), keystorePassword.toCharArray(),
-                new java.security.cert.Certificate[] { this.cert });
+                new java.security.cert.Certificate[] { getCert() });
         return keystore;
     }
 
-    public void saveKeyStore(String keystorePassword, Key key) throws GeneralSecurityException, IOException, Exception {
-        saveKeyStore(this.keystoreFileName, keystorePassword, key);
+    public void saveKeyStore(String keystorePassword, byte[] keyString)
+            throws GeneralSecurityException, IOException, Exception {
+        saveKeyStore(this.keystoreFileName, keystorePassword, keyString);
     }
 
-    public void saveKeyStore(String keystoreFileName, String keystorePassword, Key key)
+    public void saveKeyStore(String keystoreFileName, String keystorePassword, byte[] keyString)
             throws GeneralSecurityException, IOException, Exception {
         FileOutputStream keystoreStream = new FileOutputStream(keystoreFileName);
-        getKeyStore(keystorePassword, key).store(keystoreStream, keystorePassword.toCharArray());
+        KeyStore keystore = getKeyStore(keystorePassword, keyString);
+        keystore.store(keystoreStream, keystorePassword.toCharArray());
     }
 
     private X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String distName)
@@ -221,8 +262,9 @@ public class CryptoStore {
                 .getCertificate(certificateBuilder.build(contentSigner));
     }
 
-    public void generateNewKeyPair(Key key)
+    public void generateNewKeyPair(byte[] keyString)
             throws GeneralSecurityException, OperatorCreationException, IOException, Exception {
+        Key key = convertByteToKey(keyString);
         KeyPairGenerator kpg = KeyPairGenerator.getInstance(this.keystoreAlgorithm);
         kpg.initialize(this.keyLength);
         KeyPair kp = kpg.generateKeyPair();
@@ -232,7 +274,7 @@ public class CryptoStore {
         signer.update("openhab".getBytes(StandardCharsets.UTF_8));
         signer.sign();
         X509Certificate signedcert = generateSelfSignedCertificate(kp, this.distName);
-        this.privKey = encrypt(new String(kp.getPrivate().getEncoded()), key);
-        this.cert = signedcert;
+        this.privKey = encrypt(new String(Base64.getEncoder().encode(kp.getPrivate().getEncoded())), key);
+        setCert(signedcert);
     }
 }
