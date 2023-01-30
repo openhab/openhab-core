@@ -244,6 +244,14 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
                         element.getClass().getSimpleName(), uid, provider.getClass().getSimpleName());
                 return;
             }
+            Provider<E> elementProvider = elementToProvider.get(existingElement);
+            if (!elementProvider.equals(provider)) {
+                logger.error(
+                        "Provider '{}' is not allowed to remove element '{}' with key '{}' from the registry because it was added by provider '{}'.",
+                        provider.getClass().getSimpleName(), element.getClass().getSimpleName(), uid,
+                        elementProvider.getClass().getSimpleName());
+                return;
+            }
             try {
                 onRemoveElement(existingElement);
             } catch (final RuntimeException ex) {

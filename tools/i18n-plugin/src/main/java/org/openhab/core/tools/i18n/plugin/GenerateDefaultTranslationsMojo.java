@@ -86,7 +86,7 @@ public class GenerateDefaultTranslationsMojo extends AbstractI18nMojo {
     }
 
     private String propertiesFileName(BundleInfo bundleInfo) {
-        String name = bundleInfo.getBindingId();
+        String name = bundleInfo.getAddonId();
         if (name.isEmpty()) {
             Optional<ConfigDescription> optional = bundleInfo.getConfigDescriptions().stream().findFirst();
             if (optional.isPresent()) {

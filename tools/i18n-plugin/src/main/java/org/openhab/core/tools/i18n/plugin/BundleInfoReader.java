@@ -25,8 +25,8 @@ import java.util.stream.StreamSupport;
 
 import org.apache.maven.plugin.logging.Log;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.binding.xml.internal.BindingInfoReader;
-import org.openhab.core.binding.xml.internal.BindingInfoXmlResult;
+import org.openhab.core.addon.xml.internal.AddonInfoReader;
+import org.openhab.core.addon.xml.internal.AddonInfoXmlResult;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.xml.internal.ConfigDescriptionReader;
 import org.openhab.core.thing.xml.internal.ChannelGroupTypeXmlResult;
@@ -58,7 +58,7 @@ public class BundleInfoReader {
 
     public BundleInfo readBundleInfo(Path ohinfPath) throws IOException {
         BundleInfo bundleInfo = new BundleInfo();
-        readBindingInfo(ohinfPath, bundleInfo);
+        readAddonInfo(ohinfPath, bundleInfo);
         readConfigInfo(ohinfPath, bundleInfo);
         readThingInfo(ohinfPath, bundleInfo);
         readModuleTypeInfo(ohinfPath, bundleInfo);
@@ -73,16 +73,16 @@ public class BundleInfoReader {
                 : Stream.of();
     }
 
-    private void readBindingInfo(Path ohinfPath, BundleInfo bundleInfo) throws IOException {
-        BindingInfoReader reader = new BindingInfoReader();
-        try (Stream<Path> xmlPathStream = xmlPathStream(ohinfPath, "binding")) {
+    private void readAddonInfo(Path ohinfPath, BundleInfo bundleInfo) throws IOException {
+        AddonInfoReader reader = new AddonInfoReader();
+        try (Stream<Path> xmlPathStream = xmlPathStream(ohinfPath, "addon")) {
             xmlPathStream.forEach(path -> {
                 log.info("Reading: " + path);
                 try {
-                    BindingInfoXmlResult bindingInfoXml = reader.readFromXML(path.toUri().toURL());
+                    AddonInfoXmlResult bindingInfoXml = reader.readFromXML(path.toUri().toURL());
                     if (bindingInfoXml != null) {
-                        bundleInfo.setBindingId(bindingInfoXml.getBindingInfo().getUID());
-                        bundleInfo.setBindingInfoXml(bindingInfoXml);
+                        bundleInfo.setAddonId(bindingInfoXml.addonInfo().getId());
+                        bundleInfo.setAddonInfoXml(bindingInfoXml);
                     }
                 } catch (ConversionException | MalformedURLException e) {
                     log.warn("Exception while reading binding info from: " + path, e);
@@ -119,20 +119,20 @@ public class BundleInfoReader {
                     if (type instanceof ThingTypeXmlResult) {
                         ThingTypeXmlResult result = (ThingTypeXmlResult) type;
                         bundleInfo.getThingTypesXml().add(result);
-                        if (bundleInfo.getBindingId().isBlank()) {
-                            bundleInfo.setBindingId(result.getUID().getBindingId());
+                        if (bundleInfo.getAddonId().isBlank()) {
+                            bundleInfo.setAddonId(result.getUID().getBindingId());
                         }
                     } else if (type instanceof ChannelGroupTypeXmlResult) {
                         ChannelGroupTypeXmlResult result = (ChannelGroupTypeXmlResult) type;
                         bundleInfo.getChannelGroupTypesXml().add(result);
-                        if (bundleInfo.getBindingId().isBlank()) {
-                            bundleInfo.setBindingId(result.getUID().getBindingId());
+                        if (bundleInfo.getAddonId().isBlank()) {
+                            bundleInfo.setAddonId(result.getUID().getBindingId());
                         }
                     } else if (type instanceof ChannelTypeXmlResult) {
                         ChannelTypeXmlResult result = (ChannelTypeXmlResult) type;
                         bundleInfo.getChannelTypesXml().add(result);
-                        if (bundleInfo.getBindingId().isBlank()) {
-                            bundleInfo.setBindingId(result.toChannelType().getUID().getBindingId());
+                        if (bundleInfo.getAddonId().isBlank()) {
+                            bundleInfo.setAddonId(result.toChannelType().getUID().getBindingId());
                         }
                     }
                 }

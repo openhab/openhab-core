@@ -290,7 +290,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     /**
      * Convert this QuantityType to a new {@link QuantityType} using the given target unit.
-     * 
+     *
      * Implicit conversions using inverse units are allowed (i.e. mired <=> Kelvin). This may
      * change the dimension.
      *
@@ -306,7 +306,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     @SuppressWarnings("unchecked")
     public @Nullable QuantityType<?> toInvertibleUnit(String targetUnit) {
-        Unit<?> unit = (Unit<?>) AbstractUnit.parse(targetUnit);
+        Unit<?> unit = AbstractUnit.parse(targetUnit);
         if (unit != null) {
             return toInvertibleUnit(unit);
         }
@@ -336,7 +336,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
         }
         Quantity<?> result = quantity.to(targetUnit);
 
-        return new QuantityType<T>(result.getValue(), (Unit<T>) targetUnit);
+        return new QuantityType<T>(result.getValue(), targetUnit);
     }
 
     public BigDecimal toBigDecimal() {
@@ -455,10 +455,13 @@ public class QuantityType<T extends Quantity<T>> extends Number
             return target.cast(new HSBType(DecimalType.ZERO, PercentType.ZERO,
                     new PercentType(toBigDecimal().multiply(BIG_DECIMAL_HUNDRED))));
         } else if (target == PercentType.class) {
-            if (Units.PERCENT.equals(getUnit())) {
-                return target.cast(new PercentType(toBigDecimal()));
+            QuantityType<T> inPercent = toUnit(Units.PERCENT);
+            if (inPercent == null) {
+                // incompatible unit
+                return null;
+            } else {
+                return target.cast(new PercentType(inPercent.toBigDecimal()));
             }
-            return target.cast(new PercentType(toBigDecimal().multiply(BIG_DECIMAL_HUNDRED)));
         } else if (target == DecimalType.class) {
             return target.cast(new DecimalType(toBigDecimal()));
         } else {

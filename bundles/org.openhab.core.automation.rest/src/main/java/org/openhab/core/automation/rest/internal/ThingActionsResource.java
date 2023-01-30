@@ -16,6 +16,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -45,6 +46,7 @@ import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.Output;
 import org.openhab.core.automation.util.ActionBuilder;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
@@ -90,13 +92,16 @@ public class ThingActionsResource implements RESTResource {
     public static final String PATH_THINGS = "actions";
 
     private final Logger logger = LoggerFactory.getLogger(ThingActionsResource.class);
+    private final LocaleService localeService;
     private final ModuleTypeRegistry moduleTypeRegistry;
 
     Map<ThingUID, Map<String, ThingActions>> thingActionsMap = new HashMap<>();
     private List<ModuleHandlerFactory> moduleHandlerFactories = new ArrayList<>();
 
     @Activate
-    public ThingActionsResource(@Reference ModuleTypeRegistry moduleTypeRegistry) {
+    public ThingActionsResource(@Reference LocaleService localeService,
+            @Reference ModuleTypeRegistry moduleTypeRegistry) {
+        this.localeService = localeService;
         this.moduleTypeRegistry = moduleTypeRegistry;
     }
 
@@ -143,6 +148,7 @@ public class ThingActionsResource implements RESTResource {
             @ApiResponse(responseCode = "204", description = "No actions found.") })
     public Response getActions(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
+        Locale locale = localeService.getLocale(language);
         ThingUID aThingUID = new ThingUID(thingUID);
 
         List<ThingActionDTO> actions = new ArrayList<>();
@@ -163,7 +169,7 @@ public class ThingActionsResource implements RESTResource {
                 }
 
                 String actionUid = thingActionsEntry.getKey() + "." + method.getName();
-                ActionType actionType = (ActionType) moduleTypeRegistry.get(actionUid);
+                ActionType actionType = (ActionType) moduleTypeRegistry.get(actionUid, locale);
                 if (actionType == null) {
                     continue;
                 }

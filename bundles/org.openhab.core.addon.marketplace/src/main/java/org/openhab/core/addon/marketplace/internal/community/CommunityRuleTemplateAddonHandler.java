@@ -77,13 +77,13 @@ public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandle
             String yamlContent = (String) addon.getProperties().get(YAML_CONTENT_PROPERTY);
 
             if (jsonDownloadUrl != null) {
-                marketplaceRuleTemplateProvider.addTemplateAsJSON(addon.getId(), getTemplateFromURL(jsonDownloadUrl));
+                marketplaceRuleTemplateProvider.addTemplateAsJSON(addon.getUid(), getTemplateFromURL(jsonDownloadUrl));
             } else if (yamlDownloadUrl != null) {
-                marketplaceRuleTemplateProvider.addTemplateAsYAML(addon.getId(), getTemplateFromURL(yamlDownloadUrl));
+                marketplaceRuleTemplateProvider.addTemplateAsYAML(addon.getUid(), getTemplateFromURL(yamlDownloadUrl));
             } else if (jsonContent != null) {
-                marketplaceRuleTemplateProvider.addTemplateAsJSON(addon.getId(), jsonContent);
+                marketplaceRuleTemplateProvider.addTemplateAsJSON(addon.getUid(), jsonContent);
             } else if (yamlContent != null) {
-                marketplaceRuleTemplateProvider.addTemplateAsYAML(addon.getId(), yamlContent);
+                marketplaceRuleTemplateProvider.addTemplateAsYAML(addon.getUid(), yamlContent);
             }
         } catch (IOException e) {
             logger.error("Rule template from marketplace cannot be downloaded: {}", e.getMessage());
@@ -96,7 +96,7 @@ public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandle
 
     @Override
     public void uninstall(Addon addon) throws MarketplaceHandlerException {
-        marketplaceRuleTemplateProvider.getAll().stream().filter(t -> t.getTags().contains(addon.getId()))
+        marketplaceRuleTemplateProvider.getAll().stream().filter(t -> t.getTags().contains(addon.getUid()))
                 .forEach(w -> {
                     marketplaceRuleTemplateProvider.remove(w.getUID());
                 });

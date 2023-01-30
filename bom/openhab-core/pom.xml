@@ -66,7 +66,7 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.binding.xml</artifactId>
+      <artifactId>org.openhab.core.addon.xml</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>

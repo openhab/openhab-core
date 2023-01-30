@@ -88,16 +88,13 @@ public class FeatureInstaller implements ConfigurationListener {
     public static final String EXTENSION_TYPE_TRANSFORMATION = "transformation";
     public static final String EXTENSION_TYPE_UI = "ui";
     public static final String EXTENSION_TYPE_VOICE = "voice";
-    public static final List<String> EXTENSION_TYPES = List.of(EXTENSION_TYPE_AUTOMATION, EXTENSION_TYPE_BINDING,
+    public static final Set<String> EXTENSION_TYPES = Set.of(EXTENSION_TYPE_AUTOMATION, EXTENSION_TYPE_BINDING,
             EXTENSION_TYPE_MISC, EXTENSION_TYPE_PERSISTENCE, EXTENSION_TYPE_TRANSFORMATION, EXTENSION_TYPE_UI,
             EXTENSION_TYPE_VOICE);
 
     public static final String PREFIX = "openhab-";
     public static final String PREFIX_PACKAGE = "package-";
-    public static final String SIMPLE_PACKAGE = "simple";
     public static final String MINIMAL_PACKAGE = "minimal";
-
-    public static final String STANDARD_PACKAGE = "standard";
 
     private static final String CFG_REMOTE = "remote";
     private static final String PAX_URL_PID = "org.ops4j.pax.url.mvn";
@@ -120,8 +117,6 @@ public class FeatureInstaller implements ConfigurationListener {
     private boolean paxCfgUpdated = true; // a flag used to check whether CM has already successfully updated the pax
                                           // configuration as this must be waited for before trying to add feature repos
     private @Nullable Map<String, Object> configMapCache;
-
-    private @Nullable String currentPackage = null;
 
     @Activate
     public FeatureInstaller(final @Reference ConfigurationAdmin configurationAdmin,
@@ -226,11 +221,6 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    @Nullable
-    String getCurrentPackage() {
-        return currentPackage;
-    }
-
     public void addAddon(String type, String id) {
         try {
             changeAddonConfig(type, id, Collection::add);
@@ -267,10 +257,11 @@ public class FeatureInstaller implements ConfigurationListener {
                 Dictionary<String, Object> felixProperties = configurations[0].getProperties();
                 String addonsDirectory = (String) felixProperties.get("felix.fileinstall.dir");
                 if (addonsDirectory != null) {
-                    return Files.list(Path.of(addonsDirectory)).map(Path::getFileName).map(Path::toString)
-                            .filter(file -> file.endsWith(".kar"))
-                            .map(karFileName -> karFileName.substring(0, karFileName.lastIndexOf(".")))
-                            .allMatch(karRepos::contains);
+                    try (Stream<Path> files = Files.list(Path.of(addonsDirectory))) {
+                        return files.map(Path::getFileName).map(Path::toString).filter(file -> file.endsWith(".kar"))
+                                .map(karFileName -> karFileName.substring(0, karFileName.lastIndexOf(".")))
+                                .allMatch(karRepos::contains);
+                    }
                 }
             }
         } catch (Exception ignored) {
@@ -399,11 +390,11 @@ public class FeatureInstaller implements ConfigurationListener {
 
         for (String type : EXTENSION_TYPES) {
             Object configValue = config.get(type);
-            if (configValue instanceof String) {
+            if (configValue instanceof String addonString) {
                 try {
                     Feature[] features = featuresService.listInstalledFeatures();
                     String typePrefix = PREFIX + type + "-";
-                    Set<String> configFeatureNames = Arrays.stream(((String) configValue).split(",")) //
+                    Set<String> configFeatureNames = Arrays.stream(addonString.split(",")) //
                             .map(String::strip) //
                             .filter(not(String::isEmpty)) //
                             .map(addon -> typePrefix + addon) //
@@ -531,9 +522,8 @@ public class FeatureInstaller implements ConfigurationListener {
     private boolean installPackage(final Map<String, Object> config) {
         boolean configChanged = false;
         Object packageName = config.get(OpenHAB.CFG_PACKAGE);
-        if (packageName instanceof String) {
-            currentPackage = (String) packageName;
-            String fullName = PREFIX + PREFIX_PACKAGE + ((String) packageName).strip();
+        if (packageName instanceof String currentPackage) {
+            String fullName = PREFIX + PREFIX_PACKAGE + currentPackage.strip();
             if (!MINIMAL_PACKAGE.equals(currentPackage)) {
                 configChanged = installFeature(fullName);
             }

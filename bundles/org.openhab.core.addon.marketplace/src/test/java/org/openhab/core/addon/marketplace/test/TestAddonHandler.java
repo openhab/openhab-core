@@ -63,17 +63,17 @@ public class TestAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
-        if (addon.getId().endsWith(":" + INSTALL_EXCEPTION_ADDON)) {
+        if (addon.getUid().endsWith(":" + INSTALL_EXCEPTION_ADDON)) {
             throw new MarketplaceHandlerException("Installation failed", null);
         }
-        installedAddons.add(addon.getId());
+        installedAddons.add(addon.getUid());
     }
 
     @Override
     public void uninstall(Addon addon) throws MarketplaceHandlerException {
-        if (addon.getId().endsWith(":" + UNINSTALL_EXCEPTION_ADDON)) {
+        if (addon.getUid().endsWith(":" + UNINSTALL_EXCEPTION_ADDON)) {
             throw new MarketplaceHandlerException("Uninstallation failed", null);
         }
-        installedAddons.remove(addon.getId());
+        installedAddons.remove(addon.getUid());
     }
 }
