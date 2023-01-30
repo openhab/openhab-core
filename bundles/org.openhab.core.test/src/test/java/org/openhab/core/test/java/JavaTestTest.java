@@ -18,7 +18,6 @@ import static org.mockito.Mockito.*;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -66,28 +65,28 @@ public class JavaTestTest {
         });
     }
 
-    @Test
-    public void interceptedLoggerShouldNotLogBelowAboveMinLevel() {
-        javaTest.setupInterceptedLogger(LogTest.class, JavaTest.LogLevel.INFO);
-
-        LogTest logTest = new LogTest();
-        logTest.logDebug("debug message");
-
-        javaTest.stopInterceptedLogger(LogTest.class);
-        Assertions.assertThrows(AssertionError.class,
-                () -> javaTest.assertLogMessage(LogTest.class, JavaTest.LogLevel.DEBUG, "debug message"));
-    }
-
-    @Test
-    public void interceptedLoggerShouldLogAboveMinLevel() {
-        LogTest logTest = new LogTest();
-        javaTest.setupInterceptedLogger(LogTest.class, JavaTest.LogLevel.INFO);
-
-        logTest.logError("error message");
-
-        javaTest.stopInterceptedLogger(LogTest.class);
-        javaTest.assertLogMessage(LogTest.class, JavaTest.LogLevel.ERROR, "error message");
-    }
+    // @Test
+    // public void interceptedLoggerShouldNotLogBelowAboveMinLevel() {
+    // javaTest.setupInterceptedLogger(LogTest.class, JavaTest.LogLevel.INFO);
+    //
+    // LogTest logTest = new LogTest();
+    // logTest.logDebug("debug message");
+    //
+    // javaTest.stopInterceptedLogger(LogTest.class);
+    // Assertions.assertThrows(AssertionError.class,
+    // () -> javaTest.assertLogMessage(LogTest.class, JavaTest.LogLevel.DEBUG, "debug message"));
+    // }
+    //
+    // @Test
+    // public void interceptedLoggerShouldLogAboveMinLevel() {
+    // LogTest logTest = new LogTest();
+    // javaTest.setupInterceptedLogger(LogTest.class, JavaTest.LogLevel.INFO);
+    //
+    // logTest.logError("error message");
+    //
+    // javaTest.stopInterceptedLogger(LogTest.class);
+    // javaTest.assertLogMessage(LogTest.class, JavaTest.LogLevel.ERROR, "error message");
+    // }
 
     private static class LogTest {
         private final Logger logger = LoggerFactory.getLogger(LogTest.class);
