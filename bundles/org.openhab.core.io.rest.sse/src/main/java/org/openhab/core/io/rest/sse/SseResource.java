@@ -13,10 +13,13 @@
 package org.openhab.core.io.rest.sse;
 
 import static org.openhab.core.io.rest.sse.internal.SseSinkItemInfo.*;
+import static org.openhab.core.io.rest.sse.internal.SseSinkLogInfo.matchesLoggerName;
 import static org.openhab.core.io.rest.sse.internal.SseSinkTopicInfo.matchesTopic;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,10 +56,14 @@ import org.openhab.core.io.rest.SseBroadcaster;
 import org.openhab.core.io.rest.sse.internal.SseItemStatesEventBuilder;
 import org.openhab.core.io.rest.sse.internal.SsePublisher;
 import org.openhab.core.io.rest.sse.internal.SseSinkItemInfo;
+import org.openhab.core.io.rest.sse.internal.SseSinkLogInfo;
 import org.openhab.core.io.rest.sse.internal.SseSinkTopicInfo;
 import org.openhab.core.io.rest.sse.internal.dto.EventDTO;
+import org.openhab.core.io.rest.sse.internal.dto.LogEntryDTO;
 import org.openhab.core.io.rest.sse.internal.util.SseUtil;
 import org.openhab.core.items.events.ItemStateChangedEvent;
+import org.ops4j.pax.logging.spi.PaxAppender;
+import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -83,8 +90,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Markus Rathgeb - Drop Glassfish dependency and use API only
  * @author Wouter Born - Rework SSE item state sinks for dropping Glassfish
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Yannick Schaus - Add log endpoint
  */
-@Component(service = { RESTResource.class, SsePublisher.class })
+@Component(service = { RESTResource.class, SsePublisher.class, PaxAppender.class }, property = {
+        "org.ops4j.pax.logging.appender.name=SSE" })
 @JaxrsResource
 @JaxrsName(SseResource.PATH_EVENTS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
@@ -94,7 +103,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = SseResource.PATH_EVENTS)
 @Singleton
 @NonNullByDefault
-public class SseResource implements RESTResource, SsePublisher {
+public class SseResource implements RESTResource, SsePublisher, PaxAppender {
 
     // The URI path to this resource
     public static final String PATH_EVENTS = "events";
@@ -102,6 +111,7 @@ public class SseResource implements RESTResource, SsePublisher {
     private static final String X_ACCEL_BUFFERING_HEADER = "X-Accel-Buffering";
 
     public static final int ALIVE_INTERVAL_SECONDS = 10;
+    public static final int MAX_LOG_HISTORY = 25;
 
     private final Logger logger = LoggerFactory.getLogger(SseResource.class);
 
@@ -114,6 +124,9 @@ public class SseResource implements RESTResource, SsePublisher {
     private final SseBroadcaster<SseSinkItemInfo> itemStatesBroadcaster = new SseBroadcaster<>();
     private final SseItemStatesEventBuilder itemStatesEventBuilder;
     private final SseBroadcaster<SseSinkTopicInfo> topicBroadcaster = new SseBroadcaster<>();
+    private final SseBroadcaster<SseSinkLogInfo> logBroadcaster = new SseBroadcaster<>();
+
+    private final Queue<LogEntryDTO> lastLogEntries = new LinkedList<>();
 
     private ExecutorService executorService;
 
@@ -137,6 +150,7 @@ public class SseResource implements RESTResource, SsePublisher {
     public void deactivate() {
         itemStatesBroadcaster.close();
         topicBroadcaster.close();
+        logBroadcaster.close();
         executorService.shutdown();
         aliveEventJob.cancel(true);
     }
@@ -194,6 +208,47 @@ public class SseResource implements RESTResource, SsePublisher {
         final OutboundSseEvent sseEvent = SseUtil.buildEvent(sse.newEventBuilder(), eventDTO);
 
         topicBroadcaster.sendIf(sseEvent, matchesTopic(eventDTO.topic));
+    }
+
+    @GET
+    @Produces(MediaType.SERVER_SENT_EVENTS)
+    @Path("/log")
+    @RolesAllowed({ Role.ADMIN })
+    @Operation(operationId = "getLog", summary = "Stream log messages.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "Logger is empty or contains invalid characters") })
+    public void listenLog(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
+            @QueryParam("loggers") @Parameter(description = "logger names") String loggerFilter) {
+        if (!SseUtil.isValidTopicFilter(loggerFilter)) {
+            response.setStatus(Status.BAD_REQUEST.getStatusCode());
+            return;
+        }
+
+        SseSinkLogInfo sinkInfo = new SseSinkLogInfo(loggerFilter);
+        logBroadcaster.add(sseEventSink, sinkInfo);
+
+        addCommonResponseHeaders(response);
+
+        // replay the last matching messages from the queue
+        lastLogEntries.forEach(logEntry -> {
+            OutboundSseEvent logMessageEvent = sse.newEventBuilder().name("message")
+                    .mediaType(MediaType.APPLICATION_JSON_TYPE).data(logEntry).build();
+            if (matchesLoggerName(logEntry.loggerName).test(sinkInfo)) {
+                sseEventSink.send(logMessageEvent);
+            }
+        });
+    }
+
+    @Override
+    public void doAppend(PaxLoggingEvent loggingEvent) {
+        LogEntryDTO logEntry = new LogEntryDTO(loggingEvent);
+        if (lastLogEntries.size() >= MAX_LOG_HISTORY) {
+            lastLogEntries.remove();
+        }
+        lastLogEntries.offer(logEntry);
+        OutboundSseEvent logMessageEvent = sse.newEventBuilder().name("message")
+                .mediaType(MediaType.APPLICATION_JSON_TYPE).data(logEntry).build();
+        logBroadcaster.sendIf(logMessageEvent, matchesLoggerName(loggingEvent.getLoggerName()));
     }
 
     /**

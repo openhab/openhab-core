@@ -20,6 +20,7 @@
     <californium.version>2.7.4</californium.version>
     <jetty.version>9.4.46.v20220331</jetty.version>
     <swagger.version>2.1.9</swagger.version>
+    <pax.logging.version>2.0.16</pax.logging.version>
   </properties>
 
   <dependencies>
@@ -49,6 +50,11 @@
       <artifactId>org.eclipse.jdt.annotation</artifactId>
       <version>2.2.600</version>
       <!--<scope>compile</scope> -->
+    </dependency>
+    <dependency>
+        <groupId>org.ops4j.pax.logging</groupId>
+        <artifactId>pax-logging-api</artifactId>
+        <version>${pax.logging.version}</version>
     </dependency>
 
     <!-- Annotation API -->
