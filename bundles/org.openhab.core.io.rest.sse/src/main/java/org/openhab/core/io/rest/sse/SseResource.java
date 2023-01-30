@@ -240,7 +240,10 @@ public class SseResource implements RESTResource, SsePublisher, PaxAppender {
     }
 
     @Override
-    public void doAppend(PaxLoggingEvent loggingEvent) {
+    public void doAppend(@Nullable PaxLoggingEvent loggingEvent) {
+        if (loggingEvent == null) {
+            return;
+        }
         LogEntryDTO logEntry = new LogEntryDTO(loggingEvent);
         if (lastLogEntries.size() >= MAX_LOG_HISTORY) {
             lastLogEntries.remove();
