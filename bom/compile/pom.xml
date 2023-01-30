@@ -52,9 +52,9 @@
       <!--<scope>compile</scope> -->
     </dependency>
     <dependency>
-        <groupId>org.ops4j.pax.logging</groupId>
-        <artifactId>pax-logging-api</artifactId>
-        <version>${pax.logging.version}</version>
+      <groupId>org.ops4j.pax.logging</groupId>
+      <artifactId>pax-logging-api</artifactId>
+      <version>${pax.logging.version}</version>
     </dependency>
 
     <!-- Annotation API -->
