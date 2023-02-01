@@ -122,12 +122,17 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(immediate = true, service = { ThingTypeMigrationService.class, ThingManager.class })
 public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracker, ThingTypeMigrationService {
+    public static final String PROPERTY_THING_TYPE_VERSION = "thingTypeVersion";
 
+    // interval to check if thing prerequisites are met (in s)
+    private static final int CHECK_INTERVAL = 2;
+
+    // time after we try to initialize a thing even if the thing-type is not registered (in s)
+    private static final int MAX_CHECK_PREREQUISITE_TIME = 120;
     private static final ReadyMarker READY_MARKER_THINGS_LOADED = new ReadyMarker("things", "handler");
     private static final String THING_STATUS_STORAGE_NAME = "thing_status_storage";
     private static final String FORCE_REMOVE_THREAD_POOL_NAME = "forceRemove";
     private static final String THING_MANAGER_THREAD_POOL_NAME = "thingManager";
-    public static final String PROPERTY_THING_TYPE_VERSION = "thingTypeVersion";
 
     private final Logger logger = LoggerFactory.getLogger(ThingManagerImpl.class);
 
@@ -652,6 +657,11 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
 
     private void normalizeThingConfiguration(Thing thing) throws ConfigValidationException {
         ThingType thingType = thingTypeRegistry.getThingType(thing.getThingTypeUID());
+        if (thingType == null) {
+            logger.warn("Could not normalize configuration for '{}' because the thing type was not found in registry.",
+                    thing.getUID());
+            return;
+        }
         normalizeConfiguration(thingType, thing.getUID(), thing.getConfiguration());
 
         for (Channel channel : thing.getChannels()) {
@@ -1157,9 +1167,9 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                 startLevelSetterJob.cancel(false);
             }
             readyService.unregisterTracker(this);
-        }, 2, 2, TimeUnit.SECONDS);
-        prerequisiteCheckerJob = scheduler.scheduleWithFixedDelay(this::checkMissingPrerequisites, 2, 2,
-                TimeUnit.SECONDS);
+        }, CHECK_INTERVAL, CHECK_INTERVAL, TimeUnit.SECONDS);
+        prerequisiteCheckerJob = scheduler.scheduleWithFixedDelay(this::checkMissingPrerequisites, CHECK_INTERVAL,
+                CHECK_INTERVAL, TimeUnit.SECONDS);
     }
 
     @Override
@@ -1172,6 +1182,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         private @Nullable ThingTypeUID thingTypeUID;
         private final Set<ChannelTypeUID> channelTypeUIDs = new HashSet<>();
         private final Set<URI> configDescriptionUris = new HashSet<>();
+        private int timesChecked = 0;
 
         public ThingPrerequisites(Thing thing) {
             thingUID = thing.getUID();
@@ -1190,6 +1201,14 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                     URI configDescriptionUri = thingType.getConfigDescriptionURI();
                     if (configDescriptionUri != null) {
                         configDescriptionUris.add(configDescriptionUri);
+                    }
+                } else if (thingHandlerFactories.stream().anyMatch(f -> f.supportsThingType(thingTypeUID))) {
+                    timesChecked++;
+                    if (timesChecked > MAX_CHECK_PREREQUISITE_TIME / CHECK_INTERVAL) {
+                        logger.warn(
+                                "A thing handler factory claims to support '{}' for thing '{}' for more than {}s, but the thing type can't be found in the registry. This should be fixed in the binding.",
+                                thingTypeUID, thingUID, MAX_CHECK_PREREQUISITE_TIME);
+                        this.thingTypeUID = null;
                     }
                 }
             }
