@@ -911,11 +911,10 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
             setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.DISABLED));
         } else {
             if (thingHandlerFactory != null) {
-                if (checkAndPerformUpdate(thing, thingHandlerFactory)) {
-                    return;
-                }
-
                 if (!missingPrerequisites.containsKey(thing.getUID())) {
+                    if (checkAndPerformUpdate(thing, thingHandlerFactory)) {
+                        return;
+                    }
                     normalizeThingConfiguration(thing);
                     registerHandler(thing, thingHandlerFactory);
                     initializeHandler(thing);
@@ -1134,6 +1133,10 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         things.values().stream().filter(thing -> thingHandlerFactory.supportsThingType(thing.getThingTypeUID()))
                 .forEach(thing -> {
                     if (!isHandlerRegistered(thing)) {
+                        ThingPrerequisites thingPrerequisites = new ThingPrerequisites(thing);
+                        if (!thingPrerequisites.isReady()) {
+                            missingPrerequisites.put(thing.getUID(), thingPrerequisites);
+                        }
                         registerAndInitializeHandler(thing, thingHandlerFactory);
                     } else {
                         logger.debug("Thing handler for thing '{}' already registered", thing.getUID());
