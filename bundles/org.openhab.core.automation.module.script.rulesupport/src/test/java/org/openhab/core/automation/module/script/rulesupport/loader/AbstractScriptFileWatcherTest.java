@@ -366,7 +366,6 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         when(scriptEngineContainer.getFactory()).thenReturn(scriptEngineFactoryMock);
         when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
         when(scriptEngineManagerMock.loadScript(any(), any())).thenReturn(true);
-
         updateStartLevel(100);
 
         Path p = getFile("script.js");
@@ -391,7 +390,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         when(scriptEngineContainer.getScriptEngine()).thenReturn(mock(ScriptEngine.class));
         when(scriptEngineManagerMock.createScriptEngine(anyString(), anyString())).thenReturn(scriptEngineContainer);
         when(scriptEngineManagerMock.loadScript(any(), any())).thenReturn(true);
-        updateStartLevel(100);
+        updateStartLevel(10);
 
         Path p = getFile("script.js");
 
