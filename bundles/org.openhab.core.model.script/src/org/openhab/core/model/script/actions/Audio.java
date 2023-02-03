@@ -55,6 +55,12 @@ public class Audio {
         }
     }
 
+    @ActionDoc(text = "plays a sound with the given volume from the sounds folder to the default sink")
+    public static void playSound(@ParamDoc(name = "filename", text = "the filename with extension") String filename,
+                                 @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) {
+        playSound(filename, floatVolumeToPercentType(volume));
+    }
+
     @ActionDoc(text = "plays a sound from the sounds folder to the given sink(s)")
     public static void playSound(@ParamDoc(name = "sink", text = "the id of the sink") String sink,
             @ParamDoc(name = "filename", text = "the filename with extension") String filename) {
@@ -74,6 +80,13 @@ public class Audio {
         } catch (AudioException e) {
             logger.warn("Failed playing audio file: {}", e.getMessage());
         }
+    }
+
+    @ActionDoc(text = "plays a sound with the given volume from the sounds folder to the given sink(s)")
+    public static void playSound(@ParamDoc(name = "sink", text = "the id of the sink") String sink,
+                                 @ParamDoc(name = "filename", text = "the filename with extension") String filename,
+                                 @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) {
+        playSound(sink, filename, floatVolumeToPercentType(volume));
     }
 
     @ActionDoc(text = "plays an audio stream from a url to the default sink")
@@ -155,4 +168,15 @@ public class Audio {
         setMasterVolume(newVolume);
     }
 
+    /**
+     * Converts a float volume to a {@link PercentType} volume and checks if float volume is in the [0;1] range.
+     * @param volume
+     * @return
+     */
+    private static PercentType floatVolumeToPercentType(float volume) {
+        if (volume < 0 || volume > 1) {
+            throw new IllegalArgumentException("Volume value must be in the range [0;1]!");
+        }
+        return new PercentType(new BigDecimal(volume * 100f));
+    }
 }
