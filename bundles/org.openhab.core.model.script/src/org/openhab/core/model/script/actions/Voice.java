@@ -67,7 +67,7 @@ public class Voice {
      */
     @ActionDoc(text = "says a given text with the default voice and the given volume")
     public static void say(@ParamDoc(name = "text") Object text,
-            @ParamDoc(name = "volume", text = "the volume to be used") @Nullable PercentType volume) {
+                           @ParamDoc(name = "volume", text = "the volume to be used") @Nullable PercentType volume) {
         say(text, null, null, volume);
     }
 
@@ -104,8 +104,9 @@ public class Voice {
      * @param volume The volume to be used
      */
     @ActionDoc(text = "says a given text with a given voice and the given volume")
-    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
-            @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
+    public static void say(@ParamDoc(name = "text") Object text,
+                           @ParamDoc(name = "voice") @Nullable String voice,
+                           @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
         say(text, voice, null, volume);
     }
 
@@ -127,8 +128,9 @@ public class Voice {
      *            be used
      */
     @ActionDoc(text = "says a given text with a given voice through the given sink")
-    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
-            @ParamDoc(name = "sink") @Nullable String sink) {
+    public static void say(@ParamDoc(name = "text") Object text,
+                           @ParamDoc(name = "voice") @Nullable String voice,
+                           @ParamDoc(name = "sink") @Nullable String sink) {
         say(text, voice, sink, null);
     }
 
@@ -145,8 +147,8 @@ public class Voice {
      */
     @ActionDoc(text = "says a given text with a given voice and the given volume through the given sink")
     public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
-            @ParamDoc(name = "sink") @Nullable String sink,
-            @ParamDoc(name = "volume", text = "the volume to be used") @Nullable PercentType volume) {
+                           @ParamDoc(name = "sink") @Nullable String sink,
+                           @ParamDoc(name = "volume", text = "the volume to be used") @Nullable PercentType volume) {
         String output = text.toString();
         if (!output.isBlank()) {
             VoiceActionService.voiceManager.say(output, voice, sink, volume);
@@ -183,7 +185,7 @@ public class Voice {
      */
     @ActionDoc(text = "interprets a given text by given human language interpreter(s)", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
-            @ParamDoc(name = "interpreters") @Nullable String interpreters) {
+                                   @ParamDoc(name = "interpreters") @Nullable String interpreters) {
         String response;
         try {
             response = VoiceActionService.voiceManager.interpret(text.toString(), interpreters);
@@ -207,7 +209,8 @@ public class Voice {
      */
     @ActionDoc(text = "interprets a given text by given human language interpreter(s) and using the given sink", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
-            @ParamDoc(name = "interpreters") String interpreters, @ParamDoc(name = "sink") @Nullable String sink) {
+                                   @ParamDoc(name = "interpreters") String interpreters,
+                                   @ParamDoc(name = "sink") @Nullable String sink) {
         String response;
         try {
             response = VoiceActionService.voiceManager.interpret(text.toString(), interpreters);
@@ -230,7 +233,7 @@ public class Voice {
      */
     @ActionDoc(text = "starts dialog processing for a given audio source")
     public static void startDialog(@ParamDoc(name = "source") @Nullable String source,
-            @ParamDoc(name = "sink") @Nullable String sink) {
+                                   @ParamDoc(name = "sink") @Nullable String sink) {
         startDialog(null, null, null, null, null, source, sink, null, null, null);
     }
 

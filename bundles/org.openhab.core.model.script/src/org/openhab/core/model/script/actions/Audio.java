@@ -47,7 +47,7 @@ public class Audio {
 
     @ActionDoc(text = "plays a sound with the given volume from the sounds folder to the default sink")
     public static void playSound(@ParamDoc(name = "filename", text = "the filename with extension") String filename,
-            @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
+                                 @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
         try {
             AudioActionService.audioManager.playFile(filename, volume);
         } catch (AudioException e) {
@@ -63,7 +63,7 @@ public class Audio {
 
     @ActionDoc(text = "plays a sound from the sounds folder to the given sink(s)")
     public static void playSound(@ParamDoc(name = "sink", text = "the id of the sink") String sink,
-            @ParamDoc(name = "filename", text = "the filename with extension") String filename) {
+                                 @ParamDoc(name = "filename", text = "the filename with extension") String filename) {
         try {
             AudioActionService.audioManager.playFile(filename, sink);
         } catch (AudioException e) {
@@ -73,8 +73,8 @@ public class Audio {
 
     @ActionDoc(text = "plays a sound with the given volume from the sounds folder to the given sink(s)")
     public static void playSound(@ParamDoc(name = "sink", text = "the id of the sink") String sink,
-            @ParamDoc(name = "filename", text = "the filename with extension") String filename,
-            @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
+                                 @ParamDoc(name = "filename", text = "the filename with extension") String filename,
+                                 @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
         try {
             AudioActionService.audioManager.playFile(filename, sink, volume);
         } catch (AudioException e) {
@@ -109,18 +109,15 @@ public class Audio {
         }
     }
 
-    @ActionDoc(text = "gets the master volume", returns = "volume as a float in the range [0,1]")
+    @ActionDoc(text = "gets the master volume", returns = "volume as a float in the range [0;1]")
     public static float getMasterVolume() throws IOException {
         return AudioActionService.audioManager.getVolume(null).floatValue() / 100f;
     }
 
     @ActionDoc(text = "sets the master volume")
     public static void setMasterVolume(
-            @ParamDoc(name = "volume", text = "volume in the range [0,1]") final float volume) throws IOException {
-        if (volume < 0 || volume > 1) {
-            throw new IllegalArgumentException("Volume value must be in the range [0,1]!");
-        }
-        setMasterVolume(new PercentType(new BigDecimal(volume * 100f)));
+            @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) throws IOException {
+        setMasterVolume(floatVolumeToPercentType(volume));
     }
 
     @ActionDoc(text = "sets the master volume")
@@ -158,7 +155,7 @@ public class Audio {
         float volume = getMasterVolume();
         float newVolume = volume * (1f - percent / 100f);
         if (newVolume > 0 && volume - newVolume < .01) {
-            // the getMasterVolume() may only returns integers, so we have to make sure that we
+            // the getMasterVolume() may only return integers, so we have to make sure that we
             // decrease the volume level at least by 1%.
             newVolume -= .01;
         }
