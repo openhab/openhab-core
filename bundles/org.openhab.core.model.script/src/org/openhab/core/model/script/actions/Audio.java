@@ -128,7 +128,7 @@ public class Audio {
     @ActionDoc(text = "increases the master volume")
     public static void increaseMasterVolume(@ParamDoc(name = "percent") final float percent) throws IOException {
         if (percent <= 0 || percent > 100) {
-            throw new IllegalArgumentException("Percent must be in the range (0,100]!");
+            throw new IllegalArgumentException("Percent must be in the range (0;100]!");
         }
         Float volume = getMasterVolume();
         if (volume == 0) {
@@ -150,7 +150,7 @@ public class Audio {
     @ActionDoc(text = "decreases the master volume")
     public static void decreaseMasterVolume(@ParamDoc(name = "percent") final float percent) throws IOException {
         if (percent <= 0 || percent > 100) {
-            throw new IllegalArgumentException("Percent must be in the range (0,100]!");
+            throw new IllegalArgumentException("Percent must be in the range (0;100]!");
         }
         float volume = getMasterVolume();
         float newVolume = volume * (1f - percent / 100f);
