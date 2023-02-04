@@ -1074,32 +1074,25 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         synchronized (dialogRegistrationStorage) {
             dialogRegistrationStorage.getValues().stream().forEach(dr -> {
                 if (dr != null && !dialogProcessors.containsKey(dr.sourceId)) {
-                    this.tryBuildDialogRegistration(dr);
+                    try {
+                        startDialog(getDialogContextBuilder() //
+                                .withSink(audioManager.getSink(dr.sinkId)) //
+                                .withSource(audioManager.getSource(dr.sourceId)) //
+                                .withKS(getKS(dr.ksId)) //
+                                .withKeyword(dr.keyword) //
+                                .withSTT(getSTT(dr.sttId)) //
+                                .withTTS(getTTS(dr.ttsId)) //
+                                .withVoice(getVoice(dr.voiceId)) //
+                                .withHLIs(getHLIsByIds(dr.hliIds)) //
+                                .withLocale(dr.locale) //
+                                .withListeningItem(dr.listeningItem) //
+                                .withMelody(dr.listeningMelody) //
+                                .build());
+                    } catch (IllegalStateException e) {
+                        logger.debug("Unable to start dialog registration: {}", e.getMessage());
+                    }
                 }
             });
-        }
-    }
-
-    /**
-     * This method tries to start a dialog from a dialog registration.
-     */
-    private void tryBuildDialogRegistration(DialogRegistration dialogRegistration) {
-        try {
-            startDialog(getDialogContextBuilder() //
-                    .withSink(audioManager.getSink(dialogRegistration.sinkId)) //
-                    .withSource(audioManager.getSource(dialogRegistration.sourceId)) //
-                    .withKS(getKS(dialogRegistration.ksId)) //
-                    .withKeyword(dialogRegistration.keyword) //
-                    .withSTT(getSTT(dialogRegistration.sttId)) //
-                    .withTTS(getTTS(dialogRegistration.ttsId)) //
-                    .withVoice(getVoice(dialogRegistration.voiceId)) //
-                    .withHLIs(getHLIsByIds(dialogRegistration.hliIds)) //
-                    .withLocale(dialogRegistration.locale) //
-                    .withListeningItem(listeningItem) //
-                    .withMelody(listeningMelody) //
-                    .build());
-        } catch (IllegalStateException e) {
-            logger.debug("Unable to start dialog registration: {}", e.getMessage());
         }
     }
 
