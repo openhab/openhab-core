@@ -137,17 +137,23 @@ public class DialogContext {
         }
 
         public Builder withKS(@Nullable KSService service) {
-            this.ks = service;
+            if (service != null) {
+                this.ks = service;
+            }
             return this;
         }
 
         public Builder withSTT(@Nullable STTService service) {
-            this.stt = service;
+            if (service != null) {
+                this.stt = service;
+            }
             return this;
         }
 
         public Builder withTTS(@Nullable TTSService service) {
-            this.tts = service;
+            if (service != null) {
+                this.tts = service;
+            }
             return this;
         }
 
@@ -156,32 +162,44 @@ public class DialogContext {
         }
 
         public Builder withHLIs(List<HumanLanguageInterpreter> services) {
-            this.hlis = services;
+            if (!services.isEmpty()) {
+                this.hlis = services;
+            }
             return this;
         }
 
-        public Builder withKeyword(String keyword) {
-            this.keyword = keyword;
+        public Builder withKeyword(@Nullable String keyword) {
+            if (keyword != null && !keyword.isBlank()) {
+                this.keyword = keyword;
+            }
             return this;
         }
 
         public Builder withVoice(@Nullable Voice voice) {
-            this.voice = voice;
+            if (voice != null) {
+                this.voice = voice;
+            }
             return this;
         }
 
         public Builder withListeningItem(@Nullable String listeningItem) {
-            this.listeningItem = listeningItem;
+            if (listeningItem != null) {
+                this.listeningItem = listeningItem;
+            }
             return this;
         }
 
         public Builder withMelody(@Nullable String listeningMelody) {
-            this.listeningMelody = listeningMelody;
+            if (listeningMelody != null) {
+                this.listeningMelody = listeningMelody;
+            }
             return this;
         }
 
-        public Builder withLocale(Locale locale) {
-            this.locale = locale;
+        public Builder withLocale(@Nullable Locale locale) {
+            if (locale != null) {
+                this.locale = locale;
+            }
             return this;
         }
 

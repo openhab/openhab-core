@@ -354,8 +354,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         }
     }
 
-    private @Nullable Voice getVoice(String id) {
-        if (id.contains(":")) {
+    private @Nullable Voice getVoice(@Nullable String id) {
+        if (id == null) {
+            return null;
+        } else if (id.contains(":")) {
             // it is a fully qualified unique id
             String[] segments = id.split(":");
             TTSService tts = getTTS(segments[0]);
@@ -851,8 +853,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public @Nullable TTSService getTTS(String id) {
-        return ttsServices.get(id);
+    public @Nullable TTSService getTTS(@Nullable String id) {
+        return id == null ? null : ttsServices.get(id);
     }
 
     private @Nullable TTSService getTTS(Voice voice) {
@@ -881,8 +883,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public @Nullable STTService getSTT(String id) {
-        return sttServices.get(id);
+    public @Nullable STTService getSTT(@Nullable String id) {
+        return id == null ? null : sttServices.get(id);
     }
 
     @Override
@@ -907,8 +909,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public @Nullable KSService getKS(String id) {
-        return ksServices.get(id);
+    public @Nullable KSService getKS(@Nullable String id) {
+        return id == null ? null : ksServices.get(id);
     }
 
     @Override
@@ -933,8 +935,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public @Nullable HumanLanguageInterpreter getHLI(String id) {
-        return humanLanguageInterpreters.get(id);
+    public @Nullable HumanLanguageInterpreter getHLI(@Nullable String id) {
+        return id == null ? null : humanLanguageInterpreters.get(id);
     }
 
     @Override
@@ -1082,45 +1084,20 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
      * This method tries to start a dialog from a dialog registration.
      */
     private void tryBuildDialogRegistration(DialogRegistration dialogRegistration) {
-        var builder = getDialogContextBuilder().withSink(audioManager.getSink(dialogRegistration.sinkId))
-                .withSource(audioManager.getSource(dialogRegistration.sourceId));
-        String ksId = dialogRegistration.ksId;
-        if (ksId != null) {
-            builder.withKS(getKS(ksId));
-        }
-        String keyword = dialogRegistration.keyword;
-        if (keyword != null) {
-            builder.withKS(getKS(keyword));
-        }
-        String sttId = dialogRegistration.sttId;
-        if (sttId != null) {
-            builder.withSTT(getSTT(sttId));
-        }
-        String ttsId = dialogRegistration.ttsId;
-        if (ttsId != null) {
-            builder.withTTS(getTTS(ttsId));
-        }
-        String voiceId = dialogRegistration.voiceId;
-        if (voiceId != null) {
-            builder.withVoice(getVoice(voiceId));
-        }
-        if (!dialogRegistration.hliIds.isEmpty()) {
-            builder.withHLIs(getHLIsByIds(dialogRegistration.hliIds));
-        }
-        Locale locale = dialogRegistration.locale;
-        if (locale != null) {
-            builder.withLocale(locale);
-        }
-        var listeningItem = dialogRegistration.listeningItem;
-        if (listeningItem != null) {
-            builder.withListeningItem(listeningItem);
-        }
-        var listeningMelody = dialogRegistration.listeningMelody;
-        if (listeningMelody != null) {
-            builder.withMelody(listeningMelody);
-        }
         try {
-            startDialog(builder.build());
+            startDialog(getDialogContextBuilder() //
+                    .withSink(audioManager.getSink(dialogRegistration.sinkId)) //
+                    .withSource(audioManager.getSource(dialogRegistration.sourceId)) //
+                    .withKS(getKS(dialogRegistration.ksId)) //
+                    .withKeyword(dialogRegistration.keyword) //
+                    .withSTT(getSTT(dialogRegistration.sttId)) //
+                    .withTTS(getTTS(dialogRegistration.ttsId)) //
+                    .withVoice(getVoice(dialogRegistration.voiceId)) //
+                    .withHLIs(getHLIsByIds(dialogRegistration.hliIds)) //
+                    .withLocale(dialogRegistration.locale) //
+                    .withListeningItem(listeningItem) //
+                    .withMelody(listeningMelody) //
+                    .build());
         } catch (IllegalStateException e) {
             logger.debug("Unable to start dialog registration: {}", e.getMessage());
         }
