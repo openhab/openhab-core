@@ -723,7 +723,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         synchronized (dialogRegistrationStorage) {
             dialogRegistrationStorage.put(registration.sourceId, registration);
         }
-        debounceBuildDialogRegistrations();
+        scheduleDialogRegistrations();
     }
 
     @Override
@@ -736,7 +736,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         synchronized (dialogRegistrationStorage) {
             var registrationRef = dialogRegistrationStorage.remove(sourceId);
             if (registrationRef != null) {
-                dialogRegistrationStorage.remove(sourceId);
                 var dialog = dialogProcessors.get(sourceId);
                 if (dialog != null) {
                     stopDialog(dialog.dialogContext);
@@ -771,7 +770,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addAudioSink(AudioSink audioSink) {
-        debounceBuildDialogRegistrations();
+        scheduleDialogRegistrations();
     }
 
     protected void removeAudioSink(AudioSink audioSink) {
@@ -780,7 +779,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addAudioSource(AudioSource audioSource) {
-        debounceBuildDialogRegistrations();
+        scheduleDialogRegistrations();
     }
 
     protected void removeAudioSource(AudioSource audioSource) {
@@ -790,7 +789,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addKSService(KSService ksService) {
         this.ksServices.put(ksService.getId(), ksService);
-        debounceBuildDialogRegistrations();
+        scheduleDialogRegistrations();
     }
 
     protected void removeKSService(KSService ksService) {
@@ -804,7 +803,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addSTTService(STTService sttService) {
         this.sttServices.put(sttService.getId(), sttService);
-        debounceBuildDialogRegistrations();
+        scheduleDialogRegistrations();
     }
 
     protected void removeSTTService(STTService sttService) {
@@ -815,7 +814,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addTTSService(TTSService ttsService) {
         this.ttsServices.put(ttsService.getId(), ttsService);
-        debounceBuildDialogRegistrations();
+        scheduleDialogRegistrations();
     }
 
     protected void removeTTSService(TTSService ttsService) {
@@ -826,7 +825,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addHumanLanguageInterpreter(HumanLanguageInterpreter humanLanguageInterpreter) {
         this.humanLanguageInterpreters.put(humanLanguageInterpreter.getId(), humanLanguageInterpreter);
-        debounceBuildDialogRegistrations();
+        scheduleDialogRegistrations();
     }
 
     protected void removeHumanLanguageInterpreter(HumanLanguageInterpreter humanLanguageInterpreter) {
@@ -1051,7 +1050,12 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         }
     }
 
-    private void debounceBuildDialogRegistrations() {
+    /**
+     * In order to reduce the number of dialog registration builds
+     * this method schedules a call to {@link #buildDialogRegistrations() buildDialogRegistrations} in five seconds
+     * and cancel the previous one.
+     */
+    private void scheduleDialogRegistrations() {
         if (dialogRegistrationFuture != null) {
             dialogRegistrationFuture.cancel(false);
         }
@@ -1059,6 +1063,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 TimeUnit.SECONDS);
     }
 
+    /**
+     * This method tries to start a dialog for each dialog registration.
+     * It's only called from {@link #scheduleDialogRegistrations() scheduleDialogRegistrations} in order to
+     * reduce the number of executions.
+     */
     private void buildDialogRegistrations() {
         synchronized (dialogRegistrationStorage) {
             dialogRegistrationStorage.getValues().stream().forEach(dr -> {
@@ -1069,6 +1078,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         }
     }
 
+    /**
+     * This method tries to start a dialog from a dialog registration.
+     */
     private void tryBuildDialogRegistration(DialogRegistration dialogRegistration) {
         var builder = getDialogContextBuilder().withSink(audioManager.getSink(dialogRegistration.sinkId))
                 .withSource(audioManager.getSource(dialogRegistration.sourceId));
@@ -1124,7 +1136,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         var registration = dialogRegistrationStorage.get(context.source().getId());
         if (registration != null) {
             // try to rebuild in case it was manually stopped
-            debounceBuildDialogRegistrations();
+            scheduleDialogRegistrations();
         }
     }
 }
