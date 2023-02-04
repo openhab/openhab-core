@@ -14,12 +14,12 @@ package org.openhab.core.internal.addon;
 
 import java.net.URI;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
@@ -68,7 +68,7 @@ public class JarFileAddonService extends BundleTracker<Bundle> implements AddonS
     private final AddonInfoRegistry addonInfoRegistry;
     private final ScheduledExecutorService scheduler;
 
-    private final Set<Bundle> trackedBundles = new HashSet<>();
+    private final Set<Bundle> trackedBundles = ConcurrentHashMap.newKeySet();
     private Map<String, Addon> addons = Map.of();
 
     @Activate
