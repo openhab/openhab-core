@@ -1055,7 +1055,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     /**
      * In order to reduce the number of dialog registration builds
      * this method schedules a call to {@link #buildDialogRegistrations() buildDialogRegistrations} in five seconds
-     * and cancel the previous one.
+     * and cancel the previous scheduled call if any.
      */
     private void scheduleDialogRegistrations() {
         if (dialogRegistrationFuture != null) {
