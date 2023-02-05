@@ -137,7 +137,8 @@ public class JsonAddonService extends AbstractRemoteAddonService {
 
     @Override
     public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
-        return cachedAddons.stream().filter(e -> id.equals(e.getUid())).findAny().orElse(null);
+        String queryId = id.startsWith(ADDON_ID_PREFIX) ? id : ADDON_ID_PREFIX + id;
+        return cachedAddons.stream().filter(e -> queryId.equals(e.getUid())).findAny().orElse(null);
     }
 
     @Override
