@@ -1058,8 +1058,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
      * and cancel the previous scheduled call if any.
      */
     private void scheduleDialogRegistrations() {
-        if (dialogRegistrationFuture != null) {
-            dialogRegistrationFuture.cancel(false);
+        ScheduledFuture<?> job = this.dialogRegistrationFuture;
+        if (job != null) {
+            job.cancel(false);
         }
         dialogRegistrationFuture = scheduledExecutorService.schedule(this::buildDialogRegistrations, 5,
                 TimeUnit.SECONDS);
