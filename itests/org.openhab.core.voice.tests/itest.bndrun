@@ -63,6 +63,7 @@ Fragment-Host: org.openhab.core.voice
 	biz.aQute.tester.junit-platform;version='[6.4.0,6.4.1)',\
 	org.openhab.core;version='[4.0.0,4.0.1)',\
 	org.openhab.core.audio;version='[4.0.0,4.0.1)',\
+	org.openhab.core;version='[4.0.0,4.0.1)',\
 	org.openhab.core.config.core;version='[4.0.0,4.0.1)',\
 	org.openhab.core.io.console;version='[4.0.0,4.0.1)',\
 	org.openhab.core.io.http;version='[4.0.0,4.0.1)',\
