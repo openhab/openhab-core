@@ -116,7 +116,7 @@ public class Audio {
 
     @ActionDoc(text = "sets the master volume")
     public static void setMasterVolume(
-            @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) throws IOException {
+            @ParamDoc(name = "volume", text = "volume in the range [0;1]") final float volume) throws IOException {
         setMasterVolume(floatVolumeToPercentType(volume));
     }
 
