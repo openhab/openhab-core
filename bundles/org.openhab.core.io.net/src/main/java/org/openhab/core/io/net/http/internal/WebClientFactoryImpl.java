@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
@@ -129,8 +128,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     }
 
     @Override
-    public @NonNull HttpClient createHttpClient(@NonNull String consumerName,
-            @Nullable SslContextFactory sslContextFactory) {
+    public HttpClient createHttpClient(String consumerName, @Nullable SslContextFactory sslContextFactory) {
         logger.debug("http client for consumer {} requested", consumerName);
         checkConsumerName(consumerName);
         return createHttpClientInternal(consumerName, sslContextFactory, false, null);
@@ -142,8 +140,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     }
 
     @Override
-    public @NonNull WebSocketClient createWebSocketClient(@NonNull String consumerName,
-            @Nullable SslContextFactory sslContextFactory) {
+    public WebSocketClient createWebSocketClient(String consumerName, @Nullable SslContextFactory sslContextFactory) {
         logger.debug("web socket client for consumer {} requested", consumerName);
         checkConsumerName(consumerName);
         return createWebSocketClientInternal(consumerName, sslContextFactory, false, null);
