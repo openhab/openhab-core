@@ -40,7 +40,6 @@ public class AddonInfo implements Identifiable<String> {
     private final String type;
     private final String name;
     private final String description;
-    private final @Nullable String author;
     private final @Nullable String connection;
     private final List<String> countries;
     private final @Nullable String configDescriptionURI;
@@ -70,7 +69,6 @@ public class AddonInfo implements Identifiable<String> {
         this.description = description;
 
         // optional fields
-        this.author = author;
         this.connection = connection;
         this.countries = countries;
         this.configDescriptionURI = configDescriptionURI;
@@ -125,15 +123,6 @@ public class AddonInfo implements Identifiable<String> {
     }
 
     /**
-     * Returns the author of the add-on (e.g. "Max Mustermann").
-     *
-     * @return the author of the add-on (could be null or empty)
-     */
-    public @Nullable String getAuthor() {
-        return author;
-    }
-
-    /**
      * Returns the link to a concrete {@link org.openhab.core.config.core.ConfigDescription}.
      *
      * @return the link to a concrete ConfigDescription (could be <code>null</code>>)
@@ -181,7 +170,6 @@ public class AddonInfo implements Identifiable<String> {
             this.type = addonInfo.type;
             this.name = addonInfo.name;
             this.description = addonInfo.description;
-            this.author = addonInfo.author;
             this.connection = addonInfo.connection;
             this.countries = addonInfo.countries;
             this.configDescriptionURI = addonInfo.configDescriptionURI;
@@ -236,7 +224,7 @@ public class AddonInfo implements Identifiable<String> {
 
         /**
          * Build an {@link AddonInfo} from this builder
-         * 
+         *
          * @return the add-on info object
          * @throws IllegalArgumentException if any of the information in this builder is invalid
          */
