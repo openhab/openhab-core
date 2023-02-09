@@ -1181,7 +1181,8 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
     }
 
     /**
-     * The {@link ThingPrerequisites} class is used to gather and check the pre-requisites of a given thing (i.e. availability of the {@link ThingType} and all needed {@link ChannelType}s and {@link ConfigDescription}s).
+     * The {@link ThingPrerequisites} class is used to gather and check the pre-requisites of a given thing (i.e.
+     * availability of the {@link ThingType} and all needed {@link ChannelType}s and {@link ConfigDescription}s).
      *
      */
     private class ThingPrerequisites {
@@ -1201,7 +1202,9 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         /**
          * Check if all necessary information is present in the registries.
          * <p />
-         * If a {@link ThingHandlerFactory} reports that it supports {@link ThingTypeUID} but the {@link ThingType} can't be found in the {@link ThingTypeRegistry} this method also returns <code>true</code> after {@link #MAX_CHECK_PREREQUISITE_TIME} s.
+         * If a {@link ThingHandlerFactory} reports that it supports {@link ThingTypeUID} but the {@link ThingType}
+         * can't be found in the {@link ThingTypeRegistry} this method also returns <code>true</code> after
+         * {@link #MAX_CHECK_PREREQUISITE_TIME} s.
          *
          * @return <code>true</code> if all pre-requisites are present, <code>false</code> otherwise
          */

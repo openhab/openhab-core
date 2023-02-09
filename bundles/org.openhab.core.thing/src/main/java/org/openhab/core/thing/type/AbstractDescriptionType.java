@@ -46,6 +46,7 @@ public abstract class AbstractDescriptionType implements Identifiable<UID> {
      *            (must neither be null nor empty)
      * @param description the human-readable description for the according type
      *            (could be null or empty)
+     * @param configDescriptionURI the {@link URI} that references the {@link ConfigDescription} of this type
      * @throws IllegalArgumentException if the UID is null, or the label is null or empty
      */
     public AbstractDescriptionType(UID uid, String label, @Nullable String description,
