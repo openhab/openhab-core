@@ -641,13 +641,13 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
     private void validate(@Nullable AbstractDescriptionType prototype, UID targetUID, Configuration configuration)
             throws ConfigValidationException {
         if (prototype == null) {
-            logger.debug("Prototype for '{}' is not known, assuming it is initializable", targetUID);
+            logger.debug("Prototype for '{}' is not known, assuming it can be initialized", targetUID);
             return;
         }
 
         URI configDescriptionURI = prototype.getConfigDescriptionURI();
         if (configDescriptionURI == null) {
-            logger.debug("Config description URI for '{}' not found, assuming '{}' is initializable",
+            logger.debug("Config description URI for '{}' not found, assuming '{}' can be initialized",
                     prototype.getUID(), targetUID);
             return;
         }
@@ -677,7 +677,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
             Configuration configuration) throws ConfigValidationException {
         if (prototype == null) {
             ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
-                    "Type description for '{0}' not found also we checked the presence before.",
+                    "Type description for '{0}' not found although we checked the presence before.",
                     "type_description_missing", targetUID);
             throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
@@ -1180,6 +1180,10 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         // do nothing
     }
 
+    /**
+     * The {@link ThingPrerequisites} class is used to gather and check the pre-requisites of a given thing (i.e. availability of the {@link ThingType} and all needed {@link ChannelType}s and {@link ConfigDescription}s).
+     *
+     */
     private class ThingPrerequisites {
         private final ThingUID thingUID;
         private @Nullable ThingTypeUID thingTypeUID;
@@ -1194,6 +1198,13 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                     .map(Objects::requireNonNull).distinct().forEach(channelTypeUIDs::add);
         }
 
+        /**
+         * Check if all necessary information is present in the registries.
+         * <p />
+         * If a {@link ThingHandlerFactory} reports that it supports {@link ThingTypeUID} but the {@link ThingType} can't be found in the {@link ThingTypeRegistry} this method also returns <code>true</code> after {@link #MAX_CHECK_PREREQUISITE_TIME} s.
+         *
+         * @return <code>true</code> if all pre-requisites are present, <code>false</code> otherwise
+         */
         public synchronized boolean isReady() {
             ThingTypeUID thingTypeUID = this.thingTypeUID;
             // thing-type

@@ -77,7 +77,7 @@ class ThingHandlerCallbackImpl implements ThingHandlerCallback {
 
     @Override
     public void statusUpdated(Thing thing, ThingStatusInfo statusInfo) {
-        // note: all provoked operations based on a status update should be executed asynchronously!
+        // note: all operations based on a status update should be executed asynchronously!
         ThingStatusInfo oldStatusInfo = thing.getStatusInfo();
         ensureValidStatus(oldStatusInfo.getStatus(), statusInfo.getStatus());
 
