@@ -62,7 +62,7 @@ public class ThingUpdateInstructionReader {
         }
 
         Map<UpdateInstructionKey, List<ThingUpdateInstruction>> updateInstructions = new HashMap<>();
-        Enumeration<URL> entries = bundle.findEntries("update", "*.update", true);
+        Enumeration<URL> entries = bundle.findEntries("OH-INF/update", "*.update", true);
 
         if (entries != null) {
             while (entries.hasMoreElements()) {
@@ -73,8 +73,9 @@ public class ThingUpdateInstructionReader {
                 logger.trace("Reading update instructions from '{}'", url.getPath());
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
-                    updateInstructions.put(new UpdateInstructionKey(factory, thingTypeId), reader.lines()
-                            .map(this::parse).filter(Objects::nonNull).map(Objects::requireNonNull).toList());
+                    updateInstructions.put(new UpdateInstructionKey(factory, thingTypeId),
+                            reader.lines().map(String::strip).map(this::parse).filter(Objects::nonNull)
+                                    .map(Objects::requireNonNull).toList());
                 } catch (IOException e) {
                     logger.warn("Failed to read update instructions for '{}' from bundle '{}", thingTypeId,
                             bundle.getSymbolicName());
@@ -109,14 +110,14 @@ public class ThingUpdateInstructionReader {
                     return new UpdateChannelInstructionImpl(targetThingTypeVersion, parameters,
                             "ADD_CHANNEL".equals(action));
                 } else {
-                    logger.warn("Line '{}'  has wrong number of parameters (required: >=2, <=4). Ignoring.", string);
+                    logger.warn("Line '{}' has wrong number of parameters (required: >=2, <=4). Ignoring.", string);
                 }
                 break;
             case "REMOVE_CHANNEL":
                 if (parameters.size() == 1) {
                     return new RemoveChannelInstructionImpl(targetThingTypeVersion, parameters);
                 } else {
-                    logger.warn("Line '{}'  has wrong number of parameters (required: ==1). Ignoring.", string);
+                    logger.warn("Line '{}' has wrong number of parameters (required: ==1). Ignoring.", string);
                 }
                 break;
         }

@@ -15,6 +15,8 @@ package org.openhab.core.thing.internal.update;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
@@ -45,7 +47,7 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
 
     UpdateChannelInstructionImpl(int thingTypeVersion, List<String> parameters, boolean addOnly) {
         this.thingTypeVersion = thingTypeVersion;
-        this.parameters = parameters;
+        this.parameters = List.copyOf(parameters);
         this.addOnly = addOnly;
     }
 
@@ -57,11 +59,20 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
     @Override
     public void perform(Thing thing, ThingBuilder thingBuilder) {
         ChannelUID affectedChannelUid = new ChannelUID(thing.getUID(), parameters.get(0));
+        Configuration channelConfiguration = new Configuration();
+
         if (!addOnly) {
+            // if we update the channel, preserve the configuration
+            Channel oldChannel = thing.getChannel(affectedChannelUid);
+            if (oldChannel != null) {
+                channelConfiguration = oldChannel.getConfiguration();
+            }
+
             thingBuilder.withoutChannel(affectedChannelUid);
         }
+
         ChannelBuilder channelBuilder = ChannelBuilder.create(affectedChannelUid)
-                .withType(new ChannelTypeUID(parameters.get(1)));
+                .withType(new ChannelTypeUID(parameters.get(1))).withConfiguration(channelConfiguration);
 
         if (parameters.size() >= 3) {
             // label is optional (could be inherited from thing-type)

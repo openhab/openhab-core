@@ -912,7 +912,8 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         } else {
             if (thingHandlerFactory != null) {
                 if (!missingPrerequisites.containsKey(thing.getUID())) {
-                    if (checkAndPerformUpdate(thing, thingHandlerFactory)) {
+                    if (thingRegistry.getProvider(thing) instanceof ManagedProvider
+                            && checkAndPerformUpdate(thing, thingHandlerFactory)) {
                         return;
                     }
                     normalizeThingConfiguration(thing);

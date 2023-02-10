@@ -266,10 +266,12 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         ThingUID thingUID = oldThing.getUID();
 
         waitForAssert(() -> {
+            @Nullable
             Thing updatedThing = thingRegistry.get(thingUID);
             assertThat(updatedThing, is(not(sameInstance(oldThing))));
         });
 
+        @Nullable
         Thing updatedThing = thingRegistry.get(thingUID);
         assertThat(updatedThing.getStatus(), is(ThingStatus.ONLINE));
 

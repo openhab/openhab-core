@@ -37,7 +37,7 @@ public class RemoveChannelInstructionImpl implements ThingUpdateInstruction {
 
     RemoveChannelInstructionImpl(int thingTypeVersion, List<String> parameters) {
         this.thingTypeVersion = thingTypeVersion;
-        this.parameters = parameters;
+        this.parameters = List.copyOf(parameters);
     }
 
     @Override
