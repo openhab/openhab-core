@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -63,17 +63,17 @@ public class TestAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
-        if (addon.getId().endsWith(":" + INSTALL_EXCEPTION_ADDON)) {
+        if (addon.getUid().endsWith(":" + INSTALL_EXCEPTION_ADDON)) {
             throw new MarketplaceHandlerException("Installation failed", null);
         }
-        installedAddons.add(addon.getId());
+        installedAddons.add(addon.getUid());
     }
 
     @Override
     public void uninstall(Addon addon) throws MarketplaceHandlerException {
-        if (addon.getId().endsWith(":" + UNINSTALL_EXCEPTION_ADDON)) {
+        if (addon.getUid().endsWith(":" + UNINSTALL_EXCEPTION_ADDON)) {
             throw new MarketplaceHandlerException("Uninstallation failed", null);
         }
-        installedAddons.remove(addon.getId());
+        installedAddons.remove(addon.getUid());
     }
 }

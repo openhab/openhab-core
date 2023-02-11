@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,8 +13,6 @@
 package org.openhab.core.thing.internal;
 
 import java.net.URI;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -454,23 +452,20 @@ public class ThingManagerImpl
             throw new IllegalArgumentException(MessageFormat.format(
                     "Cannot update thing {0} because it is not known to the registry", thing.getUID().getAsString()));
         }
-        AccessController.doPrivileged((PrivilegedAction<@Nullable Void>) () -> {
-            final Provider<Thing> provider = thingRegistry.getProvider(thing);
-            if (provider == null) {
-                throw new IllegalArgumentException(MessageFormat.format(
-                        "Provider for thing {0} cannot be determined because it is not known to the registry",
-                        thing.getUID().getAsString()));
-            }
-            if (provider instanceof ManagedProvider) {
-                final ManagedProvider<Thing, ThingUID> managedProvider = (ManagedProvider<Thing, ThingUID>) provider;
-                managedProvider.update(thing);
-            } else {
-                logger.debug("Only updating thing {} in the registry because provider {} is not managed.",
-                        thing.getUID().getAsString(), provider);
-                thingRegistry.updated(provider, oldThing, thing);
-            }
-            return null;
-        });
+        final Provider<Thing> provider = thingRegistry.getProvider(thing);
+        if (provider == null) {
+            throw new IllegalArgumentException(MessageFormat.format(
+                    "Provider for thing {0} cannot be determined because it is not known to the registry",
+                    thing.getUID().getAsString()));
+        }
+        if (provider instanceof ManagedProvider) {
+            final ManagedProvider<Thing, ThingUID> managedProvider = (ManagedProvider<Thing, ThingUID>) provider;
+            managedProvider.update(thing);
+        } else {
+            logger.debug("Only updating thing {} in the registry because provider {} is not managed.",
+                    thing.getUID().getAsString(), provider);
+            thingRegistry.updated(provider, oldThing, thing);
+        }
         thingUpdatedLock.remove(thing.getUID());
     }
 
@@ -1119,10 +1114,7 @@ public class ThingManagerImpl
         // call asynchronous to avoid deadlocks in thing handler
         ThreadPoolManager.getPool(FORCE_REMOVE_THREAD_POOL_NAME).execute(() -> {
             try {
-                AccessController.doPrivileged((PrivilegedAction<@Nullable Void>) () -> {
-                    thingRegistry.forceRemove(thing.getUID());
-                    return null;
-                });
+                thingRegistry.forceRemove(thing.getUID());
             } catch (IllegalStateException ex) {
                 logger.debug("Could not remove thing {}. Most likely because it is not managed.", thing.getUID(), ex);
             } catch (Exception ex) {

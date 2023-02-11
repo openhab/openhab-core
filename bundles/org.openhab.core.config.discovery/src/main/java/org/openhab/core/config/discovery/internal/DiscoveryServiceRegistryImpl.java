@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,6 @@
  */
 package org.openhab.core.config.discovery.internal;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -254,13 +252,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
         }
         for (final DiscoveryListener listener : listeners) {
             try {
-                AccessController.doPrivileged(new PrivilegedAction<@Nullable Void>() {
-                    @Override
-                    public @Nullable Void run() {
-                        listener.thingDiscovered(source, result);
-                        return null;
-                    }
-                });
+                listener.thingDiscovered(source, result);
             } catch (Exception ex) {
                 logger.error("Cannot notify the DiscoveryListener '{}' on Thing discovered event!",
                         listener.getClass().getName(), ex);
@@ -280,13 +272,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
         }
         for (final DiscoveryListener listener : listeners) {
             try {
-                AccessController.doPrivileged(new PrivilegedAction<@Nullable Void>() {
-                    @Override
-                    public @Nullable Void run() {
-                        listener.thingRemoved(source, thingUID);
-                        return null;
-                    }
-                });
+                listener.thingRemoved(source, thingUID);
             } catch (Exception ex) {
                 logger.error("Cannot notify the DiscoveryListener '{}' on Thing removed event!",
                         listener.getClass().getName(), ex);
@@ -300,13 +286,8 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
         Set<ThingUID> removedResults = new HashSet<>();
         for (final DiscoveryListener listener : listeners) {
             try {
-                Collection<ThingUID> olderResults = AccessController
-                        .doPrivileged(new PrivilegedAction<@Nullable Collection<ThingUID>>() {
-                            @Override
-                            public @Nullable Collection<ThingUID> run() {
-                                return listener.removeOlderResults(source, timestamp, thingTypeUIDs, bridgeUID);
-                            }
-                        });
+                Collection<ThingUID> olderResults = listener.removeOlderResults(source, timestamp, thingTypeUIDs,
+                        bridgeUID);
                 if (olderResults != null) {
                     removedResults.addAll(olderResults);
                 }

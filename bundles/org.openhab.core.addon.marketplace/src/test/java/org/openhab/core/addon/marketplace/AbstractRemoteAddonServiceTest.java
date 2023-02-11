@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -121,7 +121,7 @@ public class AbstractRemoteAddonServiceTest {
     public void testAddonIsReportedAsInstalledIfStorageEntryMissing() {
         addonService.setInstalled(TEST_ADDON);
         List<Addon> addons = addonService.getAddons(null);
-        Addon addon = addons.stream().filter(a -> getFullAddonId(TEST_ADDON).equals(a.getId())).findAny().orElse(null);
+        Addon addon = addons.stream().filter(a -> getFullAddonId(TEST_ADDON).equals(a.getUid())).findAny().orElse(null);
 
         assertThat(addon, notNullValue());
         assertThat(addon.isInstalled(), is(true));
@@ -142,7 +142,7 @@ public class AbstractRemoteAddonServiceTest {
         // check only the installed addon is present
         addons = addonService.getAddons(null);
         assertThat(addons, hasSize(1));
-        assertThat(addons.get(0).getId(), is(getFullAddonId(TEST_ADDON)));
+        assertThat(addons.get(0).getUid(), is(getFullAddonId(TEST_ADDON)));
     }
 
     @Test

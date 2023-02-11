@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,6 @@
  */
 package org.openhab.core.automation.internal;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -92,10 +90,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
 
     public void dispose() {
         synchronized (this) {
-            AccessController.doPrivileged((PrivilegedAction<@Nullable Void>) () -> {
-                executor.shutdownNow();
-                return null;
-            });
+            executor.shutdownNow();
         }
     }
 

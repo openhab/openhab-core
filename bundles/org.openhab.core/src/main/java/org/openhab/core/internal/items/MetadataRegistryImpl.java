@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -11,6 +11,9 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.core.internal.items;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractRegistry;
@@ -40,8 +43,10 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey, MetadataProvider>
         implements MetadataRegistry {
 
-    public MetadataRegistryImpl() {
+    @Activate
+    public MetadataRegistryImpl(final @Reference ReadyService readyService) {
         super(MetadataProvider.class);
+        super.setReadyService(readyService);
     }
 
     @Override
@@ -59,6 +64,17 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
     @Override
     public boolean isInternalNamespace(String namespace) {
         return namespace.startsWith(INTERNAL_NAMESPACE_PREFIX);
+    }
+
+    /**
+     * Provides all namespaces of a particular item
+     *
+     * @param itemname the name of the item for which the namespaces should be searched.
+     */
+    @Override
+    public Collection getAllNamespaces(String itemname) {
+        return stream().map(Metadata::getUID).filter(key -> key.getItemName().equals(itemname))
+                .map(MetadataKey::getNamespace).collect(Collectors.toSet());
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)

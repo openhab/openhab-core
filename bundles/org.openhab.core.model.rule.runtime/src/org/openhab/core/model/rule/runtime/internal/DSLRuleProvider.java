@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -44,6 +43,7 @@ import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.rule.jvmmodel.RulesRefresher;
 import org.openhab.core.model.rule.rules.ChangedEventTrigger;
 import org.openhab.core.model.rule.rules.CommandEventTrigger;
+import org.openhab.core.model.rule.rules.DateTimeTrigger;
 import org.openhab.core.model.rule.rules.EventEmittedTrigger;
 import org.openhab.core.model.rule.rules.EventTrigger;
 import org.openhab.core.model.rule.rules.GroupMemberChangedEventTrigger;
@@ -56,7 +56,6 @@ import org.openhab.core.model.rule.rules.SystemStartlevelTrigger;
 import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger;
 import org.openhab.core.model.rule.rules.ThingStateUpdateEventTrigger;
 import org.openhab.core.model.rule.rules.TimerTrigger;
-import org.openhab.core.model.rule.rules.DateTimeTrigger;
 import org.openhab.core.model.rule.rules.UpdateEventTrigger;
 import org.openhab.core.model.script.runtime.DSLScriptContextProvider;
 import org.openhab.core.model.script.script.Script;
@@ -321,9 +320,8 @@ public class DSLRuleProvider
         }
         String firstLine = s.lines().findFirst().orElse("");
         String indentation = firstLine.substring(0, firstLine.length() - firstLine.stripLeading().length());
-        return s.lines().map(line -> {
-            return line.startsWith(indentation) ? line.substring(indentation.length()) : line;
-        }).collect(Collectors.joining("\n"));
+        return s.lines().map(line -> (line.startsWith(indentation) ? line.substring(indentation.length()) : line))
+                .collect(Collectors.joining("\n"));
     }
 
     private @Nullable Trigger mapTrigger(EventTrigger t) {
@@ -410,9 +408,9 @@ public class DSLRuleProvider
                 cfg.put("cronExpression", tt.getCron());
             } else {
                 id = tt.getTime();
-                if (id.equals("noon")) {
+                if ("noon".equals(id)) {
                     cfg.put("cronExpression", "0 0 12 * * ?");
-                } else if (id.equals("midnight")) {
+                } else if ("midnight".equals(id)) {
                     cfg.put("cronExpression", "0 0 0 * * ?");
                 } else {
                     logger.warn("Unrecognized time expression '{}' in rule trigger", tt.getTime());

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -123,7 +123,7 @@ public class GenerateDefaultTranslationsMojoTest {
     }
 
     @Test
-    public void addMissingBindingTranslationsWithoutI18nPath() throws IOException, MojoFailureException {
+    public void addMissingAddonTranslationsWithoutI18nPath() throws IOException, MojoFailureException {
         copyPath(WEATHER_RESOURCES_PATH, tempPath);
         deleteTempI18nPath();
 
@@ -134,7 +134,7 @@ public class GenerateDefaultTranslationsMojoTest {
     }
 
     @Test
-    public void addMissingBindingTranslationsNoChanges() throws IOException, MojoFailureException {
+    public void addMissingAddonTranslationsNoChanges() throws IOException, MojoFailureException {
         copyPath(WEATHER_RESOURCES_PATH, tempPath);
 
         mojo.setGenerationMode(ADD_MISSING_TRANSLATIONS);

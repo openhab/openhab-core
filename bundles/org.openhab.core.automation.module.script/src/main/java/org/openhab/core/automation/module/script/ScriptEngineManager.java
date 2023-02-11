@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -42,8 +42,9 @@ public interface ScriptEngineManager {
      *
      * @param engineIdentifier the unique identifier for the ScriptEngine (script file path or UUID)
      * @param scriptData the content of the script
+     * @return <code>true</code> if the script was successfully loaded, <code>false</code> otherwise
      */
-    void loadScript(String engineIdentifier, InputStreamReader scriptData);
+    boolean loadScript(String engineIdentifier, InputStreamReader scriptData);
 
     /**
      * Unloads the ScriptEngine loaded with the engineIdentifier

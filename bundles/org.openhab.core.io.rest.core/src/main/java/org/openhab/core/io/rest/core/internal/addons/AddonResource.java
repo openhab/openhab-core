@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,20 +12,25 @@
  */
 package org.openhab.core.io.rest.core.internal.addons;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.Collator;
-import java.util.Comparator;
+import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -41,10 +46,16 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonEventFactory;
+import org.openhab.core.addon.AddonInfo;
+import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
 import org.openhab.core.auth.Role;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.ConfigUtil;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.io.rest.JSONResponse;
@@ -52,6 +63,7 @@ import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
+import org.openhab.core.io.rest.core.config.ConfigurationService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -105,13 +117,22 @@ public class AddonResource implements RESTResource {
     private final Set<AddonService> addonServices = new CopyOnWriteArraySet<>();
     private final EventPublisher eventPublisher;
     private final LocaleService localeService;
+    private final ConfigurationService configurationService;
+    private final AddonInfoRegistry addonInfoRegistry;
+    private final ConfigDescriptionRegistry configDescriptionRegistry;
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
 
     @Activate
-    public AddonResource(final @Reference EventPublisher eventPublisher, final @Reference LocaleService localeService) {
+    public AddonResource(final @Reference EventPublisher eventPublisher, final @Reference LocaleService localeService,
+            final @Reference ConfigurationService configurationService,
+            final @Reference AddonInfoRegistry addonInfoRegistry,
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
         this.eventPublisher = eventPublisher;
         this.localeService = localeService;
+        this.configurationService = configurationService;
+        this.addonInfoRegistry = addonInfoRegistry;
+        this.configDescriptionRegistry = configDescriptionRegistry;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -270,6 +291,98 @@ public class AddonResource implements RESTResource {
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 
+    @GET
+    @Path("/{addonId: [a-zA-Z_0-9-:]+}/config")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "getAddonConfiguration", summary = "Get add-on configuration for given add-on ID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = "Add-on does not exist"),
+            @ApiResponse(responseCode = "500", description = "Configuration can not be read due to internal error") })
+    public Response getConfiguration(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
+            @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
+        try {
+            AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
+            if (addonService == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            Addon addon = addonService.getAddon(addonId, null);
+            if (addon == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            String infoUid = addon.getType() + "-" + addon.getId();
+            AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(infoUid);
+            if (addonInfo == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            Configuration configuration = configurationService.get(addonInfo.getServiceId());
+            return configuration != null ? Response.ok(configuration.getProperties()).build()
+                    : Response.ok(Map.of()).build();
+        } catch (IOException e) {
+            logger.error("Cannot get configuration for service {}: {}", addonId, e.getMessage(), e);
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PUT
+    @Path("/{addonId: [a-zA-Z_0-9-:]+}/config")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "updateAddonConfiguration", summary = "Updates an add-on configuration for given ID and returns the old configuration.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "204", description = "No old configuration"),
+            @ApiResponse(responseCode = "404", description = "Add-on does not exist"),
+            @ApiResponse(responseCode = "500", description = "Configuration can not be updated due to internal error") })
+    public Response updateConfiguration(@PathParam("addonId") @Parameter(description = "Add-on id") String addonId,
+            @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId,
+            @Nullable Map<String, Object> configuration) {
+        try {
+            AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
+            if (addonService == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            Addon addon = addonService.getAddon(addonId, null);
+            if (addon == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            String infoUid = addon.getType() + "-" + addon.getId();
+            AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(infoUid);
+            if (addonInfo == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            Configuration oldConfiguration = configurationService.get(addonInfo.getServiceId());
+            configurationService.update(addonInfo.getServiceId(),
+                    new Configuration(normalizeConfiguration(configuration, addonId)));
+            return oldConfiguration != null ? Response.ok(oldConfiguration.getProperties()).build()
+                    : Response.noContent().build();
+        } catch (IOException ex) {
+            logger.error("Cannot update configuration for service {}: {}", addonId, ex.getMessage(), ex);
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
+            String addonId) {
+        if (properties == null || properties.isEmpty()) {
+            return properties;
+        }
+        AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(addonId);
+
+        if (addonInfo == null || addonInfo.getConfigDescriptionURI() == null) {
+            return properties;
+        }
+
+        String configDescriptionURI = addonInfo.getConfigDescriptionURI();
+        if (configDescriptionURI != null) {
+            ConfigDescription configDesc = configDescriptionRegistry
+                    .getConfigDescription(URI.create(configDescriptionURI));
+            if (configDesc != null) {
+                return ConfigUtil.normalizeTypes(properties, List.of(configDesc));
+            }
+        }
+
+        return properties;
+    }
+
     private void postFailureEvent(String addonId, @Nullable String msg) {
         Event event = AddonEventFactory.createAddonFailureEvent(addonId, msg);
         eventPublisher.post(event);
@@ -281,18 +394,13 @@ public class AddonResource implements RESTResource {
     }
 
     private Stream<Addon> getAllAddons(Locale locale) {
-        return addonServices.stream().map(s -> s.getAddons(locale)).flatMap(l -> l.stream());
+        return addonServices.stream().map(s -> s.getAddons(locale)).flatMap(Collection::stream);
     }
 
     private Set<AddonType> getAllAddonTypes(Locale locale) {
         final Collator coll = Collator.getInstance(locale);
         coll.setStrength(Collator.PRIMARY);
-        Set<AddonType> ret = new TreeSet<>(new Comparator<AddonType>() {
-            @Override
-            public int compare(AddonType o1, AddonType o2) {
-                return coll.compare(o1.getLabel(), o2.getLabel());
-            }
-        });
+        Set<AddonType> ret = new TreeSet<>((o1, o2) -> coll.compare(o1.getLabel(), o2.getLabel()));
         for (AddonService addonService : addonServices) {
             ret.addAll(addonService.getTypes(locale));
         }
@@ -302,12 +410,7 @@ public class AddonResource implements RESTResource {
     private Set<AddonType> getAddonTypesForService(AddonService addonService, Locale locale) {
         final Collator coll = Collator.getInstance(locale);
         coll.setStrength(Collator.PRIMARY);
-        Set<AddonType> ret = new TreeSet<>(new Comparator<AddonType>() {
-            @Override
-            public int compare(AddonType o1, AddonType o2) {
-                return coll.compare(o1.getLabel(), o2.getLabel());
-            }
-        });
+        Set<AddonType> ret = new TreeSet<>((o1, o2) -> coll.compare(o1.getLabel(), o2.getLabel()));
         ret.addAll(addonService.getTypes(locale));
         return ret;
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,6 @@
  */
 package org.openhab.core.config.discovery;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -175,12 +173,7 @@ public class DiscoveryResultBuilder {
     }
 
     private String getStackTrace(final Thread thread) {
-        StackTraceElement[] elements = AccessController.doPrivileged(new PrivilegedAction<StackTraceElement[]>() {
-            @Override
-            public StackTraceElement[] run() {
-                return thread.getStackTrace();
-            }
-        });
+        StackTraceElement[] elements = thread.getStackTrace();
         return Arrays.stream(elements).map(element -> "\tat " + element.toString()).collect(Collectors.joining("\n"));
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,6 @@ import org.openhab.core.common.AbstractUID;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.Event;
-import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.Item;
@@ -176,11 +175,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     @Override
     public Set<String> getSubscribedEventTypes() {
         return SUBSCRIBED_EVENT_TYPES;
-    }
-
-    @Override
-    public @Nullable EventFilter getEventFilter() {
-        return null;
     }
 
     @Override
@@ -511,6 +505,14 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private @Nullable QuantityType<?> convertToQuantityType(DecimalType originalType, Item item,
             @Nullable String acceptedItemType) {
+        if (!(item instanceof NumberItem)) {
+            // PercentType command sent via DimmerItem to a channel that's dimensioned
+            // (such as Number:Dimensionless, expecting a %).
+            // We can't know the proper units to add, so just pass it through and assume
+            // The binding can deal with it.
+            return null;
+        }
+
         NumberItem numberItem = (NumberItem) item;
 
         // DecimalType command sent via a NumberItem with dimension:

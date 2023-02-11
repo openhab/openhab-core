@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -75,8 +75,8 @@ public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller impl
     public void install(Addon addon) throws MarketplaceHandlerException {
         try {
             URL sourceUrl = new URL((String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY));
-            addBundleToCache(addon.getId(), sourceUrl);
-            installFromCache(bundleContext, addon.getId());
+            addBundleToCache(addon.getUid(), sourceUrl);
+            installFromCache(bundleContext, addon.getUid());
         } catch (MalformedURLException e) {
             throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage(), e);
         }
@@ -84,7 +84,7 @@ public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller impl
 
     @Override
     public void uninstall(Addon addon) throws MarketplaceHandlerException {
-        uninstallBundle(bundleContext, addon.getId());
+        uninstallBundle(bundleContext, addon.getUid());
     }
 
     @Override

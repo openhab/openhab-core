@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.items.ManagedMetadataProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
+import org.openhab.core.service.ReadyService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -44,6 +45,7 @@ public class MetadataRegistryImplTest {
     private @Mock @NonNullByDefault({}) ServiceReference managedProviderRefMock;
     private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
     private @Mock @NonNullByDefault({}) ManagedMetadataProvider managedProviderMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
 
     private @NonNullByDefault({}) MetadataRegistryImpl registry;
     private @NonNullByDefault({}) ServiceListener providerTracker;
@@ -53,7 +55,7 @@ public class MetadataRegistryImplTest {
     public void setup() throws Exception {
         when(bundleContextMock.getService(same(managedProviderRefMock))).thenReturn(managedProviderMock);
 
-        registry = new MetadataRegistryImpl();
+        registry = new MetadataRegistryImpl(readyServiceMock);
         registry.setManagedProvider(managedProviderMock);
         registry.activate(bundleContextMock);
         registry.waitForCompletedAsyncActivationTasks();

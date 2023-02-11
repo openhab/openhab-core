@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -58,7 +58,6 @@ import org.openhab.core.config.discovery.inbox.events.InboxRemovedEvent;
 import org.openhab.core.config.discovery.inbox.events.InboxUpdatedEvent;
 import org.openhab.core.config.discovery.test.DummyThingTypeProvider;
 import org.openhab.core.events.Event;
-import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.test.AsyncResultWrapper;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -228,11 +227,6 @@ public class InboxOSGiTest extends JavaOSGiTest {
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Set.of(InboxRemovedEvent.TYPE);
-            }
-
-            @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
             }
         };
 
@@ -755,11 +749,6 @@ public class InboxOSGiTest extends JavaOSGiTest {
             public Set<String> getSubscribedEventTypes() {
                 return Set.of(InboxAddedEvent.TYPE, InboxRemovedEvent.TYPE, InboxUpdatedEvent.TYPE);
             }
-
-            @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
-            }
         };
 
         registerService(inboxEventSubscriber);
@@ -799,11 +788,6 @@ public class InboxOSGiTest extends JavaOSGiTest {
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Set.of(InboxAddedEvent.TYPE, InboxRemovedEvent.TYPE, InboxUpdatedEvent.TYPE);
-            }
-
-            @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
             }
         };
 
@@ -848,11 +832,6 @@ public class InboxOSGiTest extends JavaOSGiTest {
             public Set<String> getSubscribedEventTypes() {
                 return Set.of(InboxAddedEvent.TYPE, InboxRemovedEvent.TYPE, InboxUpdatedEvent.TYPE);
             }
-
-            @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
-            }
         };
 
         registerService(inboxEventSubscriber);
@@ -889,11 +868,6 @@ public class InboxOSGiTest extends JavaOSGiTest {
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Set.of(InboxAddedEvent.TYPE, InboxRemovedEvent.TYPE, InboxUpdatedEvent.TYPE);
-            }
-
-            @Override
-            public @Nullable EventFilter getEventFilter() {
-                return null;
             }
         };
 
@@ -1077,7 +1051,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         // reduce time between retries to ensure the test does not time out
         inbox.setDiscoveryResultAddRetryInterval(1);
 
-        CompletableFuture future = inbox.add(discoveryResult);
+        CompletableFuture<Boolean> future = inbox.add(discoveryResult);
 
         waitForAssert(() -> future.isDone(), 30, 5);
 
@@ -1093,7 +1067,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         // reduce time between retries to ensure the test does not time out
         inbox.setDiscoveryResultAddRetryInterval(1);
 
-        CompletableFuture future = inbox.add(discoveryResult);
+        CompletableFuture<Boolean> future = inbox.add(discoveryResult);
 
         dummyThingTypeProvider.add(thingTypeUID, ThingTypeBuilder.instance(thingTypeUID, "label").build());
 

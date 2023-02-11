@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.DateTimeException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -242,11 +243,12 @@ public class DateTimeTypeTest {
 
         assertTrue(dt1.toString().equals(dt2.toFullString()));
         assertTrue(dt1.getZonedDateTime().equals(dt2.getZonedDateTime()));
+        assertTrue(dt1.getInstant().equals(dt2.getInstant()));
         assertTrue(dt1.equals(dt2));
     }
 
     @Test
-    public void parsingTest() {
+    public void zonedParsingTest() {
         DateTimeType dt1 = new DateTimeType("2019-06-12T17:30:00Z");
         DateTimeType dt2 = new DateTimeType("2019-06-12T17:30:00+0000");
         DateTimeType dt3 = new DateTimeType("2019-06-12T19:30:00+0200");
@@ -259,6 +261,20 @@ public class DateTimeTypeTest {
         assertThat(zdt1, is(zdt2));
         assertThat(zdt1, is(zdt3.withZoneSameInstant(zdt1.getZone())));
         assertThat(zdt2, is(zdt3.withZoneSameInstant(zdt2.getZone())));
+    }
+
+    @Test
+    public void instantParsingTest() {
+        DateTimeType dt1 = new DateTimeType("2019-06-12T17:30:00Z");
+        DateTimeType dt2 = new DateTimeType("2019-06-12T17:30:00+0000");
+        DateTimeType dt3 = new DateTimeType("2019-06-12T19:30:00+0200");
+        assertThat(dt1, is(dt2));
+
+        Instant i1 = dt1.getInstant();
+        Instant i2 = dt2.getInstant();
+        Instant i3 = dt3.getInstant();
+        assertThat(i1, is(i2));
+        assertThat(i1, is(i3));
     }
 
     @Test

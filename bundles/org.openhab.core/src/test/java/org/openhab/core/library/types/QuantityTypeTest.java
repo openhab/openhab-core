@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -307,6 +307,19 @@ public class QuantityTypeTest {
 
         assertEquals(PercentType.HUNDRED, new QuantityType<>("100 %").as(PercentType.class));
         assertEquals(PercentType.ZERO, new QuantityType<>("0 %").as(PercentType.class));
+
+        // Test QuantityType (different ways to refer to 10%) conversion to PercentType
+        assertEquals(new PercentType(BigDecimal.valueOf(10)), new QuantityType<>("10 %").as(PercentType.class));
+        assertEquals(new PercentType(BigDecimal.valueOf(10)), new QuantityType<>("0.1").as(PercentType.class));
+        assertEquals(new PercentType(BigDecimal.valueOf(10)), new QuantityType<>("100 %/10").as(PercentType.class));
+        assertEquals(new PercentType(BigDecimal.valueOf(10)), new QuantityType<>("100000 ppm").as(PercentType.class));
+
+        // Known caveat: bare unit, different dimension. Still gets converted to %
+        assertEquals(new PercentType(BigDecimal.valueOf(10)),
+                new QuantityType<>(0.1, Units.RADIAN).as(PercentType.class));
+
+        // incompatible units
+        assertEquals(null, new QuantityType<>("0.5 m").as(PercentType.class));
     }
 
     @ParameterizedTest
@@ -456,7 +469,7 @@ public class QuantityTypeTest {
         assertEquals("1 GiB", bytes.toString());
         bytes = new QuantityType<DataAmount>(1, BinaryPrefix.GIBI(Units.BYTE));
         assertEquals("1 GiB", bytes.toString());
-        QuantityType<DataAmount> bigAmount = new QuantityType<>("1 Kio");
+        QuantityType<DataAmount> bigAmount = new QuantityType<>("1 kio");
         QuantityType<DataAmount> octets = bigAmount.toUnit(Units.OCTET);
         assertEquals(1024, octets.intValue());
         QuantityType<DataAmount> hugeAmount = new QuantityType<>("1024Gio");

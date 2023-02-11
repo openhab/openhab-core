@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -326,14 +326,14 @@ public class ItemStateConditionHandlerTest extends JavaTest {
 
         // added later
         ItemAddedEvent addedEvent = ItemEventFactory.createAddedEvent(new SwitchItem(ITEM_NAME));
-        assertTrue(handler.apply(addedEvent));
+        assertTrue(handler.getEventFilter().apply(addedEvent));
         handler.receive(addedEvent);
         assertLogMessage(ItemStateConditionHandler.class, LogLevel.INFO,
                 "Item 'myItem' needed for rule 'foo' added. Condition 'conditionId' will now work.");
 
         // removed later
         ItemRemovedEvent removedEvent = ItemEventFactory.createRemovedEvent(new SwitchItem(ITEM_NAME));
-        assertTrue(handler.apply(removedEvent));
+        assertTrue(handler.getEventFilter().apply(removedEvent));
         handler.receive(removedEvent);
         assertLogMessage(ItemStateConditionHandler.class, LogLevel.WARN,
                 "Item 'myItem' needed for rule 'foo' removed. Condition 'conditionId' will no longer work.");

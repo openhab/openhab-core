@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,8 +14,6 @@ package org.openhab.core.internal.common;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -56,25 +54,23 @@ public class SafeCallerBuilderImpl<T> implements SafeCallerBuilder<T> {
     @SuppressWarnings("unchecked")
     @Override
     public T build() {
-        return AccessController.doPrivileged((PrivilegedAction<T>) () -> {
-            InvocationHandler handler;
-            if (async) {
-                handler = new InvocationHandlerAsync<>(manager, target, identifier, timeout, exceptionHandler,
-                        timeoutHandler);
-            } else {
-                handler = new InvocationHandlerSync<>(manager, target, identifier, timeout, exceptionHandler,
-                        timeoutHandler);
-            }
-            ClassLoader classLoader = getClass().getClassLoader();
-            if (classLoader == null) {
-                throw new IllegalStateException(
-                        "Cannot create proxy because '" + getClass().getName() + "' class loader is null");
-            }
-            return (T) Proxy.newProxyInstance(
-                    CombinedClassLoader.fromClasses(classLoader,
-                            Stream.concat(Stream.of(target.getClass()), Arrays.stream(interfaceTypes))),
-                    interfaceTypes, handler);
-        });
+        InvocationHandler handler;
+        if (async) {
+            handler = new InvocationHandlerAsync<>(manager, target, identifier, timeout, exceptionHandler,
+                    timeoutHandler);
+        } else {
+            handler = new InvocationHandlerSync<>(manager, target, identifier, timeout, exceptionHandler,
+                    timeoutHandler);
+        }
+        ClassLoader classLoader = getClass().getClassLoader();
+        if (classLoader == null) {
+            throw new IllegalStateException(
+                    "Cannot create proxy because '" + getClass().getName() + "' class loader is null");
+        }
+        return (T) Proxy.newProxyInstance(
+                CombinedClassLoader.fromClasses(classLoader,
+                        Stream.concat(Stream.of(target.getClass()), Arrays.stream(interfaceTypes))),
+                interfaceTypes, handler);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -269,11 +269,10 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                     logger.trace("Removing an UPNP service subscription '{}' for particpant '{}'", serviceID,
                             participant.getUDN());
 
-                    UpnpSubscriptionCallback callback = subscriptionCallbacks.get(subService);
+                    UpnpSubscriptionCallback callback = subscriptionCallbacks.remove(subService);
                     if (callback != null) {
                         callback.end();
                     }
-                    subscriptionCallbacks.remove(subService);
                 } else {
                     logger.trace("Could not find service '{}' for device '{}'", serviceID,
                             device.getIdentity().getUdn());

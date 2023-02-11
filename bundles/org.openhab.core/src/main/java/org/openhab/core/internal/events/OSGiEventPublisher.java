@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,6 @@
  */
 package org.openhab.core.internal.events;
 
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -54,23 +51,17 @@ public class OSGiEventPublisher implements EventPublisher {
 
     private void postAsOSGiEvent(final EventAdmin eventAdmin, final Event event) throws IllegalStateException {
         try {
-            AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-                @Override
-                public Void run() throws Exception {
-                    Dictionary<String, Object> properties = new Hashtable<>(3);
-                    properties.put("type", event.getType());
-                    properties.put("payload", event.getPayload());
-                    properties.put("topic", event.getTopic());
-                    String source = event.getSource();
-                    if (source != null) {
-                        properties.put("source", source);
-                    }
-                    eventAdmin.postEvent(new org.osgi.service.event.Event("openhab", properties));
-                    return null;
-                }
-            });
-        } catch (PrivilegedActionException pae) {
-            Exception e = pae.getException();
+            Dictionary<String, Object> properties = new Hashtable<>(3);
+            properties.put("type", event.getType());
+            properties.put("payload", event.getPayload());
+            properties.put("topic", event.getTopic());
+            String source = event.getSource();
+            if (source != null) {
+                properties.put("source", source);
+            }
+            eventAdmin.postEvent(new org.osgi.service.event.Event("openhab", properties));
+
+        } catch (Exception e) {
             throw new IllegalStateException("Cannot post the event via the event bus. Error message: " + e.getMessage(),
                     e);
         }

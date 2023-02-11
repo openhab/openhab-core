@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -76,7 +76,7 @@ public class DialogProcessor implements KSListener, STTListener {
 
     private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
 
-    private final DialogContext dialogContext;
+    public final DialogContext dialogContext;
     private @Nullable List<ToneSynthesizer.Tone> listeningMelody;
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
@@ -220,6 +220,7 @@ public class DialogProcessor implements KSListener, STTListener {
         closeStreamKS();
         toggleProcessing(false);
         playStopSound();
+        eventListener.onDialogStopped(dialogContext);
     }
 
     /**
@@ -458,5 +459,12 @@ public class DialogProcessor implements KSListener, STTListener {
          * @param context used by the dialog processor
          */
         void onBeforeDialogInterpretation(DialogContext context);
+
+        /**
+         * Runs whenever the dialog it stopped
+         *
+         * @param context used by the dialog processor
+         */
+        void onDialogStopped(DialogContext context);
     }
 }

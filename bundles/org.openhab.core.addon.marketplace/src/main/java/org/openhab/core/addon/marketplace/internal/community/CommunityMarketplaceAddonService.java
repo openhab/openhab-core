@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,7 +27,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -88,6 +90,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     private static final String COMMUNITY_BASE_URL = "https://community.openhab.org";
     private static final String COMMUNITY_MARKETPLACE_URL = COMMUNITY_BASE_URL + "/c/marketplace/69/l/latest";
     private static final String COMMUNITY_TOPIC_URL = COMMUNITY_BASE_URL + "/t/";
+    private static final Pattern BUNDLE_NAME_PATTERN = Pattern.compile(".*/(.*)-\\d+\\.\\d+\\.\\d+.*");
 
     private static final String SERVICE_ID = "marketplace";
     private static final String ADDON_ID_PREFIX = SERVICE_ID + ":";
@@ -187,7 +190,8 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
             List<DiscourseUser> users = pages.stream().flatMap(p -> Stream.of(p.users)).collect(Collectors.toList());
             pages.stream().flatMap(p -> Stream.of(p.topicList.topics))
                     .filter(t -> showUnpublished || Arrays.asList(t.tags).contains(PUBLISHED_TAG))
-                    .map(t -> convertTopicItemToAddon(t, users)).forEach(addons::add);
+                    .map(t -> Optional.ofNullable(convertTopicItemToAddon(t, users)))
+                    .forEach(a -> a.ifPresent(addons::add));
         } catch (Exception e) {
             logger.warn("Unable to retrieve marketplace add-ons: {}", e.getMessage());
         }
@@ -195,12 +199,11 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     }
 
     @Override
-    public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
-        String fullId = ADDON_ID_PREFIX + id;
+    public @Nullable Addon getAddon(String uid, @Nullable Locale locale) {
         // check if it is an installed add-on (cachedAddons also contains possibly incomplete results from the remote
         // side, we need to retrieve them from Discourse)
-        if (installedAddons.contains(fullId)) {
-            return cachedAddons.stream().filter(e -> fullId.equals(e.getId())).findAny().orElse(null);
+        if (installedAddons.contains(uid)) {
+            return cachedAddons.stream().filter(e -> uid.equals(e.getUid())).findAny().orElse(null);
         }
 
         if (!remoteEnabled()) {
@@ -209,7 +212,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
         // retrieve from remote
         try {
-            URL url = new URL(String.format("%s%s", COMMUNITY_TOPIC_URL, id.replace(ADDON_ID_PREFIX, "")));
+            URL url = new URL(String.format("%s%s", COMMUNITY_TOPIC_URL, uid.replace(ADDON_ID_PREFIX, "")));
             URLConnection connection = url.openConnection();
             connection.addRequestProperty("Accept", "application/json");
             if (this.apiKey != null) {
@@ -277,59 +280,73 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
      * @param topic the topic
      * @return the list item
      */
-    private Addon convertTopicItemToAddon(DiscourseTopicItem topic, List<DiscourseUser> users) {
-        List<String> tags = Arrays.asList(Objects.requireNonNullElse(topic.tags, new String[0]));
+    private @Nullable Addon convertTopicItemToAddon(DiscourseTopicItem topic, List<DiscourseUser> users) {
+        try {
+            List<String> tags = Arrays.asList(Objects.requireNonNullElse(topic.tags, new String[0]));
 
-        String id = ADDON_ID_PREFIX + topic.id.toString();
-        AddonType addonType = getAddonType(topic.categoryId, tags);
-        String type = (addonType != null) ? addonType.getId() : "";
-        String contentType = getContentType(topic.categoryId, tags);
+            String uid = ADDON_ID_PREFIX + topic.id.toString();
+            AddonType addonType = getAddonType(topic.categoryId, tags);
+            if (addonType == null) {
+                logger.debug("Ignoring topic '{}' because no add-on type could be found", topic.id);
+                return null;
+            }
+            String type = addonType.getId();
+            String id = topic.id.toString(); // this will be replaced after installation by the correct id if available
+            String contentType = getContentType(topic.categoryId, tags);
 
-        String title = topic.title;
-        boolean compatible = true;
+            String title = topic.title;
+            boolean compatible = true;
 
-        int compatibilityStart = topic.title.lastIndexOf("["); // version range always starts with [
-        if (topic.title.lastIndexOf(" ") < compatibilityStart) { // check includes [ not present
-            String potentialRange = topic.title.substring(compatibilityStart + 1);
-            Matcher matcher = BundleVersion.RANGE_PATTERN.matcher(potentialRange);
-            if (matcher.matches()) {
-                try {
-                    compatible = coreVersion.inRange(potentialRange);
-                    title = topic.title.substring(0, compatibilityStart).trim();
-                } catch (IllegalArgumentException e) {
-                    logger.debug("Failed to determine compatibility for addon {}: {}", topic.title, e.getMessage());
-                    compatible = true;
+            int compatibilityStart = topic.title.lastIndexOf("["); // version range always starts with [
+            if (topic.title.lastIndexOf(" ") < compatibilityStart) { // check includes [ not present
+                String potentialRange = topic.title.substring(compatibilityStart);
+                Matcher matcher = BundleVersion.RANGE_PATTERN.matcher(potentialRange);
+                if (matcher.matches()) {
+                    try {
+                        compatible = coreVersion.inRange(potentialRange);
+                        title = topic.title.substring(0, compatibilityStart).trim();
+                        logger.debug("{} is {}compatible with core version {}", topic.title, compatible ? "" : "NOT ",
+                                coreVersion);
+                    } catch (IllegalArgumentException e) {
+                        logger.debug("Failed to determine compatibility for addon {}: {}", topic.title, e.getMessage());
+                        compatible = true;
+                    }
+                } else {
+                    logger.debug("Range pattern does not match '{}'", potentialRange);
                 }
             }
-        }
 
-        String link = COMMUNITY_TOPIC_URL + topic.id.toString();
-        int likeCount = topic.likeCount;
-        int views = topic.views;
-        int postsCount = topic.postsCount;
-        Date createdDate = topic.createdAt;
-        String author = "";
-        for (DiscoursePosterInfo posterInfo : topic.posters) {
-            if (posterInfo.description.contains("Original Poster")) {
-                author = users.stream().filter(u -> u.id.equals(posterInfo.userId)).findFirst().get().name;
+            String link = COMMUNITY_TOPIC_URL + topic.id.toString();
+            int likeCount = topic.likeCount;
+            int views = topic.views;
+            int postsCount = topic.postsCount;
+            Date createdDate = topic.createdAt;
+            String author = "";
+            for (DiscoursePosterInfo posterInfo : topic.posters) {
+                if (posterInfo.description.contains("Original Poster")) {
+                    author = users.stream().filter(u -> u.id.equals(posterInfo.userId)).findFirst().get().name;
+                }
             }
+
+            String maturity = tags.stream().filter(CODE_MATURITY_LEVELS::contains).findAny().orElse(null);
+
+            Map<String, Object> properties = Map.of("created_at", createdDate, //
+                    "like_count", likeCount, //
+                    "views", views, //
+                    "posts_count", postsCount, //
+                    "tags", tags.toArray(String[]::new));
+
+            // try to use a handler to determine if the add-on is installed
+            boolean installed = addonHandlers.stream()
+                    .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(uid));
+
+            return Addon.create(uid).withType(type).withId(id).withContentType(contentType)
+                    .withImageLink(topic.imageUrl).withAuthor(author).withProperties(properties).withLabel(title)
+                    .withInstalled(installed).withMaturity(maturity).withCompatible(compatible).withLink(link).build();
+        } catch (RuntimeException e) {
+            logger.debug("Ignoring marketplace add-on '{}' due: {}", topic.title, e.getMessage());
+            return null;
         }
-
-        String maturity = tags.stream().filter(CODE_MATURITY_LEVELS::contains).findAny().orElse(null);
-
-        Map<String, Object> properties = Map.of("created_at", createdDate, //
-                "like_count", likeCount, //
-                "views", views, //
-                "posts_count", postsCount, //
-                "tags", tags.toArray(String[]::new));
-
-        // try to use a handler to determine if the add-on is installed
-        boolean installed = addonHandlers.stream()
-                .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(id));
-
-        return Addon.create(id).withType(type).withContentType(contentType).withImageLink(topic.imageUrl)
-                .withAuthor(author).withProperties(properties).withLabel(title).withInstalled(installed)
-                .withMaturity(maturity).withCompatible(compatible).withLink(link).build();
     }
 
     /**
@@ -350,7 +367,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
      * @return the list item
      */
     private Addon convertTopicToAddon(DiscourseTopicResponseDTO topic) {
-        String id = ADDON_ID_PREFIX + topic.id.toString();
+        String uid = ADDON_ID_PREFIX + topic.id.toString();
         List<String> tags = Arrays.asList(Objects.requireNonNullElse(topic.tags, new String[0]));
 
         AddonType addonType = getAddonType(topic.categoryId, tags);
@@ -376,15 +393,18 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         properties.put("tags", tags.toArray(String[]::new));
 
         String detailedDescription = topic.postStream.posts[0].cooked;
+        String id = null;
 
         // try to extract contents or links
         if (topic.postStream.posts[0].linkCounts != null) {
             for (DiscoursePostLink postLink : topic.postStream.posts[0].linkCounts) {
                 if (postLink.url.endsWith(".jar")) {
                     properties.put("jar_download_url", postLink.url);
+                    id = determineIdFromUrl(postLink.url);
                 }
                 if (postLink.url.endsWith(".kar")) {
                     properties.put("kar_download_url", postLink.url);
+                    id = determineIdFromUrl(postLink.url);
                 }
                 if (postLink.url.endsWith(".json")) {
                     properties.put("json_download_url", postLink.url);
@@ -394,6 +414,11 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
                 }
             }
         }
+
+        if (id == null) {
+            id = topic.id.toString(); // this is a fallback if we couldn't find a better id
+        }
+
         if (detailedDescription.contains(JSON_CODE_MARKUP_START)) {
             String jsonContent = detailedDescription.substring(
                     detailedDescription.indexOf(JSON_CODE_MARKUP_START) + JSON_CODE_MARKUP_START.length(),
@@ -409,12 +434,23 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
         // try to use a handler to determine if the add-on is installed
         boolean installed = addonHandlers.stream()
-                .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(id));
+                .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(uid));
 
-        return Addon.create(id).withType(type).withContentType(contentType).withLabel(topic.title)
+        return Addon.create(uid).withType(type).withId(id).withContentType(contentType).withLabel(topic.title)
                 .withImageLink(topic.imageUrl).withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
                 .withAuthor(topic.postStream.posts[0].displayUsername).withMaturity(maturity)
                 .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties)
                 .build();
+    }
+
+    private @Nullable String determineIdFromUrl(String url) {
+        Matcher matcher = BUNDLE_NAME_PATTERN.matcher(url);
+        if (matcher.matches()) {
+            String bundleName = matcher.group(1);
+            return bundleName.substring(bundleName.lastIndexOf(".") + 1);
+        } else {
+            logger.warn("Could not determine bundle name from url: {}", url);
+        }
+        return null;
     }
 }

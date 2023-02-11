@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -42,10 +42,10 @@ public class PropertiesToTranslationsConverterTest {
         assertThat(translations.keysStream().count(), is(44L));
 
         String lines = translations.linesStream().collect(Collectors.joining(System.lineSeparator()));
-        assertThat(lines, containsString("# binding"));
-        assertThat(lines, containsString("binding.acmeweather.name = ACME Weather Binding"));
+        assertThat(lines, containsString("# add-on"));
+        assertThat(lines, containsString("addon.acmeweather.name = ACME Weather Binding"));
         assertThat(lines, containsString(
-                "binding.acmeweather.description = ACME Weather - Current weather and forecasts in your city."));
+                "addon.acmeweather.description = ACME Weather - Current weather and forecasts in your city."));
         assertThat(lines, containsString(
                 "channel-group-type.acmeweather.forecast.channel.minTemperature.description = Minimum forecasted temperature in degrees Celsius (metric) or Fahrenheit (imperial)."));
         assertThat(lines, containsString(

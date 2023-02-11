@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -283,6 +283,38 @@ public interface VoiceManager {
      *             started for this audio source
      */
     void listenAndAnswer(DialogContext context) throws IllegalStateException;
+
+    /**
+     * Register a dialog, so it will be persisted and started any time the required services are available.
+     *
+     * Only one registration can be done for an audio source.
+     *
+     * @param registration with the desired services ids and options for the dialog
+     *
+     * @throws IllegalStateException if there is another registration for the same source
+     */
+    void registerDialog(DialogRegistration registration) throws IllegalStateException;
+
+    /**
+     * Removes a dialog registration and stops the associate dialog.
+     *
+     * @param registration with the desired services ids and options for the dialog
+     */
+    void unregisterDialog(DialogRegistration registration);
+
+    /**
+     * Removes a dialog registration and stops the associate dialog.
+     *
+     * @param sourceId the registration audio source id.
+     */
+    void unregisterDialog(String sourceId);
+
+    /**
+     * List current dialog registrations
+     *
+     * @return a list of {@link DialogRegistration}
+     */
+    List<DialogRegistration> getDialogRegistrations();
 
     /**
      * Retrieves a TTS service.

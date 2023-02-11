@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -242,6 +242,14 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
             if (existingElement == null) {
                 logger.debug("Cannot remove \"{}\" with key \"{}\" from provider \"{}\" because it does not exist!",
                         element.getClass().getSimpleName(), uid, provider.getClass().getSimpleName());
+                return;
+            }
+            Provider<E> elementProvider = elementToProvider.get(existingElement);
+            if (!elementProvider.equals(provider)) {
+                logger.error(
+                        "Provider '{}' is not allowed to remove element '{}' with key '{}' from the registry because it was added by provider '{}'.",
+                        provider.getClass().getSimpleName(), element.getClass().getSimpleName(), uid,
+                        elementProvider.getClass().getSimpleName());
                 return;
             }
             try {

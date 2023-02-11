@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,6 +27,7 @@ import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.events.TopicPrefixEventFilter;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
@@ -45,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
+public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber {
 
     public static final String MODULE_TYPE_ID = "core.ItemCommandTrigger";
 
@@ -56,11 +57,11 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
 
     private final String itemName;
     private final @Nullable String command;
-    private final String topic;
 
     private final Set<String> types;
     private final BundleContext bundleContext;
     private final String ruleUID;
+    private final EventFilter eventFilter;
 
     private final ServiceRegistration<?> eventSubscriberRegistration;
 
@@ -68,15 +69,13 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
             ItemRegistry itemRegistry) {
         super(module);
         this.itemName = (String) module.getConfiguration().get(CFG_ITEMNAME);
+        this.eventFilter = new TopicPrefixEventFilter("openhab/items/" + itemName + "/");
         this.command = (String) module.getConfiguration().get(CFG_COMMAND);
         this.bundleContext = bundleContext;
         this.ruleUID = ruleUID;
         this.types = Set.of(ItemCommandEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         Dictionary<String, Object> properties = new Hashtable<>();
-        this.topic = "openhab/items/" + itemName + "/*";
-        properties.put("event.topics", topic);
-        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
-                properties);
+        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
         if (itemRegistry.get(itemName) == null) {
             logger.warn("Item '{}' needed for rule '{}' is missing. Trigger '{}' will not work.", itemName, ruleUID,
                     module.getId());
@@ -90,7 +89,7 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
 
     @Override
     public @Nullable EventFilter getEventFilter() {
-        return this;
+        return eventFilter;
     }
 
     @Override
@@ -133,11 +132,5 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
     public void dispose() {
         super.dispose();
         eventSubscriberRegistration.unregister();
-    }
-
-    @Override
-    public boolean apply(Event event) {
-        logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
-        return event.getTopic().contains("openhab/items/" + itemName + "/");
     }
 }

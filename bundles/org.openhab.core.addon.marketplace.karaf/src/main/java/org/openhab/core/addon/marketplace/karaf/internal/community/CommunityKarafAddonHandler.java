@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -106,8 +106,8 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     public void install(Addon addon) throws MarketplaceHandlerException {
         try {
             URL sourceUrl = new URL((String) addon.getProperties().get(KAR_DOWNLOAD_URL_PROPERTY));
-            addKarToCache(addon.getId(), sourceUrl);
-            installFromCache(addon.getId());
+            addKarToCache(addon.getUid(), sourceUrl);
+            installFromCache(addon.getUid());
         } catch (MalformedURLException e) {
             throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage(), e);
         }
@@ -116,7 +116,7 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     @Override
     public void uninstall(Addon addon) throws MarketplaceHandlerException {
         try {
-            Path addonPath = getAddonCacheDirectory(addon.getId());
+            Path addonPath = getAddonCacheDirectory(addon.getUid());
             List<String> repositories = karService.list();
             for (Path path : karFilesStream(addonPath).collect(Collectors.toList())) {
                 String karRepoName = pathToKarRepoName(path);

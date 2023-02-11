@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,9 @@
  */
 package org.openhab.core.thing.internal;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -38,11 +37,7 @@ public class BridgeImpl extends ThingImpl implements Bridge {
 
     private final transient Logger logger = LoggerFactory.getLogger(BridgeImpl.class);
 
-    /*
-     * !!! DO NOT CHANGE - We are not allowed to change the members of the BridgeImpl implementation as the storage for
-     * things uses this implementation itself to store and restore the data.
-     */
-    private transient List<Thing> things = new CopyOnWriteArrayList<>();
+    private transient Map<ThingUID, Thing> things = new ConcurrentHashMap<>();
 
     /**
      * Package protected default constructor to allow reflective instantiation.
@@ -66,26 +61,21 @@ public class BridgeImpl extends ThingImpl implements Bridge {
     }
 
     public void addThing(Thing thing) {
-        things.add(thing);
+        things.put(thing.getUID(), thing);
     }
 
     public void removeThing(Thing thing) {
-        things.remove(thing);
+        things.remove(thing.getUID());
     }
 
     @Override
     public @Nullable Thing getThing(ThingUID thingUID) {
-        for (Thing thing : things) {
-            if (thing.getUID().equals(thingUID)) {
-                return thing;
-            }
-        }
-        return null;
+        return things.get(thingUID);
     }
 
     @Override
     public List<Thing> getThings() {
-        return Collections.unmodifiableList(new ArrayList<>(things));
+        return List.copyOf(things.values());
     }
 
     @Override
