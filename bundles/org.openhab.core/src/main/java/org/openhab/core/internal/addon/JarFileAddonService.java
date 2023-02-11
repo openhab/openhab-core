@@ -151,9 +151,9 @@ public class JarFileAddonService extends BundleTracker<Bundle> implements AddonS
 
     private Addon toAddon(Bundle bundle, AddonInfo addonInfo) {
         String uid = ADDON_ID_PREFIX + addonInfo.getUID();
-        return Addon.create(uid).withId(addonInfo.getId()).withType(addonInfo.getType())
-                .withAuthor(addonInfo.getAuthor()).withInstalled(true).withVersion(bundle.getVersion().toString())
-                .withLabel(addonInfo.getName()).withConfigDescriptionURI(addonInfo.getConfigDescriptionURI())
+        return Addon.create(uid).withId(addonInfo.getId()).withType(addonInfo.getType()).withInstalled(true)
+                .withVersion(bundle.getVersion().toString()).withLabel(addonInfo.getName())
+                .withConfigDescriptionURI(addonInfo.getConfigDescriptionURI())
                 .withDescription(Objects.requireNonNullElse(addonInfo.getDescription(), bundle.getSymbolicName()))
                 .build();
     }

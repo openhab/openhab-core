@@ -39,7 +39,6 @@ import org.openhab.core.test.java.JavaOSGiTest;
 public class AddonInfoTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "BundleInfoTest.bundle";
-    private static final String TEST_BUNDLE_NAME2 = "BundleInfoTestNoAuthor.bundle";
 
     private @NonNullByDefault({}) AddonInfoRegistry addonInfoRegistry;
     private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
@@ -65,22 +64,6 @@ public class AddonInfoTest extends JavaOSGiTest {
             assertThat(addonInfo.getDescription(),
                     is("The hue Binding integrates the Philips hue system. It allows to control hue lights."));
             assertThat(addonInfo.getName(), is("hue Binding"));
-            assertThat(addonInfo.getAuthor(), is("Deutsche Telekom AG"));
-        });
-    }
-
-    @Test
-    public void assertThatAddonInfoWithoutAuthorIsReadProperly() throws Exception {
-        addonInstaller.exec(TEST_BUNDLE_NAME2, () -> {
-            Set<AddonInfo> addonInfos = addonInfoRegistry.getAddonInfos();
-            AddonInfo addonInfo = addonInfos.iterator().next();
-            assertThat(addonInfo.getId(), is("hue"));
-            assertThat(addonInfo.getUID(), is("binding-hue"));
-            assertThat(addonInfo.getConfigDescriptionURI(), is("foo:bar"));
-            assertThat(addonInfo.getDescription(),
-                    is("The hue Binding integrates the Philips hue system. It allows to control hue lights."));
-            assertThat(addonInfo.getName(), is("hue Binding"));
-            assertThat(addonInfo.getAuthor(), is((String) null));
         });
     }
 

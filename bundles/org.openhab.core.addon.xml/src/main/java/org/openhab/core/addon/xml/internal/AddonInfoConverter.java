@@ -85,7 +85,6 @@ public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> 
                 "Add-on description is null or empty");
 
         AddonInfo.Builder addonInfo = AddonInfo.builder(id, type).withName(name).withDescription(description);
-        addonInfo.withAuthor((String) nodeIterator.nextValue("author", false));
         addonInfo.withConnection((String) nodeIterator.nextValue("connection", false));
         addonInfo.withCountries((String) nodeIterator.nextValue("countries", false));
         addonInfo.withServiceId((String) nodeIterator.nextValue("service-id", false));
