@@ -341,54 +341,14 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             }
             dialogContextBuilder.withSink(sink);
         }
-        String sttId = parameters.remove("stt");
-        if (sttId != null) {
-            var stt = voiceManager.getSTT(sttId);
-            if (stt == null) {
-                throw new IllegalStateException("Service stt not found");
-            }
-            dialogContextBuilder.withSTT(stt);
-        }
-        String ttsId = parameters.remove("tts");
-        if (ttsId != null) {
-            var tts = voiceManager.getTTS(ttsId);
-            if (tts == null) {
-                throw new IllegalStateException("Service tts not found");
-            }
-            dialogContextBuilder.withTTS(tts);
-        }
-        String voiceId = parameters.remove("voice");
-        if (voiceId != null) {
-            var voice = getVoice(voiceId);
-            if (voice == null) {
-                throw new IllegalStateException("Tts voice not found");
-            }
-            dialogContextBuilder.withVoice(voice);
-        }
-        String hliIds = parameters.remove("hlis");
-        if (hliIds != null) {
-            var hlis = voiceManager.getHLIsByIds(hliIds);
-            if (hlis.isEmpty()) {
-                throw new IllegalStateException("No interpreters found");
-            }
-            dialogContextBuilder.withHLIs(hlis);
-        }
-        String ksId = parameters.remove("ks");
-        if (ksId != null) {
-            var ks = voiceManager.getKS(ksId);
-            if (ks == null) {
-                throw new IllegalStateException("Service ks not found");
-            }
-            dialogContextBuilder.withKS(ks);
-        }
-        String listeningItem = parameters.remove("listening-item");
-        if (listeningItem != null) {
-            dialogContextBuilder.withListeningItem(listeningItem);
-        }
-        String keyword = parameters.remove("keyword");
-        if (keyword != null) {
-            dialogContextBuilder.withKeyword(keyword);
-        }
+        dialogContextBuilder //
+                .withSTT(voiceManager.getSTT(parameters.remove("stt"))) //
+                .withTTS(voiceManager.getTTS(parameters.remove("tts"))) //
+                .withVoice(getVoice(parameters.remove("voice"))) //
+                .withHLIs(voiceManager.getHLIsByIds(parameters.remove("hlis"))) //
+                .withKS(voiceManager.getKS(parameters.remove("ks"))) //
+                .withListeningItem(parameters.remove("listening-item")) //
+                .withKeyword(parameters.remove("keyword"));
         if (!parameters.isEmpty()) {
             throw new IllegalStateException(
                     "Argument" + parameters.keySet().stream().findAny().orElse("") + "is not supported");
