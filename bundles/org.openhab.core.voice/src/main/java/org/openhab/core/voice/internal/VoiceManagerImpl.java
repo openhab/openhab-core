@@ -941,8 +941,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public List<HumanLanguageInterpreter> getHLIsByIds(String ids) {
-        return getHLIsByIds(Arrays.asList(ids.split(",")));
+    public List<HumanLanguageInterpreter> getHLIsByIds(@Nullable String ids) {
+        return ids == null ? new ArrayList<>() : getHLIsByIds(Arrays.asList(ids.split(",")));
     }
 
     @Override
@@ -1074,7 +1074,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
      */
     private void buildDialogRegistrations() {
         synchronized (dialogRegistrationStorage) {
-            dialogRegistrationStorage.getValues().stream().forEach(dr -> {
+            dialogRegistrationStorage.getValues().forEach(dr -> {
                 if (dr != null && !dialogProcessors.containsKey(dr.sourceId)) {
                     try {
                         startDialog(getDialogContextBuilder() //

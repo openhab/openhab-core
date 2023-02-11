@@ -106,21 +106,23 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         if (args.length > 0) {
             String subCommand = args[0];
             switch (subCommand) {
-                case SUBCMD_SAY:
+                case SUBCMD_SAY -> {
                     if (args.length > 1) {
                         say(Arrays.copyOfRange(args, 1, args.length), console);
                     } else {
                         console.println("Specify text to say (e.g. 'say hello')");
                     }
                     return;
-                case SUBCMD_INTERPRET:
+                }
+                case SUBCMD_INTERPRET -> {
                     if (args.length > 1) {
                         interpret(Arrays.copyOfRange(args, 1, args.length), console);
                     } else {
                         console.println("Specify text to interpret (e.g. 'interpret turn all lights off')");
                     }
                     return;
-                case SUBCMD_VOICES:
+                }
+                case SUBCMD_VOICES -> {
                     Locale locale = localeProvider.getLocale();
                     Voice defaultVoice = getDefaultVoice();
                     for (Voice voice : voiceManager.getAllVoices()) {
@@ -132,7 +134,8 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         }
                     }
                     return;
-                case SUBCMD_START_DIALOG: {
+                }
+                case SUBCMD_START_DIALOG -> {
                     DialogContext.Builder dialogContextBuilder;
                     try {
                         dialogContextBuilder = parseDialogParameters(args);
@@ -149,7 +152,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     }
                     return;
                 }
-                case SUBCMD_STOP_DIALOG:
+                case SUBCMD_STOP_DIALOG -> {
                     try {
                         voiceManager.stopDialog(args.length < 2 ? null : audioManager.getSource(args[1]));
                     } catch (IllegalStateException e) {
@@ -157,7 +160,8 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                                 "An error occurred while stopping the dialog"));
                     }
                     return;
-                case SUBCMD_LISTEN_ANSWER: {
+                }
+                case SUBCMD_LISTEN_ANSWER -> {
                     DialogContext.Builder dialogContextBuilder;
                     try {
                         dialogContextBuilder = parseDialogParameters(args);
@@ -174,20 +178,24 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     }
                     return;
                 }
-                case SUBCMD_INTERPRETERS:
+                case SUBCMD_INTERPRETERS -> {
                     listInterpreters(console);
                     return;
-                case SUBCMD_KEYWORD_SPOTTERS:
+                }
+                case SUBCMD_KEYWORD_SPOTTERS -> {
                     listKeywordSpotters(console);
                     return;
-                case SUBCMD_STT_SERVICES:
+                }
+                case SUBCMD_STT_SERVICES -> {
                     listSTTs(console);
                     return;
-                case SUBCMD_TTS_SERVICES:
+                }
+                case SUBCMD_TTS_SERVICES -> {
                     listTTSs(console);
                     return;
-                default:
-                    break;
+                }
+                default -> {
+                }
             }
         }
         printUsage(console);
@@ -213,9 +221,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         String msg = sb.toString();
         try {
             String result = voiceManager.interpret(msg);
-            if (result != null) {
-                console.println(result);
-            }
+            console.println(result);
         } catch (InterpretationException ie) {
             console.println(Objects.requireNonNullElse(ie.getMessage(),
                     String.format("An error occurred while interpreting '%s'", msg)));
@@ -229,7 +235,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 String itemName = word.substring(1, word.length() - 1);
                 try {
                     Item item = this.itemRegistry.getItemByPattern(itemName);
-                    msg.append(item.getState().toString());
+                    msg.append(item.getState());
                 } catch (ItemNotFoundException e) {
                     console.println("Error: Item '" + itemName + "' does not exist.");
                 } catch (ItemNotUniqueException e) {
@@ -302,8 +308,10 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         }
     }
 
-    private @Nullable Voice getVoice(String id) {
-        return voiceManager.getAllVoices().stream().filter(voice -> voice.getUID().equals(id)).findAny().orElse(null);
+    private @Nullable Voice getVoice(@Nullable String id) {
+        return id == null ? null
+                : voiceManager.getAllVoices().stream().filter(voice -> voice.getUID().equals(id)).findAny()
+                        .orElse(null);
     }
 
     private DialogContext.Builder parseDialogParameters(String[] args) {
