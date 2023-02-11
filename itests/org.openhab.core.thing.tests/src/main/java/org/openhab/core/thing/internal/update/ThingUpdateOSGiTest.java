@@ -103,7 +103,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
 
         registerVolatileStorageService();
 
-        testBundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME, "*.update");
+        testBundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME, "*.xml");
         assertThat(testBundle, is(notNullValue()));
 
         readyService = getService(ReadyService.class);

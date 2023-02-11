@@ -12,15 +12,18 @@
  */
 package org.openhab.core.thing.internal.update;
 
-import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.internal.update.dto.AddChannel;
+import org.openhab.core.thing.internal.update.dto.UpdateChannel;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
@@ -42,13 +45,28 @@ import org.openhab.core.thing.type.ChannelTypeUID;
 @NonNullByDefault
 public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
     private final int thingTypeVersion;
-    private final List<String> parameters;
     private final boolean addOnly;
+    private final String channelId;
+    private final String channelTypeUid;
+    private final @Nullable String label;
+    private final @Nullable String description;
 
-    UpdateChannelInstructionImpl(int thingTypeVersion, List<String> parameters, boolean addOnly) {
+    UpdateChannelInstructionImpl(int thingTypeVersion, UpdateChannel updateChannel) {
         this.thingTypeVersion = thingTypeVersion;
-        this.parameters = List.copyOf(parameters);
-        this.addOnly = addOnly;
+        this.channelId = updateChannel.getId();
+        this.channelTypeUid = updateChannel.getChannelTypeUid();
+        this.label = updateChannel.getLabel();
+        this.description = updateChannel.getDescription();
+        this.addOnly = false;
+    }
+
+    UpdateChannelInstructionImpl(int thingTypeVersion, AddChannel addChannel) {
+        this.thingTypeVersion = thingTypeVersion;
+        this.channelId = addChannel.getId();
+        this.channelTypeUid = addChannel.getChannelTypeUid();
+        this.label = addChannel.getLabel();
+        this.description = addChannel.getDescription();
+        this.addOnly = true;
     }
 
     @Override
@@ -58,7 +76,7 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
 
     @Override
     public void perform(Thing thing, ThingBuilder thingBuilder) {
-        ChannelUID affectedChannelUid = new ChannelUID(thing.getUID(), parameters.get(0));
+        ChannelUID affectedChannelUid = new ChannelUID(thing.getUID(), channelId);
         Configuration channelConfiguration = new Configuration();
 
         if (!addOnly) {
@@ -72,15 +90,15 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
         }
 
         ChannelBuilder channelBuilder = ChannelBuilder.create(affectedChannelUid)
-                .withType(new ChannelTypeUID(parameters.get(1))).withConfiguration(channelConfiguration);
+                .withType(new ChannelTypeUID(channelTypeUid)).withConfiguration(channelConfiguration);
 
-        if (parameters.size() >= 3) {
+        if (label != null) {
             // label is optional (could be inherited from thing-type)
-            channelBuilder.withLabel(parameters.get(2));
+            channelBuilder.withLabel(Objects.requireNonNull(label));
         }
-        if (parameters.size() == 4) {
+        if (description != null) {
             // description is optional (could be inherited from thing-type)
-            channelBuilder.withDescription(parameters.get(3));
+            channelBuilder.withDescription(Objects.requireNonNull(description));
         }
         thingBuilder.withChannel(channelBuilder.build());
     }

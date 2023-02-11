@@ -12,23 +12,26 @@
  */
 package org.openhab.core.thing.internal.update;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.openhab.core.thing.internal.update.dto.AddChannel;
+import org.openhab.core.thing.internal.update.dto.InstructionSet;
+import org.openhab.core.thing.internal.update.dto.RemoveChannel;
+import org.openhab.core.thing.internal.update.dto.ThingType;
+import org.openhab.core.thing.internal.update.dto.UpdateChannel;
+import org.openhab.core.thing.internal.update.dto.UpdateDescriptions;
 import org.openhab.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -42,9 +45,6 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class ThingUpdateInstructionReader {
-    private static final Pattern UPDATE_INSTRUCTION = Pattern
-            .compile("(?<version>\\d+);(?<action>ADD_CHANNEL|UPDATE_CHANNEL|REMOVE_CHANNEL);(?<parameters>.*)");
-
     private final Logger logger = LoggerFactory.getLogger(ThingUpdateInstructionReader.class);
     private final BundleResolver bundleResolver;
 
@@ -62,23 +62,40 @@ public class ThingUpdateInstructionReader {
         }
 
         Map<UpdateInstructionKey, List<ThingUpdateInstruction>> updateInstructions = new HashMap<>();
-        Enumeration<URL> entries = bundle.findEntries("OH-INF/update", "*.update", true);
-
+        Enumeration<URL> entries = bundle.findEntries("OH-INF/update", "*.xml", true);
         if (entries != null) {
             while (entries.hasMoreElements()) {
                 URL url = entries.nextElement();
-                String fileName = url.getPath();
-                String thingTypeId = fileName.substring(fileName.lastIndexOf("/") + 1, fileName.lastIndexOf("."));
+                try {
+                    JAXBContext context = JAXBContext.newInstance(UpdateDescriptions.class);
+                    Unmarshaller u = context.createUnmarshaller();
+                    UpdateDescriptions updateDescriptions = (UpdateDescriptions) u.unmarshal(url);
 
-                logger.trace("Reading update instructions from '{}'", url.getPath());
-                try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
-                    updateInstructions.put(new UpdateInstructionKey(factory, thingTypeId),
-                            reader.lines().map(String::strip).map(this::parse).filter(Objects::nonNull)
-                                    .map(Objects::requireNonNull).toList());
-                } catch (IOException e) {
-                    logger.warn("Failed to read update instructions for '{}' from bundle '{}", thingTypeId,
-                            bundle.getSymbolicName());
+                    for (ThingType thingType : updateDescriptions.getThingType()) {
+                        ThingTypeUID thingTypeUID = new ThingTypeUID(thingType.getUid());
+                        UpdateInstructionKey key = new UpdateInstructionKey(factory, thingTypeUID);
+                        List<ThingUpdateInstruction> instructions = new ArrayList<>();
+                        for (InstructionSet instructionSet : thingType.getInstructionSet()) {
+                            int targetVersion = instructionSet.getTargetVersion();
+                            for (Object instruction : instructionSet.getInstructions()) {
+                                if (instruction instanceof AddChannel addChannelType) {
+                                    instructions.add(new UpdateChannelInstructionImpl(targetVersion, addChannelType));
+                                } else if (instruction instanceof UpdateChannel updateChannelType) {
+                                    instructions
+                                            .add(new UpdateChannelInstructionImpl(targetVersion, updateChannelType));
+                                } else if (instruction instanceof RemoveChannel removeChannelType) {
+                                    instructions.add(
+                                            new RemoveChannelInstructionImpl(targetVersion, removeChannelType.getId()));
+                                } else {
+                                    logger.warn("Instruction type '{}' is unknown.", instruction.getClass());
+                                }
+                            }
+                        }
+                        updateInstructions.put(key, instructions);
+                    }
+                    logger.trace("Reading update instructions from '{}'", url.getPath());
+                } catch (IllegalArgumentException | JAXBException e) {
+                    logger.warn("Failed to parse update instructions from '{}':", url, e);
                 }
             }
         }
@@ -86,45 +103,6 @@ public class ThingUpdateInstructionReader {
         return updateInstructions;
     }
 
-    private @Nullable ThingUpdateInstruction parse(String string) {
-        if (string.isEmpty() || string.startsWith("#")) {
-            // either a comment or an empty line
-            return null;
-        }
-
-        Matcher matcher = UPDATE_INSTRUCTION.matcher(string);
-        if (!matcher.matches()) {
-            logger.warn("Line '{}' did not match format for instruction. Ignoring.", string);
-            return null;
-        }
-
-        // create update instruction: version;command;parameter(s)
-        int targetThingTypeVersion = Integer.parseInt(matcher.group("version"));
-        List<String> parameters = Arrays.asList(matcher.group("parameters").split(","));
-
-        String action = matcher.group("action");
-        switch (action) {
-            case "ADD_CHANNEL":
-            case "UPDATE_CHANNEL":
-                if (parameters.size() >= 2 && parameters.size() <= 4) {
-                    return new UpdateChannelInstructionImpl(targetThingTypeVersion, parameters,
-                            "ADD_CHANNEL".equals(action));
-                } else {
-                    logger.warn("Line '{}' has wrong number of parameters (required: >=2, <=4). Ignoring.", string);
-                }
-                break;
-            case "REMOVE_CHANNEL":
-                if (parameters.size() == 1) {
-                    return new RemoveChannelInstructionImpl(targetThingTypeVersion, parameters);
-                } else {
-                    logger.warn("Line '{}' has wrong number of parameters (required: ==1). Ignoring.", string);
-                }
-                break;
-        }
-
-        return null;
-    }
-
-    public record UpdateInstructionKey(ThingHandlerFactory factory, String thingTypeId) {
+    public record UpdateInstructionKey(ThingHandlerFactory factory, ThingTypeUID thingTypeId) {
     }
 }

@@ -12,8 +12,6 @@
  */
 package org.openhab.core.thing.internal.update;
 
-import java.util.List;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -33,11 +31,11 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
 @NonNullByDefault
 public class RemoveChannelInstructionImpl implements ThingUpdateInstruction {
     private final int thingTypeVersion;
-    private final List<String> parameters;
+    private final String channelId;
 
-    RemoveChannelInstructionImpl(int thingTypeVersion, List<String> parameters) {
+    RemoveChannelInstructionImpl(int thingTypeVersion, String channelId) {
         this.thingTypeVersion = thingTypeVersion;
-        this.parameters = List.copyOf(parameters);
+        this.channelId = channelId;
     }
 
     @Override
@@ -47,7 +45,7 @@ public class RemoveChannelInstructionImpl implements ThingUpdateInstruction {
 
     @Override
     public void perform(Thing thing, ThingBuilder thingBuilder) {
-        ChannelUID affectedChannelUid = new ChannelUID(thing.getUID(), parameters.get(0));
+        ChannelUID affectedChannelUid = new ChannelUID(thing.getUID(), channelId);
         thingBuilder.withoutChannel(affectedChannelUid);
     }
 }

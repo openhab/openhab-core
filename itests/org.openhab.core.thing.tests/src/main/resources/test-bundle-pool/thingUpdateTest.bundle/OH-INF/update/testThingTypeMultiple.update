@@ -1,3 +1,0 @@
-1;UPDATE_CHANNEL;testChannel1,testBinding:testChannelNewTypeId,Test Label
-2;ADD_CHANNEL;testChannel2,testBinding:testChannelOldTypeId,TestLabel
-3;REMOVE_CHANNEL;testChannel0

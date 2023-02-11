@@ -1074,7 +1074,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         final int currentThingTypeVersion = Integer
                 .parseInt(thing.getProperties().getOrDefault(PROPERTY_THING_TYPE_VERSION, "0"));
 
-        UpdateInstructionKey thingKey = new UpdateInstructionKey(factory, thing.getThingTypeUID().getId());
+        UpdateInstructionKey thingKey = new UpdateInstructionKey(factory, thing.getThingTypeUID());
         List<ThingUpdateInstruction> instructions = updateInstructions.getOrDefault(thingKey, List.of()).stream()
                 .filter(ThingUpdateInstruction.applies(currentThingTypeVersion)).toList();
 
