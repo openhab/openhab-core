@@ -124,16 +124,26 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
 
     @Override
     public HttpClient createHttpClient(String consumerName) {
+        return createHttpClient(consumerName, null);
+    }
+
+    @Override
+    public HttpClient createHttpClient(String consumerName, @Nullable SslContextFactory sslContextFactory) {
         logger.debug("http client for consumer {} requested", consumerName);
         checkConsumerName(consumerName);
-        return createHttpClientInternal(consumerName, false, null);
+        return createHttpClientInternal(consumerName, sslContextFactory, false, null);
     }
 
     @Override
     public WebSocketClient createWebSocketClient(String consumerName) {
+        return createWebSocketClient(consumerName, null);
+    }
+
+    @Override
+    public WebSocketClient createWebSocketClient(String consumerName, @Nullable SslContextFactory sslContextFactory) {
         logger.debug("web socket client for consumer {} requested", consumerName);
         checkConsumerName(consumerName);
-        return createWebSocketClientInternal(consumerName, false, null);
+        return createWebSocketClientInternal(consumerName, sslContextFactory, false, null);
     }
 
     @Override
@@ -191,7 +201,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
             }
 
             if (commonHttpClient == null) {
-                commonHttpClient = createHttpClientInternal("common", true, threadPool);
+                commonHttpClient = createHttpClientInternal("common", null, true, threadPool);
                 // we need to set the stop timeout AFTER the client has been started, because
                 // otherwise the Jetty client sets it back to the default value.
                 // We need the stop timeout in order to prevent blocking the deactivation of this
@@ -201,7 +211,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
             }
 
             if (commonWebSocketClient == null) {
-                commonWebSocketClient = createWebSocketClientInternal("common", true, threadPool);
+                commonWebSocketClient = createWebSocketClientInternal("common", null, true, threadPool);
                 logger.debug("Jetty shared web socket client created");
             }
         } catch (RuntimeException e) {
@@ -212,12 +222,13 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         }
     }
 
-    private HttpClient createHttpClientInternal(String consumerName, boolean startClient,
-            @Nullable QueuedThreadPool threadPool) {
+    private HttpClient createHttpClientInternal(String consumerName, @Nullable SslContextFactory sslContextFactory,
+            boolean startClient, @Nullable QueuedThreadPool threadPool) {
         try {
             logger.debug("creating http client for consumer {}", consumerName);
 
-            HttpClient httpClient = new HttpClient(createSslContextFactory());
+            HttpClient httpClient = new HttpClient(
+                    sslContextFactory != null ? sslContextFactory : createSslContextFactory());
 
             // If proxy is set as property (standard Java property), provide the proxy information to Jetty HTTP
             // Client
@@ -276,12 +287,13 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         }
     }
 
-    private WebSocketClient createWebSocketClientInternal(String consumerName, boolean startClient,
-            @Nullable QueuedThreadPool threadPool) {
+    private WebSocketClient createWebSocketClientInternal(String consumerName,
+            @Nullable SslContextFactory sslContextFactory, boolean startClient, @Nullable QueuedThreadPool threadPool) {
         try {
             logger.debug("creating web socket client for consumer {}", consumerName);
 
-            HttpClient httpClient = new HttpClient(createSslContextFactory());
+            HttpClient httpClient = new HttpClient(
+                    sslContextFactory != null ? sslContextFactory : createSslContextFactory());
             if (threadPool != null) {
                 httpClient.setExecutor(threadPool);
             } else {
