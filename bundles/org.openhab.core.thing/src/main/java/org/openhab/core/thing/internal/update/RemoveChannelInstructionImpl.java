@@ -20,11 +20,6 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
 /**
  * The {@link RemoveChannelInstructionImpl} implements a {@link ThingUpdateInstruction} that removes a channel from a
  * thing.
- * <p />
- * Parameters are:
- * <ul>
- * <li>channelId - the id of the channel</li>
- * </ul>
  *
  * @author Jan N. Klug - Initial contribution
  */

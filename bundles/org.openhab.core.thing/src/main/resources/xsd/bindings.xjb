@@ -22,4 +22,13 @@
             </jaxb:bindings>
         </jaxb:bindings>
     </jaxb:bindings>
+
+    <jaxb:bindings schemaLocation="https://openhab.org/schemas/thing-description-1.0.0.xsd">
+        <jaxb:bindings node="//xs:complexType[@name='option']">
+            <jaxb:bindings node=".//xs:attribute[@name='value']">
+                <jaxb:property name="ValueAttribute"/>
+            </jaxb:bindings>
+        </jaxb:bindings>
+    </jaxb:bindings>
+
 </jaxb:bindings>

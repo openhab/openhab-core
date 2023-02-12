@@ -6,14 +6,18 @@
 	<thing-type uid="testBinding:testThingTypeAdd">
 		<instruction-set targetVersion="1">
 			<add-channel id="testChannel1">
-				<channelTypeUid>testBinding:testChannelTypeId</channelTypeUid>
+				<type>testBinding:testChannelTypeId</type>
 			</add-channel>
 			<add-channel id="testChannel2">
-				<channelTypeUid>testBinding:testChannelTypeId</channelTypeUid>
+				<type>testBinding:testChannelTypeId</type>
 				<label>Test Label</label>
+				<tags>
+					<tag>Tag1</tag>
+					<tag>Tag2</tag>
+				</tags>
 			</add-channel>
 			<add-channel id="testChannel3">
-				<channelTypeUid>testBinding:testChannelTypeId</channelTypeUid>
+				<type>testBinding:testChannelTypeId</type>
 				<label>Test Label</label>
 				<description>Test Description</description>
 			</add-channel>
@@ -28,9 +32,12 @@
 
 	<thing-type uid="testBinding:testThingTypeUpdate">
 		<instruction-set targetVersion="1">
-			<update-channel id="testChannel">
-				<channelTypeUid>testBinding:testChannelNewTypeId</channelTypeUid>
+			<update-channel id="testChannel1">
+				<type>testBinding:testChannelNewTypeId</type>
 				<label>New Test Label</label>
+			</update-channel>
+			<update-channel id="testChannel2" preserveConfiguration="false">
+				<type>testBinding:testChannelNewTypeId</type>
 			</update-channel>
 		</instruction-set>
 	</thing-type>

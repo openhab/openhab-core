@@ -20,6 +20,7 @@ import static org.openhab.core.thing.internal.ThingManagerImpl.PROPERTY_THING_TY
 
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.test.SyntheticBundleInstaller;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -84,6 +86,8 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
             "testThingTypeRemove");
     private static final ThingTypeUID MULTIPLE_CHANNEL_THING_TYPE_UID = new ThingTypeUID(BINDING_ID,
             "testThingTypeMultiple");
+
+    private static final String[] ADDED_TAGS = { "Tag1", "Tag2" };
 
     private static final String THING_ID = "thing";
 
@@ -145,6 +149,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
 
         Channel channel2 = updatedThing.getChannel("testChannel2");
         assertChannel(channel2, channelTypeUID, "Test Label", null);
+        assertThat(channel2.getDefaultTags(), containsInAnyOrder(ADDED_TAGS));
 
         Channel channel3 = updatedThing.getChannel("testChannel3");
         assertChannel(channel3, channelTypeUID, "Test Label", "Test Description");
@@ -159,18 +164,30 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         registerChannelTypes(channelTypeOldUID, channelTypeNewUID);
 
         ThingUID thingUID = new ThingUID(UPDATE_CHANNEL_THING_TYPE_UID, THING_ID);
-        ChannelUID channelUID = new ChannelUID(thingUID, "testChannel");
+        ChannelUID channelUID1 = new ChannelUID(thingUID, "testChannel1");
+        ChannelUID channelUID2 = new ChannelUID(thingUID, "testChannel2");
+        Configuration channelConfig = new Configuration(Map.of("foo", "bar"));
+
+        Channel origChannel1 = ChannelBuilder.create(channelUID1).withType(channelTypeOldUID)
+                .withConfiguration(channelConfig).build();
+        Channel origChannel2 = ChannelBuilder.create(channelUID2).withType(channelTypeOldUID)
+                .withConfiguration(channelConfig).build();
 
         Thing thing = ThingBuilder.create(UPDATE_CHANNEL_THING_TYPE_UID, thingUID)
-                .withChannel(ChannelBuilder.create(channelUID).withType(channelTypeOldUID).build()).build();
+                .withChannels(origChannel1, origChannel2).build();
 
         managedThingProvider.add(thing);
 
         Thing updatedThing = assertThing(thing, 1);
-        assertThat(updatedThing.getChannels(), hasSize(1));
+        assertThat(updatedThing.getChannels(), hasSize(2));
 
-        Channel channel1 = updatedThing.getChannel("testChannel");
+        Channel channel1 = updatedThing.getChannel(channelUID1);
         assertChannel(channel1, channelTypeNewUID, "New Test Label", null);
+        assertThat(channel1.getConfiguration(), is(channelConfig));
+
+        Channel channel2 = updatedThing.getChannel(channelUID2);
+        assertChannel(channel2, channelTypeNewUID, null, null);
+        assertThat(channel2.getConfiguration().getProperties(), is(anEmptyMap()));
     }
 
     @Test
