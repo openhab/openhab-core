@@ -189,6 +189,17 @@ public class I18nProviderImplTest {
                 .map(UnitUtils::getDimensionName).filter(Objects::nonNull).map(Objects::requireNonNull).distinct();
     }
 
+    @Test
+    public void testFormattingTexts() {
+        String defaultText = "formatString {0} {1,number}";
+        String successResult = i18nProviderImpl.getText(bundleMock, "testKey", defaultText, null, false, 1);
+        assertThat(successResult, is("formatString false 1"));
+
+        // make sure bugs are properly handled
+        String failedResult = i18nProviderImpl.getText(bundleMock, "testKey", defaultText, null, false, "foo");
+        assertThat(failedResult, is(defaultText));
+    }
+
     private Dictionary<String, Object> buildInitialConfig() {
         Dictionary<String, Object> conf = new Hashtable<>();
         conf.put(LOCATION, LOCATION_ZERO);

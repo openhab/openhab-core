@@ -345,8 +345,12 @@ public class I18nProviderImpl
             @Nullable Locale locale, @Nullable Object @Nullable... arguments) {
         String text = getText(bundle, key, defaultText, locale);
 
-        if (text != null) {
-            return MessageFormat.format(text, arguments);
+        try {
+            if (text != null) {
+                return MessageFormat.format(text, arguments);
+            }
+        } catch (IllegalArgumentException e) {
+            logger.warn("Failed to format message '{}' with parameters {}. This is a bug.", text, arguments);
         }
 
         return text;
