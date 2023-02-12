@@ -111,4 +111,7 @@ Fragment-Host: org.openhab.core.model.script
 	org.openhab.core.test;version='[4.0.0,4.0.1)',\
 	org.openhab.core.thing;version='[4.0.0,4.0.1)',\
 	org.openhab.core.transform;version='[4.0.0,4.0.1)',\
-	org.openhab.core.voice;version='[4.0.0,4.0.1)'
+	org.openhab.core.voice;version='[4.0.0,4.0.1)',\
+	io.methvin.directory-watcher;version='[0.17.1,0.17.2)',\
+	com.sun.jna;version='[5.12.1,5.12.2)',\
+	org.openhab.core.model.sitemap.runtime;version='[4.0.0,4.0.1)'

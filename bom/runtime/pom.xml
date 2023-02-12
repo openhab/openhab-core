@@ -1039,6 +1039,26 @@
       <version>3.27.0-GA</version>
       <scope>compile</scope>
     </dependency>
+
+    <!-- dirwatcher -->
+    <dependency>
+      <groupId>org.openhab.osgiify</groupId>
+      <artifactId>io.methvin.directory-watcher</artifactId>
+      <version>0.17.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>5.12.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna-platform</artifactId>
+      <version>5.12.1</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
 </project>

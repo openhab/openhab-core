@@ -62,4 +62,6 @@ Fragment-Host: org.openhab.core.config.discovery.usbserial.linuxsysfs
 	org.openhab.core.config.discovery.usbserial.linuxsysfs.tests;version='[4.0.0,4.0.1)',\
 	org.openhab.core.io.console;version='[4.0.0,4.0.1)',\
 	org.openhab.core.test;version='[4.0.0,4.0.1)',\
-	org.openhab.core.thing;version='[4.0.0,4.0.1)'
+	org.openhab.core.thing;version='[4.0.0,4.0.1)',\
+	io.methvin.directory-watcher;version='[0.17.1,0.17.2)',\
+	com.sun.jna;version='[5.12.1,5.12.2)'

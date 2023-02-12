@@ -12,7 +12,9 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.loader;
 
-import static java.nio.file.StandardWatchEventKinds.*;
+import static org.openhab.core.service.WatchService.Kind.CREATE;
+import static org.openhab.core.service.WatchService.Kind.DELETE;
+import static org.openhab.core.service.WatchService.Kind.MODIFY;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,8 +22,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchEvent.Kind;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -48,11 +48,11 @@ import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.automation.module.script.rulesupport.internal.loader.ScriptFileReference;
 import org.openhab.core.common.NamedThreadFactory;
-import org.openhab.core.service.AbstractWatchService;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.StartLevelService;
+import org.openhab.core.service.WatchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Refactored dependency tracking to script engine factories
  */
 @NonNullByDefault
-public abstract class AbstractScriptFileWatcher extends AbstractWatchService implements ReadyService.ReadyTracker,
+public abstract class AbstractScriptFileWatcher implements WatchService.WatchEventListener, ReadyService.ReadyTracker,
         ScriptDependencyTracker.Listener, ScriptEngineManager.FactoryChangeListener, ScriptFileWatcher {
 
     private static final Set<String> EXCLUDED_FILE_EXTENSIONS = Set.of("txt", "old", "example", "backup", "md", "swp",
@@ -82,6 +82,9 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
 
     private final ScriptEngineManager manager;
     private final ReadyService readyService;
+    private final WatchService watchService;
+    private final Path watchPath;
+    private final boolean watchSubDirectories;
 
     protected ScheduledExecutorService scheduler;
 
@@ -89,13 +92,16 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
     private final Map<String, Lock> scriptLockMap = new ConcurrentHashMap<>();
     private final CompletableFuture<@Nullable Void> initialized = new CompletableFuture<>();
 
-    private volatile int currentStartLevel = 0;
+    private volatile int currentStartLevel;
 
-    public AbstractScriptFileWatcher(final ScriptEngineManager manager, final ReadyService readyService,
-            final StartLevelService startLevelService, final String fileDirectory) {
-        super(OpenHAB.getConfigFolder() + File.separator + fileDirectory);
+    public AbstractScriptFileWatcher(final WatchService watchService, final ScriptEngineManager manager,
+            final ReadyService readyService, final StartLevelService startLevelService, final String fileDirectory,
+            boolean watchSubDirectories) {
+        this.watchService = watchService;
         this.manager = manager;
         this.readyService = readyService;
+        this.watchSubDirectories = watchSubDirectories;
+        this.watchPath = Path.of(OpenHAB.getConfigFolder()).resolve(fileDirectory);
 
         manager.addFactoryChangeListener(this);
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE));
@@ -108,13 +114,6 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
         }
     }
 
-    @Override
-    public void activate() {
-        // TODO: needed to initialize underlying AbstractWatchService, should be removed when we switch to PR
-        // openhab-core#3004
-        super.activate();
-    }
-
     /**
      * Can be overridden by subclasses (e.g. for testing)
      *
@@ -124,11 +123,23 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
         return Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("scriptwatcher"));
     }
 
-    @Override
+    public void activate() {
+        if (!Files.exists(watchPath)) {
+            try {
+                Files.createDirectories(watchPath);
+            } catch (IOException e) {
+                logger.warn("Failed to create watched directory: {}", watchPath);
+            }
+        } else if (!Files.isDirectory(watchPath)) {
+            logger.warn("Trying to watch directory {}, however it is a file", watchPath);
+        }
+        watchService.registerListener(this, watchPath, watchSubDirectories);
+    }
+
     public void deactivate() {
+        watchService.unregisterListener(this);
         manager.removeFactoryChangeListener(this);
         readyService.unregisterTracker(this);
-        super.deactivate();
 
         CompletableFuture.allOf(
                 Set.copyOf(scriptMap.keySet()).stream().map(this::removeFile).toArray(CompletableFuture<?>[]::new))
@@ -200,22 +211,12 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
     }
 
     @Override
-    protected boolean watchSubDirectories() {
-        return true;
-    }
-
-    @Override
-    protected Kind<?> @Nullable [] getWatchEventKinds(@Nullable Path subDir) {
-        return new Kind<?>[] { ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY };
-    }
-
-    @Override
-    protected void processWatchEvent(@Nullable WatchEvent<?> event, @Nullable Kind<?> kind, @Nullable Path path) {
+    public void processWatchEvent(WatchService.Kind kind, Path path) {
         File file = path.toFile();
         if (!file.isHidden()) {
-            if (ENTRY_DELETE.equals(kind)) {
+            if (kind == DELETE) {
                 if (file.isDirectory()) {
-                    if (watchSubDirectories()) {
+                    if (watchSubDirectories) {
                         synchronized (this) {
                             String prefix = path.getParent().toString();
                             Set<String> toRemove = scriptMap.keySet().stream().filter(ref -> ref.startsWith(prefix))
@@ -228,8 +229,8 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
                 }
             }
 
-            if (file.canRead() && (ENTRY_CREATE.equals(kind) || ENTRY_MODIFY.equals(kind))) {
-                addFiles(listFiles(file.toPath(), watchSubDirectories()));
+            if (file.canRead() && (kind == CREATE || kind == MODIFY)) {
+                addFiles(listFiles(file.toPath(), watchSubDirectories));
             }
         }
     }
@@ -341,17 +342,17 @@ public abstract class AbstractScriptFileWatcher extends AbstractWatchService imp
     }
 
     private void initialImport() {
-        File directory = new File(pathToWatch);
+        File directory = watchPath.toFile();
 
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
-                logger.warn("Failed to create watched directory: {}", pathToWatch);
+                logger.warn("Failed to create watched directory: {}", watchPath);
             }
         } else if (directory.isFile()) {
-            logger.warn("Trying to watch directory {}, however it is a file", pathToWatch);
+            logger.warn("Trying to watch directory {}, however it is a file", watchPath);
         }
 
-        addFiles(listFiles(directory.toPath(), watchSubDirectories())).thenRun(() -> initialized.complete(null));
+        addFiles(listFiles(directory.toPath(), watchSubDirectories)).thenRun(() -> initialized.complete(null));
     }
 
     @Override
