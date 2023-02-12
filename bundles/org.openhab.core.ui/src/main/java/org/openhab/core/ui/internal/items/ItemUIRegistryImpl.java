@@ -283,6 +283,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
             if (!isReadOnly && hasStateOptions(itemName)) {
                 return SitemapFactory.eINSTANCE.createSelection();
+            }
+            Set<String> tags = getItemTags(itemName);
+            if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType) && tags.contains("Setpoint")) {
+                return SitemapFactory.eINSTANCE.createSetpoint();
             } else {
                 return SitemapFactory.eINSTANCE.createText();
             }
@@ -853,6 +857,15 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return item.getCategory();
         } catch (ItemNotFoundException e) {
             return null;
+        }
+    }
+
+    private Set<String> getItemTags(String itemName) {
+        try {
+            Item item = getItem(itemName);
+            return item.getTags();
+        } catch (ItemNotFoundException e) {
+            return Set.of();
         }
     }
 
