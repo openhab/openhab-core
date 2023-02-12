@@ -284,8 +284,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             if (!isReadOnly && hasStateOptions(itemName)) {
                 return SitemapFactory.eINSTANCE.createSelection();
             }
-            Set<String> tags = getItemTags(itemName);
-            if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType) && tags.contains("Setpoint")) {
+            if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType) && hasItemTag(itemName, "Setpoint")) {
                 return SitemapFactory.eINSTANCE.createSetpoint();
             } else {
                 return SitemapFactory.eINSTANCE.createText();
@@ -860,12 +859,12 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         }
     }
 
-    private Set<String> getItemTags(String itemName) {
+    private boolean hasItemTag(String itemName, String tag) {
         try {
             Item item = getItem(itemName);
-            return item.getTags();
+            return item.hasTag(tag);
         } catch (ItemNotFoundException e) {
-            return Set.of();
+            return false;
         }
     }
 
