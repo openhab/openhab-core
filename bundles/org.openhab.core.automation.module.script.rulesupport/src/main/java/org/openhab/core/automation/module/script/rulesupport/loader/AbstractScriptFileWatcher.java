@@ -83,7 +83,7 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
     private final ScriptEngineManager manager;
     private final ReadyService readyService;
     private final WatchService watchService;
-    protected final Path watchPath;
+    private final Path watchPath;
     private final boolean watchSubDirectories;
 
     protected ScheduledExecutorService scheduler;
@@ -112,6 +112,15 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         if (currentStartLevel > StartLevelService.STARTLEVEL_MODEL) {
             initialImport();
         }
+    }
+
+    /**
+     * Get the base path that is used by this {@link ScriptFileWatcher}
+     *
+     * @return the {@link Path} used
+     */
+    protected Path getWatchPath() {
+        return watchPath;
     }
 
     /**
