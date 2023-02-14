@@ -39,9 +39,8 @@
 				"id": "ItemUpdateTrigger_1",
 				"type": "core.GenericEventTrigger",
 				"configuration": {
-					"eventSource": "{{onItem}}",
-					"eventTopic": "openhab/items/*",
-					"eventTypes": "ItemStateEvent"
+					"topic": "openhab/items/{{onItem}}/*",
+					"types": "ItemStateEvent"
 				}
 			}
 		],

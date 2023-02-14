@@ -7,26 +7,34 @@
 			"visibility": "HIDDEN",
 			"configDescriptions": [
 				{
-					"name": "eventTopic",
+					"name": "topic",
 					"type": "TEXT",
 					"label": "Topic",
-					"description": "This is the topic, the trigger will listen to: >>openhab/*<<",
-					"required": true,
-					"default": "openhab/*"
-				},
-				{
-					"name": "eventSource",
-					"type": "TEXT",
-					"label": "Source",
-					"description": "This is the source of the event (eg. item name)",
+					"description": "the topic, as a file-system style glob (*, ** and {} operators). will match all events if empty",
 					"required": true,
 					"default": ""
 				},
 				{
-					"name": "eventTypes",
+					"name": "source",
+					"type": "TEXT",
+					"label": "Source",
+					"description": "the source of the event (e.g. org.openhab.core.expire, etc.). will match all events if empty",
+					"required": true,
+					"default": ""
+				},
+				{
+					"name": "types",
 					"type": "TEXT",
 					"label": "Event Type",
-					"description": "the event type, the trigger should listen to. Multiple types can be specified comma-separated",
+					"description": "the event type the trigger should listen to. multiple types can be specified comma-separated. will match all events if empty",
+					"required": true,
+					"default": ""
+				},
+				{
+					"name": "payload",
+					"type": "TEXT",
+					"label": "Event Payload",
+					"description": "A regex to match the event's serialized payload. will match all events if empty",
 					"required": true,
 					"default": ""
 				}

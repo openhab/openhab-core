@@ -142,8 +142,8 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
     @Test
     public void itemStateUpdatedBySimpleRule() throws ItemNotFoundException, InterruptedException {
-        final Configuration triggerConfig = new Configuration(Map.ofEntries(entry("eventSource", "myMotionItem2"),
-                entry("eventTopic", "openhab/*"), entry("eventTypes", "ItemStateEvent")));
+        final Configuration triggerConfig = new Configuration(
+                Map.ofEntries(entry("topic", "openhab/items/myMotionItem2/*"), entry("types", "ItemStateEvent")));
         final Configuration actionConfig = new Configuration(
                 Map.ofEntries(entry("itemName", "myLampItem2"), entry("command", "ON")));
         final Rule rule = RuleBuilder.create("myRule21" + new Random().nextInt())
