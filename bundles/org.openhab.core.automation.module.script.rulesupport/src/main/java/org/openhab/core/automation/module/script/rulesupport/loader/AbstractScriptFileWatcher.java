@@ -115,6 +115,15 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
     }
 
     /**
+     * Get the base path that is used by this {@link ScriptFileWatcher}
+     *
+     * @return the {@link Path} used
+     */
+    protected Path getWatchPath() {
+        return watchPath;
+    }
+
+    /**
      * Can be overridden by subclasses (e.g. for testing)
      *
      * @return a {@link ScheduledExecutorService}
@@ -212,13 +221,14 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
 
     @Override
     public void processWatchEvent(WatchService.Kind kind, Path path) {
-        File file = path.toFile();
+        Path fullPath = watchPath.resolve(path);
+        File file = fullPath.toFile();
         if (!file.isHidden()) {
             if (kind == DELETE) {
                 if (file.isDirectory()) {
                     if (watchSubDirectories) {
                         synchronized (this) {
-                            String prefix = path.getParent().toString();
+                            String prefix = fullPath.getParent().toString();
                             Set<String> toRemove = scriptMap.keySet().stream().filter(ref -> ref.startsWith(prefix))
                                     .collect(Collectors.toSet());
                             toRemove.forEach(this::removeFile);
