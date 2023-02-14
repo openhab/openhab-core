@@ -83,7 +83,7 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
     private final ScriptEngineManager manager;
     private final ReadyService readyService;
     private final WatchService watchService;
-    private final Path watchPath;
+    protected final Path watchPath;
     private final boolean watchSubDirectories;
 
     protected ScheduledExecutorService scheduler;
@@ -212,13 +212,14 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
 
     @Override
     public void processWatchEvent(WatchService.Kind kind, Path path) {
-        File file = path.toFile();
+        Path fullPath = watchPath.resolve(path);
+        File file = fullPath.toFile();
         if (!file.isHidden()) {
             if (kind == DELETE) {
                 if (file.isDirectory()) {
                     if (watchSubDirectories) {
                         synchronized (this) {
-                            String prefix = path.getParent().toString();
+                            String prefix = fullPath.getParent().toString();
                             Set<String> toRemove = scriptMap.keySet().stream().filter(ref -> ref.startsWith(prefix))
                                     .collect(Collectors.toSet());
                             toRemove.forEach(this::removeFile);
