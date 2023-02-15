@@ -159,7 +159,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
     public Path getWatchPath() {
         Path basePath = this.basePath;
         if (basePath == null) {
-            throw new IllegalStateException("Trying to register listener before initialization complete.");
+            throw new IllegalStateException("Trying to access WatchService before initialization completed.");
         }
         return basePath;
     }
@@ -168,7 +168,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
     public void registerListener(WatchEventListener watchEventListener, List<Path> paths, boolean withSubDirectories) {
         Path basePath = this.basePath;
         if (basePath == null) {
-            throw new IllegalStateException("Trying to register listener before initialization complete.");
+            throw new IllegalStateException("Trying to register listener before initialization completed.");
         }
         for (Path path : paths) {
             Path absolutePath = path.isAbsolute() ? path : basePath.resolve(path).toAbsolutePath();
