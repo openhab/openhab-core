@@ -14,9 +14,11 @@ package org.openhab.core.thing.binding.builder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -72,6 +74,19 @@ public class ThingBuilder {
      */
     public static ThingBuilder create(ThingTypeUID thingTypeUID, ThingUID thingUID) {
         return new ThingBuilder(thingTypeUID, thingUID);
+    }
+
+    /**
+     * Create a new thing {@link ThingBuilder} for a copy of the given thing
+     *
+     * @param thing the {@link Thing} to create this builder from
+     * @return the created {@link ThingBuilder}
+     *
+     */
+    public static ThingBuilder create(Thing thing) {
+        return ThingBuilder.create(thing.getThingTypeUID(), thing.getUID()).withBridge(thing.getBridgeUID())
+                .withChannels(thing.getChannels()).withConfiguration(thing.getConfiguration())
+                .withLabel(thing.getLabel()).withLocation(thing.getLocation()).withProperties(thing.getProperties());
     }
 
     /**
@@ -198,6 +213,20 @@ public class ThingBuilder {
     public ThingBuilder withBridge(@Nullable ThingUID bridgeUID) {
         this.bridgeUID = bridgeUID;
         return this;
+    }
+
+    /**
+     * Set / replace a single property for this thing
+     *
+     * @param key the key / name of the property
+     * @param value the value of the property
+     * @return the {@link ThingBuilder} itself
+     */
+    public ThingBuilder withProperty(String key, String value) {
+        Map<String, String> oldProperties = Objects.requireNonNullElse(this.properties, Map.of());
+        Map<String, String> newProperties = new HashMap<>(oldProperties);
+        newProperties.put(key, value);
+        return withProperties(newProperties);
     }
 
     /**

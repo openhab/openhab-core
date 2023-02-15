@@ -17,12 +17,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -38,6 +41,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventSubscriber;
@@ -59,6 +64,7 @@ import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.events.AbstractThingRegistryEvent;
@@ -71,7 +77,14 @@ import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 import org.openhab.core.thing.link.events.AbstractItemChannelLinkRegistryEvent;
 import org.openhab.core.thing.link.events.ItemChannelLinkRemovedEvent;
 import org.openhab.core.thing.type.ChannelKind;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeBuilder;
+import org.openhab.core.thing.type.ChannelTypeProvider;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.type.ThingType;
+import org.openhab.core.thing.type.ThingTypeBuilder;
+import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.openhab.core.thing.util.ThingHandlerHelper;
 import org.openhab.core.types.Command;
 import org.openhab.core.util.BundleResolver;
@@ -85,6 +98,7 @@ import org.slf4j.LoggerFactory;
  * @author Wouter Born - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
@@ -162,6 +176,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
     @BeforeEach
     public void beforeEach() {
         registerVolatileStorageService();
+        registerThingAndChannelTypeProvider();
 
         itemChannelLinkRegistry = getService(ItemChannelLinkRegistry.class);
         assertThat(itemChannelLinkRegistry, is(notNullValue()));
@@ -184,14 +199,8 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactoryMock.supportsThingType(eq(THING_TYPE_UID))).thenReturn(true);
         registerService(thingHandlerFactoryMock);
 
-        when(bundleMock.getSymbolicName()).thenReturn("org.openhab.core.thing");
-        when(bundleResolverMock.resolveBundle(any())).thenReturn(bundleMock);
-
         ThingManagerImpl thingManager = (ThingManagerImpl) getService(ThingManager.class);
         assertThat(thingManager, is(notNullValue()));
-        if (thingManager != null) {
-            thingManager.setBundleResolver(bundleResolverMock);
-        }
     }
 
     @AfterEach
@@ -559,5 +568,28 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
         updateLinks(subjectThing, "link1");
         assertNoChannelLinkEventsReceived(subjectThing);
         assertNoChannelLinkEventsReceived(otherThing);
+    }
+
+    private void registerThingAndChannelTypeProvider() {
+        ThingType thingType = ThingTypeBuilder.instance(THING_TYPE_UID, "label").build();
+
+        ThingTypeProvider thingTypeProvider = mock(ThingTypeProvider.class);
+        when(thingTypeProvider.getThingType(any(ThingTypeUID.class), nullable(Locale.class))).thenReturn(thingType);
+        registerService(thingTypeProvider);
+
+        ThingTypeRegistry thingTypeRegistry = mock(ThingTypeRegistry.class);
+        when(thingTypeRegistry.getThingType(any(ThingTypeUID.class))).thenReturn(thingType);
+        registerService(thingTypeRegistry);
+
+        ChannelType channelType = ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "Number", "Number").build();
+
+        ChannelTypeProvider channelTypeProvider = mock(ChannelTypeProvider.class);
+        when(channelTypeProvider.getChannelType(any(ChannelTypeUID.class), nullable(Locale.class)))
+                .thenReturn(channelType);
+        registerService(channelTypeProvider);
+
+        ChannelTypeRegistry channelTypeRegistry = mock(ChannelTypeRegistry.class);
+        when(channelTypeRegistry.getChannelType(any(ChannelTypeUID.class))).thenReturn(channelType);
+        registerService(channelTypeRegistry);
     }
 }

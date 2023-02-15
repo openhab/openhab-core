@@ -23,6 +23,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public enum ThingStatusDetail {
     NONE,
+    NOT_YET_READY,
     HANDLER_MISSING_ERROR,
     HANDLER_REGISTERING_ERROR,
     HANDLER_INITIALIZING_ERROR,

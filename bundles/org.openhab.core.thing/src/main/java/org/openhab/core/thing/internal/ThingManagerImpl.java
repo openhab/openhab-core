@@ -14,10 +14,9 @@ package org.openhab.core.thing.internal;
 
 import java.net.URI;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,19 +24,16 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Function;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.ThreadPoolManager;
-import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.config.core.ConfigDescription;
@@ -46,10 +42,11 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
 import org.openhab.core.config.core.validation.ConfigValidationException;
+import org.openhab.core.config.core.validation.ConfigValidationMessage;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
-import org.openhab.core.service.ReadyMarkerUtils;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.ReadyService.ReadyTracker;
 import org.openhab.core.service.StartLevelService;
@@ -57,8 +54,6 @@ import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
-import org.openhab.core.thing.ChannelGroupUID;
-import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingManager;
 import org.openhab.core.thing.ThingRegistry;
@@ -73,25 +68,24 @@ import org.openhab.core.thing.binding.BridgeHandler;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerCallback;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
-import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.openhab.core.thing.events.ThingEventFactory;
 import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
+import org.openhab.core.thing.internal.update.ThingUpdateInstruction;
+import org.openhab.core.thing.internal.update.ThingUpdateInstructionReader;
+import org.openhab.core.thing.internal.update.ThingUpdateInstructionReader.UpdateInstructionKey;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
-import org.openhab.core.thing.type.ChannelDefinition;
-import org.openhab.core.thing.type.ChannelGroupType;
+import org.openhab.core.thing.type.AbstractDescriptionType;
 import org.openhab.core.thing.type.ChannelGroupTypeRegistry;
-import org.openhab.core.thing.type.ChannelGroupTypeUID;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.openhab.core.thing.util.ThingHandlerHelper;
-import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
 import org.openhab.core.util.BundleResolver;
-import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -103,12 +97,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * {@link ThingManagerImpl} tracks all things in the {@link ThingRegistry} and mediates the communication between the
- * {@link Thing} and the {@link ThingHandler} from the binding. Therefore it tracks {@link ThingHandlerFactory}s and
+ * {@link Thing} and the {@link ThingHandler} from the binding. It tracks {@link ThingHandlerFactory}s and
  * calls {@link ThingHandlerFactory#registerHandler(Thing)} for each thing, that was added to the {@link ThingRegistry}.
- * In addition the {@link ThingManagerImpl} acts as an {@link org.openhab.core.internal.events.EventHandler}
+ * In addition, the {@link ThingManagerImpl} acts as an {@link org.openhab.core.internal.events.EventHandler}
  * and subscribes to update and command events.
- * Finally the {@link ThingManagerImpl} implements the {@link ThingTypeMigrationService} to offer a way to change the
- * thing type of a {@link Thing}.
+ * Finally, the {@link ThingManagerImpl} implements the {@link ThingTypeMigrationService} to offer a way to change the
+ * thing-type of a {@link Thing}.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Michael Grammling - Added dynamic configuration update
@@ -123,14 +117,19 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added preconfigured ChannelGroupBuilder
  * @author Yordan Zhelev - Added thing disabling mechanism
  * @author Björn Lange - Ignore illegal thing status transitions instead of throwing IllegalArgumentException
+ * @author Jan N. Klug - Add thing update mechanism
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ThingTypeMigrationService.class, ThingManager.class })
-public class ThingManagerImpl
-        implements ThingManager, ThingTracker, ThingTypeMigrationService, ReadyService.ReadyTracker {
+public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracker, ThingTypeMigrationService {
+    public static final String PROPERTY_THING_TYPE_VERSION = "thingTypeVersion";
 
-    static final String XML_THING_TYPE = "openhab.xmlThingTypes";
+    // interval to check if thing prerequisites are met (in s)
+    private static final int CHECK_INTERVAL = 2;
 
+    // time after we try to initialize a thing even if the thing-type is not registered (in s)
+    private static final int MAX_CHECK_PREREQUISITE_TIME = 120;
+    private static final ReadyMarker READY_MARKER_THINGS_LOADED = new ReadyMarker("things", "handler");
     private static final String THING_STATUS_STORAGE_NAME = "thing_status_storage";
     private static final String FORCE_REMOVE_THREAD_POOL_NAME = "forceRemove";
     private static final String THING_MANAGER_THREAD_POOL_NAME = "thingManager";
@@ -140,244 +139,42 @@ public class ThingManagerImpl
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(THING_MANAGER_THREAD_POOL_NAME);
 
-    private final ReadyMarker marker = new ReadyMarker("things", "handler");
-
     private final List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<>();
     private final Map<ThingUID, ThingHandler> thingHandlers = new ConcurrentHashMap<>();
-    private final Map<ThingHandlerFactory, Set<ThingHandler>> thingHandlersByFactory = new HashMap<>();
+    private final Map<ThingHandlerFactory, Set<ThingHandler>> thingHandlersByFactory = new ConcurrentHashMap<>();
+    private final Map<UpdateInstructionKey, List<ThingUpdateInstruction>> updateInstructions = new ConcurrentHashMap<>();
+    private final Map<ThingUID, ThingPrerequisites> missingPrerequisites = new ConcurrentHashMap<>();
 
     private final Map<ThingUID, Thing> things = new ConcurrentHashMap<>();
     private final Map<ThingUID, Lock> thingLocks = new HashMap<>();
     private final Set<ThingUID> thingUpdatedLock = new HashSet<>();
-    private final Set<String> loadedXmlThingTypes = new CopyOnWriteArraySet<>();
 
-    private BundleResolver bundleResolver;
-
-    private final ChannelGroupTypeRegistry channelGroupTypeRegistry;
-    private final ChannelTypeRegistry channelTypeRegistry;
-    private final CommunicationManager communicationManager;
-    private final ConfigDescriptionRegistry configDescriptionRegistry;
-    private final ConfigDescriptionValidator configDescriptionValidator;
+    protected final ChannelGroupTypeRegistry channelGroupTypeRegistry;
+    protected final ChannelTypeRegistry channelTypeRegistry;
+    protected final CommunicationManager communicationManager;
+    protected final ConfigDescriptionRegistry configDescriptionRegistry;
+    protected final ConfigDescriptionValidator configDescriptionValidator;
     private final EventPublisher eventPublisher;
-    private final ThingTypeRegistry thingTypeRegistry;
-    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+    protected final ThingTypeRegistry thingTypeRegistry;
+    protected final ItemChannelLinkRegistry itemChannelLinkRegistry;
     private final ReadyService readyService;
     private final SafeCaller safeCaller;
-    private final Storage<String> storage;
-    private final ThingRegistryImpl thingRegistry;
+    private final Storage<String> disabledStorage;
+    protected final ThingRegistryImpl thingRegistry;
+    private final TranslationProvider translationProvider;
+    private final BundleContext bundleContext;
+
+    private final ThingUpdateInstructionReader thingUpdateInstructionReader;
+
     private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
 
     private @Nullable ScheduledFuture<?> startLevelSetterJob = null;
+    private @Nullable ScheduledFuture<?> prerequisiteCheckerJob = null;
 
-    private final ThingHandlerCallback thingHandlerCallback = new ThingHandlerCallback() {
-
-        @Override
-        public void stateUpdated(ChannelUID channelUID, State state) {
-            communicationManager.stateUpdated(channelUID, state);
-        }
-
-        @Override
-        public void postCommand(ChannelUID channelUID, Command command) {
-            communicationManager.postCommand(channelUID, command);
-        }
-
-        @Override
-        public void channelTriggered(Thing thing, ChannelUID channelUID, String event) {
-            communicationManager.channelTriggered(thing, channelUID, event);
-        }
-
-        @Override
-        public void statusUpdated(Thing thing, ThingStatusInfo statusInfo) {
-            // note: all provoked operations based on a status update should be executed asynchronously!
-            ThingStatusInfo oldStatusInfo = thing.getStatusInfo();
-            ensureValidStatus(oldStatusInfo.getStatus(), statusInfo.getStatus());
-
-            if (ThingStatus.REMOVING.equals(oldStatusInfo.getStatus())
-                    && !ThingStatus.REMOVED.equals(statusInfo.getStatus())) {
-                // if we go to ONLINE and are still in REMOVING, notify handler about required removal
-                if (ThingStatus.ONLINE.equals(statusInfo.getStatus())) {
-                    logger.debug(
-                            "Handler is initialized now and we try to remove it, because it is in REMOVING state.");
-                    notifyThingHandlerAboutRemoval(thing);
-                }
-                // only allow REMOVING -> REMOVED transition, all others are ignored because they are illegal
-                logger.debug(
-                        "Ignoring illegal status transition for thing {} from REMOVING to {}, only REMOVED would have been allowed.",
-                        thing.getUID(), statusInfo.getStatus());
-                return;
-            }
-
-            // update thing status and send event about new status
-            setThingStatus(thing, statusInfo);
-
-            // if thing is a bridge
-            if (isBridge(thing)) {
-                handleBridgeStatusUpdate((Bridge) thing, statusInfo, oldStatusInfo);
-            }
-            // if thing has a bridge
-            if (hasBridge(thing)) {
-                handleBridgeChildStatusUpdate(thing, oldStatusInfo);
-            }
-            // notify thing registry about thing removal
-            if (ThingStatus.REMOVED.equals(thing.getStatus())) {
-                notifyRegistryAboutForceRemove(thing);
-            }
-        }
-
-        private void ensureValidStatus(ThingStatus oldStatus, ThingStatus newStatus) {
-            if (!(ThingStatus.UNKNOWN.equals(newStatus) || ThingStatus.ONLINE.equals(newStatus)
-                    || ThingStatus.OFFLINE.equals(newStatus) || ThingStatus.REMOVED.equals(newStatus))) {
-                throw new IllegalArgumentException(MessageFormat.format(
-                        "Illegal status {0}. Bindings only may set {1}, {2}, {3} or {4}.", newStatus,
-                        ThingStatus.UNKNOWN, ThingStatus.ONLINE, ThingStatus.OFFLINE, ThingStatus.REMOVED));
-            }
-            if (ThingStatus.REMOVED.equals(newStatus) && !ThingStatus.REMOVING.equals(oldStatus)) {
-                throw new IllegalArgumentException(
-                        MessageFormat.format("Illegal status {0}. The thing was in state {1} and not in {2}", newStatus,
-                                oldStatus, ThingStatus.REMOVING));
-            }
-        }
-
-        private void handleBridgeStatusUpdate(Bridge bridge, ThingStatusInfo statusInfo,
-                ThingStatusInfo oldStatusInfo) {
-            if (ThingHandlerHelper.isHandlerInitialized(bridge)
-                    && (ThingStatus.INITIALIZING.equals(oldStatusInfo.getStatus()))) {
-                // bridge has just been initialized: initialize child things as well
-                registerChildHandlers(bridge);
-            } else if (!statusInfo.equals(oldStatusInfo)) {
-                // bridge status has been changed: notify child things about status change
-                notifyThingsAboutBridgeStatusChange(bridge, statusInfo);
-            }
-        }
-
-        private void handleBridgeChildStatusUpdate(Thing thing, ThingStatusInfo oldStatusInfo) {
-            if (ThingHandlerHelper.isHandlerInitialized(thing)
-                    && ThingStatus.INITIALIZING.equals(oldStatusInfo.getStatus())) {
-                // child thing has just been initialized: notify bridge about it
-                notifyBridgeAboutChildHandlerInitialization(thing);
-            }
-        }
-
-        @Override
-        public void thingUpdated(final Thing thing) {
-            ThingManagerImpl.this.thingUpdated(thing);
-        }
-
-        @Override
-        public void validateConfigurationParameters(Thing thing, Map<String, Object> configurationParameters) {
-            ThingType thingType = thingTypeRegistry.getThingType(thing.getThingTypeUID());
-            if (thingType != null) {
-                URI configDescriptionURI = thingType.getConfigDescriptionURI();
-                if (configDescriptionURI != null) {
-                    configDescriptionValidator.validate(configurationParameters, configDescriptionURI);
-                }
-            }
-        }
-
-        @Override
-        public void validateConfigurationParameters(Channel channel, Map<String, Object> configurationParameters) {
-            ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
-            if (channelType != null) {
-                URI configDescriptionURI = channelType.getConfigDescriptionURI();
-                if (configDescriptionURI != null) {
-                    configDescriptionValidator.validate(configurationParameters, configDescriptionURI);
-                }
-            }
-        }
-
-        @Override
-        public @Nullable ConfigDescription getConfigDescription(ChannelTypeUID channelTypeUID) {
-            ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID);
-            if (channelType != null) {
-                URI configDescriptionUri = channelType.getConfigDescriptionURI();
-                if (configDescriptionUri != null) {
-                    return configDescriptionRegistry.getConfigDescription(configDescriptionUri);
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public @Nullable ConfigDescription getConfigDescription(ThingTypeUID thingTypeUID) {
-            ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
-            if (thingType != null) {
-                URI configDescriptionUri = thingType.getConfigDescriptionURI();
-                if (configDescriptionUri != null) {
-                    return configDescriptionRegistry.getConfigDescription(configDescriptionUri);
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public void configurationUpdated(Thing thing) {
-            if (!ThingHandlerHelper.isHandlerInitialized(thing)) {
-                initializeHandler(thing);
-            }
-        }
-
-        @Override
-        public void migrateThingType(final Thing thing, final ThingTypeUID thingTypeUID,
-                final Configuration configuration) {
-            ThingManagerImpl.this.migrateThingType(thing, thingTypeUID, configuration);
-        }
-
-        @Override
-        public ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelTypeUID channelTypeUID) {
-            ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID);
-            if (channelType == null) {
-                throw new IllegalArgumentException(String.format("Channel type '%s' is not known", channelTypeUID));
-            }
-            return ThingFactoryHelper.createChannelBuilder(channelUID, channelType, configDescriptionRegistry);
-        }
-
-        @Override
-        public ChannelBuilder editChannel(Thing thing, ChannelUID channelUID) {
-            Channel channel = thing.getChannel(channelUID.getId());
-            if (channel == null) {
-                throw new IllegalArgumentException(
-                        String.format("Channel '%s' does not exist for thing '%s'", channelUID, thing.getUID()));
-            }
-            return ChannelBuilder.create(channel);
-        }
-
-        @Override
-        public List<ChannelBuilder> createChannelBuilders(ChannelGroupUID channelGroupUID,
-                ChannelGroupTypeUID channelGroupTypeUID) {
-            ChannelGroupType channelGroupType = channelGroupTypeRegistry.getChannelGroupType(channelGroupTypeUID);
-            if (channelGroupType == null) {
-                throw new IllegalArgumentException(
-                        String.format("Channel group type '%s' is not known", channelGroupTypeUID));
-            }
-            List<ChannelBuilder> channelBuilders = new ArrayList<>();
-            for (ChannelDefinition channelDefinition : channelGroupType.getChannelDefinitions()) {
-                ChannelType channelType = channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID());
-                if (channelType != null) {
-                    ChannelUID channelUID = new ChannelUID(channelGroupUID, channelDefinition.getId());
-                    ChannelBuilder channelBuilder = ThingFactoryHelper.createChannelBuilder(channelUID,
-                            channelDefinition, configDescriptionRegistry);
-                    if (channelBuilder != null) {
-                        channelBuilders.add(channelBuilder);
-                    }
-                }
-            }
-            return channelBuilders;
-        }
-
-        @Override
-        public boolean isChannelLinked(ChannelUID channelUID) {
-            return itemChannelLinkRegistry.isLinked(channelUID);
-        }
-
-        @Override
-        public @Nullable Bridge getBridge(ThingUID bridgeUID) {
-            return (Bridge) thingRegistry.get(bridgeUID);
-        }
-    };
+    private final ThingHandlerCallback thingHandlerCallback = new ThingHandlerCallbackImpl(this);
 
     @Activate
     public ThingManagerImpl( //
-            final @Reference BundleResolver bundleResolver,
             final @Reference ChannelGroupTypeRegistry channelGroupTypeRegistry,
             final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference CommunicationManager communicationManager,
@@ -390,8 +187,8 @@ public class ThingManagerImpl
             final @Reference StorageService storageService, //
             final @Reference ThingRegistry thingRegistry,
             final @Reference ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService,
-            final @Reference ThingTypeRegistry thingTypeRegistry) {
-        this.bundleResolver = bundleResolver;
+            final @Reference ThingTypeRegistry thingTypeRegistry, final @Reference BundleResolver bundleResolver,
+            final @Reference TranslationProvider translationProvider, final BundleContext bundleContext) {
         this.channelGroupTypeRegistry = channelGroupTypeRegistry;
         this.channelTypeRegistry = channelTypeRegistry;
         this.communicationManager = communicationManager;
@@ -402,50 +199,38 @@ public class ThingManagerImpl
         this.readyService = readyService;
         this.safeCaller = safeCaller;
         this.thingRegistry = (ThingRegistryImpl) thingRegistry;
+        this.thingUpdateInstructionReader = new ThingUpdateInstructionReader(bundleResolver);
         this.thingStatusInfoI18nLocalizationService = thingStatusInfoI18nLocalizationService;
         this.thingTypeRegistry = thingTypeRegistry;
+        this.translationProvider = translationProvider;
+        this.bundleContext = bundleContext;
+        this.disabledStorage = storageService.getStorage(THING_STATUS_STORAGE_NAME, this.getClass().getClassLoader());
 
-        storage = storageService.getStorage(THING_STATUS_STORAGE_NAME, this.getClass().getClassLoader());
-
-        readyService.registerTracker(this, new ReadyMarkerFilter().withType(XML_THING_TYPE));
         this.thingRegistry.addThingTracker(this);
-        initializeStartLevelSetter();
-    }
-
-    private void initializeStartLevelSetter() {
-        readyService.registerTracker(new ReadyTracker() {
-            @Override
-            public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
-            }
-
-            @Override
-            public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-                startLevelSetterJob = scheduler.scheduleWithFixedDelay(() -> {
-                    if (things.values().stream()
-                            .anyMatch(t -> !ThingHandlerHelper.isHandlerInitialized(t) && t.isEnabled())) {
-                        return;
-                    }
-                    readyService.markReady(marker);
-                    if (startLevelSetterJob != null) {
-                        startLevelSetterJob.cancel(false);
-                    }
-                    readyService.unregisterTracker(this);
-                }, 2, 2, TimeUnit.SECONDS);
-            }
-        }, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
+        readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
                 .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_MODEL)));
     }
 
     @Deactivate
-    protected synchronized void deactivate(ComponentContext componentContext) {
+    protected synchronized void deactivate() {
         thingRegistry.removeThingTracker(this);
         for (ThingHandlerFactory factory : thingHandlerFactories) {
             removeThingHandlerFactory(factory);
         }
         readyService.unregisterTracker(this);
+        ScheduledFuture<?> startLevelSetterJob = this.startLevelSetterJob;
+        if (startLevelSetterJob != null) {
+            startLevelSetterJob.cancel(true);
+            this.startLevelSetterJob = null;
+        }
+        ScheduledFuture<?> prerequisiteCheckerJob = this.prerequisiteCheckerJob;
+        if (prerequisiteCheckerJob != null) {
+            prerequisiteCheckerJob.cancel(true);
+            this.prerequisiteCheckerJob = null;
+        }
     }
 
-    private void thingUpdated(final Thing thing) {
+    protected void thingUpdated(final Thing thing) {
         thingUpdatedLock.add(thing.getUID());
         final Thing oldThing = thingRegistry.get(thing.getUID());
         if (oldThing == null) {
@@ -458,8 +243,7 @@ public class ThingManagerImpl
                     "Provider for thing {0} cannot be determined because it is not known to the registry",
                     thing.getUID().getAsString()));
         }
-        if (provider instanceof ManagedProvider) {
-            final ManagedProvider<Thing, ThingUID> managedProvider = (ManagedProvider<Thing, ThingUID>) provider;
+        if (provider instanceof ManagedProvider<Thing, ThingUID> managedProvider) {
             managedProvider.update(thing);
         } else {
             logger.debug("Only updating thing {} in the registry because provider {} is not managed.",
@@ -483,9 +267,8 @@ public class ThingManagerImpl
             public void run() {
                 ThingUID thingUID = thing.getUID();
                 Lock lock = getLockForThing(thingUID);
+                lock.lock();
                 try {
-                    lock.lock();
-
                     // Remove the ThingHandler, if any
                     final ThingHandlerFactory oldThingHandlerFactory = findThingHandlerFactory(thing.getThingTypeUID());
                     if (oldThingHandlerFactory != null) {
@@ -561,7 +344,13 @@ public class ThingManagerImpl
         if (things.get(thing.getUID()) != null) {
             logger.error("A thing with UID '{}' is already tracked by ThingManager. This is a bug.", thing.getUID());
         }
-        this.things.put(thing.getUID(), thing);
+
+        things.put(thing.getUID(), thing);
+        ThingPrerequisites thingPrerequisites = new ThingPrerequisites(thing);
+        if (!thingPrerequisites.isReady()) {
+            missingPrerequisites.put(thing.getUID(), thingPrerequisites);
+        }
+
         eventPublisher.post(ThingEventFactory.createStatusInfoEvent(thing.getUID(), thing.getStatusInfo()));
         logger.debug("Thing '{}' is tracked by ThingManager.", thing.getUID());
         if (!isHandlerRegistered(thing)) {
@@ -573,7 +362,7 @@ public class ThingManagerImpl
 
     @Override
     public void thingRemoving(Thing thing, ThingTrackerEvent thingTrackerEvent) {
-        setThingStatus(thing, ThingStatusInfoBuilder.create(ThingStatus.REMOVING).build());
+        setThingStatus(thing, buildStatusInfo(ThingStatus.REMOVING, ThingStatusDetail.NONE));
         notifyThingHandlerAboutRemoval(thing);
     }
 
@@ -605,38 +394,51 @@ public class ThingManagerImpl
                         thing.getUID());
             }
         }
+
+        missingPrerequisites.remove(thing.getUID());
     }
 
     @Override
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public void thingUpdated(Thing oldThing, Thing newThing, ThingTrackerEvent thingTrackerEvent) {
         ThingUID thingUID = newThing.getUID();
-        normalizeThingConfiguration(oldThing);
-        normalizeThingConfiguration(newThing);
+        try {
+            normalizeThingConfiguration(oldThing);
+        } catch (ConfigValidationException e) {
+            logger.warn("Failed to normalize configuration for thing '{}': {}", oldThing.getUID(),
+                    e.getValidationMessages(null));
+        }
+        try {
+            normalizeThingConfiguration(newThing);
+        } catch (ConfigValidationException e) {
+            logger.warn("Failed to normalize configuration´for thing '{}': {}", newThing.getUID(),
+                    e.getValidationMessages(null));
+        }
         if (thingUpdatedLock.contains(thingUID)) {
-            // called from the thing handler itself, therefore
-            // it exists, is initializing/initialized and
-            // must not be informed (in order to prevent infinite loops)
+            // called from the thing handler itself or during thing structure update, therefore it exists
+            // and either is initializing/initialized and must not be informed (in order to prevent infinite loops)
+            // or will be initialized after the update is done by the thing type update method itself
             replaceThing(oldThing, newThing);
         } else {
-            Lock lock1 = getLockForThing(newThing.getUID());
+            Lock lock = getLockForThing(newThing.getUID());
+            lock.lock();
             try {
-                lock1.lock();
                 ThingHandler thingHandler = replaceThing(oldThing, newThing);
                 if (thingHandler != null) {
-                    if (ThingHandlerHelper.isHandlerInitialized(newThing) || isInitializing(newThing)) {
+                    if (ThingHandlerHelper.isHandlerInitialized(newThing)
+                            || newThing.getStatus() == ThingStatus.INITIALIZING) {
                         oldThing.setHandler(null);
                         newThing.setHandler(thingHandler);
 
                         try {
-                            validate(newThing, getThingType(newThing));
+                            validate(newThing, thingTypeRegistry.getThingType(newThing.getThingTypeUID()));
                             safeCaller.create(thingHandler, ThingHandler.class).build().thingUpdated(newThing);
                         } catch (ConfigValidationException e) {
                             final ThingHandlerFactory thingHandlerFactory = findThingHandlerFactory(
                                     newThing.getThingTypeUID());
                             if (thingHandlerFactory != null) {
-                                if (isBridge(newThing)) {
-                                    unregisterAndDisposeChildHandlers((Bridge) newThing, thingHandlerFactory);
+                                if (newThing instanceof Bridge bridge) {
+                                    unregisterAndDisposeChildHandlers(bridge, thingHandlerFactory);
                                 }
                                 disposeHandler(newThing, thingHandler);
                                 setThingStatus(newThing,
@@ -671,7 +473,7 @@ public class ThingManagerImpl
                     registerAndInitializeHandler(newThing, getThingHandlerFactory(newThing));
                 }
             } finally {
-                lock1.unlock();
+                lock.unlock();
             }
         }
     }
@@ -680,47 +482,40 @@ public class ThingManagerImpl
     private @Nullable ThingHandler replaceThing(Thing oldThing, Thing newThing) {
         final ThingHandler thingHandler = thingHandlers.get(newThing.getUID());
         if (oldThing != newThing) {
-            if (!oldThing.equals(this.things.remove(oldThing.getUID()))) {
+            if (!oldThing.equals(things.remove(oldThing.getUID()))) {
                 logger.error("Thing '{}' is different from thing tracked by ThingManager. This is a bug.",
                         oldThing.getUID());
             }
-            this.things.put(newThing.getUID(), newThing);
+            things.put(newThing.getUID(), newThing);
         }
         return thingHandler;
     }
 
-    private @Nullable ThingType getThingType(Thing thing) {
-        return thingTypeRegistry.getThingType(thing.getThingTypeUID());
-    }
-
     private @Nullable ThingHandlerFactory findThingHandlerFactory(ThingTypeUID thingTypeUID) {
-        for (ThingHandlerFactory factory : thingHandlerFactories) {
-            if (factory.supportsThingType(thingTypeUID)) {
-                return factory;
-            }
-        }
-        return null;
+        return thingHandlerFactories.stream().filter(factory -> factory.supportsThingType(thingTypeUID)).findFirst()
+                .orElse(null);
     }
 
     private void registerHandler(Thing thing, ThingHandlerFactory thingHandlerFactory) {
         Lock lock = getLockForThing(thing.getUID());
+        lock.lock();
         try {
-            lock.lock();
-            if (!isHandlerRegistered(thing)) {
-                if (!hasBridge(thing)) {
-                    doRegisterHandler(thing, thingHandlerFactory);
-                } else {
-                    Bridge bridge = getBridge(thing.getBridgeUID());
-                    if (bridge != null && ThingHandlerHelper.isHandlerInitialized(bridge)) {
-                        doRegisterHandler(thing, thingHandlerFactory);
-                    } else {
-                        setThingStatus(thing,
-                                buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.BRIDGE_UNINITIALIZED));
-                    }
-                }
-            } else {
+            if (isHandlerRegistered(thing)) {
                 logger.debug("Attempt to register a handler twice for thing {} at the same time will be ignored.",
                         thing.getUID());
+                return;
+            }
+
+            if (thing.getBridgeUID() == null) {
+                doRegisterHandler(thing, thingHandlerFactory);
+            } else {
+                Bridge bridge = getBridge(thing.getBridgeUID());
+                if (bridge == null || !ThingHandlerHelper.isHandlerInitialized(bridge)) {
+                    setThingStatus(thing,
+                            buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.BRIDGE_UNINITIALIZED));
+                } else {
+                    doRegisterHandler(thing, thingHandlerFactory);
+                }
             }
         } finally {
             lock.unlock();
@@ -732,13 +527,10 @@ public class ThingManagerImpl
                 thing.getUID());
         try {
             ThingHandler thingHandler = thingHandlerFactory.registerHandler(thing);
-            thingHandler.setCallback(ThingManagerImpl.this.thingHandlerCallback);
+            thingHandler.setCallback(thingHandlerCallback);
             thing.setHandler(thingHandler);
             thingHandlers.put(thing.getUID(), thingHandler);
-            synchronized (thingHandlersByFactory) {
-                thingHandlersByFactory.computeIfAbsent(thingHandlerFactory, unused -> new HashSet<>())
-                        .add(thingHandler);
-            }
+            thingHandlersByFactory.computeIfAbsent(thingHandlerFactory, unused -> new HashSet<>()).add(thingHandler);
         } catch (Exception ex) {
             ThingStatusInfo statusInfo = buildStatusInfo(ThingStatus.UNINITIALIZED,
                     ThingStatusDetail.HANDLER_REGISTERING_ERROR,
@@ -749,10 +541,10 @@ public class ThingManagerImpl
         }
     }
 
-    private void registerChildHandlers(final Bridge bridge) {
+    protected void registerChildHandlers(final Bridge bridge) {
         for (final Thing child : bridge.getThings()) {
             logger.debug("Register and initialize child '{}' of bridge '{}'.", child.getUID(), bridge.getUID());
-            ThreadPoolManager.getPool(THING_MANAGER_THREAD_POOL_NAME).execute(() -> {
+            scheduler.execute(() -> {
                 try {
                     registerAndInitializeHandler(child, getThingHandlerFactory(child));
                 } catch (Exception ex) {
@@ -764,8 +556,9 @@ public class ThingManagerImpl
     }
 
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
-    private void initializeHandler(Thing thing) {
-        if (isDisabledByStorage(thing.getUID())) {
+    protected void initializeHandler(Thing thing) {
+        ThingUID thingUID = thing.getUID();
+        if (disabledStorage.containsKey(thingUID.getAsString())) {
             setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.DISABLED));
             logger.debug("Thing '{}' will not be initialized. It is marked as disabled.", thing.getUID());
             return;
@@ -773,15 +566,16 @@ public class ThingManagerImpl
         if (!isHandlerRegistered(thing)) {
             return;
         }
+
         Lock lock = getLockForThing(thing.getUID());
+        lock.lock();
         try {
-            lock.lock();
             if (ThingHandlerHelper.isHandlerInitialized(thing)) {
                 logger.debug("Attempt to initialize the already initialized thing '{}' will be ignored.",
                         thing.getUID());
                 return;
             }
-            if (isInitializing(thing)) {
+            if (thing.getStatus() == ThingStatus.INITIALIZING) {
                 logger.debug("Attempt to initialize a handler twice for thing '{}' at the same time will be ignored.",
                         thing.getUID());
                 return;
@@ -793,7 +587,7 @@ public class ThingManagerImpl
             if (handler.getThing() != thing) {
                 logger.warn("The model of {} is inconsistent [thing.getHandler().getThing() != thing]", thing.getUID());
             }
-            ThingType thingType = getThingType(thing);
+            ThingType thingType = thingTypeRegistry.getThingType(thing.getThingTypeUID());
             if (thingType != null) {
                 ThingFactoryHelper.applyDefaultConfiguration(thing.getConfiguration(), thingType,
                         configDescriptionRegistry);
@@ -801,6 +595,7 @@ public class ThingManagerImpl
 
             try {
                 validate(thing, thingType);
+
                 if (ThingStatus.REMOVING.equals(thing.getStatus())) {
                     // preserve REMOVING state so the callback can later decide to remove the thing after it has been
                     // initialized
@@ -820,11 +615,18 @@ public class ThingManagerImpl
     }
 
     private void validate(Thing thing, @Nullable ThingType thingType) throws ConfigValidationException {
-        validate(thingType, thing.getUID(), ThingType::getConfigDescriptionURI, thing.getConfiguration());
+        validate(thingType, thing.getUID(), thing.getConfiguration());
+
+        // validate a bridge is set when it is mandatory
+        if (thingType != null && thing.getBridgeUID() == null && !thingType.getSupportedBridgeTypeUIDs().isEmpty()) {
+            ConfigValidationMessage message = new ConfigValidationMessage("bridge",
+                    "Configuring a bridge is mandatory.", "bridge_not_configured");
+            throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
+        }
 
         for (Channel channel : thing.getChannels()) {
             ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
-            validate(channelType, channel.getUID(), ChannelType::getConfigDescriptionURI, channel.getConfiguration());
+            validate(channelType, channel.getUID(), channel.getConfiguration());
         }
     }
 
@@ -833,22 +635,19 @@ public class ThingManagerImpl
      *
      * @param prototype the "prototype", i.e. thing type or channel type
      * @param targetUID the UID of the thing or channel entity
-     * @param configDescriptionURIFunction a function to determine the the config description UID for the given
-     *            prototype
      * @param configuration the current configuration
      * @throws ConfigValidationException if validation failed
      */
-    private <T extends Identifiable<?>> void validate(@Nullable T prototype, UID targetUID,
-            Function<T, @Nullable URI> configDescriptionURIFunction, Configuration configuration)
+    private void validate(@Nullable AbstractDescriptionType prototype, UID targetUID, Configuration configuration)
             throws ConfigValidationException {
         if (prototype == null) {
-            logger.debug("Prototype for '{}' is not known, assuming it is initializable", targetUID);
+            logger.debug("Prototype for '{}' is not known, assuming it can be initialized", targetUID);
             return;
         }
 
-        URI configDescriptionURI = configDescriptionURIFunction.apply(prototype);
+        URI configDescriptionURI = prototype.getConfigDescriptionURI();
         if (configDescriptionURI == null) {
-            logger.debug("Config description URI for '{}' not found, assuming '{}' is initializable",
+            logger.debug("Config description URI for '{}' not found, assuming '{}' can be initialized",
                     prototype.getUID(), targetUID);
             return;
         }
@@ -858,24 +657,32 @@ public class ThingManagerImpl
 
     private void normalizeThingConfiguration(Thing thing) throws ConfigValidationException {
         ThingType thingType = thingTypeRegistry.getThingType(thing.getThingTypeUID());
-        normalizeConfiguration(thingType, thing.getUID(), ThingType::getConfigDescriptionURI, thing.getConfiguration());
+        if (thingType == null) {
+            logger.warn("Could not normalize configuration for '{}' because the thing type was not found in registry.",
+                    thing.getUID());
+            return;
+        }
+        normalizeConfiguration(thingType, thing.getUID(), thing.getConfiguration());
 
         for (Channel channel : thing.getChannels()) {
-            ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
-            normalizeConfiguration(channelType, channel.getUID(), ChannelType::getConfigDescriptionURI,
-                    channel.getConfiguration());
+            ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
+            if (channelTypeUID != null) {
+                ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID);
+                normalizeConfiguration(channelType, channel.getUID(), channel.getConfiguration());
+            }
         }
     }
 
-    private <T extends Identifiable<?>> void normalizeConfiguration(@Nullable T prototype, UID targetUID,
-            Function<T, @Nullable URI> configDescriptionURIFunction, Configuration configuration)
-            throws ConfigValidationException {
+    private void normalizeConfiguration(@Nullable AbstractDescriptionType prototype, UID targetUID,
+            Configuration configuration) throws ConfigValidationException {
         if (prototype == null) {
-            logger.debug("Prototype for '{}' is not known, assuming it is already normalized", targetUID);
-            return;
+            ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
+                    "Type description for '{0}' not found although we checked the presence before.",
+                    "type_description_missing", targetUID);
+            throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
 
-        URI configDescriptionURI = configDescriptionURIFunction.apply(prototype);
+        URI configDescriptionURI = prototype.getConfigDescriptionURI();
         if (configDescriptionURI == null) {
             logger.debug("Config description URI for '{}' not found, assuming '{}' is normalized", prototype.getUID(),
                     targetUID);
@@ -884,10 +691,10 @@ public class ThingManagerImpl
 
         ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
         if (configDescription == null) {
-            logger.warn(
-                    "No config description for '{}' found when normalizing configuration for '{}'. This is probably a bug.",
-                    configDescriptionURI, targetUID);
-            return;
+            ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
+                    "Config description for '{0}' not found also we checked the presence before.",
+                    "config_description_missing", targetUID);
+            throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
 
         Objects.requireNonNull(ConfigUtil.normalizeTypes(configuration.getProperties(), List.of(configDescription)))
@@ -897,34 +704,21 @@ public class ThingManagerImpl
     private void doInitializeHandler(final ThingHandler thingHandler) {
         logger.debug("Calling initialize handler for thing '{}' at '{}'.", thingHandler.getThing().getUID(),
                 thingHandler);
-        safeCaller.create(thingHandler, ThingHandler.class).onTimeout(() -> {
-            logger.warn("Initializing handler for thing '{}' takes more than {}ms.", thingHandler.getThing().getUID(),
-                    SafeCaller.DEFAULT_TIMEOUT);
-        }).onException(e -> {
-            ThingStatusInfo statusInfo = buildStatusInfo(ThingStatus.UNINITIALIZED,
-                    ThingStatusDetail.HANDLER_INITIALIZING_ERROR, e.getMessage());
-            setThingStatus(thingHandler.getThing(), statusInfo);
-            logger.error("Exception occurred while initializing handler of thing '{}': {}",
-                    thingHandler.getThing().getUID(), e.getMessage(), e);
-        }).build().initialize();
-    }
-
-    private boolean isInitializing(Thing thing) {
-        return thing.getStatus() == ThingStatus.INITIALIZING;
+        safeCaller.create(thingHandler, ThingHandler.class)
+                .onTimeout(() -> logger.warn("Initializing handler for thing '{}' takes more than {}ms.",
+                        thingHandler.getThing().getUID(), SafeCaller.DEFAULT_TIMEOUT))
+                .onException(e -> {
+                    setThingStatus(thingHandler.getThing(), buildStatusInfo(ThingStatus.UNINITIALIZED,
+                            ThingStatusDetail.HANDLER_INITIALIZING_ERROR, e.getMessage()));
+                    logger.error("Exception occurred while initializing handler of thing '{}': {}",
+                            thingHandler.getThing().getUID(), e.getMessage(), e);
+                }).build().initialize();
     }
 
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     private boolean isHandlerRegistered(Thing thing) {
         ThingHandler handler = thingHandlers.get(thing.getUID());
         return handler != null && handler == thing.getHandler();
-    }
-
-    private boolean isBridge(Thing thing) {
-        return thing instanceof Bridge;
-    }
-
-    private boolean hasBridge(final Thing thing) {
-        return thing.getBridgeUID() != null;
     }
 
     private @Nullable Bridge getBridge(@Nullable ThingUID bridgeUID) {
@@ -937,10 +731,10 @@ public class ThingManagerImpl
 
     private void unregisterHandler(Thing thing, ThingHandlerFactory thingHandlerFactory) {
         Lock lock = getLockForThing(thing.getUID());
+        lock.lock();
         try {
-            lock.lock();
             if (isHandlerRegistered(thing)) {
-                doUnregisterHandler(thing, thingHandlerFactory);
+                safeCaller.create(() -> doUnregisterHandler(thing, thingHandlerFactory), Runnable.class).build().run();
             }
         } finally {
             lock.unlock();
@@ -949,38 +743,35 @@ public class ThingManagerImpl
 
     private void doUnregisterHandler(final Thing thing, final ThingHandlerFactory thingHandlerFactory) {
         logger.debug("Calling unregisterHandler handler for thing '{}' at '{}'.", thing.getUID(), thingHandlerFactory);
-        safeCaller.create(() -> {
-            ThingHandler thingHandler = thing.getHandler();
-            thingHandlerFactory.unregisterHandler(thing);
-            if (thingHandler != null) {
-                thingHandler.setCallback(null);
+
+        ThingHandler thingHandler = thing.getHandler();
+        thingHandlerFactory.unregisterHandler(thing);
+        if (thingHandler != null) {
+            thingHandler.setCallback(null);
+        }
+        thing.setHandler(null);
+
+        ThingUID thingUID = thing.getUID();
+        boolean enabled = !disabledStorage.containsKey(thingUID.getAsString());
+
+        ThingStatusDetail detail = enabled ? ThingStatusDetail.HANDLER_MISSING_ERROR : ThingStatusDetail.DISABLED;
+
+        setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED, detail));
+        thingHandlers.remove(thing.getUID());
+        synchronized (thingHandlersByFactory) {
+            final Set<ThingHandler> thingHandlers = thingHandlersByFactory.get(thingHandlerFactory);
+            if (thingHandlers != null) {
+                thingHandlers.remove(thingHandler);
             }
-            thing.setHandler(null);
-
-            boolean enabled = !isDisabledByStorage(thing.getUID());
-
-            ThingStatusDetail detail = enabled ? ThingStatusDetail.HANDLER_MISSING_ERROR : ThingStatusDetail.DISABLED;
-
-            setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED, detail));
-            thingHandlers.remove(thing.getUID());
-            synchronized (thingHandlersByFactory) {
-                final Set<ThingHandler> thingHandlers = thingHandlersByFactory.get(thingHandlerFactory);
-                if (thingHandlers != null) {
-                    thingHandlers.remove(thingHandler);
-                    if (thingHandlers.isEmpty()) {
-                        thingHandlersByFactory.remove(thingHandlerFactory);
-                    }
-                }
-            }
-        }, Runnable.class).build().run();
+        }
     }
 
     private void disposeHandler(Thing thing, ThingHandler thingHandler) {
         Lock lock = getLockForThing(thing.getUID());
+        lock.lock();
         try {
-            lock.lock();
             doDisposeHandler(thingHandler);
-            if (hasBridge(thing)) {
+            if (thing.getBridgeUID() != null) {
                 notifyBridgeAboutChildHandlerDisposal(thing, thingHandler);
             }
         } finally {
@@ -991,51 +782,38 @@ public class ThingManagerImpl
     private void doDisposeHandler(final ThingHandler thingHandler) {
         logger.debug("Calling dispose handler for thing '{}' at '{}'.", thingHandler.getThing().getUID(), thingHandler);
         setThingStatus(thingHandler.getThing(), buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE));
-        safeCaller.create(thingHandler, ThingHandler.class).onTimeout(() -> {
-            logger.warn("Disposing handler for thing '{}' takes more than {}ms.", thingHandler.getThing().getUID(),
-                    SafeCaller.DEFAULT_TIMEOUT);
-        }).onException(e -> {
-            logger.error("Exception occurred while disposing handler of thing '{}': {}",
-                    thingHandler.getThing().getUID(), e.getMessage(), e);
-        }).build().dispose();
+        safeCaller.create(thingHandler, ThingHandler.class) //
+                .onTimeout(() -> logger.warn("Disposing handler for thing '{}' takes more than {}ms.",
+                        thingHandler.getThing().getUID(), SafeCaller.DEFAULT_TIMEOUT)) //
+                .onException(e -> logger.error("Exception occurred while disposing handler of thing '{}': {}",
+                        thingHandler.getThing().getUID(), e.getMessage(), e)) //
+                .build().dispose();
     }
 
     private void unregisterAndDisposeChildHandlers(Bridge bridge, ThingHandlerFactory thingHandlerFactory) {
-        addThingsToBridge(bridge);
-        for (Thing child : bridge.getThings()) {
+        ThingUID bridgeUID = bridge.getUID();
+        thingRegistry.stream().filter(thing -> bridgeUID.equals(thing.getBridgeUID())).forEach(child -> {
             ThingHandler handler = child.getHandler();
             if (handler != null) {
                 logger.debug("Unregister and dispose child '{}' of bridge '{}'.", child.getUID(), bridge.getUID());
                 unregisterAndDisposeHandler(thingHandlerFactory, child, handler);
             }
-        }
+        });
     }
 
     private void unregisterAndDisposeHandler(ThingHandlerFactory thingHandlerFactory, Thing thing,
             ThingHandler handler) {
-        if (isBridge(thing)) {
-            unregisterAndDisposeChildHandlers((Bridge) thing, thingHandlerFactory);
+        if (thing instanceof Bridge bridge) {
+            unregisterAndDisposeChildHandlers(bridge, thingHandlerFactory);
         }
         disposeHandler(thing, handler);
         unregisterHandler(thing, thingHandlerFactory);
     }
 
-    private void addThingsToBridge(Bridge bridge) {
-        Collection<Thing> things = thingRegistry.getAll();
-        for (Thing thing : things) {
-            ThingUID bridgeUID = thing.getBridgeUID();
-            if (bridgeUID != null && bridgeUID.equals(bridge.getUID())) {
-                if (bridge instanceof BridgeImpl && !bridge.getThings().contains(thing)) {
-                    ((BridgeImpl) bridge).addThing(thing);
-                }
-            }
-        }
-    }
-
-    private void notifyThingsAboutBridgeStatusChange(final Bridge bridge, final ThingStatusInfo bridgeStatus) {
+    protected void notifyThingsAboutBridgeStatusChange(final Bridge bridge, final ThingStatusInfo bridgeStatus) {
         if (ThingHandlerHelper.isHandlerInitialized(bridge)) {
             for (final Thing child : bridge.getThings()) {
-                ThreadPoolManager.getPool(THING_MANAGER_THREAD_POOL_NAME).execute(() -> {
+                scheduler.execute(() -> {
                     try {
                         ThingHandler handler = child.getHandler();
                         if (handler != null && ThingHandlerHelper.isHandlerInitialized(child)) {
@@ -1051,10 +829,10 @@ public class ThingManagerImpl
         }
     }
 
-    private void notifyBridgeAboutChildHandlerInitialization(final Thing thing) {
+    protected void notifyBridgeAboutChildHandlerInitialization(final Thing thing) {
         final Bridge bridge = getBridge(thing.getBridgeUID());
         if (bridge != null) {
-            ThreadPoolManager.getPool(THING_MANAGER_THREAD_POOL_NAME).execute(() -> {
+            scheduler.execute(() -> {
                 try {
                     BridgeHandler bridgeHandler = bridge.getHandler();
                     if (bridgeHandler != null) {
@@ -1090,7 +868,7 @@ public class ThingManagerImpl
         }
     }
 
-    private void notifyThingHandlerAboutRemoval(final Thing thing) {
+    protected void notifyThingHandlerAboutRemoval(final Thing thing) {
         logger.trace("Asking handler of thing '{}' to handle its removal.", thing.getUID());
 
         ThreadPoolManager.getPool(THING_MANAGER_THREAD_POOL_NAME).execute(() -> {
@@ -1108,7 +886,7 @@ public class ThingManagerImpl
         });
     }
 
-    private void notifyRegistryAboutForceRemove(final Thing thing) {
+    protected void notifyRegistryAboutForceRemove(final Thing thing) {
         logger.debug("Removal handling of thing '{}' completed. Going to remove it now.", thing.getUID());
 
         // call asynchronous to avoid deadlocks in thing handler
@@ -1119,69 +897,36 @@ public class ThingManagerImpl
                 logger.debug("Could not remove thing {}. Most likely because it is not managed.", thing.getUID(), ex);
             } catch (Exception ex) {
                 logger.error(
-                        "Could not remove thing {}, because an unknwon Exception occurred. Most likely because it is not managed.",
+                        "Could not remove thing {}, because an unknown Exception occurred. Most likely because it is not managed.",
                         thing.getUID(), ex);
             }
         });
     }
 
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected synchronized void addThingHandlerFactory(ThingHandlerFactory thingHandlerFactory) {
-        logger.debug("Thing handler factory '{}' added", thingHandlerFactory.getClass().getSimpleName());
-        thingHandlerFactories.add(thingHandlerFactory);
-        handleThingHandlerFactoryAddition(getBundleIdentifier(thingHandlerFactory));
-    }
-
-    @Override
-    public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-        String identifier = readyMarker.getIdentifier();
-        loadedXmlThingTypes.add(identifier);
-        handleThingHandlerFactoryAddition(identifier);
-    }
-
-    @Override
-    public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
-        String identifier = readyMarker.getIdentifier();
-        loadedXmlThingTypes.remove(identifier);
-    }
-
-    private void handleThingHandlerFactoryAddition(String bundleIdentifier) {
-        thingHandlerFactories.stream().filter(it -> bundleIdentifier.equals(getBundleIdentifier(it)))
-                .forEach(thingHandlerFactory -> things.values().forEach(thing -> {
-                    if (thingHandlerFactory.supportsThingType(thing.getThingTypeUID())) {
-                        if (!isHandlerRegistered(thing)) {
-                            registerAndInitializeHandler(thing, thingHandlerFactory);
-                        } else {
-                            logger.debug("Thing handler for thing '{}' already registered", thing.getUID());
-                        }
-                    }
-                }));
-    }
-
-    private String getBundleIdentifier(ThingHandlerFactory thingHandlerFactory) {
-        return ReadyMarkerUtils.getIdentifier(bundleResolver.resolveBundle(thingHandlerFactory.getClass()));
-    }
-
     private void registerAndInitializeHandler(final Thing thing,
             final @Nullable ThingHandlerFactory thingHandlerFactory) {
-        if (isDisabledByStorage(thing.getUID())) {
+        ThingUID thingUID = thing.getUID();
+        if (disabledStorage.containsKey(thingUID.getAsString())) {
             logger.debug("Not registering a handler at this point. Thing is disabled.");
-            setThingStatus(thing, new ThingStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.DISABLED, null));
+            setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.DISABLED));
         } else {
             if (thingHandlerFactory != null) {
-                final String identifier = getBundleIdentifier(thingHandlerFactory);
-
-                if (loadedXmlThingTypes.contains(identifier)) {
+                if (!missingPrerequisites.containsKey(thing.getUID())) {
+                    if (thingRegistry.getProvider(thing) instanceof ManagedProvider
+                            && checkAndPerformUpdate(thing, thingHandlerFactory)) {
+                        return;
+                    }
                     normalizeThingConfiguration(thing);
                     registerHandler(thing, thingHandlerFactory);
                     initializeHandler(thing);
                 } else {
+                    setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.NOT_YET_READY));
                     logger.debug(
-                            "Not registering a handler at this point. The thing types of bundle '{}' are not fully loaded yet.",
-                            identifier);
+                            "Not registering a handler at this point. The thing type '{}' is not fully loaded yet.",
+                            thing.getThingTypeUID());
                 }
             } else {
-                setThingStatus(thing, new ThingStatusInfo(ThingStatus.UNINITIALIZED,
+                setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED,
                         ThingStatusDetail.HANDLER_MISSING_ERROR, "Handler factory not found"));
                 logger.debug("Not registering a handler at this point. No handler factory for thing '{}' found.",
                         thing.getUID());
@@ -1199,34 +944,8 @@ public class ThingManagerImpl
         return null;
     }
 
-    protected synchronized void removeThingHandlerFactory(ThingHandlerFactory thingHandlerFactory) {
-        logger.debug("Thing handler factory '{}' removed", thingHandlerFactory.getClass().getSimpleName());
-        thingHandlerFactories.remove(thingHandlerFactory);
-        handleThingHandlerFactoryRemoval(thingHandlerFactory);
-    }
-
-    private void handleThingHandlerFactoryRemoval(ThingHandlerFactory thingHandlerFactory) {
-        final Set<ThingHandler> handlers;
-        synchronized (thingHandlersByFactory) {
-            handlers = thingHandlersByFactory.remove(thingHandlerFactory);
-        }
-        if (handlers != null) {
-            for (ThingHandler thingHandler : handlers) {
-                final Thing thing = thingHandler.getThing();
-                if (isHandlerRegistered(thing)) {
-                    unregisterAndDisposeHandler(thingHandlerFactory, thing, thingHandler);
-                }
-            }
-        }
-    }
-
-    private synchronized Lock getLockForThing(ThingUID thingUID) {
-        Lock lock = thingLocks.get(thingUID);
-        if (lock == null) {
-            lock = new ReentrantLock();
-            thingLocks.put(thingUID, lock);
-        }
-        return lock;
+    private Lock getLockForThing(ThingUID thingUID) {
+        return Objects.requireNonNull(thingLocks.computeIfAbsent(thingUID, k -> new ReentrantLock()));
     }
 
     private ThingStatusInfo buildStatusInfo(ThingStatus thingStatus, ThingStatusDetail thingStatusDetail,
@@ -1240,7 +959,7 @@ public class ThingManagerImpl
         return buildStatusInfo(thingStatus, thingStatusDetail, null);
     }
 
-    private void setThingStatus(Thing thing, ThingStatusInfo thingStatusInfo) {
+    protected void setThingStatus(Thing thing, ThingStatusInfo thingStatusInfo) {
         ThingStatusInfo oldStatusInfo = thingStatusInfoI18nLocalizationService.getLocalizedThingStatusInfo(thing, null);
         thing.setStatusInfo(thingStatusInfo);
         ThingStatusInfo newStatusInfo = thingStatusInfoI18nLocalizationService.getLocalizedThingStatusInfo(thing, null);
@@ -1257,7 +976,7 @@ public class ThingManagerImpl
 
     @Override
     public void setEnabled(ThingUID thingUID, boolean enabled) {
-        Thing thing = this.things.get(thingUID);
+        Thing thing = things.get(thingUID);
 
         persistThingEnableStatus(thingUID, enabled);
 
@@ -1282,7 +1001,7 @@ public class ThingManagerImpl
                 // No handler registered. Try to register handler and initialize the thing.
                 registerAndInitializeHandler(thing, findThingHandlerFactory(thing.getThingTypeUID()));
                 // Check if registration was successful
-                if (!hasBridge(thing) && !isHandlerRegistered(thing)) {
+                if (!isHandlerRegistered(thing)) {
                     setThingStatus(thing,
                             buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_MISSING_ERROR));
                 }
@@ -1312,8 +1031,8 @@ public class ThingManagerImpl
                 setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.DISABLED));
             }
 
-            if (isBridge(thing)) {
-                updateChildThingStatusForDisabledBridges((Bridge) thing);
+            if (thing instanceof Bridge bridge) {
+                updateChildThingStatusForDisabledBridges(bridge);
             }
         }
     }
@@ -1331,31 +1050,214 @@ public class ThingManagerImpl
     private void persistThingEnableStatus(ThingUID thingUID, boolean enabled) {
         logger.debug("Thing with UID {} will be persisted as {}.", thingUID, enabled ? "enabled." : "disabled.");
         if (enabled) {
-            // Clear the disabled thing storage. Otherwise the handler will NOT be initialized later.
-            storage.remove(thingUID.getAsString());
+            // Clear the disabled thing storage. Otherwise, the handler will NOT be initialized later.
+            disabledStorage.remove(thingUID.getAsString());
         } else {
             // Mark the thing as disabled in the storage.
-            storage.put(thingUID.getAsString(), "");
+            disabledStorage.put(thingUID.getAsString(), "");
         }
     }
 
     @Override
     public boolean isEnabled(ThingUID thingUID) {
-        Thing thing = this.things.get(thingUID);
+        Thing thing = things.get(thingUID);
         if (thing != null) {
             return thing.isEnabled();
         }
 
         logger.debug("Thing with UID {} is unknown. Will try to get the enabled status from the persistent storage.",
                 thingUID);
-        return !isDisabledByStorage(thingUID);
+        return !disabledStorage.containsKey(thingUID.getAsString());
     }
 
-    private boolean isDisabledByStorage(ThingUID thingUID) {
-        return storage.containsKey(thingUID.getAsString());
+    private boolean checkAndPerformUpdate(Thing thing, ThingHandlerFactory factory) {
+        final int currentThingTypeVersion = Integer
+                .parseInt(thing.getProperties().getOrDefault(PROPERTY_THING_TYPE_VERSION, "0"));
+
+        UpdateInstructionKey thingKey = new UpdateInstructionKey(factory, thing.getThingTypeUID());
+        List<ThingUpdateInstruction> instructions = updateInstructions.getOrDefault(thingKey, List.of()).stream()
+                .filter(ThingUpdateInstruction.applies(currentThingTypeVersion)).toList();
+
+        if (instructions.isEmpty()) {
+            return false;
+        }
+
+        // create a thing builder and apply the update instructions
+        ThingBuilder thingBuilder = ThingBuilder.create(thing);
+        instructions.forEach(instruction -> instruction.perform(thing, thingBuilder));
+        int newThingTypeVersion = instructions.get(instructions.size() - 1).getThingTypeVersion();
+        thingBuilder.withProperty(PROPERTY_THING_TYPE_VERSION, String.valueOf(newThingTypeVersion));
+        logger.info("Updating '{}' from version {} to {}", thing.getUID(), currentThingTypeVersion,
+                newThingTypeVersion);
+
+        Thing newThing = thingBuilder.build();
+        thingUpdated(newThing);
+
+        ThingPrerequisites thingPrerequisites = new ThingPrerequisites(newThing);
+        if (!thingPrerequisites.isReady()) {
+            missingPrerequisites.put(newThing.getUID(), thingPrerequisites);
+        }
+
+        registerAndInitializeHandler(newThing, getThingHandlerFactory(newThing));
+
+        return true;
     }
 
-    void setBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
+    private void checkMissingPrerequisites() {
+        Iterator<ThingPrerequisites> it = missingPrerequisites.values().iterator();
+        while (it.hasNext()) {
+            ThingPrerequisites prerequisites = it.next();
+            if (prerequisites.isReady()) {
+                it.remove();
+                Thing thing = things.get(prerequisites.thingUID);
+                if (thing != null) {
+                    if (!isHandlerRegistered(thing)) {
+                        registerAndInitializeHandler(thing, getThingHandlerFactory(thing));
+                    } else {
+                        logger.warn(
+                                "Handler of thing '{}' already registered even though not all prerequisites were met.",
+                                thing.getUID());
+                    }
+                } else {
+                    logger.warn("Found missing thing while checking prerequisites of thing '{}'",
+                            prerequisites.thingUID);
+                }
+            }
+        }
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    protected synchronized void addThingHandlerFactory(ThingHandlerFactory thingHandlerFactory) {
+        logger.debug("Thing handler factory '{}' added", thingHandlerFactory.getClass().getSimpleName());
+        updateInstructions.putAll(thingUpdateInstructionReader.readForFactory(thingHandlerFactory));
+        thingHandlerFactories.add(thingHandlerFactory);
+        things.values().stream().filter(thing -> thingHandlerFactory.supportsThingType(thing.getThingTypeUID()))
+                .forEach(thing -> {
+                    if (!isHandlerRegistered(thing)) {
+                        ThingPrerequisites thingPrerequisites = new ThingPrerequisites(thing);
+                        if (!thingPrerequisites.isReady()) {
+                            missingPrerequisites.put(thing.getUID(), thingPrerequisites);
+                        }
+                        registerAndInitializeHandler(thing, thingHandlerFactory);
+                    } else {
+                        logger.debug("Thing handler for thing '{}' already registered", thing.getUID());
+                    }
+                });
+    }
+
+    protected synchronized void removeThingHandlerFactory(ThingHandlerFactory thingHandlerFactory) {
+        logger.debug("Thing handler factory '{}' removed", thingHandlerFactory.getClass().getSimpleName());
+        thingHandlerFactories.remove(thingHandlerFactory);
+        final Set<ThingHandler> handlers = thingHandlersByFactory.remove(thingHandlerFactory);
+        if (handlers != null) {
+            for (ThingHandler thingHandler : handlers) {
+                final Thing thing = thingHandler.getThing();
+                if (isHandlerRegistered(thing)) {
+                    unregisterAndDisposeHandler(thingHandlerFactory, thing, thingHandler);
+                }
+            }
+        }
+        updateInstructions.keySet().removeIf(key -> thingHandlerFactory.equals(key.factory()));
+    }
+
+    @Override
+    public void onReadyMarkerAdded(ReadyMarker readyMarker) {
+        startLevelSetterJob = scheduler.scheduleWithFixedDelay(() -> {
+            if (things.values().stream().anyMatch(t -> !ThingHandlerHelper.isHandlerInitialized(t) && t.isEnabled())) {
+                return;
+            }
+            readyService.markReady(READY_MARKER_THINGS_LOADED);
+            if (startLevelSetterJob != null) {
+                startLevelSetterJob.cancel(false);
+            }
+            readyService.unregisterTracker(this);
+        }, CHECK_INTERVAL, CHECK_INTERVAL, TimeUnit.SECONDS);
+        prerequisiteCheckerJob = scheduler.scheduleWithFixedDelay(this::checkMissingPrerequisites, CHECK_INTERVAL,
+                CHECK_INTERVAL, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
+        // do nothing
+    }
+
+    /**
+     * The {@link ThingPrerequisites} class is used to gather and check the pre-requisites of a given thing (i.e.
+     * availability of the {@link ThingType} and all needed {@link ChannelType}s and {@link ConfigDescription}s).
+     *
+     */
+    private class ThingPrerequisites {
+        private final ThingUID thingUID;
+        private @Nullable ThingTypeUID thingTypeUID;
+        private final Set<ChannelTypeUID> channelTypeUIDs = new HashSet<>();
+        private final Set<URI> configDescriptionUris = new HashSet<>();
+        private int timesChecked = 0;
+
+        public ThingPrerequisites(Thing thing) {
+            thingUID = thing.getUID();
+            thingTypeUID = thing.getThingTypeUID();
+            thing.getChannels().stream().map(Channel::getChannelTypeUID).filter(Objects::nonNull)
+                    .map(Objects::requireNonNull).distinct().forEach(channelTypeUIDs::add);
+        }
+
+        /**
+         * Check if all necessary information is present in the registries.
+         * <p />
+         * If a {@link ThingHandlerFactory} reports that it supports {@link ThingTypeUID} but the {@link ThingType}
+         * can't be found in the {@link ThingTypeRegistry} this method also returns <code>true</code> after
+         * {@link #MAX_CHECK_PREREQUISITE_TIME} s.
+         *
+         * @return <code>true</code> if all pre-requisites are present, <code>false</code> otherwise
+         */
+        public synchronized boolean isReady() {
+            ThingTypeUID thingTypeUID = this.thingTypeUID;
+            // thing-type
+            if (thingTypeUID != null) {
+                ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
+                if (thingType != null) {
+                    this.thingTypeUID = null;
+                    URI configDescriptionUri = thingType.getConfigDescriptionURI();
+                    if (configDescriptionUri != null) {
+                        configDescriptionUris.add(configDescriptionUri);
+                    }
+                } else if (thingHandlerFactories.stream().anyMatch(f -> f.supportsThingType(thingTypeUID))) {
+                    timesChecked++;
+                    if (timesChecked > MAX_CHECK_PREREQUISITE_TIME / CHECK_INTERVAL) {
+                        logger.warn(
+                                "A thing handler factory claims to support '{}' for thing '{}' for more than {}s, but the thing type can't be found in the registry. This should be fixed in the binding.",
+                                thingTypeUID, thingUID, MAX_CHECK_PREREQUISITE_TIME);
+                        this.thingTypeUID = null;
+                    }
+                }
+            }
+
+            // channel types
+            Iterator<ChannelTypeUID> it = channelTypeUIDs.iterator();
+            while (it.hasNext()) {
+                ChannelType channelType = channelTypeRegistry.getChannelType(it.next());
+                if (channelType != null) {
+                    it.remove();
+                    URI configDescriptionUri = channelType.getConfigDescriptionURI();
+                    if (configDescriptionUri != null) {
+                        configDescriptionUris.add(configDescriptionUri);
+                    }
+                }
+            }
+
+            // config descriptions
+            configDescriptionUris.removeIf(uri -> configDescriptionRegistry.getConfigDescription(uri) != null);
+
+            boolean isReady = this.thingTypeUID == null && channelTypeUIDs.isEmpty() && configDescriptionUris.isEmpty();
+            if (!isReady) {
+                logger.debug("Check result is 'not ready': {}", this);
+            }
+            return isReady;
+        }
+
+        @Override
+        public String toString() {
+            return "ThingPrerequisites{thingUID=" + thingUID + ", thingTypeUID=" + thingTypeUID + ", channelTypeUIDs="
+                    + channelTypeUIDs + ", configDescriptionUris=" + configDescriptionUris + "}";
+        }
     }
 }
