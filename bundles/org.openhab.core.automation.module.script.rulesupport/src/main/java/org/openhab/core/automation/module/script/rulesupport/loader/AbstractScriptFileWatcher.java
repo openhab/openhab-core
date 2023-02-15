@@ -42,7 +42,6 @@ import javax.script.ScriptEngine;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.OpenHAB;
 import org.openhab.core.automation.module.script.ScriptDependencyTracker;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
@@ -101,7 +100,7 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         this.manager = manager;
         this.readyService = readyService;
         this.watchSubDirectories = watchSubDirectories;
-        this.watchPath = Path.of(OpenHAB.getConfigFolder()).resolve(fileDirectory);
+        this.watchPath = watchService.getWatchPath().resolve(fileDirectory);
 
         manager.addFactoryChangeListener(this);
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE));

@@ -13,10 +13,7 @@
 package org.openhab.core.automation.module.script.rulesupport.loader;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
 import java.nio.file.Path;
 
@@ -49,6 +46,7 @@ public class AbstractScriptDependencyTrackerTest {
 
     @BeforeEach
     public void setup() {
+        when(watchServiceMock.getWatchPath()).thenReturn(Path.of(""));
         scriptDependencyTracker = new AbstractScriptDependencyTracker(watchServiceMock, WATCH_DIR) {
         };
     }

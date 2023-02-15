@@ -106,6 +106,13 @@ public interface WatchService {
      */
     void unregisterListener(WatchEventListener watchEventListener);
 
+    /**
+     * Get the base directory for this {@link WatchService}
+     *
+     * @return the {@link Path} that is the base path for all reported events
+     */
+    Path getWatchPath();
+
     @FunctionalInterface
     interface WatchEventListener {
         /**

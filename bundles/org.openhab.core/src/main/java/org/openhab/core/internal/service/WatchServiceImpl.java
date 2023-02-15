@@ -156,6 +156,15 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
     }
 
     @Override
+    public Path getWatchPath() {
+        Path basePath = this.basePath;
+        if (basePath == null) {
+            throw new IllegalStateException("Trying to register listener before initialization complete.");
+        }
+        return basePath;
+    }
+
+    @Override
     public void registerListener(WatchEventListener watchEventListener, List<Path> paths, boolean withSubDirectories) {
         Path basePath = this.basePath;
         if (basePath == null) {
