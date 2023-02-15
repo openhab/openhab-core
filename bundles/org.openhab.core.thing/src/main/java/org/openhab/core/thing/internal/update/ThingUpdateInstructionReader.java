@@ -14,6 +14,7 @@ package org.openhab.core.thing.internal.update;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +76,9 @@ public class ThingUpdateInstructionReader {
                         ThingTypeUID thingTypeUID = new ThingTypeUID(thingType.getUid());
                         UpdateInstructionKey key = new UpdateInstructionKey(factory, thingTypeUID);
                         List<ThingUpdateInstruction> instructions = new ArrayList<>();
-                        for (InstructionSet instructionSet : thingType.getInstructionSet()) {
+                        List<InstructionSet> instructionSets = thingType.getInstructionSet().stream()
+                                .sorted(Comparator.comparing(InstructionSet::getTargetVersion)).toList();
+                        for (InstructionSet instructionSet : instructionSets) {
                             int targetVersion = instructionSet.getTargetVersion();
                             for (Object instruction : instructionSet.getInstructions()) {
                                 if (instruction instanceof AddChannel addChannelType) {
