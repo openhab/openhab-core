@@ -45,8 +45,12 @@
         <artifactId>maven-jaxb2-plugin</artifactId>
         <version>0.15.2</version>
         <configuration>
-          <schemaDirectory>src/main/resources/xsd</schemaDirectory>
+          <schemaDirectory>xsd</schemaDirectory>
+          <generateDirectory>src/generated/java</generateDirectory>
           <noFileHeader>true</noFileHeader>
+          <markGenerated>true</markGenerated>
+          <removeOldOutput>true</removeOldOutput>
+          <cleanPackageDirectories>true</cleanPackageDirectories>
           <locale>en</locale>
           <episode>false</episode>
           <extension>true</extension>
