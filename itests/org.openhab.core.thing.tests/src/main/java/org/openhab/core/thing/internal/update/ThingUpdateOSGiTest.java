@@ -293,6 +293,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         assertThat(updatedThing.getStatus(), is(ThingStatus.ONLINE));
 
         // check thing type version is upgraded
+        @Nullable
         String thingTypeVersion = updatedThing.getProperties().get(PROPERTY_THING_TYPE_VERSION);
         assertThat(thingTypeVersion, is(Integer.toString(expectedNewThingTypeVersion)));
 
