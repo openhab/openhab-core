@@ -35,7 +35,7 @@ class ItemsValidator extends AbstractItemsValidator {
 	}
 	
 	@Check
-	def checkDiemension(ModelItem item) {
+	def checkDimension(ModelItem item) {
 	    if (item === null || item.type === null) {
             return
         }
