@@ -74,7 +74,7 @@ public abstract class AbstractScriptDependencyTracker
     }
 
     public Path getLibraryPath() {
-        return this.libraryPath;
+        return libraryPath;
     }
 
     @Override
