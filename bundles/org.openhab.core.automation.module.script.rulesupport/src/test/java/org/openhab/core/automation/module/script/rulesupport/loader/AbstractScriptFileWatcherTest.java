@@ -86,6 +86,8 @@ class AbstractScriptFileWatcherTest extends JavaTest {
     public void setUp() {
         System.setProperty(CONFIG_DIR_PROG_ARGUMENT, tempScriptDir.toString());
 
+        when(watchServiceMock.getWatchPath()).thenReturn(tempScriptDir);
+
         atomicInteger.set(0);
         currentStartLevel = 0;
 

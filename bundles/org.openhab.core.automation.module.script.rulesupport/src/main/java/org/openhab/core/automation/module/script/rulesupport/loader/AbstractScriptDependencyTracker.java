@@ -17,6 +17,8 @@ import static org.openhab.core.service.WatchService.Kind.DELETE;
 import static org.openhab.core.service.WatchService.Kind.MODIFY;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,15 +52,29 @@ public abstract class AbstractScriptDependencyTracker
     private final BidiSetBag<String, String> scriptToLibs = new BidiSetBag<>();
     private final WatchService watchService;
 
-    public AbstractScriptDependencyTracker(WatchService watchService, final String libraryPath) {
-        this.libraryPath = Path.of(libraryPath);
+    public AbstractScriptDependencyTracker(WatchService watchService, final String fileDirectory) {
         this.watchService = watchService;
+        this.libraryPath = watchService.getWatchPath().resolve(fileDirectory);
+
+        if (!Files.exists(libraryPath)) {
+            try {
+                Files.createDirectories(libraryPath);
+            } catch (IOException e) {
+                logger.warn("Failed to create watched directory: {}", libraryPath);
+            }
+        } else if (!Files.isDirectory(libraryPath)) {
+            logger.warn("Trying to watch directory {}, however it is a file", libraryPath);
+        }
 
         watchService.registerListener(this, this.libraryPath);
     }
 
     public void deactivate() {
         watchService.unregisterListener(this);
+    }
+
+    public Path getLibraryPath() {
+        return libraryPath;
     }
 
     @Override
