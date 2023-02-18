@@ -14,12 +14,15 @@ package org.openhab.core.config.dispatch.internal;
 
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.service.WatchService;
@@ -36,59 +39,58 @@ public class ConfigDispatcherFileWatcherTest {
     private @Mock @NonNullByDefault({}) ConfigDispatcher configDispatcherMock;
     private @Mock @NonNullByDefault({}) WatchService watchService;
 
+    private @TempDir @NonNullByDefault({}) Path tempDir;
+
+    private @NonNullByDefault({}) Path cfgPath;
+    private @NonNullByDefault({}) Path nonCfgPath;
+
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws IOException {
         configDispatcherFileWatcher = new ConfigDispatcherFileWatcher(configDispatcherMock, watchService);
         verify(configDispatcherMock).processConfigFile(any());
 
-        when(watchService.getWatchPath()).thenReturn(Path.of("").toAbsolutePath());
+        when(watchService.getWatchPath()).thenReturn(tempDir.toAbsolutePath());
+
+        cfgPath = tempDir.resolve("myPath.cfg");
+        nonCfgPath = tempDir.resolve("myPath");
+
+        Files.createFile(cfgPath);
+        Files.createFile(nonCfgPath);
     }
 
     @Test
-    public void configurationFileCreated() {
-        Path path = Path.of("myPath.cfg");
-        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.CREATE, path);
-
-        verify(configDispatcherMock).processConfigFile(path.toAbsolutePath().toFile());
+    public void configurationFileCreated() throws IOException {
+        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.CREATE, cfgPath);
+        verify(configDispatcherMock).processConfigFile(cfgPath.toAbsolutePath().toFile());
     }
 
     @Test
-    public void configurationFileModified() {
-        Path path = Path.of("myPath.cfg");
-        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.MODIFY, path);
-
-        verify(configDispatcherMock).processConfigFile(path.toAbsolutePath().toFile());
+    public void configurationFileModified() throws IOException {
+        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.MODIFY, cfgPath);
+        verify(configDispatcherMock).processConfigFile(cfgPath.toAbsolutePath().toFile());
     }
 
     @Test
     public void nonConfigurationFileCreated() {
-        Path path = Path.of("myPath");
-        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.CREATE, path);
-
+        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.CREATE, nonCfgPath);
         verifyNoMoreInteractions(configDispatcherMock);
     }
 
     @Test
     public void nonConfigurationFileModified() {
-        Path path = Path.of("myPath");
-        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.MODIFY, path);
-
+        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.MODIFY, nonCfgPath);
         verifyNoMoreInteractions(configDispatcherMock);
     }
 
     @Test
     public void configurationFileRemoved() {
-        Path path = Path.of("myPath.cfg");
-        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.DELETE, path);
-
-        verify(configDispatcherMock).fileRemoved(path.toAbsolutePath().toString());
+        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.DELETE, cfgPath);
+        verify(configDispatcherMock).fileRemoved(cfgPath.toAbsolutePath().toString());
     }
 
     @Test
     public void nonConfigurationFileRemoved() {
-        Path path = Path.of("myPath");
-        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.DELETE, path);
-
+        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.DELETE, nonCfgPath);
         verifyNoMoreInteractions(configDispatcherMock);
     }
 }

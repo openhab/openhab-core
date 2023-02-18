@@ -79,7 +79,7 @@ public class ConfigDispatcherFileWatcher implements WatchService.WatchEventListe
                 configDispatcher.fileRemoved(fullPath.toString());
             }
         } catch (IOException e) {
-            logger.error("Failed to process watch event {} for {}", kind, path);
+            logger.error("Failed to process watch event {} for {}", kind, path, e);
         }
     }
 }
