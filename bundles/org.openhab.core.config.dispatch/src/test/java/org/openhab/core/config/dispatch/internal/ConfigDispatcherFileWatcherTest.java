@@ -40,6 +40,8 @@ public class ConfigDispatcherFileWatcherTest {
     public void setUp() {
         configDispatcherFileWatcher = new ConfigDispatcherFileWatcher(configDispatcherMock, watchService);
         verify(configDispatcherMock).processConfigFile(any());
+
+        when(watchService.getWatchPath()).thenReturn(Path.of("").toAbsolutePath());
     }
 
     @Test
@@ -47,7 +49,7 @@ public class ConfigDispatcherFileWatcherTest {
         Path path = Path.of("myPath.cfg");
         configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.CREATE, path);
 
-        verify(configDispatcherMock).processConfigFile(path.toFile());
+        verify(configDispatcherMock).processConfigFile(path.toAbsolutePath().toFile());
     }
 
     @Test
@@ -55,7 +57,7 @@ public class ConfigDispatcherFileWatcherTest {
         Path path = Path.of("myPath.cfg");
         configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.MODIFY, path);
 
-        verify(configDispatcherMock).processConfigFile(path.toFile());
+        verify(configDispatcherMock).processConfigFile(path.toAbsolutePath().toFile());
     }
 
     @Test
