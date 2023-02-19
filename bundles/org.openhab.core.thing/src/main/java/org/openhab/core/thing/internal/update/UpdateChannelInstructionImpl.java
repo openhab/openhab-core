@@ -23,9 +23,9 @@ import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
-import org.openhab.core.thing.internal.update.dto.AddChannel;
-import org.openhab.core.thing.internal.update.dto.UpdateChannel;
 import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.xml.update.dto.AddChannel;
+import org.openhab.core.thing.xml.update.dto.UpdateChannel;
 
 /**
  * The {@link UpdateChannelInstructionImpl} implements a {@link ThingUpdateInstruction} that updates a channel of a

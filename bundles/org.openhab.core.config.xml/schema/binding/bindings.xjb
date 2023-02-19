@@ -4,9 +4,9 @@
         <xjc:serializable uid="1"/>
     </jaxb:globalBindings>
 
-    <jaxb:bindings schemaLocation="config-description-1.0.0.xsd">
+    <jaxb:bindings schemaLocation="../config-description-1.0.0.xsd">
         <jaxb:schemaBindings>
-            <jaxb:package name="org.openhab.core.config.xml.internal.dto"/>
+            <jaxb:package name="org.openhab.core.config.xml.dto"/>
         </jaxb:schemaBindings>
         <jaxb:bindings node="//xs:complexType[@name='parameter']">
             <jaxb:bindings node=".//xs:attribute[@name='required']">

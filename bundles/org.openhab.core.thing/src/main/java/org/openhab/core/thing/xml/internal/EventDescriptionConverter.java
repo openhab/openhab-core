@@ -26,12 +26,12 @@ import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.EventOption;
 
 import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
 /**
- * The {@link EventDescriptionConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface
+ * The {@link EventDescriptionConverter} is a concrete implementation of the {@code XStream}
+ * {@link com.thoughtworks.xstream.converters.Converter} interface
  * used to convert a event description within an XML document into an {@link EventDescription} object.
  * <p>
  * This converter converts {@code state} XML tags.

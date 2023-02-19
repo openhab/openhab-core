@@ -4,18 +4,21 @@
         <xjc:serializable uid="1"/>
     </jaxb:globalBindings>
 
-    <jaxb:bindings schemaLocation="update-description-1.0.0.xsd">
-        <jaxb:schemaBindings>
-            <jaxb:package name="org.openhab.core.thing.internal.update.dto"/>
-        </jaxb:schemaBindings>
-    </jaxb:bindings>
-
     <jaxb:bindings schemaLocation="https://openhab.org/schemas/thing-description-1.0.0.xsd">
+        <jaxb:schemaBindings>
+            <jaxb:package name="org.openhab.core.thing.xml.dto"/>
+        </jaxb:schemaBindings>
         <jaxb:bindings node="//xs:complexType[@name='option']">
             <jaxb:bindings node=".//xs:attribute[@name='value']">
                 <jaxb:property name="ValueAttribute"/>
             </jaxb:bindings>
         </jaxb:bindings>
+    </jaxb:bindings>
+
+    <jaxb:bindings schemaLocation="../update/update-description-1.0.0.xsd">
+        <jaxb:schemaBindings>
+            <jaxb:package name="org.openhab.core.thing.xml.update.dto"/>
+        </jaxb:schemaBindings>
     </jaxb:bindings>
 
 </jaxb:bindings>
