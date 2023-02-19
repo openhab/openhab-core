@@ -12,7 +12,6 @@
  */
 package org.openhab.core.config.dispatch.internal;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -65,22 +64,22 @@ public class ConfigDispatcherFileWatcher implements WatchService.WatchEventListe
 
     @Override
     public void processWatchEvent(WatchService.Kind kind, Path path) {
+        Path fullPath = watchService.getWatchPath().resolve(path);
         try {
             if (kind == WatchService.Kind.CREATE || kind == WatchService.Kind.MODIFY) {
-                if (!Files.isHidden(path) && path.toString().endsWith(".cfg")) {
-                    configDispatcher.processConfigFile(path.toFile());
+                if (!Files.isHidden(fullPath) && fullPath.toString().endsWith(".cfg")) {
+                    configDispatcher.processConfigFile(fullPath.toFile());
                 }
             } else if (kind == WatchService.Kind.DELETE) {
                 // Detect if a service specific configuration file was removed. We want to
                 // notify the service in this case with an updated empty configuration.
-                File configFile = path.toFile();
-                if (Files.isHidden(path) || Files.isDirectory(path) || !path.toString().endsWith(".cfg")) {
+                if (Files.isHidden(fullPath) || Files.isDirectory(fullPath) || !fullPath.toString().endsWith(".cfg")) {
                     return;
                 }
-                configDispatcher.fileRemoved(configFile.getAbsolutePath());
+                configDispatcher.fileRemoved(fullPath.toString());
             }
         } catch (IOException e) {
-            logger.error("Failed to process watch event {} for {}", kind, path);
+            logger.error("Failed to process watch event {} for {}", kind, path, e);
         }
     }
 }
