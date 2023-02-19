@@ -149,7 +149,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
         }
 
         ServiceRegistration<?> localReg = this.reg;
-        if (localReg != null) {
+        if (localReg != null && bundleContext.getService(localReg.getReference()) != null) {
             localReg.unregister();
             this.reg = null;
         }
