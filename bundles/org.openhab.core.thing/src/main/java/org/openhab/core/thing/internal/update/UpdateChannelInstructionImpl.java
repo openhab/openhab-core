@@ -24,8 +24,8 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.type.ChannelTypeUID;
-import org.openhab.core.thing.xml.update.dto.AddChannel;
-import org.openhab.core.thing.xml.update.dto.UpdateChannel;
+import org.openhab.core.thing.update.xml.dto.AddChannel;
+import org.openhab.core.thing.update.xml.dto.UpdateChannel;
 
 /**
  * The {@link UpdateChannelInstructionImpl} implements a {@link ThingUpdateInstruction} that updates a channel of a
@@ -35,7 +35,7 @@ import org.openhab.core.thing.xml.update.dto.UpdateChannel;
  */
 @NonNullByDefault
 public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
-    private boolean removeOldChannel;
+    private final boolean removeOldChannel;
     private final int thingTypeVersion;
     private final boolean preserveConfig;
     private final String channelId;

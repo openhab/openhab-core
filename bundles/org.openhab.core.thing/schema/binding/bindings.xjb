@@ -17,7 +17,7 @@
 
     <jaxb:bindings schemaLocation="../update/update-description-1.0.0.xsd">
         <jaxb:schemaBindings>
-            <jaxb:package name="org.openhab.core.thing.xml.update.dto"/>
+            <jaxb:package name="org.openhab.core.thing.update.xml.dto"/>
         </jaxb:schemaBindings>
     </jaxb:bindings>
 
