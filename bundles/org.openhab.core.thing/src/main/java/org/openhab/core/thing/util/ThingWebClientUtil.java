@@ -17,7 +17,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.ThingUID;
 
 /**
- * {@link ThingWebClientUtil} provides an utility method to create a valid consumer name for Jetty WEB clients.
+ * {@link ThingWebClientUtil} provides an utility method to create a valid consumer name for web clients.
  *
  * @author Laurent Garnier - Initial contribution
  */
@@ -27,7 +27,7 @@ public class ThingWebClientUtil {
     private static final int MAX_CONSUMER_NAME_LENGTH = 20;
 
     /**
-     * Build a valid consumer name for Jetty HTTP or WebSocket client.
+     * Build a valid consumer name for HTTP or WebSocket client.
      *
      * @param uid thing UID for which to associate HTTP or WebSocket client
      * @param prefix a prefix to consider for the name; can be null
@@ -57,7 +57,7 @@ public class ThingWebClientUtil {
     }
 
     // Make the method public just to be able to call it inside the tests
-    public static String buildHashCode(ThingUID uid, int maxLength) {
+    static String buildHashCode(ThingUID uid, int maxLength) {
         String result = Integer.toHexString(uid.hashCode());
         if (result.length() > maxLength) {
             result = result.substring(result.length() - maxLength);

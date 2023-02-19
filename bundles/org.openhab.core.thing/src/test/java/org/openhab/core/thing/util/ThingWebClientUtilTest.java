@@ -31,38 +31,38 @@ public class ThingWebClientUtilTest {
     private ThingUID uid4 = new ThingUID("amazonechocontrol", "account", "myAccount");
 
     @Test
-    public void testBuildWebClientConsumerNameWhenThingUidSizeIsOk() throws Exception {
+    public void testBuildWebClientConsumerNameWhenThingUidSizeIsOk() {
         String name = ThingWebClientUtil.buildWebClientConsumerName(uid1, null);
         assertThat(name, is("mycroft-mycroft-yy"));
     }
 
     @Test
-    public void testBuildWebClientConsumerNameWhenPrefixAndThingUidSizeIsOk() throws Exception {
+    public void testBuildWebClientConsumerNameWhenPrefixAndThingUidSizeIsOk() {
         String name = ThingWebClientUtil.buildWebClientConsumerName(uid1, "x-");
         assertThat(name, is("x-mycroft-mycroft-yy"));
     }
 
     @Test
-    public void testBuildWebClientConsumerNameWhenPrefixIsTooBig() throws Exception {
+    public void testBuildWebClientConsumerNameWhenPrefixIsTooBig() {
         String name = ThingWebClientUtil.buildWebClientConsumerName(uid1, "xxxx-");
         assertThat(name, is("xxxx-mycro-yy"));
     }
 
     @Test
-    public void testBuildWebClientConsumerNameWhenThingUidIsTooBig() throws Exception {
+    public void testBuildWebClientConsumerNameWhenThingUidIsTooBig() {
         String name = ThingWebClientUtil.buildWebClientConsumerName(uid2, null);
         assertThat(name, is("mycroft-myInstance"));
     }
 
     @Test
-    public void testBuildWebClientConsumerNameWhenThingIdIsTooBig() throws Exception {
+    public void testBuildWebClientConsumerNameWhenThingIdIsTooBig() {
         String name = ThingWebClientUtil.buildWebClientConsumerName(uid3, null);
         String hashCode = ThingWebClientUtil.buildHashCode(uid3, 12);
         assertThat(name, is("mycroft-" + hashCode));
     }
 
     @Test
-    public void testBuildWebClientConsumerNameWhenBindingIdIsTooBig() throws Exception {
+    public void testBuildWebClientConsumerNameWhenBindingIdIsTooBig() {
         String name = ThingWebClientUtil.buildWebClientConsumerName(uid4, null);
         assertThat(name, is("amazonecho-myAccount"));
     }
