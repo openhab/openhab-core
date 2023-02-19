@@ -71,11 +71,14 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
 
     private static final Set<String> EXCLUDED_FILE_EXTENSIONS = Set.of("txt", "old", "example", "backup", "md", "swp",
             "tmp", "bak");
+    private static final String REGEX_SEPARATOR = "\\".equals(File.separator) ? "\\\\" : File.separator;
 
     private static final List<Pattern> START_LEVEL_PATTERNS = List.of( //
-            Pattern.compile(".*/sl(\\d{2})/[^/]+"), // script in immediate slXX directory
-            Pattern.compile(".*/[^/]+\\.sl(\\d{2})\\.[^/.]+") // script named <name>.slXX.<ext>
-    );
+            // script in immediate slXX directory
+            Pattern.compile(".*" + REGEX_SEPARATOR + "sl(\\d{2})" + REGEX_SEPARATOR + "[^" + REGEX_SEPARATOR + "]+"),
+            // script named <name>.slXX.<ext>
+            Pattern.compile(".*" + REGEX_SEPARATOR + "[^" + REGEX_SEPARATOR + "]+\\.sl(\\d{2})\\.[^" + REGEX_SEPARATOR
+                    + ".]+"));
 
     private final Logger logger = LoggerFactory.getLogger(AbstractScriptFileWatcher.class);
 
