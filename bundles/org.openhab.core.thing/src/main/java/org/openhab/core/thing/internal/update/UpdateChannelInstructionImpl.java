@@ -83,7 +83,7 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
             doChannel(thing, thingBuilder, new ChannelUID(thing.getUID(), channelId));
         } else {
             groupIds.forEach(groupId -> doChannel(thing, thingBuilder,
-                    new ChannelUID(thing.getUID(), groupId + "#" + channelId)));
+                    new ChannelUID(thing.getUID(), groupId + ChannelUID.CHANNEL_SEGMENT_PATTERN + channelId)));
         }
     }
 

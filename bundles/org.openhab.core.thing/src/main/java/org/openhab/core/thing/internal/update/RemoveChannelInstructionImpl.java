@@ -50,8 +50,8 @@ public class RemoveChannelInstructionImpl implements ThingUpdateInstruction {
         if (groupIds.isEmpty()) {
             thingBuilder.withoutChannel(new ChannelUID(thing.getUID(), channelId));
         } else {
-            groupIds.forEach(
-                    groupId -> thingBuilder.withoutChannel(new ChannelUID(thing.getUID(), groupId + "#" + channelId)));
+            groupIds.forEach(groupId -> thingBuilder.withoutChannel(
+                    new ChannelUID(thing.getUID(), groupId + ChannelUID.CHANNEL_GROUP_SEPARATOR + channelId)));
         }
     }
 }
