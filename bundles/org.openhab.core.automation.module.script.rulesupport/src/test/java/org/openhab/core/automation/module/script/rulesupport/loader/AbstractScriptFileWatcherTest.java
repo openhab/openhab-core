@@ -67,6 +67,7 @@ import org.opentest4j.AssertionFailedError;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class AbstractScriptFileWatcherTest extends JavaTest {
+    private static final int DEFAULT_TEST_TIMEOUT_MS = 10000;
 
     private @NonNullByDefault({}) AbstractScriptFileWatcher scriptFileWatcher;
 
@@ -114,7 +115,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         scriptFileWatcher.processWatchEvent(CREATE, p);
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p.toString());
     }
 
     @Test
@@ -132,9 +133,9 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js",
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
                 ScriptFileReference.getScriptIdentifier(p0));
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js",
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
                 ScriptFileReference.getScriptIdentifier(p1));
     }
 
@@ -154,7 +155,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js",
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
                 ScriptFileReference.getScriptIdentifier(p0));
         verify(scriptEngineManagerMock, never()).createScriptEngine("js", ScriptFileReference.getScriptIdentifier(p1));
     }
@@ -182,7 +183,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p.toString());
     }
 
     @Test
@@ -209,7 +210,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p.toString());
     }
 
     @Test
@@ -243,14 +244,14 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p2.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p2.toString());
         verify(scriptEngineManagerMock, never()).createScriptEngine(anyString(), eq(p1.toString()));
 
         updateStartLevel(80);
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p1.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p1.toString());
     }
 
     @Test
@@ -277,14 +278,14 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         updateStartLevel(60);
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p2.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p2.toString());
         verify(scriptEngineManagerMock, never()).createScriptEngine(anyString(), eq(p1.toString()));
 
         updateStartLevel(80);
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p1.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p1.toString());
     }
 
     @Test
@@ -311,7 +312,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         awaitEmptyQueue();
 
         // verify script has now been processed
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p.toString());
     }
 
     @Test
@@ -337,9 +338,12 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         InOrder inOrder = inOrder(scriptEngineManagerMock);
 
-        inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p64.toString());
-        inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p65.toString());
-        inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p66.toString());
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
+                p64.toString());
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
+                p65.toString());
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
+                p66.toString());
     }
 
     @Test
@@ -365,9 +369,12 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         awaitEmptyQueue();
 
         InOrder inOrder = inOrder(scriptEngineManagerMock);
-        inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p30.toString());
-        inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p40.toString());
-        inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p50.toString());
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
+                p30.toString());
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
+                p40.toString());
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
+                p50.toString());
     }
 
     @Test
@@ -389,13 +396,15 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000).times(1)).createScriptEngine("js", p.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS).times(1)).createScriptEngine("js",
+                p.toString());
 
         scriptFileWatcher.onDependencyChange(p.toString());
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000).times(2)).createScriptEngine("js", p.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS).times(2)).createScriptEngine("js",
+                p.toString());
     }
 
     @Test
@@ -439,13 +448,15 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         scriptFileWatcher.processWatchEvent(CREATE, p);
 
         awaitEmptyQueue();
-        inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", scriptIdentifier);
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
+                scriptIdentifier);
 
         scriptFileWatcher.processWatchEvent(MODIFY, p);
 
         awaitEmptyQueue();
-        inOrder.verify(scriptEngineManagerMock, timeout(10000)).removeEngine(scriptIdentifier);
-        inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", scriptIdentifier);
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).removeEngine(scriptIdentifier);
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
+                scriptIdentifier);
     }
 
     @Test
@@ -466,8 +477,8 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p1.toString());
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p2.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p1.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p2.toString());
     }
 
     @Test
@@ -488,9 +499,9 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js",
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
                 ScriptFileReference.getScriptIdentifier(p1));
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js",
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
                 ScriptFileReference.getScriptIdentifier(p2));
     }
 
@@ -512,7 +523,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js",
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
                 ScriptFileReference.getScriptIdentifier(p1));
         verify(scriptEngineManagerMock, never()).createScriptEngine("js", ScriptFileReference.getScriptIdentifier(p2));
     }
@@ -536,8 +547,10 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         awaitEmptyQueue();
 
         InOrder inOrder = inOrder(scriptEngineManagerMock);
-        inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p10.toString());
-        inOrder.verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p20.toString());
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
+                p10.toString());
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
+                p20.toString());
     }
 
     @Test
@@ -560,10 +573,10 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         awaitEmptyQueue();
 
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p1.toString());
-        verify(scriptEngineManagerMock, timeout(10000)).createScriptEngine("js", p2.toString());
-        verify(scriptEngineManagerMock, timeout(10000)).removeEngine(p1.toString());
-        verify(scriptEngineManagerMock, timeout(10000)).removeEngine(p2.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p1.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p2.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).removeEngine(p1.toString());
+        verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).removeEngine(p2.toString());
     }
 
     @Test
@@ -585,11 +598,12 @@ class AbstractScriptFileWatcherTest extends JavaTest {
         awaitEmptyQueue();
 
         InOrder inOrder = inOrder(scriptEngineManagerMock);
-        inOrder.verify(scriptEngineManagerMock, timeout(1000)).createScriptEngine("js",
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js",
                 ScriptFileReference.getScriptIdentifier(p));
-        inOrder.verify(scriptEngineManagerMock, timeout(1000))
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS))
                 .loadScript(eq(ScriptFileReference.getScriptIdentifier(p)), any());
-        inOrder.verify(scriptEngineManagerMock, timeout(1000)).removeEngine(ScriptFileReference.getScriptIdentifier(p));
+        inOrder.verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS))
+                .removeEngine(ScriptFileReference.getScriptIdentifier(p));
     }
 
     @Test
