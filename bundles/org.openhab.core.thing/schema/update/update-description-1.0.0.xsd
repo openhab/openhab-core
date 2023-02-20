@@ -54,6 +54,7 @@
             <xs:element name="tags" type="thing-description:tags" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="id" type="update-description:channelId" use="required"/>
+        <xs:attribute name="groupIds" type="update-description:groupIds" />
     </xs:complexType>
 
     <xs:complexType name="updateChannel">
@@ -73,6 +74,7 @@
             </xs:element>
         </xs:sequence>
         <xs:attribute name="id" type="update-description:channelId" use="required"/>
+        <xs:attribute name="groupIds" type="update-description:groupIds" />
         <xs:attribute name="preserveConfiguration" type="xs:boolean" default="true"/>
     </xs:complexType>
 
@@ -81,6 +83,7 @@
             <xs:documentation>Remove a channel from a thing.</xs:documentation>
         </xs:annotation>
         <xs:attribute name="id" type="update-description:channelId" use="required"/>
+        <xs:attribute name="groupIds" type="update-description:groupIds" />
     </xs:complexType>
 
     <xs:simpleType name="channelId">
@@ -88,6 +91,13 @@
             <xs:documentation>The simple id of the channel (i.e. without the thing UID).</xs:documentation>
         </xs:annotation>
         <xs:restriction base="config-description:idRestrictionPattern"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="groupIds">
+        <xs:annotation>
+            <xs:documentation>A comma-separated list of channel-group-ids.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="thing-description:namespaceIdListRestrictionPattern"/>
     </xs:simpleType>
 
     <xs:simpleType name="channelTypeUid">

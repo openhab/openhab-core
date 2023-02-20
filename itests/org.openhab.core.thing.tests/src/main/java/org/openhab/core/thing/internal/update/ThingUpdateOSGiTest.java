@@ -19,6 +19,7 @@ import static org.mockito.Mockito.*;
 import static org.openhab.core.thing.internal.ThingManagerImpl.PROPERTY_THING_TYPE_VERSION;
 
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -80,6 +81,9 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
     private static final String TEST_BUNDLE_NAME = "thingUpdateTest.bundle";
     private static final String BINDING_ID = "testBinding";
     private static final ThingTypeUID ADD_CHANNEL_THING_TYPE_UID = new ThingTypeUID(BINDING_ID, "testThingTypeAdd");
+    private static final ThingTypeUID ADD_GROUP_CHANNEL_THING_TYPE_UID = new ThingTypeUID(BINDING_ID,
+            "testThingTypeGroupAdd");
+
     private static final ThingTypeUID UPDATE_CHANNEL_THING_TYPE_UID = new ThingTypeUID(BINDING_ID,
             "testThingTypeUpdate");
     private static final ThingTypeUID REMOVE_CHANNEL_THING_TYPE_UID = new ThingTypeUID(BINDING_ID,
@@ -260,6 +264,30 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
 
         Channel channel1 = updatedThing.getChannel("testChannel1");
         assertChannel(channel1, channelTypeOldUID, null, null);
+    }
+
+    @Test
+    public void testSingleChannelAdditionGroup() {
+        registerThingType(ADD_GROUP_CHANNEL_THING_TYPE_UID);
+
+        ChannelTypeUID channelTypeUID = new ChannelTypeUID(BINDING_ID, "testChannelTypeId");
+        registerChannelTypes(channelTypeUID);
+
+        ThingUID thingUID = new ThingUID(ADD_GROUP_CHANNEL_THING_TYPE_UID, THING_ID);
+        Thing thing = ThingBuilder.create(ADD_GROUP_CHANNEL_THING_TYPE_UID, thingUID).build();
+        managedThingProvider.add(thing);
+
+        Thing updatedThing = assertThing(thing, 1);
+
+        assertThat(updatedThing.getChannels(), hasSize(2));
+
+        List<Channel> channels1 = updatedThing.getChannelsOfGroup("group1");
+        assertThat(channels1, hasSize(1));
+        assertChannel(channels1.get(0), channelTypeUID, null, null);
+
+        List<Channel> channels2 = updatedThing.getChannelsOfGroup("group2");
+        assertThat(channels2, hasSize(1));
+        assertChannel(channels2.get(0), channelTypeUID, null, null);
     }
 
     @Test

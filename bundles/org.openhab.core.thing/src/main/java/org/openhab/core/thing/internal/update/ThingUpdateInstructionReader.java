@@ -88,7 +88,7 @@ public class ThingUpdateInstructionReader {
                                             .add(new UpdateChannelInstructionImpl(targetVersion, updateChannelType));
                                 } else if (instruction instanceof XmlRemoveChannel removeChannelType) {
                                     instructions.add(
-                                            new RemoveChannelInstructionImpl(targetVersion, removeChannelType.getId()));
+                                            new RemoveChannelInstructionImpl(targetVersion, removeChannelType));
                                 } else {
                                     logger.warn("Instruction type '{}' is unknown.", instruction.getClass());
                                 }

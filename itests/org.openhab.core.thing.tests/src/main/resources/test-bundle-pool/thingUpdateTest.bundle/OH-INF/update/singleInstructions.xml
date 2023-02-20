@@ -42,4 +42,12 @@
 		</instruction-set>
 	</thing-type>
 
+	<thing-type uid="testBinding:testThingTypeGroupAdd">
+		<instruction-set targetVersion="1">
+			<add-channel id="testChannel1" groupIds="group1,group2">
+				<type>testBinding:testChannelTypeId</type>
+			</add-channel>
+		</instruction-set>
+	</thing-type>
+
 </update:update-descriptions>
