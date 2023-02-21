@@ -1,0 +1,30 @@
+<jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+               xmlns:xs="http://www.w3.org/2001/XMLSchema"  jaxb:version="2.0">
+    <jaxb:globalBindings>
+        <xjc:serializable uid="1"/>
+    </jaxb:globalBindings>
+
+    <jaxb:bindings schemaLocation="../config-description-1.0.0.xsd">
+        <jaxb:schemaBindings>
+            <jaxb:package name="org.openhab.core.config.core.dto"/>
+            <jaxb:nameXmlTransform>
+                <jaxb:typeName prefix="Xml"/>
+                <jaxb:anonymousTypeName prefix="Xml"/>
+            </jaxb:nameXmlTransform>
+        </jaxb:schemaBindings>
+        <jaxb:bindings node="//xs:element[@name='config-descriptions']">
+            <jaxb:class name="XmlConfigDescriptions"/>
+        </jaxb:bindings>
+        <jaxb:bindings node="//xs:complexType[@name='parameter']">
+            <jaxb:bindings node=".//xs:attribute[@name='required']">
+                <jaxb:property name="RequiredAttribute"/>
+            </jaxb:bindings>
+        </jaxb:bindings>
+        <jaxb:bindings node="//xs:complexType[@name='optionsType']">
+            <jaxb:bindings node=".//xs:attribute[@name='value']">
+                <jaxb:property name="ValueAttribute"/>
+            </jaxb:bindings>
+        </jaxb:bindings>
+    </jaxb:bindings>
+
+</jaxb:bindings>

@@ -18,10 +18,10 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.xml.util.GenericUnmarshaller;
-import org.openhab.core.config.xml.util.NodeIterator;
-import org.openhab.core.config.xml.util.NodeList;
-import org.openhab.core.config.xml.util.NodeValue;
+import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
+import org.openhab.core.config.core.xml.util.NodeIterator;
+import org.openhab.core.config.core.xml.util.NodeList;
+import org.openhab.core.config.core.xml.util.NodeValue;
 import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.EventOption;
 

@@ -4,8 +4,7 @@ Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.openhab.core.ephemeris
 
 feature.openhab-config: \
-	bnd.identity;id='org.openhab.core.config.core',\
-	bnd.identity;id='org.openhab.core.config.xml'
+	bnd.identity;id='org.openhab.core.config.core'
 
 -runrequires: \
 	${feature.openhab-config},\

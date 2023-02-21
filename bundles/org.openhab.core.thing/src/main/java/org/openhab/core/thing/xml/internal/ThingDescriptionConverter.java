@@ -17,8 +17,8 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
-import org.openhab.core.config.xml.util.GenericUnmarshaller;
+import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
+import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;

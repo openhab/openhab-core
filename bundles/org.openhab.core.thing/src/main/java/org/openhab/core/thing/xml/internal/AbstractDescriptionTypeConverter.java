@@ -20,9 +20,9 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
-import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
-import org.openhab.core.config.xml.util.GenericUnmarshaller;
-import org.openhab.core.config.xml.util.NodeIterator;
+import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
+import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
+import org.openhab.core.config.core.xml.util.NodeIterator;
 import org.openhab.core.thing.type.AbstractDescriptionType;
 
 import com.thoughtworks.xstream.converters.ConversionException;

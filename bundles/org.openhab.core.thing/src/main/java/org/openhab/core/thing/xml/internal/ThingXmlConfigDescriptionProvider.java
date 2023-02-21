@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.core.i18n.ConfigI18nLocalizationService;
-import org.openhab.core.config.xml.AbstractXmlConfigDescriptionProvider;
+import org.openhab.core.config.core.xml.AbstractXmlConfigDescriptionProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

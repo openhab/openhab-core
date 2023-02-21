@@ -71,10 +71,11 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertConfigDescriptionRegistryMergesOptions() {
-        assertThat("Registery is empty to start", configDescriptionRegistry.getConfigDescriptions(), hasSize(0));
+        int preAddSize = configDescriptionRegistry.getConfigDescriptions().size();
 
         configDescriptionRegistry.addConfigDescriptionProvider(configDescriptionProviderMock);
-        assertThat("Config description added ok", configDescriptionRegistry.getConfigDescriptions(), hasSize(1));
+        assertThat("Config description added ok", configDescriptionRegistry.getConfigDescriptions(),
+                hasSize(preAddSize + 1));
 
         configDescriptionRegistry.addConfigOptionProvider(configOptionsProviderMock);
 
@@ -91,6 +92,6 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
 
         configDescriptionRegistry.removeConfigDescriptionProvider(configDescriptionProviderMock);
         assertThat("Description registery is empty to finish", configDescriptionRegistry.getConfigDescriptions(),
-                hasSize(0));
+                hasSize(preAddSize));
     }
 }

@@ -17,7 +17,7 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.xml.AbstractXmlBasedProvider;
+import org.openhab.core.config.core.xml.AbstractXmlBasedProvider;
 import org.openhab.core.thing.UID;
 import org.openhab.core.thing.i18n.ChannelTypeI18nLocalizationService;
 import org.openhab.core.thing.type.ChannelType;

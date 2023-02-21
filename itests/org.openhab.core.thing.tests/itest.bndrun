@@ -7,8 +7,7 @@ Fragment-Host: org.openhab.core.thing
 	bnd.identity;id='org.osgi.service.cm'
 
 -runrequires: \
-	bnd.identity;id='org.openhab.core.thing.tests',\
-	bnd.identity;id='org.openhab.core.config.xml'
+	bnd.identity;id='org.openhab.core.thing.tests'
 
 #
 # done

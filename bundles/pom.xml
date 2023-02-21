@@ -36,7 +36,6 @@
     <module>org.openhab.core.config.discovery.upnp</module>
     <module>org.openhab.core.config.dispatch</module>
     <module>org.openhab.core.config.serial</module>
-    <module>org.openhab.core.config.xml</module>
     <module>org.openhab.core</module>
     <module>org.openhab.core.audio</module>
     <module>org.openhab.core.ephemeris</module>

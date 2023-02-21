@@ -21,9 +21,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
-import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
-import org.openhab.core.config.xml.util.GenericUnmarshaller;
-import org.openhab.core.config.xml.util.NodeIterator;
+import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
+import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
+import org.openhab.core.config.core.xml.util.NodeIterator;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
