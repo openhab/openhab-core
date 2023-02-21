@@ -40,6 +40,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -141,12 +142,17 @@ public class RuleResource implements RESTResource {
     }
 
     @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getRules", summary = "Get available rules, optionally filtered by tags and/or prefix.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedRuleDTO.class)))) })
-    public Response get(@QueryParam("prefix") final @Nullable String prefix,
+    public Response get(@Context SecurityContext securityContext, @QueryParam("prefix") final @Nullable String prefix,
             @QueryParam("tags") final @Nullable List<String> tags,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary) {
+        if ((summary == null || !summary) && !securityContext.isUserInRole(Role.ADMIN)) {
+            // users may only access the summary
+            return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Authentication required");
+        }
         // match all
         Predicate<Rule> p = r -> true;
 
