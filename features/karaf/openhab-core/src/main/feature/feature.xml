@@ -49,7 +49,7 @@
 		<bundle>mvn:net.java.dev.jna/jna/5.12.1</bundle>
 		<bundle>mvn:net.java.dev.jna/jna-platform/5.12.1</bundle>
 		<feature dependency="true">openhab-core-storage-json</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.addon.xml/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.addon/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.id/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.persistence/${project.version}</bundle>

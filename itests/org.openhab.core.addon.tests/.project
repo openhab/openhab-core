@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.openhab.core.addon.xml</name>
+	<name>org.openhab.core.addon.tests</name>
 	<comment></comment>
 	<projects>
 	</projects>

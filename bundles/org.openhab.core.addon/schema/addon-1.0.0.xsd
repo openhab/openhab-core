@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:addon="https://openhab.org/schemas/addon/v1.0.0"
+           xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+           targetNamespace="https://openhab.org/schemas/addon/v1.0.0">
+
+    <xs:import namespace="https://openhab.org/schemas/config-description/v1.0.0"
+               schemaLocation="https://openhab.org/schemas/config-description-1.0.0.xsd"/>
+
+    <xs:element name="addon">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="type" type="addon:addonType"/>
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="description" type="xs:string"/>
+                <xs:element name="connection" type="addon:connectionType" minOccurs="0"/>
+                <xs:element name="countries" type="addon:countryType" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>Comma-separated list of two-letter ISO country codes.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="service-id" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>The ID (service.pid or component.name) of the main add-on service, which can be configured through OSGi configuration admin service. Should only be used in combination with a config description definition. The default value is &lt;type&gt;.&lt;name&gt;</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:choice minOccurs="0">
+                    <xs:element name="config-description" type="config-description:configDescription"/>
+                    <xs:element name="config-description-ref" type="config-description:configDescriptionRef"/>
+                </xs:choice>
+                </xs:sequence>
+            <xs:attribute name="id" type="config-description:idRestrictionPattern" use="required">
+                <xs:annotation>
+                    <xs:documentation>The id is used to construct the UID of this add-on to &lt;type&gt;-&lt;name&gt;</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:simpleType name="addonType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="automation"/>
+            <xs:enumeration value="binding"/>
+            <xs:enumeration value="misc"/>
+            <xs:enumeration value="persistence"/>
+            <xs:enumeration value="transformation"/>
+            <xs:enumeration value="ui"/>
+            <xs:enumeration value="voice"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="connectionType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="local"/>
+            <xs:enumeration value="cloud"/>
+            <xs:enumeration value="cloudDiscovery"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="countryType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[a-z]{2}(,[a-z]{2})*"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

@@ -51,7 +51,7 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.addon.xml</artifactId>
+      <artifactId>org.openhab.core.addon</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

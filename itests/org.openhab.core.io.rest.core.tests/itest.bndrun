@@ -104,5 +104,5 @@ Fragment-Host: org.openhab.core.io.rest.core
 	io.methvin.directory-watcher;version='[0.17.1,0.17.2)',\
 	com.sun.jna;version='[5.12.1,5.12.2)',\
 	com.fasterxml.woodstox.woodstox-core;version='[6.4.0,6.4.1)',\
-	org.openhab.core.config.xml;version='[4.0.0,4.0.1)',\
-	xstream;version='[1.4.19,1.4.20)'
+	xstream;version='[1.4.19,1.4.20)',\
+	org.openhab.core.addon;version='[4.0.0,4.0.1)'

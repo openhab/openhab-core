@@ -9,7 +9,7 @@
     <version>4.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.core.addon.xml.tests</artifactId>
+  <artifactId>org.openhab.core.addon.tests</artifactId>
 
   <name>openHAB Core :: Integration Tests :: Add-on XML Tests</name>
 

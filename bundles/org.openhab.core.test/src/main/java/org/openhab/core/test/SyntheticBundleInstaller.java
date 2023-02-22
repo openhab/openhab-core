@@ -255,7 +255,7 @@ public class SyntheticBundleInstaller {
     }
 
     private static boolean isXmlAddonInfoBundleAvailable(BundleContext context) {
-        return isBundleAvailable(context, "org.openhab.core.addon.xml");
+        return isBundleAvailable(context, "org.openhab.core.addon");
     }
 
     private static boolean isXmlConfigBundleAvailable(BundleContext context) {

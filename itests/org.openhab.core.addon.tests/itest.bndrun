@@ -1,13 +1,13 @@
 -include: ../itest-common.bndrun
 
 Bundle-SymbolicName: ${project.artifactId}
-Fragment-Host: org.openhab.core.addon.xml
+Fragment-Host: org.openhab.core.addon
 
 -runblacklist: \
 	bnd.identity;id='org.osgi.service.cm'
 
 -runrequires: \
-	bnd.identity;id='org.openhab.core.addon.xml.tests'
+	bnd.identity;id='org.openhab.core.addon.tests'
 
 #
 # done
@@ -58,5 +58,5 @@ Fragment-Host: org.openhab.core.addon.xml
 	org.openhab.core.test;version='[4.0.0,4.0.1)',\
 	io.methvin.directory-watcher;version='[0.17.1,0.17.2)',\
 	com.sun.jna;version='[5.12.1,5.12.2)',\
-	org.openhab.core.addon.xml;version='[4.0.0,4.0.1)',\
-	org.openhab.core.addon.xml.tests;version='[4.0.0,4.0.1)'
+	org.openhab.core.addon;version='[4.0.0,4.0.1)',\
+	org.openhab.core.addon.tests;version='[4.0.0,4.0.1)'

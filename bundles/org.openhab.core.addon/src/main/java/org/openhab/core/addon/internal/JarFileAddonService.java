@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.internal.addon;
+package org.openhab.core.addon.internal;
 
 import java.net.URI;
 import java.util.Arrays;

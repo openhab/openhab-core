@@ -25,8 +25,8 @@ import java.util.stream.StreamSupport;
 
 import org.apache.maven.plugin.logging.Log;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.addon.xml.internal.AddonInfoReader;
-import org.openhab.core.addon.xml.internal.AddonInfoXmlResult;
+import org.openhab.core.addon.internal.xml.AddonInfoReader;
+import org.openhab.core.addon.internal.xml.AddonInfoXmlResult;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.xml.internal.ConfigDescriptionReader;
 import org.openhab.core.thing.xml.internal.ChannelGroupTypeXmlResult;

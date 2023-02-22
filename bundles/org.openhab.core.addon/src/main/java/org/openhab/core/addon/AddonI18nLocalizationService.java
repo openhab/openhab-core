@@ -16,8 +16,8 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.addon.internal.AddonI18nUtil;
 import org.openhab.core.i18n.TranslationProvider;
-import org.openhab.core.internal.addon.AddonI18nUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;

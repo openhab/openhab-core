@@ -19,7 +19,7 @@
   <modules>
     <module>org.openhab.core.addon.marketplace</module>
     <module>org.openhab.core.addon.marketplace.karaf</module>
-    <module>org.openhab.core.addon.xml</module>
+    <module>org.openhab.core.addon</module>
     <module>org.openhab.core.auth.jaas</module>
     <module>org.openhab.core.auth.oauth2client</module>
     <module>org.openhab.core.automation</module>
