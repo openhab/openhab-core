@@ -1247,6 +1247,20 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
             // config descriptions
             configDescriptionUris.removeIf(uri -> configDescriptionRegistry.getConfigDescription(uri) != null);
 
+            // timeout
+            if (thingTypeUID == null && (!channelTypeUIDs.isEmpty() || !configDescriptionUris.isEmpty())) {
+                // the thing type is present, so most likely the bundle is fully initialized
+                // if channel types or config descriptions are missing increase the timeout counter
+                timesChecked++;
+                if (timesChecked > MAX_CHECK_PREREQUISITE_TIME / CHECK_INTERVAL) {
+                    logger.warn(
+                            "Channel types or config descriptions for thing '{}' are missing in the respective registry for more than {}s. This should be fixed in the binding.",
+                            thingUID, MAX_CHECK_PREREQUISITE_TIME);
+                    channelTypeUIDs.clear();
+                    configDescriptionUris.clear();
+                }
+            }
+
             boolean isReady = this.thingTypeUID == null && channelTypeUIDs.isEmpty() && configDescriptionUris.isEmpty();
             if (!isReady) {
                 logger.debug("Check result is 'not ready': {}", this);
