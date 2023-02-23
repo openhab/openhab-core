@@ -19,7 +19,7 @@
   <modules>
     <module>org.openhab.core.addon.marketplace</module>
     <module>org.openhab.core.addon.marketplace.karaf</module>
-    <module>org.openhab.core.addon.xml</module>
+    <module>org.openhab.core.addon</module>
     <module>org.openhab.core.auth.jaas</module>
     <module>org.openhab.core.auth.oauth2client</module>
     <module>org.openhab.core.automation</module>
@@ -36,7 +36,6 @@
     <module>org.openhab.core.config.discovery.upnp</module>
     <module>org.openhab.core.config.dispatch</module>
     <module>org.openhab.core.config.serial</module>
-    <module>org.openhab.core.config.xml</module>
     <module>org.openhab.core</module>
     <module>org.openhab.core.audio</module>
     <module>org.openhab.core.ephemeris</module>
@@ -45,7 +44,6 @@
     <module>org.openhab.core.persistence</module>
     <module>org.openhab.core.semantics</module>
     <module>org.openhab.core.thing</module>
-    <module>org.openhab.core.thing.xml</module>
     <module>org.openhab.core.transform</module>
     <module>org.openhab.core.voice</module>
     <module>org.openhab.core.karaf</module>
@@ -185,6 +183,84 @@
   </build>
 
   <profiles>
+    <profile>
+      <id>jaxb-specific-profile</id>
+      <activation>
+        <file>
+          <exists>jaxb.profile-marker</exists>
+        </file>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jvnet.jaxb2.maven2</groupId>
+            <artifactId>maven-jaxb2-plugin</artifactId>
+            <version>0.15.2</version>
+            <configuration>
+              <schemaDirectory>schema</schemaDirectory>
+              <bindingDirectory>schema/binding</bindingDirectory>
+              <generateDirectory>src/generated/java</generateDirectory>
+              <noFileHeader>true</noFileHeader>
+              <markGenerated>true</markGenerated>
+              <removeOldOutput>true</removeOldOutput>
+              <cleanPackageDirectories>true</cleanPackageDirectories>
+              <locale>en</locale>
+              <episode>true</episode>
+              <useDependenciesAsEpisodes>true</useDependenciesAsEpisodes>
+              <extension>true</extension>
+              <strict>false</strict>
+              <args>
+                <arg>-Xxew</arg>
+                <arg>-Xxew:instantiate early</arg>
+              </args>
+              <plugins>
+                <plugin>
+                  <groupId>com.github.jaxb-xew-plugin</groupId>
+                  <artifactId>jaxb-xew-plugin</artifactId>
+                  <version>1.10</version>
+                </plugin>
+              </plugins>
+            </configuration>
+            <dependencies>
+              <dependency>
+                <!-- Required for JDK 17 compatibility, see: https://github.com/highsource/maven-jaxb2-plugin/issues/207 -->
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>2.3.6</version>
+              </dependency>
+            </dependencies>
+            <executions>
+              <execution>
+                <id>generate-jaxb-sources</id>
+                <goals>
+                  <goal>generate</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>add-resource</goal>
+                </goals>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <resources>
+                    <resource>
+                      <directory>src/generated</directory>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>model-specific-profile</id>
       <activation>

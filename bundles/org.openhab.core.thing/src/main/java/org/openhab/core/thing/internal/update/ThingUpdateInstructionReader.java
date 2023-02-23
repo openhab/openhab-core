@@ -27,12 +27,12 @@ import javax.xml.bind.Unmarshaller;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
-import org.openhab.core.thing.internal.update.dto.AddChannel;
-import org.openhab.core.thing.internal.update.dto.InstructionSet;
-import org.openhab.core.thing.internal.update.dto.RemoveChannel;
-import org.openhab.core.thing.internal.update.dto.ThingType;
-import org.openhab.core.thing.internal.update.dto.UpdateChannel;
-import org.openhab.core.thing.internal.update.dto.UpdateDescriptions;
+import org.openhab.core.thing.internal.update.dto.XmlAddChannel;
+import org.openhab.core.thing.internal.update.dto.XmlInstructionSet;
+import org.openhab.core.thing.internal.update.dto.XmlRemoveChannel;
+import org.openhab.core.thing.internal.update.dto.XmlThingType;
+import org.openhab.core.thing.internal.update.dto.XmlUpdateChannel;
+import org.openhab.core.thing.internal.update.dto.XmlUpdateDescriptions;
 import org.openhab.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -68,25 +68,25 @@ public class ThingUpdateInstructionReader {
             while (entries.hasMoreElements()) {
                 URL url = entries.nextElement();
                 try {
-                    JAXBContext context = JAXBContext.newInstance(UpdateDescriptions.class);
+                    JAXBContext context = JAXBContext.newInstance(XmlUpdateDescriptions.class);
                     Unmarshaller u = context.createUnmarshaller();
-                    UpdateDescriptions updateDescriptions = (UpdateDescriptions) u.unmarshal(url);
+                    XmlUpdateDescriptions updateDescriptions = (XmlUpdateDescriptions) u.unmarshal(url);
 
-                    for (ThingType thingType : updateDescriptions.getThingType()) {
+                    for (XmlThingType thingType : updateDescriptions.getThingType()) {
                         ThingTypeUID thingTypeUID = new ThingTypeUID(thingType.getUid());
                         UpdateInstructionKey key = new UpdateInstructionKey(factory, thingTypeUID);
                         List<ThingUpdateInstruction> instructions = new ArrayList<>();
-                        List<InstructionSet> instructionSets = thingType.getInstructionSet().stream()
-                                .sorted(Comparator.comparing(InstructionSet::getTargetVersion)).toList();
-                        for (InstructionSet instructionSet : instructionSets) {
+                        List<XmlInstructionSet> instructionSets = thingType.getInstructionSet().stream()
+                                .sorted(Comparator.comparing(XmlInstructionSet::getTargetVersion)).toList();
+                        for (XmlInstructionSet instructionSet : instructionSets) {
                             int targetVersion = instructionSet.getTargetVersion();
                             for (Object instruction : instructionSet.getInstructions()) {
-                                if (instruction instanceof AddChannel addChannelType) {
+                                if (instruction instanceof XmlAddChannel addChannelType) {
                                     instructions.add(new UpdateChannelInstructionImpl(targetVersion, addChannelType));
-                                } else if (instruction instanceof UpdateChannel updateChannelType) {
+                                } else if (instruction instanceof XmlUpdateChannel updateChannelType) {
                                     instructions
                                             .add(new UpdateChannelInstructionImpl(targetVersion, updateChannelType));
-                                } else if (instruction instanceof RemoveChannel removeChannelType) {
+                                } else if (instruction instanceof XmlRemoveChannel removeChannelType) {
                                     instructions.add(
                                             new RemoveChannelInstructionImpl(targetVersion, removeChannelType.getId()));
                                 } else {

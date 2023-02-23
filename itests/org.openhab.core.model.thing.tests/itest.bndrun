@@ -6,8 +6,7 @@ Fragment-Host: org.openhab.core.model.thing
 -runrequires: \
 	bnd.identity;id='org.openhab.core.model.thing.tests',\
 	bnd.identity;id='org.openhab.core.model.thing.runtime',\
-	bnd.identity;id='org.openhab.core.model.item.runtime',\
-	bnd.identity;id='org.openhab.core.thing.xml'
+	bnd.identity;id='org.openhab.core.model.item.runtime'
 
 #
 # done
@@ -99,7 +98,6 @@ Fragment-Host: org.openhab.core.model.thing
 	org.openhab.core.automation.module.script;version='[4.0.0,4.0.1)',\
 	org.openhab.core.automation.module.script.rulesupport;version='[4.0.0,4.0.1)',\
 	org.openhab.core.config.core;version='[4.0.0,4.0.1)',\
-	org.openhab.core.config.xml;version='[4.0.0,4.0.1)',\
 	org.openhab.core.ephemeris;version='[4.0.0,4.0.1)',\
 	org.openhab.core.io.console;version='[4.0.0,4.0.1)',\
 	org.openhab.core.io.http;version='[4.0.0,4.0.1)',\
@@ -120,10 +118,8 @@ Fragment-Host: org.openhab.core.model.thing
 	org.openhab.core.semantics;version='[4.0.0,4.0.1)',\
 	org.openhab.core.test;version='[4.0.0,4.0.1)',\
 	org.openhab.core.thing;version='[4.0.0,4.0.1)',\
-	org.openhab.core.thing.xml;version='[4.0.0,4.0.1)',\
 	org.openhab.core.transform;version='[4.0.0,4.0.1)',\
 	org.openhab.core.voice;version='[4.0.0,4.0.1)',\
 	io.methvin.directory-watcher;version='[0.17.1,0.17.2)',\
 	com.sun.jna;version='[5.12.1,5.12.2)',\
-	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
-	org.openhab.core.model.sitemap.runtime;version='[4.0.0,4.0.1)'
+	org.apache.felix.configadmin;version='[1.9.24,1.9.25)'

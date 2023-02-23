@@ -44,19 +44,17 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.dispatch/${project.version}</bundle>
-		<bundle start-level="75">mvn:org.openhab.core.bundles/org.openhab.core.config.xml/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.osgiify/io.methvin.directory-watcher/0.17.1</bundle>
 		<bundle>mvn:net.java.dev.jna/jna/5.12.1</bundle>
 		<bundle>mvn:net.java.dev.jna/jna-platform/5.12.1</bundle>
 		<feature dependency="true">openhab-core-storage-json</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.addon.xml/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.addon/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.id/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.persistence/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.semantics/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.thing/${project.version}</bundle>
-		<bundle start-level="75">mvn:org.openhab.core.bundles/org.openhab.core.thing.xml/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.audio/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.voice/${project.version}</bundle>

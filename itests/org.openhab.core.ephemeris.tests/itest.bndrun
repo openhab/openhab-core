@@ -4,8 +4,7 @@ Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.openhab.core.ephemeris
 
 feature.openhab-config: \
-	bnd.identity;id='org.openhab.core.config.core',\
-	bnd.identity;id='org.openhab.core.config.xml'
+	bnd.identity;id='org.openhab.core.config.core'
 
 -runrequires: \
 	${feature.openhab-config},\
@@ -58,7 +57,6 @@ feature.openhab-config: \
 	com.google.gson;version='[2.9.1,2.9.2)',\
 	org.openhab.core;version='[4.0.0,4.0.1)',\
 	org.openhab.core.config.core;version='[4.0.0,4.0.1)',\
-	org.openhab.core.config.xml;version='[4.0.0,4.0.1)',\
 	org.openhab.core.ephemeris;version='[4.0.0,4.0.1)',\
 	org.openhab.core.ephemeris.tests;version='[4.0.0,4.0.1)',\
 	org.openhab.core.test;version='[4.0.0,4.0.1)',\

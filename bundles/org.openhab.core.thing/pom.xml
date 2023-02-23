@@ -26,11 +26,6 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>jakarta.xml.bind</groupId>
-      <artifactId>jakarta.xml.bind-api</artifactId>
-      <version>2.3.3</version>
-    </dependency>
-    <dependency>
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.test</artifactId>
       <version>${project.version}</version>
@@ -43,41 +38,10 @@
       <plugin>
         <groupId>org.jvnet.jaxb2.maven2</groupId>
         <artifactId>maven-jaxb2-plugin</artifactId>
-        <version>0.15.2</version>
         <configuration>
-          <schemaDirectory>src/main/resources/xsd</schemaDirectory>
-          <noFileHeader>true</noFileHeader>
-          <locale>en</locale>
-          <episode>false</episode>
-          <extension>true</extension>
-          <args>
-            <arg>-Xxew</arg>
-            <arg>-Xxew:instantiate early</arg>
-          </args>
-          <plugins>
-            <plugin>
-              <groupId>com.github.jaxb-xew-plugin</groupId>
-              <artifactId>jaxb-xew-plugin</artifactId>
-              <version>1.10</version>
-            </plugin>
-          </plugins>
+          <schemaDirectory>schema/update</schemaDirectory>
+          <catalog>schema/catalog.cat</catalog>
         </configuration>
-        <dependencies>
-          <dependency>
-            <!-- Required for JDK 17 compatibility, see: https://github.com/highsource/maven-jaxb2-plugin/issues/207 -->
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>2.3.6</version>
-          </dependency>
-        </dependencies>
-        <executions>
-          <execution>
-            <id>generate-jaxb-sources</id>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>

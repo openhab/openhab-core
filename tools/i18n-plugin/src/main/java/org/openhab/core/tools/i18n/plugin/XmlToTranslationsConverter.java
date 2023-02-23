@@ -26,7 +26,7 @@ import java.util.stream.Stream.Builder;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.AddonInfo;
-import org.openhab.core.addon.xml.internal.AddonInfoXmlResult;
+import org.openhab.core.addon.internal.xml.AddonInfoXmlResult;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
