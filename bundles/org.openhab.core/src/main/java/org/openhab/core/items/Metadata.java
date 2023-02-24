@@ -33,6 +33,7 @@ public final class Metadata implements Identifiable<MetadataKey> {
     private final MetadataKey key;
     private final String value;
     private final Map<String, Object> configuration;
+    private final boolean userAccessAllowed;
 
     /**
      * Package protected default constructor to allow reflective instantiation.
@@ -43,6 +44,7 @@ public final class Metadata implements Identifiable<MetadataKey> {
         key = new MetadataKey();
         value = "";
         configuration = Collections.emptyMap();
+        userAccessAllowed = false;
     }
 
     public Metadata(MetadataKey key, String value, @Nullable Map<String, Object> configuration) {
@@ -50,6 +52,16 @@ public final class Metadata implements Identifiable<MetadataKey> {
         this.value = value;
         this.configuration = configuration != null ? Collections.unmodifiableMap(new HashMap<>(configuration))
                 : Collections.emptyMap();
+        this.userAccessAllowed = false;
+    }
+
+    public Metadata(MetadataKey key, String value, @Nullable Map<String, Object> configuration,
+            @Nullable Boolean userAccessAllowed) {
+        this.key = key;
+        this.value = value;
+        this.configuration = configuration != null ? Collections.unmodifiableMap(new HashMap<>(configuration))
+                : Collections.emptyMap();
+        this.userAccessAllowed = userAccessAllowed != null ? userAccessAllowed : false;
     }
 
     @Override
@@ -73,6 +85,15 @@ public final class Metadata implements Identifiable<MetadataKey> {
      */
     public String getValue() {
         return value;
+    }
+
+    /**
+     * Provides the user access allowed flag of the meta-data.
+     *
+     * @return
+     */
+    public boolean getUserAccessAllowed() {
+        return userAccessAllowed;
     }
 
     @Override
@@ -110,6 +131,8 @@ public final class Metadata implements Identifiable<MetadataKey> {
         builder.append(value);
         builder.append(", configuration=");
         builder.append(Arrays.toString(configuration.entrySet().toArray()));
+        builder.append(", userAccessAllowed=");
+        builder.append(userAccessAllowed);
         builder.append("]");
         return builder.toString();
     }

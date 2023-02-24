@@ -98,7 +98,8 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
 
     private Metadata normalizeMetadata(Metadata metadata) {
         return new Metadata(metadata.getUID(), metadata.getValue(), metadata.getConfiguration().entrySet().stream()
-                .map(this::normalizeConfigEntry).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                .map(this::normalizeConfigEntry).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+                metadata.getUserAccessAllowed());
     }
 
     private Map.Entry<String, Object> normalizeConfigEntry(Map.Entry<String, Object> entry) {
