@@ -17,12 +17,18 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -52,6 +58,8 @@ import io.methvin.watcher.DirectoryWatcher;
 @Component(immediate = true, service = WatchService.class, configurationPid = WatchService.SERVICE_PID, configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
 
+    public static final int PROCESSING_TIME = 1000;
+
     public @interface WatchServiceConfiguration {
         String name() default "";
 
@@ -63,12 +71,17 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
     private final List<Listener> dirPathListeners = new CopyOnWriteArrayList<>();
     private final List<Listener> subDirPathListeners = new CopyOnWriteArrayList<>();
     private final ExecutorService executor;
+    private final ScheduledExecutorService scheduler;
+
     private final String name;
     private final BundleContext bundleContext;
 
     private @Nullable Path basePath;
     private @Nullable DirectoryWatcher dirWatcher;
     private @Nullable ServiceRegistration<WatchService> reg;
+
+    private final Map<Path, ScheduledFuture<?>> scheduledEvents = new HashMap<>();
+    private final Map<Path, List<Kind>> scheduledEventKinds = new ConcurrentHashMap<>();
 
     @Activate
     public WatchServiceImpl(WatchServiceConfiguration config, BundleContext bundleContext) throws IOException {
@@ -79,7 +92,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
 
         this.name = config.name();
         executor = Executors.newSingleThreadExecutor(r -> new Thread(r, name));
-
+        scheduler = ThreadPoolManager.getScheduledPool("watchservice");
         modified(config);
     }
 
@@ -207,6 +220,49 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             case OVERFLOW -> Kind.OVERFLOW;
         };
 
+        synchronized (scheduledEvents) {
+            ScheduledFuture<?> future = scheduledEvents.remove(path);
+            if (future != null && !future.isDone()) {
+                future.cancel(true);
+            }
+            future = scheduler.schedule(() -> notifyListeners(path), PROCESSING_TIME, TimeUnit.MILLISECONDS);
+            scheduledEventKinds.computeIfAbsent(path, k -> new CopyOnWriteArrayList<>()).add(kind);
+            scheduledEvents.put(path, future);
+
+        }
+    }
+
+    private void notifyListeners(Path path) {
+        List<Kind> kinds = scheduledEventKinds.remove(path);
+        if (kinds == null || kinds.isEmpty()) {
+            logger.debug("Tried to notify listeners of change events for '{}', but the event list is empty.", path);
+            return;
+        }
+
+        if (kinds.size() == 1) {
+            // we have only one event
+            doNotify(path, kinds.get(0));
+        }
+
+        Kind firstElement = kinds.get(0);
+        Kind lastElement = kinds.get(kinds.size() - 1);
+
+        // determine final event
+        if (lastElement == Kind.DELETE) {
+            if (firstElement == Kind.CREATE) {
+                logger.debug("Discarding events for '{}' because file was immediately deleted bafter creation", path);
+                return;
+            }
+            doNotify(path, Kind.DELETE);
+        } else if (firstElement == Kind.CREATE) {
+            doNotify(path, Kind.CREATE);
+        } else {
+            doNotify(path, Kind.MODIFY);
+        }
+    }
+
+    private void doNotify(Path path, Kind kind) {
+        logger.trace("Notifying listeners of '{}' event for '{}'.", kind, path);
         subDirPathListeners.stream().filter(isChildOf(path)).forEach(l -> l.notify(path, kind));
         dirPathListeners.stream().filter(isDirectChildOf(path)).forEach(l -> l.notify(path, kind));
     }
