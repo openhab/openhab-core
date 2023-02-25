@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -94,6 +95,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     private @Mock @NonNullByDefault({}) ItemProvider itemProviderMock;
     private @Mock @NonNullByDefault({}) UriBuilder uriBuilderMock;
     private @Mock @NonNullByDefault({}) UriInfo uriInfoMock;
+    private @Mock @NonNullByDefault({}) SecurityContext securityContext;
 
     @BeforeEach
     public void beforeEach() {
