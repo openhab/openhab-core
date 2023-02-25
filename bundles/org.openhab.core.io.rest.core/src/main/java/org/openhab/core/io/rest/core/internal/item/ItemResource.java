@@ -46,6 +46,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -229,7 +230,7 @@ public class ItemResource implements RESTResource {
     /**
      *
      * @param itemname name of the item
-     * @return the namesspace of that item
+     * @return the namespace of that item
      */
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
@@ -574,7 +575,7 @@ public class ItemResource implements RESTResource {
     }
 
     @PUT
-    @RolesAllowed({ Role.ADMIN })
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/{namespace}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(operationId = "addMetadataToItem", summary = "Adds metadata to an item.", security = {
@@ -584,7 +585,8 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "400", description = "Metadata value empty."), //
                     @ApiResponse(responseCode = "404", description = "Item not found."), //
                     @ApiResponse(responseCode = "405", description = "Metadata not editable.") })
-    public Response addMetadata(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    public Response addMetadata(@Context SecurityContext securityContext,
+            @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @PathParam("namespace") @Parameter(description = "namespace") String namespace,
             @Parameter(description = "metadata", required = true) MetadataDTO metadata) {
         Item item = getItem(itemname);
@@ -599,11 +601,19 @@ public class ItemResource implements RESTResource {
         }
 
         MetadataKey key = new MetadataKey(namespace, itemname);
-        Metadata md = new Metadata(key, value, metadata.config);
+        Metadata md = new Metadata(key, value, metadata.config, metadata.userAccessAllowed);
         if (metadataRegistry.get(key) == null) {
+            if (!securityContext.isUserInRole(Role.ADMIN)) {
+                // users may not create metadata
+                return Response.status(Status.UNAUTHORIZED).build();
+            }
             metadataRegistry.add(md);
             return Response.status(Status.CREATED).type(MediaType.TEXT_PLAIN).build();
         } else {
+            if (!metadataRegistry.get(key).getUserAccessAllowed() && !securityContext.isUserInRole(Role.ADMIN)) {
+                // users may only modify existing metadata if the userAccessAllowed flag is set to true
+                return Response.status(Status.UNAUTHORIZED).build();
+            }
             metadataRegistry.update(md);
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         }
