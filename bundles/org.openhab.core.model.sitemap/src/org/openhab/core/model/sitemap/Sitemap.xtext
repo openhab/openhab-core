@@ -102,7 +102,7 @@ Selection:
     ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)* ']'))?);
 
 List:
-    'List' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? & ('icon=' icon=Icon)?
+    'List' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? & ('icon=' icon=Icon)? &
     ('separator=' separator=STRING) &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)* ']'))? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
