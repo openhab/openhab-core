@@ -280,27 +280,10 @@ public class PageChangeListener implements StateChangeListener {
     }
 
     private boolean definesVisibilityOrColor(Widget w, String name) {
-        for (VisibilityRule rule : w.getVisibility()) {
-            if (name.equals(rule.getItem())) {
-                return true;
-            }
-        }
-        for (ColorArray rule : w.getLabelColor()) {
-            if (name.equals(rule.getItem())) {
-                return true;
-            }
-        }
-        for (ColorArray rule : w.getValueColor()) {
-            if (name.equals(rule.getItem())) {
-                return true;
-            }
-        }
-        for (ColorArray rule : w.getIconColor()) {
-            if (name.equals(rule.getItem())) {
-                return true;
-            }
-        }
-        return false;
+        return w.getVisibility().stream().anyMatch(r -> name.equals(r.getItem()))
+                || w.getLabelColor().stream().anyMatch(r -> name.equals(r.getItem()))
+                || w.getValueColor().stream().anyMatch(r -> name.equals(r.getItem()))
+                || w.getIconColor().stream().anyMatch(r -> name.equals(r.getItem()));
     }
 
     public void sitemapContentChanged(EList<Widget> widgets) {
