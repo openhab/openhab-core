@@ -49,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.ItemProvider;
@@ -280,9 +281,14 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     public void testMetadata() {
         MetadataDTO dto = new MetadataDTO();
         dto.value = "some value";
-        assertEquals(201, itemResource.addMetadata(ITEM_NAME1, "namespace", dto).getStatus());
-        assertEquals(200, itemResource.removeMetadata(ITEM_NAME1, "namespace").getStatus());
-        assertEquals(404, itemResource.removeMetadata(ITEM_NAME1, "namespace").getStatus());
+        // Adding metadata as admin
+        assertEquals(201, itemResource.addMetadata(ITEM_NAME1, "namespace1", dto).getStatus());
+        // Attempt to add metadata as user
+        when(securityContext.isUserInRole(Role.ADMIN)).thenReturn(false);
+        assertEquals(401, itemResource.addMetadata(ITEM_NAME1, "namespace2", dto).getStatus());
+
+        assertEquals(200, itemResource.removeMetadata(ITEM_NAME1, "namespace1").getStatus());
+        assertEquals(404, itemResource.removeMetadata(ITEM_NAME1, "namespace1").getStatus());
     }
 
     @Test
@@ -313,10 +319,22 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     public void testAddMetadataUpdate() {
         MetadataDTO dto = new MetadataDTO();
         dto.value = "some value";
-        assertEquals(201, itemResource.addMetadata(ITEM_NAME1, "namespace", dto).getStatus());
+        dto.userAccessAllowed = false;
+        assertEquals(201, itemResource.addMetadata(ITEM_NAME1, "namespace", dto).getStatus()); // userAccessAllowed set
+                                                                                               // to false
         MetadataDTO dto2 = new MetadataDTO();
         dto2.value = "new value";
-        assertEquals(200, itemResource.addMetadata(ITEM_NAME1, "namespace", dto2).getStatus());
+        dto.userAccessAllowed = true;
+        // Update metadata as admin
+        when(securityContext.isUserInRole(Role.ADMIN)).thenReturn(true);
+        assertEquals(200, itemResource.addMetadata(ITEM_NAME1, "namespace", dto2).getStatus()); // userAccessAllowed set
+                                                                                                // to true
+        // Update metadata as user when userAllowedAccess is true
+        when(securityContext.isUserInRole(Role.ADMIN)).thenReturn(false);
+        assertEquals(200, itemResource.addMetadata(ITEM_NAME1, "namespace", dto).getStatus()); // userAccessAllowed set
+                                                                                               // to false
+        // Attempt to update metadata as user when userAllowedAccess is false
+        assertEquals(401, itemResource.addMetadata(ITEM_NAME1, "namespace", dto2).getStatus());
     }
 
     @Test
