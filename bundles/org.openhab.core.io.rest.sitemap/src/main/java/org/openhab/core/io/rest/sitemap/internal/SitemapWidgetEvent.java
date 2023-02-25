@@ -18,6 +18,7 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  * A sitemap event, which provides details about a widget that has changed.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - New field iconcolor
  */
 public class SitemapWidgetEvent extends SitemapEvent {
 
@@ -27,6 +28,7 @@ public class SitemapWidgetEvent extends SitemapEvent {
     public String icon;
     public String labelcolor;
     public String valuecolor;
+    public String iconcolor;
     public boolean visibility;
     public String state;
     public EnrichedItemDTO item;

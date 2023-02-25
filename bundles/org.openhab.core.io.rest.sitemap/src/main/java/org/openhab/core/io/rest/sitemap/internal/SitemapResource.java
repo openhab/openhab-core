@@ -123,6 +123,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Yordan Zhelev - Added Swagger annotations
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Laurent Garnier - Added support for icon color
  */
 @Component(service = RESTResource.class)
 @JaxrsResource
@@ -514,6 +515,7 @@ public class SitemapResource
         bean.icon = itemUIRegistry.getCategory(widget);
         bean.labelcolor = itemUIRegistry.getLabelColor(widget);
         bean.valuecolor = itemUIRegistry.getValueColor(widget);
+        bean.iconcolor = itemUIRegistry.getIconColor(widget);
         bean.label = itemUIRegistry.getLabel(widget);
         bean.type = widget.eClass().getName();
         bean.visibility = itemUIRegistry.getVisiblity(widget);
@@ -732,10 +734,11 @@ public class SitemapResource
             if (widget instanceof Frame) {
                 items.addAll(getAllItems(((Frame) widget).getChildren()));
             }
-            // Consider items involved in any visibility, labelcolor and valuecolor condition
+            // Consider items involved in any visibility, labelcolor, valuecolor and iconcolor condition
             items.addAll(getItemsInVisibilityCond(widget.getVisibility()));
             items.addAll(getItemsInColorCond(widget.getLabelColor()));
             items.addAll(getItemsInColorCond(widget.getValueColor()));
+            items.addAll(getItemsInColorCond(widget.getIconColor()));
         }
         return items;
     }

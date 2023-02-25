@@ -79,6 +79,7 @@ public class SitemapResourceTest extends JavaTest {
     private static final String VISIBILITY_RULE_ITEM_NAME = "visibilityRuleItem";
     private static final String LABEL_COLOR_ITEM_NAME = "labelColorItemName";
     private static final String VALUE_COLOR_ITEM_NAME = "valueColorItemName";
+    private static final String ICON_COLOR_ITEM_NAME = "iconColorItemName";
     private static final String WIDGET1_LABEL = "widget 1";
     private static final String WIDGET2_LABEL = "widget 2";
     private static final String WIDGET1_ID = "00";
@@ -91,6 +92,7 @@ public class SitemapResourceTest extends JavaTest {
     private @NonNullByDefault({}) GenericItem visibilityRuleItem;
     private @NonNullByDefault({}) GenericItem labelColorItem;
     private @NonNullByDefault({}) GenericItem valueColorItem;
+    private @NonNullByDefault({}) GenericItem iconColorItem;
 
     private @Mock @NonNullByDefault({}) HttpHeaders headersMock;
     private @Mock @NonNullByDefault({}) Sitemap defaultSitemapMock;
@@ -118,6 +120,7 @@ public class SitemapResourceTest extends JavaTest {
         visibilityRuleItem = new TestItem(VISIBILITY_RULE_ITEM_NAME);
         labelColorItem = new TestItem(LABEL_COLOR_ITEM_NAME);
         valueColorItem = new TestItem(VALUE_COLOR_ITEM_NAME);
+        iconColorItem = new TestItem(ICON_COLOR_ITEM_NAME);
 
         when(localeServiceMock.getLocale(null)).thenReturn(Locale.US);
 
@@ -265,6 +268,7 @@ public class SitemapResourceTest extends JavaTest {
         assertThat(pageDTO.widgets.get(0).label, is(WIDGET1_LABEL));
         assertThat(pageDTO.widgets.get(0).labelcolor, is("GREEN"));
         assertThat(pageDTO.widgets.get(0).valuecolor, is("BLUE"));
+        assertThat(pageDTO.widgets.get(0).iconcolor, is("ORANGE"));
         assertThat(pageDTO.widgets.get(0).state, nullValue());
         assertThat(pageDTO.widgets.get(0).item, notNullValue());
         assertThat(pageDTO.widgets.get(0).item.name, is(ITEM_NAME));
@@ -274,6 +278,7 @@ public class SitemapResourceTest extends JavaTest {
         assertThat(pageDTO.widgets.get(1).label, is(WIDGET2_LABEL));
         assertThat(pageDTO.widgets.get(1).labelcolor, nullValue());
         assertThat(pageDTO.widgets.get(1).valuecolor, nullValue());
+        assertThat(pageDTO.widgets.get(1).iconcolor, nullValue());
         assertThat(pageDTO.widgets.get(1).state, is("ON"));
         assertThat(pageDTO.widgets.get(1).item, notNullValue());
         assertThat(pageDTO.widgets.get(1).item.name, is(ITEM_NAME));
@@ -286,6 +291,7 @@ public class SitemapResourceTest extends JavaTest {
         when(itemUIRegistryMock.getItem(VISIBILITY_RULE_ITEM_NAME)).thenReturn(visibilityRuleItem);
         when(itemUIRegistryMock.getItem(LABEL_COLOR_ITEM_NAME)).thenReturn(labelColorItem);
         when(itemUIRegistryMock.getItem(VALUE_COLOR_ITEM_NAME)).thenReturn(valueColorItem);
+        when(itemUIRegistryMock.getItem(ICON_COLOR_ITEM_NAME)).thenReturn(iconColorItem);
 
         when(itemUIRegistryMock.getWidgetId(widgets.get(0))).thenReturn(WIDGET1_ID);
         when(itemUIRegistryMock.getCategory(widgets.get(0))).thenReturn("");
@@ -293,6 +299,7 @@ public class SitemapResourceTest extends JavaTest {
         when(itemUIRegistryMock.getVisiblity(widgets.get(0))).thenReturn(true);
         when(itemUIRegistryMock.getLabelColor(widgets.get(0))).thenReturn("GREEN");
         when(itemUIRegistryMock.getValueColor(widgets.get(0))).thenReturn("BLUE");
+        when(itemUIRegistryMock.getIconColor(widgets.get(0))).thenReturn("ORANGE");
         when(itemUIRegistryMock.getState(widgets.get(0))).thenReturn(state1);
 
         when(itemUIRegistryMock.getWidgetId(widgets.get(1))).thenReturn(WIDGET2_ID);
@@ -301,6 +308,7 @@ public class SitemapResourceTest extends JavaTest {
         when(itemUIRegistryMock.getVisiblity(widgets.get(1))).thenReturn(true);
         when(itemUIRegistryMock.getLabelColor(widgets.get(1))).thenReturn(null);
         when(itemUIRegistryMock.getValueColor(widgets.get(1))).thenReturn(null);
+        when(itemUIRegistryMock.getIconColor(widgets.get(1))).thenReturn(null);
         when(itemUIRegistryMock.getState(widgets.get(1))).thenReturn(state2);
     }
 
@@ -337,9 +345,17 @@ public class SitemapResourceTest extends JavaTest {
         valueColors.add(valueColor);
         when(w1.getValueColor()).thenReturn(valueColors);
 
+        // add icon color conditions to the item:
+        ColorArray iconColor = mock(ColorArray.class);
+        when(iconColor.getItem()).thenReturn(ICON_COLOR_ITEM_NAME);
+        EList<ColorArray> iconColors = new BasicEList<>();
+        iconColors.add(iconColor);
+        when(w1.getIconColor()).thenReturn(iconColors);
+
         visibilityRules = new BasicEList<>();
         labelColors = new BasicEList<>();
         valueColors = new BasicEList<>();
+        iconColors = new BasicEList<>();
 
         Widget w2 = mock(Widget.class);
         EClass switchEClass = mock(EClass.class);
@@ -351,6 +367,7 @@ public class SitemapResourceTest extends JavaTest {
         when(w2.getVisibility()).thenReturn(visibilityRules);
         when(w2.getLabelColor()).thenReturn(labelColors);
         when(w2.getValueColor()).thenReturn(valueColors);
+        when(w2.getIconColor()).thenReturn(iconColors);
 
         BasicEList<Widget> widgets = new BasicEList<>(2);
         widgets.add(w1);
