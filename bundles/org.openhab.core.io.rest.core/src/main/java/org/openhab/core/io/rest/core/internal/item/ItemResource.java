@@ -928,6 +928,7 @@ public class ItemResource implements RESTResource {
                 MetadataDTO mdDto = new MetadataDTO();
                 mdDto.value = md.getValue();
                 mdDto.config = md.getConfiguration().isEmpty() ? null : md.getConfiguration();
+                mdDto.userAccessAllowed = md.getUserAccessAllowed();
                 metadata.put(namespace, mdDto);
             }
         }
