@@ -20,7 +20,6 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,15 +55,6 @@ import com.google.gson.GsonBuilder;
 public abstract class AbstractRemoteAddonService implements AddonService {
     static final String CONFIG_REMOTE_ENABLED = "remote";
     static final String CONFIG_INCLUDE_INCOMPATIBLE = "includeIncompatible";
-
-    protected static final Map<String, AddonType> TAG_ADDON_TYPE_MAP = Map.of( //
-            "automation", new AddonType("automation", "Automation"), //
-            "binding", new AddonType("binding", "Bindings"), //
-            "misc", new AddonType("misc", "Misc"), //
-            "persistence", new AddonType("persistence", "Persistence"), //
-            "transformation", new AddonType("transformation", "Transformations"), //
-            "ui", new AddonType("ui", "User Interfaces"), //
-            "voice", new AddonType("voice", "Voice"));
 
     protected final BundleVersion coreVersion;
 
@@ -163,7 +153,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
 
     @Override
     public List<AddonType> getTypes(@Nullable Locale locale) {
-        return new ArrayList<>(TAG_ADDON_TYPE_MAP.values());
+        return AddonType.DEFAULT_TYPES;
     }
 
     @Override
