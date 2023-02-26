@@ -107,6 +107,7 @@ import org.slf4j.LoggerFactory;
  * @author Chris Jackson - Initial contribution
  * @author Stefan Triller - Method to convert a state into something a sitemap entity can understand
  * @author Erdoan Hadzhiyusein - Adapted the class to work with the new DateTimeType
+ * @author Laurent Garnier - new method getIconColor
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -743,6 +744,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         target.getVisibility().addAll(EcoreUtil.copyAll(source.getVisibility()));
         target.getLabelColor().addAll(EcoreUtil.copyAll(source.getLabelColor()));
         target.getValueColor().addAll(EcoreUtil.copyAll(source.getValueColor()));
+        target.getIconColor().addAll(EcoreUtil.copyAll(source.getIconColor()));
     }
 
     /**
@@ -1174,6 +1176,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     @Override
     public @Nullable String getValueColor(Widget w) {
         return processColorDefinition(getState(w), w.getValueColor());
+    }
+
+    @Override
+    public @Nullable String getIconColor(Widget w) {
+        return processColorDefinition(getState(w), w.getIconColor());
     }
 
     @Override

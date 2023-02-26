@@ -74,6 +74,7 @@ import org.slf4j.LoggerFactory;
  * "system:sitemap" namespace.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Laurent Garnier - icon color support for all widgets
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class)
@@ -186,7 +187,6 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 widget = imageWidget;
                 setWidgetPropertyFromComponentConfig(widget, component, "url", SitemapPackage.IMAGE__URL);
                 setWidgetPropertyFromComponentConfig(widget, component, "refresh", SitemapPackage.IMAGE__REFRESH);
-                addIconColor(imageWidget.getIconColor(), component);
                 break;
             case "Video":
                 VideoImpl videoWidget = (VideoImpl) SitemapFactory.eINSTANCE.createVideo();
@@ -284,6 +284,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             addWidgetVisibility(widget.getVisibility(), component);
             addLabelColor(widget.getLabelColor(), component);
             addValueColor(widget.getValueColor(), component);
+            addIconColor(widget.getIconColor(), component);
         }
 
         return widget;
@@ -363,7 +364,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     }
 
     private void addIconColor(EList<ColorArray> iconColor, UIComponent component) {
-        addColor(iconColor, component, "valuecolor");
+        addColor(iconColor, component, "iconcolor");
     }
 
     private void addColor(EList<ColorArray> color, UIComponent component, String key) {

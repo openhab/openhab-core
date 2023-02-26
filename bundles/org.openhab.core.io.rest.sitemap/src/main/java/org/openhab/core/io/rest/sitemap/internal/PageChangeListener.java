@@ -43,6 +43,7 @@ import org.openhab.core.ui.items.ItemUIRegistry;
  * This is a class that listens on item state change events and creates sitemap events for a dedicated sitemap page.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - Added support for icon color
  */
 public class PageChangeListener implements StateChangeListener {
 
@@ -152,6 +153,10 @@ public class PageChangeListener implements StateChangeListener {
                 for (ColorArray rule : widget.getValueColor()) {
                     addItemWithName(items, rule.getItem());
                 }
+                // now scan value icon rules
+                for (ColorArray rule : widget.getIconColor()) {
+                    addItemWithName(items, rule.getItem());
+                }
             }
         }
         return items;
@@ -236,6 +241,7 @@ public class PageChangeListener implements StateChangeListener {
         event.label = itemUIRegistry.getLabel(widget);
         event.labelcolor = itemUIRegistry.getLabelColor(widget);
         event.valuecolor = itemUIRegistry.getValueColor(widget);
+        event.iconcolor = itemUIRegistry.getIconColor(widget);
         event.widgetId = itemUIRegistry.getWidgetId(widget);
         event.visibility = itemUIRegistry.getVisiblity(widget);
         event.descriptionChanged = false;
@@ -274,22 +280,10 @@ public class PageChangeListener implements StateChangeListener {
     }
 
     private boolean definesVisibilityOrColor(Widget w, String name) {
-        for (VisibilityRule rule : w.getVisibility()) {
-            if (name.equals(rule.getItem())) {
-                return true;
-            }
-        }
-        for (ColorArray rule : w.getLabelColor()) {
-            if (name.equals(rule.getItem())) {
-                return true;
-            }
-        }
-        for (ColorArray rule : w.getValueColor()) {
-            if (name.equals(rule.getItem())) {
-                return true;
-            }
-        }
-        return false;
+        return w.getVisibility().stream().anyMatch(r -> name.equals(r.getItem()))
+                || w.getLabelColor().stream().anyMatch(r -> name.equals(r.getItem()))
+                || w.getValueColor().stream().anyMatch(r -> name.equals(r.getItem()))
+                || w.getIconColor().stream().anyMatch(r -> name.equals(r.getItem()));
     }
 
     public void sitemapContentChanged(EList<Widget> widgets) {
