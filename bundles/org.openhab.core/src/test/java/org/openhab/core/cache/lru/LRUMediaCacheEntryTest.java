@@ -104,11 +104,6 @@ public class LRUMediaCacheEntryTest {
         }
     }
 
-    /**
-     * Get twice the InputStream with only one call.
-     *
-     * @throws IOException
-     */
     @Test
     public void getInputStreamTwiceWithOnlyOneCallToTheSupplierAndCompareTest() throws IOException {
         LRUMediaCache<MetadataSample> lruMediaCache = createCache(1000);
@@ -137,11 +132,6 @@ public class LRUMediaCacheEntryTest {
         verify(supplier, times(1)).get();
     }
 
-    /**
-     * Test that the service can handle several calls concurrently and get the result only once
-     *
-     * @throws IOException
-     */
     @Test
     public void loadTwoStreamsAtTheSameTimeFromTheSameSupplierTest() throws IOException {
         LRUMediaCache<MetadataSample> lruMediaCache = createCache(1000);
@@ -183,11 +173,6 @@ public class LRUMediaCacheEntryTest {
         verifyNoMoreInteractions(supplier);
     }
 
-    /**
-     * Test that the service can handle several calls concurrently in two threads and get the result only once
-     *
-     * @throws IOException
-     */
     @Test
     public void loadTwoThreadsAtTheSameTimeFromTheSameSupplierTest() throws IOException {
         LRUMediaCache<MetadataSample> lruMediaCache = createCache(1000);
@@ -264,14 +249,8 @@ public class LRUMediaCacheEntryTest {
         assertArrayEquals(randomData, bytesRead);
     }
 
-    /**
-     * Get the total length of the stream by forcing it to read everything
-     *
-     * @throws TTSException
-     * @throws IOException
-     */
     @Test
-    public void getTotalSizeTest() throws IOException {
+    public void getTotalSizeByForcingReadAllTest() throws IOException {
 
         LRUMediaCache<MetadataSample> lruMediaCache = createCache(1000);
 

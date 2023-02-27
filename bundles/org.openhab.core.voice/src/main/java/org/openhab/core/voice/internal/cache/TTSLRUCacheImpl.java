@@ -20,7 +20,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.cache.lru.DataRetrievalException;
 import org.openhab.core.cache.lru.InputStreamCacheWrapper;
 import org.openhab.core.cache.lru.LRUMediaCache;
 import org.openhab.core.cache.lru.LRUMediaCacheEntry;
@@ -46,7 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Gwendal Roulleau - Initial contribution
  */
-@Component(immediate = false, configurationPid = VoiceManagerImpl.CONFIGURATION_PID)
+@Component(configurationPid = VoiceManagerImpl.CONFIGURATION_PID)
 @NonNullByDefault
 public class TTSLRUCacheImpl implements TTSCache {
 
@@ -77,7 +76,7 @@ public class TTSLRUCacheImpl implements TTSCache {
     @Activate
     public TTSLRUCacheImpl(@Reference StorageService storageService, Map<String, Object> config) {
         this.storageService = storageService;
-        activate(config);
+        modified(config);
     }
 
     /**
@@ -86,7 +85,7 @@ public class TTSLRUCacheImpl implements TTSCache {
      * @throws IOException when we cannot create the cache directory or if we have not enough space (*2 security margin)
      */
     @Modified
-    protected void activate(Map<String, Object> config) {
+    protected void modified(Map<String, Object> config) {
         this.enableCacheTTS = ConfigParser.valueAsOrElse(config.get(CONFIG_ENABLE_CACHE_TTS), Boolean.class, true);
         this.cacheSizeTTS = ConfigParser.valueAsOrElse(config.get(CONFIG_CACHE_SIZE_TTS), Long.class,
                 DEFAULT_CACHE_SIZE_TTS) * 1024;
@@ -107,16 +106,25 @@ public class TTSLRUCacheImpl implements TTSCache {
         }
 
         String key = tts.getClass().getSimpleName() + "_" + tts.getCacheKey(text, voice, requestedFormat);
-        LRUMediaCacheEntry<AudioFormatInfo> fileAndMetadata = lruMediaCacheLocal.get(key, () -> {
-            AudioStream audioInputStream;
-            try {
-                audioInputStream = tts.synthesizeForCache(text, voice, requestedFormat);
-            } catch (TTSException e) {
-                throw new DataRetrievalException("Cannot compute TTS", e);
+
+        LRUMediaCacheEntry<AudioFormatInfo> fileAndMetadata;
+        try {
+            fileAndMetadata = lruMediaCacheLocal.get(key, () -> {
+                try {
+                    AudioStream audioInputStream = tts.synthesizeForCache(text, voice, requestedFormat);
+                    return new LRUMediaCacheEntry<AudioFormatInfo>(key, audioInputStream,
+                            new AudioFormatInfo(audioInputStream.getFormat()));
+                } catch (TTSException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (RuntimeException re) {
+            if (re.getCause() != null && re.getCause()instanceof TTSException ttse) {
+                throw ttse;
+            } else {
+                throw re;
             }
-            return new LRUMediaCacheEntry<AudioFormatInfo>(key, audioInputStream,
-                    new AudioFormatInfo(audioInputStream.getFormat()));
-        });
+        }
 
         try {
             InputStream inputStream = fileAndMetadata.getInputStream();
@@ -134,14 +142,8 @@ public class TTSLRUCacheImpl implements TTSCache {
                 return (AudioStream) fileAndMetadata.getInputStream();
             }
         } catch (IOException e) {
-            logger.warn("Cannot get audio from cache, fallback to TTS service");
+            logger.debug("Cannot get audio from cache, fallback to TTS service", e);
             return tts.synthesizeForCache(text, voice, requestedFormat);
-        } catch (DataRetrievalException de) {
-            if (de.getCause()instanceof TTSException ttsException) {
-                throw ttsException;
-            } else {
-                throw de;
-            }
         }
     }
 }

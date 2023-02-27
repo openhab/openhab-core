@@ -233,7 +233,7 @@ public class VoiceResource implements RESTResource {
             @QueryParam("sinkid") @Parameter(description = "audio sink id") @Nullable String sinkId,
             @QueryParam("volume") @Parameter(description = "volume level") @Nullable String volume) {
         PercentType volumePercent = null;
-        if (volume != null && !volume.isEmpty()) {
+        if (volume != null && !volume.isBlank()) {
             volumePercent = new PercentType(volume);
         }
         voiceManager.say(text, voiceId, sinkId, volumePercent);

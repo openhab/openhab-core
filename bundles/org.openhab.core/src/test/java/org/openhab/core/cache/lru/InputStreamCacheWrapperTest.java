@@ -29,19 +29,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
  *
  * @author Gwendal Roulleau - Initial contribution
  */
-@NonNullByDefault
 @ExtendWith(MockitoExtension.class)
+@NonNullByDefault
 public class InputStreamCacheWrapperTest {
 
     private @Mock @NonNullByDefault({}) LRUMediaCacheEntry<?> cacheEntry;
 
-    /**
-     * Test the read() method
-     *
-     * @throws IOException
-     */
     @Test
-    public void cacheWrapperStreamTest() throws IOException {
+    public void cacheWrapperStreamReadTest() throws IOException {
         when(cacheEntry.read(0, 1)).thenReturn(new byte[] { 1 });
         when(cacheEntry.read(1, 1)).thenReturn(new byte[] { 2 });
         when(cacheEntry.read(2, 1)).thenReturn(new byte[] { 3 });
@@ -59,11 +54,6 @@ public class InputStreamCacheWrapperTest {
         verifyNoMoreInteractions(cacheEntry);
     }
 
-    /**
-     * Test the read by batch method
-     *
-     * @throws IOException
-     */
     @Test
     public void cacheWrapperStreamReadBunchTest() throws IOException {
         when(cacheEntry.read(anyInt(), anyInt())).thenReturn(new byte[] { 1 }, new byte[] { 2, 3 }, new byte[0]);

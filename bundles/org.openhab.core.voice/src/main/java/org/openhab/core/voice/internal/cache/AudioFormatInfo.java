@@ -12,6 +12,7 @@
  */
 package org.openhab.core.voice.internal.cache;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 
@@ -21,6 +22,7 @@ import org.openhab.core.audio.AudioFormat;
  *
  * @author Gwendal Roulleau - Initial contribution
  */
+@NonNullByDefault
 public class AudioFormatInfo {
     public final @Nullable Boolean bigEndian;
     public final @Nullable Integer bitDepth;
@@ -33,7 +35,6 @@ public class AudioFormatInfo {
     public AudioFormatInfo(String text, @Nullable Boolean bigEndian, @Nullable Integer bitDepth,
             @Nullable Integer bitRate, @Nullable Long frequency, @Nullable Integer channels, @Nullable String codec,
             @Nullable String container) {
-        super();
         this.bigEndian = bigEndian;
         this.bitDepth = bitDepth;
         this.bitRate = bitRate;

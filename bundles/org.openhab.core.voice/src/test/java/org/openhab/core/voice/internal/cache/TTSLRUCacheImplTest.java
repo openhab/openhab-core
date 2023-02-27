@@ -75,15 +75,8 @@ public class TTSLRUCacheImplTest {
         return voiceLRUCache;
     }
 
-    /**
-     * Simulate a cache miss, then two other hits
-     * The TTS service is called only once
-     *
-     * @throws TTSException
-     * @throws IOException
-     */
     @Test
-    public void getCacheMissAndHit() throws TTSException, IOException {
+    public void getCacheMissAndTwoHitAndTTsIsCalledOnlyOnce() throws TTSException, IOException {
         when(ttsServiceMock.getCacheKey("text", voiceMock, AudioFormat.MP3)).thenReturn("filename1");
         when(ttsServiceMock.synthesizeForCache("text", voiceMock, AudioFormat.MP3)).thenReturn(audioStreamMock);
         when(audioStreamMock.getFormat()).thenReturn(AudioFormat.MP3);
@@ -121,12 +114,6 @@ public class TTSLRUCacheImplTest {
         verify(ttsServiceMock, times(3)).getCacheKey("text", voiceMock, AudioFormat.MP3);
     }
 
-    /**
-     * Load some TTSResults from files on disk
-     *
-     * @throws IOException
-     * @throws TTSException
-     */
     @Test
     public void loadTTSResultsFromCacheDirectory() throws IOException, TTSException {
 

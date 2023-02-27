@@ -175,8 +175,7 @@ public class LRUMediaCache<V> {
      * supplier the data and metadata supplier. It is OK to launch a DataRetrievalException from this, as it will be
      * rethrown.
      */
-    public LRUMediaCacheEntry<V> get(String key, Supplier<LRUMediaCacheEntry<V>> supplier)
-            throws DataRetrievalException {
+    public LRUMediaCacheEntry<V> get(String key, Supplier<LRUMediaCacheEntry<V>> supplier) {
         if (!cacheIsOK) {
             return supplier.get();
         }

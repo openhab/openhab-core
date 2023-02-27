@@ -149,6 +149,11 @@ public class LRUMediaCacheEntry<V> {
         return currentSize;
     }
 
+    /**
+     * Get the key identifying this cache entry
+     *
+     * @return
+     */
     protected String getKey() {
         return key;
     }
@@ -322,6 +327,9 @@ public class LRUMediaCacheEntry<V> {
         }
     }
 
+    /**
+     * Delete the cache file linked to this entry
+     */
     protected void deleteFile() {
         logger.debug("Receiving call to delete the cache file {}", key);
         fileOperationLock.lock();
