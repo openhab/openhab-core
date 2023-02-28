@@ -12,57 +12,27 @@
  */
 package org.openhab.core.voice;
 
-import java.util.Locale;
-import java.util.Set;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.voice.internal.cache.CachedTTSService;
 
 /**
- * This is the interface that a text-to-speech service has to implement.
+ * Cache system to avoid requesting {@link TTSService} for the same utterances.
  *
- * @author Kelly Davis - Initial contribution
- * @author Kai Kreuzer - Refactored to use AudioStreams
+ * @author Gwendal Roulleau - Initial contribution
  */
 @NonNullByDefault
-public interface TTSService {
-
-    /**
-     * Returns a simple string that uniquely identifies this service
-     *
-     * @return an id that identifies this service
-     */
-    String getId();
-
-    /**
-     * Returns a localized human readable label that can be used within UIs.
-     *
-     * @param locale the locale to provide the label for
-     * @return a localized string to be used in UIs
-     */
-    String getLabel(@Nullable Locale locale);
-
-    /**
-     * Obtain the voices available from this TTSService
-     *
-     * @return The voices available from this service
-     */
-    Set<Voice> getAvailableVoices();
-
-    /**
-     * Obtain the audio formats supported by this TTSService
-     *
-     * @return The audio formats supported by this service
-     */
-    Set<AudioFormat> getSupportedFormats();
+public interface TTSCache {
 
     /**
      * Returns an {@link AudioStream} containing the TTS results. Note, one
      * can only request a supported {@code Voice} and {@link AudioStream} or
      * an exception is thrown.
+     * The AudioStream is requested from the cache, or, if not found, from
+     * the underlying TTS service
      *
+     * @param tts the TTS service
      * @param text The text to convert to speech
      * @param voice The voice to use for speech
      * @param requestedFormat The audio format to return the results in
@@ -71,5 +41,5 @@ public interface TTSService {
      *             are not supported or another error occurs while creating an
      *             {@link AudioStream}
      */
-    AudioStream synthesize(String text, Voice voice, AudioFormat requestedFormat) throws TTSException;
+    AudioStream get(CachedTTSService tts, String text, Voice voice, AudioFormat requestedFormat) throws TTSException;
 }
