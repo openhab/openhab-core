@@ -2,4 +2,4 @@
 
 # If we would like to use a storage at all, we will use the "volatile" storage.
 -runblacklist.itest-common: \
-    bnd.identity;id='org.openhab.core.storage.json'
+	bnd.identity;id='org.openhab.core.storage.json'

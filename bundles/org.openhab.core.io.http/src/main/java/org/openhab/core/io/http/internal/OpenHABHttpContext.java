@@ -31,6 +31,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardContext;
 
 /**
  * Default HTTP context implementation which groups all openHAB related HTTP elements into one logical application.
@@ -41,8 +42,8 @@ import org.osgi.service.http.HttpContext;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
-@Component(service = { HttpContext.class, WrappingHttpContext.class }, property = {
-        "httpContext.id:String=oh-dfl-http-ctx" })
+@Component(service = { HttpContext.class, WrappingHttpContext.class })
+@HttpWhiteboardContext(path = "/", name = "oh-dfl-http-ctx")
 public class OpenHABHttpContext implements WrappingHttpContext {
 
     /**

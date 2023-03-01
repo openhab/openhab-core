@@ -180,6 +180,8 @@
 
 	<feature name="openhab-core-io-websocket" version="${project.version}">
 		<feature>openhab-core-base</feature>
+		<bundle>mvn:org.eclipse.jetty.websocket/websocket-servlet/${jetty.version}</bundle>
+		<bundle>mvn:org.eclipse.jetty.websocket/websocket-server/${jetty.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.websocket/${project.version}</bundle>
 	</feature>
 

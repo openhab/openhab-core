@@ -19,24 +19,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.io.http.servlet.OpenHABServlet;
 import org.openhab.core.ui.icon.IconProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletAsyncSupported;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletName;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,15 +46,18 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component
+@Component(service = Servlet.class)
+@HttpWhiteboardServletAsyncSupported(asyncSupported = true)
+@HttpWhiteboardServletName(IconServlet.SERVLET_PATH)
+@HttpWhiteboardServletPattern(IconServlet.SERVLET_PATH + "/*")
 @NonNullByDefault
-public class IconServlet extends OpenHABServlet {
+public class IconServlet extends HttpServlet {
 
     private static final long serialVersionUID = 2880642275858634578L;
 
     private final Logger logger = LoggerFactory.getLogger(IconServlet.class);
 
-    private static final String SERVLET_NAME = "/icon";
+    static final String SERVLET_PATH = "/icon";
     static final String PARAM_ICONSET = "iconset";
     static final String PARAM_FORMAT = "format";
     static final String PARAM_ANY_FORMAT = "anyFormat";
@@ -64,11 +68,6 @@ public class IconServlet extends OpenHABServlet {
     protected String defaultIconSetId = "classic";
 
     private final List<IconProvider> iconProvider = new ArrayList<>();
-
-    @Activate
-    public IconServlet(final @Reference HttpService httpService, final @Reference HttpContext httpContext) {
-        super(httpService, httpContext);
-    }
 
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
     public void addIconProvider(IconProvider iconProvider) {
@@ -81,15 +80,8 @@ public class IconServlet extends OpenHABServlet {
 
     @Activate
     protected void activate(Map<String, Object> config) {
-        super.activate(SERVLET_NAME);
         startupTime = System.currentTimeMillis();
-
         modified(config);
-    }
-
-    @Deactivate
-    protected void deactivate() {
-        super.deactivate(SERVLET_NAME);
     }
 
     @Modified
@@ -109,7 +101,7 @@ public class IconServlet extends OpenHABServlet {
 
         String category = getCategory(req);
         if (category.isEmpty()) {
-            logger.debug("URI must start with '{}' but is '{}'", SERVLET_NAME, req.getRequestURI());
+            logger.debug("URI must start with '{}' but is '{}'", SERVLET_PATH, req.getRequestURI());
             resp.sendError(400);
             return;
         }
