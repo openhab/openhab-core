@@ -14,7 +14,6 @@ package org.openhab.core.thing.internal;
 
 import java.net.URI;
 import java.text.MessageFormat;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -146,8 +145,8 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
     private final Map<ThingUID, ThingPrerequisites> missingPrerequisites = new ConcurrentHashMap<>();
 
     private final Map<ThingUID, Thing> things = new ConcurrentHashMap<>();
-    private final Map<ThingUID, Lock> thingLocks = new HashMap<>();
-    private final Set<ThingUID> thingUpdatedLock = new HashSet<>();
+    private final Map<ThingUID, Lock> thingLocks = new ConcurrentHashMap<>();
+    private final Set<ThingUID> thingUpdatedLock = ConcurrentHashMap.newKeySet();
 
     protected final ChannelGroupTypeRegistry channelGroupTypeRegistry;
     protected final ChannelTypeRegistry channelTypeRegistry;
