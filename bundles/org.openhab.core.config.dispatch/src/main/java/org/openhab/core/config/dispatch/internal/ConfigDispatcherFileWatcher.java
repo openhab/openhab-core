@@ -64,7 +64,7 @@ public class ConfigDispatcherFileWatcher implements WatchService.WatchEventListe
 
     @Override
     public void processWatchEvent(WatchService.Kind kind, Path path) {
-        Path fullPath = watchService.getWatchPath().resolve(path);
+        Path fullPath = watchService.getWatchPath().resolve(SERVICES_FOLDER).resolve(path);
         try {
             if (kind == WatchService.Kind.CREATE || kind == WatchService.Kind.MODIFY) {
                 if (!Files.isHidden(fullPath) && fullPath.toString().endsWith(".cfg")) {
