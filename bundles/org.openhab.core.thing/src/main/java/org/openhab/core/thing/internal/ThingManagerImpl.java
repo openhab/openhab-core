@@ -915,7 +915,12 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                             && checkAndPerformUpdate(thing, thingHandlerFactory)) {
                         return;
                     }
-                    normalizeThingConfiguration(thing);
+                    try {
+                        normalizeThingConfiguration(thing);
+                    } catch (ConfigValidationException e) {
+                        logger.warn("Failed to normalize configuration for thing '{}': {}", thing.getUID(),
+                                e.getValidationMessages(null));
+                    }
                     registerHandler(thing, thingHandlerFactory);
                     initializeHandler(thing);
                 } else {
@@ -1106,21 +1111,25 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         Iterator<ThingPrerequisites> it = missingPrerequisites.values().iterator();
         while (it.hasNext()) {
             ThingPrerequisites prerequisites = it.next();
-            if (prerequisites.isReady()) {
-                it.remove();
-                Thing thing = things.get(prerequisites.thingUID);
-                if (thing != null) {
-                    if (!isHandlerRegistered(thing)) {
-                        registerAndInitializeHandler(thing, getThingHandlerFactory(thing));
+            try {
+                if (prerequisites.isReady()) {
+                    it.remove();
+                    Thing thing = things.get(prerequisites.thingUID);
+                    if (thing != null) {
+                        if (!isHandlerRegistered(thing)) {
+                            registerAndInitializeHandler(thing, getThingHandlerFactory(thing));
+                        } else {
+                            logger.warn(
+                                    "Handler of thing '{}' already registered even though not all prerequisites were met.",
+                                    thing.getUID());
+                        }
                     } else {
-                        logger.warn(
-                                "Handler of thing '{}' already registered even though not all prerequisites were met.",
-                                thing.getUID());
+                        logger.warn("Found missing thing while checking prerequisites of thing '{}'",
+                                prerequisites.thingUID);
                     }
-                } else {
-                    logger.warn("Found missing thing while checking prerequisites of thing '{}'",
-                            prerequisites.thingUID);
                 }
+            } catch (RuntimeException e) {
+                logger.error("Checking/initializing thing '{}' failed unexpectedly.", prerequisites.thingUID, e);
             }
         }
     }
