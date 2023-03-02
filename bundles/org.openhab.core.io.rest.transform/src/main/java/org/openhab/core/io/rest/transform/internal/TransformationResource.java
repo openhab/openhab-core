@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.transform.internal;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -38,6 +39,10 @@ import org.openhab.core.io.rest.transform.TransformationDTO;
 import org.openhab.core.transform.ManagedTransformationProvider;
 import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationRegistry;
+import org.openhab.core.transform.TransformationService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -79,13 +84,17 @@ public class TransformationResource implements RESTResource {
     private final Logger logger = LoggerFactory.getLogger(TransformationResource.class);
     private final TransformationRegistry transformationRegistry;
     private final ManagedTransformationProvider managedTransformationProvider;
+    private final BundleContext bundleContext;
+
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
 
     @Activate
     public TransformationResource(final @Reference TransformationRegistry transformationRegistry,
-            final @Reference ManagedTransformationProvider managedTransformationProvider) {
+            final @Reference ManagedTransformationProvider managedTransformationProvider,
+            final BundleContext bundleContext) {
         this.transformationRegistry = transformationRegistry;
         this.managedTransformationProvider = managedTransformationProvider;
+        this.bundleContext = bundleContext;
     }
 
     @GET
@@ -97,6 +106,23 @@ public class TransformationResource implements RESTResource {
         Stream<TransformationDTO> stream = transformationRegistry.stream().map(TransformationDTO::new)
                 .peek(c -> c.editable = isEditable(c.uid));
         return Response.ok(new Stream2JSONInputStream(stream)).build();
+    }
+
+    @GET
+    @Path("services")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getTransformationServices", summary = "Get all transformation services", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))) })
+    public Response getTransformationServices() {
+        try {
+            Collection<ServiceReference<TransformationService>> refs = bundleContext
+                    .getServiceReferences(TransformationService.class, null);
+            Stream<String> services = refs.stream().map(ref -> (String) ref.getProperty("openhab.transform"))
+                    .filter(Objects::nonNull).map(Objects::requireNonNull);
+            return Response.ok(new Stream2JSONInputStream(services)).build();
+        } catch (InvalidSyntaxException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GET
