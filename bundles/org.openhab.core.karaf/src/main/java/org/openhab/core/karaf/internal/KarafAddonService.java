@@ -12,11 +12,15 @@
  */
 package org.openhab.core.karaf.internal;
 
+import static java.util.Map.entry;
+import static org.openhab.core.addon.AddonType.*;
+
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -44,14 +48,17 @@ import org.slf4j.LoggerFactory;
 public class KarafAddonService implements AddonService {
     private static final String ADDONS_CONTENT_TYPE = "application/vnd.openhab.feature;type=karaf";
     private static final String ADDONS_AUTHOR = "openHAB";
-    private static final List<AddonType> ADDON_TYPES = List.of( //
-            new AddonType(FeatureInstaller.EXTENSION_TYPE_AUTOMATION, "Automation"), //
-            new AddonType(FeatureInstaller.EXTENSION_TYPE_BINDING, "Bindings"), //
-            new AddonType(FeatureInstaller.EXTENSION_TYPE_MISC, "Misc"), //
-            new AddonType(FeatureInstaller.EXTENSION_TYPE_VOICE, "Voice"), //
-            new AddonType(FeatureInstaller.EXTENSION_TYPE_PERSISTENCE, "Persistence"), //
-            new AddonType(FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION, "Transformations"), //
-            new AddonType(FeatureInstaller.EXTENSION_TYPE_UI, "User Interfaces"));
+
+    private static final String DOCUMENTATION_URL_PREFIX = "https://www.openhab.org/addons/";
+
+    private static final Map<String, String> DOCUMENTATION_URL_FORMATS = Map.ofEntries(
+            entry(AUTOMATION.getId(), DOCUMENTATION_URL_PREFIX + "automation/%s/"), //
+            entry(BINDING.getId(), DOCUMENTATION_URL_PREFIX + "bindings/%s/"), //
+            entry(MISC.getId(), DOCUMENTATION_URL_PREFIX + "integrations/%s/"), //
+            entry(PERSISTENCE.getId(), DOCUMENTATION_URL_PREFIX + "persistence/%s/"), //
+            entry(TRANSFORMATION.getId(), DOCUMENTATION_URL_PREFIX + "transformations/%s/"), //
+            entry(UI.getId(), DOCUMENTATION_URL_PREFIX + "ui/%s/"), //
+            entry(VOICE.getId(), DOCUMENTATION_URL_PREFIX + "voice/%s/"));
 
     private final Logger logger = LoggerFactory.getLogger(KarafAddonService.class);
 
@@ -95,7 +102,7 @@ public class KarafAddonService implements AddonService {
 
     private boolean isAddon(Feature feature) {
         return feature.getName().startsWith(FeatureInstaller.PREFIX)
-                && FeatureInstaller.EXTENSION_TYPES.contains(getType(feature.getName()));
+                && FeatureInstaller.ADDON_TYPES.contains(getAddonType(feature.getName()));
     }
 
     @Override
@@ -111,24 +118,13 @@ public class KarafAddonService implements AddonService {
     }
 
     private @Nullable String getDefaultDocumentationLink(String type, String name) {
-        return switch (type) {
-            case FeatureInstaller.EXTENSION_TYPE_AUTOMATION -> "https://www.openhab.org/addons/automation/" + name
-                    + "/";
-            case FeatureInstaller.EXTENSION_TYPE_BINDING -> "https://www.openhab.org/addons/bindings/" + name + "/";
-            case FeatureInstaller.EXTENSION_TYPE_MISC -> "https://www.openhab.org/addons/integrations/" + name + "/";
-            case FeatureInstaller.EXTENSION_TYPE_PERSISTENCE -> "https://www.openhab.org/addons/persistence/" + name
-                    + "/";
-            case FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION -> "https://www.openhab.org/addons/transformations/"
-                    + name + "/";
-            case FeatureInstaller.EXTENSION_TYPE_VOICE -> "https://www.openhab.org/addons/voice/" + name + "/";
-            case FeatureInstaller.EXTENSION_TYPE_UI -> "https://www.openhab.org/addons/ui/" + name + "/";
-            default -> null;
-        };
+        String format = DOCUMENTATION_URL_FORMATS.get(type);
+        return format == null ? null : String.format(format, name);
     }
 
     private Addon getAddon(Feature feature, @Nullable Locale locale) {
         String name = getName(feature.getName());
-        String type = getType(feature.getName());
+        String type = getAddonType(feature.getName());
         String uid = type + Addon.ADDON_SEPARATOR + name;
         boolean isInstalled = featuresService.isInstalled(feature);
 
@@ -159,17 +155,17 @@ public class KarafAddonService implements AddonService {
 
     @Override
     public List<AddonType> getTypes(@Nullable Locale locale) {
-        return ADDON_TYPES;
+        return AddonType.DEFAULT_TYPES;
     }
 
     @Override
     public void install(String id) {
-        featureInstaller.addAddon(getType(id), getName(id));
+        featureInstaller.addAddon(getAddonType(id), getName(id));
     }
 
     @Override
     public void uninstall(String id) {
-        featureInstaller.removeAddon(getType(id), getName(id));
+        featureInstaller.removeAddon(getAddonType(id), getName(id));
     }
 
     @Override
@@ -177,7 +173,7 @@ public class KarafAddonService implements AddonService {
         return null;
     }
 
-    private String getType(String name) {
+    private String getAddonType(String name) {
         String str = name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name;
         int index = str.indexOf(Addon.ADDON_SEPARATOR);
         return index == -1 ? str : str.substring(0, index);

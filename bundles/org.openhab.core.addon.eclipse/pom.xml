@@ -10,9 +10,9 @@
     <version>4.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.core.addon.sample</artifactId>
+  <artifactId>org.openhab.core.addon.eclipse</artifactId>
 
-  <name>openHAB Core :: Bundles :: Sample Add-on Service</name>
+  <name>openHAB Core :: Bundles :: Eclipse Add-on Service</name>
 
   <dependencies>
     <dependency>

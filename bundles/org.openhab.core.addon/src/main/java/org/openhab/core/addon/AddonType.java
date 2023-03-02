@@ -12,6 +12,8 @@
  */
 package org.openhab.core.addon;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -22,6 +24,17 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class AddonType {
+
+    public static final AddonType AUTOMATION = new AddonType("automation", "Automation");
+    public static final AddonType BINDING = new AddonType("binding", "Bindings");
+    public static final AddonType MISC = new AddonType("misc", "Misc");
+    public static final AddonType PERSISTENCE = new AddonType("persistence", "Persistence");
+    public static final AddonType TRANSFORMATION = new AddonType("transformation", "Transformations");
+    public static final AddonType UI = new AddonType("ui", "User Interfaces");
+    public static final AddonType VOICE = new AddonType("voice", "Voice");
+
+    public static final List<AddonType> DEFAULT_TYPES = List.of(AUTOMATION, BINDING, MISC, PERSISTENCE, TRANSFORMATION,
+            UI, VOICE);
 
     private final String id;
     private final String label;
@@ -64,10 +77,7 @@ public class AddonType {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
         return id.equals(((AddonType) obj).id);

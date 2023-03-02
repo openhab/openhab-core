@@ -17,9 +17,10 @@
   <name>openHAB Core :: Bundles</name>
 
   <modules>
+    <module>org.openhab.core.addon</module>
+    <module>org.openhab.core.addon.eclipse</module>
     <module>org.openhab.core.addon.marketplace</module>
     <module>org.openhab.core.addon.marketplace.karaf</module>
-    <module>org.openhab.core.addon</module>
     <module>org.openhab.core.auth.jaas</module>
     <module>org.openhab.core.auth.oauth2client</module>
     <module>org.openhab.core.automation</module>
@@ -39,7 +40,6 @@
     <module>org.openhab.core</module>
     <module>org.openhab.core.audio</module>
     <module>org.openhab.core.ephemeris</module>
-    <module>org.openhab.core.addon.sample</module>
     <module>org.openhab.core.id</module>
     <module>org.openhab.core.persistence</module>
     <module>org.openhab.core.semantics</module>
