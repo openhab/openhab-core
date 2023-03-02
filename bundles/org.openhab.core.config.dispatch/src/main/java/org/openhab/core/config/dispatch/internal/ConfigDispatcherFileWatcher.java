@@ -53,7 +53,7 @@ public class ConfigDispatcherFileWatcher implements WatchService.WatchEventListe
 
         this.watchService = watchService;
 
-        watchService.registerListener(this, Path.of(servicesFolder));
+        watchService.registerListener(this, Path.of(servicesFolder), false);
         configDispatcher.processConfigFile(Path.of(OpenHAB.getConfigFolder(), servicesFolder).toFile());
     }
 

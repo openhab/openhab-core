@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.core.internal.folder;
 
-import static java.nio.file.StandardWatchEventKinds.*;
 import static org.openhab.core.service.WatchService.Kind.CREATE;
 import static org.openhab.core.service.WatchService.Kind.MODIFY;
 
@@ -27,8 +26,8 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -64,7 +63,7 @@ import org.slf4j.LoggerFactory;
 @Component(name = "org.openhab.core.folder", immediate = true, configurationPid = "org.openhab.folder", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class FolderObserver implements WatchService.WatchEventListener {
     private final WatchService watchService;
-    private Logger logger = LoggerFactory.getLogger(FolderObserver.class);
+    private final Logger logger = LoggerFactory.getLogger(FolderObserver.class);
 
     /* the model repository is provided as a service */
     private final ModelRepository modelRepository;
@@ -75,7 +74,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
     private boolean activated;
 
     /* map that stores a list of valid file extensions for each folder */
-    private final Map<String, String[]> folderFileExtMap = new ConcurrentHashMap<>();
+    private final Map<String, List<String>> folderFileExtMap = new ConcurrentHashMap<>();
 
     /* set of file extensions for which we have parsers already registered */
     private final Set<String> parsers = new HashSet<>();
@@ -124,16 +123,16 @@ public class FolderObserver implements WatchService.WatchEventListener {
 
             String[] fileExts = ((String) config.get(foldername)).split(",");
 
-            File folder = getFile(foldername);
+            File folder = watchService.getWatchPath().resolve(foldername).toFile();
             if (folder.exists() && folder.isDirectory()) {
-                folderFileExtMap.put(foldername, fileExts);
+                folderFileExtMap.put(foldername, Arrays.asList(fileExts));
             } else {
                 logger.warn("Directory '{}' does not exist in '{}'. Please check your configuration settings!",
                         foldername, OpenHAB.getConfigFolder());
             }
         }
 
-        watchService.registerListener(this, folderFileExtMap.keySet().stream().map(Path::of).toList());
+        watchService.registerListener(this, Path.of(""));
         addModelsToRepo();
         this.activated = true;
     }
@@ -162,9 +161,9 @@ public class FolderObserver implements WatchService.WatchEventListener {
     private void addModelsToRepo() {
         if (!folderFileExtMap.isEmpty()) {
             for (String folderName : folderFileExtMap.keySet()) {
-                final String[] validExtension = folderFileExtMap.get(folderName);
-                if (validExtension != null && validExtension.length > 0) {
-                    File folder = getFile(folderName);
+                final List<String> validExtension = folderFileExtMap.get(folderName);
+                if (validExtension != null && validExtension.size() > 0) {
+                    File folder = watchService.getWatchPath().resolve(folderName).toFile();
 
                     File[] files = folder.listFiles(new FileExtensionsFilter(validExtension));
                     if (files != null) {
@@ -196,9 +195,9 @@ public class FolderObserver implements WatchService.WatchEventListener {
 
     protected static class FileExtensionsFilter implements FilenameFilter {
 
-        private final String[] validExtensions;
+        private final List<String> validExtensions;
 
-        public FileExtensionsFilter(String[] validExtensions) {
+        public FileExtensionsFilter(List<String> validExtensions) {
             this.validExtensions = validExtensions;
         }
 
@@ -213,7 +212,6 @@ public class FolderObserver implements WatchService.WatchEventListener {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     private void checkFile(final ModelRepository modelRepository, final File file, final WatchService.Kind kind) {
         try {
             synchronized (FolderObserver.class) {
@@ -238,33 +236,6 @@ public class FolderObserver implements WatchService.WatchEventListener {
         }
     }
 
-    private @Nullable File getFileByFileExtMap(Map<String, String[]> folderFileExtMap, String filename) {
-        if (!filename.trim().isEmpty() && !folderFileExtMap.isEmpty()) {
-            String extension = getExtension(filename);
-            if (extension != null && !extension.trim().isEmpty()) {
-                Set<Entry<String, String[]>> entries = folderFileExtMap.entrySet();
-                for (Entry<String, String[]> entry : entries) {
-                    if (Arrays.asList(entry.getValue()).contains(extension)) {
-                        return new File(getFile(entry.getKey()) + File.separator + filename);
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns the {@link File} object for the given filename. <br />
-     * It must be contained in the configuration folder
-     *
-     * @param filename
-     *            the file name to get the {@link File} for
-     * @return the corresponding {@link File}
-     */
-    protected File getFile(String filename) {
-        return new File(OpenHAB.getConfigFolder() + File.separator + filename);
-    }
-
     /**
      * Returns the extension of the given file
      *
@@ -282,9 +253,18 @@ public class FolderObserver implements WatchService.WatchEventListener {
 
     @Override
     public void processWatchEvent(WatchService.Kind kind, Path path) {
-        File toCheck = getFileByFileExtMap(folderFileExtMap, path.getFileName().toString());
-        if (toCheck != null && !toCheck.isHidden()) {
-            checkFile(modelRepository, toCheck, kind);
+        if (path.getNameCount() != 2) {
+            logger.trace("{} event for {} ignored, only depth 1 is allowed.", kind, path);
+            return;
+        }
+
+        String fileExtension = getExtension(path.getFileName().toString());
+        List<String> validExtensions = folderFileExtMap.get(path.getName(0).toString());
+        if (fileExtension != null && validExtensions != null && validExtensions.contains(fileExtension)) {
+            File toCheck = watchService.getWatchPath().resolve(path).toFile();
+            if (!toCheck.isHidden()) {
+                checkFile(modelRepository, toCheck, kind);
+            }
         }
     }
 }
