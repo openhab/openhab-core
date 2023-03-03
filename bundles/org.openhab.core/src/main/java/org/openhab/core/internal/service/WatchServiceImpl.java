@@ -242,6 +242,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
         if (kinds.size() == 1) {
             // we have only one event
             doNotify(path, kinds.get(0));
+            return;
         }
 
         Kind firstElement = kinds.get(0);
