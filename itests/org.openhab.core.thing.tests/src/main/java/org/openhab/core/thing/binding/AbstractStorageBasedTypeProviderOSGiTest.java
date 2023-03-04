@@ -38,13 +38,14 @@ import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeBuilder;
 
 /**
- * The {@link AbstractDynamicTypeProviderOSGiTest} contains tests for storing and providing {@link ChannelType}s and
+ * The {@link AbstractStorageBasedTypeProviderOSGiTest} contains tests for storing and providing {@link ChannelType}s
+ * and
  * {@link ThingType}s
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class AbstractDynamicTypeProviderOSGiTest extends JavaOSGiTest {
+public class AbstractStorageBasedTypeProviderOSGiTest extends JavaOSGiTest {
 
     private static final String BINDING_ID = "testBinding";
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID(BINDING_ID, "testThingType");
@@ -52,7 +53,7 @@ public class AbstractDynamicTypeProviderOSGiTest extends JavaOSGiTest {
     private static final ChannelGroupTypeUID CHANNEL_GROUP_TYPE_UID = new ChannelGroupTypeUID(BINDING_ID,
             "testChannelGroupType");
 
-    private @NonNullByDefault({}) AbstractDynamicTypeProvider dynamicTypeProvider;
+    private @NonNullByDefault({}) AbstractStorageBasedTypeProvider typeProvider;
 
     @BeforeEach
     public void setup() {
@@ -61,21 +62,21 @@ public class AbstractDynamicTypeProviderOSGiTest extends JavaOSGiTest {
         StorageService storageService = getService(StorageService.class);
         assertThat(storageService, is(notNullValue()));
 
-        dynamicTypeProvider = new AbstractDynamicTypeProvider(storageService) {
+        typeProvider = new AbstractStorageBasedTypeProvider(storageService) {
         };
 
-        assertThat(dynamicTypeProvider.getThingTypes(null), hasSize(0));
-        assertThat(dynamicTypeProvider.getChannelTypes(null), hasSize(0));
+        assertThat(typeProvider.getThingTypes(null), hasSize(0));
+        assertThat(typeProvider.getChannelTypes(null), hasSize(0));
     }
 
     @Test
     public void testSingleThingTypeIsRestoredAsThingType() {
         ThingType thingType = ThingTypeBuilder.instance(THING_TYPE_UID, "label").build();
 
-        dynamicTypeProvider.putThingType(thingType);
-        assertThat(dynamicTypeProvider.getThingTypes(null), hasSize(1));
+        typeProvider.putThingType(thingType);
+        assertThat(typeProvider.getThingTypes(null), hasSize(1));
 
-        ThingType registryThingType = dynamicTypeProvider.getThingType(THING_TYPE_UID, null);
+        ThingType registryThingType = typeProvider.getThingType(THING_TYPE_UID, null);
         assertThat(registryThingType, is(notNullValue()));
 
         assertThat(registryThingType, not(instanceOf(BridgeType.class)));
@@ -85,10 +86,10 @@ public class AbstractDynamicTypeProviderOSGiTest extends JavaOSGiTest {
     public void testSingleBridgeTypeIsRestoredAsBridgeType() {
         BridgeType bridgeType = ThingTypeBuilder.instance(THING_TYPE_UID, "label").buildBridge();
 
-        dynamicTypeProvider.putThingType(bridgeType);
-        assertThat(dynamicTypeProvider.getThingTypes(null), hasSize(1));
+        typeProvider.putThingType(bridgeType);
+        assertThat(typeProvider.getThingTypes(null), hasSize(1));
 
-        ThingType registryThingType = dynamicTypeProvider.getThingType(THING_TYPE_UID, null);
+        ThingType registryThingType = typeProvider.getThingType(THING_TYPE_UID, null);
         assertThat(registryThingType, is(notNullValue()));
 
         assertThat(registryThingType, is(instanceOf(BridgeType.class)));
@@ -99,14 +100,14 @@ public class AbstractDynamicTypeProviderOSGiTest extends JavaOSGiTest {
         ThingType thingType1 = ThingTypeBuilder.instance(BINDING_ID, "type1", "label1").build();
         ThingType thingType2 = ThingTypeBuilder.instance(BINDING_ID, "type2", "label2").build();
 
-        dynamicTypeProvider.putThingType(thingType1);
-        dynamicTypeProvider.putThingType(thingType2);
-        assertThat(dynamicTypeProvider.getThingType(thingType1.getUID(), null), is(notNullValue()));
-        assertThat(dynamicTypeProvider.getThingType(thingType2.getUID(), null), is(notNullValue()));
+        typeProvider.putThingType(thingType1);
+        typeProvider.putThingType(thingType2);
+        assertThat(typeProvider.getThingType(thingType1.getUID(), null), is(notNullValue()));
+        assertThat(typeProvider.getThingType(thingType2.getUID(), null), is(notNullValue()));
 
-        dynamicTypeProvider.removeThingType(thingType1.getUID());
-        assertThat(dynamicTypeProvider.getThingType(thingType1.getUID(), null), is(nullValue()));
-        assertThat(dynamicTypeProvider.getThingType(thingType2.getUID(), null), is(notNullValue()));
+        typeProvider.removeThingType(thingType1.getUID());
+        assertThat(typeProvider.getThingType(thingType1.getUID(), null), is(nullValue()));
+        assertThat(typeProvider.getThingType(thingType2.getUID(), null), is(notNullValue()));
     }
 
     @Test
@@ -116,13 +117,13 @@ public class AbstractDynamicTypeProviderOSGiTest extends JavaOSGiTest {
         ThingType thingTypeOriginal = ThingTypeBuilder.instance(THING_TYPE_UID, originalLabel).build();
         ThingType thingTypeUpdated = ThingTypeBuilder.instance(THING_TYPE_UID, updatedLabel).build();
 
-        dynamicTypeProvider.putThingType(thingTypeOriginal);
-        ThingType registryThingType = dynamicTypeProvider.getThingType(THING_TYPE_UID, null);
+        typeProvider.putThingType(thingTypeOriginal);
+        ThingType registryThingType = typeProvider.getThingType(THING_TYPE_UID, null);
         assertThat(registryThingType, is(notNullValue()));
         assertThat(registryThingType.getLabel(), is(originalLabel));
 
-        dynamicTypeProvider.putThingType(thingTypeUpdated);
-        registryThingType = dynamicTypeProvider.getThingType(THING_TYPE_UID, null);
+        typeProvider.putThingType(thingTypeUpdated);
+        registryThingType = typeProvider.getThingType(THING_TYPE_UID, null);
         assertThat(registryThingType, is(notNullValue()));
         assertThat(registryThingType.getLabel(), is(updatedLabel));
     }
@@ -131,10 +132,10 @@ public class AbstractDynamicTypeProviderOSGiTest extends JavaOSGiTest {
     public void testSingleChannelTypeIsAddedAndRestored() {
         ChannelType channelType = ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "label", "Switch").build();
 
-        dynamicTypeProvider.putChannelType(channelType);
-        assertThat(dynamicTypeProvider.getChannelTypes(null), hasSize(1));
+        typeProvider.putChannelType(channelType);
+        assertThat(typeProvider.getChannelTypes(null), hasSize(1));
 
-        ChannelType registryChannelType = dynamicTypeProvider.getChannelType(CHANNEL_TYPE_UID, null);
+        ChannelType registryChannelType = typeProvider.getChannelType(CHANNEL_TYPE_UID, null);
         assertThat(registryChannelType, is(notNullValue()));
         assertThat(registryChannelType.getKind(), is(ChannelKind.STATE));
     }
@@ -146,16 +147,16 @@ public class AbstractDynamicTypeProviderOSGiTest extends JavaOSGiTest {
         ChannelType channelType2 = ChannelTypeBuilder.trigger(new ChannelTypeUID(BINDING_ID, "type2"), "label2")
                 .build();
 
-        dynamicTypeProvider.putChannelType(channelType1);
-        dynamicTypeProvider.putChannelType(channelType2);
+        typeProvider.putChannelType(channelType1);
+        typeProvider.putChannelType(channelType2);
 
-        assertThat(dynamicTypeProvider.getChannelType(channelType1.getUID(), null), is(notNullValue()));
-        assertThat(dynamicTypeProvider.getChannelType(channelType2.getUID(), null), is(notNullValue()));
+        assertThat(typeProvider.getChannelType(channelType1.getUID(), null), is(notNullValue()));
+        assertThat(typeProvider.getChannelType(channelType2.getUID(), null), is(notNullValue()));
 
-        dynamicTypeProvider.removeChannelType(channelType1.getUID());
+        typeProvider.removeChannelType(channelType1.getUID());
 
-        assertThat(dynamicTypeProvider.getChannelType(channelType1.getUID(), null), is(nullValue()));
-        assertThat(dynamicTypeProvider.getChannelType(channelType2.getUID(), null), is(notNullValue()));
+        assertThat(typeProvider.getChannelType(channelType1.getUID(), null), is(nullValue()));
+        assertThat(typeProvider.getChannelType(channelType2.getUID(), null), is(notNullValue()));
     }
 
     @Test
@@ -165,13 +166,13 @@ public class AbstractDynamicTypeProviderOSGiTest extends JavaOSGiTest {
         ChannelType channelTypeOriginal = ChannelTypeBuilder.trigger(CHANNEL_TYPE_UID, originalLabel).build();
         ChannelType channelTypeUpdated = ChannelTypeBuilder.trigger(CHANNEL_TYPE_UID, updatedLabel).build();
 
-        dynamicTypeProvider.putChannelType(channelTypeOriginal);
-        ChannelType registryChannelType = dynamicTypeProvider.getChannelType(CHANNEL_TYPE_UID, null);
+        typeProvider.putChannelType(channelTypeOriginal);
+        ChannelType registryChannelType = typeProvider.getChannelType(CHANNEL_TYPE_UID, null);
         assertThat(registryChannelType, is(notNullValue()));
         assertThat(registryChannelType.getLabel(), is(originalLabel));
 
-        dynamicTypeProvider.putChannelType(channelTypeUpdated);
-        registryChannelType = dynamicTypeProvider.getChannelType(CHANNEL_TYPE_UID, null);
+        typeProvider.putChannelType(channelTypeUpdated);
+        registryChannelType = typeProvider.getChannelType(CHANNEL_TYPE_UID, null);
         assertThat(registryChannelType, is(notNullValue()));
         assertThat(registryChannelType.getLabel(), is(updatedLabel));
     }
@@ -180,11 +181,10 @@ public class AbstractDynamicTypeProviderOSGiTest extends JavaOSGiTest {
     public void testSingleChannelGroupTypeIsAddedAndRestored() {
         ChannelGroupType channelGroupType = ChannelGroupTypeBuilder.instance(CHANNEL_GROUP_TYPE_UID, "label").build();
 
-        dynamicTypeProvider.putChannelGroupType(channelGroupType);
-        assertThat(dynamicTypeProvider.getChannelGroupTypes(null), hasSize(1));
+        typeProvider.putChannelGroupType(channelGroupType);
+        assertThat(typeProvider.getChannelGroupTypes(null), hasSize(1));
 
-        ChannelGroupType registryChannelGroupType = dynamicTypeProvider.getChannelGroupType(CHANNEL_GROUP_TYPE_UID,
-                null);
+        ChannelGroupType registryChannelGroupType = typeProvider.getChannelGroupType(CHANNEL_GROUP_TYPE_UID, null);
         assertThat(registryChannelGroupType, is(notNullValue()));
     }
 
@@ -195,16 +195,16 @@ public class AbstractDynamicTypeProviderOSGiTest extends JavaOSGiTest {
         ChannelGroupType channelGroupType2 = ChannelGroupTypeBuilder
                 .instance(new ChannelGroupTypeUID(BINDING_ID, "type2"), "label2").build();
 
-        dynamicTypeProvider.putChannelGroupType(channelGroupType1);
-        dynamicTypeProvider.putChannelGroupType(channelGroupType2);
+        typeProvider.putChannelGroupType(channelGroupType1);
+        typeProvider.putChannelGroupType(channelGroupType2);
 
-        assertThat(dynamicTypeProvider.getChannelGroupType(channelGroupType1.getUID(), null), is(notNullValue()));
-        assertThat(dynamicTypeProvider.getChannelGroupType(channelGroupType2.getUID(), null), is(notNullValue()));
+        assertThat(typeProvider.getChannelGroupType(channelGroupType1.getUID(), null), is(notNullValue()));
+        assertThat(typeProvider.getChannelGroupType(channelGroupType2.getUID(), null), is(notNullValue()));
 
-        dynamicTypeProvider.removeChannelGroupType(channelGroupType1.getUID());
+        typeProvider.removeChannelGroupType(channelGroupType1.getUID());
 
-        assertThat(dynamicTypeProvider.getChannelGroupType(channelGroupType1.getUID(), null), is(nullValue()));
-        assertThat(dynamicTypeProvider.getChannelGroupType(channelGroupType2.getUID(), null), is(notNullValue()));
+        assertThat(typeProvider.getChannelGroupType(channelGroupType1.getUID(), null), is(nullValue()));
+        assertThat(typeProvider.getChannelGroupType(channelGroupType2.getUID(), null), is(notNullValue()));
     }
 
     @Test
@@ -216,14 +216,13 @@ public class AbstractDynamicTypeProviderOSGiTest extends JavaOSGiTest {
         ChannelGroupType channelGroupTypeUpdated = ChannelGroupTypeBuilder
                 .instance(CHANNEL_GROUP_TYPE_UID, updatedLabel).build();
 
-        dynamicTypeProvider.putChannelGroupType(channelGroupTypeOriginal);
-        ChannelGroupType registryChannelGroupType = dynamicTypeProvider.getChannelGroupType(CHANNEL_GROUP_TYPE_UID,
-                null);
+        typeProvider.putChannelGroupType(channelGroupTypeOriginal);
+        ChannelGroupType registryChannelGroupType = typeProvider.getChannelGroupType(CHANNEL_GROUP_TYPE_UID, null);
         assertThat(registryChannelGroupType, is(notNullValue()));
         assertThat(registryChannelGroupType.getLabel(), is(originalLabel));
 
-        dynamicTypeProvider.putChannelGroupType(channelGroupTypeUpdated);
-        registryChannelGroupType = dynamicTypeProvider.getChannelGroupType(CHANNEL_GROUP_TYPE_UID, null);
+        typeProvider.putChannelGroupType(channelGroupTypeUpdated);
+        registryChannelGroupType = typeProvider.getChannelGroupType(CHANNEL_GROUP_TYPE_UID, null);
         assertThat(registryChannelGroupType, is(notNullValue()));
         assertThat(registryChannelGroupType.getLabel(), is(updatedLabel));
     }

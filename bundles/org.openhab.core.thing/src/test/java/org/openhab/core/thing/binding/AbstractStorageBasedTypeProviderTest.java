@@ -42,12 +42,12 @@ import org.openhab.core.types.CommandDescriptionBuilder;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 
 /**
- * The {@link AbstractDynamicTypeProviderTest} contains tests for the static mapping-methods
+ * The {@link AbstractStorageBasedTypeProviderTest} contains tests for the static mapping-methods
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class AbstractDynamicTypeProviderTest {
+public class AbstractStorageBasedTypeProviderTest {
 
     @Test
     public void testStateChannelTypeProperlyMappedToEntityAndBack() {
@@ -59,8 +59,9 @@ public class AbstractDynamicTypeProviderTest {
                 .withAutoUpdatePolicy(AutoUpdatePolicy.VETO).isAdvanced(true).withTag("testTag")
                 .withCommandDescription(CommandDescriptionBuilder.create().build())
                 .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().build()).build();
-        AbstractDynamicTypeProvider.ChannelTypeEntity entity = AbstractDynamicTypeProvider.mapToEntity(expected);
-        ChannelType actual = AbstractDynamicTypeProvider.mapFromEntity(entity);
+        AbstractStorageBasedTypeProvider.ChannelTypeEntity entity = AbstractStorageBasedTypeProvider
+                .mapToEntity(expected);
+        ChannelType actual = AbstractStorageBasedTypeProvider.mapFromEntity(entity);
 
         assertThat(actual.getUID(), is(expected.getUID()));
         assertThat(actual.getKind(), is(expected.getKind()));
@@ -88,8 +89,9 @@ public class AbstractDynamicTypeProviderTest {
                 .withDescription("testDescription").withCategory("testCategory")
                 .withChannelDefinitions(List.of(channelDefinition)).build();
 
-        AbstractDynamicTypeProvider.ChannelGroupTypeEntity entity = AbstractDynamicTypeProvider.mapToEntity(expected);
-        ChannelGroupType actual = AbstractDynamicTypeProvider.mapFromEntity(entity);
+        AbstractStorageBasedTypeProvider.ChannelGroupTypeEntity entity = AbstractStorageBasedTypeProvider
+                .mapToEntity(expected);
+        ChannelGroupType actual = AbstractStorageBasedTypeProvider.mapFromEntity(entity);
 
         assertThat(actual.getUID(), is(expected.getUID()));
         assertThat(actual.getLabel(), is(expected.getLabel()));
@@ -123,8 +125,9 @@ public class AbstractDynamicTypeProviderTest {
                 .withProperties(Map.of("key", "value")).withSupportedBridgeTypeUIDs(List.of("bridge1", "bridge2"))
                 .build();
 
-        AbstractDynamicTypeProvider.ThingTypeEntity entity = AbstractDynamicTypeProvider.mapToEntity(expected);
-        ThingType actual = AbstractDynamicTypeProvider.mapFromEntity(entity);
+        AbstractStorageBasedTypeProvider.ThingTypeEntity entity = AbstractStorageBasedTypeProvider
+                .mapToEntity(expected);
+        ThingType actual = AbstractStorageBasedTypeProvider.mapFromEntity(entity);
 
         assertThat(actual.getUID(), is(expected.getUID()));
         assertThat(actual.getLabel(), is(expected.getLabel()));

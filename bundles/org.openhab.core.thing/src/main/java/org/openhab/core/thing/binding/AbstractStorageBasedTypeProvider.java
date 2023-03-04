@@ -51,7 +51,7 @@ import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 
 /**
- * The {@link AbstractDynamicTypeProvider} is the base class for the implementation of a {@link Storage} based
+ * The {@link AbstractStorageBasedTypeProvider} is the base class for the implementation of a {@link Storage} based
  * {@link ThingTypeProvider}, {@link ChannelTypeProvider} and {@link ChannelGroupTypeProvider}
  *
  * It can be subclassed by bindings that create {@link ThingType}s and {@link ChannelType}s on-the-fly and need to
@@ -60,7 +60,7 @@ import org.openhab.core.types.StateDescriptionFragmentBuilder;
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractDynamicTypeProvider
+public abstract class AbstractStorageBasedTypeProvider
         implements ThingTypeProvider, ChannelTypeProvider, ChannelGroupTypeProvider {
 
     private final Storage<ThingTypeEntity> thingTypeEntityStorage;
@@ -68,13 +68,13 @@ public abstract class AbstractDynamicTypeProvider
     private final Storage<ChannelGroupTypeEntity> channelGroupTypeEntityStorage;
 
     /**
-     * Instantiate a new dynamic type provider. The subclass needs to be a
+     * Instantiate a new storage based type provider. The subclass needs to be a
      * {@link org.osgi.service.component.annotations.Component} and declare itself as {@link ThingTypeProvider} and/or
      * {@link ChannelTypeProvider} and/or {@link ChannelGroupTypeProvider}.
      *
      * @param storageService a persistent {@link StorageService}
      */
-    public AbstractDynamicTypeProvider(StorageService storageService) {
+    public AbstractStorageBasedTypeProvider(StorageService storageService) {
         String thingTypeStorageName = getClass().getName() + "-ThingType";
         String channelTypeStorageName = getClass().getName() + "-ChannelType";
         String channelGroupTypeStorageName = getClass().getName() + "-ChannelGroupType";
@@ -141,7 +141,7 @@ public abstract class AbstractDynamicTypeProvider
     @Override
     public Collection<ThingType> getThingTypes(@Nullable Locale locale) {
         return thingTypeEntityStorage.stream().map(Map.Entry::getValue).filter(Objects::nonNull)
-                .map(Objects::requireNonNull).map(AbstractDynamicTypeProvider::mapFromEntity).toList();
+                .map(Objects::requireNonNull).map(AbstractStorageBasedTypeProvider::mapFromEntity).toList();
     }
 
     @Override
@@ -157,7 +157,7 @@ public abstract class AbstractDynamicTypeProvider
     @Override
     public Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
         return channelTypeEntityStorage.stream().map(Map.Entry::getValue).filter(Objects::nonNull)
-                .map(Objects::requireNonNull).map(AbstractDynamicTypeProvider::mapFromEntity).toList();
+                .map(Objects::requireNonNull).map(AbstractStorageBasedTypeProvider::mapFromEntity).toList();
     }
 
     @Override
@@ -173,7 +173,7 @@ public abstract class AbstractDynamicTypeProvider
     @Override
     public Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
         return channelGroupTypeEntityStorage.stream().map(Map.Entry::getValue).filter(Objects::nonNull)
-                .map(Objects::requireNonNull).map(AbstractDynamicTypeProvider::mapFromEntity).toList();
+                .map(Objects::requireNonNull).map(AbstractStorageBasedTypeProvider::mapFromEntity).toList();
     }
 
     @Override
@@ -197,9 +197,9 @@ public abstract class AbstractDynamicTypeProvider
         entity.configDescriptionUri = thingType.getConfigDescriptionURI();
         entity.category = thingType.getCategory();
         entity.channelGroupDefinitions = thingType.getChannelGroupDefinitions().stream()
-                .map(AbstractDynamicTypeProvider::mapToEntity).collect(Collectors.toList());
+                .map(AbstractStorageBasedTypeProvider::mapToEntity).collect(Collectors.toList());
         entity.channelDefinitions = thingType.getChannelDefinitions().stream()
-                .map(AbstractDynamicTypeProvider::mapToEntity).toList();
+                .map(AbstractStorageBasedTypeProvider::mapToEntity).toList();
         entity.representationProperty = thingType.getRepresentationProperty();
         entity.properties = thingType.getProperties();
         entity.isListed = thingType.isListed();
@@ -256,17 +256,17 @@ public abstract class AbstractDynamicTypeProvider
         entity.description = channelGroupType.getDescription();
         entity.category = channelGroupType.getCategory();
         entity.channelDefinitions = channelGroupType.getChannelDefinitions().stream()
-                .map(AbstractDynamicTypeProvider::mapToEntity).toList();
+                .map(AbstractStorageBasedTypeProvider::mapToEntity).toList();
         return entity;
     }
 
     static ThingType mapFromEntity(ThingTypeEntity entity) {
         ThingTypeBuilder builder = ThingTypeBuilder.instance(entity.uid, entity.label)
                 .withSupportedBridgeTypeUIDs(entity.supportedBridgeTypeRefs).withProperties(entity.properties)
-                .withChannelDefinitions(
-                        entity.channelDefinitions.stream().map(AbstractDynamicTypeProvider::mapFromEntity).toList())
+                .withChannelDefinitions(entity.channelDefinitions.stream()
+                        .map(AbstractStorageBasedTypeProvider::mapFromEntity).toList())
                 .withChannelGroupDefinitions(entity.channelGroupDefinitions.stream()
-                        .map(AbstractDynamicTypeProvider::mapFromEntity).toList())
+                        .map(AbstractStorageBasedTypeProvider::mapFromEntity).toList())
                 .isListed(entity.isListed).withExtensibleChannelTypeIds(entity.extensibleChannelTypeIds);
         if (entity.description != null) {
             builder.withDescription(Objects.requireNonNull(entity.description));
@@ -328,8 +328,8 @@ public abstract class AbstractDynamicTypeProvider
 
     static ChannelGroupType mapFromEntity(ChannelGroupTypeEntity entity) {
         ChannelGroupTypeBuilder builder = ChannelGroupTypeBuilder.instance(entity.uid, entity.label)
-                .withChannelDefinitions(
-                        entity.channelDefinitions.stream().map(AbstractDynamicTypeProvider::mapFromEntity).toList());
+                .withChannelDefinitions(entity.channelDefinitions.stream()
+                        .map(AbstractStorageBasedTypeProvider::mapFromEntity).toList());
         if (entity.description != null) {
             builder.withDescription(Objects.requireNonNull(entity.description));
         }
