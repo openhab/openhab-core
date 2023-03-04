@@ -85,6 +85,9 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
     @Override
     public void registerDiscoveryListener(UsbSerialDiscoveryListener listener) {
         discoveryListeners.add(listener);
+        for (UsbSerialDeviceInformation deviceInfo : lastScanResult) {
+            listener.usbSerialDeviceDiscovered(deviceInfo);
+        }
     }
 
     @Override
