@@ -91,13 +91,9 @@ public class FolderObserverTest extends JavaTest {
 
         when(modelParserMock.getExtension()).thenReturn("java");
         when(contextMock.getProperties()).thenReturn(configProps);
+        when(watchServiceMock.getWatchPath()).thenReturn(WATCHED_DIRECTORY.toPath());
 
-        folderObserver = new FolderObserver(modelRepoMock, readyServiceMock, watchServiceMock) {
-            @Override
-            protected File getFile(String filename) {
-                return new File(WATCHED_DIRECTORY + File.separator + filename);
-            }
-        };
+        folderObserver = new FolderObserver(modelRepoMock, readyServiceMock, watchServiceMock);
         folderObserver.addModelParser(modelParserMock);
     }
 
@@ -134,7 +130,7 @@ public class FolderObserverTest extends JavaTest {
         Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
 
         waitForAssert(() -> assertThat(file.exists(), is(true)));
-        folderObserver.processWatchEvent(CREATE, file.toPath());
+        folderObserver.processWatchEvent(CREATE, WATCHED_DIRECTORY.toPath().relativize(file.toPath()));
 
         verify(modelRepoMock).addOrRefreshModel(eq(file.getName()), any());
         verifyNoMoreInteractions(modelRepoMock);
@@ -159,12 +155,12 @@ public class FolderObserverTest extends JavaTest {
         Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
 
         waitForAssert(() -> assertThat(file.exists(), is(true)));
-        folderObserver.processWatchEvent(CREATE, file.toPath());
+        folderObserver.processWatchEvent(CREATE, WATCHED_DIRECTORY.toPath().relativize(file.toPath()));
 
         String text = "Additional content";
         Files.writeString(file.toPath(), text, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
 
-        folderObserver.processWatchEvent(MODIFY, file.toPath());
+        folderObserver.processWatchEvent(MODIFY, WATCHED_DIRECTORY.toPath().relativize(file.toPath()));
 
         verify(modelRepoMock, times(2)).addOrRefreshModel(eq(file.getName()), any());
         verifyNoMoreInteractions(modelRepoMock);
@@ -188,7 +184,7 @@ public class FolderObserverTest extends JavaTest {
         Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
 
-        folderObserver.processWatchEvent(CREATE, file.toPath());
+        folderObserver.processWatchEvent(CREATE, WATCHED_DIRECTORY.toPath().relativize(file.toPath()));
 
         verifyNoInteractions(modelRepoMock);
     }
@@ -208,7 +204,7 @@ public class FolderObserverTest extends JavaTest {
         File file = new File(EXISTING_SUBDIR_PATH, "NewlyCreatedMockFile.java");
         Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
-        folderObserver.processWatchEvent(CREATE, file.toPath());
+        folderObserver.processWatchEvent(CREATE, WATCHED_DIRECTORY.toPath().relativize(file.toPath()));
 
         verifyNoInteractions(modelRepoMock);
     }
@@ -261,7 +257,7 @@ public class FolderObserverTest extends JavaTest {
         Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
 
-        folderObserver.processWatchEvent(CREATE, file.toPath());
+        folderObserver.processWatchEvent(CREATE, WATCHED_DIRECTORY.toPath().relativize(file.toPath()));
 
         verifyNoInteractions(modelRepoMock);
     }
@@ -270,13 +266,7 @@ public class FolderObserverTest extends JavaTest {
     public void testException() throws Exception {
         when(modelRepoMock.addOrRefreshModel(any(), any())).thenThrow(new IllegalStateException("intentional failure"));
 
-        FolderObserver localFolderObserver = new FolderObserver(modelRepoMock, readyServiceMock, watchServiceMock) {
-            @Override
-            protected File getFile(String filename) {
-                return new File(WATCHED_DIRECTORY + File.separator + filename);
-            }
-        };
-
+        FolderObserver localFolderObserver = new FolderObserver(modelRepoMock, readyServiceMock, watchServiceMock);
         localFolderObserver.addModelParser(modelParserMock);
 
         String validExtension = "java";
@@ -286,11 +276,13 @@ public class FolderObserverTest extends JavaTest {
         File mockFileWithValidExt = new File(EXISTING_SUBDIR_PATH, "MockFileForModification." + validExtension);
         Files.writeString(mockFileWithValidExt.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8,
                 StandardOpenOption.CREATE);
-        localFolderObserver.processWatchEvent(CREATE, mockFileWithValidExt.toPath());
+        localFolderObserver.processWatchEvent(CREATE,
+                WATCHED_DIRECTORY.toPath().relativize(mockFileWithValidExt.toPath()));
 
         Files.writeString(mockFileWithValidExt.toPath(), "Additional content", StandardCharsets.UTF_8,
                 StandardOpenOption.APPEND);
-        localFolderObserver.processWatchEvent(MODIFY, mockFileWithValidExt.toPath());
+        localFolderObserver.processWatchEvent(MODIFY,
+                WATCHED_DIRECTORY.toPath().relativize(mockFileWithValidExt.toPath()));
 
         verify(modelRepoMock, times(2)).addOrRefreshModel(eq(mockFileWithValidExt.getName()), any());
     }
