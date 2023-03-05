@@ -20,7 +20,7 @@
     <cxf.version>3.4.5</cxf.version>
     <jackson.version>2.14.1</jackson.version>
     <jetty.version>9.4.50.v20221201</jetty.version>
-    <pax.logging.version>2.2.0</pax.logging.version>
+    <pax.logging.version>2.2.2</pax.logging.version>
     <pax.web.version>8.0.15</pax.web.version>
     <swagger.version>2.1.9</swagger.version>
   </properties>
@@ -445,7 +445,7 @@
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.9.1</version>
+      <version>2.10.1</version>
       <scope>compile</scope>
     </dependency>
 
