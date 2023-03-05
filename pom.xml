@@ -75,7 +75,7 @@
     <karaf.compile.version>4.4.0</karaf.compile.version>
     <karaf.tooling.version>4.4.3</karaf.tooling.version>
     <sat.version>0.13.0</sat.version>
-    <slf4j.version>1.7.32</slf4j.version>
+    <slf4j.version>2.0.6</slf4j.version>
     <xtext.version>2.30.0</xtext.version>
     <spotless.version>2.28.0</spotless.version>
     <spotless.eclipse.version>4.21.0</spotless.eclipse.version>

@@ -266,10 +266,9 @@
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/io.github.classgraph/4.8.149.v20220915-0556</bundle>
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.antlr.runtime/3.2.0.v201101311130</bundle>
 
-		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.common/3.17.0</bundle>
-		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.registry/3.11.200</bundle>
-		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.supplement/1.10.600</bundle>
-		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.osgi/3.18.200</bundle>
+		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.common/3.16.200</bundle>
+		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.registry/3.9.0</bundle>
+		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.supplement/1.9.0</bundle>
 		<!-- Add ASM package -->
 		<!-- org.eclipse.xtext.common.types is using Require-Bundle -->
 		<bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm/9.4</bundle>
