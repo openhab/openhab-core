@@ -228,12 +228,13 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             future = scheduler.schedule(() -> notifyListeners(path), PROCESSING_TIME, TimeUnit.MILLISECONDS);
             scheduledEventKinds.computeIfAbsent(path, k -> new CopyOnWriteArrayList<>()).add(kind);
             scheduledEvents.put(path, future);
-
         }
     }
 
     private void notifyListeners(Path path) {
         List<Kind> kinds = scheduledEventKinds.remove(path);
+        logger.trace("notifyListeners({}) kinds: {}", path, kinds);
+
         if (kinds == null || kinds.isEmpty()) {
             logger.debug("Tried to notify listeners of change events for '{}', but the event list is empty.", path);
             return;
@@ -251,14 +252,14 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
         // determine final event
         if (lastElement == Kind.DELETE) {
             if (firstElement == Kind.CREATE) {
-                logger.debug("Discarding events for '{}' because file was immediately deleted bafter creation", path);
+                logger.debug("Discarding events for '{}' because file was immediately deleted after creation", path);
                 return;
             }
             doNotify(path, Kind.DELETE);
         } else if (firstElement == Kind.CREATE) {
             doNotify(path, Kind.CREATE);
         } else {
-            doNotify(path, Kind.MODIFY);
+            doNotify(path, lastElement);
         }
     }
 
