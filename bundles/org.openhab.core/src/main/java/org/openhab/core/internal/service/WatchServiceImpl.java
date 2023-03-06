@@ -112,7 +112,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             closeWatcherAndUnregister();
 
             if (!Files.exists(basePath)) {
-                logger.info("Watch directory '{}' does not exists. Trying to create it.", basePath);
+                logger.info("Watch directory '{}' does not exist. Trying to create it.", basePath);
                 Files.createDirectories(basePath);
             }
 
@@ -249,17 +249,26 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
         Kind firstElement = kinds.get(0);
         Kind lastElement = kinds.get(kinds.size() - 1);
 
-        // determine final event
-        if (lastElement == Kind.DELETE) {
-            if (firstElement == Kind.CREATE) {
+        if (firstElement == Kind.CREATE) {
+            if (lastElement == Kind.DELETE) {
                 logger.debug("Discarding events for '{}' because file was immediately deleted after creation", path);
-                return;
+            } else {
+                doNotify(path, Kind.CREATE);
             }
+        } else if (firstElement == Kind.DELETE) {
+            if (lastElement == Kind.DELETE) {
+                doNotify(path, Kind.DELETE);
+            } else {
+                doNotify(path, Kind.DELETE);
+                doNotify(path, Kind.CREATE);
+            }
+        } else if (lastElement == Kind.DELETE) {
             doNotify(path, Kind.DELETE);
-        } else if (firstElement == Kind.CREATE) {
+        } else if (kinds.contains(Kind.CREATE)) {
+            doNotify(path, Kind.DELETE);
             doNotify(path, Kind.CREATE);
         } else {
-            doNotify(path, lastElement);
+            doNotify(path, Kind.MODIFY);
         }
     }
 
