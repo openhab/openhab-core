@@ -34,7 +34,6 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.openhab.core.io.net.http.ExtensibleTrustManager;
-import org.openhab.core.io.net.http.Http2ClientFactory;
 import org.openhab.core.io.net.http.HttpClientFactory;
 import org.openhab.core.io.net.http.HttpClientInitializationException;
 import org.openhab.core.io.net.http.WebSocketFactory;
@@ -52,11 +51,11 @@ import org.slf4j.LoggerFactory;
  * @author Michael Bock - Initial contribution
  * @author Kai Kreuzer - added web socket support
  * @author Martin van Wingerden - Add support for ESHTrustManager
- * @author Andrew Fiddian-Green - added HTTP/2 support
+ * @author Andrew Fiddian-Green - Added support for HTTP2 client creation
  */
 @Component(immediate = true, configurationPid = "org.openhab.webclient")
 @NonNullByDefault
-public class WebClientFactoryImpl implements HttpClientFactory, Http2ClientFactory, WebSocketFactory {
+public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory {
 
     private final Logger logger = LoggerFactory.getLogger(WebClientFactoryImpl.class);
 

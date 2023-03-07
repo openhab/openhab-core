@@ -451,6 +451,8 @@
 		<bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-api/${jetty.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-common/${jetty.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-client/${jetty.version}</bundle>
+		<bundle dependency="true">mvn:org.eclipse.jetty.http2/http2-client/${jetty.version}</bundle>
+		<bundle dependency="true">mvn:org.eclipse.jetty/jetty-alpn-client/${jetty.version}</bundle>
 	</feature>
 
 	<feature name="openhab-transport-mdns" description="mDNS Transport" version="${project.version}">
