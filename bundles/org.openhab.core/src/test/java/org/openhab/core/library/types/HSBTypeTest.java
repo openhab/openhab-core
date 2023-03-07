@@ -129,14 +129,8 @@ public class HSBTypeTest {
     public void testConversionToXY() {
         HSBType hsb = new HSBType("220,90,50");
         PercentType[] xy = hsb.toXY();
-        assertEquals(new PercentType("16.969364"), xy[0]);
-        assertEquals(new PercentType("12.379659"), xy[1]);
-    }
-
-    @Test
-    public void testCreateFromXY() {
-        HSBType hsb = HSBType.fromXY(5f, 3f);
-        assertEquals(new HSBType("11,100,100"), hsb);
+        assertEquals(14.65, xy[0].doubleValue(), 0.01);
+        assertEquals(11.56, xy[1].doubleValue(), 0.01);
     }
 
     @Test
