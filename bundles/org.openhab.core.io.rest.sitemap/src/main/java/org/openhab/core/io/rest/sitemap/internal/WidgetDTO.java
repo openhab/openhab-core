@@ -42,7 +42,6 @@ public class WidgetDTO {
     public final List<MappingDTO> mappings = new ArrayList<>();
     public Boolean switchSupport;
     public Integer sendFrequency;
-    public String separator;
     public Integer refresh;
     public Integer height;
     public BigDecimal minValue;

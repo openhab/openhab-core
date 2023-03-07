@@ -45,7 +45,6 @@ import org.openhab.core.model.sitemap.sitemap.impl.DefaultImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.FrameImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.GroupImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ImageImpl;
-import org.openhab.core.model.sitemap.sitemap.impl.ListImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.MappingImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.MapviewImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.SelectionImpl;
@@ -235,11 +234,6 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 SelectionImpl selectionWidget = (SelectionImpl) SitemapFactory.eINSTANCE.createSelection();
                 addWidgetMappings(selectionWidget.getMappings(), component);
                 widget = selectionWidget;
-                break;
-            case "List":
-                ListImpl listWidget = (ListImpl) SitemapFactory.eINSTANCE.createList();
-                widget = listWidget;
-                setWidgetPropertyFromComponentConfig(widget, component, "separator", SitemapPackage.LIST__SEPARATOR);
                 break;
             case "Setpoint":
                 SetpointImpl setpointWidget = (SetpointImpl) SitemapFactory.eINSTANCE.createSetpoint();
