@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.net.http.internal;
 
+import java.nio.ByteBuffer;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
@@ -25,10 +26,15 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.http.PreEncodedHttpField;
+import org.eclipse.jetty.http2.client.HTTP2Client;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.openhab.core.io.net.http.ExtensibleTrustManager;
+import org.openhab.core.io.net.http.Http2ClientFactory;
 import org.openhab.core.io.net.http.HttpClientFactory;
 import org.openhab.core.io.net.http.HttpClientInitializationException;
 import org.openhab.core.io.net.http.WebSocketFactory;
@@ -46,10 +52,11 @@ import org.slf4j.LoggerFactory;
  * @author Michael Bock - Initial contribution
  * @author Kai Kreuzer - added web socket support
  * @author Martin van Wingerden - Add support for ESHTrustManager
+ * @author Andrew Fiddian-Green - added HTTP/2 support
  */
 @Component(immediate = true, configurationPid = "org.openhab.webclient")
 @NonNullByDefault
-public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory {
+public class WebClientFactoryImpl implements HttpClientFactory, Http2ClientFactory, WebSocketFactory {
 
     private final Logger logger = LoggerFactory.getLogger(WebClientFactoryImpl.class);
 
@@ -361,5 +368,43 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         }
 
         return sslContextFactory;
+    }
+
+    @Override
+    public HTTP2Client createHttp2Client(String consumerName) {
+        return createHttp2Client(consumerName, null);
+    }
+
+    @Override
+    public HTTP2Client createHttp2Client(String consumerName, @Nullable SslContextFactory sslContextFactory) {
+        logger.debug("http client for consumer {} requested", consumerName);
+        checkConsumerName(consumerName);
+        return createHttp2ClientInternal(consumerName, sslContextFactory);
+    }
+
+    private HTTP2Client createHttp2ClientInternal(String consumerName, @Nullable SslContextFactory sslContextFactory) {
+        try {
+            logger.debug("creating HTTP/2 client for consumer {}", consumerName);
+
+            try {
+                PreEncodedHttpField field = new PreEncodedHttpField(HttpHeader.C_METHOD, "PUT");
+                ByteBuffer bytes = ByteBuffer.allocate(32);
+                field.putTo(bytes, HttpVersion.HTTP_2);
+            } catch (Exception e) {
+                throw new HttpClientInitializationException("Jetty HTTP/2 hpack module not loaded", e);
+            }
+
+            HTTP2Client http2Client = new HTTP2Client();
+            http2Client.addBean(sslContextFactory != null ? sslContextFactory : createSslContextFactory());
+            http2Client.setExecutor(
+                    createThreadPool(consumerName, minThreadsCustom, maxThreadsCustom, keepAliveTimeoutCustom));
+
+            return http2Client;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new HttpClientInitializationException(
+                    "unexpected checked exception during initialization of the Jetty HTTP/2 client", e);
+        }
     }
 }
