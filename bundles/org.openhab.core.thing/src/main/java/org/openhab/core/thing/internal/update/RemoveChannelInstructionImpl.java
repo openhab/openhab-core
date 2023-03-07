@@ -12,10 +12,14 @@
  */
 package org.openhab.core.thing.internal.update;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.internal.update.dto.XmlRemoveChannel;
 
 /**
  * The {@link RemoveChannelInstructionImpl} implements a {@link ThingUpdateInstruction} that removes a channel from a
@@ -26,11 +30,14 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
 @NonNullByDefault
 public class RemoveChannelInstructionImpl implements ThingUpdateInstruction {
     private final int thingTypeVersion;
+    private final List<String> groupIds;
     private final String channelId;
 
-    RemoveChannelInstructionImpl(int thingTypeVersion, String channelId) {
+    RemoveChannelInstructionImpl(int thingTypeVersion, XmlRemoveChannel removeChannel) {
         this.thingTypeVersion = thingTypeVersion;
-        this.channelId = channelId;
+        String rawGroupIds = removeChannel.getGroupIds();
+        this.groupIds = rawGroupIds != null ? Arrays.asList(rawGroupIds.split(",")) : List.of();
+        this.channelId = removeChannel.getId();
     }
 
     @Override
@@ -40,7 +47,11 @@ public class RemoveChannelInstructionImpl implements ThingUpdateInstruction {
 
     @Override
     public void perform(Thing thing, ThingBuilder thingBuilder) {
-        ChannelUID affectedChannelUid = new ChannelUID(thing.getUID(), channelId);
-        thingBuilder.withoutChannel(affectedChannelUid);
+        if (groupIds.isEmpty()) {
+            thingBuilder.withoutChannel(new ChannelUID(thing.getUID(), channelId));
+        } else {
+            groupIds.forEach(groupId -> thingBuilder.withoutChannel(
+                    new ChannelUID(thing.getUID(), groupId + ChannelUID.CHANNEL_GROUP_SEPARATOR + channelId)));
+        }
     }
 }

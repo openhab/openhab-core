@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.internal.update;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -38,6 +39,7 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
     private final boolean removeOldChannel;
     private final int thingTypeVersion;
     private final boolean preserveConfig;
+    private final List<String> groupIds;
     private final String channelId;
     private final String channelTypeUid;
     private final @Nullable String label;
@@ -49,6 +51,8 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
         this.thingTypeVersion = thingTypeVersion;
         this.channelId = updateChannel.getId();
         this.channelTypeUid = updateChannel.getType();
+        String rawGroupIds = updateChannel.getGroupIds();
+        this.groupIds = rawGroupIds != null ? Arrays.asList(rawGroupIds.split(",")) : List.of();
         this.label = updateChannel.getLabel();
         this.description = updateChannel.getDescription();
         this.tags = updateChannel.getTags();
@@ -60,6 +64,8 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
         this.thingTypeVersion = thingTypeVersion;
         this.channelId = addChannel.getId();
         this.channelTypeUid = addChannel.getType();
+        String rawGroupIds = addChannel.getGroupIds();
+        this.groupIds = rawGroupIds != null ? Arrays.asList(rawGroupIds.split(",")) : List.of();
         this.label = addChannel.getLabel();
         this.description = addChannel.getDescription();
         this.tags = addChannel.getTags();
@@ -73,7 +79,15 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
 
     @Override
     public void perform(Thing thing, ThingBuilder thingBuilder) {
-        ChannelUID affectedChannelUid = new ChannelUID(thing.getUID(), channelId);
+        if (groupIds.isEmpty()) {
+            doChannel(thing, thingBuilder, new ChannelUID(thing.getUID(), channelId));
+        } else {
+            groupIds.forEach(groupId -> doChannel(thing, thingBuilder,
+                    new ChannelUID(thing.getUID(), groupId + ChannelUID.CHANNEL_GROUP_SEPARATOR + channelId)));
+        }
+    }
+
+    private void doChannel(Thing thing, ThingBuilder thingBuilder, ChannelUID affectedChannelUid) {
 
         if (removeOldChannel) {
             thingBuilder.withoutChannel(affectedChannelUid);
