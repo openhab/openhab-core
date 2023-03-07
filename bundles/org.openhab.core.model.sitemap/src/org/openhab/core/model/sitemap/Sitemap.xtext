@@ -15,7 +15,7 @@ Widget:
     (LinkableWidget | NonLinkableWidget);
 
 NonLinkableWidget:
-    Switch | Selection | Slider | List | Setpoint | Video | Chart | Webview | Colorpicker | Mapview | Input | Default;
+    Switch | Selection | Slider | Setpoint | Video | Chart | Webview | Colorpicker | Mapview | Input | Default;
 
 LinkableWidget:
     (Text | Group | Image | Frame)
@@ -106,14 +106,6 @@ Slider:
 Selection:
     'Selection' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? & ('icon=' icon=Icon)? &
     ('mappings=[' mappings+=Mapping (',' mappings+=Mapping)* ']')? &
-    ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)* ']'))? &
-    ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
-    ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)* ']'))? &
-    ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)* ']'))?);
-
-List:
-    'List' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? & ('icon=' icon=Icon)? &
-    ('separator=' separator=STRING) &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)* ']'))? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)* ']'))? &

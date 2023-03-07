@@ -75,7 +75,6 @@ import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Frame;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
-import org.openhab.core.model.sitemap.sitemap.List;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Mapview;
 import org.openhab.core.model.sitemap.sitemap.Selection;
@@ -563,10 +562,6 @@ public class SitemapResource
             bean.minValue = sliderWidget.getMinValue();
             bean.maxValue = sliderWidget.getMaxValue();
             bean.step = sliderWidget.getStep();
-        }
-        if (widget instanceof List) {
-            List listWidget = (List) widget;
-            bean.separator = listWidget.getSeparator();
         }
         if (widget instanceof Image) {
             bean.url = buildProxyUrl(sitemapName, widget, uri);
