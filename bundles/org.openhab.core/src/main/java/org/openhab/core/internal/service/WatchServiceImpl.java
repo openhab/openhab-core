@@ -240,10 +240,13 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             return;
         }
 
+        reduceEvents(path, kinds).stream().forEachOrdered(kind -> doNotify(path, kind));
+    }
+
+    private List<Kind> reduceEvents(Path path, List<Kind> kinds) {
         if (kinds.size() == 1) {
             // we have only one event
-            doNotify(path, kinds.get(0));
-            return;
+            return kinds;
         }
 
         Kind firstElement = kinds.get(0);
@@ -252,24 +255,23 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
         if (firstElement == Kind.CREATE) {
             if (lastElement == Kind.DELETE) {
                 logger.debug("Discarding events for '{}' because file was immediately deleted after creation", path);
+                return List.of();
             } else {
-                doNotify(path, Kind.CREATE);
+                return List.of(Kind.CREATE);
             }
         } else if (firstElement == Kind.DELETE) {
             if (lastElement == Kind.DELETE) {
-                doNotify(path, Kind.DELETE);
+                return List.of(Kind.DELETE);
             } else {
-                doNotify(path, Kind.DELETE);
-                doNotify(path, Kind.CREATE);
+                return List.of(Kind.DELETE, Kind.CREATE);
             }
         } else if (lastElement == Kind.DELETE) {
-            doNotify(path, Kind.DELETE);
+            return List.of(Kind.DELETE);
         } else if (kinds.contains(Kind.CREATE)) {
-            doNotify(path, Kind.DELETE);
-            doNotify(path, Kind.CREATE);
-        } else {
-            doNotify(path, Kind.MODIFY);
+            return List.of(Kind.DELETE, Kind.CREATE);
         }
+
+        return List.of(Kind.MODIFY);
     }
 
     private void doNotify(Path path, Kind kind) {
