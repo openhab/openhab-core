@@ -85,7 +85,7 @@ public class ProxyServletServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new ProxyServletService(itemUIRegistryMock, Map.of());
+        service = new ProxyServletService(httpServiceMock, itemUIRegistryMock, Map.of());
         service.sitemapProviders.add(sitemapProviderMock);
 
         sitemapMock = mock(Sitemap.class);

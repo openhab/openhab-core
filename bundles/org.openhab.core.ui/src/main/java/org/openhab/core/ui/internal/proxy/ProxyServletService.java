@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -43,11 +44,12 @@ import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletName;
-import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletPattern;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,8 +80,6 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(immediate = true, property = { "service.pid=org.openhab.proxy" })
-@HttpWhiteboardServletName(ProxyServletService.PROXY_ALIAS)
-@HttpWhiteboardServletPattern(ProxyServletService.PROXY_ALIAS + "/*")
 public class ProxyServletService extends HttpServlet {
 
     /** the alias for this servlet */
@@ -95,18 +95,34 @@ public class ProxyServletService extends HttpServlet {
 
     private @Nullable Servlet impl;
 
+    protected final HttpService httpService;
     protected final ItemUIRegistry itemUIRegistry;
     protected final List<SitemapProvider> sitemapProviders = new CopyOnWriteArrayList<>();
 
     @Activate
-    public ProxyServletService(@Reference ItemUIRegistry itemUIRegistry, Map<String, Object> config) {
+    public ProxyServletService(@Reference HttpService httpService, @Reference ItemUIRegistry itemUIRegistry,
+            Map<String, Object> config) {
+        this.httpService = httpService;
         this.itemUIRegistry = itemUIRegistry;
 
         Servlet servlet = getImpl();
 
         logger.debug("Starting up '{}' servlet  at /{}", servlet.getServletInfo(), PROXY_ALIAS);
+        try {
+            httpService.registerServlet("/" + PROXY_ALIAS, servlet, propsFromConfig(config, servlet),
+                    httpService.createDefaultHttpContext());
+        } catch (NamespaceException | ServletException e) {
+            logger.error("Error during servlet startup: {}", e.getMessage());
+        }
+    }
 
-        Hashtable<String, @Nullable String> props = propsFromConfig(config);
+    @Deactivate
+    protected void deactivate() {
+        try {
+            httpService.unregister("/" + PROXY_ALIAS);
+        } catch (IllegalArgumentException e) {
+            // ignore, had not been registered before
+        }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -142,7 +158,7 @@ public class ProxyServletService extends HttpServlet {
      * @param config the OSGi config, may be <code>null</code>
      * @return properties to pass to servlet for initialization
      */
-    private Hashtable<String, @Nullable String> propsFromConfig(Map<String, Object> config) {
+    private Hashtable<String, @Nullable String> propsFromConfig(Map<String, Object> config, Servlet servlet) {
         Hashtable<String, @Nullable String> props = new Hashtable<>();
 
         for (String key : config.keySet()) {
@@ -153,6 +169,10 @@ public class ProxyServletService extends HttpServlet {
         if (props.get(CONFIG_MAX_THREADS) == null) {
             props.put(CONFIG_MAX_THREADS,
                     String.valueOf(Math.max(DEFAULT_MAX_THREADS, Runtime.getRuntime().availableProcessors())));
+        }
+
+        if (servlet instanceof AsyncProxyServlet) {
+            props.put("async-supported", "true");
         }
 
         return props;
@@ -235,7 +255,7 @@ public class ProxyServletService extends HttpServlet {
             String itemName = widget.getItem();
             if (itemName != null) {
                 State state = itemUIRegistry.getItemState(itemName);
-                if (state != null && state instanceof StringType) {
+                if (state instanceof StringType) {
                     try {
                         uri = createURIFromString(state.toString());
                         request.setAttribute(ATTR_URI, uri);
