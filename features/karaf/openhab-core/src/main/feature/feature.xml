@@ -66,8 +66,6 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sse/${project.version}</bundle>
-		<feature dependency="true">pax-web-jetty-http2</feature>
-		<feature dependency="true">pax-web-jetty-http2-jdk9</feature>
 	</feature>
 
 	<feature name="openhab-core-addon-marketplace" version="${project.version}">
