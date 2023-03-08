@@ -30,9 +30,9 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public abstract class AbstractCachedTTSService implements CachedTTSService {
 
-    private TTSCache ttsCache;
+    private final TTSCache ttsCache;
 
-    public AbstractCachedTTSService(@Reference TTSCache ttsCache) {
+    public AbstractCachedTTSService(final @Reference TTSCache ttsCache) {
         this.ttsCache = ttsCache;
     }
 
