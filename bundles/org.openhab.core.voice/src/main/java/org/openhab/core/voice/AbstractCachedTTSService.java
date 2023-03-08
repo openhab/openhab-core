@@ -32,13 +32,13 @@ public abstract class AbstractCachedTTSService implements CachedTTSService {
 
     private TTSCache ttsCache;
 
-    @Override
-    public final AudioStream synthesize(String text, Voice voice, AudioFormat requestedFormat) throws TTSException {
-        return ttsCache.get(this, text, voice, requestedFormat);
-    }
-
     public AbstractCachedTTSService(@Reference TTSCache ttsCache) {
         this.ttsCache = ttsCache;
+    }
+
+    @Override
+    public AudioStream synthesize(String text, Voice voice, AudioFormat requestedFormat) throws TTSException {
+        return ttsCache.get(this, text, voice, requestedFormat);
     }
 
     @Override
