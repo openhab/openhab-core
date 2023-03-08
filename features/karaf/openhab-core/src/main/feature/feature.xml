@@ -66,6 +66,8 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sse/${project.version}</bundle>
+		<feature dependency="true">pax-web-jetty-http2</feature>
+		<feature dependency="true">pax-web-jetty-http2-jdk9</feature>
 	</feature>
 
 	<feature name="openhab-core-addon-marketplace" version="${project.version}">
@@ -451,8 +453,6 @@
 		<bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-api/${jetty.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-common/${jetty.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-client/${jetty.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.jetty.http2/http2-client/${jetty.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.jetty/jetty-alpn-client/${jetty.version}</bundle>
 	</feature>
 
 	<feature name="openhab-transport-mdns" description="mDNS Transport" version="${project.version}">
