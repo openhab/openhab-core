@@ -30,15 +30,15 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public abstract class AbstractCachedTTSService implements CachedTTSService {
 
-    private TTSCache ttsCache;
+    private final TTSCache ttsCache;
 
-    @Override
-    public final AudioStream synthesize(String text, Voice voice, AudioFormat requestedFormat) throws TTSException {
-        return ttsCache.get(this, text, voice, requestedFormat);
+    public AbstractCachedTTSService(final @Reference TTSCache ttsCache) {
+        this.ttsCache = ttsCache;
     }
 
-    public AbstractCachedTTSService(@Reference TTSCache ttsCache) {
-        this.ttsCache = ttsCache;
+    @Override
+    public AudioStream synthesize(String text, Voice voice, AudioFormat requestedFormat) throws TTSException {
+        return ttsCache.get(this, text, voice, requestedFormat);
     }
 
     @Override
