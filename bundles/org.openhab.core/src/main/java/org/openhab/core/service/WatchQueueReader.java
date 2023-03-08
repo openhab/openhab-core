@@ -279,8 +279,7 @@ public class WatchQueueReader implements Runnable {
                                 for (AbstractWatchService service : services) {
                                     if (service.watchSubDirectories()
                                             && service.getWatchEventKinds(resolvedPath) != null) {
-                                        registerDirectoryInternal(service, service.getWatchEventKinds(resolvedPath),
-                                                resolvedPath);
+                                        registerWithSubDirectories(service, resolvedPath);
                                     }
                                 }
                             } else if (ENTRY_DELETE.equals(kind)) {
