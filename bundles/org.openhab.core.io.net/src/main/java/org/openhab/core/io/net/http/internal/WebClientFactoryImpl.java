@@ -16,7 +16,6 @@ import java.nio.ByteBuffer;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
@@ -338,7 +337,6 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     }
 
     private void checkConsumerName(String consumerName) {
-        Objects.requireNonNull(consumerName, "consumerName must not be null");
         if (consumerName.length() < MIN_CONSUMER_NAME_LENGTH) {
             throw new IllegalArgumentException(
                     "consumerName " + consumerName + " too short, minimum " + MIN_CONSUMER_NAME_LENGTH);

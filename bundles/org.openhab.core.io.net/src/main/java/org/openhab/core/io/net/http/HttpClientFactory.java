@@ -38,7 +38,6 @@ public interface HttpClientFactory {
      * @param consumerName the for identifying the consumer in the Jetty thread pool.
      *            Must be between 4 and 20 characters long and must contain only the following characters [a-zA-Z0-9-_]
      * @return the Jetty client
-     * @throws NullPointerException if {@code consumerName} is {@code null}
      * @throws IllegalArgumentException if {@code consumerName} is invalid
      */
     HttpClient createHttpClient(String consumerName);
@@ -54,7 +53,6 @@ public interface HttpClientFactory {
      *            Must be between 4 and 20 characters long and must contain only the following characters [a-zA-Z0-9-_]
      * @param sslContextFactory the SSL factory managing TLS encryption
      * @return the Jetty client
-     * @throws NullPointerException if {@code consumerName} is {@code null}
      * @throws IllegalArgumentException if {@code consumerName} is invalid
      */
     HttpClient createHttpClient(String consumerName, @Nullable SslContextFactory sslContextFactory);
@@ -77,7 +75,6 @@ public interface HttpClientFactory {
      * @param consumerName for identifying the consumer in the Jetty thread pool.
      *            Must be between 4 and 20 characters long and must contain only the following characters [a-zA-Z0-9-_]
      * @return the Jetty HTTP/2 client
-     * @throws NullPointerException if {@code consumerName} is {@code null}
      * @throws IllegalArgumentException if {@code consumerName} is invalid
      */
     HTTP2Client createHttp2Client(String consumerName);
@@ -93,7 +90,6 @@ public interface HttpClientFactory {
      *            Must be between 4 and 20 characters long and must contain only the following characters [a-zA-Z0-9-_]
      * @param sslContextFactory the SSL factory managing TLS encryption
      * @return the Jetty HTTP/2 client
-     * @throws NullPointerException if {@code consumerName} is {@code null}
      * @throws IllegalArgumentException if {@code consumerName} is invalid
      */
     HTTP2Client createHttp2Client(String consumerName, @Nullable SslContextFactory sslContextFactory);
