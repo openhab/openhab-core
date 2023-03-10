@@ -107,11 +107,16 @@ public class ColorUtil {
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
      * developer portal</a>.
      *
-     * @param xy the CIE 1931 xy colour, x,y between 0.0000 and 1.0000.
+     * @param xy the CIE 1931 xy colour, x,y[,Y] between 0.0000 and 1.0000. <code>Y</code> value is optional.
      * @param gamut the gamut supported by the light.
      * @return the corresponding {@link HSBType}.
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
      */
     public static HSBType xyToHsv(double[] xy, Gamut gamut) {
+        if (xy.length < 2 || xy.length > 3 || !inRange(xy[0]) || !inRange(xy[1])
+                || (xy.length == 3 && !inRange(xy[2]))) {
+            throw new IllegalArgumentException("xy array only allowes two or three values between 0.0 and 1.0.");
+        }
         Point p = gamut.closest(new Point(xy[0], xy[1]));
         double x = p.x;
         double y = p.y == 0.0 ? 0.000001 : p.y;
@@ -204,7 +209,6 @@ public class ColorUtil {
          * distance between this point and another point
          *
          * @param other the other point
-         *
          * @return distance as double
          */
         public double distance(Point other) {
@@ -289,5 +293,9 @@ public class ColorUtil {
             }
             return retVal;
         }
+    }
+
+    private static boolean inRange(double val) {
+        return val >= 0.0 && val <= 1.0;
     }
 }

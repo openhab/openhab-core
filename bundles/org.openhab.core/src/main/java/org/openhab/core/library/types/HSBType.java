@@ -52,14 +52,6 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     public static final HSBType GREEN = new HSBType("120,100,100");
     public static final HSBType BLUE = new HSBType("240,100,100");
 
-    // 1931 CIE XYZ to sRGB (D65 reference white)
-    private static final float XY2RGB[][] = { { 3.2406f, -1.5372f, -0.4986f }, { -0.9689f, 1.8758f, 0.0415f },
-            { 0.0557f, -0.2040f, 1.0570f } };
-
-    // sRGB to 1931 CIE XYZ (D65 reference white)
-    private static final float RGB2XY[][] = { { 0.4124f, 0.3576f, 0.1805f }, { 0.2126f, 0.7152f, 0.0722f },
-            { 0.0193f, 0.1192f, 0.9505f } };
-
     private static final String UNIT_HSB = "%hsb%";
     private static final String UNIT_RGB = "%rgb%";
 
@@ -270,11 +262,8 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
             return false;
         }
         HSBType other = (HSBType) obj;
-        if (!getHue().equals(other.getHue()) || !getSaturation().equals(other.getSaturation())
-                || !getBrightness().equals(other.getBrightness())) {
-            return false;
-        }
-        return true;
+        return getHue().equals(other.getHue()) && getSaturation().equals(other.getSaturation())
+                && getBrightness().equals(other.getBrightness());
     }
 
     public PercentType[] toRGB() {

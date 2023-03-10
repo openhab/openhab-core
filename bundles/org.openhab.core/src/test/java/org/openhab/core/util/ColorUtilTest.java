@@ -16,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.stream.Stream;
 
@@ -37,6 +38,12 @@ public class ColorUtilTest {
                 HSBType.fromRGB(127, 94, 19)).map(Arguments::of);
     }
 
+    private static Stream<Arguments> invalids() {
+        return Stream.of(new double[] { 0.0 }, new double[] { -1.0, 0.5 }, new double[] { 1.5, 0.5 },
+                new double[] { 0.5, -1.0 }, new double[] { 0.5, 1.5 }, new double[] { 0.5, 0.5, -1.0 },
+                new double[] { 0.5, 0.5, 1.5 }, new double[] { 0.0, 1.0, 0.0, 1.0 }).map(Arguments::of);
+    }
+
     @ParameterizedTest
     @MethodSource("colors")
     public void inversionTest(HSBType hsb) {
@@ -51,5 +58,11 @@ public class ColorUtilTest {
         assertThat(deltaHue, is(lessThan(5.0)));
         assertThat(deltaSat, is(lessThanOrEqualTo(1.0)));
         assertThat(deltaBri, is(lessThanOrEqualTo(1.0)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalids")
+    public void invalidXyValues(double[] xy) {
+        assertThrows(IllegalArgumentException.class, () -> ColorUtil.xyToHsv(xy));
     }
 }
