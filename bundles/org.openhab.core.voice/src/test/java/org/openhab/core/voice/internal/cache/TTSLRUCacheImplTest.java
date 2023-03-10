@@ -78,7 +78,7 @@ public class TTSLRUCacheImplTest {
     @Test
     public void getCacheMissAndTwoHitAndTTsIsCalledOnlyOnce() throws TTSException, IOException {
         when(ttsServiceMock.getCacheKey("text", voiceMock, AudioFormat.MP3)).thenReturn("filename1");
-        when(ttsServiceMock.synthesizeForCache("text", voiceMock, AudioFormat.MP3)).thenReturn(audioStreamMock);
+        when(ttsServiceMock.synthesizeForCache("text", voiceMock, AudioFormat.MP3, false)).thenReturn(audioStreamMock);
         when(audioStreamMock.getFormat()).thenReturn(AudioFormat.MP3);
         // In this test the audio stream will return two bytes of data, then an empty stream so signal its end :
         when(audioStreamMock.readNBytes(any(Integer.class))).thenReturn(new byte[2], new byte[0]);
@@ -106,7 +106,7 @@ public class TTSLRUCacheImplTest {
 
         // even with three call to get and getFormat, the TTS service and the underlying stream were called
         // only once :
-        verify(ttsServiceMock, times(1)).synthesizeForCache("text", voiceMock, AudioFormat.MP3);
+        verify(ttsServiceMock, times(1)).synthesizeForCache("text", voiceMock, AudioFormat.MP3, false);
         verify(audioStreamMock, times(1)).getFormat();
         // this is called twice because the second call respond with zero and signal the end of stream
         verify(audioStreamMock, times(2)).readNBytes(any(Integer.class));

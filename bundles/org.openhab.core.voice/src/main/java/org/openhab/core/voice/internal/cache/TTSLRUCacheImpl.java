@@ -102,7 +102,7 @@ public class TTSLRUCacheImpl implements TTSCache {
 
         LRUMediaCache<AudioFormatInfo> lruMediaCacheLocal = lruMediaCache;
         if (!enableCacheTTS || lruMediaCacheLocal == null) {
-            return tts.synthesizeForCache(text, voice, requestedFormat);
+            return tts.synthesizeForCache(text, voice, requestedFormat, true);
         }
 
         String key = tts.getClass().getSimpleName() + "_" + tts.getCacheKey(text, voice, requestedFormat);
@@ -111,7 +111,7 @@ public class TTSLRUCacheImpl implements TTSCache {
         try {
             fileAndMetadata = lruMediaCacheLocal.get(key, () -> {
                 try {
-                    AudioStream audioInputStream = tts.synthesizeForCache(text, voice, requestedFormat);
+                    AudioStream audioInputStream = tts.synthesizeForCache(text, voice, requestedFormat, false);
                     return new LRUMediaCacheEntry<AudioFormatInfo>(key, audioInputStream,
                             new AudioFormatInfo(audioInputStream.getFormat()));
                 } catch (TTSException e) {
@@ -143,7 +143,7 @@ public class TTSLRUCacheImpl implements TTSCache {
             }
         } catch (IOException e) {
             logger.debug("Cannot get audio from cache, fallback to TTS service", e);
-            return tts.synthesizeForCache(text, voice, requestedFormat);
+            return tts.synthesizeForCache(text, voice, requestedFormat, true);
         }
     }
 }

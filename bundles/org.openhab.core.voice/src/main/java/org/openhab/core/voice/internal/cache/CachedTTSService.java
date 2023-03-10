@@ -15,6 +15,7 @@ package org.openhab.core.voice.internal.cache;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
@@ -47,10 +48,12 @@ public interface CachedTTSService extends TTSService {
      * @param text The text to convert to speech
      * @param voice The voice to use for speech
      * @param requestedFormat The audio format to return the results in
+     * @param fileStreamRequested if a {@link FileAudioStream} is requested as returned value
      * @return AudioStream containing the TTS results
      * @throws TTSException If {@code voice} and/or {@code requestedFormat}
      *             are not supported or another error occurs while creating an
      *             {@link AudioStream}
      */
-    AudioStream synthesizeForCache(String text, Voice voice, AudioFormat requestedFormat) throws TTSException;
+    AudioStream synthesizeForCache(String text, Voice voice, AudioFormat requestedFormat, boolean fileStreamRequested)
+            throws TTSException;
 }
