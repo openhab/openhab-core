@@ -82,6 +82,9 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     private int maxThreadsCustom;
     private int keepAliveTimeoutCustom; // in s
 
+    private boolean hpackLoadTestDone = false;
+    private @Nullable HttpClientInitializationException hpackException = null;
+
     @Activate
     public WebClientFactoryImpl(final @Reference ExtensibleTrustManager extensibleTrustManager) {
         this.extensibleTrustManager = extensibleTrustManager;
@@ -383,12 +386,19 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         try {
             logger.debug("creating HTTP/2 client for consumer {}", consumerName);
 
-            try {
-                PreEncodedHttpField field = new PreEncodedHttpField(HttpHeader.C_METHOD, "PUT");
-                ByteBuffer bytes = ByteBuffer.allocate(32);
-                field.putTo(bytes, HttpVersion.HTTP_2);
-            } catch (Exception e) {
-                throw new HttpClientInitializationException("Jetty HTTP/2 hpack module not loaded", e);
+            if (!hpackLoadTestDone) {
+                try {
+                    PreEncodedHttpField field = new PreEncodedHttpField(HttpHeader.C_METHOD, "PUT");
+                    ByteBuffer bytes = ByteBuffer.allocate(32);
+                    field.putTo(bytes, HttpVersion.HTTP_2);
+                    hpackException = null;
+                } catch (Exception e) {
+                    hpackException = new HttpClientInitializationException("Jetty HTTP/2 hpack module not loaded", e);
+                }
+                hpackLoadTestDone = true;
+            }
+            if (hpackException != null) {
+                throw hpackException;
             }
 
             HTTP2Client http2Client = new HTTP2Client();
