@@ -111,7 +111,7 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         this.scheduler = getScheduler();
 
         currentStartLevel = startLevelService.getStartLevel();
-        if (currentStartLevel > StartLevelService.STARTLEVEL_MODEL) {
+        if (currentStartLevel >= StartLevelService.STARTLEVEL_RULEENGINE) {
             initialImport();
         }
     }
@@ -386,7 +386,7 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
             return;
         }
 
-        if (currentStartLevel == StartLevelService.STARTLEVEL_STATES) {
+        if (currentStartLevel == StartLevelService.STARTLEVEL_RULEENGINE) {
             initialImport();
         } else {
             scriptMap.values().stream().sorted()

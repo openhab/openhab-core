@@ -613,7 +613,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         assertThat(initialized.isDone(), is(false));
 
-        updateStartLevel(StartLevelService.STARTLEVEL_STATES);
+        updateStartLevel(StartLevelService.STARTLEVEL_RULEENGINE);
         waitForAssert(() -> assertThat(initialized.isDone(), is(true)));
     }
 
