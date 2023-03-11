@@ -135,7 +135,7 @@ public class TTSLRUCacheImpl implements TTSCache {
                 // we are sure that the cache is used, and so we can use an AudioStream
                 // implementation that use convenient methods for some client, like getClonedStream()
                 // or mark /reset
-                return new AudioStreamFromCache(inputStreamCacheWrapper, metadata);
+                return new AudioStreamFromCache(inputStreamCacheWrapper, metadata, key);
             } else {
                 // the cache is not used, we can use the original response AudioStream
                 return (AudioStream) fileAndMetadata.getInputStream();

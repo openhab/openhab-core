@@ -58,6 +58,9 @@ public interface AudioSink {
      *
      * In case the audioStream is null, this should be interpreted as a request to end any currently playing stream.
      *
+     * If you call this method and if the sink is synchronous, you should thereafter get rid of a stream implementing
+     * the {@link org.openhab.core.common.Disposable} interface by calling the dispose method.
+     *
      * @param audioStream the audio stream to play or null to keep quiet
      * @throws UnsupportedAudioFormatException If audioStream format is not supported
      * @throws UnsupportedAudioStreamException If audioStream is not supported
@@ -94,4 +97,17 @@ public interface AudioSink {
      * @throws IOException if the volume can not be set
      */
     void setVolume(PercentType volume) throws IOException;
+
+    /**
+     * Tell if the sink is synchronous.
+     * If true, caller may dispose of the stream immediately after the process method.
+     * On the contrary, if in the process method, the sink returns before the input stream is entirely consumed,
+     * then the sink should override this method and return false.
+     * Please note that by doing so, the sink should then take care itself of the InputStream implementing the
+     * {@link org.openhab.core.common.Disposable} interface by calling the dispose method when finishing
+     * reading it.
+     */
+    default boolean isSynchronous() {
+        return true;
+    }
 }

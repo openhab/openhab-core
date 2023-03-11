@@ -12,8 +12,12 @@
  */
 package org.openhab.core.audio.internal;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +26,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,13 +36,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioHTTPServer;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.ByteArrayAudioStream;
+import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.FixedLengthAudioStream;
+import org.openhab.core.common.Disposable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletName;
@@ -60,12 +69,16 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     private static final List<String> WAV_MIME_TYPES = List.of("audio/wav", "audio/x-wav", "audio/vnd.wave");
 
+    // this one MB buffer will help playing multiple times an AudioStream, if the sink cannot do otherwise
+    private static final int ONETIME_STREAM_BUFFER_MAX_SIZE = 1048576;
+
     static final String SERVLET_PATH = "/audio";
 
     private final Logger logger = LoggerFactory.getLogger(AudioServlet.class);
 
     private final Map<String, AudioStream> oneTimeStreams = new ConcurrentHashMap<>();
     private final Map<String, FixedLengthAudioStream> multiTimeStreams = new ConcurrentHashMap<>();
+    private final Map<String, @NonNull AtomicInteger> currentlyServedResponseByStreamId = new ConcurrentHashMap<>();
 
     private final Map<String, Long> streamTimeouts = new ConcurrentHashMap<>();
 
@@ -160,12 +173,18 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
                 .map(String::trim).collect(Collectors.toList());
 
         try (final InputStream stream = prepareInputStream(streamId, resp, acceptedMimeTypes)) {
-            if (stream == null) {
-                logger.debug("Received request for invalid stream id at {}", requestURI);
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            } else {
-                stream.transferTo(resp.getOutputStream());
-                resp.flushBuffer();
+            try {
+                currentlyServedResponseByStreamId.computeIfAbsent(streamId, (String) -> new AtomicInteger())
+                        .incrementAndGet();
+                if (stream == null) {
+                    logger.debug("Received request for invalid stream id at {}", requestURI);
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                } else {
+                    stream.transferTo(resp.getOutputStream());
+                    resp.flushBuffer();
+                }
+            } finally {
+                currentlyServedResponseByStreamId.get(streamId).decrementAndGet();
             }
         } catch (final AudioException ex) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
@@ -179,10 +198,24 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
                 .map(Entry::getKey).collect(Collectors.toList());
 
         toRemove.forEach(streamId -> {
-            // the stream has expired, we need to remove it!
-            final FixedLengthAudioStream stream = multiTimeStreams.remove(streamId);
-            streamTimeouts.remove(streamId);
-            tryClose(stream);
+            // the stream has expired, if no one is using it we need to remove it
+            Integer numberOfStreamServed = currentlyServedResponseByStreamId.getOrDefault(streamId, new AtomicInteger())
+                    .decrementAndGet();
+            if (numberOfStreamServed <= 0) {
+                final FixedLengthAudioStream stream = multiTimeStreams.remove(streamId);
+                streamTimeouts.remove(streamId);
+                tryClose(stream);
+                if (stream instanceof Disposable disposableStream) {
+                    try {
+                        disposableStream.dispose();
+                    } catch (IOException e) {
+                        String fileName = disposableStream instanceof FileAudioStream file ? file.toString()
+                                : "unknown";
+                        logger.warn("Cannot delete temporary file {} for the AudioServlet", fileName, e);
+                    }
+                }
+            }
+
             logger.debug("Removed timed out stream {}", streamId);
         });
     }
@@ -195,11 +228,40 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
     }
 
     @Override
-    public String serve(FixedLengthAudioStream stream, int seconds) {
+    public String serve(AudioStream stream, int seconds) {
         String streamId = UUID.randomUUID().toString();
-        multiTimeStreams.put(streamId, stream);
+        if (stream instanceof FixedLengthAudioStream fixedLengthAudioStream) {
+            multiTimeStreams.put(streamId, fixedLengthAudioStream);
+        } else { // we prefer a FixedLengthAudioStream, but we can try to make one
+            try {
+                multiTimeStreams.put(streamId, createFixedLengthInputStream(stream, streamId));
+            } catch (AudioException | IOException e) {
+                logger.warn("Cannot precache the audio stream to serve it", e);
+            }
+        }
         streamTimeouts.put(streamId, System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds));
         return getRelativeURL(streamId);
+    }
+
+    private FixedLengthAudioStream createFixedLengthInputStream(AudioStream stream, String streamId)
+            throws IOException, AudioException {
+        byte[] dataBytes = stream.readNBytes(ONETIME_STREAM_BUFFER_MAX_SIZE + 1);
+        FixedLengthAudioStream fixedLengthAudioStreamResult;
+        if (dataBytes.length <= ONETIME_STREAM_BUFFER_MAX_SIZE) {
+            // we will use an in memory buffer to avoid disk operation
+            fixedLengthAudioStreamResult = new ByteArrayAudioStream(dataBytes, stream.getFormat());
+        } else {
+            // in memory max size exceeded, sound is too long, we will use a file
+            File tempFile = File.createTempFile(streamId, ".snd");
+            tempFile.deleteOnExit();
+            try (OutputStream outputStream = new FileOutputStream(tempFile)) {
+                outputStream.write(dataBytes);
+                stream.transferTo(outputStream);
+            }
+            fixedLengthAudioStreamResult = new TemporaryFileAudioStream(tempFile, stream.getFormat());
+        }
+        tryClose(stream);
+        return fixedLengthAudioStreamResult;
     }
 
     Map<String, FixedLengthAudioStream> getMultiTimeStreams() {
@@ -212,5 +274,20 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     private String getRelativeURL(String streamId) {
         return SERVLET_PATH + "/" + streamId;
+    }
+
+    private static class TemporaryFileAudioStream extends FileAudioStream implements Disposable {
+
+        private File file;
+
+        public TemporaryFileAudioStream(File file, AudioFormat format) throws AudioException {
+            super(file, format);
+            this.file = file;
+        }
+
+        @Override
+        public void dispose() throws IOException {
+            Files.delete(file.toPath());
+        }
     }
 }

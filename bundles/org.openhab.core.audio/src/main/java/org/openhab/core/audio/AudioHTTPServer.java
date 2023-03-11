@@ -40,13 +40,15 @@ public interface AudioHTTPServer {
     /**
      * Creates a relative url for a given {@link AudioStream} where it can be requested multiple times within the given
      * time frame.
-     * This method only accepts {@link FixedLengthAudioStream}s, since it needs to be able to create multiple concurrent
-     * streams from it, which isn't possible with a regular {@link AudioStream}.
+     * This method accepts all {@link AudioStream}s, but it is better to use {@link FixedLengthAudioStream}s since it
+     * needs to be able to create multiple concurrent streams from it.
+     * If generic {@link AudioStream} is used, we try to keep this capability by storing it in a small memory buffer,
+     * e.g {@link ByteArrayAudioStream}, or in a cached file if the stream is too long.
      * Streams are closed, once they expire.
      *
      * @param stream the stream to serve on HTTP
      * @param seconds number of seconds for which the stream is available through HTTP
      * @return the relative URL to access the stream starting with a '/'
      */
-    String serve(FixedLengthAudioStream stream, int seconds);
+    String serve(AudioStream stream, int seconds);
 }

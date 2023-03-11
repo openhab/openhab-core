@@ -22,7 +22,6 @@ import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioHTTPServer;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.audio.FixedLengthAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
@@ -49,8 +48,7 @@ public class WebAudioAudioSink implements AudioSink {
     private final Logger logger = LoggerFactory.getLogger(WebAudioAudioSink.class);
 
     private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
-    private static final Set<Class<? extends AudioStream>> SUPPORTED_AUDIO_STREAMS = Set
-            .of(FixedLengthAudioStream.class, URLAudioStream.class);
+    private static final Set<Class<? extends AudioStream>> SUPPORTED_AUDIO_STREAMS = Set.of(AudioStream.class);
 
     private AudioHTTPServer audioHTTPServer;
     private EventPublisher eventPublisher;
@@ -75,14 +73,9 @@ public class WebAudioAudioSink implements AudioSink {
             if (audioStream instanceof URLAudioStream urlAudioStream) {
                 // it is an external URL, so we can directly pass this on.
                 sendEvent(urlAudioStream.getURL());
-            } else if (audioStream instanceof FixedLengthAudioStream lengthAudioStream) {
-                // we need to serve it for a while and make it available to multiple clients, hence only
-                // FixedLengthAudioStreams are supported.
-                sendEvent(audioHTTPServer.serve(lengthAudioStream, 10));
             } else {
-                throw new UnsupportedAudioStreamException(
-                        "Web audio sink can only handle FixedLengthAudioStreams and URLAudioStreams.",
-                        audioStream.getClass());
+                // we need to serve it for a while and make it available to multiple clients
+                sendEvent(audioHTTPServer.serve(audioStream, 10).toString());
             }
         } catch (IOException e) {
             logger.debug("Error while closing the audio stream: {}", e.getMessage(), e);
@@ -122,5 +115,10 @@ public class WebAudioAudioSink implements AudioSink {
     @Override
     public void setVolume(final PercentType volume) throws IOException {
         throw new IOException("Web Audio sink does not support volume level changes.");
+    }
+
+    @Override
+    public boolean isSynchronous() {
+        return false;
     }
 }
