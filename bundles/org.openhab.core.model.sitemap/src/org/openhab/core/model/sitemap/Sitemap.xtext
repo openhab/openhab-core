@@ -129,7 +129,7 @@ Colorpicker:
 
 Input:
     'Input' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? & ('icon=' icon=Icon)? &
-    ('inputHint=' inputHint=STRING)? &
+    ('inputHint=' inputHint=INPUT_HINT)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)* ']'))? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)* ']'))? &
@@ -170,6 +170,10 @@ Number returns ecore::EBigDecimal:
 
 XState returns ecore::EString:
     INT | ID | STRING | FLOAT;
+
+terminal INPUT_HINT returns ecore::EString:
+            '"' ("text" | "number" | "date" | "time" | "datetime") '"' |
+            "'" ("text" | "number" | "date" | "time" | "datetime") "'";
 
 @Override 
 terminal ID:
