@@ -31,7 +31,8 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
 @NonNullByDefault
 public class ThingChannelsTest extends JavaOSGiTest {
 
-    private static final List<String> CHANNEL_IDS = List.of("polarBear", "alligator", "hippopotamus", "aardvark");
+    private static final List<String> CHANNEL_IDS = List.of("polarBear", "alligator", "hippopotamus", "aardvark",
+            "whiteRabbit", "redHerring", "orangutan", "kangaroo", "rubberDuck", "timorousBeastie");
 
     @Test
     public void testThingChannelOrder() {
