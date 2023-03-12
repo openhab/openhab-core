@@ -111,4 +111,8 @@ Fragment-Host: org.openhab.core.model.script
 	org.ops4j.pax.web.pax-web-runtime;version='[8.0.15,8.0.16)',\
 	org.ops4j.pax.web.pax-web-spi;version='[8.0.15,8.0.16)',\
 	org.ops4j.pax.web.pax-web-tomcat-common;version='[8.0.15,8.0.16)',\
-	org.osgi.service.component;version='[1.5.0,1.5.1)'
+	org.osgi.service.component;version='[1.5.0,1.5.1)',\
+	org.eclipse.jetty.alpn.client;version='[9.4.50,9.4.51)',\
+	org.eclipse.jetty.http2.client;version='[9.4.50,9.4.51)',\
+	org.eclipse.jetty.http2.common;version='[9.4.50,9.4.51)',\
+	org.eclipse.jetty.http2.hpack;version='[9.4.50,9.4.51)'
