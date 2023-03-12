@@ -96,13 +96,20 @@ public class ScriptTransformationService implements TransformationService, Regis
         scriptRecord.lock.lock();
         try {
             if (scriptRecord.script.isBlank()) {
-                Transformation transformation = transformationRegistry.get(scriptUid);
-                if (transformation != null) {
-                    if (!SUPPORTED_CONFIGURATION_TYPE.equals(transformation.getType())) {
-                        throw new TransformationException("Configuration does not have correct type 'script' but '"
-                                + transformation.getType() + "'.");
+                if (scriptUid.startsWith("|")) {
+                    // inline script -> strip inline-identifier
+                    scriptRecord.script = scriptUid.substring(1);
+                } else {
+                    // get script from transformation registry
+                    Transformation transformation = transformationRegistry.get(scriptUid);
+                    if (transformation != null) {
+                        if (!SUPPORTED_CONFIGURATION_TYPE.equals(transformation.getType())) {
+                            throw new TransformationException("Configuration does not have correct type 'script' but '"
+                                    + transformation.getType() + "'.");
+                        }
+                        scriptRecord.script = transformation.getConfiguration().getOrDefault(Transformation.FUNCTION,
+                                "");
                     }
-                    scriptRecord.script = transformation.getConfiguration().getOrDefault(Transformation.FUNCTION, "");
                 }
                 if (scriptRecord.script.isBlank()) {
                     throw new TransformationException("Could not get script for UID '" + scriptUid + "'.");
