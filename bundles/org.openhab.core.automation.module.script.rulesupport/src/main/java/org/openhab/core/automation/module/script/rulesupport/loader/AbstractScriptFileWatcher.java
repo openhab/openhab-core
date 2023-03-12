@@ -104,16 +104,9 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         this.readyService = readyService;
         this.watchSubDirectories = watchSubDirectories;
         this.watchPath = watchService.getWatchPath().resolve(fileDirectory);
-
-        manager.addFactoryChangeListener(this);
-        readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE));
-
         this.scheduler = getScheduler();
-
-        currentStartLevel = startLevelService.getStartLevel();
-        if (currentStartLevel > StartLevelService.STARTLEVEL_MODEL) {
-            initialImport();
-        }
+        // Start with the lowest level to ensure the code in onReadyMarkerAdded runs
+        this.currentStartLevel = StartLevelService.STARTLEVEL_OSGI;
     }
 
     /**
@@ -144,6 +137,9 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         } else if (!Files.isDirectory(watchPath)) {
             logger.warn("Trying to watch directory {}, however it is a file", watchPath);
         }
+
+        manager.addFactoryChangeListener(this);
+        readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE));
         watchService.registerListener(this, watchPath, watchSubDirectories);
     }
 
@@ -353,20 +349,6 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         return false;
     }
 
-    private void initialImport() {
-        File directory = watchPath.toFile();
-
-        if (!directory.exists()) {
-            if (!directory.mkdirs()) {
-                logger.warn("Failed to create watched directory: {}", watchPath);
-            }
-        } else if (directory.isFile()) {
-            logger.warn("Trying to watch directory {}, however it is a file", watchPath);
-        }
-
-        addFiles(listFiles(directory.toPath(), watchSubDirectories)).thenRun(() -> initialized.complete(null));
-    }
-
     @Override
     public void onDependencyChange(String scriptIdentifier) {
         logger.debug("Reimporting {}...", scriptIdentifier);
@@ -381,13 +363,16 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         int previousLevel = currentStartLevel;
         currentStartLevel = Integer.parseInt(readyMarker.getIdentifier());
 
+        logger.trace("Added ready marker {}: start level changed from {} to {}. watchPath: {}", readyMarker,
+                previousLevel, currentStartLevel, watchPath);
+
         if (currentStartLevel < StartLevelService.STARTLEVEL_STATES) {
             // ignore start level less than 30
             return;
         }
 
-        if (currentStartLevel == StartLevelService.STARTLEVEL_STATES) {
-            initialImport();
+        if (!initialized.isDone()) {
+            addFiles(listFiles(watchPath, watchSubDirectories)).thenRun(() -> initialized.complete(null));
         } else {
             scriptMap.values().stream().sorted()
                     .filter(ref -> needsStartLevelProcessing(ref, previousLevel, currentStartLevel))
