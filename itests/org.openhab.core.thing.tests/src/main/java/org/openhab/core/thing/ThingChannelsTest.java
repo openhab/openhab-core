@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.dto.ThingDTOMapper;
 
 /**
  * Test for thing channel creation and display order.
@@ -42,20 +43,26 @@ public class ThingChannelsTest extends JavaOSGiTest {
         // create and fill the list of origin channels
         List<Channel> originChannels = new ArrayList<>();
         CHANNEL_IDS.forEach(channelId -> originChannels
-                .add(ChannelBuilder.create(new ChannelUID(thingUID, channelId), null).withLabel(channelId).build()));
-
-        // build a thing with the origin channels and get its result channels
-        Thing thing = ThingBuilder.create(thingTypeUID, thingUID).withChannels(originChannels).build();
-        List<Channel> resultChannels = thing.getChannels();
-
-        // run the tests
+                .add(ChannelBuilder.create(new ChannelUID(thingUID, channelId), null).build()));
         assertEquals(CHANNEL_IDS.size(), originChannels.size());
+
+        // build a thing with the origin channels
+        Thing thing = ThingBuilder.create(thingTypeUID, thingUID).withChannels(originChannels).build();
+
+        List<Channel> resultChannels;
+
+        // test #1: read the channels from the thing, and compare the resulting channel order
+        resultChannels = thing.getChannels();
         assertEquals(CHANNEL_IDS.size(), resultChannels.size());
         for (int i = 0; i < CHANNEL_IDS.size(); i++) {
-            String expectId = CHANNEL_IDS.get(i);
-            Channel resultChannel = resultChannels.get(i);
-            assertTrue(expectId.equals(resultChannel.getUID().getId()));
-            assertTrue(expectId.equals(resultChannel.getLabel()));
+            assertTrue(CHANNEL_IDS.get(i).equals(resultChannels.get(i).getUID().getId()));
+        }
+
+        // test #2: serialize/deserialize the thing via a DTO, and compare the resulting channel order
+        resultChannels = ThingDTOMapper.map(ThingDTOMapper.map(thing), false).getChannels();
+        assertEquals(CHANNEL_IDS.size(), resultChannels.size());
+        for (int i = 0; i < CHANNEL_IDS.size(); i++) {
+            assertTrue(CHANNEL_IDS.get(i).equals(resultChannels.get(i).getUID().getId()));
         }
     }
 }
