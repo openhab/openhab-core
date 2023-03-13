@@ -172,8 +172,8 @@ XState returns ecore::EString:
     INT | ID | STRING | FLOAT;
 
 terminal INPUT_HINT returns ecore::EString:
-            ('"' ("text" | "number" | "date" | "time" | "datetime") '"') |
-            ("'" ("text" | "number" | "date" | "time" | "datetime") "'");
+    ('"' ("text" | "number" | "date" | "time" | "datetime") '"') |
+    ("'" ("text" | "number" | "date" | "time" | "datetime") "'");
 
 @Override 
 terminal ID:
