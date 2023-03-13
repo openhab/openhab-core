@@ -260,20 +260,21 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         return CompletableFuture.runAsync(() -> {
             Lock lock = getLockForScript(scriptIdentifier);
             try {
-                ScriptFileReference ref = scriptMap.remove(scriptIdentifier);
+                scriptMap.computeIfPresent(scriptIdentifier, (id, ref) -> {
+                    if (ref.getLoadedStatus().get()) {
+                        manager.removeEngine(scriptIdentifier);
+                        logger.debug("Unloaded script '{}'", scriptIdentifier);
+                    } else {
+                        logger.debug("Dequeued script '{}'", scriptIdentifier);
+                    }
 
-                if (ref == null) {
-                    logger.warn("Failed to unload script '{}': script reference not found.", scriptIdentifier);
-                    return;
-                }
-
-                if (ref.getLoadedStatus().get()) {
-                    manager.removeEngine(scriptIdentifier);
-                    logger.debug("Unloaded script '{}'", scriptIdentifier);
-                } else {
-                    logger.debug("Dequeued script '{}'", scriptIdentifier);
-                }
+                    return null;
+                });
             } finally {
+                if (scriptMap.containsKey(scriptIdentifier)) {
+                    logger.warn("Failed to unload script '{}'", scriptIdentifier);
+                }
+
                 scriptLockMap.remove(scriptIdentifier);
                 lock.unlock();
             }
