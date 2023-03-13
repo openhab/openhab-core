@@ -219,27 +219,22 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
 
     @Override
     public void processWatchEvent(WatchService.Kind kind, Path path) {
+        if (!initialized.isDone()) {
+            // discard events if the initial import has not finished
+            return;
+        }
+
         Path fullPath = watchPath.resolve(path);
         File file = fullPath.toFile();
-        if (!file.isHidden()) {
-            if (kind == DELETE) {
-                if (file.isDirectory()) {
-                    if (watchSubDirectories) {
-                        synchronized (this) {
-                            String prefix = fullPath.getParent().toString();
-                            Set<String> toRemove = scriptMap.keySet().stream().filter(ref -> ref.startsWith(prefix))
-                                    .collect(Collectors.toSet());
-                            toRemove.forEach(this::removeFile);
-                        }
-                    }
-                } else {
-                    removeFile(ScriptFileReference.getScriptIdentifier(file.toPath()));
-                }
-            }
 
-            if (file.canRead() && (kind == CREATE || kind == MODIFY)) {
-                addFiles(listFiles(file.toPath(), watchSubDirectories));
+        // Subdirectory events are filtered out by WatchService, so we only need to deal with files
+        if (kind == DELETE) {
+            String scriptIdentifier = ScriptFileReference.getScriptIdentifier(fullPath);
+            if (scriptMap.containsKey(scriptIdentifier)) {
+                removeFile(scriptIdentifier);
             }
+        } else if (!file.isHidden() && file.canRead() && (kind == CREATE || kind == MODIFY)) {
+            addFiles(listFiles(fullPath, watchSubDirectories));
         }
     }
 

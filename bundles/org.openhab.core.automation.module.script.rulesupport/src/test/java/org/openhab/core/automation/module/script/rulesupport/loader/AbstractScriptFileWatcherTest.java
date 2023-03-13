@@ -554,7 +554,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
     }
 
     @Test
-    public void testDirectoryRemoved() {
+    public void testFileRemoved() {
         scriptFileWatcher = createScriptFileWatcher(true);
         when(scriptEngineManagerMock.isSupported("js")).thenReturn(true);
         ScriptEngineContainer scriptEngineContainer = mock(ScriptEngineContainer.class);
@@ -565,16 +565,18 @@ class AbstractScriptFileWatcherTest extends JavaTest {
 
         Path p1 = getFile("dir/script.js");
         Path p2 = getFile("dir/script2.js");
-        Path d = p1.getParent();
 
         scriptFileWatcher.processWatchEvent(CREATE, p1);
         scriptFileWatcher.processWatchEvent(CREATE, p2);
-        scriptFileWatcher.processWatchEvent(DELETE, d);
 
         awaitEmptyQueue();
 
         verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p1.toString());
         verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).createScriptEngine("js", p2.toString());
+
+        scriptFileWatcher.processWatchEvent(DELETE, p1);
+        scriptFileWatcher.processWatchEvent(DELETE, p2);
+
         verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).removeEngine(p1.toString());
         verify(scriptEngineManagerMock, timeout(DEFAULT_TEST_TIMEOUT_MS)).removeEngine(p2.toString());
     }
