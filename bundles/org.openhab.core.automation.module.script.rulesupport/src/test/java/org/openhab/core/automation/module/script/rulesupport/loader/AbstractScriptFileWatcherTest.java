@@ -622,6 +622,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
     @Test
     public void testIfInitializedForLateInitialization() {
         scriptFileWatcher = createScriptFileWatcher(true);
+        when(startLevelServiceMock.getStartLevel()).thenReturn(StartLevelService.STARTLEVEL_RULEENGINE);
         AbstractScriptFileWatcher watcher = createScriptFileWatcher();
         watcher.activate();
         watcher.onReadyMarkerAdded(new ReadyMarker(StartLevelService.STARTLEVEL_MARKER_TYPE,
