@@ -75,7 +75,7 @@ public class FileTransformationProvider implements WatchService.WatchEventListen
         watchService.registerListener(this, transformationPath);
         // read initial contents
         try {
-            Files.walk(transformationPath).filter(Files::isRegularFile)
+            Files.walk(transformationPath).filter(Files::isRegularFile).map(transformationPath::relativize)
                     .forEach(f -> processPath(WatchService.Kind.CREATE, f));
         } catch (IOException e) {
             logger.warn("Could not list files in '{}', transformation configurations might be missing: {}",
@@ -104,13 +104,14 @@ public class FileTransformationProvider implements WatchService.WatchEventListen
     }
 
     private void processPath(WatchService.Kind kind, Path path) {
+        Path finalPath = transformationPath.resolve(path);
         if (kind == WatchService.Kind.DELETE) {
             Transformation oldElement = transformationConfigurations.remove(path);
             if (oldElement != null) {
                 logger.trace("Removed configuration from file '{}", path);
                 listeners.forEach(listener -> listener.removed(this, oldElement));
             }
-        } else if (Files.isRegularFile(path)
+        } else if (Files.isRegularFile(finalPath)
                 && (kind == WatchService.Kind.CREATE || kind == WatchService.Kind.MODIFY)) {
             try {
                 String fileName = path.getFileName().toString();
@@ -128,8 +129,8 @@ public class FileTransformationProvider implements WatchService.WatchEventListen
                     return;
                 }
 
-                String content = new String(Files.readAllBytes(path));
-                String uid = transformationPath.relativize(path).toString();
+                String content = new String(Files.readAllBytes(finalPath));
+                String uid = path.toString();
 
                 Transformation newElement = new Transformation(uid, uid, fileExtension, Map.of(FUNCTION, content));
                 Transformation oldElement = transformationConfigurations.put(path, newElement);
