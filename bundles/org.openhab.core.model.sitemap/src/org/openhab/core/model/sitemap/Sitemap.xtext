@@ -129,7 +129,7 @@ Colorpicker:
 
 Input:
     'Input' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? & ('icon=' icon=Icon)? &
-    ('inputHint=' inputHint=INPUT_HINT)? &
+    ('inputHint=' inputHint=STRING)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)* ']'))? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)* ']'))? &
@@ -147,7 +147,7 @@ Mapping:
     cmd=Command '=' label=(ID | STRING);
 
 VisibilityRule:
-    (item=ID) (condition=("==" | ">" | "<" | ">=" | "<=" | "!=")) (sign=('-' | '+'))? (state=XState);
+    (item=ID) (condition=('==' | '>' | '<' | '>=' | '<=' | '!=')) (sign=('-' | '+'))? (state=XState);
 
 ItemRef:
     ID;
@@ -159,7 +159,7 @@ Icon returns ecore::EString:
     STRING | ID;
 
 ColorArray:
-    ((item=ID)? (condition=("==" | ">" | "<" | ">=" | "<=" | "!="))? (sign=('-' | '+'))? (state=XState) '=')?
+    ((item=ID)? (condition=('==' | '>' | '<' | '>=' | '<=' | '!='))? (sign=('-' | '+'))? (state=XState) '=')?
     (arg=STRING);
 
 Command returns ecore::EString:
@@ -170,10 +170,6 @@ Number returns ecore::EBigDecimal:
 
 XState returns ecore::EString:
     INT | ID | STRING | FLOAT;
-
-terminal INPUT_HINT returns ecore::EString:
-    ('"' ("text" | "number" | "date" | "time" | "datetime") '"') |
-    ("'" ("text" | "number" | "date" | "time" | "datetime") "'");
 
 @Override 
 terminal ID:
