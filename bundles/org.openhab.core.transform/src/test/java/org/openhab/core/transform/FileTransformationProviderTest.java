@@ -19,6 +19,9 @@ import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
+import static org.openhab.core.service.WatchService.Kind.CREATE;
+import static org.openhab.core.service.WatchService.Kind.DELETE;
+import static org.openhab.core.service.WatchService.Kind.MODIFY;
 import static org.openhab.core.transform.Transformation.FUNCTION;
 
 import java.io.IOException;
@@ -89,7 +92,7 @@ public class FileTransformationProviderTest {
         Files.writeString(transformationPath.resolve(ADDED_FILENAME), ADDED_CONTENT);
         Transformation addedConfiguration = new Transformation(ADDED_FILENAME.toString(), ADDED_FILENAME.toString(),
                 FOO_TYPE, Map.of(FUNCTION, ADDED_CONTENT));
-        provider.processWatchEvent(WatchService.Kind.CREATE, ADDED_FILENAME);
+        provider.processWatchEvent(CREATE, ADDED_FILENAME);
 
         // assert registry is notified and internal cache updated
         Mockito.verify(listenerMock).added(provider, addedConfiguration);
@@ -101,7 +104,7 @@ public class FileTransformationProviderTest {
         Files.writeString(transformationPath.resolve(INITIAL_FILENAME), "updated");
         Transformation updatedConfiguration = new Transformation(INITIAL_FILENAME.toString(),
                 INITIAL_FILENAME.toString(), FOO_TYPE, Map.of(FUNCTION, "updated"));
-        provider.processWatchEvent(WatchService.Kind.MODIFY, INITIAL_FILENAME);
+        provider.processWatchEvent(MODIFY, INITIAL_FILENAME);
 
         Mockito.verify(listenerMock).updated(provider, INITIAL_CONFIGURATION, updatedConfiguration);
         assertThat(provider.getAll(), contains(updatedConfiguration));
@@ -110,7 +113,7 @@ public class FileTransformationProviderTest {
 
     @Test
     public void testDeletingConfigurationIsPropagated() {
-        provider.processWatchEvent(WatchService.Kind.DELETE, INITIAL_FILENAME);
+        provider.processWatchEvent(DELETE, INITIAL_FILENAME);
 
         Mockito.verify(listenerMock).removed(provider, INITIAL_CONFIGURATION);
         assertThat(provider.getAll(), not(contains(INITIAL_CONFIGURATION)));
@@ -125,7 +128,7 @@ public class FileTransformationProviderTest {
 
         Transformation expected = new Transformation(fileName, fileName, FOO_TYPE, Map.of(FUNCTION, INITIAL_CONTENT));
 
-        provider.processWatchEvent(WatchService.Kind.CREATE, Path.of(fileName));
+        provider.processWatchEvent(CREATE, Path.of(fileName));
         assertThat(provider.getAll(), hasItem(expected));
     }
 
@@ -134,8 +137,8 @@ public class FileTransformationProviderTest {
         Path extensionMissing = Path.of("extensionMissing");
         Path path = transformationPath.resolve(extensionMissing);
         Files.writeString(path, INITIAL_CONTENT);
-        provider.processWatchEvent(WatchService.Kind.CREATE, extensionMissing);
-        provider.processWatchEvent(WatchService.Kind.MODIFY, extensionMissing);
+        provider.processWatchEvent(CREATE, extensionMissing);
+        provider.processWatchEvent(MODIFY, extensionMissing);
 
         Mockito.verify(listenerMock, never()).added(any(), any());
         Mockito.verify(listenerMock, never()).updated(any(), any(), any());
@@ -146,8 +149,8 @@ public class FileTransformationProviderTest {
         Path extensionIgnored = Path.of("extensionIgnore.txt");
         Path path = transformationPath.resolve(extensionIgnored);
         Files.writeString(path, INITIAL_CONTENT);
-        provider.processWatchEvent(WatchService.Kind.CREATE, extensionIgnored);
-        provider.processWatchEvent(WatchService.Kind.MODIFY, extensionIgnored);
+        provider.processWatchEvent(CREATE, extensionIgnored);
+        provider.processWatchEvent(MODIFY, extensionIgnored);
 
         Mockito.verify(listenerMock, never()).added(any(), any());
         Mockito.verify(listenerMock, never()).updated(any(), any(), any());

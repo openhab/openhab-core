@@ -14,6 +14,7 @@ package org.openhab.core.transform;
 
 import static org.openhab.core.service.WatchService.Kind.CREATE;
 import static org.openhab.core.service.WatchService.Kind.DELETE;
+import static org.openhab.core.service.WatchService.Kind.MODIFY;
 import static org.openhab.core.transform.Transformation.FUNCTION;
 
 import java.io.IOException;
@@ -101,7 +102,7 @@ public class FileTransformationProvider implements WatchService.WatchEventListen
                 logger.trace("Removed configuration from file '{}", path);
                 listeners.forEach(listener -> listener.removed(this, oldElement));
             }
-        } else if (Files.isRegularFile(finalPath) && ((kind == CREATE) || (kind == WatchService.Kind.MODIFY))) {
+        } else if (Files.isRegularFile(finalPath) && ((kind == CREATE) || (kind == MODIFY))) {
             try {
                 String fileName = path.getFileName().toString();
                 Matcher m = FILENAME_PATTERN.matcher(fileName);
