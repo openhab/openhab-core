@@ -942,7 +942,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public List<HumanLanguageInterpreter> getHLIsByIds(@Nullable String ids) {
-        return ids == null ? new ArrayList<>() : getHLIsByIds(Arrays.asList(ids.split(",")));
+        return ids == null ? List.of() : getHLIsByIds(Arrays.asList(ids.split(",")));
     }
 
     @Override
