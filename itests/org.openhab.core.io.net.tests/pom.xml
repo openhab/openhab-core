@@ -10,7 +10,7 @@
     <version>4.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.core.net.io.tests</artifactId>
+  <artifactId>org.openhab.core.io.net.tests</artifactId>
 
   <name>openHAB Core :: Integration Tests :: IO NET Tests</name>
 
