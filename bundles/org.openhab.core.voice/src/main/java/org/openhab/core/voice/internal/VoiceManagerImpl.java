@@ -497,7 +497,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 .withKS(this.getKS()) //
                 .withSTT(this.getSTT()) //
                 .withTTS(this.getTTS()) //
-                .withHLIs(this.getHLIs()) //
+                .withHLI(this.getHLI()) //
                 .withVoice(this.getDefaultVoice()) //
                 .withMelody(listeningMelody) //
                 .withListeningItem(listeningItem);
