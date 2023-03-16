@@ -157,6 +157,13 @@ public class DialogContext {
             return this;
         }
 
+        public Builder withHLI(@Nullable HumanLanguageInterpreter service) {
+            if (service != null) {
+                this.hlis = List.of(service);
+            }
+            return this;
+        }
+
         public Builder withHLIs(Collection<HumanLanguageInterpreter> services) {
             return withHLIs(new ArrayList<>(services));
         }
