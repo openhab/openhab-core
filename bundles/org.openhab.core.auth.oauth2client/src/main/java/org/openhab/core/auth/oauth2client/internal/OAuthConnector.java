@@ -19,6 +19,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -43,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSyntaxException;
 
 /**
@@ -65,7 +69,15 @@ public class OAuthConnector {
 
     public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable String deserializerClassName) {
         this.httpClientFactory = httpClientFactory;
-        GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+        GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, typeOfT, context) -> {
+                    try {
+                        return Instant.parse(json.getAsString());
+                    } catch (DateTimeParseException e) {
+                        return LocalDateTime.parse(json.getAsString()).atZone(ZoneId.systemDefault()).toInstant();
+                    }
+                });
+
         if (deserializerClassName != null) {
             try {
                 Class<?> deserializerClass = Class.forName(deserializerClassName);
