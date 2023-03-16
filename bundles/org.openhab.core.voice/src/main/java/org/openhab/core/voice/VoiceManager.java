@@ -138,6 +138,11 @@ public interface VoiceManager {
     DialogContext getLastDialogContext();
 
     /**
+     * Returns a list with the contexts of all running dialogs.
+     */
+    List<DialogContext> getDialogsContexts();
+
+    /**
      * Starts an infinite dialog sequence using all default services: keyword spotting on the default audio source,
      * audio source listening to retrieve a question or a command (default Speech to Text service), interpretation and
      * handling of the command, and finally playback of the answer on the default audio sink (default Text to Speech

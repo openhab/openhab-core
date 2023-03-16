@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -33,6 +34,7 @@ import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemNotUniqueException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.voice.DialogContext;
+import org.openhab.core.voice.DialogRegistration;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
@@ -60,7 +62,11 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private static final String SUBCMD_VOICES = "voices";
     private static final String SUBCMD_START_DIALOG = "startdialog";
     private static final String SUBCMD_STOP_DIALOG = "stopdialog";
+    private static final String SUBCMD_REGISTER_DIALOG = "registerdialog";
+    private static final String SUBCMD_UNREGISTER_DIALOG = "unregisterdialog";
     private static final String SUBCMD_LISTEN_ANSWER = "listenandanswer";
+    private static final String SUBCMD_DIALOGS = "dialogs";
+    private static final String SUBCMD_DIALOG_REGS = "dialogregs";
     private static final String SUBCMD_INTERPRETERS = "interpreters";
     private static final String SUBCMD_KEYWORD_SPOTTERS = "keywordspotters";
     private static final String SUBCMD_STT_SERVICES = "sttservices";
@@ -87,13 +93,21 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         return List.of(buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"),
                 buildCommandUsage(SUBCMD_INTERPRET + " <command>", "interprets a human language command"),
                 buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services"),
+                buildCommandUsage(SUBCMD_DIALOGS, "lists the running dialog an its audio/voice services"),
+                buildCommandUsage(SUBCMD_DIALOG_REGS,
+                        "lists the existing dialog registrations and its selected audio/voice services"),
+                buildCommandUsage(SUBCMD_REGISTER_DIALOG
+                        + " [--source <source>] [--sink <sink>] [--hlis <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--ks ks [--keyword <ks>]] [--listening-item <listeningItem>]",
+                        "register a new dialog processing using the default services or the services identified with provided arguments, it will be persisted and keep running whenever is possible."),
+                buildCommandUsage(SUBCMD_UNREGISTER_DIALOG + " [source]",
+                        "unregister the dialog processing for the default audio source or the audio source identified with provided argument, stopping it if started"),
                 buildCommandUsage(SUBCMD_START_DIALOG
-                        + " [--source <source>] [--sink <sink>] [--interpreters <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--ks ks [--keyword <ks>]] [--listening-item <listeningItem>]",
+                        + " [--source <source>] [--sink <sink>] [--hlis <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--ks ks [--keyword <ks>]] [--listening-item <listeningItem>]",
                         "start a new dialog processing using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_STOP_DIALOG + " [<source>]",
                         "stop the dialog processing for the default audio source or the audio source identified with provided argument"),
                 buildCommandUsage(SUBCMD_LISTEN_ANSWER
-                        + " [--source <source>] [--sink <sink>] [--interpreters <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--listening-item <listeningItem>]",
+                        + " [--source <source>] [--sink <sink>] [--hlis <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--listening-item <listeningItem>]",
                         "Execute a simple dialog sequence without keyword spotting using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_INTERPRETERS, "lists the interpreters"),
                 buildCommandUsage(SUBCMD_KEYWORD_SPOTTERS, "lists the keyword spotters"),
@@ -135,10 +149,41 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     }
                     return;
                 }
+                case SUBCMD_REGISTER_DIALOG -> {
+                    DialogRegistration dialogRegistration;
+                    try {
+                        dialogRegistration = parseDialogRegistration(args);
+                    } catch (IllegalStateException e) {
+                        console.println(Objects.requireNonNullElse(e.getMessage(),
+                                "An error occurred while parsing the dialog options"));
+                        break;
+                    }
+                    try {
+                        voiceManager.registerDialog(dialogRegistration);
+                    } catch (IllegalStateException e) {
+                        console.println(Objects.requireNonNullElse(e.getMessage(),
+                                "An error occurred while registering the dialog"));
+                    }
+                    return;
+                }
+                case SUBCMD_UNREGISTER_DIALOG -> {
+                    try {
+                        var sourceId = args.length < 2 ? audioManager.getSourceId() : args[1];
+                        if (sourceId == null) {
+                            console.println("No source provided nor default source available");
+                            break;
+                        }
+                        voiceManager.unregisterDialog(sourceId);
+                    } catch (IllegalStateException e) {
+                        console.println(Objects.requireNonNullElse(e.getMessage(),
+                                "An error occurred while stopping the dialog"));
+                    }
+                    return;
+                }
                 case SUBCMD_START_DIALOG -> {
                     DialogContext.Builder dialogContextBuilder;
                     try {
-                        dialogContextBuilder = parseDialogParameters(args);
+                        dialogContextBuilder = parseDialogContext(args);
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while parsing the dialog options"));
@@ -164,7 +209,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 case SUBCMD_LISTEN_ANSWER -> {
                     DialogContext.Builder dialogContextBuilder;
                     try {
-                        dialogContextBuilder = parseDialogParameters(args);
+                        dialogContextBuilder = parseDialogContext(args);
                     } catch (IllegalStateException e) {
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while parsing the dialog options"));
@@ -176,6 +221,14 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         console.println(Objects.requireNonNullElse(e.getMessage(),
                                 "An error occurred while executing the simple dialog sequence"));
                     }
+                    return;
+                }
+                case SUBCMD_DIALOGS -> {
+                    listDialogs(console);
+                    return;
+                }
+                case SUBCMD_DIALOG_REGS -> {
+                    listDialogRegistrations(console);
                     return;
                 }
                 case SUBCMD_INTERPRETERS -> {
@@ -252,6 +305,42 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         voiceManager.say(msg.toString());
     }
 
+    private void listDialogRegistrations(Console console) {
+        Collection<DialogRegistration> registrations = voiceManager.getDialogRegistrations();
+        if (!registrations.isEmpty()) {
+            registrations.stream().sorted(comparing(dr -> dr.sourceId)).forEach(dr -> {
+                console.println(
+                        String.format(" Source: %s - Sink: %s (STT: %s, TTS: %s, HLIs: %s, KS: %s, Keyword: %s)",
+                                dr.sourceId, dr.sinkId, getOrDefault(dr.sttId), getOrDefault(dr.ttsId),
+                                dr.hliIds.isEmpty() ? getOrDefault(null) : String.join("->", dr.hliIds),
+                                getOrDefault(dr.ksId), getOrDefault(dr.keyword)));
+            });
+        } else {
+            console.println("No dialog registrations.");
+        }
+    }
+
+    private String getOrDefault(@Nullable String value) {
+        return value != null && !value.isBlank() ? value : "**Default**";
+    }
+
+    private void listDialogs(Console console) {
+        Collection<DialogContext> dialogContexts = voiceManager.getDialogsContexts();
+        if (!dialogContexts.isEmpty()) {
+            dialogContexts.stream().sorted(comparing(s -> s.source().getId())).forEach(c -> {
+                var ks = c.ks();
+                String ksText = ks != null ? String.format(", KS: %s, Keyword: %s", ks.getId(), c.keyword()) : "";
+                console.println(
+                        String.format(" Source: %s - Sink: %s (STT: %s, TTS: %s, HLIs: %s%s)", c.source().getId(),
+                                c.sink().getId(), c.stt().getId(), c.tts().getId(), c.hlis().stream()
+                                        .map(HumanLanguageInterpreter::getId).collect(Collectors.joining("->")),
+                                ksText));
+            });
+        } else {
+            console.println("No running dialogs.");
+        }
+    }
+
     private void listInterpreters(Console console) {
         Collection<HumanLanguageInterpreter> interpreters = voiceManager.getHLIs();
         if (!interpreters.isEmpty()) {
@@ -314,11 +403,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         .orElse(null);
     }
 
-    private DialogContext.Builder parseDialogParameters(String[] args) {
-        var dialogContextBuilder = voiceManager.getDialogContextBuilder();
-        if (args.length < 2) {
-            return dialogContextBuilder;
-        }
+    private HashMap<String, String> parseDialogParameters(String[] args) {
         var parameters = new HashMap<String, String>();
         for (int i = 1; i < args.length; i++) {
             var arg = args[i].trim();
@@ -333,6 +418,15 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 throw new IllegalStateException("Argument name should start by -- " + arg);
             }
         }
+        return parameters;
+    }
+
+    private DialogContext.Builder parseDialogContext(String[] args) {
+        var dialogContextBuilder = voiceManager.getDialogContextBuilder();
+        if (args.length < 2) {
+            return dialogContextBuilder;
+        }
+        var parameters = parseDialogParameters(args);
         String sourceId = parameters.remove("source");
         if (sourceId != null) {
             var source = audioManager.getSource(sourceId);
@@ -362,5 +456,41 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     "Argument" + parameters.keySet().stream().findAny().orElse("") + "is not supported");
         }
         return dialogContextBuilder;
+    }
+
+    private DialogRegistration parseDialogRegistration(String[] args) {
+        var parameters = parseDialogParameters(args);
+        @Nullable
+        String sourceId = parameters.remove("source");
+        if (sourceId == null) {
+            sourceId = audioManager.getSourceId();
+        }
+        if (sourceId == null) {
+            throw new IllegalStateException("A source is required if the default is not configured");
+        }
+        @Nullable
+        String sinkId = parameters.remove("sink");
+        if (sinkId == null) {
+            sinkId = audioManager.getSinkId();
+        }
+        if (sinkId == null) {
+            throw new IllegalStateException("A sink is required if the default is not configured");
+        }
+        var dr = new DialogRegistration(sourceId, sinkId);
+        dr.ksId = parameters.remove("ks");
+        dr.keyword = parameters.remove("keyword");
+        dr.sttId = parameters.remove("stt");
+        dr.ttsId = parameters.remove("tts");
+        dr.voiceId = parameters.remove("voice");
+        dr.listeningItem = parameters.remove("listening-item");
+        String hliIds = parameters.remove("hlis");
+        if (hliIds != null) {
+            dr.hliIds = Arrays.stream(hliIds.split(",")).map(String::trim).collect(Collectors.toList());
+        }
+        if (!parameters.isEmpty()) {
+            throw new IllegalStateException(
+                    "Argument " + parameters.keySet().stream().findAny().orElse("") + " is not supported");
+        }
+        return dr;
     }
 }

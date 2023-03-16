@@ -526,6 +526,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
+    public List<DialogContext> getDialogsContexts() {
+        return dialogProcessors.values().stream().map(DialogProcessor::getContext).collect(Collectors.toList());
+    }
+
+    @Override
     public @Nullable DialogContext getLastDialogContext() {
         return lastDialogContext;
     }
