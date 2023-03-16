@@ -75,6 +75,7 @@
 		<feature dependency="true">pax-web-jetty-http2-jdk9</feature>
 		<bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
 		<bundle dependency="true">mvn:org.eclipse.jetty/jetty-alpn-client/${jetty.version}</bundle>
+		<bundle dependency="true">mvn:org.eclipse.jetty/jetty-alpn-java-client/${jetty.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.jetty/jetty-client/${jetty.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
