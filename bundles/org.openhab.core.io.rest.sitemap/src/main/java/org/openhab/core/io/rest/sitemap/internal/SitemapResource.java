@@ -69,6 +69,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.StateChangeListener;
 import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.types.HSBType;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
@@ -492,9 +493,11 @@ public class SitemapResource
         }
 
         WidgetDTO bean = new WidgetDTO();
+        State itemState = null;
         if (widget.getItem() != null) {
             try {
                 Item item = itemUIRegistry.getItem(widget.getItem());
+                itemState = item.getState();
                 String widgetTypeName = widget.eClass().getInstanceTypeName()
                         .substring(widget.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
                 boolean isMapview = "mapview".equalsIgnoreCase(widgetTypeName);
@@ -512,9 +515,9 @@ public class SitemapResource
         }
         bean.widgetId = widgetId;
         bean.icon = itemUIRegistry.getCategory(widget);
-        bean.labelcolor = itemUIRegistry.getLabelColor(widget);
-        bean.valuecolor = itemUIRegistry.getValueColor(widget);
-        bean.iconcolor = itemUIRegistry.getIconColor(widget);
+        bean.labelcolor = convertItemValueColor(itemUIRegistry.getLabelColor(widget), itemState);
+        bean.valuecolor = convertItemValueColor(itemUIRegistry.getValueColor(widget), itemState);
+        bean.iconcolor = convertItemValueColor(itemUIRegistry.getIconColor(widget), itemState);
         bean.label = itemUIRegistry.getLabel(widget);
         bean.type = widget.eClass().getName();
         bean.visibility = itemUIRegistry.getVisiblity(widget);
@@ -608,6 +611,16 @@ public class SitemapResource
             bean.step = setpointWidget.getStep();
         }
         return bean;
+    }
+
+    public static @Nullable String convertItemValueColor(@Nullable String color, @Nullable State itemState) {
+        if ("itemValue".equals(color)) {
+            if (itemState instanceof HSBType hsbState) {
+                return "#" + Integer.toHexString(hsbState.getRGB()).substring(2);
+            }
+            return null;
+        }
+        return color;
     }
 
     private String buildProxyUrl(String sitemapName, Widget widget, URI uri) {

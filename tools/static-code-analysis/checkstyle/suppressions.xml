@@ -22,6 +22,9 @@
 	<suppress files=".+org.openhab.core.config.core.ConfigurableService" checks="ConstantNameCheck"/>
 	<suppress files=".+org.openhab.core.config.discovery.mdns.internal.MDNSDiscoveryService.java|.+org.openhab.core.config.discovery.upnp.internal.UpnpDiscoveryService.java|.+org.openhab.core.io.console.eclipse.internal.ConsoleSupportEclipse.java|.+org.openhab.core.io.console.rfc147.internal.CommandWrapper.java|.+org.openhab.core.library.unit.BinaryPrefix.java|.+org.openhab.core.library.unit.MetricPrefix.java" checks="MethodNameCheck"/>
 
+	<!--suppress local variable naming check to stay consistent with the usual convention when calculating xyY/RGB/HSB conversion -->
+	<suppress files=".+org.openhab.core.util.ColorUtil.java" checks="LocalVariableNameCheck" />
+
 	<!-- Add suppression as discussed in https://github.com/openhab/static-code-analysis/issues/265 -->
 	<suppress files=".+org.openhab.core.common.registry.AbstractRegistry.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
 	<suppress files=".+org.openhab.core.thing.binding.BaseThingHandler.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
