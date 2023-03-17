@@ -204,6 +204,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
             if (numberOfStreamServed <= 0) {
                 final FixedLengthAudioStream stream = multiTimeStreams.remove(streamId);
                 streamTimeouts.remove(streamId);
+                currentlyServedResponseByStreamId.remove(streamId);
                 tryClose(stream);
                 if (stream instanceof Disposable disposableStream) {
                     try {
