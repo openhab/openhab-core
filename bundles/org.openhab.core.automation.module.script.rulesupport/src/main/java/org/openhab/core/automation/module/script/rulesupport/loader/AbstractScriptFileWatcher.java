@@ -104,16 +104,9 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         this.readyService = readyService;
         this.watchSubDirectories = watchSubDirectories;
         this.watchPath = watchService.getWatchPath().resolve(fileDirectory);
-
-        manager.addFactoryChangeListener(this);
-        readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE));
-
         this.scheduler = getScheduler();
-
-        currentStartLevel = startLevelService.getStartLevel();
-        if (currentStartLevel > StartLevelService.STARTLEVEL_MODEL) {
-            initialImport();
-        }
+        // Start with the lowest level to ensure the code in onReadyMarkerAdded runs
+        this.currentStartLevel = StartLevelService.STARTLEVEL_OSGI;
     }
 
     /**
@@ -144,6 +137,9 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         } else if (!Files.isDirectory(watchPath)) {
             logger.warn("Trying to watch directory {}, however it is a file", watchPath);
         }
+
+        manager.addFactoryChangeListener(this);
+        readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE));
         watchService.registerListener(this, watchPath, watchSubDirectories);
     }
 
@@ -223,27 +219,22 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
 
     @Override
     public void processWatchEvent(WatchService.Kind kind, Path path) {
+        if (!initialized.isDone()) {
+            // discard events if the initial import has not finished
+            return;
+        }
+
         Path fullPath = watchPath.resolve(path);
         File file = fullPath.toFile();
-        if (!file.isHidden()) {
-            if (kind == DELETE) {
-                if (file.isDirectory()) {
-                    if (watchSubDirectories) {
-                        synchronized (this) {
-                            String prefix = fullPath.getParent().toString();
-                            Set<String> toRemove = scriptMap.keySet().stream().filter(ref -> ref.startsWith(prefix))
-                                    .collect(Collectors.toSet());
-                            toRemove.forEach(this::removeFile);
-                        }
-                    }
-                } else {
-                    removeFile(ScriptFileReference.getScriptIdentifier(file.toPath()));
-                }
-            }
 
-            if (file.canRead() && (kind == CREATE || kind == MODIFY)) {
-                addFiles(listFiles(file.toPath(), watchSubDirectories));
+        // Subdirectory events are filtered out by WatchService, so we only need to deal with files
+        if (kind == DELETE) {
+            String scriptIdentifier = ScriptFileReference.getScriptIdentifier(fullPath);
+            if (scriptMap.containsKey(scriptIdentifier)) {
+                removeFile(scriptIdentifier);
             }
+        } else if (!file.isHidden() && file.canRead() && (kind == CREATE || kind == MODIFY)) {
+            addFiles(listFiles(fullPath, watchSubDirectories));
         }
     }
 
@@ -269,20 +260,21 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         return CompletableFuture.runAsync(() -> {
             Lock lock = getLockForScript(scriptIdentifier);
             try {
-                ScriptFileReference ref = scriptMap.remove(scriptIdentifier);
+                scriptMap.computeIfPresent(scriptIdentifier, (id, ref) -> {
+                    if (ref.getLoadedStatus().get()) {
+                        manager.removeEngine(scriptIdentifier);
+                        logger.debug("Unloaded script '{}'", scriptIdentifier);
+                    } else {
+                        logger.debug("Dequeued script '{}'", scriptIdentifier);
+                    }
 
-                if (ref == null) {
-                    logger.warn("Failed to unload script '{}': script reference not found.", scriptIdentifier);
-                    return;
-                }
-
-                if (ref.getLoadedStatus().get()) {
-                    manager.removeEngine(scriptIdentifier);
-                    logger.debug("Unloaded script '{}'", scriptIdentifier);
-                } else {
-                    logger.debug("Dequeued script '{}'", scriptIdentifier);
-                }
+                    return null;
+                });
             } finally {
+                if (scriptMap.containsKey(scriptIdentifier)) {
+                    logger.warn("Failed to unload script '{}'", scriptIdentifier);
+                }
+
                 scriptLockMap.remove(scriptIdentifier);
                 lock.unlock();
             }
@@ -353,20 +345,6 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         return false;
     }
 
-    private void initialImport() {
-        File directory = watchPath.toFile();
-
-        if (!directory.exists()) {
-            if (!directory.mkdirs()) {
-                logger.warn("Failed to create watched directory: {}", watchPath);
-            }
-        } else if (directory.isFile()) {
-            logger.warn("Trying to watch directory {}, however it is a file", watchPath);
-        }
-
-        addFiles(listFiles(directory.toPath(), watchSubDirectories)).thenRun(() -> initialized.complete(null));
-    }
-
     @Override
     public void onDependencyChange(String scriptIdentifier) {
         logger.debug("Reimporting {}...", scriptIdentifier);
@@ -381,13 +359,16 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
         int previousLevel = currentStartLevel;
         currentStartLevel = Integer.parseInt(readyMarker.getIdentifier());
 
+        logger.trace("Added ready marker {}: start level changed from {} to {}. watchPath: {}", readyMarker,
+                previousLevel, currentStartLevel, watchPath);
+
         if (currentStartLevel < StartLevelService.STARTLEVEL_STATES) {
             // ignore start level less than 30
             return;
         }
 
-        if (currentStartLevel == StartLevelService.STARTLEVEL_STATES) {
-            initialImport();
+        if (!initialized.isDone()) {
+            addFiles(listFiles(watchPath, watchSubDirectories)).thenRun(() -> initialized.complete(null));
         } else {
             scriptMap.values().stream().sorted()
                     .filter(ref -> needsStartLevelProcessing(ref, previousLevel, currentStartLevel))
