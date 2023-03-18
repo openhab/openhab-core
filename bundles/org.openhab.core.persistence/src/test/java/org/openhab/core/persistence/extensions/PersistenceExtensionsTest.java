@@ -570,7 +570,8 @@ public class PersistenceExtensionsTest {
             }
         });
 
-        ZonedDateTime beginStored = ZonedDateTime.now().minusHours(27);
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime beginStored = now.minusHours(27);
 
         persistenceService.addHistoricItem(beginStored, new DecimalType(0), TEST_NUMBER);
         persistenceService.addHistoricItem(beginStored.plusHours(1), new DecimalType(100), TEST_NUMBER);
@@ -585,6 +586,10 @@ public class PersistenceExtensionsTest {
         average = PersistenceExtensions.averageSince(numberItem, beginStored.plusHours(3),
                 TestCachedValuesPersistenceService.ID);
         assertThat(average.doubleValue(), is(closeTo(50.0 / 24.0, 0.01)));
+
+        average = PersistenceExtensions.averageSince(numberItem, now.minusMinutes(30),
+                TestCachedValuesPersistenceService.ID);
+        assertThat(average.doubleValue(), is(closeTo(0, 0.01)));
     }
 
     @Test
