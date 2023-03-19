@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.io.net.tests.ClientFactoryTest;
 
 /**
  * Servlet for org.openhab.core.io.net tests.
@@ -29,18 +30,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public class ClientFactoryTestServlet extends HttpServlet {
-
-    private static final long serialVersionUID = -5055206326396721335L;
-
-    public static final String RESPONSE = "testResponse";
+public class TestHttpServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType(MediaType.TEXT_PLAIN);
         response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-        response.getWriter().write(RESPONSE);
-        response.flushBuffer();
+        response.getWriter().write(ClientFactoryTest.RESPONSE);
     }
 }

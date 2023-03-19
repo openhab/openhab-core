@@ -12,14 +12,14 @@
  */
 package org.openhab.core.io.net.tests.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Embedded jetty server used in the tests.
@@ -28,58 +28,46 @@ import org.slf4j.LoggerFactory;
  *
  * @author Velin Yordanov - Initial contribution
  * @author Wouter Born - Increase test coverage
- * @author Andrew Fiddian-Green - Copied to org.openhab.core.io.net
+ * @author Andrew Fiddian-Green - Adapted for org.openhab.core.io.net.tests
  */
-public class ClientFactoryTestServer {
-    private final Logger logger = LoggerFactory.getLogger(ClientFactoryTestServer.class);
+@NonNullByDefault
+public class TestServer {
+    private final String host;
+    private final int port;
+    private final int timeout;
+    private final Server server;
 
-    private Server server;
-    private String host;
-    private int port;
-    private int timeout;
-    private ServletHolder servletHolder;
-
-    public ClientFactoryTestServer(String host, int port, int timeout, ServletHolder servletHolder) {
+    public TestServer(String host, int port, int timeout) {
         this.host = host;
         this.port = port;
         this.timeout = timeout;
-        this.servletHolder = servletHolder;
+        this.server = new Server();
     }
 
     public void startServer() {
         Thread thread = new Thread(new Runnable() {
             @Override
-            @SuppressWarnings("resource")
             public void run() {
-                server = new Server();
                 ServletHandler handler = new ServletHandler();
-                handler.addServletWithMapping(servletHolder, "/*");
+                handler.addServletWithMapping(new ServletHolder(new TestHttpServlet()), "/http1");
+                handler.addServletWithMapping(new ServletHolder(new TestHttpServlet()), "/http2");
+                handler.addServletWithMapping(new ServletHolder(new TestWebSocketServlet()), "/ws");
                 server.setHandler(handler);
 
                 HttpConfiguration httpConfig = new HttpConfiguration();
+                HttpConnectionFactory h1 = new HttpConnectionFactory(httpConfig);
+                HTTP2CServerConnectionFactory h2c = new HTTP2CServerConnectionFactory(httpConfig);
 
-                HttpConnectionFactory http11 = new HttpConnectionFactory(httpConfig);
-                /*
-                 * TODO waiting on dependency on Jetty http2.server
-                 * HTTP2CServerConnectionFactory h2c = new HTTP2CServerConnectionFactory(httpConfig);
-                 * ServerConnector connector = new ServerConnector(server, http11, h2c);
-                 */
-                ServerConnector connector = new ServerConnector(server, http11);
+                ServerConnector connector = new ServerConnector(server, h1, h2c);
                 connector.setHost(host);
                 connector.setPort(port);
                 connector.setIdleTimeout(timeout);
-
                 server.addConnector(connector);
 
                 try {
                     server.start();
                     server.join();
-                } catch (InterruptedException ex) {
-                    logger.error("Server got interrupted", ex);
-                    return;
                 } catch (Exception e) {
-                    logger.error("Error in starting the server", e);
-                    return;
                 }
             }
         });
@@ -91,8 +79,6 @@ public class ClientFactoryTestServer {
         try {
             server.stop();
         } catch (Exception e) {
-            logger.error("Error in stopping the server", e);
-            return;
         }
     }
 }

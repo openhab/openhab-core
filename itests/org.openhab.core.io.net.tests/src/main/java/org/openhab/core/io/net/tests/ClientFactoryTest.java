@@ -15,14 +15,15 @@ package org.openhab.core.io.net.tests;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletableFuture;
+import java.net.URI;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.http.HttpURI;
@@ -31,20 +32,19 @@ import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.http2.api.Session;
 import org.eclipse.jetty.http2.api.Stream;
 import org.eclipse.jetty.http2.client.HTTP2Client;
-import org.eclipse.jetty.http2.frames.DataFrame;
 import org.eclipse.jetty.http2.frames.HeadersFrame;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.Promise.Completable;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.openhab.core.io.net.http.HttpClientFactory;
 import org.openhab.core.io.net.http.WebSocketFactory;
-import org.openhab.core.io.net.tests.internal.ClientFactoryTestServer;
-import org.openhab.core.io.net.tests.internal.ClientFactoryTestServlet;
+import org.openhab.core.io.net.tests.internal.TestServer;
+import org.openhab.core.io.net.tests.internal.TestStreamAdapter;
+import org.openhab.core.io.net.tests.internal.TestWebSocket;
 import org.openhab.core.test.TestPortUtil;
 import org.openhab.core.test.java.JavaOSGiTest;
 
@@ -54,42 +54,40 @@ import org.openhab.core.test.java.JavaOSGiTest;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
+@TestMethodOrder(MethodName.class)
 public class ClientFactoryTest extends JavaOSGiTest {
 
-    private static class StreamAdapter extends Stream.Listener.Adapter {
-        public final CompletableFuture<String> completable = new CompletableFuture<>();
-
-        @Override
-        public void onData(@Nullable Stream stream, @Nullable DataFrame frame, @Nullable Callback callback) {
-            assertNotNull(stream);
-            assertNotNull(frame);
-            assertTrue(frame.isEndStream());
-            completable.complete(StandardCharsets.UTF_8.decode(frame.getData()).toString());
-        }
-    }
+    private static final String CONSUMER = "consumer";
+    public static final String RESPONSE = "response";
 
     private static final String HOST = "127.0.0.1";
     private static final int TIMEOUT = -1;
-    private static final String CONSUMER = "testConsumer";
+    private static final int WAIT_SECONDS = 3;
 
-    private static @Nullable ClientFactoryTestServer server;
-    private static String serverUrl = "";
-    private static int serverPort;
+    private static int port;
+    private static String wsUrl = "";
+    private static String httpUrl = "";
+    private static String http2Url = "";
+
+    private static @Nullable TestServer server;
 
     @AfterAll
     public static void afterAll() {
-        if (server != null) {
-            server.stopServer();
+        TestServer theServer = server;
+        if (theServer != null) {
+            theServer.stopServer();
         }
     }
 
     @BeforeAll
     public static void beforeAll() {
-        serverPort = TestPortUtil.findFreePort();
-        serverUrl = "http://" + HOST + ":" + serverPort;
-        server = new ClientFactoryTestServer(HOST, serverPort, TIMEOUT,
-                new ServletHolder(new ClientFactoryTestServlet()));
-        server.startServer();
+        port = TestPortUtil.findFreePort();
+        wsUrl = "ws://" + HOST + ":" + port + "/ws";
+        httpUrl = "http://" + HOST + ":" + port + "/http1";
+        http2Url = "http://" + HOST + ":" + port + "/http2";
+        TestServer theServer = new TestServer(HOST, port, TIMEOUT);
+        theServer.startServer();
+        server = theServer;
     }
 
     @Test
@@ -98,6 +96,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
         assertNotNull(httpClientFactory);
 
         HttpClient client = httpClientFactory.createHttpClient(CONSUMER);
+        // HttpClient client = new HttpClient();
         assertNotNull(client);
 
         try {
@@ -105,33 +104,42 @@ public class ClientFactoryTest extends JavaOSGiTest {
             client.start();
 
             // send request
-            ContentResponse response = client.GET(serverUrl);
-            assertEquals(HttpStatus.OK_200, response.getStatus());
-            assertEquals(ClientFactoryTestServlet.RESPONSE, response.getContentAsString());
+            ContentResponse response = client.GET(httpUrl);
 
-            // stop client
-            client.stop();
+            // check response
+            assertEquals(HttpStatus.OK_200, response.getStatus());
+            assertEquals(RESPONSE, response.getContentAsString());
+
         } catch (Exception e) {
-            fail(e.getMessage());
+            fail(e);
+        } finally {
+            try {
+                // stop client
+                client.stop();
+            } catch (Exception e) {
+            }
         }
     }
 
-    @Disabled("TODO waiting on dependencies on Jetty http2.hpack and Jetty http2.server")
     @Test
     public void testHttp2Client() {
         HttpClientFactory httpClientFactory = getService(HttpClientFactory.class);
         assertNotNull(httpClientFactory);
 
         HTTP2Client client = httpClientFactory.createHttp2Client(CONSUMER);
+        // HTTP2Client client = new HTTP2Client();
         assertNotNull(client);
+
+        // initialise address
+        InetSocketAddress address = new InetSocketAddress(HOST, port);
 
         Completable<@Nullable Session> sessionCompletable = new Completable<>();
         Completable<@Nullable Stream> streamCompletable = new Completable<>();
 
-        StreamAdapter streamAdapter = new StreamAdapter();
-        InetSocketAddress address = new InetSocketAddress(HOST, serverPort);
-        MetaData.Request request = new MetaData.Request(HttpMethod.GET.toString(), new HttpURI(serverUrl),
-                HttpVersion.HTTP_2, null);
+        TestStreamAdapter streamAdapter = new TestStreamAdapter();
+
+        MetaData.Request request = new MetaData.Request(HttpMethod.GET.toString(), new HttpURI(http2Url),
+                HttpVersion.HTTP_2, new HttpFields());
 
         HeadersFrame headers = new HeadersFrame(request, null, true);
 
@@ -139,24 +147,33 @@ public class ClientFactoryTest extends JavaOSGiTest {
             // start client
             client.start();
 
-            // establish the session
-            client.connect(address, null, sessionCompletable);
-            Session session = sessionCompletable.get(1, TimeUnit.SECONDS);
+            // establish session
+            client.connect(address, new Session.Listener.Adapter(), sessionCompletable);
+            Session session = sessionCompletable.get(WAIT_SECONDS, TimeUnit.SECONDS);
             assertNotNull(session);
+            assertFalse(session.isClosed());
 
-            // open a stream
+            // open stream
             session.newStream(headers, streamCompletable, streamAdapter);
-            Stream stream = streamCompletable.get(1, TimeUnit.SECONDS);
+            Stream stream = streamCompletable.get(WAIT_SECONDS, TimeUnit.SECONDS);
             assertNotNull(stream);
 
-            // wait for the response
-            String response = streamAdapter.completable.get(1, TimeUnit.SECONDS);
-            assertEquals(ClientFactoryTestServlet.RESPONSE, response);
+            // confirm stream is open
+            assertFalse(stream.isClosed());
+            assertFalse(stream.isReset());
 
-            // stop client
-            client.stop();
+            // check response
+            String response = streamAdapter.completable.get(WAIT_SECONDS, TimeUnit.SECONDS);
+            assertEquals(RESPONSE, response);
+
         } catch (Exception e) {
-            fail(e.getMessage());
+            fail(e);
+        } finally {
+            try {
+                // stop client
+                client.stop();
+            } catch (Exception e) {
+            }
         }
     }
 
@@ -166,18 +183,38 @@ public class ClientFactoryTest extends JavaOSGiTest {
         assertNotNull(webSocketFactory);
 
         WebSocketClient client = webSocketFactory.createWebSocketClient(CONSUMER);
+        // WebSocketClient client = new WebSocketClient();
         assertNotNull(client);
 
         try {
-            // stop client
+            // start client
             client.start();
 
-            // TODO run the tests
+            // initialise address
+            URI address = new URI(wsUrl);
 
-            // stop client
-            client.stop();
+            // establish session
+            Future<org.eclipse.jetty.websocket.api.Session> session;
+            TestWebSocket webSocket = new TestWebSocket();
+            session = client.connect(webSocket, address);
+            assertNotNull(session);
+
+            // confirm session is open
+            assertFalse(session.isDone());
+            assertFalse(session.isCancelled());
+
+            // check response
+            String response = webSocket.completable.get(WAIT_SECONDS, TimeUnit.SECONDS);
+            assertEquals(RESPONSE, response);
+
         } catch (Exception e) {
-            fail(e.getMessage());
+            fail(e);
+        } finally {
+            try {
+                // stop client
+                client.stop();
+            } catch (Exception e) {
+            }
         }
     }
 }
