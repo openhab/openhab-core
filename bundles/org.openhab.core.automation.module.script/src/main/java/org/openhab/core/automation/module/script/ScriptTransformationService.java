@@ -139,13 +139,6 @@ public class ScriptTransformationService implements TransformationService, Regis
             try {
                 CompiledScript compiledScript = scriptRecord.compiledScript;
 
-                if (compiledScript == null && scriptEngineContainer.getScriptEngine() instanceof Compilable) {
-                    // no compiled script available but compiling is supported
-                    compiledScript = ((Compilable) scriptEngineContainer.getScriptEngine())
-                            .compile(scriptRecord.script);
-                    scriptRecord.compiledScript = compiledScript;
-                }
-
                 ScriptEngine engine = compiledScript != null ? compiledScript.getEngine()
                         : scriptEngineContainer.getScriptEngine();
                 ScriptContext executionContext = engine.getContext();
@@ -163,6 +156,15 @@ public class ScriptTransformationService implements TransformationService, Regis
                             executionContext.setAttribute(splitString[0], splitString[1], ScriptContext.ENGINE_SCOPE);
                         }
                     }
+                }
+
+                // compile the script here _after_ setting context attributes, so that the script engine
+                // can bind the attributes as variables during compilation. This primarily affects jruby.
+                if (compiledScript == null && scriptEngineContainer.getScriptEngine() instanceof Compilable) {
+                    // no compiled script available but compiling is supported
+                    compiledScript = ((Compilable) scriptEngineContainer.getScriptEngine())
+                            .compile(scriptRecord.script);
+                    scriptRecord.compiledScript = compiledScript;
                 }
 
                 Object result = compiledScript != null ? compiledScript.eval() : engine.eval(scriptRecord.script);
