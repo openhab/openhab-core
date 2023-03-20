@@ -49,5 +49,4 @@ public class RuleEvaluationContext extends DefaultEvaluationContext {
             }
         }
     }
-
 }

@@ -15,11 +15,11 @@ package org.openhab.core.model.thing.valueconverter;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import org.openhab.core.thing.UID;
 import org.eclipse.xtext.conversion.IValueConverter;
 import org.eclipse.xtext.conversion.ValueConverterException;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.util.Strings;
+import org.openhab.core.thing.UID;
 
 /**
  * A {@link UIDtoStringConverter} is used to create {@link UID} string

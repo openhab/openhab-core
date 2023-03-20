@@ -177,7 +177,7 @@ public class ScriptTransformationService
                 // compile the script here _after_ setting context attributes, so that the script engine
                 // can bind the attributes as variables during compilation. This primarily affects jruby.
                 if (compiledScript == null
-                        && scriptEngineContainer.getScriptEngine()instanceof Compilable scriptEngine) {
+                        && scriptEngineContainer.getScriptEngine() instanceof Compilable scriptEngine) {
                     // no compiled script available but compiling is supported
                     compiledScript = scriptEngine.compile(scriptRecord.script);
                     scriptRecord.compiledScript = compiledScript;

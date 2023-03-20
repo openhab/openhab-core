@@ -162,5 +162,4 @@ public class ScriptServiceUtil {
         // uninjected as a callback from the script engine, not via DS as it is a circular dependency...
         this.scriptEngine.compareAndSet(scriptEngine, null);
     }
-
 }
