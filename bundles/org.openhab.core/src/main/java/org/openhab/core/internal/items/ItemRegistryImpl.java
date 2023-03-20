@@ -370,8 +370,8 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     @Override
     public @Nullable Item remove(String itemName, boolean recursive) {
         return ((ManagedItemProvider) getManagedProvider()
-                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"))).remove(itemName,
-                        recursive);
+                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available")))
+                .remove(itemName, recursive);
     }
 
     @Override

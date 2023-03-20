@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.script.actions;
 
+import java.time.ZonedDateTime;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.xbase.XExpression;
@@ -25,8 +27,6 @@ import org.openhab.core.model.script.engine.action.ActionDoc;
 import org.openhab.core.model.script.internal.engine.action.ScriptExecutionActionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.time.ZonedDateTime;
 
 /**
  * The {@link ScriptExecution} is a wrapper for the ScriptExecution actions
@@ -78,17 +78,23 @@ public class ScriptExecution {
     }
 
     @ActionDoc(text = "create an identifiable timer ")
-    public static Timer createTimer(@Nullable String identifier, ZonedDateTime zonedDateTime, Procedures.Procedure0 closure) {
-        return new Timer(ScriptExecutionActionService.getScriptExecution().createTimer(identifier, zonedDateTime, closure::apply));
+    public static Timer createTimer(@Nullable String identifier, ZonedDateTime zonedDateTime,
+            Procedures.Procedure0 closure) {
+        return new Timer(ScriptExecutionActionService.getScriptExecution().createTimer(identifier, zonedDateTime,
+                closure::apply));
     }
 
     @ActionDoc(text = "create a timer with argument")
-    public static Timer createTimerWithArgument(ZonedDateTime zonedDateTime, Object arg1, Procedures.Procedure1 closure) {
-        return new Timer(ScriptExecutionActionService.getScriptExecution().createTimerWithArgument(zonedDateTime, arg1, closure::apply));
+    public static Timer createTimerWithArgument(ZonedDateTime zonedDateTime, Object arg1,
+            Procedures.Procedure1 closure) {
+        return new Timer(ScriptExecutionActionService.getScriptExecution().createTimerWithArgument(zonedDateTime, arg1,
+                closure::apply));
     }
 
     @ActionDoc(text = "create an identifiable timer with argument")
-    public static Timer createTimerWithArgument(@Nullable String identifier, ZonedDateTime zonedDateTime, Object arg1, Procedures.Procedure1 closure) {
-        return new Timer(ScriptExecutionActionService.getScriptExecution().createTimerWithArgument(identifier, zonedDateTime, arg1, closure::apply));
+    public static Timer createTimerWithArgument(@Nullable String identifier, ZonedDateTime zonedDateTime, Object arg1,
+            Procedures.Procedure1 closure) {
+        return new Timer(ScriptExecutionActionService.getScriptExecution().createTimerWithArgument(identifier,
+                zonedDateTime, arg1, closure::apply));
     }
 }

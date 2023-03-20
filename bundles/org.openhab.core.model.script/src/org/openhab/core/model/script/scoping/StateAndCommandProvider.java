@@ -90,5 +90,4 @@ public class StateAndCommandProvider {
     public Iterable<State> getAllStates() {
         return STATES;
     }
-
 }

@@ -61,9 +61,9 @@ public final class ConfigParser {
      *
      * <pre>
      * {@code
-     *   public void modified(Map<String, Object> properties) {
+     * public void modified(Map<String, Object> properties) {
      *     YourConfig config = ConfigParser.configurationAs(properties, YourConfig.class);
-     *   }
+     * }
      * }
      * </pre>
      *

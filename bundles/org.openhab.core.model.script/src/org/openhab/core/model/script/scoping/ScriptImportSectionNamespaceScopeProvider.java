@@ -50,5 +50,4 @@ public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNam
         implicitImports.add(doCreateImportNormalizer(QUANTITY_PACKAGE, true, false));
         return implicitImports;
     }
-
 }

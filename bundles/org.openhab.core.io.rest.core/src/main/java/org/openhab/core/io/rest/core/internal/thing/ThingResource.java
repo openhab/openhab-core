@@ -505,7 +505,7 @@ public class ThingResource implements RESTResource {
             thingRegistry.updateConfiguration(thingUIDObject,
                     new Configuration(
                             normalizeConfiguration(configurationParameters, thing.getThingTypeUID(), thing.getUID()))
-                                    .getProperties());
+                            .getProperties());
         } catch (ConfigValidationException ex) {
             logger.debug("Config description validation exception occurred for thingUID {} - Messages: {}", thingUID,
                     ex.getValidationMessages());

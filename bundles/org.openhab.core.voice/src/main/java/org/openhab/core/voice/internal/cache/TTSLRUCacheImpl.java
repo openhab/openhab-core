@@ -119,7 +119,7 @@ public class TTSLRUCacheImpl implements TTSCache {
                 }
             });
         } catch (RuntimeException re) {
-            if (re.getCause() != null && re.getCause()instanceof TTSException ttse) {
+            if (re.getCause() != null && re.getCause() instanceof TTSException ttse) {
                 throw ttse;
             } else {
                 throw re;

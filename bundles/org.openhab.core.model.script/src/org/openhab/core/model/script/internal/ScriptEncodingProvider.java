@@ -35,5 +35,4 @@ public class ScriptEncodingProvider implements IEncodingProvider {
         }
         return Charset.defaultCharset().name();
     }
-
 }
