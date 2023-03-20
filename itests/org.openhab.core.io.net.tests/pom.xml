@@ -12,13 +12,6 @@
 
   <artifactId>org.openhab.core.io.net.tests</artifactId>
 
-  <name>openHAB Core :: Integration Tests :: IO NET Tests</name>
+  <name>openHAB Core :: Integration Tests :: Network I/O Tests</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.eclipse.jetty.http2</groupId>
-      <artifactId>http2-server</artifactId>
-      <version>9.4.50.v20221201</version>
-    </dependency>
-  </dependencies>
 </project>
