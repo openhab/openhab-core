@@ -152,9 +152,9 @@ public class ScriptProfile implements StateProfile {
                 return transformationService.transform(scriptLanguage + ":" + script, input.toFullString());
             } catch (TransformationException e) {
                 if (e.getCause() instanceof ScriptException) {
-                    logger.warn("Failed to process script '{}': {}", script, e.getCause().getMessage());
+                    logger.error("Failed to process script '{}': {}", script, e.getCause().getMessage());
                 } else {
-                    logger.warn("Failed to process script '{}': {}", script, e.getMessage());
+                    logger.error("Failed to process script '{}': {}", script, e.getMessage());
                 }
             }
         }
