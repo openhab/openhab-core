@@ -80,7 +80,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
     }
 
     @BeforeAll
-    public static void beforeAll() {
+    public static void beforeAll() throws Exception {
         port = TestPortUtil.findFreePort();
         wsUrl = "ws://" + HOST + ":" + port + "/ws";
         httpUrl = "http://" + HOST + ":" + port + "/http1";
@@ -91,7 +91,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testHttp1Client() {
+    public void testHttp1Client() throws Exception {
         HttpClientFactory httpClientFactory = getService(HttpClientFactory.class);
         assertNotNull(httpClientFactory);
 
@@ -109,9 +109,6 @@ public class ClientFactoryTest extends JavaOSGiTest {
             // check response
             assertEquals(HttpStatus.OK_200, response.getStatus());
             assertEquals(RESPONSE, response.getContentAsString());
-
-        } catch (Exception e) {
-            fail(e);
         } finally {
             try {
                 // stop client
@@ -122,7 +119,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testHttp2Client() {
+    public void testHttp2Client() throws Exception {
         HttpClientFactory httpClientFactory = getService(HttpClientFactory.class);
         assertNotNull(httpClientFactory);
 
@@ -130,7 +127,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
         // HTTP2Client client = new HTTP2Client();
         assertNotNull(client);
 
-        // initialise address
+        // initialize address
         InetSocketAddress address = new InetSocketAddress(HOST, port);
 
         Completable<@Nullable Session> sessionCompletable = new Completable<>();
@@ -165,9 +162,6 @@ public class ClientFactoryTest extends JavaOSGiTest {
             // check response
             String response = streamAdapter.completable.get(WAIT_SECONDS, TimeUnit.SECONDS);
             assertEquals(RESPONSE, response);
-
-        } catch (Exception e) {
-            fail(e);
         } finally {
             try {
                 // stop client
@@ -178,7 +172,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testWebSocketClient() {
+    public void testWebSocketClient() throws Exception {
         WebSocketFactory webSocketFactory = getService(WebSocketFactory.class);
         assertNotNull(webSocketFactory);
 
@@ -190,7 +184,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
             // start client
             client.start();
 
-            // initialise address
+            // initialize address
             URI address = new URI(wsUrl);
 
             // establish session
@@ -206,9 +200,6 @@ public class ClientFactoryTest extends JavaOSGiTest {
             // check response
             String response = webSocket.completable.get(WAIT_SECONDS, TimeUnit.SECONDS);
             assertEquals(RESPONSE, response);
-
-        } catch (Exception e) {
-            fail(e);
         } finally {
             try {
                 // stop client

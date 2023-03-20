@@ -44,35 +44,24 @@ public class TestServer {
         this.server = new Server();
     }
 
-    public void startServer() {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ServletHandler handler = new ServletHandler();
-                handler.addServletWithMapping(new ServletHolder(new TestHttpServlet()), "/http1");
-                handler.addServletWithMapping(new ServletHolder(new TestHttpServlet()), "/http2");
-                handler.addServletWithMapping(new ServletHolder(new TestWebSocketServlet()), "/ws");
-                server.setHandler(handler);
+    public void startServer() throws Exception {
+        ServletHandler handler = new ServletHandler();
+        handler.addServletWithMapping(new ServletHolder(new TestHttpServlet()), "/http1");
+        handler.addServletWithMapping(new ServletHolder(new TestHttpServlet()), "/http2");
+        handler.addServletWithMapping(new ServletHolder(new TestWebSocketServlet()), "/ws");
+        server.setHandler(handler);
 
-                HttpConfiguration httpConfig = new HttpConfiguration();
-                HttpConnectionFactory h1 = new HttpConnectionFactory(httpConfig);
-                HTTP2CServerConnectionFactory h2c = new HTTP2CServerConnectionFactory(httpConfig);
+        HttpConfiguration httpConfig = new HttpConfiguration();
+        HttpConnectionFactory h1 = new HttpConnectionFactory(httpConfig);
+        HTTP2CServerConnectionFactory h2c = new HTTP2CServerConnectionFactory(httpConfig);
 
-                ServerConnector connector = new ServerConnector(server, h1, h2c);
-                connector.setHost(host);
-                connector.setPort(port);
-                connector.setIdleTimeout(timeout);
-                server.addConnector(connector);
+        ServerConnector connector = new ServerConnector(server, h1, h2c);
+        connector.setHost(host);
+        connector.setPort(port);
+        connector.setIdleTimeout(timeout);
+        server.addConnector(connector);
 
-                try {
-                    server.start();
-                    server.join();
-                } catch (Exception e) {
-                }
-            }
-        });
-
-        thread.start();
+        server.start();
     }
 
     public void stopServer() {
