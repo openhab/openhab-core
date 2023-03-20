@@ -48,6 +48,7 @@ public class ThingBuilder {
     private @Nullable ThingUID bridgeUID;
     private @Nullable Map<String, String> properties;
     private @Nullable String location;
+    private @Nullable String category;
 
     protected ThingBuilder(ThingTypeUID thingTypeUID, ThingUID thingUID) {
         this.thingUID = thingUID;
@@ -86,7 +87,8 @@ public class ThingBuilder {
     public static ThingBuilder create(Thing thing) {
         return ThingBuilder.create(thing.getThingTypeUID(), thing.getUID()).withBridge(thing.getBridgeUID())
                 .withChannels(thing.getChannels()).withConfiguration(thing.getConfiguration())
-                .withLabel(thing.getLabel()).withLocation(thing.getLocation()).withProperties(thing.getProperties());
+                .withLabel(thing.getLabel()).withLocation(thing.getLocation()).withCategory(thing.getCategory())
+                .withProperties(thing.getProperties());
     }
 
     /**
@@ -251,6 +253,17 @@ public class ThingBuilder {
         return this;
     }
 
+    /**
+     * Set the category for this thing
+     *
+     * @param category a string wih the category of the thing
+     * @return the {@link ThingBuilder} itself
+     */
+    public ThingBuilder withCategory(@Nullable String category) {
+        this.category = category;
+        return this;
+    }
+
     protected Thing populate(ThingImpl thing) {
         thing.setLabel(label);
         thing.setChannels(channels);
@@ -262,6 +275,7 @@ public class ThingBuilder {
             }
         }
         thing.setLocation(location);
+        thing.setCategory(category);
         return thing;
     }
 

@@ -32,12 +32,13 @@ public abstract class AbstractThingDTO {
     public String UID;
     public String thingTypeUID;
     public String location;
+    public String category;
 
     public AbstractThingDTO() {
     }
 
     protected AbstractThingDTO(String thingTypeUID, String UID, String label, String bridgeUID,
-            Map<String, Object> configuration, Map<String, String> properties, String location) {
+            Map<String, Object> configuration, Map<String, String> properties, String location, String category) {
         this.thingTypeUID = thingTypeUID;
         this.UID = UID;
         this.label = label;
@@ -45,5 +46,6 @@ public abstract class AbstractThingDTO {
         this.configuration = configuration;
         this.properties = properties;
         this.location = location;
+        this.category = category;
     }
 }

@@ -188,6 +188,13 @@ public class ThingHelper {
             builder.withLocation(thing.getLocation());
         }
 
+        // Update the category
+        if (updatedContents.category != null) {
+            builder.withCategory(updatedContents.category);
+        } else {
+            builder.withCategory(thing.getCategory());
+        }
+
         // update bridge UID
         if (updatedContents.bridgeUID != null) {
             builder.withBridge(new ThingUID(updatedContents.bridgeUID));

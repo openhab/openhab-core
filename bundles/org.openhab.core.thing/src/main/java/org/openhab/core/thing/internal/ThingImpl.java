@@ -64,6 +64,8 @@ public class ThingImpl implements Thing {
 
     private @Nullable String location;
 
+    private @Nullable String category;
+
     private transient volatile ThingStatusInfo status = ThingStatusInfoBuilder
             .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
 
@@ -206,7 +208,7 @@ public class ThingImpl implements Thing {
 
     @Override
     public @Nullable String setProperty(String name, @Nullable String value) {
-        if (name == null || name.isEmpty()) {
+        if (name.isEmpty()) {
             throw new IllegalArgumentException("Property name must not be null or empty");
         }
         synchronized (this) {
@@ -230,6 +232,16 @@ public class ThingImpl implements Thing {
     @Override
     public void setLocation(@Nullable String location) {
         this.location = location;
+    }
+
+    @Override
+    public @Nullable String getCategory() {
+        return category;
+    }
+
+    @Override
+    public void setCategory(@Nullable String category) {
+        this.category = category;
     }
 
     @Override
