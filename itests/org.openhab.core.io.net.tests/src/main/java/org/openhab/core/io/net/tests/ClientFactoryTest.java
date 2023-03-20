@@ -62,7 +62,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
 
     private static final String HOST = "127.0.0.1";
     private static final int TIMEOUT = -1;
-    private static final int WAIT_SECONDS = 3;
+    private static final int WAIT_SECONDS = 10;
 
     private static int port;
     private static String wsUrl = "";
@@ -101,6 +101,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
 
         try {
             // start client
+            client.setConnectTimeout(WAIT_SECONDS * 1000);
             client.start();
 
             // send request
@@ -142,6 +143,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
 
         try {
             // start client
+            client.setConnectTimeout(WAIT_SECONDS * 1000);
             client.start();
 
             // establish session
@@ -182,6 +184,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
 
         try {
             // start client
+            client.setConnectTimeout(WAIT_SECONDS * 1000);
             client.start();
 
             // initialize address
