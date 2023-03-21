@@ -130,12 +130,6 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http.auth/${project.version}</bundle>
 	</feature>
 
-	<feature name="openhab-core-io-net-test" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<bundle>mvn:org.eclipse.jetty.http2/http2-server/${jetty.version}</bundle>
-		<bundle>mvn:org.eclipse.jetty.http2/http2-hpack/${jetty.version}</bundle>
-	</feature>
-
 	<feature name="openhab-core-io-rest-auth" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-auth-jaas</feature>
