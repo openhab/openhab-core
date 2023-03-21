@@ -70,6 +70,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
     private static String http2Url = "";
 
     private static @Nullable TestServer server;
+    private static final Completable<Boolean> SERVER_RUNNING = new Completable<>();
 
     @AfterAll
     public static void afterAll() {
@@ -87,12 +88,14 @@ public class ClientFactoryTest extends JavaOSGiTest {
         http2Url = "http://" + HOST + ":" + port + "/http2";
         TestServer theServer = new TestServer(HOST, port, TIMEOUT);
         theServer.startServer();
-        theServer.isStarted.get(WAIT_SECONDS, TimeUnit.SECONDS);
         server = theServer;
+        SERVER_RUNNING.complete(true);
     }
 
     @Test
     public void testHttp1Client() throws Exception {
+        SERVER_RUNNING.get(WAIT_SECONDS, TimeUnit.SECONDS);
+
         HttpClientFactory httpClientFactory = getService(HttpClientFactory.class);
         assertNotNull(httpClientFactory);
 
@@ -122,6 +125,8 @@ public class ClientFactoryTest extends JavaOSGiTest {
 
     @Test
     public void testHttp2Client() throws Exception {
+        SERVER_RUNNING.get(WAIT_SECONDS, TimeUnit.SECONDS);
+
         HttpClientFactory httpClientFactory = getService(HttpClientFactory.class);
         assertNotNull(httpClientFactory);
 
@@ -176,6 +181,8 @@ public class ClientFactoryTest extends JavaOSGiTest {
 
     @Test
     public void testWebSocketClient() throws Exception {
+        SERVER_RUNNING.get(WAIT_SECONDS, TimeUnit.SECONDS);
+
         WebSocketFactory webSocketFactory = getService(WebSocketFactory.class);
         assertNotNull(webSocketFactory);
 
