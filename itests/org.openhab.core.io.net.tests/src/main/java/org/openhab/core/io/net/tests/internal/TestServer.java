@@ -13,6 +13,7 @@
 package org.openhab.core.io.net.tests.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -20,6 +21,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.Promise.Completable;
+import org.eclipse.jetty.util.component.LifeCycle;
 
 /**
  * Embedded jetty server used in the tests.
@@ -36,6 +39,7 @@ public class TestServer {
     private final int port;
     private final int timeout;
     private final Server server;
+    public final Completable<Boolean> isStarted = new Completable<>();
 
     public TestServer(String host, int port, int timeout) {
         this.host = host;
@@ -60,6 +64,17 @@ public class TestServer {
         connector.setPort(port);
         connector.setIdleTimeout(timeout);
         server.addConnector(connector);
+
+        server.addLifeCycleListener(new LifeCycle.Listener() {
+            @Override
+            public void lifeCycleStarted(@Nullable LifeCycle event) {
+                if (event != null && event.isStarted()) {
+                    isStarted.complete(true);
+                } else {
+                    isStarted.completeExceptionally(new IllegalStateException("Server not started"));
+                }
+            }
+        });
 
         server.start();
     }

@@ -87,6 +87,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
         http2Url = "http://" + HOST + ":" + port + "/http2";
         TestServer theServer = new TestServer(HOST, port, TIMEOUT);
         theServer.startServer();
+        theServer.isStarted.get(WAIT_SECONDS, TimeUnit.SECONDS);
         server = theServer;
     }
 
