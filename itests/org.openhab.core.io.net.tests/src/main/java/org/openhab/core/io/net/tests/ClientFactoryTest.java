@@ -70,10 +70,19 @@ public class ClientFactoryTest extends JavaOSGiTest {
     private static String http2Url = "";
 
     private static @Nullable TestServer server;
+
+    // synchronization objects for multi- thread testing
     private static final Completable<Boolean> SERVER_RUNNING = new Completable<>();
+    private static final Completable<Boolean> HTTP_TEST_DONE = new Completable<>();
+    private static final Completable<Boolean> HTTP2_TEST_DONE = new Completable<>();
+    private static final Completable<Boolean> WS_TEST_DONE = new Completable<>();
 
     @AfterAll
-    public static void afterAll() {
+    public static void afterAll() throws Exception {
+        HTTP_TEST_DONE.get(WAIT_SECONDS, TimeUnit.SECONDS);
+        HTTP2_TEST_DONE.get(WAIT_SECONDS, TimeUnit.SECONDS);
+        WS_TEST_DONE.get(WAIT_SECONDS, TimeUnit.SECONDS);
+
         TestServer theServer = server;
         if (theServer != null) {
             theServer.stopServer();
@@ -89,6 +98,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
         TestServer theServer = new TestServer(HOST, port, TIMEOUT);
         theServer.startServer();
         server = theServer;
+
         SERVER_RUNNING.complete(true);
     }
 
@@ -121,6 +131,8 @@ public class ClientFactoryTest extends JavaOSGiTest {
             } catch (Exception e) {
             }
         }
+
+        HTTP_TEST_DONE.complete(true);
     }
 
     @Test
@@ -177,6 +189,8 @@ public class ClientFactoryTest extends JavaOSGiTest {
             } catch (Exception e) {
             }
         }
+
+        HTTP2_TEST_DONE.complete(true);
     }
 
     @Test
@@ -218,5 +232,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
             } catch (Exception e) {
             }
         }
+
+        WS_TEST_DONE.complete(true);
     }
 }
