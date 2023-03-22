@@ -35,11 +35,7 @@ import org.eclipse.jetty.http2.client.HTTP2Client;
 import org.eclipse.jetty.http2.frames.HeadersFrame;
 import org.eclipse.jetty.util.Promise.Completable;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer.MethodName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.openhab.core.io.net.http.HttpClientFactory;
 import org.openhab.core.io.net.http.WebSocketFactory;
 import org.openhab.core.io.net.tests.internal.TestServer;
@@ -47,6 +43,8 @@ import org.openhab.core.io.net.tests.internal.TestStreamAdapter;
 import org.openhab.core.io.net.tests.internal.TestWebSocket;
 import org.openhab.core.test.TestPortUtil;
 import org.openhab.core.test.java.JavaOSGiTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tests for HttpClientFactory and WebSocketFactory implementations.
@@ -54,7 +52,6 @@ import org.openhab.core.test.java.JavaOSGiTest;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-@TestMethodOrder(MethodName.class)
 public class ClientFactoryTest extends JavaOSGiTest {
 
     private static final String CONSUMER = "consumer";
@@ -63,23 +60,38 @@ public class ClientFactoryTest extends JavaOSGiTest {
     private static final String HOST = "127.0.0.1";
     private static final int WAIT_SECONDS = 10;
 
-    private static int port;
-    private static String wsUrl = "";
-    private static String httpUrl = "";
-    private static String http2Url = "";
+    private final Logger logger = LoggerFactory.getLogger(ClientFactoryTest.class);
+
+    private int port;
+    private String wsUrl = "";
+    private String httpUrl = "";
+    private String http2Url = "";
 
     private static @Nullable TestServer server;
 
-    @AfterAll
-    public static void afterAll() throws Exception {
+    @Test
+    public void pipelineAllMethods() throws Exception {
+        logger.warn("Test started");
+        beforeAll();
+        logger.warn("Server initialized");
+        testHttp1Client();
+        logger.warn("Http1 test completed");
+        testHttp2Client();
+        logger.warn("Http2 test completed");
+        testWebSocketClient();
+        logger.warn("WebSocket test completed");
+        afterAll();
+        logger.warn("No errors");
+    }
+
+    private void afterAll() throws Exception {
         TestServer theServer = server;
         if (theServer != null) {
             theServer.stopServer();
         }
     }
 
-    @BeforeAll
-    public static void beforeAll() throws Exception {
+    private void beforeAll() throws Exception {
         port = TestPortUtil.findFreePort();
         wsUrl = "ws://" + HOST + ":" + port + "/ws";
         httpUrl = "http://" + HOST + ":" + port + "/http1";
@@ -89,8 +101,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
         server = theServer;
     }
 
-    @Test
-    public void testHttp1Client() throws Exception {
+    private void testHttp1Client() throws Exception {
         HttpClientFactory httpClientFactory = getService(HttpClientFactory.class);
         assertNotNull(httpClientFactory);
 
@@ -118,8 +129,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
         }
     }
 
-    @Test
-    public void testHttp2Client() throws Exception {
+    private void testHttp2Client() throws Exception {
         HttpClientFactory httpClientFactory = getService(HttpClientFactory.class);
         assertNotNull(httpClientFactory);
 
@@ -172,8 +182,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
         }
     }
 
-    @Test
-    public void testWebSocketClient() throws Exception {
+    private void testWebSocketClient() throws Exception {
         WebSocketFactory webSocketFactory = getService(WebSocketFactory.class);
         assertNotNull(webSocketFactory);
 
