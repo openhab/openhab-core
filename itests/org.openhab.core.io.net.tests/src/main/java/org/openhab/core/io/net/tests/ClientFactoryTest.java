@@ -43,8 +43,6 @@ import org.openhab.core.io.net.tests.internal.TestStreamAdapter;
 import org.openhab.core.io.net.tests.internal.TestWebSocket;
 import org.openhab.core.test.TestPortUtil;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Tests for HttpClientFactory and WebSocketFactory implementations.
@@ -60,8 +58,6 @@ public class ClientFactoryTest extends JavaOSGiTest {
     private static final String HOST = "127.0.0.1";
     private static final int WAIT_SECONDS = 10;
 
-    private final Logger logger = LoggerFactory.getLogger(ClientFactoryTest.class);
-
     private int port;
     private String wsUrl = "";
     private String httpUrl = "";
@@ -69,19 +65,25 @@ public class ClientFactoryTest extends JavaOSGiTest {
 
     private static @Nullable TestServer server;
 
+    /**
+     * Pipeline the initialization method `beforeAll()`, the three test methods, and the shutdown method `afterAll()`,
+     * in series through a single method call, and synchronize this method so that only one such test series method can
+     * run at a time either within a single class instance or across multiple class instances on the same JVM. Note:
+     * even this cannot synchronize across multiple JVMs running on the same (virtual) machine! i.e. if there are
+     * multiple JVMs on one machine, they could still try to access the machine's common `localHost` IP stack at the
+     * same time..
+     *
+     * @throws Exception
+     */
     @Test
     public void pipelineAllMethods() throws Exception {
-        logger.warn("Test started");
-        beforeAll();
-        logger.warn("Server initialized");
-        testHttp1Client();
-        logger.warn("Http1 test completed");
-        testHttp2Client();
-        logger.warn("Http2 test completed");
-        testWebSocketClient();
-        logger.warn("WebSocket test completed");
-        afterAll();
-        logger.warn("No errors");
+        synchronized (ClientFactoryTest.class) {
+            beforeAll();
+            testHttp1Client();
+            testHttp2Client();
+            testWebSocketClient();
+            afterAll();
+        }
     }
 
     private void afterAll() throws Exception {
