@@ -34,13 +34,11 @@ import org.eclipse.jetty.servlet.ServletHolder;
 public class TestServer {
     private final String host;
     private final int port;
-    private final int timeout;
     private final Server server;
 
-    public TestServer(String host, int port, int timeout) {
+    public TestServer(String host, int port) {
         this.host = host;
         this.port = port;
-        this.timeout = timeout;
         this.server = new Server();
     }
 
@@ -58,7 +56,6 @@ public class TestServer {
         ServerConnector connector = new ServerConnector(server, h1, h2c);
         connector.setHost(host);
         connector.setPort(port);
-        connector.setIdleTimeout(timeout);
         server.addConnector(connector);
 
         server.start();
