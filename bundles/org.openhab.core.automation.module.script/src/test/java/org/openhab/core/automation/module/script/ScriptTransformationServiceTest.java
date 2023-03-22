@@ -86,6 +86,14 @@ public class ScriptTransformationServiceTest {
             String scriptUid = arguments.getArgument(0);
             if (SCRIPT_UID.equals(scriptUid)) {
                 return TRANSFORMATION_CONFIGURATION;
+            } else if (scriptUid.startsWith(SCRIPT_UID + ".")) {
+                String scriptType = "";
+                int index = scriptUid.lastIndexOf(".");
+                if (index >= 0) {
+                    scriptType = scriptUid.substring(index + 1);
+                }
+
+                return new Transformation(SCRIPT_UID, "label", scriptType, Map.of(Transformation.FUNCTION, SCRIPT));
             } else if (INVALID_SCRIPT_UID.equals(scriptUid)) {
                 return INVALID_TRANSFORMATION_CONFIGURATION;
             } else {
@@ -102,8 +110,25 @@ public class ScriptTransformationServiceTest {
     }
 
     @Test
+    public void supportsScriptTypeAsExtension() throws TransformationException {
+        String returnValue = Objects.requireNonNull(service.transform(SCRIPT_UID + "." + SCRIPT_LANGUAGE, "input"));
+
+        assertThat(returnValue, is(SCRIPT_OUTPUT));
+    }
+
+    @Test
     public void scriptExecutionParametersAreInjectedIntoEngineContext() throws TransformationException {
         service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID + "?param1=value1&param2=value2", "input");
+
+        verify(scriptContext).setAttribute(eq("input"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
+        verify(scriptContext).setAttribute(eq("param1"), eq("value1"), eq(ScriptContext.ENGINE_SCOPE));
+        verify(scriptContext).setAttribute(eq("param2"), eq("value2"), eq(ScriptContext.ENGINE_SCOPE));
+        verifyNoMoreInteractions(scriptContext);
+    }
+
+    @Test
+    public void scriptTypeExtensionSupportsParameters() throws TransformationException {
+        service.transform(SCRIPT_UID + "." + SCRIPT_LANGUAGE + "?param1=value1&param2=value2", "input");
 
         verify(scriptContext).setAttribute(eq("input"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param1"), eq("value1"), eq(ScriptContext.ENGINE_SCOPE));
@@ -173,6 +198,14 @@ public class ScriptTransformationServiceTest {
     }
 
     @Test
+    public void unknownScriptExtensionThrowsException() {
+        TransformationException e = assertThrows(TransformationException.class,
+                () -> service.transform(SCRIPT_UID + ".foo", "input"));
+
+        assertThat(e.getMessage(), is("Script type 'foo' is not supported by any available script engine."));
+    }
+
+    @Test
     public void unknownScriptUidThrowsException() {
         TransformationException e = assertThrows(TransformationException.class,
                 () -> service.transform(SCRIPT_LANGUAGE + ":" + "foo", "input"));
@@ -193,11 +226,11 @@ public class ScriptTransformationServiceTest {
     }
 
     @Test
-    public void invalidConfigurationTypeThrowsTransformationException() {
+    public void invalidScriptTypeThrowsTransformationException() {
         TransformationException e = assertThrows(TransformationException.class,
-                () -> service.transform(SCRIPT_LANGUAGE + ":" + INVALID_SCRIPT_UID, "input"));
+                () -> service.transform("invalid:" + INVALID_SCRIPT_UID, "input"));
 
-        assertThat(e.getMessage(), is("Configuration does not have correct type 'script' but 'invalid'."));
+        assertThat(e.getMessage(), is("Script type 'invalid' is not supported by any available script engine."));
     }
 
     @Test

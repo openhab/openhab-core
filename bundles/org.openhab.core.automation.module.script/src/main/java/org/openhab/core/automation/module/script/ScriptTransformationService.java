@@ -68,8 +68,12 @@ public class ScriptTransformationService
     private static final String PROFILE_CONFIG_URI = "profile:transform:SCRIPT";
     public static final String SUPPORTED_CONFIGURATION_TYPE = "script";
 
+    // exclude `?` in scriptType so "script.js?param=:|" doesn't match inline pattern
+    private static final Pattern INLINE_SCRIPT_CONFIG_PATTERN = Pattern
+            .compile("(?<scriptType>[^?]*?):\\|(?<inlineScript>.+)");
+
     private static final Pattern SCRIPT_CONFIG_PATTERN = Pattern
-            .compile("(?<scriptType>.*?):(?<scriptUid>.*?)(\\?(?<params>.*?))?");
+            .compile("((?<scriptType>.+):)?(?<scriptUid>.+?)(\\?(?<params>.*?))?");
 
     private final Logger logger = LoggerFactory.getLogger(ScriptTransformationService.class);
 
@@ -101,30 +105,53 @@ public class ScriptTransformationService
 
     @Override
     public @Nullable String transform(String function, String source) throws TransformationException {
-        Matcher configMatcher = SCRIPT_CONFIG_PATTERN.matcher(function);
-        if (!configMatcher.matches()) {
-            throw new TransformationException("Script Type must be prepended to transformation UID.");
+        String scriptType;
+        String scriptUid;
+        String inlineScript = null;
+        String params = null;
+
+        Matcher configMatcher = INLINE_SCRIPT_CONFIG_PATTERN.matcher(function);
+        if (configMatcher.matches()) {
+            scriptType = configMatcher.group("scriptType");
+            inlineScript = configMatcher.group("inlineScript");
+
+            if (scriptType == null || scriptType.isBlank()) {
+                throw new TransformationException(
+                        "Script type must be specified for the inline transformation '" + inlineScript + "'");
+            }
+
+            scriptUid = "|" + Integer.toString(inlineScript.hashCode()); // prefix with | to avoid clashing with a real
+                                                                         // filename
+        } else {
+            configMatcher = SCRIPT_CONFIG_PATTERN.matcher(function);
+            if (!configMatcher.matches()) {
+                throw new TransformationException("Invalid syntax for the script transformation: '" + function + "'");
+            }
+            scriptUid = configMatcher.group("scriptUid");
+            scriptType = configMatcher.group("scriptType");
+            params = configMatcher.group("params");
         }
-        String scriptType = configMatcher.group("scriptType");
-        String scriptUid = configMatcher.group("scriptUid");
 
         ScriptRecord scriptRecord = scriptCache.computeIfAbsent(scriptUid, k -> new ScriptRecord());
         scriptRecord.lock.lock();
         try {
             if (scriptRecord.script.isBlank()) {
-                if (scriptUid.startsWith("|")) {
-                    // inline script -> strip inline-identifier
-                    scriptRecord.script = scriptUid.substring(1);
+                scriptRecord.scriptType = scriptType;
+                if (inlineScript != null) {
+                    scriptRecord.script = inlineScript;
                 } else {
                     // get script from transformation registry
                     Transformation transformation = transformationRegistry.get(scriptUid);
                     if (transformation != null) {
-                        if (!SUPPORTED_CONFIGURATION_TYPE.equals(transformation.getType())) {
-                            throw new TransformationException("Configuration does not have correct type 'script' but '"
-                                    + transformation.getType() + "'.");
-                        }
                         scriptRecord.script = transformation.getConfiguration().getOrDefault(Transformation.FUNCTION,
                                 "");
+                        if (scriptType == null || scriptType.isBlank()) {
+                            scriptRecord.scriptType = transformation.getType();
+                            if (scriptRecord.scriptType.equals(SUPPORTED_CONFIGURATION_TYPE)) {
+                                throw new TransformationException(
+                                        "Script Type must be prepended to transformation UID.");
+                            }
+                        }
                     }
                 }
                 if (scriptRecord.script.isBlank()) {
@@ -133,18 +160,18 @@ public class ScriptTransformationService
                 scriptCache.put(scriptUid, scriptRecord);
             }
 
-            if (!scriptEngineManager.isSupported(scriptType)) {
+            if (!scriptEngineManager.isSupported(scriptRecord.scriptType)) {
                 // language has been removed, clear container and compiled scripts if found
                 if (scriptRecord.scriptEngineContainer != null) {
                     scriptEngineManager.removeEngine(OPENHAB_TRANSFORMATION_SCRIPT + scriptUid);
                 }
                 clearCache(scriptUid);
-                throw new TransformationException(
-                        "Script type '" + scriptType + "' is not supported by any available script engine.");
+                throw new TransformationException("Script type '" + scriptRecord.scriptType
+                        + "' is not supported by any available script engine.");
             }
 
             if (scriptRecord.scriptEngineContainer == null) {
-                scriptRecord.scriptEngineContainer = scriptEngineManager.createScriptEngine(scriptType,
+                scriptRecord.scriptEngineContainer = scriptEngineManager.createScriptEngine(scriptRecord.scriptType,
                         OPENHAB_TRANSFORMATION_SCRIPT + scriptUid);
             }
             ScriptEngineContainer scriptEngineContainer = scriptRecord.scriptEngineContainer;
@@ -160,7 +187,6 @@ public class ScriptTransformationService
                 ScriptContext executionContext = engine.getContext();
                 executionContext.setAttribute("input", source, ScriptContext.ENGINE_SCOPE);
 
-                String params = configMatcher.group("params");
                 if (params != null) {
                     for (String param : params.split("&")) {
                         String[] splitString = param.split("=");
@@ -279,6 +305,7 @@ public class ScriptTransformationService
         public String script = "";
         public @Nullable ScriptEngineContainer scriptEngineContainer;
         public @Nullable CompiledScript compiledScript;
+        public String scriptType = "";
 
         public final Lock lock = new ReentrantLock();
     }
