@@ -24,10 +24,10 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
-import org.openhab.core.model.script.ScriptServiceUtil;
 import org.slf4j.LoggerFactory;
 
 /**

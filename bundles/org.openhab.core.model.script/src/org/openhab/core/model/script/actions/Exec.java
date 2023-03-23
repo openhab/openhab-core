@@ -56,5 +56,4 @@ public class Exec {
     public static String executeCommandLine(Duration timeout, String... commandLine) {
         return ExecUtil.executeCommandLineAndWaitResponse(timeout, commandLine);
     }
-
 }

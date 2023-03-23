@@ -80,5 +80,4 @@ public class Log {
     static public void logError(String loggerName, String format, Object... args) {
         LoggerFactory.getLogger(LOGGER_NAME_PREFIX.concat(loggerName)).error(format, args);
     }
-
 }

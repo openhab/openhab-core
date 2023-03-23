@@ -88,7 +88,8 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
      * Removes all meta-data for a given item
      *
      * @param itemName the item name
-     */public void removeMetadataByItemName(String itemName) {
+     */
+    public void removeMetadataByItemName(String itemName) {
         Set<Metadata> toBeRemoved;
         try {
             lock.writeLock().lock();
@@ -101,6 +102,7 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
             notifyListenersAboutRemovedElement(m);
         }
     }
+
     @Override
     public Collection<Metadata> getAll() {
         try {
@@ -110,5 +112,4 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
             lock.readLock().unlock();
         }
     }
-
 }

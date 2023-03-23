@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.script.Compilable;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -30,6 +31,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -107,6 +109,25 @@ public class ScriptTransformationServiceTest {
         verify(scriptContext).setAttribute(eq("param1"), eq("value1"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param2"), eq("value2"), eq(ScriptContext.ENGINE_SCOPE));
         verifyNoMoreInteractions(scriptContext);
+    }
+
+    @Test
+    public void scriptSetAttributesBeforeCompiling() throws TransformationException, ScriptException {
+        abstract class CompilableScriptEngine implements ScriptEngine, Compilable {
+        }
+        scriptEngine = mock(CompilableScriptEngine.class);
+
+        when(scriptEngineContainer.getScriptEngine()).thenReturn(scriptEngine);
+        when(scriptEngine.getContext()).thenReturn(scriptContext);
+
+        InOrder inOrder = inOrder(scriptContext, scriptEngine);
+
+        service.transform(SCRIPT_LANGUAGE + ":" + SCRIPT_UID + "?param1=value1", "input");
+
+        inOrder.verify(scriptContext, times(2)).setAttribute(anyString(), anyString(), eq(ScriptContext.ENGINE_SCOPE));
+        inOrder.verify((Compilable) scriptEngine).compile(SCRIPT);
+        inOrder.verify(scriptEngine).eval(SCRIPT);
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test

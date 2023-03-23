@@ -20,12 +20,12 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
-import org.openhab.core.model.persistence.persistence.Strategy;
 import org.eclipse.xtext.resource.EObjectDescription;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeProvider;
 import org.eclipse.xtext.scoping.impl.SimpleScope;
+import org.openhab.core.model.persistence.persistence.Strategy;
 
 import com.google.common.base.Predicate;
 
@@ -53,5 +53,4 @@ public class PersistenceGlobalScopeProvider extends AbstractGlobalScopeProvider 
         }
         return new SimpleScope(parentScope, descs);
     }
-
 }

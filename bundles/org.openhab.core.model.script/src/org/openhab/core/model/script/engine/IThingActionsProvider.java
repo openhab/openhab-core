@@ -19,5 +19,4 @@ import org.openhab.core.thing.binding.ThingActions;
 public interface IThingActionsProvider {
 
     List<ThingActions> get();
-
 }

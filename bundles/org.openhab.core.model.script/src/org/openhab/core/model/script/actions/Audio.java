@@ -47,7 +47,7 @@ public class Audio {
 
     @ActionDoc(text = "plays a sound with the given volume from the sounds folder to the default sink")
     public static void playSound(@ParamDoc(name = "filename", text = "the filename with extension") String filename,
-                                 @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
+            @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
         try {
             AudioActionService.audioManager.playFile(filename, volume);
         } catch (AudioException e) {
@@ -57,13 +57,13 @@ public class Audio {
 
     @ActionDoc(text = "plays a sound with the given volume from the sounds folder to the default sink")
     public static void playSound(@ParamDoc(name = "filename", text = "the filename with extension") String filename,
-                                 @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) {
+            @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) {
         playSound(filename, floatVolumeToPercentType(volume));
     }
 
     @ActionDoc(text = "plays a sound from the sounds folder to the given sink(s)")
     public static void playSound(@ParamDoc(name = "sink", text = "the id of the sink") String sink,
-                                 @ParamDoc(name = "filename", text = "the filename with extension") String filename) {
+            @ParamDoc(name = "filename", text = "the filename with extension") String filename) {
         try {
             AudioActionService.audioManager.playFile(filename, sink);
         } catch (AudioException e) {
@@ -73,8 +73,8 @@ public class Audio {
 
     @ActionDoc(text = "plays a sound with the given volume from the sounds folder to the given sink(s)")
     public static void playSound(@ParamDoc(name = "sink", text = "the id of the sink") String sink,
-                                 @ParamDoc(name = "filename", text = "the filename with extension") String filename,
-                                 @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
+            @ParamDoc(name = "filename", text = "the filename with extension") String filename,
+            @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
         try {
             AudioActionService.audioManager.playFile(filename, sink, volume);
         } catch (AudioException e) {
@@ -84,8 +84,8 @@ public class Audio {
 
     @ActionDoc(text = "plays a sound with the given volume from the sounds folder to the given sink(s)")
     public static void playSound(@ParamDoc(name = "sink", text = "the id of the sink") String sink,
-                                 @ParamDoc(name = "filename", text = "the filename with extension") String filename,
-                                 @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) {
+            @ParamDoc(name = "filename", text = "the filename with extension") String filename,
+            @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) {
         playSound(sink, filename, floatVolumeToPercentType(volume));
     }
 
@@ -167,6 +167,7 @@ public class Audio {
 
     /**
      * Converts a float volume to a {@link PercentType} volume and checks if float volume is in the [0;1] range.
+     * 
      * @param volume
      * @return
      */

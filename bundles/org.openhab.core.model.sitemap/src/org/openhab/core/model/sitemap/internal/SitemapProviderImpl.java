@@ -127,5 +127,4 @@ public class SitemapProviderImpl implements SitemapProvider, ModelRepositoryChan
     public void removeModelChangeListener(ModelRepositoryChangeListener listener) {
         modelChangeListeners.remove(listener);
     }
-
 }

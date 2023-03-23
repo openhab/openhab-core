@@ -45,7 +45,8 @@ public class DSLScriptEngineFactory implements ScriptEngineFactory {
     protected @Nullable DSLScriptContextProvider contextProvider;
 
     @Activate
-    public DSLScriptEngineFactory(@Reference ScriptEngine scriptEngine, @Reference ScriptExtensionAccessor scriptExtensionAccessor) {
+    public DSLScriptEngineFactory(@Reference ScriptEngine scriptEngine,
+            @Reference ScriptExtensionAccessor scriptExtensionAccessor) {
         this.scriptEngine = scriptEngine;
         this.scriptExtensionAccessor = scriptExtensionAccessor;
     }
@@ -63,5 +64,4 @@ public class DSLScriptEngineFactory implements ScriptEngineFactory {
     public javax.script.@Nullable ScriptEngine createScriptEngine(String scriptType) {
         return new DSLScriptEngine(scriptEngine, contextProvider, scriptExtensionAccessor);
     }
-
 }

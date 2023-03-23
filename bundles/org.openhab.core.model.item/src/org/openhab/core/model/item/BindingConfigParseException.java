@@ -28,5 +28,4 @@ public class BindingConfigParseException extends Exception {
     public BindingConfigParseException(String msg, Exception e) {
         super(msg, e);
     }
-
 }

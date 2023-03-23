@@ -53,7 +53,7 @@ public class ItemConsoleCommandCompleter implements ConsoleCommandCompleter {
         if (cursorArgumentIndex <= 0) {
             return new StringsCompleter(
                     itemRegistry.getAll().stream().map(i -> i.getName()).collect(Collectors.toList()), true)
-                            .complete(args, cursorArgumentIndex, cursorPosition, candidates);
+                    .complete(args, cursorArgumentIndex, cursorPosition, candidates);
         }
         var localDataTypeGetter = dataTypeGetter;
         if (cursorArgumentIndex == 1 && localDataTypeGetter != null) {
