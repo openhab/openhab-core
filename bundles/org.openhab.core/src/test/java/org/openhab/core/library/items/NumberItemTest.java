@@ -19,9 +19,9 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-import javax.measure.quantity.Energy;
 import java.util.List;
 
+import javax.measure.quantity.Energy;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -34,10 +34,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.events.ItemCommandEvent;
-import org.openhab.core.events.Event;
 import org.openhab.core.items.events.ItemStateUpdatedEvent;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
