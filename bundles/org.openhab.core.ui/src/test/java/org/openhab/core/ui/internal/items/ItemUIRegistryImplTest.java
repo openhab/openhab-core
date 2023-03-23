@@ -979,4 +979,40 @@ public class ItemUIRegistryImplTest {
         color = uiRegistry.getValueColor(widgetMock);
         assertEquals("blue", color);
     }
+
+    @Test
+    public void getIconColor() {
+        ColorArray colorArray = mock(ColorArray.class);
+        when(colorArray.getState()).thenReturn("21");
+        when(colorArray.getCondition()).thenReturn("<");
+        when(colorArray.getArg()).thenReturn("yellow");
+        BasicEList<ColorArray> colorArrays = new BasicEList<>();
+        colorArrays.add(colorArray);
+        ColorArray colorArray2 = mock(ColorArray.class);
+        when(colorArray2.getState()).thenReturn("24");
+        when(colorArray2.getCondition()).thenReturn("<");
+        when(colorArray2.getArg()).thenReturn("red");
+        colorArrays.add(colorArray2);
+        ColorArray colorArray3 = mock(ColorArray.class);
+        when(colorArray3.getState()).thenReturn(null);
+        when(colorArray3.getCondition()).thenReturn(null);
+        when(colorArray3.getArg()).thenReturn("blue");
+        colorArrays.add(colorArray3);
+        when(widgetMock.getIconColor()).thenReturn(colorArrays);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(20.9));
+
+        String color = uiRegistry.getIconColor(widgetMock);
+        assertEquals("yellow", color);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(23.5));
+
+        color = uiRegistry.getIconColor(widgetMock);
+        assertEquals("red", color);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(30.0));
+
+        color = uiRegistry.getIconColor(widgetMock);
+        assertEquals("blue", color);
+    }
 }

@@ -69,13 +69,13 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.StateChangeListener;
 import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.types.HSBType;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Frame;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
-import org.openhab.core.model.sitemap.sitemap.List;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Mapview;
 import org.openhab.core.model.sitemap.sitemap.Selection;
@@ -123,6 +123,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Yordan Zhelev - Added Swagger annotations
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Laurent Garnier - Added support for icon color
  */
 @Component(service = RESTResource.class)
 @JaxrsResource
@@ -492,9 +493,11 @@ public class SitemapResource
         }
 
         WidgetDTO bean = new WidgetDTO();
+        State itemState = null;
         if (widget.getItem() != null) {
             try {
                 Item item = itemUIRegistry.getItem(widget.getItem());
+                itemState = item.getState();
                 String widgetTypeName = widget.eClass().getInstanceTypeName()
                         .substring(widget.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
                 boolean isMapview = "mapview".equalsIgnoreCase(widgetTypeName);
@@ -512,8 +515,9 @@ public class SitemapResource
         }
         bean.widgetId = widgetId;
         bean.icon = itemUIRegistry.getCategory(widget);
-        bean.labelcolor = itemUIRegistry.getLabelColor(widget);
-        bean.valuecolor = itemUIRegistry.getValueColor(widget);
+        bean.labelcolor = convertItemValueColor(itemUIRegistry.getLabelColor(widget), itemState);
+        bean.valuecolor = convertItemValueColor(itemUIRegistry.getValueColor(widget), itemState);
+        bean.iconcolor = convertItemValueColor(itemUIRegistry.getIconColor(widget), itemState);
         bean.label = itemUIRegistry.getLabel(widget);
         bean.type = widget.eClass().getName();
         bean.visibility = itemUIRegistry.getVisiblity(widget);
@@ -562,10 +566,6 @@ public class SitemapResource
             bean.maxValue = sliderWidget.getMaxValue();
             bean.step = sliderWidget.getStep();
         }
-        if (widget instanceof List) {
-            List listWidget = (List) widget;
-            bean.separator = listWidget.getSeparator();
-        }
         if (widget instanceof Image) {
             bean.url = buildProxyUrl(sitemapName, widget, uri);
             Image imageWidget = (Image) widget;
@@ -611,6 +611,16 @@ public class SitemapResource
             bean.step = setpointWidget.getStep();
         }
         return bean;
+    }
+
+    public static @Nullable String convertItemValueColor(@Nullable String color, @Nullable State itemState) {
+        if ("itemValue".equals(color)) {
+            if (itemState instanceof HSBType hsbState) {
+                return "#" + Integer.toHexString(hsbState.getRGB()).substring(2);
+            }
+            return null;
+        }
+        return color;
     }
 
     private String buildProxyUrl(String sitemapName, Widget widget, URI uri) {
@@ -732,10 +742,11 @@ public class SitemapResource
             if (widget instanceof Frame) {
                 items.addAll(getAllItems(((Frame) widget).getChildren()));
             }
-            // Consider items involved in any visibility, labelcolor and valuecolor condition
+            // Consider items involved in any visibility, labelcolor, valuecolor and iconcolor condition
             items.addAll(getItemsInVisibilityCond(widget.getVisibility()));
             items.addAll(getItemsInColorCond(widget.getLabelColor()));
             items.addAll(getItemsInColorCond(widget.getValueColor()));
+            items.addAll(getItemsInColorCond(widget.getIconColor()));
         }
         return items;
     }

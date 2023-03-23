@@ -247,9 +247,10 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
                 .filter(t -> "ItemStateChangeTriggerID".equals(t.getId())).findFirst();
         assertThat(trigger.isPresent(), is(true));
         assertThat(trigger.get().getTypeUID(), is("core.GenericEventTrigger"));
-        assertThat(trigger.get().getConfiguration().get("eventSource"), is("myMotionItem"));
-        assertThat(trigger.get().getConfiguration().get("eventTopic"), is("openhab/items/*"));
-        assertThat(trigger.get().getConfiguration().get("eventTypes"), is("ItemStateEvent"));
+        assertThat(trigger.get().getConfiguration().get("source"), is(""));
+        assertThat(trigger.get().getConfiguration().get("topic"), is("openhab/items/myMotionItem/*"));
+        assertThat(trigger.get().getConfiguration().get("types"), is("ItemStateEvent"));
+        assertThat(trigger.get().getConfiguration().get("payload"), is(""));
         Optional<? extends Action> action = rule.getActions().stream()
                 .filter(a -> "ItemPostCommandActionID".equals(a.getId())).findFirst();
         assertThat(action.isPresent(), is(true));
@@ -287,8 +288,10 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
                 .filter(t -> "ItemStateChangeTriggerID".equals(t.getId())).findFirst();
         assertThat(trigger.isPresent(), is(true));
         assertThat(trigger.get().getTypeUID(), is("core.GenericEventTrigger"));
-        assertThat(trigger.get().getConfiguration().get("eventTopic"), is("openhab/items/*"));
-        assertThat(trigger.get().getConfiguration().get("eventTypes"), is("ItemStateEvent"));
+        assertThat(trigger.get().getConfiguration().get("source"), is(""));
+        assertThat(trigger.get().getConfiguration().get("topic"), is("openhab/items/myMotionItem/*"));
+        assertThat(trigger.get().getConfiguration().get("types"), is("ItemStateEvent"));
+        assertThat(trigger.get().getConfiguration().get("payload"), is(""));
         Optional<? extends Action> action = rule.getActions().stream()
                 .filter(a -> "ItemPostCommandActionID".equals(a.getId())).findFirst();
         assertThat(action.isPresent(), is(true));

@@ -116,5 +116,4 @@ public class ThingActionService implements ActionService {
         ThingActionsScope scopeAnnotation = actions.getClass().getAnnotation(ThingActionsScope.class);
         return scopeAnnotation.name();
     }
-
 }

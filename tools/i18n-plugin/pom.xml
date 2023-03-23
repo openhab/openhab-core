@@ -29,7 +29,7 @@
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
-      <version>1.4.19</version>
+      <version>1.4.20</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -51,17 +51,17 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.addon.xml</artifactId>
+      <artifactId>org.openhab.core.addon</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.config.xml</artifactId>
+      <artifactId>org.openhab.core.config.core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.thing.xml</artifactId>
+      <artifactId>org.openhab.core.thing</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

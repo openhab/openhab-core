@@ -38,5 +38,4 @@ public class ItemRuntimeActivator implements ModelParser {
     public String getExtension() {
         return "items";
     }
-
 }

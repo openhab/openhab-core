@@ -37,6 +37,10 @@ public class DeltaUsbSerialScanner {
         this.usbSerialScanner = usbSerialScanner;
     }
 
+    public Set<UsbSerialDeviceInformation> getLastScanResult() {
+        return lastScanResult;
+    }
+
     /**
      * Scans for USB-Serial devices, and returns the delta to the last scan result.
      * <p/>

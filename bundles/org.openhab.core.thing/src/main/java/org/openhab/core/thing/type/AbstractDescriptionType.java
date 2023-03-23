@@ -12,9 +12,12 @@
  */
 package org.openhab.core.thing.type;
 
+import java.net.URI;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Identifiable;
+import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.thing.UID;
 
 /**
@@ -29,23 +32,25 @@ import org.openhab.core.thing.UID;
 @NonNullByDefault
 public abstract class AbstractDescriptionType implements Identifiable<UID> {
 
-    private UID uid;
-    private String label;
-    private @Nullable String description;
+    private final UID uid;
+    private final String label;
+    private final @Nullable String description;
+    private final @Nullable URI configDescriptionURI;
 
     /**
      * Creates a new instance of this class with the specified parameters.
      *
      * @param uid the unique identifier which identifies the according type within
      *            the overall system (must neither be null, nor empty)
-     * @param label the human readable label for the according type
+     * @param label the human-readable label for the according type
      *            (must neither be null nor empty)
-     * @param description the human readable description for the according type
+     * @param description the human-readable description for the according type
      *            (could be null or empty)
+     * @param configDescriptionURI the {@link URI} that references the {@link ConfigDescription} of this type
      * @throws IllegalArgumentException if the UID is null, or the label is null or empty
      */
-    public AbstractDescriptionType(UID uid, String label, @Nullable String description)
-            throws IllegalArgumentException {
+    public AbstractDescriptionType(UID uid, String label, @Nullable String description,
+            @Nullable URI configDescriptionURI) throws IllegalArgumentException {
         if (label.isEmpty()) {
             throw new IllegalArgumentException("The label must neither be null nor empty!");
         }
@@ -53,6 +58,7 @@ public abstract class AbstractDescriptionType implements Identifiable<UID> {
         this.uid = uid;
         this.label = label;
         this.description = description;
+        this.configDescriptionURI = configDescriptionURI;
     }
 
     /**
@@ -67,20 +73,29 @@ public abstract class AbstractDescriptionType implements Identifiable<UID> {
     }
 
     /**
-     * Returns the human readable label for the according type.
+     * Returns the human-readable label for the according type.
      *
-     * @return the human readable label for the according type (neither null, nor empty)
+     * @return the human-readable label for the according type (neither null, nor empty)
      */
     public String getLabel() {
         return this.label;
     }
 
     /**
-     * Returns the human readable description for the according type.
+     * Returns the human-readable description for the according type.
      *
-     * @return the human readable description for the according type (could be null or empty)
+     * @return the human-readable description for the according type (could be null or empty)
      */
     public @Nullable String getDescription() {
         return this.description;
+    }
+
+    /**
+     * Returns the link to a concrete {@link ConfigDescription}.
+     *
+     * @return the link to a concrete ConfigDescription
+     */
+    public @Nullable URI getConfigDescriptionURI() {
+        return configDescriptionURI;
     }
 }

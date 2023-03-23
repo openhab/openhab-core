@@ -49,7 +49,7 @@ import org.openhab.core.types.StateOption;
 import com.google.gson.Gson;
 
 /**
- * {@link ThingEventFactoryTests} tests the {@link ThingEventFactory}.
+ * {@link ThingEventFactoryTest} tests the {@link ThingEventFactory}.
  *
  * @author Stefan Bußweiler - Initial contribution
  * @author Christoph Weitkamp - Added ChannelStateDescriptionChangedEvent

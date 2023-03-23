@@ -18,10 +18,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
@@ -41,10 +43,10 @@ import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.ItemRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletName;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,35 +57,31 @@ import com.google.gson.Gson;
  *
  * @author Jan N. Klug - Initial contribution
  */
-@Component(immediate = true, service = EventSubscriber.class)
 @NonNullByDefault
+@HttpWhiteboardServletName(EventWebSocketServlet.SERVLET_PATH)
+@HttpWhiteboardServletPattern(EventWebSocketServlet.SERVLET_PATH + "/*")
+@Component(immediate = true, service = { EventSubscriber.class, Servlet.class })
 public class EventWebSocketServlet extends WebSocketServlet implements EventSubscriber {
     private static final long serialVersionUID = 1L;
 
+    public static final String SERVLET_PATH = "/ws";
     private final Gson gson = new Gson();
-    private final HttpService httpService;
     private final UserRegistry userRegistry;
     private final EventPublisher eventPublisher;
 
     private final ItemEventUtility itemEventUtility;
     private final Set<EventWebSocket> webSockets = new CopyOnWriteArraySet<>();
 
+    @SuppressWarnings("unused")
+    private @Nullable WebSocketServerFactory importNeeded;
+
     @Activate
-    public EventWebSocketServlet(@Reference HttpService httpService, @Reference UserRegistry userRegistry,
-            @Reference EventPublisher eventPublisher, @Reference ItemRegistry itemRegistry)
-            throws ServletException, NamespaceException {
-        this.httpService = httpService;
+    public EventWebSocketServlet(@Reference UserRegistry userRegistry, @Reference EventPublisher eventPublisher,
+            @Reference ItemRegistry itemRegistry) throws ServletException, NamespaceException {
         this.userRegistry = userRegistry;
         this.eventPublisher = eventPublisher;
 
         itemEventUtility = new ItemEventUtility(gson, itemRegistry);
-
-        httpService.registerServlet("/ws", this, null, null);
-    }
-
-    @Deactivate
-    public void deactivate() {
-        httpService.unregister("/ws");
     }
 
     @Override

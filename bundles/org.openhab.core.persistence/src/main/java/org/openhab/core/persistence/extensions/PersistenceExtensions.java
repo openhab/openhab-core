@@ -113,8 +113,7 @@ public class PersistenceExtensions {
      */
     public static @Nullable HistoricItem historicState(Item item, ZonedDateTime timestamp, String serviceId) {
         PersistenceService service = getService(serviceId);
-        if (service instanceof QueryablePersistenceService) {
-            QueryablePersistenceService qService = (QueryablePersistenceService) service;
+        if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             filter.setEndDate(timestamp);
             filter.setItemName(item.getName());
@@ -156,8 +155,7 @@ public class PersistenceExtensions {
      */
     public static @Nullable ZonedDateTime lastUpdate(Item item, String serviceId) {
         PersistenceService service = getService(serviceId);
-        if (service instanceof QueryablePersistenceService) {
-            QueryablePersistenceService qService = (QueryablePersistenceService) service;
+        if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             filter.setItemName(item.getName());
             filter.setOrdering(Ordering.DESCENDING);
@@ -211,8 +209,7 @@ public class PersistenceExtensions {
      */
     public static @Nullable HistoricItem previousState(Item item, boolean skipEqual, String serviceId) {
         PersistenceService service = getService(serviceId);
-        if (service instanceof QueryablePersistenceService) {
-            QueryablePersistenceService qService = (QueryablePersistenceService) service;
+        if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             filter.setItemName(item.getName());
             filter.setOrdering(Ordering.DESCENDING);
@@ -306,7 +303,7 @@ public class PersistenceExtensions {
             String serviceId) {
         Iterable<HistoricItem> result = getAllStatesBetween(item, begin, end, serviceId);
         Iterator<HistoricItem> it = result.iterator();
-        HistoricItem itemThen = historicState(item, begin);
+        HistoricItem itemThen = historicState(item, begin, serviceId);
         if (itemThen == null) {
             // Can't get the state at the start time
             // If we've got results more recent than this, it must have changed

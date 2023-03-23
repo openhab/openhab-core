@@ -28,6 +28,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -39,6 +43,7 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ParameterOption;
@@ -46,7 +51,10 @@ import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.library.types.PercentType;
+import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.StorageService;
 import org.openhab.core.voice.DialogContext;
+import org.openhab.core.voice.DialogRegistration;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSException;
@@ -103,7 +111,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private static final String CONFIG_PREFIX_DEFAULT_VOICE = "defaultVoice.";
 
     private final Logger logger = LoggerFactory.getLogger(VoiceManagerImpl.class);
-
+    private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
+            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     // service maps
     private final Map<String, KSService> ksServices = new HashMap<>();
     private final Map<String, STTService> sttServices = new HashMap<>();
@@ -114,6 +123,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final AudioManager audioManager;
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
+    private final Storage<DialogRegistration> dialogRegistrationStorage;
 
     private @Nullable Bundle bundle;
 
@@ -129,18 +139,21 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private @Nullable String defaultHLI;
     private @Nullable String defaultVoice;
     private final Map<String, String> defaultVoices = new HashMap<>();
-
-    private Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
-    private Map<String, DialogProcessor> singleDialogProcessors = new ConcurrentHashMap<>();
-    private @Nullable DialogContext lastDialogContext = null;
+    private final Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
+    private final Map<String, DialogProcessor> singleDialogProcessors = new ConcurrentHashMap<>();
+    private @Nullable DialogContext lastDialogContext;
+    private @Nullable ScheduledFuture<?> dialogRegistrationFuture;
 
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
-            final @Reference EventPublisher eventPublisher, final @Reference TranslationProvider i18nProvider) {
+            final @Reference EventPublisher eventPublisher, final @Reference TranslationProvider i18nProvider,
+            final @Reference StorageService storageService) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
+        this.dialogRegistrationStorage = storageService.getStorage(DialogRegistration.class.getName(),
+                this.getClass().getClassLoader());
     }
 
     @Activate
@@ -151,7 +164,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Deactivate
     protected void deactivate() {
-        stopAllDialogs();
+        dialogProcessors.values().forEach(DialogProcessor::stop);
+        dialogProcessors.clear();
+        ScheduledFuture<?> dialogRegistrationFuture = this.dialogRegistrationFuture;
+        if (dialogRegistrationFuture != null) {
+            dialogRegistrationFuture.cancel(true);
+            this.dialogRegistrationFuture = null;
+        }
     }
 
     @SuppressWarnings("null")
@@ -336,8 +355,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         }
     }
 
-    private @Nullable Voice getVoice(String id) {
-        if (id.contains(":")) {
+    private @Nullable Voice getVoice(@Nullable String id) {
+        if (id == null) {
+            return null;
+        } else if (id.contains(":")) {
             // it is a fully qualified unique id
             String[] segments = id.split(":");
             TTSService tts = getTTS(segments[0]);
@@ -498,7 +519,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 .withKS(this.getKS()) //
                 .withSTT(this.getSTT()) //
                 .withTTS(this.getTTS()) //
-                .withHLIs(this.getHLIs()) //
+                .withHLI(this.getHLI()) //
                 .withVoice(this.getDefaultVoice()) //
                 .withMelody(listeningMelody) //
                 .withListeningItem(listeningItem);
@@ -624,11 +645,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         stopDialog(context.source());
     }
 
-    private void stopAllDialogs() {
-        dialogProcessors.values().forEach(DialogProcessor::stop);
-        dialogProcessors.clear();
-    }
-
     @Override
     @Deprecated
     public void listenAndAnswer() throws IllegalStateException {
@@ -701,6 +717,49 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         }
     }
 
+    @Override
+    public void registerDialog(DialogRegistration registration) throws IllegalStateException {
+        if (dialogRegistrationStorage.containsKey(registration.sourceId)) {
+            throw new IllegalStateException(String.format(
+                    "Cannot register dialog as a dialog is registered for audio source '%s'.", registration.sourceId));
+        }
+        synchronized (dialogRegistrationStorage) {
+            dialogRegistrationStorage.put(registration.sourceId, registration);
+        }
+        scheduleDialogRegistrations();
+    }
+
+    @Override
+    public void unregisterDialog(DialogRegistration registration) {
+        unregisterDialog(registration.sourceId);
+    }
+
+    @Override
+    public void unregisterDialog(String sourceId) {
+        synchronized (dialogRegistrationStorage) {
+            var registrationRef = dialogRegistrationStorage.remove(sourceId);
+            if (registrationRef != null) {
+                var dialog = dialogProcessors.get(sourceId);
+                if (dialog != null) {
+                    stopDialog(dialog.dialogContext);
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<DialogRegistration> getDialogRegistrations() {
+        var list = new ArrayList<DialogRegistration>();
+        dialogRegistrationStorage.getValues().forEach(dr -> {
+            if (dr != null) {
+                // update running state
+                dr.running = dialogProcessors.containsKey(dr.sourceId);
+                list.add(dr);
+            }
+        });
+        return list;
+    }
+
     private boolean checkLocales(Set<Locale> supportedLocales, Locale locale) {
         if (supportedLocales.isEmpty()) {
             return true;
@@ -713,39 +772,69 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    protected void addAudioSink(AudioSink audioSink) {
+        scheduleDialogRegistrations();
+    }
+
+    protected void removeAudioSink(AudioSink audioSink) {
+        stopDialogs((dialog) -> dialog.dialogContext.sink().getId().equals(audioSink.getId()));
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    protected void addAudioSource(AudioSource audioSource) {
+        scheduleDialogRegistrations();
+    }
+
+    protected void removeAudioSource(AudioSource audioSource) {
+        stopDialogs((dialog) -> dialog.dialogContext.source().getId().equals(audioSource.getId()));
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addKSService(KSService ksService) {
         this.ksServices.put(ksService.getId(), ksService);
+        scheduleDialogRegistrations();
     }
 
     protected void removeKSService(KSService ksService) {
         this.ksServices.remove(ksService.getId());
+        stopDialogs((dialog) -> {
+            var ks = dialog.dialogContext.ks();
+            return ks != null && ks.getId().equals(ksService.getId());
+        });
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addSTTService(STTService sttService) {
         this.sttServices.put(sttService.getId(), sttService);
+        scheduleDialogRegistrations();
     }
 
     protected void removeSTTService(STTService sttService) {
         this.sttServices.remove(sttService.getId());
+        stopDialogs((dialog) -> dialog.dialogContext.stt().getId().equals(sttService.getId()));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addTTSService(TTSService ttsService) {
         this.ttsServices.put(ttsService.getId(), ttsService);
+        scheduleDialogRegistrations();
     }
 
     protected void removeTTSService(TTSService ttsService) {
         this.ttsServices.remove(ttsService.getId());
+        stopDialogs((dialog) -> dialog.dialogContext.tts().getId().equals(ttsService.getId()));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addHumanLanguageInterpreter(HumanLanguageInterpreter humanLanguageInterpreter) {
         this.humanLanguageInterpreters.put(humanLanguageInterpreter.getId(), humanLanguageInterpreter);
+        scheduleDialogRegistrations();
     }
 
     protected void removeHumanLanguageInterpreter(HumanLanguageInterpreter humanLanguageInterpreter) {
         this.humanLanguageInterpreters.remove(humanLanguageInterpreter.getId());
+        stopDialogs((dialog) -> dialog.dialogContext.hlis().stream()
+                .anyMatch(hli -> hli.getId().equals(humanLanguageInterpreter.getId())));
     }
 
     @Override
@@ -765,8 +854,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public @Nullable TTSService getTTS(String id) {
-        return ttsServices.get(id);
+    public @Nullable TTSService getTTS(@Nullable String id) {
+        return id == null ? null : ttsServices.get(id);
     }
 
     private @Nullable TTSService getTTS(Voice voice) {
@@ -795,8 +884,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public @Nullable STTService getSTT(String id) {
-        return sttServices.get(id);
+    public @Nullable STTService getSTT(@Nullable String id) {
+        return id == null ? null : sttServices.get(id);
     }
 
     @Override
@@ -821,8 +910,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public @Nullable KSService getKS(String id) {
-        return ksServices.get(id);
+    public @Nullable KSService getKS(@Nullable String id) {
+        return id == null ? null : ksServices.get(id);
     }
 
     @Override
@@ -847,13 +936,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public @Nullable HumanLanguageInterpreter getHLI(String id) {
-        return humanLanguageInterpreters.get(id);
+    public @Nullable HumanLanguageInterpreter getHLI(@Nullable String id) {
+        return id == null ? null : humanLanguageInterpreters.get(id);
     }
 
     @Override
-    public List<HumanLanguageInterpreter> getHLIsByIds(String ids) {
-        return getHLIsByIds(Arrays.asList(ids.split(",")));
+    public List<HumanLanguageInterpreter> getHLIsByIds(@Nullable String ids) {
+        return ids == null ? List.of() : getHLIsByIds(Arrays.asList(ids.split(",")));
     }
 
     @Override
@@ -952,8 +1041,74 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         return null;
     }
 
+    private void stopDialogs(Predicate<DialogProcessor> filter) {
+        synchronized (dialogRegistrationStorage) {
+            var dialogsToStop = dialogProcessors.values().stream().filter(filter).toList();
+            if (dialogsToStop.isEmpty()) {
+                return;
+            }
+            for (var dialog : dialogsToStop) {
+                stopDialog(dialog.dialogContext.source());
+            }
+        }
+    }
+
+    /**
+     * In order to reduce the number of dialog registration builds
+     * this method schedules a call to {@link #buildDialogRegistrations() buildDialogRegistrations} in five seconds
+     * and cancel the previous scheduled call if any.
+     */
+    private void scheduleDialogRegistrations() {
+        ScheduledFuture<?> job = this.dialogRegistrationFuture;
+        if (job != null) {
+            job.cancel(false);
+        }
+        dialogRegistrationFuture = scheduledExecutorService.schedule(this::buildDialogRegistrations, 5,
+                TimeUnit.SECONDS);
+    }
+
+    /**
+     * This method tries to start a dialog for each dialog registration.
+     * It's only called from {@link #scheduleDialogRegistrations() scheduleDialogRegistrations} in order to
+     * reduce the number of executions.
+     */
+    private void buildDialogRegistrations() {
+        synchronized (dialogRegistrationStorage) {
+            dialogRegistrationStorage.getValues().forEach(dr -> {
+                if (dr != null && !dialogProcessors.containsKey(dr.sourceId)) {
+                    try {
+                        startDialog(getDialogContextBuilder() //
+                                .withSink(audioManager.getSink(dr.sinkId)) //
+                                .withSource(audioManager.getSource(dr.sourceId)) //
+                                .withKS(getKS(dr.ksId)) //
+                                .withKeyword(dr.keyword) //
+                                .withSTT(getSTT(dr.sttId)) //
+                                .withTTS(getTTS(dr.ttsId)) //
+                                .withVoice(getVoice(dr.voiceId)) //
+                                .withHLIs(getHLIsByIds(dr.hliIds)) //
+                                .withLocale(dr.locale) //
+                                .withListeningItem(dr.listeningItem) //
+                                .withMelody(dr.listeningMelody) //
+                                .build());
+                    } catch (IllegalStateException e) {
+                        logger.debug("Unable to start dialog registration: {}", e.getMessage());
+                    }
+                }
+            });
+        }
+    }
+
     @Override
     public void onBeforeDialogInterpretation(DialogContext context) {
         lastDialogContext = context;
+    }
+
+    @Override
+    public void onDialogStopped(DialogContext context) {
+        var registration = dialogRegistrationStorage.get(context.source().getId());
+        if (registration != null) {
+            // try to rebuild in case it was manually stopped
+            scheduleDialogRegistrations();
+        }
     }
 }

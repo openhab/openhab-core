@@ -45,7 +45,6 @@ import org.openhab.core.model.sitemap.sitemap.impl.DefaultImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.FrameImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.GroupImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ImageImpl;
-import org.openhab.core.model.sitemap.sitemap.impl.ListImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.MappingImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.MapviewImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.SelectionImpl;
@@ -74,6 +73,7 @@ import org.slf4j.LoggerFactory;
  * "system:sitemap" namespace.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Laurent Garnier - icon color support for all widgets
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class)
@@ -186,7 +186,6 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 widget = imageWidget;
                 setWidgetPropertyFromComponentConfig(widget, component, "url", SitemapPackage.IMAGE__URL);
                 setWidgetPropertyFromComponentConfig(widget, component, "refresh", SitemapPackage.IMAGE__REFRESH);
-                addIconColor(imageWidget.getIconColor(), component);
                 break;
             case "Video":
                 VideoImpl videoWidget = (VideoImpl) SitemapFactory.eINSTANCE.createVideo();
@@ -236,11 +235,6 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 addWidgetMappings(selectionWidget.getMappings(), component);
                 widget = selectionWidget;
                 break;
-            case "List":
-                ListImpl listWidget = (ListImpl) SitemapFactory.eINSTANCE.createList();
-                widget = listWidget;
-                setWidgetPropertyFromComponentConfig(widget, component, "separator", SitemapPackage.LIST__SEPARATOR);
-                break;
             case "Setpoint":
                 SetpointImpl setpointWidget = (SetpointImpl) SitemapFactory.eINSTANCE.createSetpoint();
                 widget = setpointWidget;
@@ -284,6 +278,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             addWidgetVisibility(widget.getVisibility(), component);
             addLabelColor(widget.getLabelColor(), component);
             addValueColor(widget.getValueColor(), component);
+            addIconColor(widget.getIconColor(), component);
         }
 
         return widget;
@@ -363,7 +358,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     }
 
     private void addIconColor(EList<ColorArray> iconColor, UIComponent component) {
-        addColor(iconColor, component, "valuecolor");
+        addColor(iconColor, component, "iconcolor");
     }
 
     private void addColor(EList<ColorArray> color, UIComponent component, String key) {

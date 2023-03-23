@@ -53,11 +53,9 @@ public class ScriptParsingException extends ScriptException {
 
     public ScriptParsingException addValidationIssues(Iterable<Issue> validationErrors) {
         for (Issue validationError : validationErrors) {
-            this.getErrors().add(
-                    new ScriptError(validationError.getMessage(), validationError.getLineNumber(), validationError
-                            .getOffset(), validationError.getLength()));
+            this.getErrors().add(new ScriptError(validationError.getMessage(), validationError.getLineNumber(),
+                    validationError.getOffset(), validationError.getLength()));
         }
         return this;
     }
-
 }

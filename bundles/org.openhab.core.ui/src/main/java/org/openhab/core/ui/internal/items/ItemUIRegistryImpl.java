@@ -107,6 +107,7 @@ import org.slf4j.LoggerFactory;
  * @author Chris Jackson - Initial contribution
  * @author Stefan Triller - Method to convert a state into something a sitemap entity can understand
  * @author Erdoan Hadzhiyusein - Adapted the class to work with the new DateTimeType
+ * @author Laurent Garnier - new method getIconColor
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -283,6 +284,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
             if (!isReadOnly && hasStateOptions(itemName)) {
                 return SitemapFactory.eINSTANCE.createSelection();
+            }
+            if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType) && hasItemTag(itemName, "Setpoint")) {
+                return SitemapFactory.eINSTANCE.createSetpoint();
             } else {
                 return SitemapFactory.eINSTANCE.createText();
             }
@@ -740,6 +744,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         target.getVisibility().addAll(EcoreUtil.copyAll(source.getVisibility()));
         target.getLabelColor().addAll(EcoreUtil.copyAll(source.getLabelColor()));
         target.getValueColor().addAll(EcoreUtil.copyAll(source.getValueColor()));
+        target.getIconColor().addAll(EcoreUtil.copyAll(source.getIconColor()));
     }
 
     /**
@@ -853,6 +858,15 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return item.getCategory();
         } catch (ItemNotFoundException e) {
             return null;
+        }
+    }
+
+    private boolean hasItemTag(String itemName, String tag) {
+        try {
+            Item item = getItem(itemName);
+            return item.hasTag(tag);
+        } catch (ItemNotFoundException e) {
+            return false;
         }
     }
 
@@ -1162,6 +1176,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     @Override
     public @Nullable String getValueColor(Widget w) {
         return processColorDefinition(getState(w), w.getValueColor());
+    }
+
+    @Override
+    public @Nullable String getIconColor(Widget w) {
+        return processColorDefinition(getState(w), w.getIconColor());
     }
 
     @Override

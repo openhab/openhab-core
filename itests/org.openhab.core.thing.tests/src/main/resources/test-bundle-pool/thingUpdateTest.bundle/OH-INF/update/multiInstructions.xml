@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<update:update-descriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:update="https://openhab.org/schemas/update-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/update-description/v1.0.0 https://openhab.org/schemas/update-description-1.0.0.xsd">
+
+	<thing-type uid="testBinding:testThingTypeMultiple">
+		<instruction-set targetVersion="1">
+			<update-channel id="testChannel1">
+				<type>testBinding:testChannelNewTypeId</type>
+				<label>Test Label</label>
+			</update-channel>
+		</instruction-set>
+		<instruction-set targetVersion="2">
+			<add-channel id="testChannel2">
+				<type>testBinding:testChannelOldTypeId</type>
+				<label>TestLabel</label>
+			</add-channel>
+		</instruction-set>
+		<instruction-set targetVersion="3">
+			<remove-channel id="testChannel0"/>
+		</instruction-set>
+	</thing-type>
+
+</update:update-descriptions>

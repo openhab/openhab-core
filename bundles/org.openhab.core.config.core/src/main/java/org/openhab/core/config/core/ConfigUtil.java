@@ -206,16 +206,12 @@ public class ConfigUtil {
      * @param configuration the configuration to be normalized
      * @param configDescriptions the configuration descriptions that should be applied (must not be empty).
      * @return the normalized configuration or null if given configuration was null
-     * @throws IllegalArgumentExcetpion if given config description is null
+     * @throws IllegalArgumentException if given config description is null
      */
-    public static @Nullable Map<String, Object> normalizeTypes(@Nullable Map<String, Object> configuration,
+    public static Map<String, Object> normalizeTypes(Map<String, Object> configuration,
             List<ConfigDescription> configDescriptions) {
         if (configDescriptions.isEmpty()) {
             throw new IllegalArgumentException("Config description must not be empty.");
-        }
-
-        if (configuration == null) {
-            return null;
         }
 
         Map<String, Object> convertedConfiguration = new HashMap<>();

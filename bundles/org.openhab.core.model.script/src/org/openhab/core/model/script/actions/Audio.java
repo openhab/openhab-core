@@ -55,6 +55,12 @@ public class Audio {
         }
     }
 
+    @ActionDoc(text = "plays a sound with the given volume from the sounds folder to the default sink")
+    public static void playSound(@ParamDoc(name = "filename", text = "the filename with extension") String filename,
+            @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) {
+        playSound(filename, floatVolumeToPercentType(volume));
+    }
+
     @ActionDoc(text = "plays a sound from the sounds folder to the given sink(s)")
     public static void playSound(@ParamDoc(name = "sink", text = "the id of the sink") String sink,
             @ParamDoc(name = "filename", text = "the filename with extension") String filename) {
@@ -74,6 +80,13 @@ public class Audio {
         } catch (AudioException e) {
             logger.warn("Failed playing audio file: {}", e.getMessage());
         }
+    }
+
+    @ActionDoc(text = "plays a sound with the given volume from the sounds folder to the given sink(s)")
+    public static void playSound(@ParamDoc(name = "sink", text = "the id of the sink") String sink,
+            @ParamDoc(name = "filename", text = "the filename with extension") String filename,
+            @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) {
+        playSound(sink, filename, floatVolumeToPercentType(volume));
     }
 
     @ActionDoc(text = "plays an audio stream from a url to the default sink")
@@ -96,18 +109,15 @@ public class Audio {
         }
     }
 
-    @ActionDoc(text = "gets the master volume", returns = "volume as a float in the range [0,1]")
+    @ActionDoc(text = "gets the master volume", returns = "volume as a float in the range [0;1]")
     public static float getMasterVolume() throws IOException {
         return AudioActionService.audioManager.getVolume(null).floatValue() / 100f;
     }
 
     @ActionDoc(text = "sets the master volume")
     public static void setMasterVolume(
-            @ParamDoc(name = "volume", text = "volume in the range [0,1]") final float volume) throws IOException {
-        if (volume < 0 || volume > 1) {
-            throw new IllegalArgumentException("Volume value must be in the range [0,1]!");
-        }
-        setMasterVolume(new PercentType(new BigDecimal(volume * 100f)));
+            @ParamDoc(name = "volume", text = "volume in the range [0;1]") final float volume) throws IOException {
+        setMasterVolume(floatVolumeToPercentType(volume));
     }
 
     @ActionDoc(text = "sets the master volume")
@@ -118,7 +128,7 @@ public class Audio {
     @ActionDoc(text = "increases the master volume")
     public static void increaseMasterVolume(@ParamDoc(name = "percent") final float percent) throws IOException {
         if (percent <= 0 || percent > 100) {
-            throw new IllegalArgumentException("Percent must be in the range (0,100]!");
+            throw new IllegalArgumentException("Percent must be in the range (0;100]!");
         }
         Float volume = getMasterVolume();
         if (volume == 0) {
@@ -140,12 +150,12 @@ public class Audio {
     @ActionDoc(text = "decreases the master volume")
     public static void decreaseMasterVolume(@ParamDoc(name = "percent") final float percent) throws IOException {
         if (percent <= 0 || percent > 100) {
-            throw new IllegalArgumentException("Percent must be in the range (0,100]!");
+            throw new IllegalArgumentException("Percent must be in the range (0;100]!");
         }
         float volume = getMasterVolume();
         float newVolume = volume * (1f - percent / 100f);
         if (newVolume > 0 && volume - newVolume < .01) {
-            // the getMasterVolume() may only returns integers, so we have to make sure that we
+            // the getMasterVolume() may only return integers, so we have to make sure that we
             // decrease the volume level at least by 1%.
             newVolume -= .01;
         }
@@ -155,4 +165,16 @@ public class Audio {
         setMasterVolume(newVolume);
     }
 
+    /**
+     * Converts a float volume to a {@link PercentType} volume and checks if float volume is in the [0;1] range.
+     * 
+     * @param volume
+     * @return
+     */
+    private static PercentType floatVolumeToPercentType(float volume) {
+        if (volume < 0 || volume > 1) {
+            throw new IllegalArgumentException("Volume value must be in the range [0;1]!");
+        }
+        return new PercentType(new BigDecimal(volume * 100f));
+    }
 }

@@ -213,7 +213,11 @@ public class HttpUtil {
 
         if (httpHeaders != null) {
             for (String httpHeaderKey : httpHeaders.stringPropertyNames()) {
-                request.header(httpHeaderKey, httpHeaders.getProperty(httpHeaderKey));
+                if (httpHeaderKey.equalsIgnoreCase(HttpHeader.USER_AGENT.toString())) {
+                    request.agent(httpHeaders.getProperty(httpHeaderKey));
+                } else {
+                    request.header(httpHeaderKey, httpHeaders.getProperty(httpHeaderKey));
+                }
             }
         }
 

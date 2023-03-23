@@ -301,7 +301,16 @@ public class AddonResource implements RESTResource {
     public Response getConfiguration(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         try {
-            AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(addonId);
+            AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
+            if (addonService == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            Addon addon = addonService.getAddon(addonId, null);
+            if (addon == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            String infoUid = addon.getType() + "-" + addon.getId();
+            AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(infoUid);
             if (addonInfo == null) {
                 return Response.status(Status.NOT_FOUND).build();
             }
@@ -327,7 +336,16 @@ public class AddonResource implements RESTResource {
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId,
             @Nullable Map<String, Object> configuration) {
         try {
-            AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(addonId);
+            AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
+            if (addonService == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            Addon addon = addonService.getAddon(addonId, null);
+            if (addon == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            String infoUid = addon.getType() + "-" + addon.getId();
+            AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(infoUid);
             if (addonInfo == null) {
                 return Response.status(Status.NOT_FOUND).build();
             }

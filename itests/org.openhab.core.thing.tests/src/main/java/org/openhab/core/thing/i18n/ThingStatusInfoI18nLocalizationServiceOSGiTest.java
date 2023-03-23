@@ -39,9 +39,13 @@ import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.thing.binding.BaseThingHandlerFactory;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.openhab.core.thing.testutil.i18n.DefaultLocaleSetter;
+import org.openhab.core.thing.type.ThingType;
+import org.openhab.core.thing.type.ThingTypeBuilder;
+import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.openhab.core.types.Command;
 import org.openhab.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
@@ -87,6 +91,8 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
         simpleThingHandlerFactory.activate(componentContext);
         registerService(simpleThingHandlerFactory, ThingHandlerFactory.class.getName());
+
+        registerThingType();
 
         thing = ThingBuilder.create(new ThingTypeUID("aaa:bbb"), "ccc").build();
 
@@ -329,5 +335,18 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
                 return FrameworkUtil.getBundle(clazz);
             }
         }
+    }
+
+    private void registerThingType() {
+        ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("aaa:bbb"), "label").build();
+
+        ThingTypeProvider thingTypeProvider = mock(ThingTypeProvider.class);
+        ThingTypeRegistry thingTypeRegistry = mock(ThingTypeRegistry.class);
+
+        when(thingTypeProvider.getThingType(eq(thingType.getUID()), nullable(Locale.class))).thenReturn(thingType);
+        when(thingTypeRegistry.getThingType(eq(thingType.getUID()))).thenReturn(thingType);
+
+        registerService(thingTypeProvider);
+        registerService(thingTypeRegistry);
     }
 }

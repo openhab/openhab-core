@@ -112,5 +112,4 @@ public class RuleHumanLanguageInterpreter implements HumanLanguageInterpreter {
     public Set<String> getSupportedGrammarFormats() {
         return Collections.emptySet();
     }
-
 }
