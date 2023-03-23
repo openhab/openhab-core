@@ -1,3 +1,5 @@
 Bundle-SymbolicName: ${project.artifactId}
 Bundle-Activator: org.openhab.core.io.jetty.certificate.internal.CertificateGenerator
-Import-Package: !org.bouncycastle.*,*
+Import-Package: !org.bouncycastle.*, \
+    !org.slf4j.*,\
+    *
