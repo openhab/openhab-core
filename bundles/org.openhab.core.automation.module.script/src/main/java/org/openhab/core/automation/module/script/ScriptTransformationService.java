@@ -13,6 +13,7 @@
 package org.openhab.core.automation.module.script;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -84,6 +85,7 @@ public class ScriptTransformationService
 
     private final TransformationRegistry transformationRegistry;
     private final Map<String, String> supportedScriptTypes = new ConcurrentHashMap<>();
+    private final List<String> supportedTransformationTypes = new ArrayList<>(List.of(SUPPORTED_CONFIGURATION_TYPE));
 
     private final ScriptEngineManager scriptEngineManager;
 
@@ -275,7 +277,7 @@ public class ScriptTransformationService
         if (PROFILE_CONFIG_URI.equals(uri.toString())) {
             if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param)
                     || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)) {
-                return transformationRegistry.getTransformations(List.of(SUPPORTED_CONFIGURATION_TYPE)).stream()
+                return transformationRegistry.getTransformations(supportedTransformationTypes).stream()
                         .map(c -> new ParameterOption(c.getUID(), c.getLabel())).collect(Collectors.toList());
             }
             if (ScriptProfile.CONFIG_SCRIPT_LANGUAGE.equals(param)) {
@@ -295,10 +297,12 @@ public class ScriptTransformationService
         if (parameterOption != null) {
             supportedScriptTypes.put(parameterOption.getKey(), parameterOption.getValue());
         }
+        supportedTransformationTypes.addAll(engineFactory.getScriptTypes());
     }
 
     public void unsetScriptEngineFactory(ScriptEngineFactory engineFactory) {
         supportedScriptTypes.remove(ScriptEngineFactoryHelper.getPreferredMimeType(engineFactory));
+        supportedTransformationTypes.removeAll(engineFactory.getScriptTypes());
     }
 
     private static class ScriptRecord {
