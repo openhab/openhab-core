@@ -150,8 +150,9 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
             }
         }
 
-        return new HSBType(new DecimalType((int) tmpHue), new PercentType((int) tmpSaturation),
-                new PercentType((int) tmpBrightness));
+        // adding 0.5 and casting to int approximates rounding
+        return new HSBType(new DecimalType((int) (tmpHue + .5f)), new PercentType((int) (tmpSaturation + .5f)),
+                new PercentType((int) (tmpBrightness + .5f)));
     }
 
     /**
@@ -274,7 +275,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
         BigDecimal h = hue.divide(BIG_DECIMAL_HUNDRED, 10, RoundingMode.HALF_UP);
         BigDecimal s = saturation.divide(BIG_DECIMAL_HUNDRED);
 
-        int hInt = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP).intValue();
+        int hInt = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 0, RoundingMode.DOWN).intValue();
         BigDecimal f = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP)
                 .remainder(BigDecimal.ONE);
         PercentType a = new PercentType(value.multiply(BigDecimal.ONE.subtract(s)));
@@ -334,7 +335,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     }
 
     private int convertPercentToByte(PercentType percent) {
-        return percent.value.multiply(BigDecimal.valueOf(255)).divide(BIG_DECIMAL_HUNDRED, 2, RoundingMode.HALF_UP)
+        return percent.value.multiply(BigDecimal.valueOf(255)).divide(BIG_DECIMAL_HUNDRED, 0, RoundingMode.HALF_UP)
                 .intValue();
     }
 

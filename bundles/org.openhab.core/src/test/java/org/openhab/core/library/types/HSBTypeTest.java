@@ -18,9 +18,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
 /**
  *
@@ -46,7 +54,7 @@ public class HSBTypeTest {
         HSBType hsb = new HSBType("316,69,47");
 
         assertEquals("color 316,69,47", hsb.format("color %hsb%"));
-        assertEquals("color 119,37,97", hsb.format("color %rgb%"));
+        assertEquals("color 120,37,98", hsb.format("color %rgb%"));
         assertEquals("color 316,69,47", hsb.format("color %s"));
     }
 
@@ -85,8 +93,8 @@ public class HSBTypeTest {
         compareRgbToHsbValues("240,100,100", 0, 0, 255); // blue
         compareRgbToHsbValues("60,60,60", 153, 153, 61); // green
         compareRgbToHsbValues("300,100,40", 102, 0, 102);
-        compareRgbToHsbValues("228,37,61", 99, 110, 158); // blueish
-        compareRgbToHsbValues("316,68,46", 119, 37, 97); // purple
+        compareRgbToHsbValues("229,37,62", 99, 110, 158); // blueish
+        compareRgbToHsbValues("316,69,47", 119, 37, 97); // purple
     }
 
     private void compareRgbToHsbValues(String hsbValues, int red, int green, int blue) {
@@ -197,5 +205,110 @@ public class HSBTypeTest {
     @Test
     public void testConstructorWithIllegalBrightnessValue() {
         assertThrows(IllegalArgumentException.class, () -> new HSBType("5,85,151"));
+    }
+
+    // return a stream RGB values together with allowed deviation
+    static class RgbValueProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(@Nullable ExtensionContext context) throws Exception {
+            return Stream.of(Arguments.of(new int[] { 0, 0, 0 }, 0), Arguments.of(new int[] { 255, 255, 255 }, 0),
+                    Arguments.of(new int[] { 255, 0, 0 }, 0), Arguments.of(new int[] { 0, 255, 0 }, 0),
+                    Arguments.of(new int[] { 0, 0, 255 }, 0), Arguments.of(new int[] { 255, 255, 0 }, 0),
+                    Arguments.of(new int[] { 255, 0, 255 }, 0), Arguments.of(new int[] { 0, 255, 255 }, 0),
+                    Arguments.of(new int[] { 191, 191, 191 }, 0), Arguments.of(new int[] { 128, 128, 128 }, 0),
+                    Arguments.of(new int[] { 128, 0, 0 }, 0), Arguments.of(new int[] { 128, 128, 0 }, 0),
+                    Arguments.of(new int[] { 0, 128, 0 }, 0), Arguments.of(new int[] { 128, 0, 128 }, 0),
+                    Arguments.of(new int[] { 0, 128, 128 }, 0), Arguments.of(new int[] { 0, 0, 128 }, 0),
+                    Arguments.of(new int[] { 0, 132, 255 }, 0), Arguments.of(new int[] { 1, 131, 254 }, 3),
+                    Arguments.of(new int[] { 2, 130, 253 }, 6), Arguments.of(new int[] { 3, 129, 252 }, 4),
+                    Arguments.of(new int[] { 4, 128, 251 }, 3), Arguments.of(new int[] { 5, 127, 250 }, 0));
+        }
+    }
+
+    // test RGB -> HSB -> RGB conversion for different values, including the ones known to cause rounding error
+    @ParameterizedTest
+    @ArgumentsSource(RgbValueProvider.class)
+    public void parameterizedTestRgbToHsbToRgbConversion(int[] rgb, int maxSquaredSum) {
+        HSBType hsb = HSBType.fromRGB(rgb[0], rgb[1], rgb[2]);
+        Assertions.assertNotNull(hsb);
+
+        final PercentType[] rgbPercent = hsb.toRGB();
+        compareRgbToRgbValues(rgb, rgbPercent, maxSquaredSum);
+    }
+
+    // return a stream of well known HSB - RGB pairs
+    static class HsbRgbProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(@Nullable ExtensionContext context) throws Exception {
+            return Stream.of(Arguments.of(new int[] { 0, 0, 0 }, new int[] { 0, 0, 0 }),
+                    Arguments.of(new int[] { 0, 0, 100 }, new int[] { 255, 255, 255 }),
+                    Arguments.of(new int[] { 0, 100, 100 }, new int[] { 255, 0, 0 }),
+                    Arguments.of(new int[] { 120, 100, 100 }, new int[] { 0, 255, 0 }),
+                    Arguments.of(new int[] { 240, 100, 100 }, new int[] { 0, 0, 255 }),
+                    Arguments.of(new int[] { 60, 100, 100 }, new int[] { 255, 255, 0 }),
+                    Arguments.of(new int[] { 180, 100, 100 }, new int[] { 0, 255, 255 }),
+                    Arguments.of(new int[] { 300, 100, 100 }, new int[] { 255, 0, 255 }),
+                    Arguments.of(new int[] { 0, 0, 75 }, new int[] { 191, 191, 191 }),
+                    Arguments.of(new int[] { 0, 0, 50 }, new int[] { 128, 128, 128 }),
+                    Arguments.of(new int[] { 0, 100, 50 }, new int[] { 128, 0, 0 }),
+                    Arguments.of(new int[] { 60, 100, 50 }, new int[] { 128, 128, 0 }),
+                    Arguments.of(new int[] { 120, 100, 50 }, new int[] { 0, 128, 0 }),
+                    Arguments.of(new int[] { 300, 100, 50 }, new int[] { 128, 0, 128 }),
+                    Arguments.of(new int[] { 180, 100, 50 }, new int[] { 0, 128, 128 }),
+                    Arguments.of(new int[] { 240, 100, 50 }, new int[] { 0, 0, 128 }));
+        }
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(HsbRgbProvider.class)
+    public void paremeterizedTestHsbToRgbConversion(int[] hsb, int[] rgb) {
+        final String hsbString = hsb[0] + ", " + hsb[1] + ", " + hsb[2];
+        final HSBType hsbType = new HSBType(hsbString);
+
+        final PercentType[] rgbPercent = hsbType.toRGB();
+        compareRgbToRgbValues(rgb, rgbPercent, 0);
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(HsbRgbProvider.class)
+    public void paremeterizedTestRgbToRgbConversion(int[] hsb, int[] rgb) {
+        final HSBType hsbType = HSBType.fromRGB(rgb[0], rgb[1], rgb[2]);
+
+        final PercentType[] rgbPercent = hsbType.toRGB();
+        compareRgbToRgbValues(rgb, rgbPercent, 0);
+    }
+
+    // compare two rgb representations based on squared sum of differences, prepare a readable test message on fail
+    private void compareRgbToRgbValues(final int[] rgb, final PercentType[] rgbPercent, int maxSquaredSum) {
+        int squaredSum = 0;
+
+        final String expected = rgb[0] + ", " + rgb[1] + ", " + rgb[2];
+
+        int[] actualRgb = new int[3];
+        for (int i = 0; i < 3; i++) {
+            actualRgb[i] = rgbPercent[i].toBigDecimal().multiply(BigDecimal.valueOf(2.55))
+                    .setScale(0, RoundingMode.HALF_UP).intValue();
+
+            int diff = rgb[i] - actualRgb[i];
+            squaredSum = squaredSum + diff * diff;
+        }
+
+        if (squaredSum > maxSquaredSum) {
+            // deviation too high, just prepare readable string compare and let it fail
+            final String actual = actualRgb[0] + ", " + actualRgb[1] + ", " + actualRgb[2];
+            assertEquals(expected, actual);
+        }
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(HsbRgbProvider.class)
+    public void paremeterizedTestRgbToHsbConversion(int[] hsb, int[] rgb) {
+        HSBType hsbType = HSBType.fromRGB(rgb[0], rgb[1], rgb[2]);
+
+        final String expected = hsb[0] + ", " + hsb[1] + ", " + hsb[2];
+        final String actual = hsbType.getHue().toBigDecimal().setScale(0, RoundingMode.HALF_UP).intValue() + ", "
+                + hsbType.getSaturation().toBigDecimal().setScale(0, RoundingMode.HALF_UP).intValue() + ", "
+                + hsbType.getBrightness().toBigDecimal().setScale(0, RoundingMode.HALF_UP).intValue();
+        assertEquals(expected, actual);
     }
 }
