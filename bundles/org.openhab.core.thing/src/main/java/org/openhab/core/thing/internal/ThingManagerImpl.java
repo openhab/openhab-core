@@ -677,7 +677,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         if (prototype == null) {
             ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
                     "Type description for '{0}' not found although we checked the presence before.",
-                    "type_description_missing", targetUID);
+                    "type_description_missing", targetUID.toString());
             throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
 
