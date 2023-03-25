@@ -13,6 +13,7 @@
 package org.openhab.core.util;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.PercentType;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
  * project
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Holger Friedrich - Transfer RGB color conversion from HSBType, improve RGB conversion, restructuring
  */
 @NonNullByDefault
 public class ColorUtil {
@@ -85,6 +87,62 @@ public class ColorUtil {
     }
 
     /**
+     * Transform RGB color format to
+     * <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> based {@link HSBType}.
+     *
+     * Note: Conversion result is rounded and HSBType is created with integer valued components.
+     *
+     * @param rgb int array of length 3, all values are constrained to 0-255
+     * @return the corresponding {@link HSBType}.
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
+     */
+    public static HSBType rgbToHsv(int[] rgb) throws IllegalArgumentException {
+        if (rgb.length != 3 || !inByteRange(rgb[0]) || !inByteRange(rgb[1]) || !inByteRange(rgb[2])) {
+            throw new IllegalArgumentException("rgb array only allows values between 0 and 255");
+        }
+        final int r  = rgb[0];
+        final int g  = rgb[1];
+        final int b  = rgb[2];
+
+        int max = (r > g) ? r : g;
+        if (b > max) {
+            max = b;
+        }
+        int min = (r < g) ? r : g;
+        if (b < min) {
+            min = b;
+        }
+        float tmpHue;
+        final float tmpBrightness = max / 2.55f;
+        final float tmpSaturation = (max != 0 ? ((float) (max - min)) / ((float) max) : 0) * 100.0f;
+        // smallest possible saturation: 0 (max=0 or max-min=0), other value closest to 0 is 100/255 (max=255, min=254)
+        // -> avoid float comparision to 0
+        // if (tmpSaturation == 0) {
+        if (max==0 || (max-min)==0) {
+            tmpHue = 0;
+        } else {
+            float red = ((float) (max - r)) / ((float) (max - min));
+            float green = ((float) (max - g)) / ((float) (max - min));
+            float blue = ((float) (max - b)) / ((float) (max - min));
+            if (r == max) {
+                tmpHue = blue - green;
+            } else if (g == max) {
+                tmpHue = 2.0f + red - blue;
+            } else {
+                tmpHue = 4.0f + green - red;
+            }
+            tmpHue = tmpHue / 6.0f * 360;
+            if (tmpHue < 0) {
+                tmpHue = tmpHue + 360.0f;
+            }
+        }
+
+        // adding 0.5 and casting to int approximates rounding
+        return new HSBType(new DecimalType((int) (tmpHue + .5f)), new PercentType((int) (tmpSaturation + .5f)),
+                new PercentType((int) (tmpBrightness + .5f)));
+    }
+
+    /**
      * Transform <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> `xy` format to
      * <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> based {@link HSBType}.
      *
@@ -94,8 +152,9 @@ public class ColorUtil {
      *
      * @param xy the CIE 1931 xy colour, x,y between 0.0000 and 1.0000.
      * @return the corresponding {@link HSBType}.
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
      */
-    public static HSBType xyToHsv(double[] xy) {
+    public static HSBType xyToHsv(double[] xy) throws IllegalArgumentException {
         return xyToHsv(xy, DEFAULT_GAMUT);
     }
 
@@ -112,7 +171,7 @@ public class ColorUtil {
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
      */
-    public static HSBType xyToHsv(double[] xy, Gamut gamut) {
+    public static HSBType xyToHsv(double[] xy, Gamut gamut) throws IllegalArgumentException {
         if (xy.length < 2 || xy.length > 3 || !inRange(xy[0]) || !inRange(xy[1])
                 || (xy.length == 3 && !inRange(xy[2]))) {
             throw new IllegalArgumentException("xy array only allowes two or three values between 0.0 and 1.0.");
@@ -156,8 +215,8 @@ public class ColorUtil {
             b /= max;
         }
 
-        HSBType hsb = HSBType.fromRGB((int) Math.round(255.0 * r), (int) Math.round(255.0 * g),
-                (int) Math.round(255.0 * b));
+        HSBType hsb = rgbToHsv(new int[] {(int) Math.round(255.0 * r), (int) Math.round(255.0 * g),
+                (int) Math.round(255.0 * b)});
         LOGGER.trace("xy: {} - XYZ: {} {} {} - RGB: {} {} {} - HSB: {} ", xy, X, Y, Z, r, g, b, hsb);
 
         return hsb;
@@ -293,6 +352,10 @@ public class ColorUtil {
             }
             return retVal;
         }
+    }
+
+    private static boolean inByteRange(int val) {
+        return val >= 0 && val <= 255;
     }
 
     private static boolean inRange(double val) {

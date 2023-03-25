@@ -113,46 +113,18 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     }
 
     /**
+     * @deprecated Use {@link ColorUtil#rgbToHsv(int[])} instead
+     *
      * Create HSB from RGB
      *
      * @param r red 0-255
      * @param g green 0-255
      * @param b blue 0-255
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
      */
-    public static HSBType fromRGB(int r, int g, int b) {
-        float tmpHue, tmpSaturation, tmpBrightness;
-        int max = (r > g) ? r : g;
-        if (b > max) {
-            max = b;
-        }
-        int min = (r < g) ? r : g;
-        if (b < min) {
-            min = b;
-        }
-        tmpBrightness = max / 2.55f;
-        tmpSaturation = (max != 0 ? ((float) (max - min)) / ((float) max) : 0) * 100;
-        if (tmpSaturation == 0) {
-            tmpHue = 0;
-        } else {
-            float red = ((float) (max - r)) / ((float) (max - min));
-            float green = ((float) (max - g)) / ((float) (max - min));
-            float blue = ((float) (max - b)) / ((float) (max - min));
-            if (r == max) {
-                tmpHue = blue - green;
-            } else if (g == max) {
-                tmpHue = 2.0f + red - blue;
-            } else {
-                tmpHue = 4.0f + green - red;
-            }
-            tmpHue = tmpHue / 6.0f * 360;
-            if (tmpHue < 0) {
-                tmpHue = tmpHue + 360.0f;
-            }
-        }
-
-        // adding 0.5 and casting to int approximates rounding
-        return new HSBType(new DecimalType((int) (tmpHue + .5f)), new PercentType((int) (tmpSaturation + .5f)),
-                new PercentType((int) (tmpBrightness + .5f)));
+    @Deprecated
+    public static HSBType fromRGB(int r, int g, int b) throws IllegalArgumentException {
+        return ColorUtil.rgbToHsv(new int[] { r, g, b });
     }
 
     /**
@@ -165,10 +137,10 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
      *
      * @param x, y color information 0.0 - 1.0
      * @return new HSBType object representing the given CIE XY color, full brightness
-     *
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
      */
     @Deprecated
-    public static HSBType fromXY(float x, float y) {
+    public static HSBType fromXY(float x, float y) throws IllegalArgumentException {
         return ColorUtil.xyToHsv(new double[] { x, y });
     }
 
