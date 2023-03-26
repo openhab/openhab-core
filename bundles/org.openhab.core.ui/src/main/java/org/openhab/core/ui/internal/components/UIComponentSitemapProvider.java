@@ -239,6 +239,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             case "Input":
                 InputImpl inputWidget = (InputImpl) SitemapFactory.eINSTANCE.createInput();
                 widget = inputWidget;
+                setWidgetPropertyFromComponentConfig(widget, component, "inputHint", SitemapPackage.INPUT__INPUT_HINT);
                 break;
             case "Setpoint":
                 SetpointImpl setpointWidget = (SetpointImpl) SitemapFactory.eINSTANCE.createSetpoint();
