@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<update:update-descriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:update="https://openhab.org/schemas/update-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/update-description/v1.0.0 https://openhab.org/schemas/update-description-1.0.0.xsd">
+
+	<thing-type uid="testBinding:testThingTypeAdd">
+		<instruction-set targetVersion="1">
+			<add-channel id="testChannel1">
+				<type>testBinding:testChannelTypeId</type>
+			</add-channel>
+			<add-channel id="testChannel2">
+				<type>testBinding:testChannelTypeId</type>
+				<label>Test Label</label>
+				<tags>
+					<tag>Tag1</tag>
+					<tag>Tag2</tag>
+				</tags>
+			</add-channel>
+			<add-channel id="testChannel3">
+				<type>testBinding:testChannelTypeId</type>
+				<label>Test Label</label>
+				<description>Test Description</description>
+			</add-channel>
+		</instruction-set>
+	</thing-type>
+
+	<thing-type uid="testBinding:testThingTypeRemove">
+		<instruction-set targetVersion="1">
+			<remove-channel id="testChannel"/>
+		</instruction-set>
+	</thing-type>
+
+	<thing-type uid="testBinding:testThingTypeUpdate">
+		<instruction-set targetVersion="1">
+			<update-channel id="testChannel1">
+				<type>testBinding:testChannelNewTypeId</type>
+				<label>New Test Label</label>
+			</update-channel>
+			<update-channel id="testChannel2" preserveConfiguration="false">
+				<type>testBinding:testChannelNewTypeId</type>
+			</update-channel>
+		</instruction-set>
+	</thing-type>
+
+	<thing-type uid="testBinding:testThingTypeGroupAdd">
+		<instruction-set targetVersion="1">
+			<add-channel id="testChannel1" groupIds="group1,group2">
+				<type>testBinding:testChannelTypeId</type>
+			</add-channel>
+		</instruction-set>
+	</thing-type>
+
+</update:update-descriptions>

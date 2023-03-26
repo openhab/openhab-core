@@ -48,7 +48,6 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
@@ -101,9 +100,29 @@ public class ProxyServletService extends HttpServlet {
     protected final List<SitemapProvider> sitemapProviders = new CopyOnWriteArrayList<>();
 
     @Activate
-    public ProxyServletService(@Reference ItemUIRegistry itemUIRegistry, @Reference HttpService httpService) {
-        this.itemUIRegistry = itemUIRegistry;
+    public ProxyServletService(@Reference HttpService httpService, @Reference ItemUIRegistry itemUIRegistry,
+            Map<String, Object> config) {
         this.httpService = httpService;
+        this.itemUIRegistry = itemUIRegistry;
+
+        Servlet servlet = getImpl();
+
+        logger.debug("Starting up '{}' servlet  at /{}", servlet.getServletInfo(), PROXY_ALIAS);
+        try {
+            httpService.registerServlet("/" + PROXY_ALIAS, servlet, propsFromConfig(config, servlet),
+                    httpService.createDefaultHttpContext());
+        } catch (NamespaceException | ServletException e) {
+            logger.error("Error during servlet startup: {}", e.getMessage());
+        }
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        try {
+            httpService.unregister("/" + PROXY_ALIAS);
+        } catch (IllegalArgumentException e) {
+            // ignore, had not been registered before
+        }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -139,7 +158,7 @@ public class ProxyServletService extends HttpServlet {
      * @param config the OSGi config, may be <code>null</code>
      * @return properties to pass to servlet for initialization
      */
-    private Hashtable<String, @Nullable String> propsFromConfig(Map<String, Object> config) {
+    private Hashtable<String, @Nullable String> propsFromConfig(Map<String, Object> config, Servlet servlet) {
         Hashtable<String, @Nullable String> props = new Hashtable<>();
 
         for (String key : config.keySet()) {
@@ -152,39 +171,11 @@ public class ProxyServletService extends HttpServlet {
                     String.valueOf(Math.max(DEFAULT_MAX_THREADS, Runtime.getRuntime().availableProcessors())));
         }
 
+        if (servlet instanceof AsyncProxyServlet) {
+            props.put("async-supported", "true");
+        }
+
         return props;
-    }
-
-    @Activate
-    protected void activate(Map<String, Object> config) {
-        try {
-            Servlet servlet = getImpl();
-
-            logger.debug("Starting up '{}' servlet  at /{}", servlet.getServletInfo(), PROXY_ALIAS);
-
-            Hashtable<String, @Nullable String> props = propsFromConfig(config);
-            httpService.registerServlet("/" + PROXY_ALIAS, servlet, props, createHttpContext());
-        } catch (NamespaceException | ServletException e) {
-            logger.error("Error during servlet startup: {}", e.getMessage());
-        }
-    }
-
-    @Deactivate
-    protected void deactivate() {
-        try {
-            httpService.unregister("/" + PROXY_ALIAS);
-        } catch (IllegalArgumentException e) {
-            // ignore, had not been registered before
-        }
-    }
-
-    /**
-     * Creates a {@link HttpContext}
-     *
-     * @return a {@link HttpContext}
-     */
-    protected HttpContext createHttpContext() {
-        return httpService.createDefaultHttpContext();
     }
 
     /**
@@ -264,7 +255,7 @@ public class ProxyServletService extends HttpServlet {
             String itemName = widget.getItem();
             if (itemName != null) {
                 State state = itemUIRegistry.getItemState(itemName);
-                if (state != null && state instanceof StringType) {
+                if (state instanceof StringType) {
                     try {
                         uri = createURIFromString(state.toString());
                         request.setAttribute(ATTR_URI, uri);

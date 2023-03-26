@@ -14,12 +14,12 @@ package org.openhab.core.automation.rest.internal;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -95,7 +95,7 @@ public class ThingActionsResource implements RESTResource {
     private final LocaleService localeService;
     private final ModuleTypeRegistry moduleTypeRegistry;
 
-    Map<ThingUID, Map<String, ThingActions>> thingActionsMap = new HashMap<>();
+    Map<ThingUID, Map<String, ThingActions>> thingActionsMap = new ConcurrentHashMap<>();
     private List<ModuleHandlerFactory> moduleHandlerFactories = new ArrayList<>();
 
     @Activate
@@ -111,7 +111,7 @@ public class ThingActionsResource implements RESTResource {
         String scope = getScope(thingActions);
         if (handler != null && scope != null) {
             ThingUID thingUID = handler.getThing().getUID();
-            thingActionsMap.computeIfAbsent(thingUID, thingUid -> new HashMap<>()).put(scope, thingActions);
+            thingActionsMap.computeIfAbsent(thingUID, thingUid -> new ConcurrentHashMap<>()).put(scope, thingActions);
         }
     }
 

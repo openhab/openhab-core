@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="profile:transform:SCRIPT">
+		<parameter name="scriptLanguage" type="text" required="true">
+			<label>Script Language</label>
+			<description>MIME-type ("application/vnd.openhab.dsl.rule") of the scripting language</description>
+		</parameter>
+		<parameter name="toItemScript" type="text">
+			<label>To Item Script</label>
+			<description>The Script for transforming states and commands from handler to item.</description>
+		</parameter>
+		<parameter name="toHandlerScript" type="text">
+			<label>To Handler Script</label>
+			<description>The Script for transforming states and commands from item to handler.</description>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>

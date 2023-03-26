@@ -12,15 +12,15 @@
  */
 package org.openhab.core.model.script.jvmmodel;
 
-import org.openhab.core.library.types.QuantityType;
-import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
-import org.openhab.core.model.script.script.QuantityLiteral;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState;
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeExpectation;
 import org.eclipse.xtext.xbase.typesystem.computation.XbaseTypeComputer;
 import org.eclipse.xtext.xbase.typesystem.references.LightweightTypeReference;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.model.script.script.QuantityLiteral;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 /**
  * Calculates the type information used by Xbase to select the correct method during script execution.
@@ -61,5 +61,4 @@ public class ScriptTypeComputer extends XbaseTypeComputer {
         }
         state.acceptActualType(qt);
     }
-
 }

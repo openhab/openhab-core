@@ -12,25 +12,22 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.loader;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
 import java.nio.file.Path;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.automation.module.script.ScriptDependencyTracker;
-import org.openhab.core.service.AbstractWatchService;
+import org.openhab.core.service.WatchService;
 
 /**
  * The {@link AbstractScriptDependencyTrackerTest} contains tests for the {@link AbstractScriptDependencyTracker}
@@ -38,32 +35,20 @@ import org.openhab.core.service.AbstractWatchService;
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AbstractScriptDependencyTrackerTest {
 
     private static final String WATCH_DIR = "test";
 
-    private @Nullable AbstractWatchService dependencyWatchService;
-
     private @NonNullByDefault({}) AbstractScriptDependencyTracker scriptDependencyTracker;
+    private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
 
     @BeforeEach
     public void setup() {
-        scriptDependencyTracker = new AbstractScriptDependencyTracker(WATCH_DIR) {
-
-            @Override
-            protected AbstractWatchService createDependencyWatchService() {
-                AbstractWatchService dependencyWatchService = Mockito.spy(super.createDependencyWatchService());
-                AbstractScriptDependencyTrackerTest.this.dependencyWatchService = dependencyWatchService;
-                return dependencyWatchService;
-            }
-
-            @Override
-            public void dependencyChanged(String dependency) {
-                super.dependencyChanged(dependency);
-            }
+        when(watchServiceMock.getWatchPath()).thenReturn(Path.of(""));
+        scriptDependencyTracker = new AbstractScriptDependencyTracker(watchServiceMock, WATCH_DIR) {
         };
-
-        scriptDependencyTracker.activate();
     }
 
     @AfterEach
@@ -73,18 +58,14 @@ public class AbstractScriptDependencyTrackerTest {
 
     @Test
     public void testScriptLibraryWatcherIsCreatedAndActivated() {
-        assertThat(dependencyWatchService, is(notNullValue()));
-
-        assertThat(dependencyWatchService.getSourcePath(), is(Path.of(WATCH_DIR)));
-
-        verify(dependencyWatchService).activate();
+        verify(watchServiceMock).registerListener(eq(scriptDependencyTracker), eq(Path.of(WATCH_DIR)));
     }
 
     @Test
     public void testScriptLibraryWatchersIsDeactivatedOnShutdown() {
         scriptDependencyTracker.deactivate();
 
-        verify(dependencyWatchService).deactivate();
+        verify(watchServiceMock).unregisterListener(eq(scriptDependencyTracker));
     }
 
     @Test

@@ -23,6 +23,9 @@ import org.openhab.core.model.sitemap.sitemap.SitemapPackage
 import org.openhab.core.model.sitemap.sitemap.Widget
 import org.eclipse.xtext.validation.Check
 import java.math.BigDecimal
+import org.openhab.core.model.sitemap.sitemap.Input
+import org.eclipse.xtext.nodemodel.INode
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 
 //import org.eclipse.xtext.validation.Check
 /**
@@ -32,6 +35,8 @@ import java.math.BigDecimal
  */
 class SitemapValidator extends AbstractSitemapValidator {
 
+    val ALLOWED_HINTS = #["text", "number", "date", "time", "datetime"]
+    
     @Check
     def void checkFramesInFrame(Frame frame) {
         for (Widget w : frame.children) {
@@ -100,6 +105,16 @@ class SitemapValidator extends AbstractSitemapValidator {
         if (sp.minValue !== null && sp.maxValue !== null && sp.minValue > sp.maxValue) {
             error("Setpoint on item '" + sp.item + "' has larger minValue than maxValue",
                 SitemapPackage.Literals.SETPOINT.getEStructuralFeature(SitemapPackage.SETPOINT__MIN_VALUE));
+        }
+    }
+    
+    @Check
+    def void checkInputHintParameter(Input i) {
+        if (i.inputHint !== null && !ALLOWED_HINTS.contains(i.inputHint)) {
+            val node = NodeModelUtils.getNode(i)
+            val line = node.getStartLine()
+            error("Input on item '" + i.item + "' has invalid inputHint '" + i.inputHint + "' at line " + line,
+                SitemapPackage.Literals.INPUT.getEStructuralFeature(SitemapPackage.INPUT__INPUT_HINT))
         }
     }
 }

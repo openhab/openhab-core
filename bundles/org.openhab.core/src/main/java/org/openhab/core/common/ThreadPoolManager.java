@@ -79,14 +79,16 @@ public class ThreadPoolManager {
 
     private static Map<String, Integer> configs = new ConcurrentHashMap<>();
 
+    private static final Set<String> OSGI_PROPERTY_NAMES = Set.of(Constants.SERVICE_PID,
+            ComponentConstants.COMPONENT_ID, ComponentConstants.COMPONENT_NAME, "osgi.ds.satisfying.condition.target");
+
     protected void activate(Map<String, Object> properties) {
         modified(properties);
     }
 
     protected void modified(Map<String, Object> properties) {
         for (Entry<String, Object> entry : properties.entrySet()) {
-            if (Constants.SERVICE_PID.equals(entry.getKey()) || ComponentConstants.COMPONENT_ID.equals(entry.getKey())
-                    || ComponentConstants.COMPONENT_NAME.equals(entry.getKey())) {
+            if (OSGI_PROPERTY_NAMES.contains(entry.getKey())) {
                 continue;
             }
             String poolName = entry.getKey();

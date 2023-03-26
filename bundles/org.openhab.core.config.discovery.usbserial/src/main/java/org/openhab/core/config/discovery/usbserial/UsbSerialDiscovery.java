@@ -42,7 +42,8 @@ public interface UsbSerialDiscovery {
     void stopBackgroundScanning();
 
     /**
-     * Registers an {@link UsbSerialDiscoveryListener} that is then notified about discovered serial ports and USB
+     * Registers an {@link UsbSerialDiscoveryListener} that is then notified about discovered serial ports and USB,
+     * including those already found during previous scan.
      * devices.
      */
     void registerDiscoveryListener(UsbSerialDiscoveryListener listener);

@@ -1,0 +1,1 @@
+REWRITE_SYSTEM "https://openhab.org/schemas" "file:${project.basedir}/xsd/thing"

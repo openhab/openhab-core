@@ -34,7 +34,7 @@ public interface TTSService {
      *
      * @return an id that identifies this service
      */
-    public String getId();
+    String getId();
 
     /**
      * Returns a localized human readable label that can be used within UIs.
@@ -42,21 +42,21 @@ public interface TTSService {
      * @param locale the locale to provide the label for
      * @return a localized string to be used in UIs
      */
-    public String getLabel(@Nullable Locale locale);
+    String getLabel(@Nullable Locale locale);
 
     /**
      * Obtain the voices available from this TTSService
      *
      * @return The voices available from this service
      */
-    public Set<Voice> getAvailableVoices();
+    Set<Voice> getAvailableVoices();
 
     /**
      * Obtain the audio formats supported by this TTSService
      *
      * @return The audio formats supported by this service
      */
-    public Set<AudioFormat> getSupportedFormats();
+    Set<AudioFormat> getSupportedFormats();
 
     /**
      * Returns an {@link AudioStream} containing the TTS results. Note, one
@@ -71,5 +71,5 @@ public interface TTSService {
      *             are not supported or another error occurs while creating an
      *             {@link AudioStream}
      */
-    public AudioStream synthesize(String text, Voice voice, AudioFormat requestedFormat) throws TTSException;
+    AudioStream synthesize(String text, Voice voice, AudioFormat requestedFormat) throws TTSException;
 }

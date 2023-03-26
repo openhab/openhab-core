@@ -118,9 +118,8 @@ public class ScriptRuleOSGiTest extends JavaOSGiTest {
                 .findFirst();
         assertThat(trigger.isPresent(), is(true));
         assertThat(trigger.get().getTypeUID(), is("core.GenericEventTrigger"));
-        assertThat(trigger.get().getConfiguration().get("eventSource"), is("MyTrigger"));
-        assertThat(trigger.get().getConfiguration().get("eventTopic"), is("openhab/items/MyTrigger/state"));
-        assertThat(trigger.get().getConfiguration().get("eventTypes"), is("ItemStateEvent"));
+        assertThat(trigger.get().getConfiguration().get("topic"), is("openhab/items/MyTrigger/state"));
+        assertThat(trigger.get().getConfiguration().get("types"), is("ItemStateEvent"));
         Optional<? extends Condition> condition1 = rule.getConditions().stream()
                 .filter(c -> "condition".equals(c.getId())).findFirst();
         assertThat(condition1.isPresent(), is(true));

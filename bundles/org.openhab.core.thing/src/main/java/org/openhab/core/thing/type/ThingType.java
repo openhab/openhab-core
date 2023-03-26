@@ -19,12 +19,11 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
 
 /**
- * The {@link ThingType} describes a concrete type of a {@link Thing}.
+ * The {@link ThingType} describes a concrete type of {@link Thing}.
  * <p>
  * This description is used as template definition for the creation of the according concrete {@link Thing} object.
  * <p>
@@ -46,7 +45,6 @@ public class ThingType extends AbstractDescriptionType {
     private final List<String> supportedBridgeTypeUIDs;
     private final Map<String, String> properties;
     private final @Nullable String representationProperty;
-    private final @Nullable URI configDescriptionURI;
     private final boolean listed;
     private final @Nullable String category;
 
@@ -57,9 +55,9 @@ public class ThingType extends AbstractDescriptionType {
      *            (must neither be null, nor empty)
      * @param supportedBridgeTypeUIDs the unique identifiers of the bridges this Thing type supports
      *            (could be null or empty)
-     * @param label the human readable label for the according type
+     * @param label the human-readable label for the according type
      *            (must neither be null nor empty)
-     * @param description the human readable description for the according type
+     * @param description the human-readable description for the according type
      *            (could be null or empty)
      * @param listed determines whether it should be listed for manually pairing or not
      * @param representationProperty name of the property that uniquely identifies this Thing
@@ -69,7 +67,7 @@ public class ThingType extends AbstractDescriptionType {
      * @param properties the properties this Thing type provides (could be null)
      * @param configDescriptionURI the link to the concrete ConfigDescription (could be null)
      * @param extensibleChannelTypeIds the channel-type ids this thing-type is extensible with (could be null or empty).
-     * @throws IllegalArgumentException if the UID is null or empty, or the the meta information is null
+     * @throws IllegalArgumentException if the UID is null or empty, or the meta information is null
      */
     ThingType(ThingTypeUID uid, @Nullable List<String> supportedBridgeTypeUIDs, String label,
             @Nullable String description, @Nullable String category, boolean listed,
@@ -77,7 +75,7 @@ public class ThingType extends AbstractDescriptionType {
             @Nullable List<ChannelGroupDefinition> channelGroupDefinitions, @Nullable Map<String, String> properties,
             @Nullable URI configDescriptionURI, @Nullable List<String> extensibleChannelTypeIds)
             throws IllegalArgumentException {
-        super(uid, label, description);
+        super(uid, label, description, configDescriptionURI);
 
         this.category = category;
         this.listed = listed;
@@ -91,7 +89,6 @@ public class ThingType extends AbstractDescriptionType {
         this.extensibleChannelTypeIds = extensibleChannelTypeIds == null ? Collections.emptyList()
                 : Collections.unmodifiableList(extensibleChannelTypeIds);
         this.properties = properties == null ? Collections.emptyMap() : Collections.unmodifiableMap(properties);
-        this.configDescriptionURI = configDescriptionURI;
     }
 
     /**
@@ -146,15 +143,6 @@ public class ThingType extends AbstractDescriptionType {
      */
     public List<ChannelGroupDefinition> getChannelGroupDefinitions() {
         return this.channelGroupDefinitions;
-    }
-
-    /**
-     * Returns the link to a concrete {@link ConfigDescription}.
-     *
-     * @return the link to a concrete ConfigDescription (could be null)
-     */
-    public @Nullable URI getConfigDescriptionURI() {
-        return this.configDescriptionURI;
     }
 
     /**

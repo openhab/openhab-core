@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.script.internal.engine.action;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.action.ScriptExecution;
@@ -19,8 +21,6 @@ import org.openhab.core.model.script.engine.action.ActionService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-
-import java.util.Objects;
 
 /**
  * This class registers an OSGi service for the ScriptExecution action.

@@ -113,8 +113,7 @@ public class RunRuleModuleTest extends JavaOSGiTest {
 
     private Rule createOuterRule() {
         final Configuration outerRuleTriggerConfig = new Configuration(
-                Map.ofEntries(entry("eventSource", "ruleTrigger"), entry("eventTopic", "openhab/*"),
-                        entry("eventTypes", "ItemStateEvent")));
+                Map.ofEntries(entry("topic", "openhab/items/ruleTrigger/*"), entry("types", "ItemStateEvent")));
 
         final List<String> ruleUIDs = new ArrayList<>();
         ruleUIDs.add("exampleSceneRule");

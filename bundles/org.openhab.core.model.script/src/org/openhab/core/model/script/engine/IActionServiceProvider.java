@@ -19,5 +19,4 @@ import org.openhab.core.model.script.engine.action.ActionService;
 public interface IActionServiceProvider {
 
     List<ActionService> get();
-
 }

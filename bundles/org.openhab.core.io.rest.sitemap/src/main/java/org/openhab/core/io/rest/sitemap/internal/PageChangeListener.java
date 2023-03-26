@@ -43,6 +43,7 @@ import org.openhab.core.ui.items.ItemUIRegistry;
  * This is a class that listens on item state change events and creates sitemap events for a dedicated sitemap page.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - Added support for icon color
  */
 public class PageChangeListener implements StateChangeListener {
 
@@ -152,6 +153,10 @@ public class PageChangeListener implements StateChangeListener {
                 for (ColorArray rule : widget.getValueColor()) {
                     addItemWithName(items, rule.getItem());
                 }
+                // now scan value icon rules
+                for (ColorArray rule : widget.getIconColor()) {
+                    addItemWithName(items, rule.getItem());
+                }
             }
         }
         return items;
@@ -234,8 +239,6 @@ public class PageChangeListener implements StateChangeListener {
         event.sitemapName = sitemapName;
         event.pageId = pageId;
         event.label = itemUIRegistry.getLabel(widget);
-        event.labelcolor = itemUIRegistry.getLabelColor(widget);
-        event.valuecolor = itemUIRegistry.getValueColor(widget);
         event.widgetId = itemUIRegistry.getWidgetId(widget);
         event.visibility = itemUIRegistry.getVisiblity(widget);
         event.descriptionChanged = false;
@@ -243,6 +246,7 @@ public class PageChangeListener implements StateChangeListener {
         // the widget including its state (in event.item.state)
         boolean itemBelongsToWidget = widget.getItem() != null && widget.getItem().equals(item.getName());
         final Item itemToBeSent = itemBelongsToWidget ? item : getItemForWidget(widget);
+        State stateToBeSent = null;
         if (itemToBeSent != null) {
             String widgetTypeName = widget.eClass().getInstanceTypeName()
                     .substring(widget.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
@@ -251,13 +255,16 @@ public class PageChangeListener implements StateChangeListener {
             event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null);
 
             // event.state is an adjustment of the item state to the widget type.
-            final State stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();
+            stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();
             event.state = itemUIRegistry.convertState(widget, itemToBeSent, stateToBeSent).toFullString();
             // In case this state is identical to the item state, its value is set to null.
             if (event.state != null && event.state.equals(event.item.state)) {
                 event.state = null;
             }
         }
+        event.labelcolor = SitemapResource.convertItemValueColor(itemUIRegistry.getLabelColor(widget), stateToBeSent);
+        event.valuecolor = SitemapResource.convertItemValueColor(itemUIRegistry.getValueColor(widget), stateToBeSent);
+        event.iconcolor = SitemapResource.convertItemValueColor(itemUIRegistry.getIconColor(widget), stateToBeSent);
         return event;
     }
 
@@ -274,22 +281,10 @@ public class PageChangeListener implements StateChangeListener {
     }
 
     private boolean definesVisibilityOrColor(Widget w, String name) {
-        for (VisibilityRule rule : w.getVisibility()) {
-            if (name.equals(rule.getItem())) {
-                return true;
-            }
-        }
-        for (ColorArray rule : w.getLabelColor()) {
-            if (name.equals(rule.getItem())) {
-                return true;
-            }
-        }
-        for (ColorArray rule : w.getValueColor()) {
-            if (name.equals(rule.getItem())) {
-                return true;
-            }
-        }
-        return false;
+        return w.getVisibility().stream().anyMatch(r -> name.equals(r.getItem()))
+                || w.getLabelColor().stream().anyMatch(r -> name.equals(r.getItem()))
+                || w.getValueColor().stream().anyMatch(r -> name.equals(r.getItem()))
+                || w.getIconColor().stream().anyMatch(r -> name.equals(r.getItem()));
     }
 
     public void sitemapContentChanged(EList<Widget> widgets) {

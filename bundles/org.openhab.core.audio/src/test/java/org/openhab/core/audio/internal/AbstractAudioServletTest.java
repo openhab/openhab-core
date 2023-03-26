@@ -65,7 +65,7 @@ public abstract class AbstractAudioServletTest extends JavaTest {
 
     @BeforeEach
     public void setupServerAndClient() {
-        audioServlet = new AudioServlet(httpServiceMock, httpContextMock);
+        audioServlet = new AudioServlet();
 
         ServletHolder servletHolder = new ServletHolder(audioServlet);
 

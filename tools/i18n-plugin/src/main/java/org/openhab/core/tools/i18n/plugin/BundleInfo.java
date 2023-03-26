@@ -19,7 +19,7 @@ import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.addon.xml.internal.AddonInfoXmlResult;
+import org.openhab.core.addon.internal.xml.AddonInfoXmlResult;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.thing.xml.internal.ChannelGroupTypeXmlResult;
 import org.openhab.core.thing.xml.internal.ChannelTypeXmlResult;

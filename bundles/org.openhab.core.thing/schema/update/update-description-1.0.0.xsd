@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0"
+           xmlns:update-description="https://openhab.org/schemas/update-description/v1.0.0"
+           xmlns:thing-description="https://openhab.org/schemas/thing-description/v1.0.0"
+           xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+           targetNamespace="https://openhab.org/schemas/update-description/v1.0.0">
+
+    <xs:import namespace="https://openhab.org/schemas/config-description/v1.0.0"
+               schemaLocation="https://openhab.org/schemas/config-description-1.0.0.xsd"/>
+    <xs:import namespace="https://openhab.org/schemas/thing-description/v1.0.0"
+               schemaLocation="https://openhab.org/schemas/thing-description-1.0.0.xsd"/>
+
+    <xs:element name="update-descriptions">
+        <xs:annotation>
+            <xs:documentation>The root element of an update description. It contains the update instructions for managed
+                things after thing-type changes. Instructions are grouped by thing-type and (internal) version.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="thing-type" type="update-description:thingType" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="thingType">
+        <xs:sequence>
+            <xs:element name="instruction-set" type="update-description:instructionSet" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="uid" type="update-description:thingTypeUid" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="instructionSet">
+        <xs:choice maxOccurs="unbounded">
+            <xs:annotation>
+                <xs:appinfo>
+                    <jaxb:property name="instructions"/>
+                </xs:appinfo>
+            </xs:annotation>
+            <xs:element name="add-channel" type="update-description:addChannel" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="update-channel" type="update-description:updateChannel" minOccurs="0"
+                        maxOccurs="unbounded"/>
+            <xs:element name="remove-channel" type="update-description:removeChannel" minOccurs="0"
+                        maxOccurs="unbounded"/>
+        </xs:choice>
+        <xs:attribute name="targetVersion" type="xs:int" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="addChannel">
+        <xs:sequence>
+            <xs:element name="type" type="update-description:channelTypeUid"/>
+            <xs:element name="label" type="xs:string" minOccurs="0"/>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+            <xs:element name="tags" type="thing-description:tags" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="update-description:channelId" use="required"/>
+        <xs:attribute name="groupIds" type="update-description:groupIds" />
+    </xs:complexType>
+
+    <xs:complexType name="updateChannel">
+        <xs:annotation>
+            <xs:documentation>Update a channel (e.g. change channel-type, label, description). By default, the old
+                configuration and tags are copied to the new channel.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="type" type="update-description:channelTypeUid"/>
+            <xs:element name="label" type="xs:string" minOccurs="0"/>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+            <xs:element name="tags" type="thing-description:tags" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>If set, already existing tags are overwritten.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id" type="update-description:channelId" use="required"/>
+        <xs:attribute name="groupIds" type="update-description:groupIds" />
+        <xs:attribute name="preserveConfiguration" type="xs:boolean" default="true"/>
+    </xs:complexType>
+
+    <xs:complexType name="removeChannel">
+        <xs:annotation>
+            <xs:documentation>Remove a channel from a thing.</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="id" type="update-description:channelId" use="required"/>
+        <xs:attribute name="groupIds" type="update-description:groupIds" />
+    </xs:complexType>
+
+    <xs:simpleType name="channelId">
+        <xs:annotation>
+            <xs:documentation>The simple id of the channel (i.e. without the thing UID).</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="config-description:idRestrictionPattern"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="groupIds">
+        <xs:annotation>
+            <xs:documentation>A comma-separated list of channel-group-ids.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="thing-description:namespaceIdListRestrictionPattern"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="channelTypeUid">
+        <xs:annotation>
+            <xs:documentation>The fully qualified UID of the channel type (e.g. "system:color",
+                "viessmann:lastErrorMessage").
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="config-description:uriRestrictionPattern"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="thingTypeUid">
+        <xs:annotation>
+            <xs:documentation>The fully qualified UID of the thing type.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="config-description:uriRestrictionPattern"/>
+    </xs:simpleType>
+
+</xs:schema>

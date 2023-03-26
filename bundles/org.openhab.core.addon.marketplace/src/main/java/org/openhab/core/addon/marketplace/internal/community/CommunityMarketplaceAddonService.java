@@ -239,14 +239,15 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     private @Nullable AddonType getAddonType(@Nullable Integer category, List<String> tags) {
         // check if we can determine the addon type from the category
         if (RULETEMPLATES_CATEGORY.equals(category)) {
-            return TAG_ADDON_TYPE_MAP.get("automation");
+            return AddonType.AUTOMATION;
         } else if (UIWIDGETS_CATEGORY.equals(category)) {
-            return TAG_ADDON_TYPE_MAP.get("ui");
+            return AddonType.UI;
         } else if (BLOCKLIBRARIES_CATEGORY.equals(category)) {
-            return TAG_ADDON_TYPE_MAP.get("automation");
+            return AddonType.AUTOMATION;
         } else if (BUNDLES_CATEGORY.equals(category)) {
             // try to get it from tags if we have tags
-            return tags.stream().map(TAG_ADDON_TYPE_MAP::get).filter(Objects::nonNull).findFirst().orElse(null);
+            return AddonType.DEFAULT_TYPES.stream().filter(type -> tags.contains(type.getId())).findFirst()
+                    .orElse(null);
         }
 
         // or return null

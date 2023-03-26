@@ -33,6 +33,7 @@ import org.openhab.core.types.State;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Initial contribution
+ * @author Laurent Garnier - new method getIconColor
  */
 @NonNullByDefault
 public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
@@ -148,6 +149,16 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      */
     @Nullable
     String getValueColor(Widget w);
+
+    /**
+     * Gets the icon color for the widget. Checks conditional statements to
+     * find the color based on the item value
+     *
+     * @param w Widget
+     * @return String with the color
+     */
+    @Nullable
+    String getIconColor(Widget w);
 
     /**
      * Gets the widget visibility based on the item state

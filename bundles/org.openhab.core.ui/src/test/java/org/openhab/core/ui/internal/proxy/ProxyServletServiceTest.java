@@ -18,6 +18,7 @@ import static org.mockito.Mockito.*;
 
 import java.net.URI;
 import java.util.Base64;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -84,7 +85,7 @@ public class ProxyServletServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new ProxyServletService(itemUIRegistryMock, httpServiceMock);
+        service = new ProxyServletService(httpServiceMock, itemUIRegistryMock, Map.of());
         service.sitemapProviders.add(sitemapProviderMock);
 
         sitemapMock = mock(Sitemap.class);
