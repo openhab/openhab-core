@@ -65,7 +65,7 @@ public class MetadataCommandDescriptionProvider implements CommandDescriptionPro
                         if (o.contains("=")) {
                             String command;
                             String label;
-                            if (o.startsWith("\"")) {
+                            if (o.startsWith("\"") && o.contains("\"=\"")) {
                                 String[] parts = o.trim().split("\"=\"");
                                 command = removeSurroundingQuotes(parts[0]);
                                 label = removeSurroundingQuotes(parts[1]);

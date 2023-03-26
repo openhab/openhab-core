@@ -108,7 +108,7 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
                                 if (o.contains("=")) {
                                     String value;
                                     String label;
-                                    if (o.startsWith("\"")) {
+                                    if (o.startsWith("\"") && o.contains("\"=\"")) {
                                         String[] parts = o.trim().split("\"=\"");
                                         value = removeSurroundingQuotes(parts[0]);
                                         label = removeSurroundingQuotes(parts[1]);
