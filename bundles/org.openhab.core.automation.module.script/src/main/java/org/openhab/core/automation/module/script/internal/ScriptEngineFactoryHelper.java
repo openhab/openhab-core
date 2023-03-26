@@ -13,8 +13,10 @@
 package org.openhab.core.automation.module.script.internal;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.script.ScriptEngine;
 
@@ -66,5 +68,11 @@ public class ScriptEngineFactoryHelper {
         return String.format("%s (%s)",
                 factory.getLanguageName().substring(0, 1).toUpperCase() + factory.getLanguageName().substring(1),
                 factory.getLanguageVersion());
+    }
+
+    public static Optional<String> getPreferredExtension(ScriptEngineFactory factory) {
+        // return an Optional because GenericScriptEngineFactory has no scriptTypes
+        return factory.getScriptTypes().stream().filter(type -> !type.contains("/"))
+                .min(Comparator.comparing(String::length));
     }
 }

@@ -32,6 +32,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public interface TransformationService {
 
+    public static final String SERVICE_PROPERTY_NAME = "openhab.transform";
     public static final String TRANSFORM_FOLDER_NAME = "transform";
     public static final String TRANSFORM_PROFILE_SCOPE = "transform";
 
