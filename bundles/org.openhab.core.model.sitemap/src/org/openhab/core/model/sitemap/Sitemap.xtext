@@ -54,7 +54,7 @@ Image:
 
 Video:
     'Video' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? & ('icon=' icon=Icon)? &
-    ('url=' url=(STRING)) & ('encoding=' encoding=(STRING))? &
+    ('url=' url=STRING) & ('encoding=' encoding=STRING)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)* ']'))? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)* ']'))? &
@@ -62,7 +62,7 @@ Video:
 
 Chart:
     'Chart' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? & ('icon=' icon=Icon)? &
-    ('service=' service=(STRING))? & ('refresh=' refresh=INT)? & ('period=' period=ID) &
+    ('service=' service=STRING)? & ('refresh=' refresh=INT)? & ('period=' period=ID) &
     ('legend=' legend=BOOLEAN_OBJECT)? & ('forceasitem=' forceAsItem=BOOLEAN_OBJECT)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)* ']'))? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
@@ -72,7 +72,7 @@ Chart:
 
 Webview:
     'Webview' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? & ('icon=' icon=Icon)? &
-    ('height=' height=INT)? & ('url=' url=(STRING)) &
+    ('height=' height=INT)? & ('url=' url=STRING) &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)* ']'))? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)* ']'))? &
@@ -129,6 +129,7 @@ Colorpicker:
 
 Input:
     'Input' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? & ('icon=' icon=Icon)? &
+    ('inputHint=' inputHint=STRING)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)* ']'))? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)* ']'))? &
@@ -146,7 +147,7 @@ Mapping:
     cmd=Command '=' label=(ID | STRING);
 
 VisibilityRule:
-    (item=ID) (condition=("==" | ">" | "<" | ">=" | "<=" | "!=")) (sign=('-' | '+'))? (state=XState);
+    (item=ID) (condition=('==' | '>' | '<' | '>=' | '<=' | '!=')) (sign=('-' | '+'))? (state=XState);
 
 ItemRef:
     ID;
@@ -158,7 +159,7 @@ Icon returns ecore::EString:
     STRING | ID;
 
 ColorArray:
-    ((item=ID)? (condition=("==" | ">" | "<" | ">=" | "<=" | "!="))? (sign=('-' | '+'))? (state=XState) '=')?
+    ((item=ID)? (condition=('==' | '>' | '<' | '>=' | '<=' | '!='))? (sign=('-' | '+'))? (state=XState) '=')?
     (arg=STRING);
 
 Command returns ecore::EString:
@@ -170,6 +171,7 @@ Number returns ecore::EBigDecimal:
 XState returns ecore::EString:
     INT | ID | STRING | FLOAT;
 
+@Override 
 terminal ID:
     ('^'? ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*) |
     (('0'..'9')+ ('a'..'z' | 'A'..'Z' | '_') ('0'..'9' | 'a'..'z' | 'A'..'Z' | '_')*);
