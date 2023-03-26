@@ -47,6 +47,7 @@ public class WidgetDTO {
     public BigDecimal minValue;
     public BigDecimal maxValue;
     public BigDecimal step;
+    public String inputHint;
     public String url;
     public String encoding;
     public String service;
