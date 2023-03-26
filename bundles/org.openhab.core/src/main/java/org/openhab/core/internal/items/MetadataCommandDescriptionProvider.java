@@ -63,8 +63,18 @@ public class MetadataCommandDescriptionProvider implements CommandDescriptionPro
                 if (metadata.getConfiguration().containsKey("options")) {
                     Stream.of(metadata.getConfiguration().get("options").toString().split(",")).forEach(o -> {
                         if (o.contains("=")) {
-                            commandDescription.addCommandOption(
-                                    new CommandOption(o.split("=")[0].trim(), o.split("=")[1].trim()));
+                            String command;
+                            String label;
+                            if (o.startsWith("\"")) {
+                                String[] parts = o.trim().split("\"=\"");
+                                command = removeSurroundingQuotes(parts[0]);
+                                label = removeSurroundingQuotes(parts[1]);
+                            } else {
+                                String[] parts = o.trim().split("=");
+                                command = parts[0];
+                                label = parts[1];
+                            }
+                            commandDescription.addCommandOption(new CommandOption(command.trim(), label.trim()));
                         } else {
                             commandDescription.addCommandOption(new CommandOption(o.trim(), null));
                         }
@@ -79,5 +89,16 @@ public class MetadataCommandDescriptionProvider implements CommandDescriptionPro
         }
 
         return null;
+    }
+
+    public static String removeSurroundingQuotes(String input) {
+        String output = input;
+        if (input.startsWith("\"")) {
+            output = output.substring(1);
+        }
+        if (input.endsWith("\"")) {
+            output = output.substring(0, output.length() - 1);
+        }
+        return output;
     }
 }
