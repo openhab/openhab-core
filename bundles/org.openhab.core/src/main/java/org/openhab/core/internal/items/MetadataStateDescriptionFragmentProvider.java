@@ -12,6 +12,8 @@
  */
 package org.openhab.core.internal.items;
 
+import static org.openhab.core.internal.items.MetadataCommandDescriptionProvider.removeSurroundingQuotes;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -103,9 +105,22 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
                 if (metadata.getConfiguration().containsKey("options")) {
                     List<StateOption> stateOptions = Stream
                             .of(metadata.getConfiguration().get("options").toString().split(",")).map(o -> {
-                                return (o.contains("="))
-                                        ? new StateOption(o.split("=")[0].trim(), o.split("=")[1].trim())
-                                        : new StateOption(o.trim(), null);
+                                if (o.contains("=")) {
+                                    String value;
+                                    String label;
+                                    if (o.startsWith("\"")) {
+                                        String[] parts = o.trim().split("\"=\"");
+                                        value = removeSurroundingQuotes(parts[0]);
+                                        label = removeSurroundingQuotes(parts[1]);
+                                    } else {
+                                        String[] parts = o.trim().split("=");
+                                        value = parts[0];
+                                        label = parts[1];
+                                    }
+                                    return new StateOption(value.trim(), label.trim());
+                                } else {
+                                    return new StateOption(o.trim(), null);
+                                }
                             }).collect(Collectors.toList());
                     builder.withOptions(stateOptions);
                 }
