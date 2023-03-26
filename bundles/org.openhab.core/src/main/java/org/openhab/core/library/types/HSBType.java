@@ -113,9 +113,9 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     }
 
     /**
-     * @deprecated Use {@link ColorUtil#rgbToHsv(int[])} instead
+     * @deprecated Use {@link ColorUtil#rgbToHsb(int[])} instead
      *
-     * Create HSB from RGB
+     *             Create HSB from RGB
      *
      * @param r red 0-255
      * @param g green 0-255
@@ -124,12 +124,12 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
      */
     @Deprecated
     public static HSBType fromRGB(int r, int g, int b) throws IllegalArgumentException {
-        return ColorUtil.rgbToHsv(new int[] { r, g, b });
+        return ColorUtil.rgbToHsb(new int[] { r, g, b });
     }
 
     /**
-     * @deprecated Use {@link ColorUtil#xyToHsv(double[])} or {@link ColorUtil#xyToHsv(double[], ColorUtil.Gamut)}
-     *             instead
+     * @deprecated Use {@link ColorUtil#xyToHsb(double[])} or {@link ColorUtil#xyToHsb(double[], ColorUtil.Gamut)}
+     *             instead.
      *
      *             Returns a HSBType object representing the provided xy color values in CIE XY color model.
      *             Conversion from CIE XY color model to sRGB using D65 reference white
@@ -141,7 +141,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
      */
     @Deprecated
     public static HSBType fromXY(float x, float y) throws IllegalArgumentException {
-        return ColorUtil.xyToHsv(new double[] { x, y });
+        return ColorUtil.xyToHsb(new double[] { x, y });
     }
 
     @Override
@@ -165,29 +165,36 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
         return new PercentType(value);
     }
 
+    /** @deprecated Use {@link ColorUtil#hsbToRgb(HSBType)} instead */
+    @Deprecated
     public PercentType getRed() {
         return toRGB()[0];
     }
 
+    /** @deprecated Use {@link ColorUtil#hsbToRgb(HSBType)} instead */
+    @Deprecated
     public PercentType getGreen() {
         return toRGB()[1];
     }
 
+    /** @deprecated Use {@link ColorUtil#hsbToRgb(HSBType)} instead */
+    @Deprecated
     public PercentType getBlue() {
         return toRGB()[2];
     }
 
     /**
-     * Returns the RGB value representing the color in the default sRGB
-     * color model.
-     * (Bits 24-31 are alpha, 16-23 are red, 8-15 are green, 0-7 are blue).
+     * @deprecated Use {@link ColorUtil#hsbTosRgb(HSBType)} instead.
+     *
+     *             Returns the RGB value representing the color in the default sRGB
+     *             color model.
+     *             (Bits 24-31 are alpha, 16-23 are red, 8-15 are green, 0-7 are blue).
      *
      * @return the RGB value of the color in the default sRGB color model
      */
+    @Deprecated
     public int getRGB() {
-        PercentType[] rgb = toRGB();
-        return ((0xFF) << 24) | ((convertPercentToByte(rgb[0]) & 0xFF) << 16)
-                | ((convertPercentToByte(rgb[1]) & 0xFF) << 8) | ((convertPercentToByte(rgb[2]) & 0xFF) << 0);
+        return ColorUtil.hsbTosRgb(this);
     }
 
     @Override
@@ -239,58 +246,10 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
                 && getBrightness().equals(other.getBrightness());
     }
 
+    /* @deprecated Use {@link ColorUtil#hsbToRgb(HSBType)} instead */
+    @Deprecated
     public PercentType[] toRGB() {
-        PercentType red = null;
-        PercentType green = null;
-        PercentType blue = null;
-
-        BigDecimal h = hue.divide(BIG_DECIMAL_HUNDRED, 10, RoundingMode.HALF_UP);
-        BigDecimal s = saturation.divide(BIG_DECIMAL_HUNDRED);
-
-        int hInt = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 0, RoundingMode.DOWN).intValue();
-        BigDecimal f = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP)
-                .remainder(BigDecimal.ONE);
-        PercentType a = new PercentType(value.multiply(BigDecimal.ONE.subtract(s)));
-        PercentType b = new PercentType(value.multiply(BigDecimal.ONE.subtract(s.multiply(f))));
-        PercentType c = new PercentType(
-                value.multiply(BigDecimal.ONE.subtract((BigDecimal.ONE.subtract(f)).multiply(s))));
-
-        switch (hInt) {
-            case 0:
-            case 6:
-                red = getBrightness();
-                green = c;
-                blue = a;
-                break;
-            case 1:
-                red = b;
-                green = getBrightness();
-                blue = a;
-                break;
-            case 2:
-                red = a;
-                green = getBrightness();
-                blue = c;
-                break;
-            case 3:
-                red = a;
-                green = b;
-                blue = getBrightness();
-                break;
-            case 4:
-                red = c;
-                green = a;
-                blue = getBrightness();
-                break;
-            case 5:
-                red = getBrightness();
-                green = a;
-                blue = b;
-                break;
-            default:
-                throw new IllegalArgumentException("Could not convert to RGB.");
-        }
-        return new PercentType[] { red, green, blue };
+        return ColorUtil.hsbToRgbPercent(this);
     }
 
     /**
