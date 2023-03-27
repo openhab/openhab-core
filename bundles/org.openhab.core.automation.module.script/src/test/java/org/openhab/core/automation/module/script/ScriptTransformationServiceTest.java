@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,6 +40,7 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationRegistry;
+import org.openhab.core.transform.TransformationService;
 
 /**
  * The {@link ScriptTransformationServiceTest} holds tests for the {@link ScriptTransformationService}
@@ -49,7 +51,7 @@ import org.openhab.core.transform.TransformationRegistry;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class ScriptTransformationServiceTest {
-    private static final String SCRIPT_LANGUAGE = "customDsl";
+    private static final String SCRIPT_LANGUAGE = "customdsl";
     private static final String SCRIPT_UID = "scriptUid." + SCRIPT_LANGUAGE;
     private static final String INVALID_SCRIPT_UID = "invalidScriptUid";
 
@@ -73,7 +75,9 @@ public class ScriptTransformationServiceTest {
 
     @BeforeEach
     public void setUp() throws ScriptException {
-        service = new ScriptTransformationService(SCRIPT_LANGUAGE, transformationRegistry, scriptEngineManager);
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(TransformationService.SERVICE_PROPERTY_NAME, SCRIPT_LANGUAGE);
+        service = new ScriptTransformationService(transformationRegistry, scriptEngineManager, properties);
 
         when(scriptEngineManager.createScriptEngine(eq(SCRIPT_LANGUAGE), any())).thenReturn(scriptEngineContainer);
         when(scriptEngineManager.isSupported(anyString()))

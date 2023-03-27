@@ -33,10 +33,15 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationRegistry;
 import org.openhab.core.transform.TransformationService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +52,7 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
+@Component(factory = "org.openhab.core.automation.module.script.transformation.factory")
 public class ScriptTransformationService implements TransformationService, RegistryChangeListener<Transformation> {
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
 
@@ -66,14 +72,23 @@ public class ScriptTransformationService implements TransformationService, Regis
     private final TransformationRegistry transformationRegistry;
     private final ScriptEngineManager scriptEngineManager;
 
-    public ScriptTransformationService(final String scriptType, TransformationRegistry transformationRegistry,
-            ScriptEngineManager scriptEngineManager) {
+    @Activate
+    public ScriptTransformationService(@Reference TransformationRegistry transformationRegistry,
+            @Reference ScriptEngineManager scriptEngineManager, Map<String, Object> config) {
+        String servicePropertyName = ConfigParser.valueAs(config.get(TransformationService.SERVICE_PROPERTY_NAME),
+                String.class);
+        if (servicePropertyName == null) {
+            throw new IllegalStateException(
+                    "'" + TransformationService.SERVICE_PROPERTY_NAME + "' must not be null in service configuration");
+        }
+
         this.transformationRegistry = transformationRegistry;
         this.scriptEngineManager = scriptEngineManager;
-        this.scriptType = scriptType;
+        this.scriptType = servicePropertyName.toLowerCase();
         transformationRegistry.addRegistryChangeListener(this);
     }
 
+    @Deactivate
     public void deactivate() {
         transformationRegistry.removeRegistryChangeListener(this);
 
