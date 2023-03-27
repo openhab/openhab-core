@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -73,6 +74,9 @@ public class ScriptProfileFactory
     @Override
     public @Nullable Profile createProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback,
             ProfileContext profileContext) {
+        if (!profileTypeUID.getScope().equals(TransformationService.TRANSFORM_PROFILE_SCOPE)) {
+            return null;
+        }
 
         if (getSupportedProfileTypeUIDs().contains(profileTypeUID)) {
             String scriptType = profileTypeUID.getId().toLowerCase();
@@ -85,7 +89,7 @@ public class ScriptProfileFactory
 
     @Override
     public Collection<ProfileTypeUID> getSupportedProfileTypeUIDs() {
-        return scriptTransformationFactory.getScriptTypes().stream()
+        return getScriptTypes()
                 .map(type -> new ProfileTypeUID(TransformationService.TRANSFORM_PROFILE_SCOPE, type.toUpperCase()))
                 .toList();
     }
@@ -103,16 +107,18 @@ public class ScriptProfileFactory
             return Collections.emptyList();
         }
 
-        return scriptTransformationFactory.getScriptTypes().stream()
-                .map(type -> ConfigDescriptionBuilder.create(URI.create(PROFILE_CONFIG_URI_PREFIX + type.toUpperCase()))
-                        .withParameters(template.getParameters()).withParameterGroups(template.getParameterGroups())
-                        .build())
+        return getScriptTypes().map(type -> ConfigDescriptionBuilder
+                .create(URI.create(PROFILE_CONFIG_URI_PREFIX + type.toUpperCase()))
+                .withParameters(template.getParameters()).withParameterGroups(template.getParameterGroups()).build())
                 .toList();
     }
 
-    private Stream<String> getProfileConfigURIs() {
-        return scriptTransformationFactory.getScriptTypes().stream()
-                .map(type -> PROFILE_CONFIG_URI_PREFIX + type.toUpperCase());
+    private Stream<String> getScriptTypes() {
+        return scriptTransformationFactory.getScriptTypes().stream();
+    }
+
+    private Set<String> getProfileConfigURIs() {
+        return getScriptTypes().map(type -> PROFILE_CONFIG_URI_PREFIX + type.toUpperCase()).collect(Collectors.toSet());
     }
 
     /**
@@ -124,9 +130,8 @@ public class ScriptProfileFactory
      */
     @Override
     public @Nullable ConfigDescription getConfigDescription(URI uri, @Nullable Locale locale) {
-
-        if (getProfileConfigURIs()
-                .noneMatch(script_transformation_uri -> script_transformation_uri.equals(uri.toString()))) {
+        String uriString = uri.toString();
+        if (!uriString.startsWith(PROFILE_CONFIG_URI_PREFIX) || !getProfileConfigURIs().contains(uriString)) {
             return null;
         }
 
@@ -141,8 +146,8 @@ public class ScriptProfileFactory
     @Override
     public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
             @Nullable Locale locale) {
-        if (getProfileConfigURIs()
-                .noneMatch(script_transformation_uri -> script_transformation_uri.equals(uri.toString()))) {
+        String uriString = uri.toString();
+        if (!uriString.startsWith(PROFILE_CONFIG_URI_PREFIX) || !getProfileConfigURIs().contains(uriString)) {
             return null;
         }
 
@@ -154,8 +159,7 @@ public class ScriptProfileFactory
         String scriptType = uri_parts[uri_parts.length - 1].toLowerCase();
 
         if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param) || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)) {
-            Collection<String> scriptTypes = scriptType.equals("dsl") ? List.of(scriptType, "rules")
-                    : List.of(scriptType);
+            var scriptTypes = scriptType.equals("dsl") ? List.of(scriptType, "rules") : List.of(scriptType);
             return transformationRegistry.getTransformations(scriptTypes).stream()
                     .map(c -> new ParameterOption(c.getUID(), c.getLabel())).collect(Collectors.toList());
         }
