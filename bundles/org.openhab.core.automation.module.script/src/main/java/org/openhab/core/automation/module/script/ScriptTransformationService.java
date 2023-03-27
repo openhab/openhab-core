@@ -12,8 +12,14 @@
  */
 package org.openhab.core.automation.module.script;
 
+import static org.openhab.core.automation.module.script.profile.ScriptProfileFactory.PROFILE_CONFIG_URI_PREFIX;
+
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,6 +28,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -31,9 +38,12 @@ import javax.script.ScriptException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.module.script.profile.ScriptProfile;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigParser;
+import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationRegistry;
@@ -52,8 +62,10 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-@Component(factory = "org.openhab.core.automation.module.script.transformation.factory")
-public class ScriptTransformationService implements TransformationService, RegistryChangeListener<Transformation> {
+@Component(factory = "org.openhab.core.automation.module.script.transformation.factory", service = {
+        TransformationService.class, ScriptTransformationService.class, ConfigOptionProvider.class })
+public class ScriptTransformationService
+        implements TransformationService, ConfigOptionProvider, RegistryChangeListener<Transformation> {
     public static final String SCRIPT_TYPE_PROPERTY_NAME = "openhab.transform.script.scriptType";
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
 
@@ -210,6 +222,26 @@ public class ScriptTransformationService implements TransformationService, Regis
     @Override
     public void updated(Transformation oldElement, Transformation element) {
         clearCache(element.getUID());
+    }
+
+    @Override
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
+            @Nullable Locale locale) {
+        String uriString = uri.toString();
+        if (!uriString.startsWith(PROFILE_CONFIG_URI_PREFIX)) {
+            return null;
+        }
+
+        String scriptType = uriString.substring(PROFILE_CONFIG_URI_PREFIX.length()).toLowerCase();
+        if (!this.scriptType.equals(scriptType)) {
+            return null;
+        }
+
+        if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param) || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)) {
+            return transformationRegistry.getTransformations(List.of(scriptType.toLowerCase())).stream()
+                    .map(c -> new ParameterOption(c.getUID(), c.getLabel())).collect(Collectors.toList());
+        }
+        return null;
     }
 
     private void clearCache(String uid) {

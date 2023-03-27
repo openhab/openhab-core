@@ -32,9 +32,10 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public interface TransformationService {
 
-    public static final String SERVICE_PROPERTY_NAME = "openhab.transform";
-    public static final String TRANSFORM_FOLDER_NAME = "transform";
-    public static final String TRANSFORM_PROFILE_SCOPE = "transform";
+    String SERVICE_PROPERTY_NAME = "openhab.transform";
+    String SERVICE_PROPERTY_LABEL = "openhab.transform.label";
+    String TRANSFORM_FOLDER_NAME = "transform";
+    String TRANSFORM_PROFILE_SCOPE = "transform";
 
     /**
      * Transforms the input <code>source</code> by means of the given <code>function</code> and returns the transformed

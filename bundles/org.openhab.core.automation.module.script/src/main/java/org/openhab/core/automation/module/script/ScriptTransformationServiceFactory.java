@@ -12,31 +12,27 @@
  */
 package org.openhab.core.automation.module.script;
 
+import static org.openhab.core.automation.module.script.profile.ScriptProfileFactory.PROFILE_CONFIG_URI_PREFIX;
+
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import javax.script.ScriptEngine;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.internal.ScriptEngineFactoryHelper;
-import org.openhab.core.automation.module.script.profile.ScriptProfile;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
-import org.openhab.core.config.core.ConfigOptionProvider;
-import org.openhab.core.config.core.ParameterOption;
-import org.openhab.core.transform.TransformationRegistry;
 import org.openhab.core.transform.TransformationService;
 import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
@@ -46,8 +42,6 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link ScriptTransformationServiceFactory} registers a {@link ScriptTransformationService}
@@ -55,33 +49,27 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-@Component(immediate = true, service = { ScriptTransformationServiceFactory.class, ConfigDescriptionProvider.class,
-        ConfigOptionProvider.class })
+@Component(immediate = true, service = { ScriptTransformationServiceFactory.class, ConfigDescriptionProvider.class })
 @NonNullByDefault
-public class ScriptTransformationServiceFactory implements ConfigDescriptionProvider, ConfigOptionProvider {
-    private final Logger logger = LoggerFactory.getLogger(ScriptTransformationServiceFactory.class);
-
-    public static final String PROFILE_CONFIG_URI_PREFIX = "profile:transform:";
+public class ScriptTransformationServiceFactory implements ConfigDescriptionProvider {
     private static final URI CONFIG_DESCRIPTION_TEMPLATE_URI = URI.create(PROFILE_CONFIG_URI_PREFIX + "SCRIPT");
 
     private final ConfigDescriptionRegistry configDescRegistry;
     private final ComponentFactory<ScriptTransformationService> scriptTransformationFactory;
-    private final TransformationRegistry transformationRegistry;
 
-    private final Map<String, TransformationRecord> scriptTransformations = new ConcurrentHashMap<>();
+    private final Map<String, ComponentInstance<ScriptTransformationService>> scriptTransformations = new ConcurrentHashMap<>();
 
     @Activate
     public ScriptTransformationServiceFactory(@Reference ConfigDescriptionRegistry configDescRegistry,
-            @Reference TransformationRegistry transformationRegistry,
             @Reference(target = "(component.factory=org.openhab.core.automation.module.script.transformation.factory)") ComponentFactory<ScriptTransformationService> factory) {
         this.configDescRegistry = configDescRegistry;
         this.scriptTransformationFactory = factory;
-        this.transformationRegistry = transformationRegistry;
     }
 
     @Deactivate
     public void deactivate() {
-        scriptTransformations.values().stream().map(tr -> tr.instance()).forEach(this::unregisterService);
+        scriptTransformations.values().forEach(this::unregisterService);
+        scriptTransformations.clear();
     }
 
     /**
@@ -91,61 +79,40 @@ public class ScriptTransformationServiceFactory implements ConfigDescriptionProv
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void setScriptEngineFactory(ScriptEngineFactory engineFactory) {
         Optional<String> scriptType = ScriptEngineFactoryHelper.getPreferredExtension(engineFactory);
-        if (!scriptType.isPresent()) {
+        if (scriptType.isEmpty()) {
             return;
         }
 
         scriptTransformations.computeIfAbsent(scriptType.get(), type -> {
-
+            ScriptEngine scriptEngine = engineFactory.createScriptEngine(type);
+            if (scriptEngine == null) {
+                return null;
+            }
+            String languageName = ScriptEngineFactoryHelper.getLanguageName(scriptEngine.getFactory());
             Dictionary<String, Object> properties = new Hashtable<>();
             properties.put(TransformationService.SERVICE_PROPERTY_NAME, type.toUpperCase());
+            properties.put(TransformationService.SERVICE_PROPERTY_LABEL, languageName);
             properties.put(ScriptTransformationService.SCRIPT_TYPE_PROPERTY_NAME, type);
-            ComponentInstance<ScriptTransformationService> instance = scriptTransformationFactory
-                    .newInstance(properties);
-
-            return new TransformationRecord(instance, getLanguageName(type, engineFactory));
+            return scriptTransformationFactory.newInstance(properties);
         });
     }
 
     public void unsetScriptEngineFactory(ScriptEngineFactory engineFactory) {
         Optional<String> scriptType = ScriptEngineFactoryHelper.getPreferredExtension(engineFactory);
-        if (scriptType.isPresent()) {
-            Optional.ofNullable(scriptTransformations.remove(scriptType.get()))
-                    .ifPresent(tr -> unregisterService(tr.instance()));
+        if (scriptType.isEmpty()) {
+            return;
         }
-    }
 
-    public Stream<String> getScriptTypes() {
-        return scriptTransformations.keySet().stream();
-    }
-
-    private String getLanguageName(final String scriptType, ScriptEngineFactory engineFactory) {
-        var scriptEngine = engineFactory.createScriptEngine(scriptType);
-        String languageName = ScriptEngineFactoryHelper.getLanguageName(scriptEngine.getFactory());
-        return languageName;
-    }
-
-    @Nullable
-    public String getLanguageName(final String scriptType) {
-        TransformationRecord tr = scriptTransformations.get(scriptType);
-        if (tr != null) {
-            return tr.languageName();
+        ComponentInstance<ScriptTransformationService> toBeUnregistered = scriptTransformations
+                .remove(scriptType.get());
+        if (toBeUnregistered != null) {
+            unregisterService(toBeUnregistered);
         }
-        return null;
     }
 
     private void unregisterService(ComponentInstance<ScriptTransformationService> instance) {
         instance.getInstance().deactivate();
         instance.dispose();
-    }
-
-    @Nullable
-    public ScriptTransformationService getTransformationService(String scriptType) {
-        TransformationRecord rec = scriptTransformations.get(scriptType);
-        if (rec == null) {
-            return null;
-        }
-        return rec.instance().getInstance();
     }
 
     @Override
@@ -155,23 +122,21 @@ public class ScriptTransformationServiceFactory implements ConfigDescriptionProv
             return Collections.emptyList();
         }
 
-        return getScriptTypes().map(type -> ConfigDescriptionBuilder
-                .create(URI.create(PROFILE_CONFIG_URI_PREFIX + type.toUpperCase()))
-                .withParameters(template.getParameters()).withParameterGroups(template.getParameterGroups()).build())
+        return scriptTransformations.keySet().stream()
+                .map(type -> ConfigDescriptionBuilder.create(URI.create(PROFILE_CONFIG_URI_PREFIX + type.toUpperCase()))
+                        .withParameters(template.getParameters()).withParameterGroups(template.getParameterGroups())
+                        .build())
                 .toList();
     }
 
-    /**
-     * Provides a {@link ConfigDescription} for the given URI.
-     *
-     * @param uri uri of the config description
-     * @param locale locale
-     * @return config description or null if no config description could be found
-     */
     @Override
     public @Nullable ConfigDescription getConfigDescription(URI uri, @Nullable Locale locale) {
         String uriString = uri.toString();
-        if (!uriString.startsWith(PROFILE_CONFIG_URI_PREFIX) || !getProfileConfigURIs().contains(uriString)) {
+        if (!uriString.startsWith(PROFILE_CONFIG_URI_PREFIX)) {
+            return null;
+        }
+        String scriptType = uriString.substring(PROFILE_CONFIG_URI_PREFIX.length());
+        if (!scriptTransformations.containsKey(scriptType.toLowerCase())) {
             return null;
         }
 
@@ -181,35 +146,5 @@ public class ScriptTransformationServiceFactory implements ConfigDescriptionProv
         }
         return ConfigDescriptionBuilder.create(uri).withParameters(template.getParameters())
                 .withParameterGroups(template.getParameterGroups()).build();
-    }
-
-    private Set<String> getProfileConfigURIs() {
-        return getScriptTypes().map(type -> PROFILE_CONFIG_URI_PREFIX + type.toUpperCase()).collect(Collectors.toSet());
-    }
-
-    @Override
-    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
-            @Nullable Locale locale) {
-        String uriString = uri.toString();
-        if (!uriString.startsWith(PROFILE_CONFIG_URI_PREFIX) || !getProfileConfigURIs().contains(uriString)) {
-            return null;
-        }
-
-        String[] uri_parts = uri.toString().split(":");
-        if (uri_parts.length == 0) {
-            return null;
-        }
-
-        String scriptType = uri_parts[uri_parts.length - 1].toLowerCase();
-
-        if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param) || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)) {
-            var scriptTypes = scriptType.equals("dsl") ? List.of(scriptType, "rules") : List.of(scriptType);
-            return transformationRegistry.getTransformations(scriptTypes).stream()
-                    .map(c -> new ParameterOption(c.getUID(), c.getLabel())).collect(Collectors.toList());
-        }
-        return null;
-    }
-
-    private record TransformationRecord(ComponentInstance<ScriptTransformationService> instance, String languageName) {
     }
 }
