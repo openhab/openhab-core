@@ -32,7 +32,7 @@ import net.wimpi.modbus.net.ModbusSlaveConnection;
  *
  */
 @NonNullByDefault
-public class ModbusPoolConfig extends GenericKeyedObjectPoolConfig<ModbusSlaveConnection> {
+public class ModbusPoolConfig extends GenericKeyedObjectPoolConfig<@Nullable ModbusSlaveConnection> {
 
     @SuppressWarnings("unused")
     private EvictionPolicy<ModbusSlaveConnection> evictionPolicy = new DefaultEvictionPolicy<>();
