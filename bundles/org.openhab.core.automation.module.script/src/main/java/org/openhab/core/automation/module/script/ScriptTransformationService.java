@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(factory = "org.openhab.core.automation.module.script.transformation.factory")
 public class ScriptTransformationService implements TransformationService, RegistryChangeListener<Transformation> {
+    public static final String SCRIPT_TYPE_PROPERTY_NAME = "openhab.transform.script.scriptType";
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
 
     private static final Pattern INLINE_SCRIPT_CONFIG_PATTERN = Pattern.compile("\\|(?<inlineScript>.+)");
@@ -75,16 +76,15 @@ public class ScriptTransformationService implements TransformationService, Regis
     @Activate
     public ScriptTransformationService(@Reference TransformationRegistry transformationRegistry,
             @Reference ScriptEngineManager scriptEngineManager, Map<String, Object> config) {
-        String servicePropertyName = ConfigParser.valueAs(config.get(TransformationService.SERVICE_PROPERTY_NAME),
-                String.class);
-        if (servicePropertyName == null) {
+        String scriptType = ConfigParser.valueAs(config.get(SCRIPT_TYPE_PROPERTY_NAME), String.class);
+        if (scriptType == null) {
             throw new IllegalStateException(
-                    "'" + TransformationService.SERVICE_PROPERTY_NAME + "' must not be null in service configuration");
+                    "'" + SCRIPT_TYPE_PROPERTY_NAME + "' must not be null in service configuration");
         }
 
         this.transformationRegistry = transformationRegistry;
         this.scriptEngineManager = scriptEngineManager;
-        this.scriptType = servicePropertyName.toLowerCase();
+        this.scriptType = scriptType;
         transformationRegistry.addRegistryChangeListener(this);
     }
 

@@ -55,7 +55,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-@Component(immediate = true, service = { ConfigDescriptionProvider.class, ConfigOptionProvider.class })
+@Component(immediate = true, service = { ScriptTransformationServiceFactory.class, ConfigDescriptionProvider.class,
+        ConfigOptionProvider.class })
 @NonNullByDefault
 public class ScriptTransformationServiceFactory implements ConfigDescriptionProvider, ConfigOptionProvider {
     private final Logger logger = LoggerFactory.getLogger(ScriptTransformationServiceFactory.class);
@@ -98,6 +99,7 @@ public class ScriptTransformationServiceFactory implements ConfigDescriptionProv
 
             Dictionary<String, Object> properties = new Hashtable<>();
             properties.put(TransformationService.SERVICE_PROPERTY_NAME, type.toUpperCase());
+            properties.put(ScriptTransformationService.SCRIPT_TYPE_PROPERTY_NAME, type);
             ComponentInstance<ScriptTransformationService> instance = scriptTransformationFactory
                     .newInstance(properties);
 
