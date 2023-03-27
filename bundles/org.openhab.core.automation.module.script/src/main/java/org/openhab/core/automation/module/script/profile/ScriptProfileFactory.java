@@ -50,16 +50,15 @@ public class ScriptProfileFactory implements ProfileFactory, ProfileTypeProvider
     @Override
     public @Nullable Profile createProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback,
             ProfileContext profileContext) {
-        String scriptType = profileTypeUID.getId().toLowerCase();
-        ScriptTransformationService transformationService = services.get(scriptType).service();
+        String serviceId = profileTypeUID.getId();
+        ScriptTransformationService transformationService = services.get(serviceId).service();
         return new ScriptProfile(profileTypeUID, callback, profileContext, transformationService);
     }
 
     @Override
     public Collection<ProfileTypeUID> getSupportedProfileTypeUIDs() {
         return services.keySet().stream()
-                .map(type -> new ProfileTypeUID(TransformationService.TRANSFORM_PROFILE_SCOPE, type.toUpperCase()))
-                .toList();
+                .map(id -> new ProfileTypeUID(TransformationService.TRANSFORM_PROFILE_SCOPE, id)).toList();
     }
 
     @Override
