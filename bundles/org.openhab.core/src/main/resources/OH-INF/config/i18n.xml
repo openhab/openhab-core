@@ -33,6 +33,10 @@
 			<label>Location</label>
 			<description><![CDATA[The location of this installation.<br>Coordinates as &lt;latitude&gt;,&lt;longitude&gt;[&lt;altitude&gt;]<br>Example: "52.5200066,13.4049540" (Berlin)]]></description>
 		</parameter>
+		<parameter name="baseCurrency" type="text" pattern="[A-Z]{3}">
+			<label>Base Currency</label>
+			<description>The base currency of this system (determined by locale if not set)</description>
+		</parameter>
 		<parameter name="measurementSystem" type="text">
 			<label>Measurement System</label>
 			<description>The measurement system is used for unit conversion.</description>

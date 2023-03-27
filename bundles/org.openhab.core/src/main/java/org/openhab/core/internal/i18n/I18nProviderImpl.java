@@ -14,6 +14,7 @@ package org.openhab.core.internal.i18n;
 
 import static org.openhab.core.library.unit.MetricPrefix.HECTO;
 
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.DateTimeException;
 import java.time.ZoneId;
@@ -24,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -70,14 +72,19 @@ import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.library.dimension.ArealDensity;
+import org.openhab.core.library.dimension.Currency;
 import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
+import org.openhab.core.library.dimension.EnergyPrice;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 import org.openhab.core.library.types.PointType;
+import org.openhab.core.library.unit.CurrencyProvider;
+import org.openhab.core.library.unit.CurrencyUnit;
+import org.openhab.core.library.unit.CurrencyUnits;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
@@ -117,8 +124,8 @@ import org.slf4j.LoggerFactory;
         "service.config.category=system", //
         "service.config.description.uri=system:i18n" })
 @NonNullByDefault
-public class I18nProviderImpl
-        implements TranslationProvider, LocaleProvider, LocationProvider, TimeZoneProvider, UnitProvider {
+public class I18nProviderImpl implements TranslationProvider, LocaleProvider, LocationProvider, TimeZoneProvider,
+        UnitProvider, CurrencyProvider {
 
     private final Logger logger = LoggerFactory.getLogger(I18nProviderImpl.class);
 
@@ -126,10 +133,12 @@ public class I18nProviderImpl
 
     // LocaleProvider
     public static final String LANGUAGE = "language";
+    public static final String BASE_CURRENCY = "baseCurrency";
     public static final String SCRIPT = "script";
     public static final String REGION = "region";
     public static final String VARIANT = "variant";
     private @Nullable Locale locale;
+    private @Nullable String currencyCode;
 
     // TranslationProvider
     private final ResourceBundleTracker resourceBundleTracker;
@@ -165,6 +174,7 @@ public class I18nProviderImpl
     @Modified
     protected synchronized void modified(Map<String, Object> config) {
         final String language = toStringOrNull(config.get(LANGUAGE));
+        this.currencyCode = toStringOrNull(config.get(BASE_CURRENCY));
         final String script = toStringOrNull(config.get(SCRIPT));
         final String region = toStringOrNull(config.get(REGION));
         final String variant = toStringOrNull(config.get(VARIANT));
@@ -395,6 +405,7 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, Area.class, SIUnits.SQUARE_METRE, ImperialUnits.SQUARE_FOOT);
         addDefaultUnit(dimensionMap, ArealDensity.class, Units.DOBSON_UNIT);
         addDefaultUnit(dimensionMap, CatalyticActivity.class, Units.KATAL);
+        addDefaultUnit(dimensionMap, Currency.class, CurrencyUnits.BASE_CURRENCY);
         addDefaultUnit(dimensionMap, DataAmount.class, Units.BYTE);
         addDefaultUnit(dimensionMap, DataTransferRate.class, Units.MEGABIT_PER_SECOND);
         addDefaultUnit(dimensionMap, Density.class, Units.KILOGRAM_PER_CUBICMETRE);
@@ -420,6 +431,7 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, Mass.class, SIUnits.KILOGRAM, ImperialUnits.POUND);
         addDefaultUnit(dimensionMap, Power.class, Units.WATT);
         addDefaultUnit(dimensionMap, Pressure.class, HECTO(SIUnits.PASCAL), ImperialUnits.INCH_OF_MERCURY);
+        addDefaultUnit(dimensionMap, EnergyPrice.class, CurrencyUnits.BASE_ENERGY_PRICE);
         addDefaultUnit(dimensionMap, RadiationDoseAbsorbed.class, Units.GRAY);
         addDefaultUnit(dimensionMap, RadiationDoseEffective.class, Units.SIEVERT);
         addDefaultUnit(dimensionMap, Radioactivity.class, Units.BECQUEREL);
@@ -444,5 +456,30 @@ public class I18nProviderImpl
             Map<Class<? extends Quantity<?>>, Map<SystemOfUnits, Unit<? extends Quantity<?>>>> dimensionMap,
             Class<T> dimension, Unit<T> unit) {
         dimensionMap.put(dimension, Map.of(SIUnits.getInstance(), unit, ImperialUnits.getInstance(), unit));
+    }
+
+    @Override
+    public Unit<Currency> getBaseCurrency() {
+        String currencyCode = this.currencyCode;
+        if (currencyCode == null && locale != null) {
+            currencyCode = java.util.Currency.getInstance(locale).getCurrencyCode();
+        }
+        if (currencyCode != null) {
+            // either the currency was set or determined from the locale
+            String symbol = java.util.Currency.getInstance(currencyCode).getSymbol();
+            return new CurrencyUnit(currencyCode, symbol);
+        } else {
+            return new CurrencyUnit("DEF", null);
+        }
+    }
+
+    @Override
+    public Collection<Unit<Currency>> getCurrencies() {
+        return Set.of();
+    }
+
+    @Override
+    public Function<Unit<Currency>, @Nullable BigDecimal> getExchangeRateFunction() {
+        return unit -> null;
     }
 }
