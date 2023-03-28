@@ -37,6 +37,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationRegistry;
@@ -76,7 +77,8 @@ public class ScriptTransformationServiceTest {
     public void setUp() throws ScriptException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(ScriptTransformationService.SCRIPT_TYPE_PROPERTY_NAME, SCRIPT_LANGUAGE);
-        service = new ScriptTransformationService(transformationRegistry, scriptEngineManager, properties);
+        service = new ScriptTransformationService(transformationRegistry, mock(ConfigDescriptionRegistry.class),
+                scriptEngineManager, properties);
 
         when(scriptEngineManager.createScriptEngine(eq(SCRIPT_LANGUAGE), any())).thenReturn(scriptEngineContainer);
         when(scriptEngineManager.isSupported(anyString()))

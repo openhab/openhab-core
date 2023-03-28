@@ -18,6 +18,7 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,6 +42,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.profile.ScriptProfile;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
+import org.openhab.core.config.core.ConfigDescriptionProvider;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ParameterOption;
@@ -63,11 +68,14 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(factory = "org.openhab.core.automation.module.script.transformation.factory", service = {
-        TransformationService.class, ScriptTransformationService.class, ConfigOptionProvider.class })
-public class ScriptTransformationService
-        implements TransformationService, ConfigOptionProvider, RegistryChangeListener<Transformation> {
+        TransformationService.class, ScriptTransformationService.class, ConfigOptionProvider.class,
+        ConfigDescriptionProvider.class })
+public class ScriptTransformationService implements TransformationService, ConfigOptionProvider,
+        ConfigDescriptionProvider, RegistryChangeListener<Transformation> {
     public static final String SCRIPT_TYPE_PROPERTY_NAME = "openhab.transform.script.scriptType";
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
+
+    private static final URI CONFIG_DESCRIPTION_TEMPLATE_URI = URI.create(PROFILE_CONFIG_URI_PREFIX + "SCRIPT");
 
     private static final Pattern INLINE_SCRIPT_CONFIG_PATTERN = Pattern.compile("\\|(?<inlineScript>.+)");
 
@@ -84,10 +92,12 @@ public class ScriptTransformationService
 
     private final TransformationRegistry transformationRegistry;
     private final ScriptEngineManager scriptEngineManager;
+    private final ConfigDescriptionRegistry configDescRegistry;
 
     @Activate
     public ScriptTransformationService(@Reference TransformationRegistry transformationRegistry,
-            @Reference ScriptEngineManager scriptEngineManager, Map<String, Object> config) {
+            @Reference ConfigDescriptionRegistry configDescRegistry, @Reference ScriptEngineManager scriptEngineManager,
+            Map<String, Object> config) {
         String scriptType = ConfigParser.valueAs(config.get(SCRIPT_TYPE_PROPERTY_NAME), String.class);
         if (scriptType == null) {
             throw new IllegalStateException(
@@ -95,6 +105,7 @@ public class ScriptTransformationService
         }
 
         this.transformationRegistry = transformationRegistry;
+        this.configDescRegistry = configDescRegistry;
         this.scriptEngineManager = scriptEngineManager;
         this.scriptType = scriptType;
         transformationRegistry.addRegistryChangeListener(this);
@@ -242,6 +253,36 @@ public class ScriptTransformationService
                     .map(c -> new ParameterOption(c.getUID(), c.getLabel())).collect(Collectors.toList());
         }
         return null;
+    }
+
+    @Override
+    public Collection<ConfigDescription> getConfigDescriptions(@Nullable Locale locale) {
+        URI uri = URI.create(PROFILE_CONFIG_URI_PREFIX + scriptType.toUpperCase());
+        var configDescription = getConfigDescription(uri, locale);
+        if (configDescription != null) {
+            return List.of(configDescription);
+        }
+
+        return Collections.emptyList();
+    }
+
+    @Override
+    public @Nullable ConfigDescription getConfigDescription(URI uri, @Nullable Locale locale) {
+        String uriString = uri.toString();
+        if (!uriString.startsWith(PROFILE_CONFIG_URI_PREFIX)) {
+            return null;
+        }
+        String transformationId = uriString.substring(PROFILE_CONFIG_URI_PREFIX.length());
+        if (!transformationId.equals(scriptType.toUpperCase())) {
+            return null;
+        }
+
+        ConfigDescription template = configDescRegistry.getConfigDescription(CONFIG_DESCRIPTION_TEMPLATE_URI, locale);
+        if (template == null) {
+            return null;
+        }
+        return ConfigDescriptionBuilder.create(uri).withParameters(template.getParameters())
+                .withParameterGroups(template.getParameterGroups()).build();
     }
 
     private void clearCache(String uid) {
