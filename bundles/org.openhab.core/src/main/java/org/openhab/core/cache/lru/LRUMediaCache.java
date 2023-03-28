@@ -20,6 +20,7 @@ import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -30,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -112,21 +113,19 @@ public class LRUMediaCache<V> {
     }
 
     private void cleanCacheDirectory() throws IOException {
-        try {
-            List<@Nullable Path> filesInCacheFolder = Files.list(cacheFolder).collect(Collectors.toList());
+        try (Stream<Path> files = Files.list(cacheFolder)) {
+            List<Path> filesInCacheFolder = new ArrayList<>(files.toList());
 
             // 1 delete empty files
-            Iterator<@Nullable Path> fileDeleterIterator = filesInCacheFolder.iterator();
+            Iterator<Path> fileDeleterIterator = filesInCacheFolder.iterator();
             while (fileDeleterIterator.hasNext()) {
                 Path path = fileDeleterIterator.next();
-                if (path != null) {
-                    File file = path.toFile();
-                    if (file.length() == 0) {
-                        file.delete();
-                        String fileName = path.getFileName().toString();
-                        storage.remove(fileName);
-                        fileDeleterIterator.remove();
-                    }
+                File file = path.toFile();
+                if (file.length() == 0) {
+                    file.delete();
+                    String fileName = path.getFileName().toString();
+                    storage.remove(fileName);
+                    fileDeleterIterator.remove();
                 }
             }
 
