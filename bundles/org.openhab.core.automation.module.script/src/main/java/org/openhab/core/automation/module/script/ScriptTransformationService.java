@@ -253,7 +253,7 @@ public class ScriptTransformationService implements TransformationService, Confi
 
     @Override
     public Collection<ConfigDescription> getConfigDescriptions(@Nullable Locale locale) {
-        var configDescription = getConfigDescription(profileConfigUri, locale);
+        ConfigDescription configDescription = getConfigDescription(profileConfigUri, locale);
         if (configDescription != null) {
             return List.of(configDescription);
         }
