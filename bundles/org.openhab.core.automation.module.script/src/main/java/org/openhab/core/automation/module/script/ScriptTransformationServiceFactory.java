@@ -76,8 +76,9 @@ public class ScriptTransformationServiceFactory {
             }
             String languageName = ScriptEngineFactoryHelper.getLanguageName(scriptEngine.getFactory());
             Dictionary<String, Object> properties = new Hashtable<>();
-            properties.put(TransformationService.SERVICE_PROPERTY_NAME, type.toUpperCase());
-            properties.put(TransformationService.SERVICE_PROPERTY_LABEL, languageName);
+            String name = type.toUpperCase();
+            properties.put(TransformationService.SERVICE_PROPERTY_NAME, name);
+            properties.put(TransformationService.SERVICE_PROPERTY_LABEL, name + " - " + languageName);
             properties.put(ScriptTransformationService.SCRIPT_TYPE_PROPERTY_NAME, type);
             return scriptTransformationFactory.newInstance(properties);
         });

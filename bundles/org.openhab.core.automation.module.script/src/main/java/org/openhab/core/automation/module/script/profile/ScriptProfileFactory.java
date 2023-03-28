@@ -73,8 +73,8 @@ public class ScriptProfileFactory implements ProfileFactory, ProfileTypeProvider
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void bindScriptTransformationService(ScriptTransformationService service, Map<String, Object> properties) {
         String serviceId = (String) properties.get(TransformationService.SERVICE_PROPERTY_NAME);
-        String serviceName = (String) properties.get(TransformationService.SERVICE_PROPERTY_LABEL);
-        services.put(serviceId, new ServiceRecord(service, serviceName));
+        String serviceLabel = (String) properties.get(TransformationService.SERVICE_PROPERTY_LABEL);
+        services.put(serviceId, new ServiceRecord(service, serviceLabel));
     }
 
     public void unbindScriptTransformationService(ScriptTransformationService service, Map<String, Object> properties) {
