@@ -87,6 +87,7 @@ public class ScriptTransformationService implements TransformationService, Confi
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
     private final String scriptType;
+    private final URI profileConfigUri;
 
     private final Map<String, ScriptRecord> scriptCache = new ConcurrentHashMap<>();
 
@@ -108,6 +109,7 @@ public class ScriptTransformationService implements TransformationService, Confi
         this.configDescRegistry = configDescRegistry;
         this.scriptEngineManager = scriptEngineManager;
         this.scriptType = scriptType;
+        this.profileConfigUri = URI.create(PROFILE_CONFIG_URI_PREFIX + scriptType.toUpperCase());
         transformationRegistry.addRegistryChangeListener(this);
     }
 
@@ -238,13 +240,7 @@ public class ScriptTransformationService implements TransformationService, Confi
     @Override
     public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
             @Nullable Locale locale) {
-        String uriString = uri.toString();
-        if (!uriString.startsWith(PROFILE_CONFIG_URI_PREFIX)) {
-            return null;
-        }
-
-        String scriptType = uriString.substring(PROFILE_CONFIG_URI_PREFIX.length()).toLowerCase();
-        if (!this.scriptType.equals(scriptType)) {
+        if (!uri.equals(profileConfigUri)) {
             return null;
         }
 
@@ -257,8 +253,7 @@ public class ScriptTransformationService implements TransformationService, Confi
 
     @Override
     public Collection<ConfigDescription> getConfigDescriptions(@Nullable Locale locale) {
-        URI uri = URI.create(PROFILE_CONFIG_URI_PREFIX + scriptType.toUpperCase());
-        var configDescription = getConfigDescription(uri, locale);
+        var configDescription = getConfigDescription(profileConfigUri, locale);
         if (configDescription != null) {
             return List.of(configDescription);
         }
@@ -268,12 +263,7 @@ public class ScriptTransformationService implements TransformationService, Confi
 
     @Override
     public @Nullable ConfigDescription getConfigDescription(URI uri, @Nullable Locale locale) {
-        String uriString = uri.toString();
-        if (!uriString.startsWith(PROFILE_CONFIG_URI_PREFIX)) {
-            return null;
-        }
-        String transformationId = uriString.substring(PROFILE_CONFIG_URI_PREFIX.length());
-        if (!transformationId.equals(scriptType.toUpperCase())) {
+        if (!uri.equals(profileConfigUri)) {
             return null;
         }
 
