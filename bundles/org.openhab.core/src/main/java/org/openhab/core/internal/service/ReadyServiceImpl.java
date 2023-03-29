@@ -72,11 +72,8 @@ public class ReadyServiceImpl implements ReadyService {
     }
 
     private void notifyTrackers(ReadyMarker readyMarker, Consumer<ReadyTracker> action) {
-        trackers.entrySet().stream().filter(entry -> {
-            return entry.getValue().apply(readyMarker);
-        }).map(entry -> {
-            return entry.getKey();
-        }).forEach(action);
+        trackers.entrySet().stream().filter(entry -> entry.getValue().apply(readyMarker)).map(Map.Entry::getKey)
+                .forEach(action);
     }
 
     @Override
@@ -95,7 +92,7 @@ public class ReadyServiceImpl implements ReadyService {
         try {
             if (!trackers.containsKey(readyTracker)) {
                 trackers.put(readyTracker, filter);
-                notifyTracker(readyTracker, marker -> readyTracker.onReadyMarkerAdded(marker));
+                notifyTracker(readyTracker, readyTracker::onReadyMarkerAdded);
             }
         } catch (RuntimeException e) {
             logger.error("Registering tracker '{}' failed!", readyTracker, e);
@@ -109,7 +106,7 @@ public class ReadyServiceImpl implements ReadyService {
         rwlTrackers.writeLock().lock();
         try {
             if (trackers.containsKey(readyTracker)) {
-                notifyTracker(readyTracker, marker -> readyTracker.onReadyMarkerRemoved(marker));
+                notifyTracker(readyTracker, readyTracker::onReadyMarkerRemoved);
             }
             trackers.remove(readyTracker);
         } finally {
@@ -119,6 +116,6 @@ public class ReadyServiceImpl implements ReadyService {
 
     private void notifyTracker(ReadyTracker readyTracker, Consumer<ReadyMarker> action) {
         ReadyMarkerFilter f = trackers.get(readyTracker);
-        markers.stream().filter(marker -> f.apply(marker)).forEach(action);
+        markers.stream().filter(f::apply).forEach(action);
     }
 }

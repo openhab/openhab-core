@@ -287,7 +287,7 @@ public class NetUtil implements NetworkAddressService {
         if (primaryIp != null) {
             try {
                 Short prefix = getAllInterfaceAddresses().stream()
-                        .filter(a -> a.getAddress().getHostAddress().equals(primaryIp)).map(a -> a.getPrefix())
+                        .filter(a -> a.getAddress().getHostAddress().equals(primaryIp)).map(CidrAddress::getPrefix)
                         .findFirst().get().shortValue();
                 broadcastAddress = getIpv4NetBroadcastAddress(primaryIp, prefix);
             } catch (IllegalArgumentException ex) {
@@ -467,7 +467,7 @@ public class NetUtil implements NetworkAddressService {
 
                     String ipv4AddressOnInterface = addr.getHostAddress();
                     String subnetStringOnInterface = getIpv4NetAddress(ipv4AddressOnInterface,
-                            ifAddr.getNetworkPrefixLength()) + "/" + String.valueOf(ifAddr.getNetworkPrefixLength());
+                            ifAddr.getNetworkPrefixLength()) + "/" + ifAddr.getNetworkPrefixLength();
 
                     String configuredSubnetString = getIpv4NetAddress(ipAddress, Short.parseShort(subnetMask)) + "/"
                             + subnetMask;
@@ -493,7 +493,7 @@ public class NetUtil implements NetworkAddressService {
      */
     public static boolean isValidIPConfig(String ipAddress) {
         if (ipAddress.contains("/")) {
-            String parts[] = ipAddress.split("/");
+            String[] parts = ipAddress.split("/");
             boolean ipMatches = IPV4_PATTERN.matcher(parts[0]).matches();
 
             int netMask = Integer.parseInt(parts[1]);
@@ -518,7 +518,7 @@ public class NetUtil implements NetworkAddressService {
         }
 
         networkInterfacePollFuture = scheduledExecutorService.scheduleWithFixedDelay(
-                () -> this.pollAndNotifyNetworkInterfaceAddress(), 1, intervalInSeconds, TimeUnit.SECONDS);
+                this::pollAndNotifyNetworkInterfaceAddress, 1, intervalInSeconds, TimeUnit.SECONDS);
     }
 
     private void pollAndNotifyNetworkInterfaceAddress() {
@@ -587,11 +587,11 @@ public class NetUtil implements NetworkAddressService {
         if (value == null) {
             return defaultValue;
         }
-        if (value instanceof Boolean) {
-            return (Boolean) value;
+        if (value instanceof Boolean boolean1) {
+            return boolean1;
         }
-        if (value instanceof String) {
-            return Boolean.valueOf((String) value);
+        if (value instanceof String string) {
+            return Boolean.valueOf(string);
         } else {
             return defaultValue;
         }

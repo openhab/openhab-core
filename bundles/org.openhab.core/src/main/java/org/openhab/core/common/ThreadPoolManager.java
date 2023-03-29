@@ -96,9 +96,9 @@ public class ThreadPoolManager {
             if (config == null) {
                 configs.remove(poolName);
             }
-            if (config instanceof String) {
+            if (config instanceof String string) {
                 try {
-                    Integer poolSize = Integer.valueOf((String) config);
+                    Integer poolSize = Integer.valueOf(string);
                     configs.put(poolName, poolSize);
                     ThreadPoolExecutor pool = (ThreadPoolExecutor) pools.get(poolName);
                     if (pool instanceof ScheduledThreadPoolExecutor) {
@@ -142,8 +142,8 @@ public class ThreadPoolManager {
                 }
             }
         }
-        if (pool instanceof ScheduledExecutorService) {
-            return new UnstoppableScheduledExecutorService(poolName, (ScheduledExecutorService) pool);
+        if (pool instanceof ScheduledExecutorService service) {
+            return new UnstoppableScheduledExecutorService(poolName, service);
         } else {
             throw new IllegalArgumentException("Pool " + poolName + " is not a scheduled pool!");
         }

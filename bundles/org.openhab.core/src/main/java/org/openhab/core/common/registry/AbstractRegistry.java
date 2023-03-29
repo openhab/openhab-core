@@ -63,7 +63,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
     private enum EventType {
         ADDED,
         REMOVED,
-        UPDATED;
+        UPDATED
     }
 
     private final Logger logger = LoggerFactory.getLogger(AbstractRegistry.class);
