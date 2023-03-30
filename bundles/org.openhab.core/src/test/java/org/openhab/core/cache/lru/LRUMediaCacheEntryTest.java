@@ -26,6 +26,8 @@ import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -191,10 +193,21 @@ public class LRUMediaCacheEntryTest {
         InputStream actualAudioStream2 = lruMediaCacheEntry.getInputStream();
 
         // read bytes from the two stream concurrently
+        Mutable<@Nullable IOException> exceptionCatched = new MutableObject<>();
         List<InputStream> parallelAudioStreamList = Arrays.asList(actualAudioStream1, actualAudioStream2);
-        List<byte[]> bytesResultList = parallelAudioStreamList.parallelStream().map(this::readSafe)
-                .collect(Collectors.toList());
+        List<byte[]> bytesResultList = parallelAudioStreamList.parallelStream().map(stream -> {
+            try {
+                return stream.readAllBytes();
+            } catch (IOException e) {
+                exceptionCatched.setValue(e);
+                return new byte[0];
+            }
+        }).collect(Collectors.toList());
 
+        IOException possibleException = exceptionCatched.getValue();
+        if (possibleException != null) {
+            throw possibleException;
+        }
         assertArrayEquals(randomData, bytesResultList.get(0));
         assertArrayEquals(randomData, bytesResultList.get(1));
 
@@ -206,14 +219,6 @@ public class LRUMediaCacheEntryTest {
         // we call the TTS service only once
         verify(supplier).get();
         verifyNoMoreInteractions(ttsServiceMock);
-    }
-
-    private byte[] readSafe(InputStream InputStream) {
-        try {
-            return InputStream.readAllBytes();
-        } catch (IOException e) {
-            return new byte[0];
-        }
     }
 
     private byte[] getRandomData(int length) {

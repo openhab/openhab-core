@@ -41,10 +41,8 @@ import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
-import org.openhab.core.common.Disposable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
@@ -293,27 +291,22 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                             e.getMessage(), e);
                 }
             }
-            try {
-                sink.process(audioStream);
-                // if the stream is not needed anymore, then we should call back the AudioStream to let it a chance
-                // to auto dispose:
-                if (sink.isSynchronous() && audioStream instanceof Disposable disposableAudioStream) {
-                    disposableAudioStream.dispose();
-                }
-            } catch (IOException e) {
-                String fileName = audioStream instanceof FileAudioStream file ? file.toString() : "unknown";
-                logger.warn("Cannot dispose of stream {}", fileName, e);
-            } finally {
-                if (volume != null && oldVolume != null) {
+
+            final PercentType oldVolumeFinal = oldVolume;
+            Runnable toRunWhenProcessFinished = () -> {
+                if (volume != null && oldVolumeFinal != null) {
                     // restore volume only if it was set before
                     try {
-                        sink.setVolume(oldVolume);
+                        sink.setVolume(oldVolumeFinal);
                     } catch (IOException e) {
                         logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
                                 e.getMessage(), e);
                     }
                 }
-            }
+            };
+
+            sink.process(audioStream, toRunWhenProcessFinished);
+
         } catch (TTSException | UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Error saying '{}': {}", text, e.getMessage(), e);

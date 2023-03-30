@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioHTTPServer;
 import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSinkAsync;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
@@ -43,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(service = AudioSink.class, immediate = true)
-public class WebAudioAudioSink implements AudioSink {
+public class WebAudioAudioSink extends AudioSinkAsync {
 
     private final Logger logger = LoggerFactory.getLogger(WebAudioAudioSink.class);
 
@@ -68,17 +69,21 @@ public class WebAudioAudioSink implements AudioSink {
             logger.debug("Web Audio sink does not support stopping the currently playing stream.");
             return;
         }
-        try (AudioStream stream = audioStream) {
-            logger.debug("Received audio stream of format {}", audioStream.getFormat());
-            if (audioStream instanceof URLAudioStream urlAudioStream) {
+        logger.debug("Received audio stream of format {}", audioStream.getFormat());
+        if (audioStream instanceof URLAudioStream urlAudioStream) {
+            try (AudioStream stream = urlAudioStream) {
+                // in this case only, we need to close the stream by ourself in a try with block,
+                // because nothing will consume it
                 // it is an external URL, so we can directly pass this on.
                 sendEvent(urlAudioStream.getURL());
-            } else {
-                // we need to serve it for a while and make it available to multiple clients
-                sendEvent(audioHTTPServer.serve(audioStream, 10).toString());
+            } catch (IOException e) {
+                logger.debug("Error while closing the audio stream: {}", e.getMessage(), e);
             }
-        } catch (IOException e) {
-            logger.debug("Error while closing the audio stream: {}", e.getMessage(), e);
+        } else {
+            // we will let the HTTP servlet run the delayed task when finished with the stream
+            Runnable delayedTask = () -> this.runDelayed(audioStream);
+            // we need to serve it for a while and make it available to multiple clients
+            sendEvent(audioHTTPServer.serve(audioStream, 10, delayedTask).toString());
         }
     }
 
@@ -115,10 +120,5 @@ public class WebAudioAudioSink implements AudioSink {
     @Override
     public void setVolume(final PercentType volume) throws IOException {
         throw new IOException("Web Audio sink does not support volume level changes.");
-    }
-
-    @Override
-    public boolean isSynchronous() {
-        return false;
     }
 }

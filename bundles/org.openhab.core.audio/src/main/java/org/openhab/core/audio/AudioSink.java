@@ -58,8 +58,8 @@ public interface AudioSink {
      *
      * In case the audioStream is null, this should be interpreted as a request to end any currently playing stream.
      *
-     * If you call this method and if the sink is synchronous, you should thereafter get rid of a stream implementing
-     * the {@link org.openhab.core.common.Disposable} interface by calling the dispose method.
+     * When the process method ends, if the stream implements the {@link org.openhab.core.common.Disposable} interface,
+     * the sink should hereafter get rid of it by calling the dispose method.
      *
      * @param audioStream the audio stream to play or null to keep quiet
      * @throws UnsupportedAudioFormatException If audioStream format is not supported
@@ -67,6 +67,35 @@ public interface AudioSink {
      */
     void process(@Nullable AudioStream audioStream)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException;
+
+    /**
+     * Processes the passed {@link AudioStream}, and executes the whenFinished Runnable (or stores for later execution
+     * if the sink is asynchronous).
+     *
+     * If the passed {@link AudioStream} is not supported by this instance, an {@link UnsupportedAudioStreamException}
+     * is thrown.
+     *
+     * If the passed {@link AudioStream} has an {@link AudioFormat} not supported by this instance,
+     * an {@link UnsupportedAudioFormatException} is thrown.
+     *
+     * In case the audioStream is null, this should be interpreted as a request to end any currently playing stream.
+     *
+     * When the process method ends, if the stream implements the {@link org.openhab.core.common.Disposable} interface,
+     * the sink should hereafter get rid of it by calling the dispose method.
+     *
+     * @param audioStream the audio stream to play or null to keep quiet
+     * @param whenFinished A Runnable to run when the sound is finished playing.
+     * @throws UnsupportedAudioFormatException If audioStream format is not supported
+     * @throws UnsupportedAudioStreamException If audioStream is not supported
+     */
+    default void process(@Nullable AudioStream audioStream, Runnable whenFinished)
+            throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
+        try {
+            process(audioStream);
+        } finally {
+            whenFinished.run();
+        }
+    }
 
     /**
      * Gets a set containing all supported audio formats
@@ -97,17 +126,4 @@ public interface AudioSink {
      * @throws IOException if the volume can not be set
      */
     void setVolume(PercentType volume) throws IOException;
-
-    /**
-     * Tell if the sink is synchronous.
-     * If true, caller may dispose of the stream immediately after the process method.
-     * On the contrary, if in the process method, the sink returns before the input stream is entirely consumed,
-     * then the sink should override this method and return false.
-     * Please note that by doing so, the sink should then take care itself of the InputStream implementing the
-     * {@link org.openhab.core.common.Disposable} interface by calling the dispose method when finishing
-     * reading it.
-     */
-    default boolean isSynchronous() {
-        return true;
-    }
 }

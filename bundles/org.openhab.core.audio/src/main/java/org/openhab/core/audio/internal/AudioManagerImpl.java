@@ -41,7 +41,6 @@ import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.audio.utils.ToneSynthesizer;
-import org.openhab.core.common.Disposable;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ParameterOption;
@@ -141,28 +140,23 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
                             e.getMessage(), e);
                 }
             }
-            try {
-                sink.process(audioStream);
-                // if the stream is not needed anymore, then we should call back the AudioStream to let it a chance
-                // to auto dispose:
-                if (sink.isSynchronous() && audioStream instanceof Disposable disposableAudioStream) {
-                    disposableAudioStream.dispose();
-                }
-            } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
-                logger.warn("Error playing '{}': {}", audioStream, e.getMessage(), e);
-            } catch (IOException e) {
-                String fileName = audioStream instanceof FileAudioStream file ? file.toString() : "unknown";
-                logger.warn("Cannot dispose of audio stream {}", fileName, e);
-            } finally {
-                if (volume != null && oldVolume != null) {
+
+            final PercentType oldVolumeFinal = oldVolume;
+            Runnable toRunWhenProcessFinished = () -> {
+                if (volume != null && oldVolumeFinal != null) {
                     // restore volume only if it was set before
                     try {
-                        sink.setVolume(oldVolume);
+                        sink.setVolume(oldVolumeFinal);
                     } catch (IOException e) {
                         logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
                                 e.getMessage(), e);
                     }
                 }
+            };
+            try {
+                sink.process(audioStream, toRunWhenProcessFinished);
+            } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
+                logger.warn("Error playing '{}': {}", audioStream, e.getMessage(), e);
             }
         } else {
             logger.warn("Failed playing audio stream '{}' as no audio sink was found.", audioStream);

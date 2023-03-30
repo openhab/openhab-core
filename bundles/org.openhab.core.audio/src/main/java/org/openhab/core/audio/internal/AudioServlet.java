@@ -25,6 +25,8 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -36,7 +38,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioException;
@@ -44,9 +45,11 @@ import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioHTTPServer;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
+import org.openhab.core.audio.ClonableAudioStream;
 import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.FixedLengthAudioStream;
 import org.openhab.core.common.Disposable;
+import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletName;
@@ -69,27 +72,29 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     private static final List<String> WAV_MIME_TYPES = List.of("audio/wav", "audio/x-wav", "audio/vnd.wave");
 
-    // this one MB buffer will help playing multiple times an AudioStream, if the sink cannot do otherwise
+    // A 1MB in memory buffer will help playing multiple times an AudioStream, if the sink cannot do otherwise
     private static final int ONETIME_STREAM_BUFFER_MAX_SIZE = 1048576;
+    // 5MB max for a file buffer
+    private static final int ONETIME_STREAM_FILE_MAX_SIZE = 5242880;
 
     static final String SERVLET_PATH = "/audio";
 
     private final Logger logger = LoggerFactory.getLogger(AudioServlet.class);
 
-    private final Map<String, AudioStream> oneTimeStreams = new ConcurrentHashMap<>();
-    private final Map<String, FixedLengthAudioStream> multiTimeStreams = new ConcurrentHashMap<>();
-    private final Map<String, @NonNull AtomicInteger> currentlyServedResponseByStreamId = new ConcurrentHashMap<>();
+    private final Map<String, StreamServed> servedStreams = new ConcurrentHashMap<>();
 
-    private final Map<String, Long> streamTimeouts = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService threadPool = ThreadPoolManager
+            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
+    @Nullable
+    ScheduledFuture<?> periodicCleaner;
+
+    private static final Runnable doNothing = () -> {
+    };
 
     @Deactivate
     protected synchronized void deactivate() {
-        multiTimeStreams.values().forEach(this::tryClose);
-        multiTimeStreams.clear();
-        streamTimeouts.clear();
-
-        oneTimeStreams.values().forEach(this::tryClose);
-        oneTimeStreams.clear();
+        servedStreams.values().stream().map(streamServed -> streamServed.audioStream).forEach(this::tryClose);
+        servedStreams.clear();
     }
 
     private void tryClose(@Nullable AudioStream stream) {
@@ -101,29 +106,18 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         }
     }
 
-    private @Nullable InputStream prepareInputStream(final String streamId, final HttpServletResponse resp,
+    private InputStream prepareInputStream(final StreamServed servedStream, final HttpServletResponse resp,
             List<String> acceptedMimeTypes) throws AudioException {
-        final AudioStream stream;
-        final boolean multiAccess;
-        if (oneTimeStreams.containsKey(streamId)) {
-            stream = oneTimeStreams.remove(streamId);
-            multiAccess = false;
-        } else if (multiTimeStreams.containsKey(streamId)) {
-            stream = multiTimeStreams.get(streamId);
-            multiAccess = true;
-        } else {
-            return null;
-        }
 
-        logger.debug("Stream to serve is {}", streamId);
+        logger.debug("Stream to serve is {}", servedStream.id);
 
         // try to set the content-type, if possible
         final String mimeType;
-        if (AudioFormat.CODEC_MP3.equals(stream.getFormat().getCodec())) {
+        if (AudioFormat.CODEC_MP3.equals(servedStream.audioStream.getFormat().getCodec())) {
             mimeType = "audio/mpeg";
-        } else if (AudioFormat.CONTAINER_WAVE.equals(stream.getFormat().getContainer())) {
+        } else if (AudioFormat.CONTAINER_WAVE.equals(servedStream.audioStream.getFormat().getContainer())) {
             mimeType = WAV_MIME_TYPES.stream().filter(acceptedMimeTypes::contains).findFirst().orElse("audio/wav");
-        } else if (AudioFormat.CONTAINER_OGG.equals(stream.getFormat().getContainer())) {
+        } else if (AudioFormat.CONTAINER_OGG.equals(servedStream.audioStream.getFormat().getContainer())) {
             mimeType = "audio/ogg";
         } else {
             mimeType = null;
@@ -133,16 +127,17 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         }
 
         // try to set the content-length, if possible
-        if (stream instanceof FixedLengthAudioStream audioStream) {
-            final long size = audioStream.length();
+        if (servedStream.audioStream instanceof FixedLengthAudioStream fixedLengthServedStream) {
+            final long size = fixedLengthServedStream.length();
             resp.setContentLength((int) size);
         }
 
-        if (multiAccess) {
+        if (servedStream.multiTimeStream
+                && servedStream.audioStream instanceof ClonableAudioStream clonableAudioStream) {
             // we need to care about concurrent access and have a separate stream for each thread
-            return ((FixedLengthAudioStream) stream).getClonedStream();
+            return clonableAudioStream.getClonedStream();
         } else {
-            return stream;
+            return servedStream.audioStream;
         }
     }
 
@@ -159,7 +154,6 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        removeTimedOutStreams();
 
         String requestURI = req.getRequestURI();
         if (requestURI == null) {
@@ -172,111 +166,156 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         List<String> acceptedMimeTypes = Stream.of(Objects.requireNonNullElse(req.getHeader("Accept"), "").split(","))
                 .map(String::trim).collect(Collectors.toList());
 
-        try (final InputStream stream = prepareInputStream(streamId, resp, acceptedMimeTypes)) {
-            try {
-                currentlyServedResponseByStreamId.computeIfAbsent(streamId, (String) -> new AtomicInteger())
-                        .incrementAndGet();
-                if (stream == null) {
-                    logger.debug("Received request for invalid stream id at {}", requestURI);
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                } else {
-                    stream.transferTo(resp.getOutputStream());
-                    resp.flushBuffer();
-                }
+        StreamServed servedStream = servedStreams.get(streamId);
+        if (servedStream == null) {
+            logger.debug("Received request for invalid stream id at {}", requestURI);
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        // we count the number of active process using the input stream
+        AtomicInteger currentlyServedStream = servedStream.currentlyServedStream;
+        if (currentlyServedStream.incrementAndGet() == 1 || servedStream.multiTimeStream) {
+            try (final InputStream stream = prepareInputStream(servedStream, resp, acceptedMimeTypes)) {
+                stream.transferTo(resp.getOutputStream());
+                resp.flushBuffer();
+            } catch (final AudioException ex) {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
             } finally {
-                currentlyServedResponseByStreamId.get(streamId).decrementAndGet();
+                currentlyServedStream.decrementAndGet();
             }
-        } catch (final AudioException ex) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
+        } else {
+            logger.debug("Received request for already consumed stream id at {}", requestURI);
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        // we can immediately dispose and remove, if it is a one time stream
+        if (!servedStream.multiTimeStream) {
+            servedStream.callback.run();
+            servedStreams.remove(streamId);
+            logger.debug("Removed timed out stream {}", streamId);
         }
     }
 
     private synchronized void removeTimedOutStreams() {
         // Build list of expired streams.
         long now = System.nanoTime();
-        final List<String> toRemove = streamTimeouts.entrySet().stream().filter(e -> e.getValue() < now)
+        final List<String> toRemove = servedStreams.entrySet().stream()
+                .filter(e -> e.getValue().timeout < now && e.getValue().currentlyServedStream.get() <= 0)
                 .map(Entry::getKey).collect(Collectors.toList());
 
         toRemove.forEach(streamId -> {
-            // the stream has expired, if no one is using it we need to remove it
-            Integer numberOfStreamServed = currentlyServedResponseByStreamId.getOrDefault(streamId, new AtomicInteger())
-                    .decrementAndGet();
-            if (numberOfStreamServed <= 0) {
-                final FixedLengthAudioStream stream = multiTimeStreams.remove(streamId);
-                streamTimeouts.remove(streamId);
-                currentlyServedResponseByStreamId.remove(streamId);
-                tryClose(stream);
-                if (stream instanceof Disposable disposableStream) {
-                    try {
-                        disposableStream.dispose();
-                    } catch (IOException e) {
-                        String fileName = disposableStream instanceof FileAudioStream file ? file.toString()
-                                : "unknown";
-                        logger.warn("Cannot delete temporary file {} for the AudioServlet", fileName, e);
-                    }
-                }
+            // the stream has expired and no one is using it, we need to remove it!
+            StreamServed streamServed = servedStreams.remove(streamId);
+            if (streamServed != null) {
+                tryClose(streamServed.audioStream);
+                // we can notify the caller of the stream consumption
+                streamServed.callback.run();
+                logger.debug("Removed timed out stream {}", streamId);
             }
-
-            logger.debug("Removed timed out stream {}", streamId);
         });
+
+        // Because the callback should be executed as soon as possible,
+        // we cannot wait for the next doGet to perform a clean. So we have to schedule a periodic cleaner.
+        ScheduledFuture<?> periodicCleanerLocal = periodicCleaner;
+        if (!servedStreams.isEmpty()) {
+            if (periodicCleanerLocal == null || periodicCleanerLocal.isDone()) {
+                // reschedule a clean
+                periodicCleaner = threadPool.scheduleWithFixedDelay(this::removeTimedOutStreams, 5, 5,
+                        TimeUnit.SECONDS);
+            }
+        } else if (periodicCleanerLocal != null) { // no more stream to serve, shut the periodic cleaning thread:
+            periodicCleanerLocal.cancel(true);
+            periodicCleaner = null;
+        }
     }
 
     @Override
     public String serve(AudioStream stream) {
         String streamId = UUID.randomUUID().toString();
-        oneTimeStreams.put(streamId, stream);
+        // Because we cannot wait indefinitely before executing the callback,
+        // even if this is a one time stream, we set a timeout just in case.
+        long timeOut = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        StreamServed streamToServe = new StreamServed(streamId, stream, new AtomicInteger(), timeOut, false, doNothing);
+        servedStreams.put(streamId, streamToServe);
+
+        // try to clean, or a least launch the periodic cleanse:
+        removeTimedOutStreams();
+
         return getRelativeURL(streamId);
     }
 
     @Override
     public String serve(AudioStream stream, int seconds) {
+        return serve(stream, seconds, doNothing);
+    }
+
+    @Override
+    public String serve(AudioStream stream, int seconds, Runnable callBack) {
+
         String streamId = UUID.randomUUID().toString();
-        if (stream instanceof FixedLengthAudioStream fixedLengthAudioStream) {
-            multiTimeStreams.put(streamId, fixedLengthAudioStream);
-        } else { // we prefer a FixedLengthAudioStream, but we can try to make one
+        ClonableAudioStream clonableAudioStream = null;
+        if (stream instanceof ClonableAudioStream clonableAudioStreamDetected) {
+            clonableAudioStream = clonableAudioStreamDetected;
+        } else { // we prefer a ClonableAudioStream, but we can try to make one
             try {
-                multiTimeStreams.put(streamId, createFixedLengthInputStream(stream, streamId));
+                clonableAudioStream = createClonableInputStream(stream, streamId);
             } catch (AudioException | IOException e) {
                 logger.warn("Cannot precache the audio stream to serve it", e);
+                return getRelativeURL(streamId);
             }
         }
-        streamTimeouts.put(streamId, System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds));
+        long timeOut = System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds);
+        StreamServed streamToServe = new StreamServed(streamId, clonableAudioStream, new AtomicInteger(), timeOut, true,
+                callBack);
+        servedStreams.put(streamId, streamToServe);
+
+        // try to clean, or a least launch the periodic cleanse:
+        removeTimedOutStreams();
+
         return getRelativeURL(streamId);
     }
 
-    private FixedLengthAudioStream createFixedLengthInputStream(AudioStream stream, String streamId)
+    private ClonableAudioStream createClonableInputStream(AudioStream stream, String streamId)
             throws IOException, AudioException {
         byte[] dataBytes = stream.readNBytes(ONETIME_STREAM_BUFFER_MAX_SIZE + 1);
-        FixedLengthAudioStream fixedLengthAudioStreamResult;
+        ClonableAudioStream clonableAudioStreamResult;
         if (dataBytes.length <= ONETIME_STREAM_BUFFER_MAX_SIZE) {
             // we will use an in memory buffer to avoid disk operation
-            fixedLengthAudioStreamResult = new ByteArrayAudioStream(dataBytes, stream.getFormat());
+            clonableAudioStreamResult = new ByteArrayAudioStream(dataBytes, stream.getFormat());
         } else {
             // in memory max size exceeded, sound is too long, we will use a file
             File tempFile = File.createTempFile(streamId, ".snd");
             tempFile.deleteOnExit();
             try (OutputStream outputStream = new FileOutputStream(tempFile)) {
+                // copy already read data to file :
                 outputStream.write(dataBytes);
-                stream.transferTo(outputStream);
+                // copy the remaining stream data to a file.
+                byte[] buf = new byte[8192];
+                int length;
+                // but with a limit
+                int fileSize = 0;
+                while ((length = stream.read(buf)) != -1 && fileSize < ONETIME_STREAM_FILE_MAX_SIZE) {
+                    outputStream.write(buf, 0, length);
+                    fileSize += length;
+                }
             }
-            fixedLengthAudioStreamResult = new TemporaryFileAudioStream(tempFile, stream.getFormat());
+            clonableAudioStreamResult = new TemporaryFileAudioStream(tempFile, stream.getFormat());
         }
         tryClose(stream);
-        return fixedLengthAudioStreamResult;
+        return clonableAudioStreamResult;
     }
 
-    Map<String, FixedLengthAudioStream> getMultiTimeStreams() {
-        return Collections.unmodifiableMap(multiTimeStreams);
-    }
-
-    Map<String, AudioStream> getOneTimeStreams() {
-        return Collections.unmodifiableMap(oneTimeStreams);
+    Map<String, StreamServed> getServedStreams() {
+        return Collections.unmodifiableMap(servedStreams);
     }
 
     private String getRelativeURL(String streamId) {
         return SERVLET_PATH + "/" + streamId;
     }
 
+    // Using a FileAudioStream implementing Disposable allows file deletion when it is not used anymore
     private static class TemporaryFileAudioStream extends FileAudioStream implements Disposable {
 
         private File file;
@@ -290,5 +329,9 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         public void dispose() throws IOException {
             Files.delete(file.toPath());
         }
+    }
+
+    protected static record StreamServed(String id, AudioStream audioStream, AtomicInteger currentlyServedStream,
+            long timeout, boolean multiTimeStream, Runnable callback) {
     }
 }

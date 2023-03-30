@@ -25,11 +25,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.audio.utils.ToneSynthesizer;
-import org.openhab.core.common.Disposable;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.items.ItemUtil;
@@ -149,7 +147,7 @@ public class DialogProcessor implements KSListener, STTListener {
 
     /**
      * Starts a persistent dialog
-     *
+     * 
      * @throws IllegalStateException if keyword spot service is misconfigured
      */
     public void start() throws IllegalStateException {
@@ -382,24 +380,11 @@ public class DialogProcessor implements KSListener, STTListener {
             if (dialogContext.sink().getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(audioStream))) {
                 try {
                     dialogContext.sink().process(audioStream);
-                    // if the stream is not needed anymore, then we should call back the AudioStream to let it a chance
-                    // to auto dispose:
-                    if (dialogContext.sink().isSynchronous()
-                            && audioStream instanceof Disposable disposableAudioStream) {
-                        disposableAudioStream.dispose();
-                    }
                 } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Error saying '{}': {}", text, e.getMessage(), e);
                     } else {
                         logger.warn("Error saying '{}': {}", text, e.getMessage());
-                    }
-                } catch (IOException e) {
-                    String fileName = audioStream instanceof FileAudioStream file ? file.toString() : "unknown";
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Cannot dispose of stream {}", fileName, e);
-                    } else {
-                        logger.warn("Cannot dispose of stream {}", fileName);
                     }
                 }
             } else {

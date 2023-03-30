@@ -12,18 +12,16 @@
  */
 package org.openhab.core.audio;
 
-import java.io.InputStream;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This is an {@link AudioStream}, which can provide information about its absolute length and is able to provide
- * cloned streams.
+ * This is a {@link ClonableAudioStream}, which can also provide information about its absolute length.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Gwendal Roulleau - Separate getClonedStream into its own class
  */
 @NonNullByDefault
-public abstract class FixedLengthAudioStream extends AudioStream {
+public abstract class FixedLengthAudioStream extends ClonableAudioStream {
 
     /**
      * Provides the length of the stream in bytes.
@@ -31,13 +29,4 @@ public abstract class FixedLengthAudioStream extends AudioStream {
      * @return absolute length in bytes
      */
     public abstract long length();
-
-    /**
-     * Returns a new, fully independent stream instance, which can be read and closed without impacting the original
-     * instance.
-     *
-     * @return a new input stream that can be consumed by the caller
-     * @throws AudioException if stream cannot be created
-     */
-    public abstract InputStream getClonedStream() throws AudioException;
 }

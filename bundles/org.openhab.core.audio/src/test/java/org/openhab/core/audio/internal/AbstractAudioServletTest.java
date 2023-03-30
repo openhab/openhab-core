@@ -33,7 +33,6 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
-import org.openhab.core.audio.FixedLengthAudioStream;
 import org.openhab.core.test.TestPortUtil;
 import org.openhab.core.test.TestServer;
 import org.openhab.core.test.java.JavaTest;
@@ -126,7 +125,7 @@ public abstract class AbstractAudioServletTest extends JavaTest {
 
         String path;
         if (timeInterval != null) {
-            path = audioServlet.serve((FixedLengthAudioStream) stream, timeInterval);
+            path = audioServlet.serve(stream, timeInterval);
         } else {
             path = audioServlet.serve(stream);
         }

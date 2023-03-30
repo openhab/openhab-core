@@ -32,6 +32,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSinkSync;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
@@ -55,7 +56,7 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(service = AudioSink.class, immediate = true)
-public class JavaSoundAudioSink implements AudioSink {
+public class JavaSoundAudioSink extends AudioSinkSync {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JavaSoundAudioSink.class);
 
