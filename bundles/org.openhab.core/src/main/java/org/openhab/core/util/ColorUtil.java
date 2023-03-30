@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Initial contribution
  * @author Holger Friedrich - Transfer RGB color conversion from HSBType, improve RGB conversion, restructuring
  * @author Chris Jackson - Added fromRGB (moved from HSBType)
- * @author Andrew Fiddian-Green - assertHSBEqual/hsbEquals (copyied from binding)
+ * @author Andrew Fiddian-Green - assertHSBEqual/hsbEquals (copied from binding)
  */
 @NonNullByDefault
 public class ColorUtil {
