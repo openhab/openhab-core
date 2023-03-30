@@ -12,7 +12,7 @@
  */
 package org.openhab.core.internal.items;
 
-import static org.openhab.core.internal.items.MetadataCommandDescriptionProvider.removeSurroundingQuotes;
+import static org.openhab.core.internal.items.MetadataCommandDescriptionProvider.parseValueLabelPair;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -106,18 +106,8 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
                     List<StateOption> stateOptions = Stream
                             .of(metadata.getConfiguration().get("options").toString().split(",")).map(o -> {
                                 if (o.contains("=")) {
-                                    String value;
-                                    String label;
-                                    if (o.startsWith("\"")) {
-                                        String[] parts = o.trim().split("\"=\"");
-                                        value = removeSurroundingQuotes(parts[0]);
-                                        label = removeSurroundingQuotes(parts[1]);
-                                    } else {
-                                        String[] parts = o.trim().split("=");
-                                        value = parts[0];
-                                        label = parts[1];
-                                    }
-                                    return new StateOption(value.trim(), label.trim());
+                                    var pair = parseValueLabelPair(o.trim());
+                                    return new StateOption(pair[0], pair[1]);
                                 } else {
                                     return new StateOption(o.trim(), null);
                                 }

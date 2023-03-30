@@ -96,7 +96,7 @@ public class MetadataStateDescriptionFragmentProviderTest {
         metadataConfig.put("max", "34");
         metadataConfig.put("step", 3);
         metadataConfig.put("readOnly", "true");
-        metadataConfig.put("options", "OPTION1,OPTION2 , 3 =Option 3 ");
+        metadataConfig.put("options", "OPTION1,OPTION2 , 3 =Option 3 ,\"4=4\"=\" Option=4 \" ");
         Metadata metadata = new Metadata(metadataKey, "N/A", metadataConfig);
         metadataRegistryMock.added(managedProviderMock, metadata);
 
@@ -119,5 +119,8 @@ public class MetadataStateDescriptionFragmentProviderTest {
         stateOption = it.next();
         assertEquals("3", stateOption.getValue());
         assertEquals("Option 3", stateOption.getLabel());
+        stateOption = it.next();
+        assertEquals("4=4", stateOption.getValue());
+        assertEquals("Option=4", stateOption.getLabel());
     }
 }
