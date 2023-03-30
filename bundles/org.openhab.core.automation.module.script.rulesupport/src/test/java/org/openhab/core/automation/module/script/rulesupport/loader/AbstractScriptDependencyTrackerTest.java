@@ -49,6 +49,8 @@ public class AbstractScriptDependencyTrackerTest {
     private @NonNullByDefault({}) AbstractScriptDependencyTracker scriptDependencyTracker;
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
     private @NonNullByDefault({}) @TempDir Path rootWatchPath;
+    private @NonNullByDefault({}) Path depPath;
+    private @NonNullByDefault({}) Path depPath2;
 
     @BeforeEach
     public void setup() throws IOException {
@@ -56,8 +58,12 @@ public class AbstractScriptDependencyTrackerTest {
         scriptDependencyTracker = new AbstractScriptDependencyTracker(watchServiceMock, WATCH_DIR) {
         };
 
-        Files.createFile(rootWatchPath.resolve(WATCH_DIR).resolve(DEPENDENCY));
-        Files.createFile(rootWatchPath.resolve(WATCH_DIR).resolve(DEPENDENCY2));
+        depPath =rootWatchPath.resolve(WATCH_DIR).resolve(DEPENDENCY);
+        depPath2 =rootWatchPath.resolve(WATCH_DIR).resolve(DEPENDENCY2);
+
+        Files.createFile(depPath);
+
+        Files.createFile(depPath2);
     }
 
     @AfterEach
@@ -85,7 +91,7 @@ public class AbstractScriptDependencyTrackerTest {
         scriptDependencyTracker.addChangeTracker(listener1);
         scriptDependencyTracker.addChangeTracker(listener2);
 
-        scriptDependencyTracker.startTracking("scriptId", DEPENDENCY.toString());
+        scriptDependencyTracker.startTracking("scriptId", depPath.toString());
         scriptDependencyTracker.processWatchEvent(WatchService.Kind.CREATE, DEPENDENCY);
 
         verify(listener1).onDependencyChange(eq("scriptId"));
@@ -100,8 +106,8 @@ public class AbstractScriptDependencyTrackerTest {
 
         scriptDependencyTracker.addChangeTracker(listener);
 
-        scriptDependencyTracker.startTracking("scriptId1", DEPENDENCY.toString());
-        scriptDependencyTracker.startTracking("scriptId2", DEPENDENCY.toString());
+        scriptDependencyTracker.startTracking("scriptId1", depPath.toString());
+        scriptDependencyTracker.startTracking("scriptId2", depPath.toString());
         scriptDependencyTracker.processWatchEvent(WatchService.Kind.MODIFY, DEPENDENCY);
 
         verify(listener).onDependencyChange(eq("scriptId1"));
@@ -115,8 +121,8 @@ public class AbstractScriptDependencyTrackerTest {
 
         scriptDependencyTracker.addChangeTracker(listener);
 
-        scriptDependencyTracker.startTracking("scriptId", DEPENDENCY.toString());
-        scriptDependencyTracker.startTracking("scriptId", DEPENDENCY2.toString());
+        scriptDependencyTracker.startTracking("scriptId", depPath.toString());
+        scriptDependencyTracker.startTracking("scriptId", depPath2.toString());
         scriptDependencyTracker.processWatchEvent(WatchService.Kind.MODIFY, DEPENDENCY);
         scriptDependencyTracker.processWatchEvent(WatchService.Kind.DELETE, DEPENDENCY2);
 
@@ -130,8 +136,8 @@ public class AbstractScriptDependencyTrackerTest {
 
         scriptDependencyTracker.addChangeTracker(listener);
 
-        scriptDependencyTracker.startTracking("scriptId1", DEPENDENCY.toString());
-        scriptDependencyTracker.startTracking("scriptId2", DEPENDENCY2.toString());
+        scriptDependencyTracker.startTracking("scriptId1", depPath.toString());
+        scriptDependencyTracker.startTracking("scriptId2", depPath2.toString());
 
         scriptDependencyTracker.processWatchEvent(WatchService.Kind.CREATE, DEPENDENCY);
 
