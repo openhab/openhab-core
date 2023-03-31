@@ -46,7 +46,9 @@ import org.openhab.core.internal.items.GroupFunctionHelper;
 import org.openhab.core.internal.items.ItemStateConverterImpl;
 import org.openhab.core.items.dto.GroupFunctionDTO;
 import org.openhab.core.items.events.GroupItemStateChangedEvent;
+import org.openhab.core.items.events.GroupStateUpdatedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemStateUpdatedEvent;
 import org.openhab.core.items.events.ItemUpdatedEvent;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.ColorItem;
@@ -422,6 +424,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     public void assertThatGroupItemPostsEventsForChangesCorrectly() {
         // from ItemEventFactory.GROUPITEM_STATE_CHANGED_EVENT_TOPIC
         String groupitemStateChangedEventTopic = "openhab/items/{itemName}/{memberName}/statechanged";
+        String groupitemStateUpdatedEventTopic = "openhab/items/{itemName}/{memberName}/stateupdated";
 
         events.clear();
         GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"), new GroupFunction.Equality());
@@ -432,10 +435,21 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         groupItem.setEventPublisher(publisher);
         State oldGroupState = groupItem.getState();
 
-        // State changes -> one change event is fired
+        // State changes -> one update and one change event is fired
         member.setState(OnOffType.ON);
 
-        waitForAssert(() -> assertThat(events.size(), is(1)));
+        waitForAssert(() -> assertThat(events.size(), is(2)));
+
+        List<Event> updates = events.stream().filter(it -> it instanceof GroupStateUpdatedEvent)
+                .collect(Collectors.toList());
+        assertThat(updates.size(), is(1));
+
+        GroupStateUpdatedEvent update = (GroupStateUpdatedEvent) updates.get(0);
+        assertThat(update.getItemName(), is(groupItem.getName()));
+        assertThat(update.getMemberName(), is(member.getName()));
+        assertThat(update.getTopic(), is(groupitemStateUpdatedEventTopic.replace("{memberName}", member.getName())
+                .replace("{itemName}", groupItem.getName())));
+        assertThat(update.getItemState(), is(groupItem.getState()));
 
         List<Event> changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
                 .collect(Collectors.toList());
@@ -451,9 +465,10 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         events.clear();
 
-        // State doesn't change -> no events are fired
+        // State doesn't change -> only update event is posted
         member.setState(member.getState());
-        assertThat(events.size(), is(0));
+        waitForAssert(() -> assertThat(events.size(), is(1)));
+        assertThat(events.get(0), is(instanceOf(ItemStateUpdatedEvent.class)));
     }
 
     @Test
@@ -470,10 +485,10 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         groupItem.setEventPublisher(publisher);
 
-        // State changes -> one change event is fired
+        // State changes -> one update and one change event is fired
         sw1.setState(OnOffType.ON);
 
-        waitForAssert(() -> assertThat(events, hasSize(1)));
+        waitForAssert(() -> assertThat(events, hasSize(2)));
 
         List<Event> groupItemStateChangedEvents = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
                 .collect(Collectors.toList());
@@ -490,13 +505,13 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         events.clear();
 
-        // State does not change -> no change event is fired
+        // State does not change -> only update event is fired
         sw2.setState(OnOffType.ON);
 
         // wait to see that the event doesn't fire
         Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
 
-        waitForAssert(() -> assertThat(events, hasSize(0)));
+        waitForAssert(() -> assertThat(events, hasSize(1)));
     }
 
     @Test
@@ -543,14 +558,18 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         groupItem.setEventPublisher(publisher);
 
-        // State changes -> one change event is fired
+        // State changes -> one update and one change event is fired
         sw1.setState(OnOffType.ON);
 
-        waitForAssert(() -> assertThat(events, hasSize(1)));
+        waitForAssert(() -> assertThat(events, hasSize(2)));
 
         List<Event> changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
                 .collect(Collectors.toList());
         assertThat(changes, hasSize(1));
+
+        List<Event> updates = events.stream().filter(it -> it instanceof GroupStateUpdatedEvent)
+                .collect(Collectors.toList());
+        assertThat(updates, hasSize(1));
 
         GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
         assertThat(change.getItemName(), is(groupItem.getName()));
@@ -563,15 +582,21 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         events.clear();
 
-        // State does not change -> no change event is fired
+        // State does not change -> only update event is fired
         sw2.setState(OnOffType.ON);
 
         sw2.setState(UnDefType.UNDEF);
 
-        // wait to see that the event doesn't fire
+        // wait to see that only state updated events are fired
         Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
 
-        assertThat(events, hasSize(0));
+        assertThat(events, hasSize(2));
+
+        changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent).collect(Collectors.toList());
+        assertThat(changes, hasSize(0));
+
+        updates = events.stream().filter(it -> it instanceof GroupStateUpdatedEvent).collect(Collectors.toList());
+        assertThat(updates, hasSize(2));
 
         assertThat(groupItem.getState(), is(OnOffType.ON));
     }
@@ -590,10 +615,10 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         groupItem.setEventPublisher(publisher);
 
-        // State changes -> one change event is fired
+        // State changes -> one update and one change event is fired
         sw1.setState(OnOffType.ON);
 
-        waitForAssert(() -> assertThat(events, hasSize(1)));
+        waitForAssert(() -> assertThat(events, hasSize(2)));
 
         List<Event> changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
                 .collect(Collectors.toList());
@@ -610,10 +635,10 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         events.clear();
 
-        // State changes -> one change event is fired
+        // State changes -> one update and one change event is fired
         sw2.setState(OnOffType.ON);
 
-        waitForAssert(() -> assertThat(events, hasSize(1)));
+        waitForAssert(() -> assertThat(events, hasSize(2)));
 
         changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent).collect(Collectors.toList());
         assertThat(changes, hasSize(1));
@@ -727,7 +752,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         member1.setState(new PercentType(50));
 
-        waitForAssert(() -> assertThat(events.size(), is(1)));
+        waitForAssert(() -> assertThat(events.size(), is(2)));
 
         List<Event> changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
                 .collect(Collectors.toList());
@@ -746,7 +771,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         member2.setState(new PercentType(10));
 
-        waitForAssert(() -> assertThat(events.size(), is(1)));
+        waitForAssert(() -> assertThat(events.size(), is(2)));
 
         changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent).collect(Collectors.toList());
         assertThat(changes.size(), is(1));

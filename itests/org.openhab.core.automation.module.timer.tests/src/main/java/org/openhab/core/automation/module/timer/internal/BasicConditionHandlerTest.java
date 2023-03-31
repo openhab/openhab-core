@@ -179,7 +179,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
         logger.info("Rule is enabled and idle");
 
         logger.info("Send and wait for item state is ON");
-        eventPublisher.post(ItemEventFactory.createStateEvent(testItemName1, OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
 
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
@@ -194,7 +194,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
 
         // prepare the execution
         itemEvent = null;
-        eventPublisher.post(ItemEventFactory.createStateEvent(testItemName1, OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
         waitForAssert(() -> {
             assertThat(itemEvent, is(nullValue()));
         });

@@ -31,7 +31,7 @@ import org.openhab.core.items.events.GroupItemStateChangedEvent;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemRemovedEvent;
 import org.openhab.core.items.events.ItemStateChangedEvent;
-import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.items.events.ItemStateUpdatedEvent;
 import org.openhab.core.types.State;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -77,7 +77,7 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
         this.previousState = (String) module.getConfiguration().get(CFG_PREVIOUS_STATE);
         this.ruleUID = ruleUID;
         if (UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            this.types = Set.of(ItemStateEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
+            this.types = Set.of(ItemStateUpdatedEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         } else {
             this.types = Set.of(ItemStateChangedEvent.TYPE, GroupItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE,
                     ItemRemovedEvent.TYPE);
@@ -122,9 +122,9 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
             Map<String, Object> values = new HashMap<>();
-            if (event instanceof ItemStateEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
+            if (event instanceof ItemStateUpdatedEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 String state = this.state;
-                State itemState = ((ItemStateEvent) event).getItemState();
+                State itemState = ((ItemStateUpdatedEvent) event).getItemState();
                 if ((state == null || state.equals(itemState.toFullString()))) {
                     values.put("state", itemState);
                 }

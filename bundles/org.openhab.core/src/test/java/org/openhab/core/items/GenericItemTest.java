@@ -27,7 +27,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.items.events.ItemStateChangedEvent;
+import org.openhab.core.items.events.ItemStateUpdatedEvent;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.RawType;
@@ -58,24 +60,51 @@ public class GenericItemTest {
         item.setEventPublisher(publisher);
         State oldState = item.getState();
 
-        // State changes -> one change event is fired
+        // State changes -> one update and one change event is fired
         item.setState(new RawType(new byte[0], RawType.DEFAULT_MIME_TYPE));
 
-        ArgumentCaptor<ItemStateChangedEvent> captor = ArgumentCaptor.forClass(ItemStateChangedEvent.class);
+        ArgumentCaptor<ItemEvent> captor = ArgumentCaptor.forClass(ItemEvent.class);
 
-        verify(publisher, times(1)).post(captor.capture());
+        verify(publisher, times(2)).post(captor.capture());
 
-        ItemStateChangedEvent change = captor.getValue();
+        List<ItemEvent> events = captor.getAllValues();
+        assertEquals(2, events.size());
 
+        // first event should be updated event
+        assertInstanceOf(ItemStateUpdatedEvent.class, events.get(0));
+        ItemStateUpdatedEvent updated = (ItemStateUpdatedEvent) events.get(0);
+        assertEquals(item.getName(), updated.getItemName());
+        assertEquals("openhab/items/member1/stateupdated", updated.getTopic());
+        assertEquals(item.getState(), updated.getItemState());
+        assertEquals(ItemStateUpdatedEvent.TYPE, updated.getType());
+
+        // second event should be changed event
+        assertInstanceOf(ItemStateChangedEvent.class, events.get(1));
+        ItemStateChangedEvent change = (ItemStateChangedEvent) events.get(1);
         assertEquals(item.getName(), change.getItemName());
         assertEquals("openhab/items/member1/statechanged", change.getTopic());
         assertEquals(oldState, change.getOldItemState());
         assertEquals(item.getState(), change.getItemState());
         assertEquals(ItemStateChangedEvent.TYPE, change.getType());
 
-        // State doesn't change -> no event is fired
+        // reset invocations and captor
+        clearInvocations(publisher);
+        captor = ArgumentCaptor.forClass(ItemEvent.class);
+
+        // State doesn't change -> only update event is fired
         item.setState(item.getState());
-        verifyNoMoreInteractions(publisher);
+        verify(publisher).post(captor.capture());
+
+        events = captor.getAllValues();
+        assertEquals(1, events.size()); // two before and one additional
+
+        // event should be updated event
+        assertInstanceOf(ItemStateUpdatedEvent.class, events.get(0));
+        updated = (ItemStateUpdatedEvent) events.get(0);
+        assertEquals(item.getName(), updated.getItemName());
+        assertEquals("openhab/items/member1/stateupdated", updated.getTopic());
+        assertEquals(item.getState(), updated.getItemState());
+        assertEquals(ItemStateUpdatedEvent.TYPE, updated.getType());
     }
 
     @Test
