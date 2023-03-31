@@ -113,16 +113,15 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     }
 
     /**
-     * @deprecated Use {@link ColorUtil#rgbToHsb(int[])} instead
+     * Create HSB from RGB.
      *
-     *             Create HSB from RGB
+     * See also {@link ColorUtil#rgbToHsb(int[])}.
      *
      * @param r red 0-255
      * @param g green 0-255
      * @param b blue 0-255
-     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
+     * @throws IllegalArgumentException when color values exceed allowed range
      */
-    @Deprecated
     public static HSBType fromRGB(int r, int g, int b) throws IllegalArgumentException {
         return ColorUtil.rgbToHsb(new int[] { r, g, b });
     }

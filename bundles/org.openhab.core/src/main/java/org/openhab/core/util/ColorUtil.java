@@ -468,7 +468,7 @@ public class ColorUtil {
                 .divide(BIG_DECIMAL_HUNDRED, 0, RoundingMode.HALF_UP).intValue();
     }
 
-    /* Helper functions */
+    /* Utility functions for comparing color values */
 
     /**
      * Helper method for checking if expected and actual HSBType color parameters lie within a given percentage of each
