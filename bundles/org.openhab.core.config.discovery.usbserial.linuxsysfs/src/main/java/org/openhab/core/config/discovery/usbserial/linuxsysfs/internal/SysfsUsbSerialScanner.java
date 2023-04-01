@@ -154,16 +154,18 @@ public class SysfsUsbSerialScanner implements UsbSerialScanner {
         Path devSerialDir = Path.of(DEV_SERIAL_BY_ID_DIRECTORY);
         if (exists(devSerialDir) && isDirectory(devSerialDir) && isReadable(devSerialDir)) {
             // browse serial/by-id directory :
-            for (Path devLinkPath : newDirectoryStream(devSerialDir)) {
-                if (Files.isSymbolicLink(devLinkPath)) {
-                    Path devicePath = getRealDevicePath(devLinkPath);
-                    if (devicePath != null) {
-                        String serialPortName = devicePath.getFileName().toString();
-                        // get the corresponding real sysinfo special dir :
-                        Path sysfsDevicePath = getRealDevicePath(
-                                Paths.get(sysfsTtyDevicesDirectory).resolve(serialPortName));
-                        if (sysfsDevicePath != null && isReadable(devicePath) && isWritable(devicePath)) {
-                            result.add(new SerialPortInfo(devLinkPath, sysfsDevicePath));
+            try (DirectoryStream<Path> directoryStream = newDirectoryStream(devSerialDir)) {
+                for (Path devLinkPath : directoryStream) {
+                    if (Files.isSymbolicLink(devLinkPath)) {
+                        Path devicePath = getRealDevicePath(devLinkPath);
+                        if (devicePath != null) {
+                            String serialPortName = devicePath.getFileName().toString();
+                            // get the corresponding real sysinfo special dir :
+                            Path sysfsDevicePath = getRealDevicePath(
+                                    Paths.get(sysfsTtyDevicesDirectory).resolve(serialPortName));
+                            if (sysfsDevicePath != null && isReadable(devicePath) && isWritable(devicePath)) {
+                                result.add(new SerialPortInfo(devLinkPath, sysfsDevicePath));
+                            }
                         }
                     }
                 }
