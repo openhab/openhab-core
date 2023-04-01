@@ -298,8 +298,7 @@ public class Addon {
      * Create a builder for an {@link Addon}
      *
      * @param uid the UID of the add-on (e.g. "binding-dmx", "json:transform-format" or "marketplace:123456")
-     *
-     * @return
+     * @return the builder
      */
     public static Builder create(String uid) {
         return new Builder(uid);

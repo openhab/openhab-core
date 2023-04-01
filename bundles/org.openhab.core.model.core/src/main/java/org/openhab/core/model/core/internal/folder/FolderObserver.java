@@ -12,8 +12,7 @@
  */
 package org.openhab.core.model.core.internal.folder;
 
-import static org.openhab.core.service.WatchService.Kind.CREATE;
-import static org.openhab.core.service.WatchService.Kind.MODIFY;
+import static org.openhab.core.service.WatchService.Kind.*;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -162,7 +161,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
         if (!folderFileExtMap.isEmpty()) {
             for (String folderName : folderFileExtMap.keySet()) {
                 final List<String> validExtension = folderFileExtMap.get(folderName);
-                if (validExtension != null && validExtension.size() > 0) {
+                if (validExtension != null && !validExtension.isEmpty()) {
                     File folder = watchService.getWatchPath().resolve(folderName).toFile();
 
                     File[] files = folder.listFiles(new FileExtensionsFilter(validExtension));

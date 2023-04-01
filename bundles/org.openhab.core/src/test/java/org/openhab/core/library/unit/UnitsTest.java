@@ -398,7 +398,6 @@ public class UnitsTest {
         @Override
         public boolean matches(@Nullable Object actualValue) {
             if (actualValue instanceof Quantity other) {
-
                 if (!other.getUnit().isCompatible(quantity.getUnit())) {
                     return false;
                 }

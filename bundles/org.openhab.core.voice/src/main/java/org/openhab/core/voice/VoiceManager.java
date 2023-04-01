@@ -290,7 +290,6 @@ public interface VoiceManager {
      * Only one registration can be done for an audio source.
      *
      * @param registration with the desired services ids and options for the dialog
-     *
      * @throws IllegalStateException if there is another registration for the same source
      */
     void registerDialog(DialogRegistration registration) throws IllegalStateException;

@@ -177,7 +177,6 @@ public class SchedulerImpl implements Scheduler {
 
         deferred.thenAccept(v -> {
             if (temporalAdjuster instanceof SchedulerTemporalAdjuster schedulerTemporalAdjuster) {
-
                 if (!schedulerTemporalAdjuster.isDone(newTime)) {
                     schedule(recurringSchedule, runnable, identifier, temporalAdjuster);
                     return;

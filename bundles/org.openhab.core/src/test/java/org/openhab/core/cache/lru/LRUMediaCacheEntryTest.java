@@ -250,7 +250,6 @@ public class LRUMediaCacheEntryTest {
 
     @Test
     public void getTotalSizeByForcingReadAllTest() throws IOException {
-
         LRUMediaCache<MetadataSample> lruMediaCache = createCache(1000);
 
         // init simulated data stream
