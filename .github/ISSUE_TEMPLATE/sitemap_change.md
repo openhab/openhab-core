@@ -1,5 +1,5 @@
 ---
-name: Suggest a Sitemap change
+name: 🗺  Sitemap change
 about: 'Suggest a change in the Sitemap syntax and corresponding UIs'
 labels: sitemap
 ---
