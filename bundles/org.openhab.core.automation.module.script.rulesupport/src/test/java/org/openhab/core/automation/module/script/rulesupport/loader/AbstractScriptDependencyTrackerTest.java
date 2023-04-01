@@ -58,8 +58,8 @@ public class AbstractScriptDependencyTrackerTest {
         scriptDependencyTracker = new AbstractScriptDependencyTracker(watchServiceMock, WATCH_DIR) {
         };
 
-        depPath =rootWatchPath.resolve(WATCH_DIR).resolve(DEPENDENCY);
-        depPath2 =rootWatchPath.resolve(WATCH_DIR).resolve(DEPENDENCY2);
+        depPath = rootWatchPath.resolve(WATCH_DIR).resolve(DEPENDENCY);
+        depPath2 = rootWatchPath.resolve(WATCH_DIR).resolve(DEPENDENCY2);
 
         Files.createFile(depPath);
 
