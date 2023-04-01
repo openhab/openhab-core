@@ -85,7 +85,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
      * @param value a stringified HSBType value in the format "hue,saturation,brightness"
      */
     public HSBType(String value) {
-        List<String> constituents = Arrays.stream(value.split(",")).map(in -> in.trim()).collect(Collectors.toList());
+        List<String> constituents = Arrays.stream(value.split(",")).map(String::trim).collect(Collectors.toList());
         if (constituents.size() == 3) {
             this.hue = new BigDecimal(constituents.get(0));
             this.saturation = new BigDecimal(constituents.get(1));

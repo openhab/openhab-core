@@ -116,8 +116,8 @@ public class UnitUtils {
             for (Field field : system.getDeclaredFields()) {
                 if (field.getType().isAssignableFrom(Unit.class) && Modifier.isStatic(field.getModifiers())) {
                     Type genericType = field.getGenericType();
-                    if (genericType instanceof ParameterizedType) {
-                        Type typeParam = ((ParameterizedType) genericType).getActualTypeArguments()[0];
+                    if (genericType instanceof ParameterizedType type) {
+                        Type typeParam = type.getActualTypeArguments()[0];
                         if (typeParam instanceof WildcardType) {
                             continue;
                         }
@@ -188,14 +188,12 @@ public class UnitUtils {
                 || (siUnits.contains(thatUnit) && usUnits.contains(thisUnit));
 
         if (!differentSystems) {
-            if (thisUnit instanceof TransformedUnit
-                    && isMetricConversion(((TransformedUnit<?>) thisUnit).getConverter())) {
-                return isDifferentMeasurementSystem(((TransformedUnit<?>) thisUnit).getParentUnit(), thatUnit);
+            if (thisUnit instanceof TransformedUnit unit && isMetricConversion(unit.getConverter())) {
+                return isDifferentMeasurementSystem(unit.getParentUnit(), thatUnit);
             }
 
-            if (thatUnit instanceof TransformedUnit
-                    && isMetricConversion(((TransformedUnit<?>) thatUnit).getConverter())) {
-                return isDifferentMeasurementSystem(thisUnit, ((TransformedUnit<?>) thatUnit).getParentUnit());
+            if (thatUnit instanceof TransformedUnit unit && isMetricConversion(unit.getConverter())) {
+                return isDifferentMeasurementSystem(thisUnit, unit.getParentUnit());
             }
         }
 

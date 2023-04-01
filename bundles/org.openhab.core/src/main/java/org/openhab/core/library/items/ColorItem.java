@@ -63,19 +63,19 @@ public class ColorItem extends DimmerItem {
         if (isAcceptedState(ACCEPTED_DATA_TYPES, state)) {
             State currentState = this.state;
 
-            if (currentState instanceof HSBType) {
-                DecimalType hue = ((HSBType) currentState).getHue();
-                PercentType saturation = ((HSBType) currentState).getSaturation();
+            if (currentState instanceof HSBType hsbType) {
+                DecimalType hue = hsbType.getHue();
+                PercentType saturation = hsbType.getSaturation();
                 // we map ON/OFF values to dark/bright, so that the hue and saturation values are not changed
                 if (state == OnOffType.OFF) {
                     applyState(new HSBType(hue, saturation, PercentType.ZERO));
                 } else if (state == OnOffType.ON) {
                     applyState(new HSBType(hue, saturation, PercentType.HUNDRED));
-                } else if (state instanceof PercentType && !(state instanceof HSBType)) {
-                    applyState(new HSBType(hue, saturation, (PercentType) state));
-                } else if (state instanceof DecimalType && !(state instanceof HSBType)) {
+                } else if (state instanceof PercentType percentType && !(state instanceof HSBType)) {
+                    applyState(new HSBType(hue, saturation, percentType));
+                } else if (state instanceof DecimalType decimalType && !(state instanceof HSBType)) {
                     applyState(new HSBType(hue, saturation,
-                            new PercentType(((DecimalType) state).toBigDecimal().multiply(BigDecimal.valueOf(100)))));
+                            new PercentType(decimalType.toBigDecimal().multiply(BigDecimal.valueOf(100)))));
                 } else {
                     applyState(state);
                 }

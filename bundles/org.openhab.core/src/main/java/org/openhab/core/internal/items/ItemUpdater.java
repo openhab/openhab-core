@@ -89,8 +89,7 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
     protected void receiveCommand(ItemCommandEvent commandEvent) {
         try {
             Item item = itemRegistry.getItem(commandEvent.getItemName());
-            if (item instanceof GroupItem) {
-                GroupItem groupItem = (GroupItem) item;
+            if (item instanceof GroupItem groupItem) {
                 groupItem.send(commandEvent.getItemCommand());
             }
         } catch (ItemNotFoundException e) {

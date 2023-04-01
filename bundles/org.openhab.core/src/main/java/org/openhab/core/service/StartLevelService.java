@@ -171,7 +171,7 @@ public class StartLevelService {
     protected void modified(Map<String, Object> configuration) {
         // clean up
         slmarker.clear();
-        trackers.values().forEach(t -> readyService.unregisterTracker(t));
+        trackers.values().forEach(readyService::unregisterTracker);
         trackers.clear();
 
         // set up trackers and markers
@@ -180,7 +180,7 @@ public class StartLevelService {
                 .forEach(sl -> slmarker.put(sl, new ReadyMarker(STARTLEVEL_MARKER_TYPE, Integer.toString(sl))));
         slmarker.put(STARTLEVEL_COMPLETE,
                 new ReadyMarker(STARTLEVEL_MARKER_TYPE, Integer.toString(STARTLEVEL_COMPLETE)));
-        startlevels.values().stream().forEach(ms -> ms.forEach(e -> registerTracker(e)));
+        startlevels.values().stream().forEach(ms -> ms.forEach(this::registerTracker));
     }
 
     private void registerTracker(ReadyMarker e) {
@@ -204,7 +204,7 @@ public class StartLevelService {
 
     private Map<Integer, Set<ReadyMarker>> parseConfig(Map<String, Object> configuration) {
         return configuration.entrySet().stream() //
-                .filter(e -> hasIntegerKey(e)) //
+                .filter(this::hasIntegerKey) //
                 .map(e -> new AbstractMap.SimpleEntry<>(Integer.valueOf(e.getKey()), markerSet(e.getValue()))) //
                 .sorted(Map.Entry.<Integer, Set<ReadyMarker>> comparingByKey().reversed()) //
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -212,8 +212,8 @@ public class StartLevelService {
 
     private Set<ReadyMarker> markerSet(Object value) {
         Set<ReadyMarker> markerSet = new HashSet<>();
-        if (value instanceof String) {
-            String[] segments = ((String) value).split(",");
+        if (value instanceof String string) {
+            String[] segments = string.split(",");
             for (String segment : segments) {
                 if (segment.contains(":")) {
                     String[] markerParts = segment.strip().split(":");
@@ -238,7 +238,7 @@ public class StartLevelService {
     @Deactivate
     protected void deactivate() {
         slmarker.clear();
-        trackers.values().forEach(t -> readyService.unregisterTracker(t));
+        trackers.values().forEach(readyService::unregisterTracker);
         ScheduledFuture<?> job = this.job;
         if (job != null) {
             job.cancel(true);
