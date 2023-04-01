@@ -22,6 +22,7 @@ import java.util.ResourceBundle.Control;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -84,7 +85,10 @@ public class SemanticTags {
             String entry = rb.getString(tag.getAnnotation(TagInfo.class).id());
             return List.of(entry.toLowerCase(locale).split(","));
         } catch (MissingResourceException e) {
-            return List.of(tag.getAnnotation(TagInfo.class).label());
+            TagInfo tagInfo = tag.getAnnotation(TagInfo.class);
+            Stream<String> label = Stream.of(tagInfo.label());
+            Stream<String> synonyms = Stream.of(tagInfo.synonyms().split(","));
+            return Stream.concat(label, synonyms).map(s -> s.toLowerCase(locale)).distinct().toList();
         }
     }
 
