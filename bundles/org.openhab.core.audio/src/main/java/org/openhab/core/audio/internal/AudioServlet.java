@@ -17,7 +17,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +47,6 @@ import org.openhab.core.audio.ByteArrayAudioStream;
 import org.openhab.core.audio.ClonableAudioStream;
 import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.FixedLengthAudioStream;
-import org.openhab.core.common.Disposable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -301,7 +299,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
                     fileSize += length;
                 }
             }
-            clonableAudioStreamResult = new TemporaryFileAudioStream(tempFile, stream.getFormat());
+            clonableAudioStreamResult = new FileAudioStream(tempFile, stream.getFormat(), true);
         }
         tryClose(stream);
         return clonableAudioStreamResult;
@@ -313,22 +311,6 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     private String getRelativeURL(String streamId) {
         return SERVLET_PATH + "/" + streamId;
-    }
-
-    // Using a FileAudioStream implementing Disposable allows file deletion when it is not used anymore
-    private static class TemporaryFileAudioStream extends FileAudioStream implements Disposable {
-
-        private File file;
-
-        public TemporaryFileAudioStream(File file, AudioFormat format) throws AudioException {
-            super(file, format);
-            this.file = file;
-        }
-
-        @Override
-        public void dispose() throws IOException {
-            Files.delete(file.toPath());
-        }
     }
 
     protected static record StreamServed(String id, AudioStream audioStream, AtomicInteger currentlyServedStream,
