@@ -12,9 +12,7 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
@@ -74,7 +72,6 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
         this.bundleContext = bundleContext;
         this.ruleUID = ruleUID;
         this.types = Set.of(ItemCommandEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
-        Dictionary<String, Object> properties = new Hashtable<>();
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
         if (itemRegistry.get(itemName) == null) {
             logger.warn("Item '{}' needed for rule '{}' is missing. Trigger '{}' will not work.", itemName, ruleUID,

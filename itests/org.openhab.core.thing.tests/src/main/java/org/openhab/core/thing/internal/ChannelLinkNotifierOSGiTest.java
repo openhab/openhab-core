@@ -15,11 +15,9 @@ package org.openhab.core.thing.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,9 +114,9 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
     private @NonNullByDefault({}) ThingRegistry thingRegistry;
 
-    private @Mock @NonNullByDefault({}) Bundle bundleMock;
-    private @Mock @NonNullByDefault({}) BundleResolver bundleResolverMock;
-    private @Mock @NonNullByDefault({}) ThingHandlerFactory thingHandlerFactoryMock;
+    public @Mock @NonNullByDefault({}) Bundle bundleMock;
+    public @Mock @NonNullByDefault({}) BundleResolver bundleResolverMock;
+    public @Mock @NonNullByDefault({}) ThingHandlerFactory thingHandlerFactoryMock;
 
     /**
      * A thing handler which updates the {@link ThingStatus} when initialized to the provided {@code thingStatus} value.

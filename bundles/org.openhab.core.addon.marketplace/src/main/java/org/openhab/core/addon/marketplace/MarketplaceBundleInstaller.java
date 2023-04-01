@@ -160,7 +160,6 @@ public abstract class MarketplaceBundleInstaller {
                                 logger.warn("Failed reinstalling add-on from cache", e);
                             }
                         });
-
             } catch (IOException e) {
                 logger.warn("Failed to re-install bundles: {}", e.getMessage());
             }

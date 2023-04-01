@@ -13,7 +13,7 @@
 package org.openhab.core.storage.json.internal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,7 +38,6 @@ import org.openhab.core.thing.Thing;
 public class ThingMigrationOSGiTest extends JavaOSGiTest {
     private static final Path DB_DIR = Path.of(OpenHAB.getUserDataFolder(), "jsondb");
     private static final String DB_NAME = "org.openhab.core.thing.Thing";
-    private static final String DB_OLD_NAME = "org.openhab.core.thing.Thing-old";
 
     @Test
     public void migrationParsable() throws IOException {

@@ -322,7 +322,6 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
             }
 
             return webSocketClient;
-
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {

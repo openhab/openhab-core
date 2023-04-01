@@ -116,7 +116,6 @@ public class TTSLRUCacheImplTest {
 
     @Test
     public void loadTTSResultsFromCacheDirectory() throws IOException, TTSException {
-
         // prepare cache directory
         Path cacheDirectory = tempDir.resolve("cache").resolve(TTSLRUCacheImpl.VOICE_TTS_CACHE_PID);
         Files.createDirectories(cacheDirectory);
