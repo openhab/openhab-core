@@ -40,16 +40,16 @@ public abstract class AudioSinkAsync implements AudioSink {
     private final Map<AudioStream, Runnable> runnableByAudioStream = new HashMap<>();
 
     @Override
-    public void process(@Nullable AudioStream audioStream, Runnable whenFinished)
+    public void process(@Nullable AudioStream audioStream, @Nullable Runnable whenFinished)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
 
         try {
-            if (audioStream != null) {
+            if (audioStream != null && whenFinished != null) {
                 runnableByAudioStream.put(audioStream, whenFinished);
             }
             process(audioStream);
         } finally {
-            if (audioStream == null) {
+            if (audioStream == null && whenFinished != null) {
                 // No need to delay the post process task
                 whenFinished.run();
             }

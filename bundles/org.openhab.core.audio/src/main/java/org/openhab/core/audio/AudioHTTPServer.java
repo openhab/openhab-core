@@ -12,6 +12,8 @@
  */
 package org.openhab.core.audio;
 
+import java.io.IOException;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.audio.internal.AudioServlet;
 
@@ -70,6 +72,7 @@ public interface AudioHTTPServer {
      * @param a Runnable callback for cleaning resources. The AudioHTTPServer will run the callback when the stream is
      *            not used anymore and timed-out.
      * @return the relative URL to access the stream starting with a '/'
+     * @throws IOException when the stream is not a {@link ClonableAudioStream} and we cannot get or store it on disk.
      */
-    String serve(AudioStream stream, int seconds, Runnable callBack);
+    String serve(AudioStream stream, int seconds, Runnable callBack) throws IOException;
 }

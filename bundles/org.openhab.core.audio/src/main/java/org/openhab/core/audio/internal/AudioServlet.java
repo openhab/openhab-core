@@ -86,9 +86,6 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
     @Nullable
     ScheduledFuture<?> periodicCleaner;
 
-    private static final Runnable doNothing = () -> {
-    };
-
     @Deactivate
     protected synchronized void deactivate() {
         servedStreams.values().stream().map(streamServed -> streamServed.audioStream).forEach(this::tryClose);
@@ -190,7 +187,10 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
         // we can immediately dispose and remove, if it is a one time stream
         if (!servedStream.multiTimeStream) {
-            servedStream.callback.run();
+            Runnable callback = servedStream.callback;
+            if (callback != null) {
+                callback.run();
+            }
             servedStreams.remove(streamId);
             logger.debug("Removed timed out stream {}", streamId);
         }
@@ -209,7 +209,10 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
             if (streamServed != null) {
                 tryClose(streamServed.audioStream);
                 // we can notify the caller of the stream consumption
-                streamServed.callback.run();
+                Runnable callback = streamServed.callback;
+                if (callback != null) {
+                    callback.run();
+                }
                 logger.debug("Removed timed out stream {}", streamId);
             }
         });
@@ -235,7 +238,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         // Because we cannot wait indefinitely before executing the callback,
         // even if this is a one time stream, we set a timeout just in case.
         long timeOut = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
-        StreamServed streamToServe = new StreamServed(streamId, stream, new AtomicInteger(), timeOut, false, doNothing);
+        StreamServed streamToServe = new StreamServed(streamId, stream, new AtomicInteger(), timeOut, false, null);
         servedStreams.put(streamId, streamToServe);
 
         // try to clean, or a least launch the periodic cleanse:
@@ -246,23 +249,23 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     @Override
     public String serve(AudioStream stream, int seconds) {
-        return serve(stream, seconds, doNothing);
+        try {
+            return serve(stream, seconds, null);
+        } catch (IOException e) {
+            logger.warn("Cannot precache the audio stream to serve it", e);
+            return getRelativeURL("error");
+        }
     }
 
     @Override
-    public String serve(AudioStream stream, int seconds, Runnable callBack) {
+    public String serve(AudioStream stream, int seconds, @Nullable Runnable callBack) throws IOException {
 
         String streamId = UUID.randomUUID().toString();
         ClonableAudioStream clonableAudioStream = null;
         if (stream instanceof ClonableAudioStream clonableAudioStreamDetected) {
             clonableAudioStream = clonableAudioStreamDetected;
         } else { // we prefer a ClonableAudioStream, but we can try to make one
-            try {
-                clonableAudioStream = createClonableInputStream(stream, streamId);
-            } catch (AudioException | IOException e) {
-                logger.warn("Cannot precache the audio stream to serve it", e);
-                return getRelativeURL(streamId);
-            }
+            clonableAudioStream = createClonableInputStream(stream, streamId);
         }
         long timeOut = System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds);
         StreamServed streamToServe = new StreamServed(streamId, clonableAudioStream, new AtomicInteger(), timeOut, true,
@@ -275,8 +278,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         return getRelativeURL(streamId);
     }
 
-    private ClonableAudioStream createClonableInputStream(AudioStream stream, String streamId)
-            throws IOException, AudioException {
+    private ClonableAudioStream createClonableInputStream(AudioStream stream, String streamId) throws IOException {
         byte[] dataBytes = stream.readNBytes(ONETIME_STREAM_BUFFER_MAX_SIZE + 1);
         ClonableAudioStream clonableAudioStreamResult;
         if (dataBytes.length <= ONETIME_STREAM_BUFFER_MAX_SIZE) {
@@ -293,13 +295,17 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
                 byte[] buf = new byte[8192];
                 int length;
                 // but with a limit
-                int fileSize = 0;
+                int fileSize = ONETIME_STREAM_BUFFER_MAX_SIZE + 1;
                 while ((length = stream.read(buf)) != -1 && fileSize < ONETIME_STREAM_FILE_MAX_SIZE) {
                     outputStream.write(buf, 0, length);
                     fileSize += length;
                 }
             }
-            clonableAudioStreamResult = new FileAudioStream(tempFile, stream.getFormat(), true);
+            try {
+                clonableAudioStreamResult = new FileAudioStream(tempFile, stream.getFormat(), true);
+            } catch (AudioException e) { // this is in fact a FileNotFoundException and should not happen
+                throw new IOException("Cannot found the cache file we just created.", e);
+            }
         }
         tryClose(stream);
         return clonableAudioStreamResult;
@@ -314,6 +320,6 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
     }
 
     protected static record StreamServed(String id, AudioStream audioStream, AtomicInteger currentlyServedStream,
-            long timeout, boolean multiTimeStream, Runnable callback) {
+            long timeout, boolean multiTimeStream, @Nullable Runnable callback) {
     }
 }

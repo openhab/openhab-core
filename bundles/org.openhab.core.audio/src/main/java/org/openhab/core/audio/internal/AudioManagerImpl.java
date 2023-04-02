@@ -40,6 +40,7 @@ import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.audio.utils.AudioSinkUtils;
 import org.openhab.core.audio.utils.ToneSynthesizer;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
@@ -122,39 +123,9 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     public void play(@Nullable AudioStream audioStream, @Nullable String sinkId, @Nullable PercentType volume) {
         AudioSink sink = getSink(sinkId);
         if (sink != null) {
-            PercentType oldVolume = null;
-            // set notification sound volume
-            if (volume != null) {
-                try {
-                    // get current volume
-                    oldVolume = sink.getVolume();
-                } catch (IOException e) {
-                    logger.debug("An exception occurred while getting the volume of sink '{}' : {}", sink.getId(),
-                            e.getMessage(), e);
-                }
-
-                try {
-                    sink.setVolume(volume);
-                } catch (IOException e) {
-                    logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
-                            e.getMessage(), e);
-                }
-            }
-
-            final PercentType oldVolumeFinal = oldVolume;
-            Runnable toRunWhenProcessFinished = () -> {
-                if (volume != null && oldVolumeFinal != null) {
-                    // restore volume only if it was set before
-                    try {
-                        sink.setVolume(oldVolumeFinal);
-                    } catch (IOException e) {
-                        logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
-                                e.getMessage(), e);
-                    }
-                }
-            };
+            Runnable volumeRestoration = AudioSinkUtils.handleVolumeCommand(volume, sink, logger);
             try {
-                sink.process(audioStream, toRunWhenProcessFinished);
+                sink.process(audioStream, volumeRestoration);
             } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
                 logger.warn("Error playing '{}': {}", audioStream, e.getMessage(), e);
             }

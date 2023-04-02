@@ -35,14 +35,15 @@ public abstract class AudioSinkSync implements AudioSink {
     private final Logger logger = LoggerFactory.getLogger(AudioSinkSync.class);
 
     @Override
-    public void process(@Nullable AudioStream audioStream, Runnable whenFinished)
+    public void process(@Nullable AudioStream audioStream, @Nullable Runnable whenFinished)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
 
         try {
             process(audioStream);
         } finally {
-
-            whenFinished.run();
+            if (whenFinished != null) {
+                whenFinished.run();
+            }
 
             // if the stream is not needed anymore, then we should call back the AudioStream to let it a chance
             // to auto dispose:

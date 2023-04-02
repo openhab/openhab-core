@@ -83,7 +83,11 @@ public class WebAudioAudioSink extends AudioSinkAsync {
             // we will let the HTTP servlet run the delayed task when finished with the stream
             Runnable delayedTask = () -> this.runDelayed(audioStream);
             // we need to serve it for a while and make it available to multiple clients
-            sendEvent(audioHTTPServer.serve(audioStream, 10, delayedTask).toString());
+            try {
+                sendEvent(audioHTTPServer.serve(audioStream, 10, delayedTask).toString());
+            } catch (IOException e) {
+                logger.warn("Cannot precache the audio stream to serve it", e);
+            }
         }
     }
 

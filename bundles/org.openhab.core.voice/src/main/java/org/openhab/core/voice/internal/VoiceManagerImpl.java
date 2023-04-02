@@ -12,7 +12,6 @@
  */
 package org.openhab.core.voice.internal;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +42,7 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.audio.utils.AudioSinkUtils;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
@@ -273,40 +273,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                         "Failed playing audio stream '" + audioStream + "' as audio sink doesn't support it");
             }
 
-            PercentType oldVolume = null;
-            // set notification sound volume
-            if (volume != null) {
-                try {
-                    // get current volume
-                    oldVolume = sink.getVolume();
-                } catch (IOException e) {
-                    logger.debug("An exception occurred while getting the volume of sink '{}' : {}", sink.getId(),
-                            e.getMessage(), e);
-                }
+            Runnable volumeRestoration = AudioSinkUtils.handleVolumeCommand(volume, sink, logger);
 
-                try {
-                    sink.setVolume(volume);
-                } catch (IOException e) {
-                    logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
-                            e.getMessage(), e);
-                }
-            }
-
-            final PercentType oldVolumeFinal = oldVolume;
-            Runnable toRunWhenProcessFinished = () -> {
-                if (volume != null && oldVolumeFinal != null) {
-                    // restore volume only if it was set before
-                    try {
-                        sink.setVolume(oldVolumeFinal);
-                    } catch (IOException e) {
-                        logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
-                                e.getMessage(), e);
-                    }
-                }
-            };
-
-            sink.process(audioStream, toRunWhenProcessFinished);
-
+            sink.process(audioStream, volumeRestoration);
         } catch (TTSException | UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Error saying '{}': {}", text, e.getMessage(), e);

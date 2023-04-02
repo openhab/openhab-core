@@ -88,12 +88,14 @@ public interface AudioSink {
      * @throws UnsupportedAudioFormatException If audioStream format is not supported
      * @throws UnsupportedAudioStreamException If audioStream is not supported
      */
-    default void process(@Nullable AudioStream audioStream, Runnable whenFinished)
+    default void process(@Nullable AudioStream audioStream, @Nullable Runnable whenFinished)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
         try {
             process(audioStream);
         } finally {
-            whenFinished.run();
+            if (whenFinished != null) {
+                whenFinished.run();
+            }
         }
     }
 
