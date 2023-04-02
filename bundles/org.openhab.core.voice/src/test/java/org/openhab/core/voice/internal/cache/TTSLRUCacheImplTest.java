@@ -71,8 +71,7 @@ public class TTSLRUCacheImplTest {
         Map<String, Object> config = new HashMap<>();
         config.put(TTSLRUCacheImpl.CONFIG_CACHE_SIZE_TTS, size);
         config.put(TTSLRUCacheImpl.CONFIG_ENABLE_CACHE_TTS, true);
-        TTSLRUCacheImpl voiceLRUCache = new TTSLRUCacheImpl(storageService, config);
-        return voiceLRUCache;
+        return new TTSLRUCacheImpl(storageService, config);
     }
 
     @Test

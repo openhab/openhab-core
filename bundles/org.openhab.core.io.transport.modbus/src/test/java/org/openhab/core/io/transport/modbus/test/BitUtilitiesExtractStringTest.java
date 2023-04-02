@@ -99,8 +99,7 @@ public class BitUtilitiesExtractStringTest {
                 streamBuilder.add(
                         new Object[] { expected, offset, bytesOffsetted, origByteIndex + offset, length, charset });
             }
-            Stream<Object[]> variations = streamBuilder.build();
-            return variations;
+            return streamBuilder.build();
         });
     }
 
@@ -109,8 +108,8 @@ public class BitUtilitiesExtractStringTest {
     @MethodSource("data")
     public void testExtractStringFromRegisters(Object expectedResult, ModbusRegisterArray registers, int index,
             int length, Charset charset) {
-        if (expectedResult instanceof Class && Exception.class.isAssignableFrom((Class) expectedResult)) {
-            assertThrows((Class) expectedResult,
+        if (expectedResult instanceof Class class1 && Exception.class.isAssignableFrom(class1)) {
+            assertThrows(class1,
                     () -> ModbusBitUtilities.extractStringFromRegisters(registers, index, length, charset));
             return;
         } else {
@@ -125,9 +124,8 @@ public class BitUtilitiesExtractStringTest {
     @MethodSource("dataWithByteVariations")
     public void testExtractStringFromBytes(Object expectedResult, int byteOffset, byte[] bytes, int byteIndex,
             int length, Charset charset) {
-        if (expectedResult instanceof Class && Exception.class.isAssignableFrom((Class) expectedResult)) {
-            assertThrows((Class) expectedResult,
-                    () -> ModbusBitUtilities.extractStringFromBytes(bytes, byteIndex, length, charset));
+        if (expectedResult instanceof Class class1 && Exception.class.isAssignableFrom(class1)) {
+            assertThrows(class1, () -> ModbusBitUtilities.extractStringFromBytes(bytes, byteIndex, length, charset));
             return;
         } else {
             String actualState = ModbusBitUtilities.extractStringFromBytes(bytes, byteIndex, length, charset);

@@ -28,5 +28,5 @@ public enum ThingStatus {
     ONLINE,
     OFFLINE,
     REMOVING,
-    REMOVED;
+    REMOVED
 }

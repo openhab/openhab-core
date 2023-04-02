@@ -429,15 +429,15 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     }
 
     private boolean getAutoDiscoveryEnabled(Object autoDiscoveryEnabled) {
-        if (autoDiscoveryEnabled instanceof String) {
-            return Boolean.valueOf((String) autoDiscoveryEnabled);
+        if (autoDiscoveryEnabled instanceof String string) {
+            return Boolean.valueOf(string);
         } else {
             return Boolean.TRUE.equals(autoDiscoveryEnabled);
         }
     }
 
     private String inferKey(DiscoveryResult discoveryResult, String lastSegment) {
-        return "discovery." + discoveryResult.getThingUID().getAsString().replaceAll(":", ".") + "." + lastSegment;
+        return "discovery." + discoveryResult.getThingUID().getAsString().replace(":", ".") + "." + lastSegment;
     }
 
     protected DiscoveryResult getLocalizedDiscoveryResult(final DiscoveryResult discoveryResult,

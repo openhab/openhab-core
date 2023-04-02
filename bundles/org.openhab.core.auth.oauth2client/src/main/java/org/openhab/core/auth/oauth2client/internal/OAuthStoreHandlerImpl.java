@@ -127,9 +127,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
             // token does not exist
             return null;
         }
-
-        AccessTokenResponse decryptedAccessToken = decryptToken(accessTokenResponseFromStore);
-        return decryptedAccessToken;
+        return decryptToken(accessTokenResponseFromStore);
     }
 
     @Override
@@ -167,8 +165,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
 
     @Override
     public @Nullable PersistedParams loadPersistedParams(String handle) {
-        PersistedParams persistedParams = (PersistedParams) storageFacade.get(handle, SERVICE_CONFIGURATION);
-        return persistedParams;
+        return (PersistedParams) storageFacade.get(handle, SERVICE_CONFIGURATION);
     }
 
     private AccessTokenResponse encryptToken(AccessTokenResponse accessTokenResponse) throws GeneralSecurityException {
@@ -185,7 +182,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
 
     private AccessTokenResponse decryptToken(AccessTokenResponse accessTokenResponse) throws GeneralSecurityException {
         AccessTokenResponse decryptedToken = (AccessTokenResponse) accessTokenResponse.clone();
-        if (!storageCipher.isPresent()) {
+        if (storageCipher.isEmpty()) {
             return decryptedToken; // do nothing if no cipher
         }
         logger.debug("Decrypting token: {}", accessTokenResponse);
@@ -195,7 +192,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
     }
 
     private @Nullable String encrypt(String token) throws GeneralSecurityException {
-        if (!storageCipher.isPresent()) {
+        if (storageCipher.isEmpty()) {
             return token; // do nothing if no cipher
         } else {
             StorageCipher cipher = storageCipher.get();
@@ -288,8 +285,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                 // update last used when it is an access token
                 if (ACCESS_TOKEN_RESPONSE.equals(recordType)) {
                     try {
-                        AccessTokenResponse accessTokenResponse = gson.fromJson(value, AccessTokenResponse.class);
-                        return accessTokenResponse;
+                        return gson.fromJson(value, AccessTokenResponse.class);
                     } catch (Exception e) {
                         logger.error(
                                 "Unable to deserialize json, discarding AccessTokenResponse.  "
@@ -299,16 +295,14 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                     }
                 } else if (SERVICE_CONFIGURATION.equals(recordType)) {
                     try {
-                        PersistedParams params = gson.fromJson(value, PersistedParams.class);
-                        return params;
+                        return gson.fromJson(value, PersistedParams.class);
                     } catch (Exception e) {
                         logger.error("Unable to deserialize json, discarding PersistedParams. json:\n{}", value, e);
                         return null;
                     }
                 } else if (LAST_USED.equals(recordType)) {
                     try {
-                        Instant lastUsedDate = gson.fromJson(value, Instant.class);
-                        return lastUsedDate;
+                        return gson.fromJson(value, Instant.class);
                     } catch (Exception e) {
                         logger.info("Unable to deserialize json, reset LAST_USED to now.  json:\n{}", value);
                         return Instant.now();

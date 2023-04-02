@@ -105,14 +105,14 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ItemAddedEvent) {
-            if (itemName.equals(((ItemAddedEvent) event).getItem().name)) {
+        if (event instanceof ItemAddedEvent addedEvent) {
+            if (itemName.equals(addedEvent.getItem().name)) {
                 logger.info("Item '{}' needed for rule '{}' added. Trigger '{}' will now work.", itemName, ruleUID,
                         module.getId());
                 return;
             }
-        } else if (event instanceof ItemRemovedEvent) {
-            if (itemName.equals(((ItemRemovedEvent) event).getItem().name)) {
+        } else if (event instanceof ItemRemovedEvent removedEvent) {
+            if (itemName.equals(removedEvent.getItem().name)) {
                 logger.warn("Item '{}' needed for rule '{}' removed. Trigger '{}' will no longer work.", itemName,
                         ruleUID, module.getId());
                 return;
@@ -124,15 +124,17 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
             Map<String, Object> values = new HashMap<>();
-            if (event instanceof ItemStateUpdatedEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
+            if (event instanceof ItemStateUpdatedEvent updatedEvent
+                    && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 String state = this.state;
-                State itemState = ((ItemStateUpdatedEvent) event).getItemState();
+                State itemState = updatedEvent.getItemState();
                 if ((state == null || state.equals(itemState.toFullString()))) {
                     values.put("state", itemState);
                 }
-            } else if (event instanceof ItemStateChangedEvent && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-                State itemState = ((ItemStateChangedEvent) event).getItemState();
-                State oldItemState = ((ItemStateChangedEvent) event).getOldItemState();
+            } else if (event instanceof ItemStateChangedEvent changedEvent
+                    && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
+                State itemState = changedEvent.getItemState();
+                State oldItemState = changedEvent.getOldItemState();
 
                 if (stateMatches(this.state, itemState) && stateMatches(this.previousState, oldItemState)) {
                     values.put("oldState", oldItemState);

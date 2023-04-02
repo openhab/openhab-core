@@ -186,12 +186,12 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         if (value == null) {
             return defaultValue;
         }
-        if (value instanceof Integer) {
-            return (Integer) value;
+        if (value instanceof Integer integer) {
+            return integer;
         }
-        if (value instanceof String) {
+        if (value instanceof String string) {
             try {
-                return Integer.parseInt((String) value);
+                return Integer.parseInt(string);
             } catch (NumberFormatException e) {
                 logger.warn("ignoring invalid value {} for parameter {}", value, parameter);
                 return defaultValue;

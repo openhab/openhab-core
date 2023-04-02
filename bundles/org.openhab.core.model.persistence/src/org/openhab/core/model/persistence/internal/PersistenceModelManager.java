@@ -133,10 +133,10 @@ public class PersistenceModelManager implements ModelRepositoryChangeListener {
         for (final EObject item : config.getItems()) {
             if (item instanceof AllConfig) {
                 items.add(new PersistenceAllConfig());
-            } else if (item instanceof GroupConfig) {
-                items.add(new PersistenceGroupConfig(((GroupConfig) item).getGroup()));
-            } else if (item instanceof ItemConfig) {
-                items.add(new PersistenceItemConfig(((ItemConfig) item).getItem()));
+            } else if (item instanceof GroupConfig groupConfig) {
+                items.add(new PersistenceGroupConfig(groupConfig.getGroup()));
+            } else if (item instanceof ItemConfig itemConfig) {
+                items.add(new PersistenceItemConfig(itemConfig.getItem()));
             }
         }
         return new PersistenceItemConfiguration(items, config.getAlias(), mapStrategies(config.getStrategies()),
@@ -152,8 +152,8 @@ public class PersistenceModelManager implements ModelRepositoryChangeListener {
     }
 
     private PersistenceStrategy mapStrategy(Strategy strategy) {
-        if (strategy instanceof CronStrategy) {
-            return new PersistenceCronStrategy(strategy.getName(), ((CronStrategy) strategy).getCronExpression());
+        if (strategy instanceof CronStrategy cronStrategy) {
+            return new PersistenceCronStrategy(strategy.getName(), cronStrategy.getCronExpression());
         } else {
             return new PersistenceStrategy(strategy.getName());
         }

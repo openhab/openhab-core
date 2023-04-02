@@ -32,8 +32,8 @@ public class ScriptTypeComputer extends XbaseTypeComputer {
 
     @Override
     public void computeTypes(XExpression expression, ITypeComputationState state) {
-        if (expression instanceof QuantityLiteral) {
-            _computeTypes((QuantityLiteral) expression, state);
+        if (expression instanceof QuantityLiteral literal) {
+            _computeTypes(literal, state);
         } else {
             super.computeTypes(expression, state);
         }

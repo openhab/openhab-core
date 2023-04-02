@@ -328,7 +328,7 @@ public class IntegrationTestSupport extends JavaTest {
     public class SerialConnectionFactoryImpl implements SerialConnectionFactory {
         @Override
         public SerialConnection create(@NonNullByDefault({}) SerialParameters parameters) {
-            SerialConnection serialConnection = new SerialConnection(parameters) {
+            return new SerialConnection(parameters) {
                 @Override
                 public ModbusTransport getModbusTransport() {
                     ModbusTransport transport = spy(super.getModbusTransport());
@@ -336,7 +336,6 @@ public class IntegrationTestSupport extends JavaTest {
                     return transport;
                 }
             };
-            return serialConnection;
         }
     }
 

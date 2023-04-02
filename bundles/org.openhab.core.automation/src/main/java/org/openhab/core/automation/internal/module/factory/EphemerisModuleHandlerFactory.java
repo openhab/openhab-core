@@ -70,14 +70,14 @@ public class EphemerisModuleHandlerFactory extends BaseModuleHandlerFactory impl
         final String moduleTypeUID = module.getTypeUID();
         logger.trace("create {} -> {} : {}", module.getId(), moduleTypeUID, ruleUID);
 
-        if (module instanceof Condition) {
+        if (module instanceof Condition condition) {
             switch (moduleTypeUID) {
                 case EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID:
                 case EphemerisConditionHandler.NOT_HOLIDAY_MODULE_TYPE_ID:
                 case EphemerisConditionHandler.WEEKEND_MODULE_TYPE_ID:
                 case EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID:
                 case EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID:
-                    return new EphemerisConditionHandler((Condition) module, ephemerisManager);
+                    return new EphemerisConditionHandler(condition, ephemerisManager);
             }
         }
 

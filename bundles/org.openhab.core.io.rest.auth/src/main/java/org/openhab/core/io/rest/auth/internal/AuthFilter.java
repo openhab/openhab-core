@@ -115,7 +115,6 @@ public class AuthFilter implements ContainerRequestFilter {
 
         @Override
         public void added(User element) {
-            return;
         }
 
         @Override

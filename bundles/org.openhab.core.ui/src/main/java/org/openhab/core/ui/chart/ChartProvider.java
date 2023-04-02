@@ -109,6 +109,6 @@ public interface ChartProvider {
     public enum ImageType {
         png,
         jpg,
-        gif;
+        gif
     }
 }

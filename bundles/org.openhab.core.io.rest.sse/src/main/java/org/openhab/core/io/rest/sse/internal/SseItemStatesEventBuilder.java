@@ -128,8 +128,7 @@ public class SseItemStatesEventBuilder {
                         } else {
                             // if it's not a transformation pattern, then it must be a format string
 
-                            if (state instanceof QuantityType) {
-                                QuantityType<?> quantityState = (QuantityType<?>) state;
+                            if (state instanceof QuantityType quantityState) {
                                 // sanity convert current state to the item state description unit in case it was
                                 // updated in the meantime. The item state is still in the "original" unit while the
                                 // state description will display the new unit:
@@ -141,10 +140,10 @@ public class SseItemStatesEventBuilder {
                                 if (quantityState != null) {
                                     state = quantityState;
                                 }
-                            } else if (state instanceof DateTimeType) {
+                            } else if (state instanceof DateTimeType type) {
                                 // Translate a DateTimeType state to the local time zone
                                 try {
-                                    state = ((DateTimeType) state).toLocaleZone();
+                                    state = type.toLocaleZone();
                                 } catch (DateTimeException e) {
                                 }
                             }

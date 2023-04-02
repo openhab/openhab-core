@@ -43,7 +43,7 @@ public class HTTP {
      * @param url the URL to be used for the GET request.
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpGetRequest(String url) {
+    public static String sendHttpGetRequest(String url) {
         return sendHttpGetRequest(url, 5000);
     }
 
@@ -54,7 +54,7 @@ public class HTTP {
      * @param timeout timeout in ms
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpGetRequest(String url, int timeout) {
+    public static String sendHttpGetRequest(String url, int timeout) {
         String response = null;
         try {
             return HttpUtil.executeUrl(HttpMethod.GET.name(), url, timeout);
@@ -89,7 +89,7 @@ public class HTTP {
      * @param url the URL to be used for the PUT request.
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpPutRequest(String url) {
+    public static String sendHttpPutRequest(String url) {
         return sendHttpPutRequest(url, 1000);
     }
 
@@ -100,7 +100,7 @@ public class HTTP {
      * @param timeout timeout in ms
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpPutRequest(String url, int timeout) {
+    public static String sendHttpPutRequest(String url, int timeout) {
         String response = null;
         try {
             response = HttpUtil.executeUrl(HttpMethod.PUT.name(), url, timeout);
@@ -119,7 +119,7 @@ public class HTTP {
      *            send.
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpPutRequest(String url, String contentType, String content) {
+    public static String sendHttpPutRequest(String url, String contentType, String content) {
         return sendHttpPutRequest(url, contentType, content, 1000);
     }
 
@@ -133,7 +133,7 @@ public class HTTP {
      * @param timeout timeout in ms
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpPutRequest(String url, String contentType, String content, int timeout) {
+    public static String sendHttpPutRequest(String url, String contentType, String content, int timeout) {
         String response = null;
         try {
             response = HttpUtil.executeUrl(HttpMethod.PUT.name(), url,
@@ -155,7 +155,7 @@ public class HTTP {
      * @param timeout timeout in ms
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpPutRequest(String url, String contentType, String content, Map<String, String> headers,
+    public static String sendHttpPutRequest(String url, String contentType, String content, Map<String, String> headers,
             int timeout) {
         try {
             Properties headerProperties = new Properties();
@@ -174,7 +174,7 @@ public class HTTP {
      * @param url the URL to be used for the POST request.
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpPostRequest(String url) {
+    public static String sendHttpPostRequest(String url) {
         return sendHttpPostRequest(url, 1000);
     }
 
@@ -185,7 +185,7 @@ public class HTTP {
      * @param timeout timeout in ms
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpPostRequest(String url, int timeout) {
+    public static String sendHttpPostRequest(String url, int timeout) {
         String response = null;
         try {
             response = HttpUtil.executeUrl(HttpMethod.POST.name(), url, timeout);
@@ -204,7 +204,7 @@ public class HTTP {
      *            send.
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpPostRequest(String url, String contentType, String content) {
+    public static String sendHttpPostRequest(String url, String contentType, String content) {
         return sendHttpPostRequest(url, contentType, content, 1000);
     }
 
@@ -218,7 +218,7 @@ public class HTTP {
      * @param timeout timeout in ms
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpPostRequest(String url, String contentType, String content, int timeout) {
+    public static String sendHttpPostRequest(String url, String contentType, String content, int timeout) {
         String response = null;
         try {
             response = HttpUtil.executeUrl(HttpMethod.POST.name(), url,
@@ -259,7 +259,7 @@ public class HTTP {
      * @param url the URL to be used for the DELETE request.
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpDeleteRequest(String url) {
+    public static String sendHttpDeleteRequest(String url) {
         return sendHttpDeleteRequest(url, 1000);
     }
 
@@ -270,7 +270,7 @@ public class HTTP {
      * @param timeout timeout in ms
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpDeleteRequest(String url, int timeout) {
+    public static String sendHttpDeleteRequest(String url, int timeout) {
         String response = null;
         try {
             response = HttpUtil.executeUrl(HttpMethod.DELETE.name(), url, timeout);
@@ -288,7 +288,7 @@ public class HTTP {
      * @param timeout timeout in ms
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpDeleteRequest(String url, Map<String, String> headers, int timeout) {
+    public static String sendHttpDeleteRequest(String url, Map<String, String> headers, int timeout) {
         try {
             Properties headerProperties = new Properties();
             headerProperties.putAll(headers);

@@ -211,9 +211,7 @@ public class ThingHelper {
         Thing mergedThing = builder.build();
 
         // keep all child things in place on a merged bridge
-        if (mergedThing instanceof BridgeImpl && thing instanceof Bridge) {
-            Bridge bridge = (Bridge) thing;
-            BridgeImpl mergedBridge = (BridgeImpl) mergedThing;
+        if (mergedThing instanceof BridgeImpl mergedBridge && thing instanceof Bridge bridge) {
             for (Thing child : bridge.getThings()) {
                 mergedBridge.addThing(child);
             }

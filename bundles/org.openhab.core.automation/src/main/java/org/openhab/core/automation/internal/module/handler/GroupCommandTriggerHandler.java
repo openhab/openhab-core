@@ -85,27 +85,25 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ItemAddedEvent) {
-            if (groupName.equals(((ItemAddedEvent) event).getItem().name)) {
+        if (event instanceof ItemAddedEvent addedEvent) {
+            if (groupName.equals(addedEvent.getItem().name)) {
                 logger.info("Group '{}' needed for rule '{}' added. Trigger '{}' will now work.", groupName, ruleUID,
                         module.getId());
                 return;
             }
-        } else if (event instanceof ItemRemovedEvent) {
-            if (groupName.equals(((ItemRemovedEvent) event).getItem().name)) {
+        } else if (event instanceof ItemRemovedEvent removedEvent) {
+            if (groupName.equals(removedEvent.getItem().name)) {
                 logger.warn("Group '{}' needed for rule '{}' removed. Trigger '{}' will no longer work.", groupName,
                         ruleUID, module.getId());
                 return;
             }
         }
 
-        if (callback instanceof TriggerHandlerCallback) {
-            TriggerHandlerCallback cb = (TriggerHandlerCallback) callback;
+        if (callback instanceof TriggerHandlerCallback cb) {
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
             Map<String, Object> values = new HashMap<>();
-            if (event instanceof ItemCommandEvent) {
-                ItemCommandEvent icEvent = (ItemCommandEvent) event;
+            if (event instanceof ItemCommandEvent icEvent) {
                 String itemName = icEvent.getItemName();
                 Item item = itemRegistry.get(itemName);
                 if (item != null && item.getGroupNames().contains(groupName)) {

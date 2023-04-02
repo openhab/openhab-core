@@ -170,11 +170,9 @@ public class ThingFactoryHelper {
 
     static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelDefinition channelDefinition,
             ConfigDescriptionRegistry configDescriptionRegistry) {
-        ChannelType channelType = withChannelTypeRegistry(channelTypeRegistry -> {
-            return (channelTypeRegistry != null)
+        ChannelType channelType = withChannelTypeRegistry(channelTypeRegistry -> (channelTypeRegistry != null)
                     ? channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID())
-                    : null;
-        });
+                    : null);
         if (channelType == null) {
             logger.warn("Could not create channel '{}', because channel type '{}' could not be found.",
                     channelDefinition.getId(), channelDefinition.getChannelTypeUID());

@@ -95,26 +95,24 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ItemAddedEvent) {
-            if (groupName.equals(((ItemAddedEvent) event).getItem().name)) {
+        if (event instanceof ItemAddedEvent addedEvent) {
+            if (groupName.equals(addedEvent.getItem().name)) {
                 logger.info("Group '{}' needed for rule '{}' added. Trigger '{}' will now work.", groupName, ruleUID,
                         module.getId());
                 return;
             }
-        } else if (event instanceof ItemRemovedEvent) {
-            if (groupName.equals(((ItemRemovedEvent) event).getItem().name)) {
+        } else if (event instanceof ItemRemovedEvent removedEvent) {
+            if (groupName.equals(removedEvent.getItem().name)) {
                 logger.warn("Group '{}' needed for rule '{}' removed. Trigger '{}' will no longer work.", groupName,
                         ruleUID, module.getId());
                 return;
             }
         }
 
-        if (callback instanceof TriggerHandlerCallback) {
-            TriggerHandlerCallback cb = (TriggerHandlerCallback) callback;
+        if (callback instanceof TriggerHandlerCallback cb) {
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
-            if (event instanceof ItemStateUpdatedEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-                ItemStateUpdatedEvent isEvent = (ItemStateUpdatedEvent) event;
+            if (event instanceof ItemStateUpdatedEvent isEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 String itemName = isEvent.getItemName();
                 Item item = itemRegistry.get(itemName);
                 if (item != null && item.getGroupNames().contains(groupName)) {
@@ -127,8 +125,8 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
                         cb.triggered(this.module, values);
                     }
                 }
-            } else if (event instanceof ItemStateChangedEvent && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-                ItemStateChangedEvent iscEvent = (ItemStateChangedEvent) event;
+            } else if (event instanceof ItemStateChangedEvent iscEvent
+                    && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 String itemName = iscEvent.getItemName();
                 Item item = itemRegistry.get(itemName);
                 if (item != null && item.getGroupNames().contains(groupName)) {

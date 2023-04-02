@@ -148,8 +148,8 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
                 Object serviceInstance = c.getConstructor().newInstance();
 
                 ThingHandlerService ths = null;
-                if (serviceInstance instanceof ThingHandlerService) {
-                    ths = (ThingHandlerService) serviceInstance;
+                if (serviceInstance instanceof ThingHandlerService service) {
+                    ths = service;
                     ths.setThingHandler(thingHandler);
                 } else {
                     logger.warn(
@@ -340,9 +340,8 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
         ThingUID effectiveUID = thingUID != null ? thingUID : ThingFactory.generateRandomThingUID(thingTypeUID);
         ThingType thingType = getThingTypeByUID(thingTypeUID);
         if (thingType != null) {
-            Thing thing = ThingFactory.createThing(thingType, effectiveUID, configuration, bridgeUID,
+            return ThingFactory.createThing(thingType, effectiveUID, configuration, bridgeUID,
                     getConfigDescriptionRegistry());
-            return thing;
         } else {
             return null;
         }

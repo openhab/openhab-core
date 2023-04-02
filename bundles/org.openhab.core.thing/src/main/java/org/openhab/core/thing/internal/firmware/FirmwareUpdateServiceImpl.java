@@ -265,8 +265,7 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ThingStatusInfoChangedEvent) {
-            ThingStatusInfoChangedEvent changedEvent = (ThingStatusInfoChangedEvent) event;
+        if (event instanceof ThingStatusInfoChangedEvent changedEvent) {
             if (changedEvent.getStatusInfo().getStatus() != ThingStatus.ONLINE) {
                 return;
             }
@@ -327,11 +326,10 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
             eventPublisher.post(FirmwareEventFactory.createFirmwareStatusInfoEvent(newFirmwareStatusInfo));
 
             if (newFirmwareStatusInfo.getFirmwareStatus() == FirmwareStatus.UPDATE_AVAILABLE
-                    && firmwareUpdateHandler instanceof FirmwareUpdateBackgroundTransferHandler
+                    && firmwareUpdateHandler instanceof FirmwareUpdateBackgroundTransferHandler handler
                     && !firmwareUpdateHandler.isUpdateExecutable()) {
                 if (latestFirmware != null) {
-                    transferLatestFirmware((FirmwareUpdateBackgroundTransferHandler) firmwareUpdateHandler,
-                            latestFirmware, previousFirmwareStatusInfo);
+                    transferLatestFirmware(handler, latestFirmware, previousFirmwareStatusInfo);
                 }
             }
         }

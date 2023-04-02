@@ -368,8 +368,8 @@ public class SitemapResource
                         false, isLeaf(children), uri, locale, timeout, includeHidden);
             } else {
                 Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
-                if (pageWidget instanceof LinkableWidget) {
-                    EList<Widget> children = itemUIRegistry.getChildren((LinkableWidget) pageWidget);
+                if (pageWidget instanceof LinkableWidget widget) {
+                    EList<Widget> children = itemUIRegistry.getChildren(widget);
                     PageDTO pageBean = createPageBean(sitemapName, itemUIRegistry.getLabel(pageWidget),
                             itemUIRegistry.getCategory(pageWidget), pageId, children, false, isLeaf(children), uri,
                             locale, timeout, includeHidden);
@@ -377,8 +377,8 @@ public class SitemapResource
                     while (parentPage instanceof Frame) {
                         parentPage = parentPage.eContainer();
                     }
-                    if (parentPage instanceof Widget) {
-                        String parentId = itemUIRegistry.getWidgetId((Widget) parentPage);
+                    if (parentPage instanceof Widget parentPageWidget) {
+                        String parentId = itemUIRegistry.getWidgetId(parentPageWidget);
                         pageBean.parent = getPageBean(sitemapName, parentId, uri, locale, timeout, includeHidden);
                         pageBean.parent.widgets = null;
                         pageBean.parent.parent = null;
@@ -522,8 +522,7 @@ public class SitemapResource
         bean.label = itemUIRegistry.getLabel(widget);
         bean.type = widget.eClass().getName();
         bean.visibility = itemUIRegistry.getVisiblity(widget);
-        if (widget instanceof LinkableWidget) {
-            LinkableWidget linkableWidget = (LinkableWidget) widget;
+        if (widget instanceof LinkableWidget linkableWidget) {
             EList<Widget> children = itemUIRegistry.getChildren(linkableWidget);
             if (widget instanceof Frame) {
                 for (Widget child : children) {
@@ -541,8 +540,7 @@ public class SitemapResource
                         isLeaf(children), uri, locale, false, evenIfHidden);
             }
         }
-        if (widget instanceof Switch) {
-            Switch switchWidget = (Switch) widget;
+        if (widget instanceof Switch switchWidget) {
             for (Mapping mapping : switchWidget.getMappings()) {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
@@ -550,8 +548,7 @@ public class SitemapResource
                 bean.mappings.add(mappingBean);
             }
         }
-        if (widget instanceof Selection) {
-            Selection selectionWidget = (Selection) widget;
+        if (widget instanceof Selection selectionWidget) {
             for (Mapping mapping : selectionWidget.getMappings()) {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
@@ -559,27 +556,23 @@ public class SitemapResource
                 bean.mappings.add(mappingBean);
             }
         }
-        if (widget instanceof Input) {
-            Input inputWidget = (Input) widget;
+        if (widget instanceof Input inputWidget) {
             bean.inputHint = inputWidget.getInputHint();
         }
-        if (widget instanceof Slider) {
-            Slider sliderWidget = (Slider) widget;
+        if (widget instanceof Slider sliderWidget) {
             bean.sendFrequency = sliderWidget.getFrequency();
             bean.switchSupport = sliderWidget.isSwitchEnabled();
             bean.minValue = sliderWidget.getMinValue();
             bean.maxValue = sliderWidget.getMaxValue();
             bean.step = sliderWidget.getStep();
         }
-        if (widget instanceof Image) {
+        if (widget instanceof Image imageWidget) {
             bean.url = buildProxyUrl(sitemapName, widget, uri);
-            Image imageWidget = (Image) widget;
             if (imageWidget.getRefresh() > 0) {
                 bean.refresh = imageWidget.getRefresh();
             }
         }
-        if (widget instanceof Video) {
-            Video videoWidget = (Video) widget;
+        if (widget instanceof Video videoWidget) {
             if (videoWidget.getEncoding() != null) {
                 bean.encoding = videoWidget.getEncoding();
             }
@@ -589,17 +582,14 @@ public class SitemapResource
                 bean.url = buildProxyUrl(sitemapName, videoWidget, uri);
             }
         }
-        if (widget instanceof Webview) {
-            Webview webViewWidget = (Webview) widget;
+        if (widget instanceof Webview webViewWidget) {
             bean.url = webViewWidget.getUrl();
             bean.height = webViewWidget.getHeight();
         }
-        if (widget instanceof Mapview) {
-            Mapview mapViewWidget = (Mapview) widget;
+        if (widget instanceof Mapview mapViewWidget) {
             bean.height = mapViewWidget.getHeight();
         }
-        if (widget instanceof Chart) {
-            Chart chartWidget = (Chart) widget;
+        if (widget instanceof Chart chartWidget) {
             bean.service = chartWidget.getService();
             bean.period = chartWidget.getPeriod();
             bean.legend = chartWidget.getLegend();
@@ -609,8 +599,7 @@ public class SitemapResource
                 bean.refresh = chartWidget.getRefresh();
             }
         }
-        if (widget instanceof Setpoint) {
-            Setpoint setpointWidget = (Setpoint) widget;
+        if (widget instanceof Setpoint setpointWidget) {
             bean.minValue = setpointWidget.getMinValue();
             bean.maxValue = setpointWidget.getMaxValue();
             bean.step = setpointWidget.getStep();
@@ -641,12 +630,11 @@ public class SitemapResource
 
     private boolean isLeaf(EList<Widget> children) {
         for (Widget w : children) {
-            if (w instanceof Frame) {
-                if (isLeaf(((Frame) w).getChildren())) {
+            if (w instanceof Frame frame) {
+                if (isLeaf(frame.getChildren())) {
                     return false;
                 }
-            } else if (w instanceof LinkableWidget) {
-                LinkableWidget linkableWidget = (LinkableWidget) w;
+            } else if (w instanceof LinkableWidget linkableWidget) {
                 if (!itemUIRegistry.getChildren(linkableWidget).isEmpty()) {
                     return false;
                 }
@@ -675,8 +663,8 @@ public class SitemapResource
                 timeout = waitForChanges(children);
             } else {
                 Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
-                if (pageWidget instanceof LinkableWidget) {
-                    EList<Widget> children = itemUIRegistry.getChildren((LinkableWidget) pageWidget);
+                if (pageWidget instanceof LinkableWidget widget) {
+                    EList<Widget> children = itemUIRegistry.getChildren(widget);
                     timeout = waitForChanges(children);
                 }
             }
@@ -728,24 +716,23 @@ public class SitemapResource
         for (Widget widget : widgets) {
             // We skip the chart widgets having a refresh argument
             boolean skipWidget = false;
-            if (widget instanceof Chart) {
-                Chart chartWidget = (Chart) widget;
+            if (widget instanceof Chart chartWidget) {
                 skipWidget = chartWidget.getRefresh() > 0;
             }
             String itemName = widget.getItem();
             if (!skipWidget && itemName != null) {
                 try {
                     Item item = itemUIRegistry.getItem(itemName);
-                    if (item instanceof GenericItem) {
-                        items.add((GenericItem) item);
+                    if (item instanceof GenericItem genericItem) {
+                        items.add(genericItem);
                     }
                 } catch (ItemNotFoundException e) {
                     // ignore
                 }
             }
             // Consider all items inside the frame
-            if (widget instanceof Frame) {
-                items.addAll(getAllItems(((Frame) widget).getChildren()));
+            if (widget instanceof Frame frame) {
+                items.addAll(getAllItems(frame.getChildren()));
             }
             // Consider items involved in any visibility, labelcolor, valuecolor and iconcolor condition
             items.addAll(getItemsInVisibilityCond(widget.getVisibility()));
@@ -763,8 +750,8 @@ public class SitemapResource
             if (itemName != null) {
                 try {
                     Item item = itemUIRegistry.getItem(itemName);
-                    if (item instanceof GenericItem) {
-                        items.add((GenericItem) item);
+                    if (item instanceof GenericItem genericItem) {
+                        items.add(genericItem);
                     }
                 } catch (ItemNotFoundException e) {
                     // ignore
@@ -781,8 +768,8 @@ public class SitemapResource
             if (itemName != null) {
                 try {
                     Item item = itemUIRegistry.getItem(itemName);
-                    if (item instanceof GenericItem) {
-                        items.add((GenericItem) item);
+                    if (item instanceof GenericItem genericItem) {
+                        items.add(genericItem);
                     }
                 } catch (ItemNotFoundException e) {
                     // ignore
@@ -839,9 +826,9 @@ public class SitemapResource
             if (sitemapName != null && sitemapName.equals(subscriptions.getSitemapName(info.subscriptionId))
                     && pageId != null && pageId.equals(subscriptions.getPageId(info.subscriptionId))) {
                 if (logger.isDebugEnabled()) {
-                    if (event instanceof SitemapWidgetEvent) {
-                        logger.debug("Sent sitemap event for widget {} to subscription {}.",
-                                ((SitemapWidgetEvent) event).widgetId, info.subscriptionId);
+                    if (event instanceof SitemapWidgetEvent widgetEvent) {
+                        logger.debug("Sent sitemap event for widget {} to subscription {}.", widgetEvent.widgetId,
+                                info.subscriptionId);
                     } else if (event instanceof ServerAliveEvent) {
                         logger.debug("Sent alive event to subscription {}.", info.subscriptionId);
                     }

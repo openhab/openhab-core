@@ -71,8 +71,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
     private static String getValidConfigParameter(String parameter, Configuration config, String moduleId) {
         Object value = config.get(parameter);
-        if (value != null && value instanceof String && !((String) value).trim().isEmpty()) {
-            return (String) value;
+        if (value != null && value instanceof String string && !string.trim().isEmpty()) {
+            return string;
         } else {
             throw new IllegalStateException(String.format(
                     "Config parameter '%s' is missing in the configuration of module '%s'.", parameter, moduleId));

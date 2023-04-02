@@ -77,8 +77,7 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
     @Override
     public boolean apply(Event event) {
         boolean eventMatches = false;
-        if (event instanceof ChannelTriggeredEvent) {
-            ChannelTriggeredEvent cte = (ChannelTriggeredEvent) event;
+        if (event instanceof ChannelTriggeredEvent cte) {
             if (channelUID.equals(cte.getChannel())) {
                 String eventOnChannel = this.eventOnChannel;
                 logger.trace("->FILTER: {}:{}", cte.getEvent(), eventOnChannel);

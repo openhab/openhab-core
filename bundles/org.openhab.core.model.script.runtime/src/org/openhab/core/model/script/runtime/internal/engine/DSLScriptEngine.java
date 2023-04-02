@@ -142,12 +142,12 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
 
     private DefaultEvaluationContext createEvaluationContext(Script script, IEvaluationContext specificContext) {
         IEvaluationContext parentContext = specificContext;
-        if (specificContext == null && script instanceof ScriptImpl) {
-            XExpression xExpression = ((ScriptImpl) script).getXExpression();
+        if (specificContext == null && script instanceof ScriptImpl impl) {
+            XExpression xExpression = impl.getXExpression();
             if (xExpression != null) {
                 Resource resource = xExpression.eResource();
-                if (resource instanceof XtextResource) {
-                    IResourceServiceProvider provider = ((XtextResource) resource).getResourceServiceProvider();
+                if (resource instanceof XtextResource xtextResource) {
+                    IResourceServiceProvider provider = xtextResource.getResourceServiceProvider();
                     parentContext = provider.get(IEvaluationContext.class);
                 }
             }
@@ -171,19 +171,16 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
         evalContext.newValue(QualifiedName.create("privateCache"), cachePreset.get("privateCache"));
         // now add specific implicit vars, where we have to map the right content
         Object value = context.getAttribute(OUTPUT_EVENT);
-        if (value instanceof ChannelTriggeredEvent) {
-            ChannelTriggeredEvent event = (ChannelTriggeredEvent) value;
+        if (value instanceof ChannelTriggeredEvent event) {
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_RECEIVED_EVENT), event.getEvent());
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_CHANNEL),
                     event.getChannel().getAsString());
         }
-        if (value instanceof ItemEvent) {
-            ItemEvent event = (ItemEvent) value;
+        if (value instanceof ItemEvent event) {
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM_NAME),
                     event.getItemName());
         }
-        if (value instanceof ThingStatusInfoChangedEvent) {
-            ThingStatusInfoChangedEvent event = (ThingStatusInfoChangedEvent) value;
+        if (value instanceof ThingStatusInfoChangedEvent event) {
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_THING),
                     event.getThingUID().toString());
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_PREVIOUS_STATUS),

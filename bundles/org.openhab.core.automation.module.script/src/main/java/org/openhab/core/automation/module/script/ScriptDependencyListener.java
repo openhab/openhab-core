@@ -24,5 +24,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 @FunctionalInterface
 public interface ScriptDependencyListener extends Consumer<String> {
+    @Override
     void accept(String dependency);
 }

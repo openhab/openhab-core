@@ -98,8 +98,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
         this.genericMetaDataProvider = genericMetadataProvider;
 
         Object serviceRanking = properties.get(Constants.SERVICE_RANKING);
-        if (serviceRanking instanceof Integer) {
-            rank = (Integer) serviceRanking;
+        if (serviceRanking instanceof Integer integer) {
+            rank = integer;
         } else {
             rank = 0;
         }
@@ -223,8 +223,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
     private @Nullable Item createItemFromModelItem(ModelItem modelItem) {
         Item item;
-        if (modelItem instanceof ModelGroupItem) {
-            ModelGroupItem modelGroupItem = (ModelGroupItem) modelItem;
+        if (modelItem instanceof ModelGroupItem modelGroupItem) {
             Item baseItem;
             try {
                 baseItem = createItemOfType(modelGroupItem.getType(), modelGroupItem.getName());

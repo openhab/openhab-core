@@ -149,8 +149,8 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
     @Override
     protected void onAddElement(Thing thing) throws IllegalArgumentException {
         addThingToBridge(thing);
-        if (thing instanceof Bridge) {
-            addThingsToBridge((Bridge) thing);
+        if (thing instanceof Bridge bridge) {
+            addThingsToBridge(bridge);
         }
     }
 
@@ -161,8 +161,8 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
         ThingUID bridgeUID = thing.getBridgeUID();
         if (bridgeUID != null) {
             Thing bridge = this.get(bridgeUID);
-            if (bridge instanceof BridgeImpl) {
-                ((BridgeImpl) bridge).removeThing(thing);
+            if (bridge instanceof BridgeImpl impl) {
+                impl.removeThing(thing);
             }
         }
     }
@@ -187,8 +187,8 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
         forEach(thing -> {
             ThingUID bridgeUID = thing.getBridgeUID();
             if (bridgeUID != null && bridgeUID.equals(bridge.getUID())) {
-                if (bridge instanceof BridgeImpl && !bridge.getThings().contains(thing)) {
-                    ((BridgeImpl) bridge).addThing(thing);
+                if (bridge instanceof BridgeImpl impl && !bridge.getThings().contains(thing)) {
+                    impl.addThing(thing);
                 }
             }
         });
@@ -198,8 +198,8 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
         ThingUID bridgeUID = thing.getBridgeUID();
         if (bridgeUID != null) {
             Thing bridge = this.get(bridgeUID);
-            if (bridge instanceof BridgeImpl && !((Bridge) bridge).getThings().contains(thing)) {
-                ((BridgeImpl) bridge).addThing(thing);
+            if (bridge instanceof BridgeImpl impl && !impl.getThings().contains(thing)) {
+                impl.addThing(thing);
             }
         }
     }

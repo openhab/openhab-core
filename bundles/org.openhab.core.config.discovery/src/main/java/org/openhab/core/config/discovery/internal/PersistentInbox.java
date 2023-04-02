@@ -284,8 +284,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
                 logger.info("Added new thing '{}' to inbox.", thingUID);
                 discoveryResultWrapper.future.complete(true);
             } else {
-                if (inboxResult instanceof DiscoveryResultImpl) {
-                    DiscoveryResultImpl resultImpl = (DiscoveryResultImpl) inboxResult;
+                if (inboxResult instanceof DiscoveryResultImpl resultImpl) {
                     resultImpl.synchronize(discoveryResult);
                     discoveryResultStorage.put(discoveryResult.getThingUID().toString(), resultImpl);
                     notifyListeners(resultImpl, EventType.UPDATED);
@@ -478,8 +477,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     @Override
     public void setFlag(ThingUID thingUID, @Nullable DiscoveryResultFlag flag) {
         DiscoveryResult result = get(thingUID);
-        if (result instanceof DiscoveryResultImpl) {
-            DiscoveryResultImpl resultImpl = (DiscoveryResultImpl) result;
+        if (result instanceof DiscoveryResultImpl resultImpl) {
             resultImpl.setFlag((flag == null) ? DiscoveryResultFlag.NEW : flag);
             discoveryResultStorage.put(resultImpl.getThingUID().toString(), resultImpl);
             notifyListeners(resultImpl, EventType.UPDATED);

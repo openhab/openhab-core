@@ -77,7 +77,7 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
                     list(console, itemChannelLinkRegistry.getAll());
                     return;
                 case SUBCMD_ORPHAN:
-                    if (args.length == 2 && (args[1].equals("list") || args[1].equals("purge"))) {
+                    if (args.length == 2 && ("list".equals(args[1]) || "purge".equals(args[1]))) {
                         orphan(console, args[1], itemChannelLinkRegistry.getAll(), thingRegistry.getAll(),
                                 itemRegistry.getAll());
                     } else {

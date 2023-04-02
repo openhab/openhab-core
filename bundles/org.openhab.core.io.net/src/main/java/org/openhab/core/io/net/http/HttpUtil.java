@@ -154,7 +154,7 @@ public class HttpUtil {
             String proxyPassword, String nonProxyHosts) throws IOException {
         ContentResponse response = executeUrlAndGetReponse(httpMethod, url, httpHeaders, content, contentType, timeout,
                 proxyHost, proxyPort, proxyUser, proxyPassword, nonProxyHosts);
-        String encoding = response.getEncoding() != null ? response.getEncoding().replaceAll("\"", "").trim()
+        String encoding = response.getEncoding() != null ? response.getEncoding().replace("\"", "").trim()
                 : StandardCharsets.UTF_8.name();
         String responseBody;
         try {
