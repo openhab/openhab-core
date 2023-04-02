@@ -32,7 +32,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSink;
-import org.openhab.core.audio.AudioSinkSync;
+import org.openhab.core.audio.AudioSinkAsync;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(service = AudioSink.class, immediate = true)
-public class JavaSoundAudioSink extends AudioSinkSync {
+public class JavaSoundAudioSink extends AudioSinkAsync {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JavaSoundAudioSink.class);
 
@@ -105,7 +105,7 @@ public class JavaSoundAudioSink extends AudioSinkSync {
                     try {
                         // we start a new continuous stream and store its handle
                         streamPlayer = new Player(audioStream);
-                        playInThread(streamPlayer);
+                        playInThread(streamPlayer, () -> runDelayed(audioStream));
                     } catch (JavaLayerException e) {
                         LOGGER.error("An exception occurred while playing url audio stream : '{}'", e.getMessage());
                     }
@@ -114,7 +114,7 @@ public class JavaSoundAudioSink extends AudioSinkSync {
             } else {
                 // we are playing some normal file (no url stream)
                 try {
-                    playInThread(new Player(audioStream));
+                    playInThread(new Player(audioStream), () -> runDelayed(audioStream));
                 } catch (JavaLayerException e) {
                     LOGGER.error("An exception occurred while playing audio : '{}'", e.getMessage());
                 }
@@ -122,7 +122,7 @@ public class JavaSoundAudioSink extends AudioSinkSync {
         }
     }
 
-    private void playInThread(final @Nullable Player player) {
+    private void playInThread(final @Nullable Player player, Runnable toRunAfter) {
         // run in new thread
         threadFactory.newThread(() -> {
             if (player != null) {
@@ -132,6 +132,7 @@ public class JavaSoundAudioSink extends AudioSinkSync {
                     LOGGER.error("An exception occurred while playing audio : '{}'", e.getMessage());
                 } finally {
                     player.close();
+                    toRunAfter.run();
                 }
             }
         }).start();
