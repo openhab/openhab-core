@@ -44,7 +44,7 @@ public class ScriptTransformationServiceFactory {
 
     private final ComponentFactory<ScriptTransformationService> scriptTransformationFactory;
 
-    private final Map<String, ComponentInstance<ScriptTransformationService>> scriptTransformations = new ConcurrentHashMap<>();
+    private final Map<ScriptEngineFactory, ComponentInstance<ScriptTransformationService>> scriptTransformations = new ConcurrentHashMap<>();
 
     @Activate
     public ScriptTransformationServiceFactory(
@@ -69,28 +69,22 @@ public class ScriptTransformationServiceFactory {
             return;
         }
 
-        scriptTransformations.computeIfAbsent(scriptType.get(), type -> {
-            ScriptEngine scriptEngine = engineFactory.createScriptEngine(type);
+        scriptTransformations.computeIfAbsent(engineFactory, factory -> {
+            ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptType.get());
             if (scriptEngine == null) {
                 return null;
             }
             String languageName = ScriptEngineFactoryHelper.getLanguageName(scriptEngine.getFactory());
             Dictionary<String, Object> properties = new Hashtable<>();
-            properties.put(TransformationService.SERVICE_PROPERTY_NAME, type.toUpperCase());
+            properties.put(TransformationService.SERVICE_PROPERTY_NAME, scriptType.get().toUpperCase());
             properties.put(TransformationService.SERVICE_PROPERTY_LABEL, "SCRIPT " + languageName);
-            properties.put(ScriptTransformationService.SCRIPT_TYPE_PROPERTY_NAME, type);
+            properties.put(ScriptTransformationService.SCRIPT_TYPE_PROPERTY_NAME, scriptType.get());
             return scriptTransformationFactory.newInstance(properties);
         });
     }
 
     public void unsetScriptEngineFactory(ScriptEngineFactory engineFactory) {
-        Optional<String> scriptType = ScriptEngineFactoryHelper.getPreferredExtension(engineFactory);
-        if (scriptType.isEmpty()) {
-            return;
-        }
-
-        ComponentInstance<ScriptTransformationService> toBeUnregistered = scriptTransformations
-                .remove(scriptType.get());
+        ComponentInstance<ScriptTransformationService> toBeUnregistered = scriptTransformations.remove(engineFactory);
         if (toBeUnregistered != null) {
             unregisterService(toBeUnregistered);
         }
