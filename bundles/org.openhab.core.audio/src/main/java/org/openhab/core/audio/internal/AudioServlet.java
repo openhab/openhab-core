@@ -28,6 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,6 +48,7 @@ import org.openhab.core.audio.ByteArrayAudioStream;
 import org.openhab.core.audio.ClonableAudioStream;
 import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.FixedLengthAudioStream;
+import org.openhab.core.audio.utils.AudioStreamUtils;
 import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -172,7 +174,12 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         AtomicInteger currentlyServedStream = servedStream.currentlyServedStream;
         if (currentlyServedStream.incrementAndGet() == 1 || servedStream.multiTimeStream) {
             try (final InputStream stream = prepareInputStream(servedStream, resp, acceptedMimeTypes)) {
-                stream.transferTo(resp.getOutputStream());
+                Long endOfPlayTimestamp = AudioStreamUtils.transferAndAnalyzeLength(stream, resp.getOutputStream(),
+                        servedStream.audioStream.getFormat());
+                // update timeout with the sound duration :
+                if (endOfPlayTimestamp != null) {
+                    servedStream.timeout.set(Math.max(servedStream.timeout.get(), endOfPlayTimestamp));
+                }
                 resp.flushBuffer();
             } catch (final AudioException ex) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
@@ -200,7 +207,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         // Build list of expired streams.
         long now = System.nanoTime();
         final List<String> toRemove = servedStreams.entrySet().stream()
-                .filter(e -> e.getValue().timeout < now && e.getValue().currentlyServedStream.get() <= 0)
+                .filter(e -> e.getValue().timeout.get() < now && e.getValue().currentlyServedStream.get() <= 0)
                 .map(Entry::getKey).collect(Collectors.toList());
 
         toRemove.forEach(streamId -> {
@@ -238,7 +245,8 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         // Because we cannot wait indefinitely before executing the callback,
         // even if this is a one time stream, we set a timeout just in case.
         long timeOut = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
-        StreamServed streamToServe = new StreamServed(streamId, stream, new AtomicInteger(), timeOut, false, null);
+        StreamServed streamToServe = new StreamServed(streamId, stream, new AtomicInteger(), new AtomicLong(timeOut),
+                false, null);
         servedStreams.put(streamId, streamToServe);
 
         // try to clean, or a least launch the periodic cleanse:
@@ -268,8 +276,8 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
             clonableAudioStream = createClonableInputStream(stream, streamId);
         }
         long timeOut = System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds);
-        StreamServed streamToServe = new StreamServed(streamId, clonableAudioStream, new AtomicInteger(), timeOut, true,
-                callBack);
+        StreamServed streamToServe = new StreamServed(streamId, clonableAudioStream, new AtomicInteger(),
+                new AtomicLong(timeOut), true, callBack);
         servedStreams.put(streamId, streamToServe);
 
         // try to clean, or a least launch the periodic cleanse:
@@ -320,6 +328,6 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
     }
 
     protected static record StreamServed(String id, AudioStream audioStream, AtomicInteger currentlyServedStream,
-            long timeout, boolean multiTimeStream, @Nullable Runnable callback) {
+            AtomicLong timeout, boolean multiTimeStream, @Nullable Runnable callback) {
     }
 }

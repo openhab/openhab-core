@@ -198,6 +198,7 @@ public class AudioServletTest extends AbstractAudioServletTest {
         AudioFormat audioFormat = mock(AudioFormat.class);
         when(audioStream.getFormat()).thenReturn(audioFormat);
         when(audioFormat.getCodec()).thenReturn(AudioFormat.CODEC_MP3);
+        when(audioStream.readNBytes(anyInt())).thenReturn(new byte[] { 1, 2, 3 });
 
         String url = serveStream(audioStream);
         assertThat(audioServlet.getServedStreams().values().stream().map(StreamServed::audioStream).toList(),
@@ -221,6 +222,8 @@ public class AudioServletTest extends AbstractAudioServletTest {
             cloneCounter.getAndIncrement();
             return clonedStream;
         });
+        when(audioStream.readNBytes(anyInt())).thenReturn(new byte[] { 1, 2, 3 });
+        when(clonedStream.readNBytes(anyInt())).thenReturn(new byte[] { 1, 2, 3 });
         when(audioFormat.getCodec()).thenReturn(AudioFormat.CODEC_MP3);
 
         String url = serveStream(audioStream, 2);
