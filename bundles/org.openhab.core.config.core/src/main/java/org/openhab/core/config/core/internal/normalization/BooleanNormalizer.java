@@ -31,14 +31,14 @@ final class BooleanNormalizer extends AbstractNormalizer {
         if (value instanceof Boolean) {
             return value;
         }
-        if (value instanceof Byte byte1) {
-            return handleNumeric(byte1.longValue());
+        if (value instanceof Byte) {
+            return handleNumeric(((Byte) value).longValue());
         }
-        if (value instanceof Integer integer) {
-            return handleNumeric(integer.longValue());
+        if (value instanceof Integer) {
+            return handleNumeric(((Integer) value).longValue());
         }
-        if (value instanceof Long long1) {
-            return handleNumeric(long1);
+        if (value instanceof Long) {
+            return handleNumeric((Long) value);
         }
         String s = value.toString();
         if ("true".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s) || "on".equalsIgnoreCase(s)

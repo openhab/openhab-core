@@ -29,26 +29,26 @@ final class IntNormalizer extends AbstractNormalizer {
     @Override
     public Object doNormalize(Object value) {
         try {
-            if (value instanceof BigDecimal decimal) {
-                return decimal.setScale(0, RoundingMode.UNNECESSARY);
+            if (value instanceof BigDecimal) {
+                return ((BigDecimal) value).setScale(0, RoundingMode.UNNECESSARY);
             }
-            if (value instanceof Byte byte1) {
-                return new BigDecimal(byte1);
+            if (value instanceof Byte) {
+                return new BigDecimal((Byte) value);
             }
-            if (value instanceof Integer integer) {
-                return new BigDecimal(integer);
+            if (value instanceof Integer) {
+                return new BigDecimal((Integer) value);
             }
-            if (value instanceof Long long1) {
-                return BigDecimal.valueOf(long1);
+            if (value instanceof Long) {
+                return BigDecimal.valueOf((Long) value);
             }
-            if (value instanceof String string) {
-                return new BigDecimal(string).setScale(0, RoundingMode.UNNECESSARY);
+            if (value instanceof String) {
+                return new BigDecimal((String) value).setScale(0, RoundingMode.UNNECESSARY);
             }
-            if (value instanceof Float float1) {
-                return new BigDecimal(float1.toString()).setScale(0, RoundingMode.UNNECESSARY);
+            if (value instanceof Float) {
+                return new BigDecimal(((Float) value).toString()).setScale(0, RoundingMode.UNNECESSARY);
             }
-            if (value instanceof Double double1) {
-                return BigDecimal.valueOf(double1).setScale(0, RoundingMode.UNNECESSARY);
+            if (value instanceof Double) {
+                return BigDecimal.valueOf((Double) value).setScale(0, RoundingMode.UNNECESSARY);
             }
         } catch (ArithmeticException | NumberFormatException e) {
             logger.trace("\"{}\" is not a valid integer number.", value, e);

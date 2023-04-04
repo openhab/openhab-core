@@ -343,11 +343,12 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                 (profile, thing, convertedCommand) -> {
                     if (profile instanceof StateProfile stateProfile) {
                         int key = Objects.hash("COMMAND", profile, thing);
-                        Profile p = profileSafeCallCache.putIfAbsentAndGet(key, () -> safeCaller.create(stateProfile, StateProfile.class) //
-                                    .withAsync() //
-                                    .withIdentifier(thing) //
-                                    .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
-                                    .build());
+                        Profile p = profileSafeCallCache.putIfAbsentAndGet(key,
+                                () -> safeCaller.create(stateProfile, StateProfile.class) //
+                                        .withAsync() //
+                                        .withIdentifier(thing) //
+                                        .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
+                                        .build());
                         if (p instanceof StateProfile profileP) {
                             profileP.onCommandFromItem(convertedCommand);
                         } else {
@@ -363,11 +364,12 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         handleEvent(itemName, newState, updateEvent.getSource(), s -> acceptedStateTypeMap.get(s),
                 (profile, thing, convertedState) -> {
                     int key = Objects.hash("UPDATE", profile, thing);
-                    Profile p = profileSafeCallCache.putIfAbsentAndGet(key, () -> safeCaller.create(profile, Profile.class) //
-                                .withAsync() //
-                                .withIdentifier(thing) //
-                                .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
-                                .build());
+                    Profile p = profileSafeCallCache.putIfAbsentAndGet(key,
+                            () -> safeCaller.create(profile, Profile.class) //
+                                    .withAsync() //
+                                    .withIdentifier(thing) //
+                                    .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
+                                    .build());
                     if (p != null) {
                         p.onStateUpdateFromItem(convertedState);
                     } else {

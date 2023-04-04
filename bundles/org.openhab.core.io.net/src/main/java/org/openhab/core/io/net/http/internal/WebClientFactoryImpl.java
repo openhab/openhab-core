@@ -186,8 +186,8 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         if (value == null) {
             return defaultValue;
         }
-        if (value instanceof Integer integer) {
-            return integer;
+        if (value instanceof Integer) {
+            return (Integer) value;
         }
         if (value instanceof String string) {
             try {

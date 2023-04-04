@@ -111,10 +111,10 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
                 output.put(MODULE_RESULT, result);
             } else if (result instanceof Integer) {
                 output.put(MODULE_RESULT, result);
-            } else if (result instanceof Double double1) {
-                output.put(MODULE_RESULT, double1);
-            } else if (result instanceof Float float1) {
-                output.put(MODULE_RESULT, float1);
+            } else if (result instanceof Double) {
+                output.put(MODULE_RESULT, (double) result);
+            } else if (result instanceof Float) {
+                output.put(MODULE_RESULT, (float) result);
             } else {
                 logger.warn("Non compatible return type '{}' on action method.", result.getClass());
             }
