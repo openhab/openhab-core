@@ -14,10 +14,10 @@ package org.openhab.core.io.monitor.internal;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.service.ReadyMarker;
@@ -73,8 +73,9 @@ public class EventLogger implements EventSubscriber, ReadyTracker {
         }
     }
 
-    private @Nullable Logger getLogger(String eventType) {
-        return eventLoggers.computeIfAbsent(eventType, type -> LoggerFactory.getLogger("openhab.event." + eventType));
+    private Logger getLogger(String eventType) {
+        return Objects.requireNonNull(
+                eventLoggers.computeIfAbsent(eventType, type -> LoggerFactory.getLogger("openhab.event." + eventType)));
     }
 
     @Override
