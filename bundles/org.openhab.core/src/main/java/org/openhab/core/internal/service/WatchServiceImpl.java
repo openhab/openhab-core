@@ -210,6 +210,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
 
     @Override
     public void onEvent(@Nullable DirectoryChangeEvent directoryChangeEvent) throws IOException {
+        logger.error("{} - {}", System.currentTimeMillis(), directoryChangeEvent);
         if (directoryChangeEvent == null || directoryChangeEvent.isDirectory()
                 || directoryChangeEvent.eventType() == DirectoryChangeEvent.EventType.OVERFLOW) {
             // exit early, we are neither interested in directory events nor in OVERFLOW events
@@ -238,6 +239,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
 
     private void notifyListeners(Path path) {
         List<Kind> kinds = scheduledEventKinds.remove(path);
+        logger.error("Events in queue: {}", kinds);
         if (kinds == null || kinds.isEmpty()) {
             logger.debug("Tried to notify listeners of change events for '{}', but the event list is empty.", path);
             return;
