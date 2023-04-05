@@ -180,12 +180,12 @@ public class ColorUtilTest {
      * other. This method is required in order to eliminate integer rounding artifacts in JUnit tests when comparing HSB
      * values. Asserts that the color parameters of expected and actual are within delta percent of each other.
      *
-     * @param expected an HSBType containing the expected colour.
-     * @param actual an HSBType containing the actual colour.
+     * @param expected an HSBType containing the expected color.
+     * @param actual an HSBType containing the actual color.
      * @param delta the maximum allowed percentage difference between the two (0..99 percent).
      */
     private static void assertHsbEquals(HSBType expected, HSBType actual, float delta) {
-        assertTrue(ColorUtil.hsbEquals(expected, actual, delta));
+        assertTrue(ColorUtil.closeToHsb(expected, actual, delta));
     }
 
     /**
@@ -196,12 +196,12 @@ public class ColorUtilTest {
      *
      * When the test fails, both colors are printed.
      *
-     * @param expected an HSBType containing the expected colour.
-     * @param actual an HSBType containing the actual colour.
+     * @param expected an HSBType containing the expected color.
+     * @param actual an HSBType containing the actual color.
      * @param maxSquaredSum the maximum allowed squared sum of differences.
      */
     private void assertRgbEquals(final int[] expected, final int[] actual, int maxSquaredSum) {
-        if (!ColorUtil.rgbEquals(expected, actual, maxSquaredSum)) {
+        if (!ColorUtil.closeToRgb(expected, actual, maxSquaredSum)) {
             // deviation too high, just prepare readable string compare and let it fail
             final String expectedS = expected[0] + ", " + expected[1] + ", " + expected[2];
             final String actualS = actual[0] + ", " + actual[1] + ", " + actual[2];

@@ -147,7 +147,7 @@ public class ColorUtil {
      * developerportal</a>.
      *
      * @param hsbType a {@link HSBType} value
-     * @return double array with the closest matching CIE 1931 colour, x, y between 0.0000 and 1.0000.
+     * @return double array with the closest matching CIE 1931 color, x, y between 0.0000 and 1.0000.
      */
     public static double[] hsbToXY(HSBType hsbType) {
         return hsbToXY(hsbType, DEFAULT_GAMUT);
@@ -163,7 +163,7 @@ public class ColorUtil {
      *
      * @param hsbType a {@link HSBType} value
      * @param gamut the gamut supported by the light.
-     * @return double array with the closest matching CIE 1931 colour, x, y, Y between 0.0000 and 1.0000.
+     * @return double array with the closest matching CIE 1931 color, x, y, Y between 0.0000 and 1.0000.
      */
     public static double[] hsbToXY(HSBType hsbType, Gamut gamut) {
         PercentType[] rgb = hsbToRgbPercent(hsbType);
@@ -251,7 +251,7 @@ public class ColorUtil {
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
      * developer portal</a>.
      *
-     * @param xy the CIE 1931 xy colour, x,y between 0.0000 and 1.0000.
+     * @param xy the CIE 1931 xy color, x,y between 0.0000 and 1.0000.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
      */
@@ -267,7 +267,7 @@ public class ColorUtil {
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
      * developer portal</a>.
      *
-     * @param xy the CIE 1931 xy colour, x,y[,Y] between 0.0000 and 1.0000. <code>Y</code> value is optional.
+     * @param xy the CIE 1931 xy color, x,y[,Y] between 0.0000 and 1.0000. <code>Y</code> value is optional.
      * @param gamut the gamut supported by the light.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
@@ -471,15 +471,15 @@ public class ColorUtil {
     /* Utility functions for comparing color values */
 
     /**
-     * Helper method for checking if expected and actual HSBType color parameters lie within a given percentage of each
-     * other. This method is required in order to eliminate integer rounding artifacts in JUnit tests when comparing HSB
-     * values. Asserts that the color parameters of expected and actual are within delta percent of each other.
+     * Helper method for checking if two HSBType colors are close to each other. A maximum deviation is specifid in
+     * percent.
      *
-     * @param expected an HSBType containing the expected colour.
-     * @param actual an HSBType containing the actual colour.
+     * @param expected an HSBType containing the first color.
+     * @param actual an HSBType containing the second color.
      * @param delta the maximum allowed percentage difference between the two (1..99 percent).
+     * @throws IllegalArgumentException if delta is out of range.
      */
-    public static boolean hsbEquals(HSBType expected, HSBType actual, float delta) {
+    public static boolean closeToHsb(HSBType expected, HSBType actual, float delta) throws IllegalArgumentException {
         if (delta <= 0f || delta > 99f) {
             throw new IllegalArgumentException("'delta' out of bounds");
         }
@@ -490,22 +490,25 @@ public class ColorUtil {
     }
 
     /**
-     * Helper method for checking if expected and actual RGB color parameters (int[3], 0..255) lie within a given
-     * percentage of each other. This method is required in order to eliminate integer rounding artifacts in JUnit tests
-     * when comparing RGB values. Asserts that the color parameters of expected and actual do not have a squared sum
-     * of differences which exceeds maxSquaredSum.
+     * Helper method for checking if two RGB colors (int[3], 0..255) are close to each other. A maximum distance is
+     * specified
+     * as sum of squared distances of the integer components.
      *
-     * @param expected an HSBType containing the expected colour.
-     * @param actual an HSBType containing the actual colour.
+     * @param first an int array containing the first RGB color.
+     * @param second an int array containing the second RGB color.
      * @param maxSquaredSum the maximum allowed squared sum of differences.
+     * @throws IllegalArgumentException if array size is not 3.
      */
-    public static boolean rgbEquals(final int[] expectedRgb, final int[] actualRgb, int maxSquaredSum) {
+    public static boolean closeToRgb(final int[] firstRgb, final int[] secondRgb, int maxSquaredSum)
+            throws IllegalArgumentException {
+        if (firstRgb.length != 3 || secondRgb.length != 3) {
+            throw new IllegalArgumentException("RGB array only allowes three values");
+        }
         int squaredSum = 0;
-
-        if (expectedRgb[0] != actualRgb[0] || expectedRgb[1] != actualRgb[1] || expectedRgb[2] != actualRgb[2]) {
+        if (firstRgb[0] != secondRgb[0] || firstRgb[1] != secondRgb[1] || firstRgb[2] != secondRgb[2]) {
             // only proceed if both RGB colors are not idential
             for (int i = 0; i < 3; i++) {
-                int diff = expectedRgb[i] - actualRgb[i];
+                int diff = firstRgb[i] - secondRgb[i];
                 squaredSum = squaredSum + diff * diff;
             }
             return (squaredSum <= maxSquaredSum);
