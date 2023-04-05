@@ -77,8 +77,8 @@ public class WatchServiceImplTest extends JavaTest {
     public void testFileInWatchedDir() throws IOException, InterruptedException {
         watchService.registerListener(listener, rootPath, false);
 
-        Path testFile = rootPath.resolve(TEST_FILE_NAME + "1");
-        Path relativeTestFilePath = Path.of(TEST_FILE_NAME + "1");
+        Path testFile = rootPath.resolve(TEST_FILE_NAME);
+        Path relativeTestFilePath = Path.of(TEST_FILE_NAME);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
         assertEvent(relativeTestFilePath, Kind.CREATE);
@@ -100,8 +100,8 @@ public class WatchServiceImplTest extends JavaTest {
         // listener is listening to root and sub-dir
         watchService.registerListener(listener, rootPath, true);
 
-        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NAME + "2");
-        Path relativeTestFilePath = Path.of(SUB_DIR_PATH_NAME, TEST_FILE_NAME + "2");
+        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NAME);
+        Path relativeTestFilePath = Path.of(SUB_DIR_PATH_NAME, TEST_FILE_NAME);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
         assertEvent(relativeTestFilePath, Kind.CREATE);
@@ -123,8 +123,8 @@ public class WatchServiceImplTest extends JavaTest {
         // listener is only listening to sub-dir of root
         watchService.registerListener(listener, Path.of(SUB_DIR_PATH_NAME), false);
 
-        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NAME + "3");
-        Path relativeTestFilePath = Path.of(TEST_FILE_NAME + "3");
+        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NAME);
+        Path relativeTestFilePath = Path.of(TEST_FILE_NAME);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
         assertEvent(relativeTestFilePath, Kind.CREATE);
@@ -145,7 +145,7 @@ public class WatchServiceImplTest extends JavaTest {
 
         watchService.registerListener(listener, rootPath, false);
 
-        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NAME + "4");
+        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NAME);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
         assertNoEvent();
@@ -167,7 +167,7 @@ public class WatchServiceImplTest extends JavaTest {
         Path subDirSubDir = Files.createDirectories(rootPath.resolve(SUB_DIR_PATH_NAME).resolve(SUB_DIR_PATH_NAME));
         assertNoEvent();
 
-        Path testFile = subDirSubDir.resolve(TEST_FILE_NAME + "5");
+        Path testFile = subDirSubDir.resolve(TEST_FILE_NAME);
         Path relativeTestFilePath = rootPath.relativize(testFile);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
