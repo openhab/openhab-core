@@ -34,6 +34,7 @@ import org.openhab.core.util.ColorUtil;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Added fromRGB
+ * @author Andrew Fiddian-Green - closeTo (copied from binding)
  */
 @NonNullByDefault
 public class HSBType extends PercentType implements ComplexType, State, Command {
@@ -282,5 +283,22 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
         } else {
             return defaultConversion(target);
         }
+    }
+
+    /**
+     * Helper method for checking if two HSBType colors are close to each other. A maximum deviation is specifid in
+     * percent.
+     *
+     * @param other an HSBType containing the other color.
+     * @param maxPercentage the maximum allowed difference in percent (range 0.0..1.0).
+     * @throws IllegalArgumentException if percentage is out of range.
+     */
+    public boolean closeTo(HSBType other, double maxPercentage) throws IllegalArgumentException {
+        if (maxPercentage <= 0.0 || maxPercentage > 1.0) {
+            throw new IllegalArgumentException("'maxPercentage' out of bounds, allowed range 0..1");
+        }
+        double[] exp = ColorUtil.hsbToXY(this);
+        double[] act = ColorUtil.hsbToXY(other);
+        return ((Math.abs(exp[0] - act[0]) < maxPercentage) && (Math.abs(exp[1] - act[1]) < maxPercentage));
     }
 }

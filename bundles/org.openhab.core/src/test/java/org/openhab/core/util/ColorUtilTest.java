@@ -110,7 +110,7 @@ public class ColorUtilTest {
         final String expected = hsb[0] + ", " + hsb[1] + ", " + hsb[2];
 
         // compare in HSB space, threshold 1% difference
-        assertHsbEquals(hsbType, new HSBType(expected), 1);
+        assertTrue(hsbType.closeTo(new HSBType(expected), 0.01));
     }
 
     /* Providers for parameterized tests */
@@ -176,19 +176,6 @@ public class ColorUtilTest {
     /* Helper functions */
 
     /**
-     * Helper method for checking if expected and actual HSBType color parameters lie within a given percentage of each
-     * other. This method is required in order to eliminate integer rounding artifacts in JUnit tests when comparing HSB
-     * values. Asserts that the color parameters of expected and actual are within delta percent of each other.
-     *
-     * @param expected an HSBType containing the expected color.
-     * @param actual an HSBType containing the actual color.
-     * @param delta the maximum allowed percentage difference between the two (0..99 percent).
-     */
-    private static void assertHsbEquals(HSBType expected, HSBType actual, float delta) {
-        assertTrue(ColorUtil.closeToHsb(expected, actual, delta));
-    }
-
-    /**
      * Helper method for checking if expected and actual RGB color parameters (int[3], 0..255) lie within a given
      * percentage of each other. This method is required in order to eliminate integer rounding artifacts in JUnit tests
      * when comparing RGB values. Asserts that the color parameters of expected and actual do not have a squared sum
@@ -201,11 +188,19 @@ public class ColorUtilTest {
      * @param maxSquaredSum the maximum allowed squared sum of differences.
      */
     private void assertRgbEquals(final int[] expected, final int[] actual, int maxSquaredSum) {
-        if (!ColorUtil.closeToRgb(expected, actual, maxSquaredSum)) {
-            // deviation too high, just prepare readable string compare and let it fail
-            final String expectedS = expected[0] + ", " + expected[1] + ", " + expected[2];
-            final String actualS = actual[0] + ", " + actual[1] + ", " + actual[2];
-            assertEquals(expectedS, actualS);
+        int squaredSum = 0;
+        if (expected[0] != actual[0] || expected[1] != actual[1] || expected[2] != actual[2]) {
+            // only proceed if both RGB colors are not idential
+            for (int i = 0; i < 3; i++) {
+                int diff = expected[i] - actual[i];
+                squaredSum = squaredSum + diff * diff;
+            }
+            if (squaredSum > maxSquaredSum) {
+                // deviation too high, just prepare readable string compare and let it fail
+                final String expectedS = expected[0] + ", " + expected[1] + ", " + expected[2];
+                final String actualS = actual[0] + ", " + actual[1] + ", " + actual[2];
+                assertEquals(expectedS, actualS);
+            }
         }
     }
 }

@@ -198,4 +198,19 @@ public class HSBTypeTest {
     public void testConstructorWithIllegalBrightnessValue() {
         assertThrows(IllegalArgumentException.class, () -> new HSBType("5,85,151"));
     }
+
+    @Test
+    public void testCloseTo() {
+        HSBType hsb1 = new HSBType("5,85,11");
+        HSBType hsb2 = new HSBType("4,84,12");
+        HSBType hsb3 = new HSBType("1,8,99");
+
+        assertThrows(IllegalArgumentException.class, () -> hsb1.closeTo(hsb2, 0.0));
+        assertThrows(IllegalArgumentException.class, () -> hsb1.closeTo(hsb2, 1.1));
+        assertDoesNotThrow(() -> hsb1.closeTo(hsb2, 0.1));
+
+        assertTrue(hsb1.closeTo(hsb2, 0.01));
+        assertTrue(!hsb1.closeTo(hsb3, 0.01));
+        assertTrue(hsb1.closeTo(hsb3, 0.5));
+    }
 }

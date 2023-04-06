@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Initial contribution
  * @author Holger Friedrich - Transfer RGB color conversion from HSBType, improve RGB conversion, restructuring
  * @author Chris Jackson - Added fromRGB (moved from HSBType)
- * @author Andrew Fiddian-Green - assertHSBEqual/hsbEquals (copied from binding)
  */
 @NonNullByDefault
 public class ColorUtil {
@@ -466,53 +465,5 @@ public class ColorUtil {
     private static int convertColorPercentToByte(PercentType percent) {
         return percent.toBigDecimal().multiply(BigDecimal.valueOf(255))
                 .divide(BIG_DECIMAL_HUNDRED, 0, RoundingMode.HALF_UP).intValue();
-    }
-
-    /* Utility functions for comparing color values */
-
-    /**
-     * Helper method for checking if two HSBType colors are close to each other. A maximum deviation is specifid in
-     * percent.
-     *
-     * @param expected an HSBType containing the first color.
-     * @param actual an HSBType containing the second color.
-     * @param delta the maximum allowed percentage difference between the two (1..99 percent).
-     * @throws IllegalArgumentException if delta is out of range.
-     */
-    public static boolean closeToHsb(HSBType expected, HSBType actual, float delta) throws IllegalArgumentException {
-        if (delta <= 0f || delta > 99f) {
-            throw new IllegalArgumentException("'delta' out of bounds");
-        }
-        double[] exp = ColorUtil.hsbToXY(expected);
-        double[] act = ColorUtil.hsbToXY(actual);
-        double max = delta / 100.0f;
-        return ((Math.abs(exp[0] - act[0]) < max) && (Math.abs(exp[1] - act[1]) < max));
-    }
-
-    /**
-     * Helper method for checking if two RGB colors (int[3], 0..255) are close to each other. A maximum distance is
-     * specified
-     * as sum of squared distances of the integer components.
-     *
-     * @param first an int array containing the first RGB color.
-     * @param second an int array containing the second RGB color.
-     * @param maxSquaredSum the maximum allowed squared sum of differences.
-     * @throws IllegalArgumentException if array size is not 3.
-     */
-    public static boolean closeToRgb(final int[] firstRgb, final int[] secondRgb, int maxSquaredSum)
-            throws IllegalArgumentException {
-        if (firstRgb.length != 3 || secondRgb.length != 3) {
-            throw new IllegalArgumentException("RGB array only allowes three values");
-        }
-        int squaredSum = 0;
-        if (firstRgb[0] != secondRgb[0] || firstRgb[1] != secondRgb[1] || firstRgb[2] != secondRgb[2]) {
-            // only proceed if both RGB colors are not idential
-            for (int i = 0; i < 3; i++) {
-                int diff = firstRgb[i] - secondRgb[i];
-                squaredSum = squaredSum + diff * diff;
-            }
-            return (squaredSum <= maxSquaredSum);
-        }
-        return true;
     }
 }
