@@ -602,19 +602,20 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
     }
 
     def private createThingsFromModelForThingHandlerFactory(String modelName, ThingHandlerFactory factory) {
-        if (!loadedXmlThingTypes.contains(factory.bundleName)) {
+        if (!loadedXmlThingTypes.contains(factory.bundleName) || modelRepository == null) {
             return
         }
         val oldThings = thingsMap.get(modelName).clone
         val newThings = newArrayList()
-        if (modelRepository !== null) {
-            val model = modelRepository.getModel(modelName) as ThingModel
-            if (model !== null) {
-                flattenModelThings(model.things).forEach [
-                    createThing(newThings, factory)
-                ]
-            }
+
+        val model = modelRepository.getModel(modelName) as ThingModel
+        if (model !== null) {
+            flattenModelThings(model.things).forEach [
+                createThing(newThings, factory)
+            ]
         }
+        thingsMap.put(modelName, newThings)
+
         newThings.forEach [ newThing |
             val oldThing = oldThings.findFirst[it.UID == newThing.UID]
             if (oldThing !== null) {
@@ -624,7 +625,6 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                 }
             } else {
                 logger.debug("Adding thing '{}' from model '{}'.", newThing.UID, modelName);
-                thingsMap.get(modelName).add(newThing)
                 newThing.notifyListenersAboutAddedElement
             }
         ]
