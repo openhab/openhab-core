@@ -450,7 +450,7 @@ public class PersistenceExtensions {
 
     private static @Nullable HistoricItem internalMaximum(final Item item, ZonedDateTime begin,
             @Nullable ZonedDateTime end, String serviceId) {
-        Iterable<HistoricItem> result = getAllStatesBetweenWithStartingState(item, begin, end, serviceId);
+        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, serviceId);
         Iterator<HistoricItem> it = result.iterator();
         HistoricItem maximumHistoricItem = null;
         // include current state only if no end time is given
@@ -531,7 +531,7 @@ public class PersistenceExtensions {
 
     private static @Nullable HistoricItem internalMinimum(final Item item, ZonedDateTime begin,
             @Nullable ZonedDateTime end, String serviceId) {
-        Iterable<HistoricItem> result = getAllStatesBetweenWithStartingState(item, begin, end, serviceId);
+        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, serviceId);
         Iterator<HistoricItem> it = result.iterator();
         HistoricItem minimumHistoricItem = null;
         DecimalType minimum = end == null ? item.getStateAs(DecimalType.class) : null;
@@ -611,7 +611,7 @@ public class PersistenceExtensions {
 
     private static @Nullable DecimalType internalVariance(Item item, ZonedDateTime begin, @Nullable ZonedDateTime end,
             String serviceId) {
-        Iterable<HistoricItem> result = getAllStatesBetweenWithStartingState(item, begin, end, serviceId);
+        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, serviceId);
         Iterator<HistoricItem> it = result.iterator();
         DecimalType averageSince = internalAverage(item, it, end);
 
@@ -785,7 +785,7 @@ public class PersistenceExtensions {
      */
     public static @Nullable DecimalType averageBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
             String serviceId) {
-        Iterable<HistoricItem> result = getAllStatesBetweenWithStartingState(item, begin, end, serviceId);
+        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, serviceId);
         Iterator<HistoricItem> it = result.iterator();
         return internalAverage(item, it, end);
     }
@@ -1257,54 +1257,35 @@ public class PersistenceExtensions {
         }
     }
 
-    private static Iterable<HistoricItem> getAllStatesBetweenWithStartingState(Item item, ZonedDateTime begin,
+    private static Iterable<HistoricItem> getAllStatesBetweenWithBoundaries(Item item, ZonedDateTime begin,
             @Nullable ZonedDateTime end, String serviceId) {
         Iterable<HistoricItem> betweenItems = getAllStatesBetween(item, begin, end, serviceId);
 
-        List<HistoricItem> betweenItemsList;
-        if (betweenItems instanceof List<HistoricItem>) {
-            betweenItemsList = (List<HistoricItem>) betweenItems;
-        } else {
-            betweenItemsList = new ArrayList<>();
-            for (HistoricItem historicItem : betweenItems) {
-                betweenItemsList.add(historicItem);
+        List<HistoricItem> betweenItemsList = new ArrayList<>();
+        for (HistoricItem historicItem : betweenItems) {
+            betweenItemsList.add(historicItem);
+        }
+
+        // add HistoricItem at begin
+        if (betweenItemsList.isEmpty() || !betweenItemsList.get(0).getTimestamp().equals(begin)) {
+            if (!begin.isAfter(ZonedDateTime.now())) {
+                HistoricItem first = historicState(item, begin, serviceId);
+
+                if (first != null) {
+                    betweenItemsList.add(0, new RetimedHistoricItem(first, begin));
+                }
             }
         }
 
-        if ((!betweenItemsList.isEmpty()) && betweenItemsList.get(0).getTimestamp().equals(begin)) {
-            // we do not need to add a starting point
-            return betweenItemsList;
-        }
+        // add HistoricItem at end
+        if (end != null && !end.isAfter(ZonedDateTime.now())) {
+            if (betweenItemsList.isEmpty()
+                    || !betweenItemsList.get(betweenItemsList.size() - 1).getTimestamp().equals(end)) {
+                HistoricItem last = historicState(item, end, serviceId);
 
-        if (!begin.isAfter(ZonedDateTime.now())) {
-            HistoricItem first = historicState(item, begin, serviceId);
-            LoggerFactory.getLogger(PersistenceExtensions.class).info("first: {}", first);
-
-            if (first != null) {
-                List<HistoricItem> result = new ArrayList<>(betweenItemsList.size() + 1);
-                result.add(new HistoricItem() {
-
-                    @Override
-                    public ZonedDateTime getTimestamp() {
-                        return begin;
-                    }
-
-                    @Override
-                    public State getState() {
-                        return first.getState();
-                    }
-
-                    @Override
-                    public String getName() {
-                        return first.getName();
-                    }
-                });
-
-                result.addAll(betweenItemsList);
-
-                LoggerFactory.getLogger(PersistenceExtensions.class).info("result.size={}", result.size());
-
-                return result;
+                if (last != null) {
+                    betweenItemsList.add(new RetimedHistoricItem(last, end));
+                }
             }
         }
 
