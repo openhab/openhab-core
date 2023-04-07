@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -48,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import io.methvin.watcher.DirectoryChangeEvent;
 import io.methvin.watcher.DirectoryChangeListener;
 import io.methvin.watcher.DirectoryWatcher;
+import io.methvin.watcher.hashing.FileHash;
 
 /**
  * The {@link WatchServiceImpl} is the implementation of the {@link WatchService}
@@ -70,6 +72,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
 
     private final List<Listener> dirPathListeners = new CopyOnWriteArrayList<>();
     private final List<Listener> subDirPathListeners = new CopyOnWriteArrayList<>();
+    private final Map<Path, FileHash> hashCache = new ConcurrentHashMap<>();
     private final ExecutorService executor;
     private final ScheduledExecutorService scheduler;
 
@@ -81,7 +84,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
     private @Nullable ServiceRegistration<WatchService> reg;
 
     private final Map<Path, ScheduledFuture<?>> scheduledEvents = new HashMap<>();
-    private final Map<Path, List<Kind>> scheduledEventKinds = new ConcurrentHashMap<>();
+    private final Map<Path, List<DirectoryChangeEvent>> scheduledEventKinds = new ConcurrentHashMap<>();
 
     @Activate
     public WatchServiceImpl(WatchServiceConfiguration config, BundleContext bundleContext) throws IOException {
@@ -170,6 +173,8 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             }
             this.reg = null;
         }
+
+        hashCache.clear();
     }
 
     @Override
@@ -217,12 +222,6 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
         }
 
         Path path = directoryChangeEvent.path();
-        Kind kind = switch (directoryChangeEvent.eventType()) {
-            case CREATE -> Kind.CREATE;
-            case MODIFY -> Kind.MODIFY;
-            case DELETE -> Kind.DELETE;
-            case OVERFLOW -> Kind.OVERFLOW;
-        };
 
         synchronized (scheduledEvents) {
             ScheduledFuture<?> future = scheduledEvents.remove(path);
@@ -230,39 +229,39 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
                 future.cancel(true);
             }
             future = scheduler.schedule(() -> notifyListeners(path), PROCESSING_TIME, TimeUnit.MILLISECONDS);
-            scheduledEventKinds.computeIfAbsent(path, k -> new CopyOnWriteArrayList<>()).add(kind);
+            scheduledEventKinds.computeIfAbsent(path, k -> new CopyOnWriteArrayList<>()).add(directoryChangeEvent);
             scheduledEvents.put(path, future);
 
         }
     }
 
     private void notifyListeners(Path path) {
-        List<Kind> kinds = scheduledEventKinds.remove(path);
-        if (kinds == null || kinds.isEmpty()) {
+        List<DirectoryChangeEvent> events = scheduledEventKinds.remove(path);
+        if (events == null || events.isEmpty()) {
             logger.debug("Tried to notify listeners of change events for '{}', but the event list is empty.", path);
             return;
         }
 
-        if (kinds.size() == 1) {
-            // we have only one event
-            doNotify(path, kinds.get(0));
-            return;
-        }
-
-        Kind firstElement = kinds.get(0);
-        Kind lastElement = kinds.get(kinds.size() - 1);
+        DirectoryChangeEvent firstElement = events.get(0);
+        DirectoryChangeEvent lastElement = events.get(events.size() - 1);
 
         // determine final event
-        if (lastElement == Kind.DELETE) {
-            if (firstElement == Kind.CREATE) {
-                logger.debug("Discarding events for '{}' because file was immediately deleted bafter creation", path);
+        if (lastElement.eventType() == DirectoryChangeEvent.EventType.DELETE) {
+            if (firstElement.eventType() == DirectoryChangeEvent.EventType.CREATE) {
+                logger.debug("Discarding events for '{}' because file was immediately deleted after creation", path);
                 return;
             }
+            hashCache.remove(lastElement.path());
             doNotify(path, Kind.DELETE);
-        } else if (firstElement == Kind.CREATE) {
+        } else if (firstElement.eventType() == DirectoryChangeEvent.EventType.CREATE) {
+            hashCache.put(lastElement.path(), lastElement.hash());
             doNotify(path, Kind.CREATE);
         } else {
-            doNotify(path, Kind.MODIFY);
+            FileHash oldHash = hashCache.put(lastElement.path(), lastElement.hash());
+            if (!Objects.equals(oldHash, lastElement.hash())) {
+                // only notify if hashes are different, otherwise the file content did not chnge
+                doNotify(path, Kind.MODIFY);
+            }
         }
     }
 
