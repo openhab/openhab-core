@@ -1317,4 +1317,35 @@ public class PersistenceExtensions {
             return historicItem;
         }
     }
+
+    private static class RetimedHistoricItem implements HistoricItem {
+
+        private final HistoricItem originItem;
+        private final ZonedDateTime timestamp;
+
+        public RetimedHistoricItem(HistoricItem originItem, ZonedDateTime timestamp) {
+            this.originItem = originItem;
+            this.timestamp = timestamp;
+        }
+
+        @Override
+        public ZonedDateTime getTimestamp() {
+            return timestamp;
+        }
+
+        @Override
+        public State getState() {
+            return originItem.getState();
+        }
+
+        @Override
+        public String getName() {
+            return originItem.getName();
+        }
+
+        @Override
+        public String toString() {
+            return "RetimedHistoricItem [originItem=" + originItem + ", timestamp=" + timestamp + "]";
+        }
+    }
 }
