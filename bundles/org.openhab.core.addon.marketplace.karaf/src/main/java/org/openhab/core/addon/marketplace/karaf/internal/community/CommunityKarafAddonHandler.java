@@ -80,7 +80,8 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     private Stream<Path> karFilesStream(Path addonDirectory) throws IOException {
         if (Files.isDirectory(addonDirectory)) {
             try (Stream<Path> files = Files.list(addonDirectory)) {
-                return files.map(Path::getFileName).filter(path -> path.toString().endsWith(KAR_EXTENSION));
+                return files.map(Path::getFileName).filter(path -> path.toString().endsWith(KAR_EXTENSION)).toList()
+                        .stream();
             }
         }
         return Stream.empty();
