@@ -43,9 +43,7 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
     protected void afterExecute(Runnable r, Throwable t) {
         super.afterExecute(r, t);
         Throwable actualThrowable = t;
-        if (actualThrowable == null && r instanceof Future<?>) {
-            Future<?> f = (Future<?>) r;
-
+        if (actualThrowable == null && r instanceof Future<?> f) {
             // The Future is the wrapper task around our scheduled Runnable. This is only "done" if an Exception
             // occurred, the Task was completed, or aborted. A periodic Task (scheduleWithFixedDelay etc.) is NEVER
             // "done" unless there was an Exception because the outer Task is always rescheduled.

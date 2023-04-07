@@ -31,8 +31,8 @@ import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.script.internal.engine.action.SemanticsActionService;
-import org.openhab.core.semantics.model.equipment.CleaningRobot;
 import org.openhab.core.semantics.model.equipment.Battery;
+import org.openhab.core.semantics.model.equipment.CleaningRobot;
 import org.openhab.core.semantics.model.location.Bathroom;
 import org.openhab.core.semantics.model.location.Indoor;
 

@@ -147,8 +147,8 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             if (groupName != null) {
                 try {
                     Item groupItem = getItem(groupName);
-                    if (groupItem instanceof GroupItem) {
-                        ((GroupItem) groupItem).addMember(item);
+                    if (groupItem instanceof GroupItem groupItem1) {
+                        groupItem1.addMember(item);
                     }
                 } catch (ItemNotFoundException e) {
                     // the group might not yet be registered, let's ignore this
@@ -162,8 +162,8 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             if (groupName != null) {
                 try {
                     Item groupItem = getItem(groupName);
-                    if (groupItem instanceof GroupItem) {
-                        ((GroupItem) groupItem).replaceMember(oldItem, newItem);
+                    if (groupItem instanceof GroupItem item) {
+                        item.replaceMember(oldItem, newItem);
                     }
                 } catch (ItemNotFoundException e) {
                     // the group might not yet be registered, let's ignore this
@@ -185,9 +185,9 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
         injectServices(item);
 
-        if (item instanceof GroupItem) {
+        if (item instanceof GroupItem groupItem) {
             // fill group with its members
-            addMembersToGroupItem((GroupItem) item);
+            addMembersToGroupItem(groupItem);
         }
 
         // add the item to all relevant groups
@@ -195,8 +195,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     }
 
     private void injectServices(Item item) {
-        if (item instanceof GenericItem) {
-            GenericItem genericItem = (GenericItem) item;
+        if (item instanceof GenericItem genericItem) {
             genericItem.setEventPublisher(getEventPublisher());
             genericItem.setStateDescriptionService(stateDescriptionService);
             genericItem.setCommandDescriptionService(commandDescriptionService);
@@ -218,8 +217,8 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             if (groupName != null) {
                 try {
                     Item groupItem = getItem(groupName);
-                    if (groupItem instanceof GroupItem) {
-                        ((GroupItem) groupItem).removeMember(item);
+                    if (groupItem instanceof GroupItem groupItem1) {
+                        groupItem1.removeMember(item);
                     }
                 } catch (ItemNotFoundException e) {
                     // the group might not yet be registered, let's ignore this
@@ -235,16 +234,16 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     @Override
     protected void onRemoveElement(Item element) {
-        if (element instanceof GenericItem) {
-            ((GenericItem) element).dispose();
+        if (element instanceof GenericItem item) {
+            item.dispose();
         }
         removeFromGroupItems(element, element.getGroupNames());
     }
 
     @Override
     protected void beforeUpdateElement(Item existingElement) {
-        if (existingElement instanceof GenericItem) {
-            ((GenericItem) existingElement).dispose();
+        if (existingElement instanceof GenericItem item) {
+            item.dispose();
         }
     }
 
@@ -253,13 +252,13 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         // don't use #initialize and retain order of items in groups:
         List<String> oldNames = oldItem.getGroupNames();
         List<String> newNames = item.getGroupNames();
-        List<String> commonNames = oldNames.stream().filter(name -> newNames.contains(name)).collect(toList());
+        List<String> commonNames = oldNames.stream().filter(newNames::contains).collect(toList());
 
         removeFromGroupItems(oldItem, oldNames.stream().filter(name -> !commonNames.contains(name)).collect(toList()));
         replaceInGroupItems(oldItem, item, commonNames);
         addToGroupItems(item, newNames.stream().filter(name -> !commonNames.contains(name)).collect(toList()));
-        if (item instanceof GroupItem) {
-            addMembersToGroupItem((GroupItem) item);
+        if (item instanceof GroupItem groupItem) {
+            addMembersToGroupItem(groupItem);
         }
         injectServices(item);
     }
@@ -370,8 +369,8 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     @Override
     public @Nullable Item remove(String itemName, boolean recursive) {
         return ((ManagedItemProvider) getManagedProvider()
-                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"))).remove(itemName,
-                        recursive);
+                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available")))
+                .remove(itemName, recursive);
     }
 
     @Override

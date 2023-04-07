@@ -105,15 +105,8 @@ public class GenerateDefaultTranslationsMojoTest {
     }
 
     @AfterEach
-    public void afterEach() {
-        try {
-            Files.walk(tempPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-        } catch (IOException e) {
-            // XStream does not close the HierarchicalStreamReader created in XStream.fromXML(URL)
-            // which causes issues when deleting the temporary path on Windows.
-            // See: https://github.com/x-stream/xstream/pull/287
-            tempPath.toFile().deleteOnExit();
-        }
+    public void afterEach() throws IOException {
+        Files.walk(tempPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
     }
 
     private void assertSameProperties(Path expectedPath, Path actualPath) throws IOException {

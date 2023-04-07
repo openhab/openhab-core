@@ -99,7 +99,6 @@ public class TTSLRUCacheImpl implements TTSCache {
     @Override
     public AudioStream get(CachedTTSService tts, String text, Voice voice, AudioFormat requestedFormat)
             throws TTSException {
-
         LRUMediaCache<AudioFormatInfo> lruMediaCacheLocal = lruMediaCache;
         if (!enableCacheTTS || lruMediaCacheLocal == null) {
             return tts.synthesizeForCache(text, voice, requestedFormat);
@@ -115,14 +114,14 @@ public class TTSLRUCacheImpl implements TTSCache {
                     return new LRUMediaCacheEntry<AudioFormatInfo>(key, audioInputStream,
                             new AudioFormatInfo(audioInputStream.getFormat()));
                 } catch (TTSException e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalStateException(e);
                 }
             });
-        } catch (RuntimeException re) {
-            if (re.getCause() != null && re.getCause()instanceof TTSException ttse) {
+        } catch (IllegalStateException ise) {
+            if (ise.getCause() != null && ise.getCause() instanceof TTSException ttse) {
                 throw ttse;
             } else {
-                throw re;
+                throw ise;
             }
         }
 

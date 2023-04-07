@@ -176,6 +176,20 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- Jetty HTTP2 -->
+    <dependency>
+      <groupId>org.eclipse.jetty.http2</groupId>
+      <artifactId>http2-client</artifactId>
+      <version>${jetty.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.http2</groupId>
+      <artifactId>http2-server</artifactId>
+      <version>${jetty.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
     <!-- JmDNS -->
     <dependency>
       <groupId>org.jmdns</groupId>
@@ -342,7 +356,7 @@
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
-      <version>1.4.19</version>
+      <version>1.4.20</version>
       <scope>compile</scope>
     </dependency>
 

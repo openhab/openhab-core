@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -221,12 +222,12 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         }
     }
 
-    private boolean isExpired(@Nullable LocalDateTime lastUsed) {
+    private boolean isExpired(@Nullable Instant lastUsed) {
         if (lastUsed == null) {
             return false;
         }
         // (last used + 183 days < now) then it is expired
-        return lastUsed.plusDays(EXPIRE_DAYS).isBefore(LocalDateTime.now());
+        return lastUsed.plus(EXPIRE_DAYS, ChronoUnit.DAYS).isBefore(Instant.now());
     }
 
     /**
@@ -306,28 +307,14 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                     }
                 } else if (LAST_USED.equals(recordType)) {
                     try {
-                        LocalDateTime lastUsedDate = gson.fromJson(value, LocalDateTime.class);
+                        Instant lastUsedDate = gson.fromJson(value, Instant.class);
                         return lastUsedDate;
                     } catch (Exception e) {
                         logger.info("Unable to deserialize json, reset LAST_USED to now.  json:\n{}", value);
-                        return LocalDateTime.now();
+                        return Instant.now();
                     }
                 }
                 return null;
-            } finally {
-                storageLock.unlock();
-            }
-        }
-
-        public void put(String handle, @Nullable LocalDateTime lastUsed) {
-            storageLock.lock();
-            try {
-                if (lastUsed == null) {
-                    storage.put(LAST_USED.getKey(handle), (String) null);
-                } else {
-                    String gsonStr = gson.toJson(lastUsed);
-                    storage.put(LAST_USED.getKey(handle), gsonStr);
-                }
             } finally {
                 storageLock.unlock();
             }
@@ -341,7 +328,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                 } else {
                     String gsonAccessTokenStr = gson.toJson(accessTokenResponse);
                     storage.put(ACCESS_TOKEN_RESPONSE.getKey(handle), gsonAccessTokenStr);
-                    String gsonDateStr = gson.toJson(LocalDateTime.now());
+                    String gsonDateStr = gson.toJson(Instant.now());
                     storage.put(LAST_USED.getKey(handle), gsonDateStr);
 
                     if (!allHandles.contains(handle)) {
@@ -363,7 +350,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                 } else {
                     String gsonPersistedParamsStr = gson.toJson(persistedParams);
                     storage.put(SERVICE_CONFIGURATION.getKey(handle), gsonPersistedParamsStr);
-                    String gsonDateStr = gson.toJson(LocalDateTime.now());
+                    String gsonDateStr = gson.toJson(Instant.now());
                     storage.put(LAST_USED.getKey(handle), gsonDateStr);
                     if (!allHandles.contains(handle)) {
                         // update all handles index
@@ -412,7 +399,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                     if (handlesSSV != null) {
                         String[] handles = handlesSSV.trim().split(" ");
                         for (String handle : handles) {
-                            LocalDateTime lastUsed = (LocalDateTime) get(handle, LAST_USED);
+                            Instant lastUsed = (Instant) get(handle, LAST_USED);
                             if (isExpired(lastUsed)) {
                                 removeByHandle(handle);
                             }

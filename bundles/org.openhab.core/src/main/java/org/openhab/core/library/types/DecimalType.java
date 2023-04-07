@@ -51,10 +51,10 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
      * @param value a number
      */
     public DecimalType(Number value) {
-        if (value instanceof QuantityType) {
-            this.value = ((QuantityType<?>) value).toBigDecimal();
-        } else if (value instanceof HSBType) {
-            this.value = ((HSBType) value).toBigDecimal();
+        if (value instanceof QuantityType type) {
+            this.value = type.toBigDecimal();
+        } else if (value instanceof HSBType type) {
+            this.value = type.toBigDecimal();
         } else {
             this.value = new BigDecimal(value.toString());
         }

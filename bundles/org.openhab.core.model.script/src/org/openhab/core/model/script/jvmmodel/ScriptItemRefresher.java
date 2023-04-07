@@ -97,7 +97,6 @@ public class ScriptItemRefresher implements ItemRegistryChangeListener {
 
     @Override
     public void updated(Item oldElement, Item element) {
-
     }
 
     @Override

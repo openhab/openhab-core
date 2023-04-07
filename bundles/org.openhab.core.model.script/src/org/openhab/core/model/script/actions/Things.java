@@ -12,9 +12,9 @@
  */
 package org.openhab.core.model.script.actions;
 
+import org.openhab.core.model.script.internal.engine.action.ThingActionService;
 import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.binding.ThingActions;
-import org.openhab.core.model.script.internal.engine.action.ThingActionService;
 
 /**
  * This class provides static methods that can be used in automation rules for

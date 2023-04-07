@@ -165,7 +165,8 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             }
         }
 
-        Map<String, Object> cachePreset = scriptExtensionAccessor.findPreset("cache", (String) context.getAttribute("oh.engine-identifier", ScriptContext.ENGINE_SCOPE));
+        Map<String, Object> cachePreset = scriptExtensionAccessor.findPreset("cache",
+                (String) context.getAttribute("oh.engine-identifier", ScriptContext.ENGINE_SCOPE));
         evalContext.newValue(QualifiedName.create("sharedCache"), cachePreset.get("sharedCache"));
         evalContext.newValue(QualifiedName.create("privateCache"), cachePreset.get("privateCache"));
         // now add specific implicit vars, where we have to map the right content
@@ -211,7 +212,6 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
 
     @Override
     public void put(String key, Object value) {
-
     }
 
     @Override
@@ -240,7 +240,6 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
 
     @Override
     public void setContext(ScriptContext context) {
-
     }
 
     @Override
@@ -308,5 +307,4 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             }
         };
     }
-
 }

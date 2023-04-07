@@ -517,5 +517,4 @@ public class GenericItemProvider extends AbstractProvider<Item>
     public @Nullable StateDescriptionFragment getStateDescriptionFragment(String itemName, @Nullable Locale locale) {
         return stateDescriptionFragments.get(itemName);
     }
-
 }

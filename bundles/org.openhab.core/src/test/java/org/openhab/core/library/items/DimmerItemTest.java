@@ -41,8 +41,7 @@ public class DimmerItemTest {
     private static BigDecimal getState(final Item item, Class<? extends State> typeClass) {
         final State state = item.getStateAs(typeClass);
         final String str = state.toString();
-        final BigDecimal result = new BigDecimal(str);
-        return result;
+        return new BigDecimal(str);
     }
 
     @Test

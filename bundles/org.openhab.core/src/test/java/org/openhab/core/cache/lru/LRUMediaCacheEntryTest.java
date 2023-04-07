@@ -74,9 +74,8 @@ public class LRUMediaCacheEntryTest {
     }
 
     private LRUMediaCache<MetadataSample> createCache(long size) throws IOException {
-        LRUMediaCache<MetadataSample> voiceLRUCache = new LRUMediaCache<MetadataSample>(storageService, size,
-                "lrucachetest.pid", this.getClass().getClassLoader());
-        return voiceLRUCache;
+        return new LRUMediaCache<MetadataSample>(storageService, size, "lrucachetest.pid",
+                this.getClass().getClassLoader());
     }
 
     public static class FakeStream extends InputStream {
@@ -193,7 +192,7 @@ public class LRUMediaCacheEntryTest {
 
         // read bytes from the two stream concurrently
         List<InputStream> parallelAudioStreamList = Arrays.asList(actualAudioStream1, actualAudioStream2);
-        List<byte[]> bytesResultList = parallelAudioStreamList.parallelStream().map(stream -> readSafe(stream))
+        List<byte[]> bytesResultList = parallelAudioStreamList.parallelStream().map(this::readSafe)
                 .collect(Collectors.toList());
 
         assertArrayEquals(randomData, bytesResultList.get(0));
@@ -251,7 +250,6 @@ public class LRUMediaCacheEntryTest {
 
     @Test
     public void getTotalSizeByForcingReadAllTest() throws IOException {
-
         LRUMediaCache<MetadataSample> lruMediaCache = createCache(1000);
 
         // init simulated data stream

@@ -40,11 +40,6 @@ Fragment-Host: org.openhab.core.model.script
 	uom-lib-common;version='[2.1.0,2.1.1)',\
 	si-units;version='[2.1.0,2.1.1)',\
 	si.uom.si-quantity;version='[2.1.0,2.1.1)',\
-	junit-jupiter-api;version='[5.8.1,5.8.2)',\
-	junit-jupiter-engine;version='[5.8.1,5.8.2)',\
-	junit-platform-commons;version='[1.8.1,1.8.2)',\
-	junit-platform-engine;version='[1.8.1,1.8.2)',\
-	junit-platform-launcher;version='[1.8.1,1.8.2)',\
 	org.osgi.util.function;version='[1.2.0,1.2.1)',\
 	org.osgi.util.promise;version='[1.2.0,1.2.1)',\
 	com.google.inject;version='[5.0.1,5.0.2)',\
@@ -88,7 +83,6 @@ Fragment-Host: org.openhab.core.model.script
 	org.openhab.core.voice;version='[4.0.0,4.0.1)',\
 	io.methvin.directory-watcher;version='[0.17.1,0.17.2)',\
 	com.sun.jna;version='[5.12.1,5.12.2)',\
-	xstream;version='[1.4.19,1.4.20)',\
 	org.apache.felix.configadmin;version='[1.9.26,1.9.27)',\
 	org.apache.felix.http.servlet-api;version='[1.2.0,1.2.1)',\
 	org.apache.felix.scr;version='[2.2.4,2.2.5)',\
@@ -111,4 +105,15 @@ Fragment-Host: org.openhab.core.model.script
 	org.ops4j.pax.web.pax-web-runtime;version='[8.0.15,8.0.16)',\
 	org.ops4j.pax.web.pax-web-spi;version='[8.0.15,8.0.16)',\
 	org.ops4j.pax.web.pax-web-tomcat-common;version='[8.0.15,8.0.16)',\
-	org.osgi.service.component;version='[1.5.0,1.5.1)'
+	org.osgi.service.component;version='[1.5.0,1.5.1)',\
+	org.eclipse.jetty.alpn.client;version='[9.4.50,9.4.51)',\
+	org.eclipse.jetty.http2.client;version='[9.4.50,9.4.51)',\
+	org.eclipse.jetty.http2.common;version='[9.4.50,9.4.51)',\
+	org.eclipse.jetty.http2.hpack;version='[9.4.50,9.4.51)',\
+	xstream;version='[1.4.20,1.4.21)',\
+	junit-jupiter-api;version='[5.9.2,5.9.3)',\
+	junit-jupiter-engine;version='[5.9.2,5.9.3)',\
+	junit-platform-commons;version='[1.9.2,1.9.3)',\
+	junit-platform-engine;version='[1.9.2,1.9.3)',\
+	junit-platform-launcher;version='[1.9.2,1.9.3)',\
+	org.openhab.core.model.thing.runtime;version='[4.0.0,4.0.1)'

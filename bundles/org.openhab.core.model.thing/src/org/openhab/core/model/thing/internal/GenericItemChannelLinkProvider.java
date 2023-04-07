@@ -141,5 +141,4 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
     public Collection<ItemChannelLink> getAll() {
         return itemChannelLinkMap.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
     }
-
 }

@@ -45,7 +45,6 @@ public class SitemapConverters extends DefaultTerminalConverters {
                 }
                 return value;
             }
-
         };
     }
 

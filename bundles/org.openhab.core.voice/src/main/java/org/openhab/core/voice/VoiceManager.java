@@ -290,7 +290,6 @@ public interface VoiceManager {
      * Only one registration can be done for an audio source.
      *
      * @param registration with the desired services ids and options for the dialog
-     *
      * @throws IllegalStateException if there is another registration for the same source
      */
     void registerDialog(DialogRegistration registration) throws IllegalStateException;
@@ -334,7 +333,7 @@ public interface VoiceManager {
      * @return a TTS service or null, if no service with this id exists
      */
     @Nullable
-    TTSService getTTS(String id);
+    TTSService getTTS(@Nullable String id);
 
     /**
      * Retrieves all TTS services.
@@ -361,7 +360,7 @@ public interface VoiceManager {
      * @return a STT service or null, if no service with this id exists
      */
     @Nullable
-    STTService getSTT(String id);
+    STTService getSTT(@Nullable String id);
 
     /**
      * Retrieves all STT services.
@@ -388,7 +387,7 @@ public interface VoiceManager {
      * @return a KS service or null, if no service with this id exists
      */
     @Nullable
-    KSService getKS(String id);
+    KSService getKS(@Nullable String id);
 
     /**
      * Retrieves all KS services.
@@ -404,7 +403,7 @@ public interface VoiceManager {
      * @param ids Comma separated list of HLI service ids to use
      * @return a List<HumanLanguageInterpreter> or empty, if none of the services is available
      */
-    List<HumanLanguageInterpreter> getHLIsByIds(String ids);
+    List<HumanLanguageInterpreter> getHLIsByIds(@Nullable String ids);
 
     /**
      * Retrieves a HumanLanguageInterpreter collection.
@@ -433,7 +432,7 @@ public interface VoiceManager {
      * @return a HumanLanguageInterpreter or null, if no interpreter with this id exists
      */
     @Nullable
-    HumanLanguageInterpreter getHLI(String id);
+    HumanLanguageInterpreter getHLI(@Nullable String id);
 
     /**
      * Retrieves all HumanLanguageInterpreters.

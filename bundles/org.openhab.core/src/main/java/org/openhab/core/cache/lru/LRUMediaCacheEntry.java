@@ -166,7 +166,6 @@ public class LRUMediaCacheEntry<V> {
      * @throws IOException
      */
     public InputStream getInputStream() throws IOException {
-
         File localFile = file;
         if (localFile == null) { // the cache entry is not tied to the disk. The cache is not ready or not to be used.
             InputStream inputStreamLocal = inputStream;

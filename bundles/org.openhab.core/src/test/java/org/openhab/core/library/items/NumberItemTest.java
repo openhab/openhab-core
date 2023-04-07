@@ -14,13 +14,18 @@ package org.openhab.core.library.items;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+
+import java.util.List;
 
 import javax.measure.quantity.Energy;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,9 +34,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemStateUpdatedEvent;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.PercentType;
@@ -57,12 +64,15 @@ public class NumberItemTest {
     private static final String ITEM_NAME = "test";
 
     private @Mock @NonNullByDefault({}) StateDescriptionService stateDescriptionServiceMock;
+    private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
+    private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
 
     @BeforeEach
     public void setup() {
         when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null))
                 .thenReturn(StateDescriptionFragmentBuilder.create().withPattern("%.1f " + UnitUtils.UNIT_PLACEHOLDER)
                         .build().toStateDescription());
+        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
     }
 
     @Test
@@ -285,5 +295,48 @@ public class NumberItemTest {
 
         assertThat(item.getState(), is(new QuantityType<>("329 kWh")));
         assertThat(item.getUnit(), is(nullValue()));
+    }
+
+    public void quantityTypeCorrectlySetWithDifferentUnit() {
+        NumberItem numberItem = new NumberItem("Number:Temperature", ITEM_NAME);
+        numberItem.setUnitProvider(unitProviderMock);
+        numberItem.setEventPublisher(eventPublisherMock);
+        numberItem.setState(new QuantityType<>("140 °F"));
+
+        assertThat(numberItem.getState(), Matchers.is(new QuantityType<>("60 °C")));
+
+        ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+        verify(eventPublisherMock, times(2)).post(captor.capture());
+
+        List<Event> events = captor.getAllValues();
+        assertThat(events, hasSize(2));
+
+        assertThat(events.get(0), Matchers.is(instanceOf(ItemStateUpdatedEvent.class)));
+
+        ItemStateUpdatedEvent updatedEvent = (ItemStateUpdatedEvent) events.get(0);
+        assertThat(updatedEvent.getItemName(), Matchers.is(ITEM_NAME));
+        assertThat(updatedEvent.getItemState(), Matchers.is(new QuantityType<>("60°C")));
+    }
+
+    @Test
+    public void decimalTypeCorrectlySetWithUnit() {
+        NumberItem numberItem = new NumberItem("Number:Temperature", ITEM_NAME);
+        numberItem.setUnitProvider(unitProviderMock);
+        numberItem.setEventPublisher(eventPublisherMock);
+        numberItem.setState(new DecimalType(10));
+
+        assertThat(numberItem.getState(), Matchers.is(new QuantityType<>("10 °C")));
+
+        ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+        verify(eventPublisherMock, times(2)).post(captor.capture());
+
+        List<Event> events = captor.getAllValues();
+        assertThat(events, hasSize(2));
+
+        assertThat(events.get(0), Matchers.is(instanceOf(ItemStateUpdatedEvent.class)));
+
+        ItemStateUpdatedEvent updatedEvent = (ItemStateUpdatedEvent) events.get(0);
+        assertThat(updatedEvent.getItemName(), Matchers.is(ITEM_NAME));
+        assertThat(updatedEvent.getItemState(), Matchers.is(new QuantityType<>("10°C")));
     }
 }

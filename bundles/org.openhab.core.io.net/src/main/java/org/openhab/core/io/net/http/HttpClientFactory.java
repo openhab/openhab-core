@@ -15,6 +15,7 @@ package org.openhab.core.io.net.http;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.http2.client.HTTP2Client;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 /**
@@ -22,6 +23,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
  *
  * @author Michael Bock - Initial contribution
  * @author Martin van Wingerden - add createHttpClient without endpoint
+ * @author Andrew Fiddian-Green - Added support for HTTP2 client creation
  */
 @NonNullByDefault
 public interface HttpClientFactory {
@@ -36,7 +38,6 @@ public interface HttpClientFactory {
      * @param consumerName the for identifying the consumer in the Jetty thread pool.
      *            Must be between 4 and 20 characters long and must contain only the following characters [a-zA-Z0-9-_]
      * @return the Jetty client
-     * @throws NullPointerException if {@code consumerName} is {@code null}
      * @throws IllegalArgumentException if {@code consumerName} is invalid
      */
     HttpClient createHttpClient(String consumerName);
@@ -52,7 +53,6 @@ public interface HttpClientFactory {
      *            Must be between 4 and 20 characters long and must contain only the following characters [a-zA-Z0-9-_]
      * @param sslContextFactory the SSL factory managing TLS encryption
      * @return the Jetty client
-     * @throws NullPointerException if {@code consumerName} is {@code null}
      * @throws IllegalArgumentException if {@code consumerName} is invalid
      */
     HttpClient createHttpClient(String consumerName, @Nullable SslContextFactory sslContextFactory);
@@ -64,4 +64,33 @@ public interface HttpClientFactory {
      * @return the shared Jetty http client
      */
     HttpClient getCommonHttpClient();
+
+    /**
+     * Creates a new Jetty HTTP/2 client.
+     * The returned client is not started yet. You have to start it yourself before using.
+     * Don't forget to stop a started client again after its usage.
+     * The client lifecycle should be the same as for your service.
+     * DO NOT CREATE NEW CLIENTS FOR EACH REQUEST!
+     *
+     * @param consumerName for identifying the consumer in the Jetty thread pool.
+     *            Must be between 4 and 20 characters long and must contain only the following characters [a-zA-Z0-9-_]
+     * @return the Jetty HTTP/2 client
+     * @throws IllegalArgumentException if {@code consumerName} is invalid
+     */
+    HTTP2Client createHttp2Client(String consumerName);
+
+    /**
+     * Creates a new Jetty HTTP/2 client.
+     * The returned client is not started yet. You have to start it yourself before using.
+     * Don't forget to stop a started client again after its usage.
+     * The client lifecycle should be the same as for your service.
+     * DO NOT CREATE NEW CLIENTS FOR EACH REQUEST!
+     *
+     * @param consumerName for identifying the consumer in the Jetty thread pool.
+     *            Must be between 4 and 20 characters long and must contain only the following characters [a-zA-Z0-9-_]
+     * @param sslContextFactory the SSL factory managing TLS encryption
+     * @return the Jetty HTTP/2 client
+     * @throws IllegalArgumentException if {@code consumerName} is invalid
+     */
+    HTTP2Client createHttp2Client(String consumerName, @Nullable SslContextFactory sslContextFactory);
 }

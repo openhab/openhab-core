@@ -37,5 +37,4 @@ public interface ActionService {
      * @return the action class
      */
     Class<?> getActionClass();
-
 }

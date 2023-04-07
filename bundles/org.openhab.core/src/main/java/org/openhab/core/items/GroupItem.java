@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.service.CommandDescriptionService;
@@ -138,8 +139,8 @@ public class GroupItem extends GenericItem implements StateChangeListener {
                 continue;
             }
             allMembers.add(member);
-            if (member instanceof GroupItem) {
-                collectMembers(allMembers, ((GroupItem) member).members);
+            if (member instanceof GroupItem item) {
+                collectMembers(allMembers, item.members);
             }
         }
     }
@@ -171,22 +172,20 @@ public class GroupItem extends GenericItem implements StateChangeListener {
 
         // in case membership is constructed programmatically this sanitizes
         // the group names on the item:
-        if (added && item instanceof GenericItem) {
-            ((GenericItem) item).addGroupName(getName());
+        if (added && item instanceof GenericItem genericItem) {
+            genericItem.addGroupName(getName());
         }
         registerStateListener(item);
     }
 
     private void registerStateListener(Item item) {
-        if (item instanceof GenericItem) {
-            GenericItem genericItem = (GenericItem) item;
+        if (item instanceof GenericItem genericItem) {
             genericItem.addStateChangeListener(this);
         }
     }
 
     private void unregisterStateListener(Item old) {
-        if (old instanceof GenericItem) {
-            GenericItem genericItem = (GenericItem) old;
+        if (old instanceof GenericItem genericItem) {
             genericItem.removeStateChangeListener(this);
         }
     }
@@ -308,9 +307,9 @@ public class GroupItem extends GenericItem implements StateChangeListener {
             newState = function.getStateAs(getStateMembers(getMembers()), typeClass);
         }
 
-        if (newState == null && baseItem != null && baseItem instanceof GenericItem) {
+        if (newState == null && baseItem != null && baseItem instanceof GenericItem item) {
             // we use the transformation method from the base item
-            ((GenericItem) baseItem).setState(state);
+            item.setState(state);
             newState = baseItem.getStateAs(typeClass);
         }
         if (newState == null) {
@@ -371,6 +370,7 @@ public class GroupItem extends GenericItem implements StateChangeListener {
             State calculatedState = function.calculate(getStateMembers(getMembers()));
             newState = itemStateConverter.convertToAcceptedState(calculatedState, baseItem);
             setState(newState);
+            sendGroupStateUpdatedEvent(item.getName(), newState);
         }
         if (!oldState.equals(newState)) {
             sendGroupStateChangedEvent(item.getName(), newState, oldState);
@@ -380,8 +380,8 @@ public class GroupItem extends GenericItem implements StateChangeListener {
     @Override
     public void setState(State state) {
         State oldState = this.state;
-        if (baseItem != null && baseItem instanceof GenericItem) {
-            ((GenericItem) baseItem).setState(state);
+        if (baseItem != null && baseItem instanceof GenericItem item) {
+            item.setState(state);
             this.state = baseItem.getState();
         } else {
             this.state = state;
@@ -392,30 +392,38 @@ public class GroupItem extends GenericItem implements StateChangeListener {
     @Override
     public void setStateDescriptionService(@Nullable StateDescriptionService stateDescriptionService) {
         super.setStateDescriptionService(stateDescriptionService);
-        if (baseItem instanceof GenericItem) {
-            ((GenericItem) baseItem).setStateDescriptionService(stateDescriptionService);
+        if (baseItem instanceof GenericItem item) {
+            item.setStateDescriptionService(stateDescriptionService);
         }
     }
 
     @Override
     public void setCommandDescriptionService(@Nullable CommandDescriptionService commandDescriptionService) {
         super.setCommandDescriptionService(commandDescriptionService);
-        if (baseItem instanceof GenericItem) {
-            ((GenericItem) baseItem).setCommandDescriptionService(commandDescriptionService);
+        if (baseItem instanceof GenericItem item) {
+            item.setCommandDescriptionService(commandDescriptionService);
         }
     }
 
     @Override
     public void setUnitProvider(@Nullable UnitProvider unitProvider) {
         super.setUnitProvider(unitProvider);
-        if (baseItem instanceof GenericItem) {
-            ((GenericItem) baseItem).setUnitProvider(unitProvider);
+        if (baseItem instanceof GenericItem item) {
+            item.setUnitProvider(unitProvider);
+        }
+    }
+
+    private void sendGroupStateUpdatedEvent(String memberName, State state) {
+        EventPublisher eventPublisher1 = this.eventPublisher;
+        if (eventPublisher1 != null) {
+            eventPublisher1.post(ItemEventFactory.createGroupStateUpdatedEvent(getName(), memberName, state, null));
         }
     }
 
     private void sendGroupStateChangedEvent(String memberName, State newState, State oldState) {
-        if (eventPublisher != null) {
-            eventPublisher
+        EventPublisher eventPublisher1 = this.eventPublisher;
+        if (eventPublisher1 != null) {
+            eventPublisher1
                     .post(ItemEventFactory.createGroupStateChangedEvent(getName(), memberName, newState, oldState));
         }
     }

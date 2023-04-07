@@ -12,10 +12,10 @@
  */
 package org.openhab.core.model.script.actions;
 
+import java.time.ZonedDateTime;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-
-import java.time.ZonedDateTime;
 
 /**
  * The {@link Timer} is a wrapper for the {@link org.openhab.core.automation.module.script.action.Timer}

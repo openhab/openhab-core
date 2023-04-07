@@ -88,7 +88,6 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
     }
 
     private void doChannel(Thing thing, ThingBuilder thingBuilder, ChannelUID affectedChannelUid) {
-
         if (removeOldChannel) {
             thingBuilder.withoutChannel(affectedChannelUid);
         }

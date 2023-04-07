@@ -55,9 +55,9 @@ public class ItemBuilderImpl implements ItemBuilder {
         this.groups = item.getGroupNames();
         this.label = item.getLabel();
         this.tags = item.getTags();
-        if (item instanceof GroupItem) {
-            this.baseItem = ((GroupItem) item).getBaseItem();
-            this.groupFunction = ((GroupItem) item).getFunction();
+        if (item instanceof GroupItem groupItem) {
+            this.baseItem = groupItem.getBaseItem();
+            this.groupFunction = groupItem.getFunction();
         }
     }
 
@@ -129,8 +129,7 @@ public class ItemBuilderImpl implements ItemBuilder {
         if (item == null) {
             throw new IllegalStateException("No item factory could handle type " + itemType);
         }
-        if (item instanceof ActiveItem) {
-            ActiveItem activeItem = (ActiveItem) item;
+        if (item instanceof ActiveItem activeItem) {
             activeItem.setLabel(label);
             activeItem.setCategory(category);
             activeItem.addGroupNames(groups);

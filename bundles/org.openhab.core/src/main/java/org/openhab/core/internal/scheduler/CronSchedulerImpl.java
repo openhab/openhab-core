@@ -80,10 +80,10 @@ public class CronSchedulerImpl implements CronScheduler {
         final Object scheduleConfig = map.get(CronJob.CRON);
         String[] schedules = null;
 
-        if (scheduleConfig instanceof String[]) {
-            schedules = (String[]) scheduleConfig;
-        } else if (scheduleConfig instanceof String) {
-            schedules = new String[] { (String) scheduleConfig };
+        if (scheduleConfig instanceof String[] strings) {
+            schedules = strings;
+        } else if (scheduleConfig instanceof String string) {
+            schedules = new String[] { string };
         }
         if (schedules == null || schedules.length == 0) {
             logger.info("No schedules in map with key '" + CronJob.CRON + "'. Nothing scheduled");

@@ -395,5 +395,4 @@ public class NumberExtensions {
     private static boolean isAbstractUnitOne(QuantityType<?> left) {
         return Units.ONE.equals(left.getUnit());
     }
-
 }

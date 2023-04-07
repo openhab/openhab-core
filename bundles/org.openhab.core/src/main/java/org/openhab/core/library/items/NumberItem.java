@@ -115,28 +115,28 @@ public class NumberItem extends GenericItem {
     @Override
     public void setState(State state) {
         // QuantityType update to a NumberItem without, strip unit
-        if (state instanceof QuantityType && dimension == null) {
-            DecimalType plainState = new DecimalType(((QuantityType<?>) state).toBigDecimal());
+        if (state instanceof QuantityType quantityType && dimension == null) {
+            DecimalType plainState = new DecimalType(quantityType.toBigDecimal());
             super.setState(plainState);
             return;
         }
 
         // DecimalType update for a NumberItem with dimension, convert to QuantityType:
-        if (state instanceof DecimalType && dimension != null) {
+        if (state instanceof DecimalType decimalType && dimension != null) {
             Unit<?> unit = getUnit(dimension, false);
             if (unit != null) {
-                super.setState(new QuantityType<>(((DecimalType) state).doubleValue(), unit));
+                super.setState(new QuantityType<>(decimalType.doubleValue(), unit));
                 return;
             }
         }
 
         // QuantityType update, check unit and convert if necessary:
-        if (state instanceof QuantityType) {
+        if (state instanceof QuantityType quantityType) {
             Unit<?> itemUnit = getUnit(dimension, true);
-            Unit<?> stateUnit = ((QuantityType<?>) state).getUnit();
+            Unit<?> stateUnit = quantityType.getUnit();
             if (itemUnit != null && (!stateUnit.getSystemUnit().equals(itemUnit.getSystemUnit())
                     || UnitUtils.isDifferentMeasurementSystem(itemUnit, stateUnit))) {
-                QuantityType<?> convertedState = ((QuantityType<?>) state).toInvertibleUnit(itemUnit);
+                QuantityType<?> convertedState = quantityType.toInvertibleUnit(itemUnit);
                 if (convertedState != null) {
                     super.setState(convertedState);
                     return;

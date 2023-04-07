@@ -75,9 +75,8 @@ public class LRUMediaCacheTest {
     }
 
     private LRUMediaCache<MetadataSample> createCache(long size) throws IOException {
-        LRUMediaCache<MetadataSample> voiceLRUCache = new LRUMediaCache<MetadataSample>(storageService, size,
-                "lrucachetest.pid", this.getClass().getClassLoader());
-        return voiceLRUCache;
+        return new LRUMediaCache<MetadataSample>(storageService, size, "lrucachetest.pid",
+                this.getClass().getClassLoader());
     }
 
     /**

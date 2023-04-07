@@ -209,7 +209,7 @@ public class JsonStorageTest extends JavaTest {
                         orderedMap.getAsJsonObject("DummyObject").getAsJsonObject("value")
                                 .getAsJsonObject("innerMapWithComparableKeys"),
                         TypeToken.getParameterized(LinkedHashMap.class, Integer.class, Object.class).getType()))
-                                .keySet().toArray());
+                        .keySet().toArray());
     }
 
     private static class DummyObject {

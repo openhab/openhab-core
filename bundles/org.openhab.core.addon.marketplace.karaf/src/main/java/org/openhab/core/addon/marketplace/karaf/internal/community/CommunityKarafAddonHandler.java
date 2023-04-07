@@ -78,8 +78,13 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     }
 
     private Stream<Path> karFilesStream(Path addonDirectory) throws IOException {
-        return Files.isDirectory(addonDirectory) ? Files.list(addonDirectory).map(Path::getFileName)
-                .filter(path -> path.toString().endsWith(KAR_EXTENSION)) : Stream.empty();
+        if (Files.isDirectory(addonDirectory)) {
+            try (Stream<Path> files = Files.list(addonDirectory)) {
+                return files.map(Path::getFileName).filter(path -> path.toString().endsWith(KAR_EXTENSION)).toList()
+                        .stream();
+            }
+        }
+        return Stream.empty();
     }
 
     private String pathToKarRepoName(Path path) {
@@ -153,8 +158,8 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     private void installFromCache(String addonId) throws MarketplaceHandlerException {
         Path addonPath = getAddonCacheDirectory(addonId);
         if (Files.isDirectory(addonPath)) {
-            try {
-                List<Path> karFiles = Files.list(addonPath).collect(Collectors.toList());
+            try (Stream<Path> files = Files.list(addonPath)) {
+                List<Path> karFiles = files.toList();
                 if (karFiles.size() != 1) {
                     throw new MarketplaceHandlerException(
                             "The local cache folder doesn't contain a single file: " + addonPath, null);
@@ -172,10 +177,10 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     }
 
     private void ensureCachedKarsAreInstalled() {
-        try {
-            if (Files.isDirectory(KAR_CACHE_PATH)) {
-                Files.list(KAR_CACHE_PATH).filter(Files::isDirectory).map(this::addonIdFromPath)
-                        .filter(addonId -> !isInstalled(addonId)).forEach(addonId -> {
+        if (Files.isDirectory(KAR_CACHE_PATH)) {
+            try (Stream<Path> files = Files.list(KAR_CACHE_PATH)) {
+                files.filter(Files::isDirectory).map(this::addonIdFromPath).filter(addonId -> !isInstalled(addonId))
+                        .forEach(addonId -> {
                             logger.info("Reinstalling missing marketplace KAR: {}", addonId);
                             try {
                                 installFromCache(addonId);
@@ -183,9 +188,9 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
                                 logger.warn("Failed reinstalling add-on from cache", e);
                             }
                         });
+            } catch (IOException e) {
+                logger.warn("Failed to re-install KARs: {}", e.getMessage());
             }
-        } catch (IOException e) {
-            logger.warn("Failed to re-install KARs: {}", e.getMessage());
         }
         isReady = true;
     }

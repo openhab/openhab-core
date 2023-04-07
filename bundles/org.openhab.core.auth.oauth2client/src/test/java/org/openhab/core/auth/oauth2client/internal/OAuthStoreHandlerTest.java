@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.auth.oauth2client;
+package org.openhab.core.auth.oauth2client.internal;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,8 +32,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
-import org.openhab.core.auth.oauth2client.internal.OAuthStoreHandlerImpl;
-import org.openhab.core.auth.oauth2client.internal.StorageRecordType;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.storage.VolatileStorage;
@@ -55,14 +53,14 @@ public class OAuthStoreHandlerTest {
     private @NonNullByDefault({}) OAuthStoreHandlerImpl storeHandler;
 
     @BeforeEach
-    public void initialize() throws IOException {
+    void initialize() throws IOException {
         storage = new VolatileStorage<>();
         Mockito.doReturn(storage).when(storageService).getStorage(STORE_NAME);
         storeHandler = new OAuthStoreHandlerImpl(storageService);
     }
 
     @Test
-    public void loadAccessTokenResponseWhenCreatedOnIsLocalDateTime() throws GeneralSecurityException {
+    void loadAccessTokenResponseWhenCreatedOnIsLocalDateTime() throws GeneralSecurityException {
         final String handle = "test";
         final String createdOn = "2022-08-14T21:21:05.568991";
         final Instant expected = LocalDateTime.parse(createdOn).atZone(ZoneId.systemDefault()).toInstant();
@@ -77,7 +75,7 @@ public class OAuthStoreHandlerTest {
     }
 
     @Test
-    public void loadAccessTokenResponseWhenCreatedOnIsInstant() throws GeneralSecurityException {
+    void loadAccessTokenResponseWhenCreatedOnIsInstant() throws GeneralSecurityException {
         final String handle = "test";
         final String createdOn = "2022-08-14T19:21:05.568991Z";
         final Instant expected = Instant.parse(createdOn);
@@ -89,6 +87,13 @@ public class OAuthStoreHandlerTest {
         if (response != null) {
             assertThat(response.getCreatedOn(), is(expected));
         }
+    }
+
+    @Test
+    void savePersistedParamsShouldNotThrow() {
+        final String handle = "test";
+
+        storeHandler.savePersistedParams(handle, new PersistedParams());
     }
 
     private String getJsonforCreatedOn(String createdOn) {

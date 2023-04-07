@@ -17,8 +17,8 @@
 
   <properties>
     <cxf.version>3.4.5</cxf.version>
-    <junit.version>5.8.1</junit.version>
-    <mockito.version>4.1.0</mockito.version>
+    <junit.version>5.9.2</junit.version>
+    <mockito.version>4.11.0</mockito.version>
   </properties>
 
   <dependencies>

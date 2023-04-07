@@ -242,18 +242,15 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             return;
         }
 
-        if (event instanceof ItemStateEvent) {
-            ItemStateEvent isEvent = (ItemStateEvent) event;
+        if (event instanceof ItemStateEvent isEvent) {
             if (!expireConfig.ignoreStateUpdates) {
                 processEvent(itemName, isEvent.getItemState(), expireConfig, event.getClass());
             }
-        } else if (event instanceof ItemCommandEvent) {
-            ItemCommandEvent icEvent = (ItemCommandEvent) event;
+        } else if (event instanceof ItemCommandEvent icEvent) {
             if (!expireConfig.ignoreCommands) {
                 processEvent(itemName, icEvent.getItemCommand(), expireConfig, event.getClass());
             }
-        } else if (event instanceof ItemStateChangedEvent) {
-            ItemStateChangedEvent icEvent = (ItemStateChangedEvent) event;
+        } else if (event instanceof ItemStateChangedEvent icEvent) {
             processEvent(itemName, icEvent.getItemState(), expireConfig, event.getClass());
         }
     }
@@ -386,10 +383,10 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         private boolean getBooleanConfigValue(Map<String, Object> configuration, String configKey) {
             boolean configValue;
             Object configValueObject = configuration.get(configKey);
-            if (configValueObject instanceof String) {
-                configValue = Boolean.parseBoolean((String) configValueObject);
-            } else if (configValueObject instanceof Boolean) {
-                configValue = (Boolean) configValueObject;
+            if (configValueObject instanceof String string) {
+                configValue = Boolean.parseBoolean(string);
+            } else if (configValueObject instanceof Boolean boolean1) {
+                configValue = boolean1;
             } else {
                 configValue = false;
             }

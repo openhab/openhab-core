@@ -41,8 +41,9 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemStateConverter;
 import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.events.AbstractItemRegistryEvent;
+import org.openhab.core.items.events.GroupStateUpdatedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
-import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.items.events.ItemStateUpdatedEvent;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
@@ -114,8 +115,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     // the timeout to use for any item event processing
     public static final long THINGHANDLER_EVENT_TIMEOUT = TimeUnit.SECONDS.toMillis(30);
 
-    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE,
-            ChannelTriggeredEvent.TYPE);
+    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Set.of(ItemStateUpdatedEvent.TYPE, ItemCommandEvent.TYPE,
+            GroupStateUpdatedEvent.TYPE, ChannelTriggeredEvent.TYPE);
 
     private final Logger logger = LoggerFactory.getLogger(CommunicationManager.class);
 
@@ -179,8 +180,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ItemStateEvent) {
-            receiveUpdate((ItemStateEvent) event);
+        if (event instanceof ItemStateUpdatedEvent) {
+            receiveUpdate((ItemStateUpdatedEvent) event);
         } else if (event instanceof ItemCommandEvent) {
             receiveCommand((ItemCommandEvent) event);
         } else if (event instanceof ChannelTriggeredEvent) {
@@ -358,7 +359,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                 });
     }
 
-    private void receiveUpdate(ItemStateEvent updateEvent) {
+    private void receiveUpdate(ItemStateUpdatedEvent updateEvent) {
         final String itemName = updateEvent.getItemName();
         final State newState = updateEvent.getItemState();
         handleEvent(itemName, newState, updateEvent.getSource(), s -> acceptedStateTypeMap.get(s),

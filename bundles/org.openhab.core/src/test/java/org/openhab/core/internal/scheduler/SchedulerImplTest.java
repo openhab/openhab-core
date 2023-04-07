@@ -77,7 +77,7 @@ public class SchedulerImplTest extends JavaTest {
         assertTrue(after.isCancelled(), "Scheduled job cancelled before timeout");
         Thread.sleep(200);
         assertFalse(check.get(), "Callable method should not been called");
-        assertThrows(CancellationException.class, () -> after.get());
+        assertThrows(CancellationException.class, after::get);
     }
 
     @Test
@@ -144,9 +144,7 @@ public class SchedulerImplTest extends JavaTest {
         ScheduledCompletableFuture<Integer> before = scheduler.before(d, Duration.ofMillis(100));
         before.cancel(true);
         assertTrue(before.getPromise().isCompletedExceptionally(), "Scheduled job cancelled before timeout");
-        assertThrows(CancellationException.class, () -> {
-            before.get();
-        });
+        assertThrows(CancellationException.class, before::get);
     }
 
     @Test
@@ -322,7 +320,7 @@ public class SchedulerImplTest extends JavaTest {
             }
         };
         final AtomicReference<ScheduledCompletableFuture<Object>> reference = new AtomicReference<>();
-        final ScheduledCompletableFuture<Object> future = scheduler.schedule(() -> counter.incrementAndGet(),
+        final ScheduledCompletableFuture<Object> future = scheduler.schedule(counter::incrementAndGet,
                 temporalAdjuster);
         reference.set(future);
         future.get();

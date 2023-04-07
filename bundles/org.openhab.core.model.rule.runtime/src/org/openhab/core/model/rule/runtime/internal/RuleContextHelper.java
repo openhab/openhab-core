@@ -94,7 +94,5 @@ public class RuleContextHelper {
         public IEvaluationContext getContext() {
             return context;
         }
-
     }
-
 }
