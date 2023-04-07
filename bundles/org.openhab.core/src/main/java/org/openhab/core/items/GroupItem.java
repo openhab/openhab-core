@@ -416,7 +416,7 @@ public class GroupItem extends GenericItem implements StateChangeListener {
     private void sendGroupStateUpdatedEvent(String memberName, State state) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
-            eventPublisher1.post(ItemEventFactory.createGroupStateEvent(getName(), memberName, state, null));
+            eventPublisher1.post(ItemEventFactory.createGroupStateUpdatedEvent(getName(), memberName, state, null));
         }
     }
 

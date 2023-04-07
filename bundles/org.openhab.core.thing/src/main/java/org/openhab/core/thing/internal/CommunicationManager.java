@@ -43,7 +43,6 @@ import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.events.AbstractItemRegistryEvent;
 import org.openhab.core.items.events.GroupStateUpdatedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
-import org.openhab.core.items.events.ItemStateEvent;
 import org.openhab.core.items.events.ItemStateUpdatedEvent;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
@@ -116,7 +115,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     // the timeout to use for any item event processing
     public static final long THINGHANDLER_EVENT_TIMEOUT = TimeUnit.SECONDS.toMillis(30);
 
-    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE,
+    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Set.of(ItemStateUpdatedEvent.TYPE, ItemCommandEvent.TYPE,
             GroupStateUpdatedEvent.TYPE, ChannelTriggeredEvent.TYPE);
 
     private final Logger logger = LoggerFactory.getLogger(CommunicationManager.class);
