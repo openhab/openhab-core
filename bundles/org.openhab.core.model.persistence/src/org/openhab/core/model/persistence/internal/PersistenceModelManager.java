@@ -22,21 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractProvider;
-import org.openhab.core.model.persistence.persistence.ThresholdFilter;
-import org.openhab.core.model.persistence.persistence.TimeFilter;
-import org.openhab.core.persistence.PersistenceService;
-import org.openhab.core.persistence.filter.PersistenceFilter;
-import org.openhab.core.persistence.PersistenceItemConfiguration;
-import org.openhab.core.persistence.config.PersistenceAllConfig;
-import org.openhab.core.persistence.config.PersistenceConfig;
-import org.openhab.core.persistence.config.PersistenceGroupConfig;
-import org.openhab.core.persistence.config.PersistenceItemConfig;
-import org.openhab.core.persistence.filter.PersistenceThresholdFilter;
-import org.openhab.core.persistence.filter.PersistenceTimeFilter;
-import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
-import org.openhab.core.persistence.registry.PersistenceServiceConfigurationProvider;
-import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
-import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
@@ -48,15 +33,19 @@ import org.openhab.core.model.persistence.persistence.ItemConfig;
 import org.openhab.core.model.persistence.persistence.PersistenceConfiguration;
 import org.openhab.core.model.persistence.persistence.PersistenceModel;
 import org.openhab.core.model.persistence.persistence.Strategy;
-import org.openhab.core.persistence.PersistenceFilter;
+import org.openhab.core.model.persistence.persistence.ThresholdFilter;
+import org.openhab.core.model.persistence.persistence.TimeFilter;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
-import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
-import org.openhab.core.persistence.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.config.PersistenceConfig;
 import org.openhab.core.persistence.config.PersistenceGroupConfig;
 import org.openhab.core.persistence.config.PersistenceItemConfig;
+import org.openhab.core.persistence.filter.PersistenceFilter;
+import org.openhab.core.persistence.filter.PersistenceThresholdFilter;
+import org.openhab.core.persistence.filter.PersistenceTimeFilter;
+import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
+import org.openhab.core.persistence.registry.PersistenceServiceConfigurationProvider;
 import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.osgi.service.component.annotations.Activate;
@@ -74,7 +63,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(immediate = true, service = PersistenceServiceConfigurationProvider.class)
 @NonNullByDefault
-public class PersistenceModelManager extends AbstractProvider<PersistenceServiceConfiguration> implements ModelRepositoryChangeListener, PersistenceServiceConfigurationProvider {
+public class PersistenceModelManager extends AbstractProvider<PersistenceServiceConfiguration>
+        implements ModelRepositoryChangeListener, PersistenceServiceConfigurationProvider {
     private final Map<String, PersistenceServiceConfiguration> configurations = new ConcurrentHashMap<>();
     private final ModelRepository modelRepository;
 
@@ -83,7 +73,8 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
         this.modelRepository = modelRepository;
 
         modelRepository.addModelRepositoryChangeListener(this);
-        modelRepository.getAllModelNamesOfType("persist").forEach(modelName -> modelChanged(modelName, EventType.ADDED));
+        modelRepository.getAllModelNamesOfType("persist")
+                .forEach(modelName -> modelChanged(modelName, EventType.ADDED));
     }
 
     @Deactivate
@@ -102,9 +93,11 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
                 final PersistenceModel model = (PersistenceModel) modelRepository.getModel(modelName);
 
                 if (model != null) {
-                    PersistenceServiceConfiguration newConfiguration = new PersistenceServiceConfiguration(serviceName, mapConfigs(model.getConfigs()),
-                                    mapStrategies(model.getDefaults()), mapStrategies(model.getStrategies()), mapFilters(model.getFilters()));
-                    PersistenceServiceConfiguration oldConfiguration = configurations.put(serviceName, newConfiguration);
+                    PersistenceServiceConfiguration newConfiguration = new PersistenceServiceConfiguration(serviceName,
+                            mapConfigs(model.getConfigs()), mapStrategies(model.getDefaults()),
+                            mapStrategies(model.getStrategies()), mapFilters(model.getFilters()));
+                    PersistenceServiceConfiguration oldConfiguration = configurations.put(serviceName,
+                            newConfiguration);
                     if (oldConfiguration == null) {
                         notifyListenersAboutAddedElement(newConfiguration);
                     } else {
@@ -172,7 +165,8 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
             return new PersistenceTimeFilter(filter.getName(), timeFilter.getValue(), timeFilter.getUnit());
         } else if (filter.getDefinition() instanceof ThresholdFilter) {
             ThresholdFilter thresholdFilter = (ThresholdFilter) filter.getDefinition();
-            return new PersistenceThresholdFilter(filter.getName(), thresholdFilter.getValue(),thresholdFilter.getUnit());
+            return new PersistenceThresholdFilter(filter.getName(), thresholdFilter.getValue(),
+                    thresholdFilter.getUnit());
         }
         throw new IllegalArgumentException("Unknown filter type " + filter.getClass());
     }
