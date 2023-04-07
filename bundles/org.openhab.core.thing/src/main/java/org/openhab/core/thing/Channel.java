@@ -182,10 +182,12 @@ public class Channel {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
         Channel channel = (Channel) o;
         return Objects.equals(acceptedItemType, channel.acceptedItemType) && kind == channel.kind
                 && Objects.equals(uid, channel.uid) && Objects.equals(channelTypeUID, channel.channelTypeUID)
