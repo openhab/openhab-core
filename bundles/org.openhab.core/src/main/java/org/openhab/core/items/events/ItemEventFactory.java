@@ -95,14 +95,14 @@ public class ItemEventFactory extends AbstractEventFactory {
         } else if (ItemRemovedEvent.TYPE.equals(eventType)) {
             return createRemovedEvent(topic, payload);
         } else if (GroupStateUpdatedEvent.TYPE.equals(eventType)) {
-            return createGroupStateEvent(topic, payload);
+            return createGroupStateUpdatedEvent(topic, payload);
         } else if (GroupItemStateChangedEvent.TYPE.equals(eventType)) {
             return createGroupStateChangedEvent(topic, payload);
         }
         throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");
     }
 
-    private Event createGroupStateEvent(String topic, String payload) {
+    private Event createGroupStateUpdatedEvent(String topic, String payload) {
         String itemName = getItemName(topic);
         String memberName = getMemberName(topic);
         ItemEventPayloadBean bean = deserializePayload(payload, ItemEventPayloadBean.class);
@@ -321,7 +321,7 @@ public class ItemEventFactory extends AbstractEventFactory {
     }
 
     /**
-     * Creates an group item state updated event.
+     * Creates a group item state updated event.
      *
      * @param groupName the name of the group to report the state update for
      * @param member the name of the item that updated the group state
@@ -330,7 +330,7 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @return the created group item state update event
      * @throws IllegalArgumentException if groupName or state is null
      */
-    public static GroupStateUpdatedEvent createGroupStateEvent(String groupName, String member, State state,
+    public static GroupStateUpdatedEvent createGroupStateUpdatedEvent(String groupName, String member, State state,
             @Nullable String source) {
         assertValidArguments(groupName, member, state, "state");
         String topic = buildGroupTopic(GROUP_STATE_EVENT_TOPIC, groupName, member);
