@@ -46,7 +46,7 @@ public class HSBTypeTest {
         HSBType hsb = new HSBType("316,69,47");
 
         assertEquals("color 316,69,47", hsb.format("color %hsb%"));
-        assertEquals("color 119,37,97", hsb.format("color %rgb%"));
+        assertEquals("color 120,37,98", hsb.format("color %rgb%"));
         assertEquals("color 316,69,47", hsb.format("color %s"));
     }
 
@@ -85,8 +85,8 @@ public class HSBTypeTest {
         compareRgbToHsbValues("240,100,100", 0, 0, 255); // blue
         compareRgbToHsbValues("60,60,60", 153, 153, 61); // green
         compareRgbToHsbValues("300,100,40", 102, 0, 102);
-        compareRgbToHsbValues("228,37,61", 99, 110, 158); // blueish
-        compareRgbToHsbValues("316,68,46", 119, 37, 97); // purple
+        compareRgbToHsbValues("229,37,62", 99, 110, 158); // blueish
+        compareRgbToHsbValues("316,69,47", 119, 37, 97); // purple
     }
 
     private void compareRgbToHsbValues(String hsbValues, int red, int green, int blue) {
@@ -197,5 +197,20 @@ public class HSBTypeTest {
     @Test
     public void testConstructorWithIllegalBrightnessValue() {
         assertThrows(IllegalArgumentException.class, () -> new HSBType("5,85,151"));
+    }
+
+    @Test
+    public void testCloseTo() {
+        HSBType hsb1 = new HSBType("5,85,11");
+        HSBType hsb2 = new HSBType("4,84,12");
+        HSBType hsb3 = new HSBType("1,8,99");
+
+        assertThrows(IllegalArgumentException.class, () -> hsb1.closeTo(hsb2, 0.0));
+        assertThrows(IllegalArgumentException.class, () -> hsb1.closeTo(hsb2, 1.1));
+        assertDoesNotThrow(() -> hsb1.closeTo(hsb2, 0.1));
+
+        assertTrue(hsb1.closeTo(hsb2, 0.01));
+        assertTrue(!hsb1.closeTo(hsb3, 0.01));
+        assertTrue(hsb1.closeTo(hsb3, 0.5));
     }
 }
