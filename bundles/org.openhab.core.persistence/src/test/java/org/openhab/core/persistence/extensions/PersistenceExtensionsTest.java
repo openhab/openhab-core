@@ -12,17 +12,25 @@
  */
 package org.openhab.core.persistence.extensions;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import javax.measure.quantity.Temperature;
@@ -192,7 +200,7 @@ public class PersistenceExtensionsTest {
                 ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertThat(historicItem.getState(), is(instanceOf(DecimalType.class)));
-        assertEquals("1", historicItem.getState().toString());
+        assertEquals("2012", historicItem.getState().toString());
 
         historicItem = PersistenceExtensions.maximumSince(numberItem,
                 ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
@@ -229,7 +237,7 @@ public class PersistenceExtensionsTest {
                 ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
         assertThat(historicItem, is(notNullValue()));
         assertThat(historicItem.getState(), is(instanceOf(QuantityType.class)));
-        assertThat(historicItem.getState().toString(), is("1 °C"));
+        assertThat(historicItem.getState().toString(), is("2012 °C"));
 
         historicItem = PersistenceExtensions.maximumSince(quantityItem,
                 ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
@@ -279,7 +287,7 @@ public class PersistenceExtensionsTest {
 
         historicItem = PersistenceExtensions.maximumSince(switchItem, now, TestPersistenceService.ID);
         assertNotNull(historicItem);
-        assertEquals(OnOffType.OFF, historicItem.getState());
+        assertEquals(OnOffType.ON, historicItem.getState());
 
         historicItem = PersistenceExtensions.maximumSince(switchItem, now.plusHours(1), TestPersistenceService.ID);
         assertNotNull(historicItem);
@@ -393,10 +401,12 @@ public class PersistenceExtensionsTest {
 
         ZonedDateTime startStored = ZonedDateTime.of(2003, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         ZonedDateTime endStored = ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-        long storedInterval = endStored.toInstant().toEpochMilli() - startStored.toInstant().toEpochMilli();
-        long recentInterval = Instant.now().toEpochMilli() - endStored.toInstant().toEpochMilli();
-        double expectedAverage = (2007.4994 * storedInterval + 2518.5 * recentInterval)
+
+        long storedInterval = Duration.between(startStored, endStored).toDays();
+        long recentInterval = Duration.between(endStored, ZonedDateTime.now()).toDays();
+        double expectedAverage = ((2003.0 + 2011.0) / 2.0 * storedInterval + 2012.0 * recentInterval)
                 / (storedInterval + recentInterval);
+
         double expected = IntStream.of(2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012)
                 .mapToDouble(i -> Double.parseDouble(Integer.toString(i))).map(d -> Math.pow(d - expectedAverage, 2))
                 .sum() / 10d;
@@ -413,10 +423,14 @@ public class PersistenceExtensionsTest {
     public void testVarianceBetween() {
         ZonedDateTime startStored = ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         ZonedDateTime endStored = ZonedDateTime.of(2011, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+
+        double expected = DoubleStream.of(2005, 2006, 2007, 2008, 2009, 2010, 2011)
+                .map(d -> Math.pow(d - (2005.0 + 2010.0) / 2.0, 2)).sum() / 7d;
+
         DecimalType variance = PersistenceExtensions.varianceBetween(numberItem, startStored, endStored,
                 TestPersistenceService.ID);
         assertThat(variance, is(notNullValue()));
-        assertThat(variance.doubleValue(), is(closeTo(4, 0.01)));
+        assertThat(variance.doubleValue(), is(closeTo(expected, 0.01)));
 
         // default persistence service
         variance = PersistenceExtensions.varianceBetween(numberItem, startStored, endStored);
@@ -425,17 +439,16 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testDeviationSinceDecimalType() {
-        numberItem.setState(new DecimalType(3025));
-
         ZonedDateTime startStored = ZonedDateTime.of(2003, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         ZonedDateTime endStored = ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-        long storedInterval = endStored.toInstant().toEpochMilli() - startStored.toInstant().toEpochMilli();
-        long recentInterval = Instant.now().toEpochMilli() - endStored.toInstant().toEpochMilli();
-        double expectedAverage = (2007.4994 * storedInterval + 2518.5 * recentInterval)
+
+        long storedInterval = Duration.between(startStored, endStored).toDays();
+        long recentInterval = Duration.between(endStored, ZonedDateTime.now()).toDays();
+        double expectedAverage = ((2003.0 + 2011.0) / 2.0 * storedInterval + 2012.0 * recentInterval)
                 / (storedInterval + recentInterval);
-        double expected = Math.sqrt(IntStream.of(2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012)
-                .mapToDouble(i -> Double.parseDouble(Integer.toString(i))).map(d -> Math.pow(d - expectedAverage, 2))
-                .sum() / 10d);
+
+        double expected = Math.sqrt(DoubleStream.of(2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012)
+                .map(d -> Math.pow(d - expectedAverage, 2)).sum() / 10d);
         DecimalType deviation = PersistenceExtensions.deviationSince(numberItem, startStored,
                 TestPersistenceService.ID);
         assertNotNull(deviation);
@@ -450,10 +463,14 @@ public class PersistenceExtensionsTest {
     public void testDeviationBetweenDecimalType() {
         ZonedDateTime startStored = ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         ZonedDateTime endStored = ZonedDateTime.of(2011, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+
+        double expected = Math.sqrt(DoubleStream.of(2005, 2006, 2007, 2008, 2009, 2010, 2011)
+                .map(d -> Math.pow(d - (2005.0 + 2010.0) / 2.0, 2)).sum() / 7d);
+
         DecimalType deviation = PersistenceExtensions.deviationBetween(numberItem, startStored, endStored,
                 TestPersistenceService.ID);
         assertThat(deviation, is(notNullValue()));
-        assertThat(deviation.doubleValue(), is(closeTo(2, 0.01)));
+        assertThat(deviation.doubleValue(), is(closeTo(expected, 0.01)));
 
         // default persistence service
         deviation = PersistenceExtensions.deviationBetween(numberItem, startStored, endStored);
@@ -466,13 +483,15 @@ public class PersistenceExtensionsTest {
 
         ZonedDateTime startStored = ZonedDateTime.of(2003, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         ZonedDateTime endStored = ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-        long storedInterval = endStored.toInstant().toEpochMilli() - startStored.toInstant().toEpochMilli();
-        long recentInterval = Instant.now().toEpochMilli() - endStored.toInstant().toEpochMilli();
-        double expectedAverage = (2007.4994 * storedInterval + 2518.5 * recentInterval)
+
+        long storedInterval = Duration.between(startStored, endStored).toDays();
+        long recentInterval = Duration.between(endStored, ZonedDateTime.now()).toDays();
+        double expectedAverage = ((2003.0 + 2011.0) / 2.0 * storedInterval + 2012.0 * recentInterval)
                 / (storedInterval + recentInterval);
-        double expected = Math.sqrt(IntStream.of(2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012)
-                .mapToDouble(i -> Double.parseDouble(Integer.toString(i))).map(d -> Math.pow(d - expectedAverage, 2))
-                .sum() / 10d);
+
+        double expected = Math.sqrt(DoubleStream.of(2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012)
+                .map(d -> Math.pow(d - expectedAverage, 2)).sum() / 10d);
+
         DecimalType deviation = PersistenceExtensions.deviationSince(quantityItem, startStored,
                 TestPersistenceService.ID);
         assertNotNull(deviation);
@@ -487,10 +506,14 @@ public class PersistenceExtensionsTest {
     public void testDeviationBetweenQuantityType() {
         ZonedDateTime startStored = ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         ZonedDateTime endStored = ZonedDateTime.of(2011, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+
+        double expected = Math.sqrt(DoubleStream.of(2005, 2006, 2007, 2008, 2009, 2010, 2011)
+                .map(d -> Math.pow(d - (2005.0 + 2010.0) / 2.0, 2)).sum() / 7d);
+
         DecimalType deviation = PersistenceExtensions.deviationBetween(quantityItem, startStored, endStored,
                 TestPersistenceService.ID);
         assertThat(deviation, is(notNullValue()));
-        assertThat(deviation.doubleValue(), is(closeTo(2, 0.01)));
+        assertThat(deviation.doubleValue(), is(closeTo(expected, 0.01)));
 
         // default persistence service
         deviation = PersistenceExtensions.deviationBetween(quantityItem, startStored, endStored);
@@ -499,17 +522,17 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testAverageSinceDecimalType() {
-        numberItem.setState(new DecimalType(3025));
-
         ZonedDateTime startStored = ZonedDateTime.of(1940, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         DecimalType average = PersistenceExtensions.averageSince(numberItem, startStored, TestPersistenceService.ID);
         assertNull(average);
 
         startStored = ZonedDateTime.of(2003, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-        Instant endStored = ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant();
-        long storedInterval = endStored.toEpochMilli() - startStored.toInstant().toEpochMilli();
-        long recentInterval = Instant.now().toEpochMilli() - endStored.toEpochMilli();
-        double expected = (2007.4994 * storedInterval + 2518.5 * recentInterval) / (storedInterval + recentInterval);
+        ZonedDateTime endStored = ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        long storedInterval = Duration.between(startStored, endStored).toDays();
+        long recentInterval = Duration.between(endStored, ZonedDateTime.now()).toDays();
+        double expected = ((2003.0 + 2011.0) / 2.0 * storedInterval + 2012.0 * recentInterval)
+                / (storedInterval + recentInterval);
+
         average = PersistenceExtensions.averageSince(numberItem, startStored, TestPersistenceService.ID);
         assertNotNull(average);
         assertEquals(expected, average.doubleValue(), 0.01);
@@ -520,6 +543,56 @@ public class PersistenceExtensionsTest {
     }
 
     @Test
+    public void testAverageSinceDecimalTypeIrregularTimespans() {
+        TestCachedValuesPersistenceService persistenceService = new TestCachedValuesPersistenceService();
+        new PersistenceExtensions(new PersistenceServiceRegistry() {
+
+            @Override
+            public @Nullable String getDefaultId() {
+                // not available
+                return null;
+            }
+
+            @Override
+            public @Nullable PersistenceService getDefault() {
+                // not available
+                return null;
+            }
+
+            @Override
+            public Set<PersistenceService> getAll() {
+                return Set.of(persistenceService);
+            }
+
+            @Override
+            public @Nullable PersistenceService get(@Nullable String serviceId) {
+                return TestCachedValuesPersistenceService.ID.equals(serviceId) ? persistenceService : null;
+            }
+        });
+
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime beginStored = now.minusHours(27);
+
+        persistenceService.addHistoricItem(beginStored, new DecimalType(0), TEST_NUMBER);
+        persistenceService.addHistoricItem(beginStored.plusHours(1), new DecimalType(100), TEST_NUMBER);
+        persistenceService.addHistoricItem(beginStored.plusHours(2), new DecimalType(0), TEST_NUMBER);
+        persistenceService.addHistoricItem(beginStored.plusHours(25), new DecimalType(50), TEST_NUMBER);
+        persistenceService.addHistoricItem(beginStored.plusHours(26), new DecimalType(0), TEST_NUMBER);
+
+        DecimalType average = PersistenceExtensions.averageSince(numberItem, beginStored,
+                TestCachedValuesPersistenceService.ID);
+        assertThat(average.doubleValue(), is(closeTo((100.0 + 50.0) / 27.0, 0.01)));
+
+        average = PersistenceExtensions.averageSince(numberItem, beginStored.plusHours(3),
+                TestCachedValuesPersistenceService.ID);
+        assertThat(average.doubleValue(), is(closeTo(50.0 / 24.0, 0.01)));
+
+        average = PersistenceExtensions.averageSince(numberItem, now.minusMinutes(30),
+                TestCachedValuesPersistenceService.ID);
+        assertThat(average.doubleValue(), is(closeTo(0, 0.01)));
+    }
+
+    @Test
     public void testAverageBetweenDecimalType() {
         ZonedDateTime beginStored = ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         ZonedDateTime endStored = ZonedDateTime.of(2011, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -527,7 +600,7 @@ public class PersistenceExtensionsTest {
                 TestPersistenceService.ID);
 
         assertThat(average, is(notNullValue()));
-        assertThat(average.doubleValue(), is(closeTo(2008, 0.01)));
+        assertThat(average.doubleValue(), is(closeTo((2005.0 + 2010.0) / 2.0, 0.01)));
 
         // default persistence service
         average = PersistenceExtensions.averageBetween(quantityItem, beginStored, endStored);
@@ -543,10 +616,12 @@ public class PersistenceExtensionsTest {
         assertNull(average);
 
         startStored = ZonedDateTime.of(2003, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-        Instant endStored = ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant();
-        long storedInterval = endStored.toEpochMilli() - startStored.toInstant().toEpochMilli();
-        long recentInterval = Instant.now().toEpochMilli() - endStored.toEpochMilli();
-        double expected = (2007.4994 * storedInterval + 2518.5 * recentInterval) / (storedInterval + recentInterval);
+        ZonedDateTime endStored = ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        long storedInterval = Duration.between(startStored, endStored).toDays();
+        long recentInterval = Duration.between(endStored, ZonedDateTime.now()).toDays();
+        double expected = ((2003.0 + 2011.0) / 2.0 * storedInterval + 2012.0 * recentInterval)
+                / (storedInterval + recentInterval);
+
         average = PersistenceExtensions.averageSince(quantityItem, startStored, TestPersistenceService.ID);
         assertNotNull(average);
         assertEquals(expected, average.doubleValue(), 0.01);
@@ -564,7 +639,7 @@ public class PersistenceExtensionsTest {
                 TestPersistenceService.ID);
 
         assertThat(average, is(notNullValue()));
-        assertThat(average.doubleValue(), is(closeTo(2008, 0.01)));
+        assertThat(average.doubleValue(), is(closeTo((2005.0 + 2010.0) / 2, 0.01)));
 
         // default persistence service
         average = PersistenceExtensions.averageBetween(quantityItem, beginStored, endStored);
@@ -573,17 +648,17 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testAverageSinceSwitch() {
-        switchItem.setState(OnOffType.ON);
+        // switch is 5h ON, 6h OFF, and 4h ON (until now)
 
         ZonedDateTime now = ZonedDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         DecimalType average = PersistenceExtensions.averageSince(switchItem, now.minusHours(15),
                 TestPersistenceService.ID);
         assertThat(average, is(notNullValue()));
-        assertThat(average.doubleValue(), is(closeTo(0.625, 0.04)));
+        assertThat(average.doubleValue(), is(closeTo(9.0 / 15.0, 0.01)));
 
         average = PersistenceExtensions.averageSince(switchItem, now.minusHours(7), TestPersistenceService.ID);
         assertThat(average, is(notNullValue()));
-        assertThat(average.doubleValue(), is(closeTo(0.714, 0.1)));
+        assertThat(average.doubleValue(), is(closeTo(4.0 / 7.0, 0.01)));
 
         average = PersistenceExtensions.averageSince(switchItem, now.minusHours(6), TestPersistenceService.ID);
         assertThat(average, is(notNullValue()));
