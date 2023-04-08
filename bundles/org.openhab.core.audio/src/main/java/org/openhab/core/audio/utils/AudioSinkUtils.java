@@ -49,7 +49,7 @@ public class AudioSinkUtils {
         try {
             // get current volume
             oldVolume = sink.getVolume();
-        } catch (IOException e) {
+        } catch (IOException | UnsupportedOperationException e) {
             logger.debug("An exception occurred while getting the volume of sink '{}' : {}", sink.getId(),
                     e.getMessage(), e);
         }
@@ -58,7 +58,7 @@ public class AudioSinkUtils {
             try {
                 sink.setVolume(volume);
                 volumeChanged = true;
-            } catch (IOException e) {
+            } catch (IOException | UnsupportedOperationException e) {
                 logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
                         e.getMessage(), e);
             }

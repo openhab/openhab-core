@@ -305,14 +305,15 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
                 // but with a limit
                 int fileSize = ONETIME_STREAM_BUFFER_MAX_SIZE + 1;
                 while ((length = stream.read(buf)) != -1 && fileSize < ONETIME_STREAM_FILE_MAX_SIZE) {
-                    outputStream.write(buf, 0, length);
-                    fileSize += length;
+                    int lengthToWrite = Math.min(length, ONETIME_STREAM_FILE_MAX_SIZE - fileSize);
+                    outputStream.write(buf, 0, lengthToWrite);
+                    fileSize += lengthToWrite;
                 }
             }
             try {
                 clonableAudioStreamResult = new FileAudioStream(tempFile, stream.getFormat(), true);
             } catch (AudioException e) { // this is in fact a FileNotFoundException and should not happen
-                throw new IOException("Cannot found the cache file we just created.", e);
+                throw new IOException("Cannot find the cache file we just created.", e);
             }
         }
         tryClose(stream);
