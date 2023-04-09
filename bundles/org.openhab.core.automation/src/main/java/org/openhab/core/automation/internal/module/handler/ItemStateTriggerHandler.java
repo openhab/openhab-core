@@ -28,6 +28,7 @@ import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.events.TopicPrefixEventFilter;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.GroupItemStateChangedEvent;
+import org.openhab.core.items.events.GroupStateUpdatedEvent;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemRemovedEvent;
 import org.openhab.core.items.events.ItemStateChangedEvent;
@@ -77,7 +78,8 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
         this.previousState = (String) module.getConfiguration().get(CFG_PREVIOUS_STATE);
         this.ruleUID = ruleUID;
         if (UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            this.types = Set.of(ItemStateUpdatedEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
+            this.types = Set.of(ItemStateUpdatedEvent.TYPE, GroupStateUpdatedEvent.TYPE, ItemAddedEvent.TYPE,
+                    ItemRemovedEvent.TYPE);
         } else {
             this.types = Set.of(ItemStateChangedEvent.TYPE, GroupItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE,
                     ItemRemovedEvent.TYPE);
