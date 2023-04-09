@@ -126,12 +126,13 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         String state = (String) module.getConfiguration().get(STATE);
         String operator = (String) module.getConfiguration().get(OPERATOR);
         if (operator == null || state == null || itemName == null) {
-            logger.error("Module is not well configured: itemName={}  operator={}  state = {}", itemName, operator,
-                    state);
+            logger.error("Module is not well configured: itemName={}  operator={}  state = {} for rule {}", itemName,
+                    operator, state, ruleUID);
             return false;
         }
         try {
-            logger.debug("ItemStateCondition '{}' checking if {} {} {}", module.getId(), itemName, operator, state);
+            logger.debug("ItemStateCondition '{}' checking if {} {} {} for rule {}", module.getId(), itemName, operator,
+                    state, ruleUID);
             switch (operator) {
                 case "=":
                     return equalsToItemState(itemName, state);
@@ -149,7 +150,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
                     return greaterThanOrEqualsToItemState(itemName, state);
             }
         } catch (ItemNotFoundException e) {
-            logger.error("Item with name {} not found in ItemRegistry.", itemName);
+            logger.error("Item with name {} not found in ItemRegistry for condition of rule {}.", itemName, ruleUID);
         }
         return false;
     }
@@ -170,8 +171,8 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
                 // state, but warn the user
                 if (!Units.ONE.equals(qtState.getUnit())) {
                     logger.warn(
-                            "Received a QuantityType state '{}' with unit for item {}, but the condition is defined as a plain number without unit ({}), please consider adding a unit to the condition.",
-                            qtState, itemName, state);
+                            "Received a QuantityType state '{}' with unit for item {}, but the condition is defined as a plain number without unit ({}), please consider adding a unit to the condition for rule {}.",
+                            qtState, itemName, state, ruleUID);
                 }
                 return qtState.compareTo(
                         new QuantityType<>(((DecimalType) compareState).toBigDecimal(), qtState.getUnit())) <= 0;
@@ -209,8 +210,8 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
                 // state, but warn the user
                 if (!Units.ONE.equals(qtState.getUnit())) {
                     logger.warn(
-                            "Received a QuantityType state '{}' with unit for item {}, but the condition is defined as a plain number without unit ({}), please consider adding a unit to the condition.",
-                            qtState, itemName, state);
+                            "Received a QuantityType state '{}' with unit for item {}, but the condition is defined as a plain number without unit ({}), please consider adding a unit to the condition for rule {}.",
+                            qtState, itemName, state, ruleUID);
                 }
                 return qtState.compareTo(
                         new QuantityType<>(((DecimalType) compareState).toBigDecimal(), qtState.getUnit())) >= 0;
@@ -245,8 +246,8 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
             } else {
                 // log a warning if the unit of the state differs from ONE
                 logger.warn(
-                        "Received a QuantityType state '{}' with unit for item {}, but the condition is defined as a plain number without unit ({}), comparison will fail unless a unit is added to the condition.",
-                        itemState, itemName, state);
+                        "Received a QuantityType state '{}' with unit for item {}, but the condition is defined as a plain number without unit ({}), comparison will fail unless a unit is added to the condition for rule {}.",
+                        itemState, itemName, state, ruleUID);
                 return false;
             }
         }
