@@ -50,7 +50,7 @@ public class ColorUtil {
      *
      * This function does rounding to integer valued components. It is the preferred way of doing HSB to RGB conversion.
      *
-     * See also: {@link hsbToRgbPercent(HSBType)}, {@link hsbTosRGB(HSBType)}
+     * See also: {@link #hsbToRgbPercent(HSBType)}, {@link #hsbTosRGB(HSBType)}
      */
     public static int[] hsbToRgb(HSBType hsb) {
         final PercentType[] rgbPercent = hsbToRgbPercent(hsb);
@@ -62,10 +62,10 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to
      * <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a>.
      *
-     * This function not round the components to integer values. Please consider consider
-     * using {@link hsbToRgb(HSBType)} whenever integer values are required.
+     * This function does not round the components to integer values. Please consider
+     * using {@link #hsbToRgb(HSBType)} whenever integer values are required.
      *
-     * See also: {@link hsbToRgb(HSBType)}, {@link hsbTosRgb(HSBType)}
+     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}
      */
     public static PercentType[] hsbToRgbPercent(HSBType hsb) {
         PercentType red = null;
@@ -128,7 +128,7 @@ public class ColorUtil {
      * <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color model.
      * (Bits 24-31 are alpha, 16-23 are red, 8-15 are green, 0-7 are blue).
      *
-     * See also: {@link hsbToRgb(HSBType)}, {@link hsbToRgbPercent(HSBType)}
+     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbToRgbPercent(HSBType)}
      *
      * @return the RGB value of the color in the default sRGB color model
      */
@@ -237,9 +237,10 @@ public class ColorUtil {
             }
         }
 
-        // adding 0.5 and casting to int approximates rounding
-        return new HSBType(new DecimalType((int) (tmpHue + .5f)), new PercentType((int) (tmpSaturation + .5f)),
-                new PercentType((int) (tmpBrightness + .5f)));
+        // two places after the decimal seems sufficient for lossles conversions
+        return new HSBType(new DecimalType(BigDecimal.valueOf(tmpHue).setScale(2, RoundingMode.HALF_UP)),
+                new PercentType(BigDecimal.valueOf(tmpSaturation).setScale(2, RoundingMode.HALF_UP)),
+                new PercentType(BigDecimal.valueOf(tmpBrightness).setScale(2, RoundingMode.HALF_UP)));
     }
 
     /**

@@ -93,9 +93,9 @@ public class HSBTypeTest {
         HSBType hsb = new HSBType(hsbValues);
         HSBType hsbRgb = HSBType.fromRGB(red, green, blue);
 
-        assertEquals(hsb.getHue(), hsbRgb.getHue());
-        assertEquals(hsb.getSaturation(), hsbRgb.getSaturation());
-        assertEquals(hsb.getBrightness(), hsbRgb.getBrightness());
+        assertEquals(hsb.getHue().doubleValue(), hsbRgb.getHue().doubleValue(), 0.5);
+        assertEquals(hsb.getSaturation().doubleValue(), hsbRgb.getSaturation().doubleValue(), 0.5);
+        assertEquals(hsb.getBrightness().doubleValue(), hsbRgb.getBrightness().doubleValue(), 0.5);
     }
 
     @Test
