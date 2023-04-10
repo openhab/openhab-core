@@ -291,6 +291,15 @@
 			],
 			"outputs": [
 				{
+					"name": "triggeringGroup",
+					"type": "org.openhab.core.items.Item",
+					"description": "the group that the item belongs to",
+					"label": "Triggering Group",
+					"tags": [
+						"item"
+					]
+				},
+				{
 					"name": "triggeringItem",
 					"type": "org.openhab.core.items.Item",
 					"description": "the member of the group that received the command",
@@ -366,6 +375,15 @@
 				}
 			],
 			"outputs": [
+				{
+					"name": "triggeringGroup",
+					"type": "org.openhab.core.items.Item",
+					"description": "the group that the item belongs to",
+					"label": "Triggering Group",
+					"tags": [
+						"item"
+					]
+				},
 				{
 					"name": "triggeringItem",
 					"type": "org.openhab.core.items.Item",

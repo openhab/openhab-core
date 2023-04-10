@@ -108,10 +108,14 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
                 ItemCommandEvent icEvent = (ItemCommandEvent) event;
                 String itemName = icEvent.getItemName();
                 Item item = itemRegistry.get(itemName);
+                Item group = itemRegistry.get(groupName);
                 if (item != null && item.getGroupNames().contains(groupName)) {
                     String command = this.command;
                     Command itemCommand = icEvent.getItemCommand();
                     if (command == null || command.equals(itemCommand.toFullString())) {
+                        if (group != null) {
+                            values.put("triggeringGroup", group);
+                        }
                         values.put("triggeringItem", item);
                         values.put("command", itemCommand);
                         values.put("event", event);
