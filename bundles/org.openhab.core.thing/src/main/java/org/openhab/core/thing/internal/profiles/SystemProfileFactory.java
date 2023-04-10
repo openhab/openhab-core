@@ -67,7 +67,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
     private final ChannelTypeRegistry channelTypeRegistry;
 
     private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Set.of(DEFAULT_TYPE, FOLLOW_TYPE, HYSTERESIS_TYPE,
-            OFFSET_TYPE, RANGE_TYPE, RAWBUTTON_ON_OFF_SWITCH_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE,
+            OFFSET_TYPE, RANGE_TYPE, RANGE_FILTER_TYPE, RAWBUTTON_ON_OFF_SWITCH_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE,
             RAWBUTTON_TOGGLE_ROLLERSHUTTER_TYPE, RAWBUTTON_TOGGLE_SWITCH_TYPE, RAWROCKER_DIMMER_TYPE,
             RAWROCKER_NEXT_PREVIOUS_TYPE, RAWROCKER_ON_OFF_TYPE, RAWROCKER_PLAY_PAUSE_TYPE,
             RAWROCKER_REWIND_FASTFORWARD_TYPE, RAWROCKER_STOP_MOVE_TYPE, RAWROCKER_UP_DOWN_TYPE,
@@ -75,7 +75,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             TIMESTAMP_UPDATE_TYPE);
 
     private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Set.of(DEFAULT, FOLLOW, HYSTERESIS, OFFSET,
-            RANGE, RAWBUTTON_ON_OFF_SWITCH, RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_ROLLERSHUTTER,
+            RANGE, RANGE_FILTER, RAWBUTTON_ON_OFF_SWITCH, RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_ROLLERSHUTTER,
             RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER, RAWROCKER_NEXT_PREVIOUS, RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE,
             RAWROCKER_REWIND_FASTFORWARD, RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN, TRIGGER_EVENT_STRING,
             TIMESTAMP_CHANGE, TIMESTAMP_OFFSET, TIMESTAMP_TRIGGER, TIMESTAMP_UPDATE);
@@ -107,6 +107,8 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return new SystemOffsetProfile(callback, context);
         } else if (RANGE.equals(profileTypeUID)) {
             return new SystemRangeStateProfile(callback, context);
+        } else if (RANGE_FILTER.equals(profileTypeUID)) {
+            return new SystemRangeFilterProfile(callback, context);
         } else if (BUTTON_TOGGLE_SWITCH.equals(profileTypeUID)) {
             return new ToggleProfile<OnOffType>(callback, context, BUTTON_TOGGLE_SWITCH,
                     DefaultSystemChannelTypeProvider.SYSTEM_BUTTON, OnOffType.ON, OnOffType.OFF,

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="profile:system:range-filter">
+		<parameter name="range" type="text" required="true">
+			<label>Range</label>
+			<description><![CDATA[
+				The range to allow (or reject when inverted) using interval notation.
+				<ul>
+					<li><tt>[1..2]</tt> means to allow <tt>1 <= value <= 2</tt>.</li>
+					<li><tt>[1..2)</tt> means to allow <tt>1 <= value < 2</tt>.</li>
+				</ul>
+				Unit of Measurement can be specified against a dimensioned channel, e.g. <tt>( -18 °C .. -2 °C )</tt>.
+
+				Begin-less and end-less ranges can be defined by omitting the corresponding value.
+				For example: <tt>[..10]</tt> for <= 10 and <tt>[10..]<tt> for >= 10.
+
+				Multiple ranges can be specified, e.g. <tt>[1..2], [5..8], [9..]</tt>
+			]]></description>
+		</parameter>
+		<parameter name="action" type="text">
+			<label>Range Action</label>
+			<description>Whether to allow or discard values within the given range.</description>
+			<options>
+				<option value="allow">Only allow values within the range</option>
+				<option value="discard">Only allow values outside the range</option>
+			</options>
+			<default>allow</default>
+		</parameter>
+	</config-description>
+</config-description:config-descriptions>

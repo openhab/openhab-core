@@ -31,6 +31,7 @@ public interface SystemProfiles {
     ProfileTypeUID OFFSET = new ProfileTypeUID(SYSTEM_SCOPE, "offset");
     ProfileTypeUID HYSTERESIS = new ProfileTypeUID(SYSTEM_SCOPE, "hysteresis");
     ProfileTypeUID RANGE = new ProfileTypeUID(SYSTEM_SCOPE, "range");
+    ProfileTypeUID RANGE_FILTER = new ProfileTypeUID(SYSTEM_SCOPE, "range-filter");
     ProfileTypeUID BUTTON_TOGGLE_SWITCH = new ProfileTypeUID(SYSTEM_SCOPE, "button-toggle-switch");
     ProfileTypeUID BUTTON_TOGGLE_PLAYER = new ProfileTypeUID(SYSTEM_SCOPE, "button-toggle-player");
     ProfileTypeUID BUTTON_TOGGLE_ROLLERSHUTTER = new ProfileTypeUID(SYSTEM_SCOPE, "button-toggle-rollershutter");
@@ -62,6 +63,11 @@ public interface SystemProfiles {
     ProfileType HYSTERESIS_TYPE = ProfileTypeBuilder.newState(HYSTERESIS, "Hysteresis") //
             .withSupportedItemTypesOfChannel(CoreItemFactory.DIMMER, CoreItemFactory.NUMBER) //
             .withSupportedItemTypes(CoreItemFactory.SWITCH) //
+            .build();
+
+    ProfileType RANGE_FILTER_TYPE = ProfileTypeBuilder.newState(RANGE_FILTER, "Range Filter") //
+            .withSupportedItemTypesOfChannel(CoreItemFactory.DIMMER, CoreItemFactory.NUMBER) //
+            .withSupportedItemTypes(CoreItemFactory.NUMBER) //
             .build();
 
     ProfileType RANGE_TYPE = ProfileTypeBuilder.newState(RANGE, "Range") //
