@@ -17,7 +17,7 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.google.gson.JsonDeserializer;
+import com.google.gson.GsonBuilder;
 
 /**
  * This is the service factory to produce an OAuth2 service client that authenticates using OAUTH2.
@@ -291,10 +291,10 @@ public interface OAuthClientService extends AutoCloseable {
     boolean removeAccessTokenRefreshListener(AccessTokenRefreshListener listener);
 
     /**
-     * Adds a personalized deserializer to a given oauth service.
+     * Adds a custom GsonBuilder to be used with a given OAuth service.
      *
-     * @param deserializeClass the deserializer class that should be used to deserialize AccessTokenResponse
-     * @return the oauth service
+     * @param gsonBuilder the custom GsonBuilder instance
+     * @return the OAuth service
      */
-    <T extends JsonDeserializer<?>> OAuthClientService withDeserializer(Class<T> deserializerClass);
+    OAuthClientService withGsonBuilder(GsonBuilder gsonBuilder);
 }
