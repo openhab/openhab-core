@@ -21,7 +21,7 @@ import com.google.gson.GsonBuilder;
 
 /**
  * This is the service factory to produce an OAuth2 service client that authenticates using OAUTH2.
- * This is a service factory pattern; the OAuthe2 service client is not shared between bundles.
+ * This is a service factory pattern; the OAuth2 service client is not shared between bundles.
  *
  * <p>
  * The basic uses of this OAuthClient are as follows:
@@ -291,7 +291,7 @@ public interface OAuthClientService extends AutoCloseable {
     boolean removeAccessTokenRefreshListener(AccessTokenRefreshListener listener);
 
     /**
-     * Adds a custom GsonBuilder to be used with a given OAuth service.
+     * Adds a custom GsonBuilder to be used with the OAuth service instance.
      *
      * @param gsonBuilder the custom GsonBuilder instance
      * @return the OAuth service

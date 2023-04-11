@@ -121,7 +121,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
      *            {@link org.openhab.core.auth.client.oauth2.OAuthFactory#createOAuthClientService}*
      * @param storeHandler Storage handler
      * @param httpClientFactory Http client factory
-     * @param persistedParams These parameters are static with respect to the oauth provider and thus can be persisted.
+     * @param persistedParams These parameters are static with respect to the OAuth provider and thus can be persisted.
      * @return OAuthClientServiceImpl an instance
      */
     static OAuthClientServiceImpl createInstance(String handle, OAuthStoreHandler storeHandler,
