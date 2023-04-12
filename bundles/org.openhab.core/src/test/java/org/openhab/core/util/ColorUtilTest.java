@@ -115,7 +115,7 @@ public class ColorUtilTest {
     private void xyToXY(double[] xy, Gamut gamut) {
         assertTrue(xy.length > 1);
         HSBType hsb = ColorUtil.xyToHsbFine(xy, gamut);
-        double[] xy2 = ColorUtil.hsbToXYFine(hsb, gamut);
+        double[] xy2 = ColorUtil.hsbToXY(hsb, gamut);
         assertTrue(xy2.length > 1);
         for (int i = 0; i < xy.length; i++) {
             assertEquals(xy[i], xy2[i], 0.02);

@@ -13,6 +13,7 @@
 package org.openhab.core.util;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -50,7 +51,7 @@ public class ColorUtil {
      *
      * This function does rounding to integer valued components. It is the preferred way of doing HSB to RGB conversion.
      *
-     * See also: {@link hsbToRgbPercent(HSBType)}, {@link hsbTosRGB(HSBType)}
+     * See also: {@link #hsbToRgbPercent(HSBType)}, {@link #hsbTosRgb(HSBType)}
      */
     public static int[] hsbToRgb(HSBType hsb) {
         final PercentType[] rgbPercent = hsbToRgbPercent(hsb);
@@ -62,10 +63,10 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to
      * <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a>.
      *
-     * This function not round the components to integer values. Please consider consider
-     * using {@link hsbToRgb(HSBType)} whenever integer values are required.
+     * This function not round the components to integer values. Please consider using {@link #hsbToRgb(HSBType)}
+     * whenever integer values are required.
      *
-     * See also: {@link hsbToRgb(HSBType)}, {@link hsbTosRgb(HSBType)}
+     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}
      */
     public static PercentType[] hsbToRgbPercent(HSBType hsb) {
         PercentType red = null;
@@ -128,7 +129,7 @@ public class ColorUtil {
      * <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color model.
      * (Bits 24-31 are alpha, 16-23 are red, 8-15 are green, 0-7 are blue).
      *
-     * See also: {@link hsbToRgb(HSBType)}, {@link hsbToRgbPercent(HSBType)}
+     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbToRgbPercent(HSBType)}
      *
      * @return the RGB value of the color in the default sRGB color model
      */
@@ -200,46 +201,51 @@ public class ColorUtil {
         if (rgb.length != 3 || !inByteRange(rgb[0]) || !inByteRange(rgb[1]) || !inByteRange(rgb[2])) {
             throw new IllegalArgumentException("RGB array only allows values between 0 and 255");
         }
-        final int r = rgb[0];
-        final int g = rgb[1];
-        final int b = rgb[2];
+        return rgbToHsb(new PercentType[] { convertByteToColorPercent(rgb[0]), convertByteToColorPercent(rgb[1]),
+                convertByteToColorPercent(rgb[2]) });
+    }
 
-        int max = (r > g) ? r : g;
-        if (b > max) {
-            max = b;
+    public static HSBType rgbToHsb(PercentType[] rgb) throws IllegalArgumentException {
+        if (rgb.length != 3) {
+            throw new IllegalArgumentException("RGB array needs exactly three values!");
         }
-        int min = (r < g) ? r : g;
-        if (b < min) {
-            min = b;
+
+        BigDecimal r = rgb[0].toBigDecimal();
+        BigDecimal g = rgb[1].toBigDecimal();
+        BigDecimal b = rgb[2].toBigDecimal();
+
+        BigDecimal max = r.max(g).max(b);
+        BigDecimal min = r.min(g).min(b);
+        BigDecimal span = max.subtract(min);
+
+        if (max.compareTo(BigDecimal.ZERO) == 0) { // all values are 0, return black
+            return new HSBType();
+        } else if (span.compareTo(BigDecimal.ZERO) == 0) { // all values are equal, return dimmed white
+            return new HSBType(new DecimalType(), new PercentType(), new PercentType(max));
         }
-        float tmpHue;
-        final float tmpBrightness = max / 2.55f;
-        final float tmpSaturation = (max != 0 ? ((float) (max - min)) / ((float) max) : 0) * 100.0f;
-        // smallest possible saturation: 0 (max=0 or max-min=0), other value closest to 0 is 100/255 (max=255, min=254)
-        // -> avoid float comparision to 0
-        // if (tmpSaturation == 0) {
-        if (max == 0 || (max - min) == 0) {
-            tmpHue = 0;
+
+        PercentType saturation = new PercentType(span.divide(max, MathContext.DECIMAL64).multiply(BIG_DECIMAL_HUNDRED));
+        PercentType brightness = new PercentType(max);
+
+        BigDecimal scale = span.divide(BigDecimal.valueOf(60), MathContext.DECIMAL64);
+
+        BigDecimal redAngle = max.subtract(r).divide(scale, MathContext.DECIMAL64);
+        BigDecimal greenAngle = max.subtract(g).divide(scale, MathContext.DECIMAL64);
+        BigDecimal blueAngle = max.subtract(b).divide(scale, MathContext.DECIMAL64);
+
+        BigDecimal hue;
+        if (r.compareTo(max) == 0) {
+            hue = blueAngle.subtract(greenAngle);
+        } else if (g.compareTo(max) == 0) {
+            hue = BigDecimal.valueOf(120).add(redAngle).subtract(blueAngle);
         } else {
-            float red = ((float) (max - r)) / ((float) (max - min));
-            float green = ((float) (max - g)) / ((float) (max - min));
-            float blue = ((float) (max - b)) / ((float) (max - min));
-            if (r == max) {
-                tmpHue = blue - green;
-            } else if (g == max) {
-                tmpHue = 2.0f + red - blue;
-            } else {
-                tmpHue = 4.0f + green - red;
-            }
-            tmpHue = tmpHue / 6.0f * 360;
-            if (tmpHue < 0) {
-                tmpHue = tmpHue + 360.0f;
-            }
+            hue = BigDecimal.valueOf(240).add(greenAngle).subtract(redAngle);
+        }
+        if (hue.compareTo(BigDecimal.ZERO) < 0) {
+            hue = hue.add(BigDecimal.valueOf(360));
         }
 
-        // adding 0.5 and casting to int approximates rounding
-        return new HSBType(new DecimalType((int) (tmpHue + .5f)), new PercentType((int) (tmpSaturation + .5f)),
-                new PercentType((int) (tmpBrightness + .5f)));
+        return new HSBType(new DecimalType(hue), saturation, brightness);
     }
 
     /**
@@ -272,6 +278,21 @@ public class ColorUtil {
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
      */
     public static HSBType xyToHsb(double[] xy, Gamut gamut) throws IllegalArgumentException {
+        double[] rgb = xyToRgb(xy, gamut);
+        int[] rgbParameters = new int[] { (int) Math.round(255.0 * rgb[0]), (int) Math.round(255.0 * rgb[1]),
+                (int) Math.round(255.0 * rgb[2]) };
+        return rgbToHsb(rgbParameters);
+    }
+
+    public static HSBType xyToHsbFine(double[] xy, Gamut gamut) throws IllegalArgumentException {
+        double[] rgb = xyToRgb(xy, gamut);
+        PercentType[] rgbParameters = new PercentType[] { new PercentType(BigDecimal.valueOf(rgb[0] * 100.0)),
+                new PercentType(BigDecimal.valueOf(rgb[1] * 100.0)),
+                new PercentType(BigDecimal.valueOf(rgb[2] * 100.0)) };
+        return rgbToHsb(rgbParameters);
+    }
+
+    private static double[] xyToRgb(double[] xy, Gamut gamut) throws IllegalArgumentException {
         if (xy.length < 2 || xy.length > 3 || !inRange(xy[0]) || !inRange(xy[1])
                 || (xy.length == 3 && !inRange(xy[2]))) {
             throw new IllegalArgumentException("xy array only allows two or three values between 0.0 and 1.0.");
@@ -315,11 +336,8 @@ public class ColorUtil {
             b /= max;
         }
 
-        HSBType hsb = rgbToHsb(
-                new int[] { (int) Math.round(255.0 * r), (int) Math.round(255.0 * g), (int) Math.round(255.0 * b) });
-        LOGGER.trace("xy: {} - XYZ: {} {} {} - RGB: {} {} {} - HSB: {} ", xy, X, Y, Z, r, g, b, hsb);
-
-        return hsb;
+        LOGGER.trace("xy: {} - XYZ: {} {} {} - RGB: {} {} {}", xy, X, Y, Z, r, g, b);
+        return new double[] { r, g, b };
     }
 
     /**
@@ -467,152 +485,7 @@ public class ColorUtil {
                 .divide(BIG_DECIMAL_HUNDRED, 0, RoundingMode.HALF_UP).intValue();
     }
 
-    /**
-     * Fine precision version of rgbToHsb().
-     *
-     * @param rgb double array of length 3, all values are constrained to 0-255
-     * @return the corresponding {@link HSBType}.
-     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
-     */
-    public static HSBType rgbToHsbFine(double[] rgb) throws IllegalArgumentException {
-        if (rgb.length != 3 || !inByteRange(rgb[0]) || !inByteRange(rgb[1]) || !inByteRange(rgb[2])) {
-            throw new IllegalArgumentException("RGB array only allows values between 0 and 255");
-        }
-        final double r = rgb[0];
-        final double g = rgb[1];
-        final double b = rgb[2];
-
-        double max = (r > g) ? r : g;
-        if (b > max) {
-            max = b;
-        }
-        double min = (r < g) ? r : g;
-        if (b < min) {
-            min = b;
-        }
-        double tmpHue;
-        final double tmpBrightness = max * 100.0 / 255.0;
-        final double tmpSaturation = (max != 0 ? (max - min) / max : 0) * 100.0f;
-        // smallest possible saturation: 0 (max=0 or max-min=0), other value closest to 0 is 100/255 (max=255, min=254)
-        // -> avoid float comparision to 0
-        // if (tmpSaturation == 0) {
-        if (max == 0 || (max - min) == 0) {
-            tmpHue = 0;
-        } else {
-            double red = (max - r) / (max - min);
-            double green = (max - g) / (max - min);
-            double blue = (max - b) / (max - min);
-            if (r == max) {
-                tmpHue = blue - green;
-            } else if (g == max) {
-                tmpHue = 2.0f + red - blue;
-            } else {
-                tmpHue = 4.0f + green - red;
-            }
-            tmpHue = tmpHue / 6.0f * 360;
-            if (tmpHue < 0) {
-                tmpHue = tmpHue + 360.0f;
-            }
-        }
-
-        return new HSBType(new DecimalType(tmpHue), new PercentType(BigDecimal.valueOf(tmpSaturation)),
-                new PercentType(BigDecimal.valueOf(tmpBrightness)));
-    }
-
-    /**
-     * Fine precision version of xyToHsb().
-     *
-     * @param xy the CIE 1931 xy color, x,y between 0.0000 and 1.0000.
-     * @return the corresponding {@link HSBType}.
-     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
-     */
-    public static HSBType xyToHsbFine(double[] xy) throws IllegalArgumentException {
-        return xyToHsbFine(xy, DEFAULT_GAMUT);
-    }
-
-    /**
-     * Fine precision version of xyToHsb().
-     *
-     * @param xy the CIE 1931 xy color, x,y[,Y] between 0.0000 and 1.0000. <code>Y</code> value is optional.
-     * @param gamut the gamut supported by the light.
-     * @return the corresponding {@link HSBType}.
-     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
-     */
-    public static HSBType xyToHsbFine(double[] xy, Gamut gamut) throws IllegalArgumentException {
-        if (xy.length < 2 || xy.length > 3 || !inRange(xy[0]) || !inRange(xy[1])
-                || (xy.length == 3 && !inRange(xy[2]))) {
-            throw new IllegalArgumentException("xy array only allows two or three values between 0.0 and 1.0.");
-        }
-        Point p = gamut.closest(new Point(xy[0], xy[1]));
-        double x = p.x;
-        double y = p.y == 0.0 ? 0.000001 : p.y;
-        double z = 1.0 - x - y;
-        double Y = (xy.length == 3) ? xy[2] : 1.0;
-        double X = (Y / y) * x;
-        double Z = (Y / y) * z;
-        double r = X * 1.656492 + Y * -0.354851 + Z * -0.255038;
-        double g = X * -0.707196 + Y * 1.655397 + Z * 0.036152;
-        double b = X * 0.051713 + Y * -0.121364 + Z * 1.011530;
-
-        // Correction for negative values is missing from Philips' documentation.
-        double min = Math.min(r, Math.min(g, b));
-        if (min < 0.0) {
-            r -= min;
-            g -= min;
-            b -= min;
-        }
-
-        // rescale
-        double max = Math.max(r, Math.max(g, b));
-        if (max > 1.0) {
-            r /= max;
-            g /= max;
-            b /= max;
-        }
-
-        r = compand(r);
-        g = compand(g);
-        b = compand(b);
-
-        // rescale
-        max = Math.max(r, Math.max(g, b));
-        if (max > 1.0) {
-            r /= max;
-            g /= max;
-            b /= max;
-        }
-
-        HSBType hsb = rgbToHsbFine(new double[] { 255.0 * r, 255.0 * g, 255.0 * b });
-        LOGGER.trace("xy: {} - XYZ: {} {} {} - RGB: {} {} {} - HSB: {} ", xy, X, Y, Z, r, g, b, hsb);
-
-        return hsb;
-    }
-
-    /**
-     * Fine precision version of hsbToXY().
-     *
-     * @param hsbType a {@link HSBType} value
-     * @return double array with the closest matching CIE 1931 color, x, y between 0.0000 and 1.0000.
-     */
-    public static double[] hsbToXYFine(HSBType hsbType) {
-        return hsbToXYFine(hsbType, DEFAULT_GAMUT);
-    }
-
-    /**
-     * Fine precision version of hsbToXY().
-     *
-     * @param hsbType a {@link HSBType} value
-     * @return double array with the closest matching CIE 1931 color, x, y between 0.0000 and 1.0000.
-     */
-    public static double[] hsbToXYFine(HSBType hsbType, Gamut gamut) {
-        // defer to original method since it is already fine precision
-        return hsbToXY(hsbType, gamut);
-    }
-
-    /**
-     * Fine precision version of inByteRange().
-     */
-    private static boolean inByteRange(double val) {
-        return val >= 0 && val <= 255;
+    private static PercentType convertByteToColorPercent(int b) {
+        return new PercentType(new BigDecimal(b).divide(new BigDecimal("2.55"), MathContext.DECIMAL64));
     }
 }
