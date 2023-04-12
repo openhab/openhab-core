@@ -156,7 +156,11 @@ GroupItemRef:
     ID;
 
 Icon returns ecore::EString:
-    STRING | ID;
+    STRING | (ID ':' (ID ':')?)? IconName;
+
+// Allow hyphen inside an icon name
+IconName:
+    (ID '-')* ID;
 
 ColorArray:
     ((item=ID)? (condition=('==' | '>' | '<' | '>=' | '<=' | '!='))? (sign=('-' | '+'))? (state=XState) '=')?
