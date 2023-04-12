@@ -274,7 +274,7 @@ public class ColorUtil {
     public static HSBType xyToHsb(double[] xy, Gamut gamut) throws IllegalArgumentException {
         if (xy.length < 2 || xy.length > 3 || !inRange(xy[0]) || !inRange(xy[1])
                 || (xy.length == 3 && !inRange(xy[2]))) {
-            throw new IllegalArgumentException("xy array only allowes two or three values between 0.0 and 1.0.");
+            throw new IllegalArgumentException("xy array only allows two or three values between 0.0 and 1.0.");
         }
         Point p = gamut.closest(new Point(xy[0], xy[1]));
         double x = p.x;
@@ -465,5 +465,154 @@ public class ColorUtil {
     private static int convertColorPercentToByte(PercentType percent) {
         return percent.toBigDecimal().multiply(BigDecimal.valueOf(255))
                 .divide(BIG_DECIMAL_HUNDRED, 0, RoundingMode.HALF_UP).intValue();
+    }
+
+    /**
+     * Fine precision version of rgbToHsb().
+     *
+     * @param rgb double array of length 3, all values are constrained to 0-255
+     * @return the corresponding {@link HSBType}.
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
+     */
+    public static HSBType rgbToHsbFine(double[] rgb) throws IllegalArgumentException {
+        if (rgb.length != 3 || !inByteRange(rgb[0]) || !inByteRange(rgb[1]) || !inByteRange(rgb[2])) {
+            throw new IllegalArgumentException("RGB array only allows values between 0 and 255");
+        }
+        final double r = rgb[0];
+        final double g = rgb[1];
+        final double b = rgb[2];
+
+        double max = (r > g) ? r : g;
+        if (b > max) {
+            max = b;
+        }
+        double min = (r < g) ? r : g;
+        if (b < min) {
+            min = b;
+        }
+        double tmpHue;
+        final double tmpBrightness = max * 100.0 / 255.0;
+        final double tmpSaturation = (max != 0 ? (max - min) / max : 0) * 100.0f;
+        // smallest possible saturation: 0 (max=0 or max-min=0), other value closest to 0 is 100/255 (max=255, min=254)
+        // -> avoid float comparision to 0
+        // if (tmpSaturation == 0) {
+        if (max == 0 || (max - min) == 0) {
+            tmpHue = 0;
+        } else {
+            double red = (max - r) / (max - min);
+            double green = (max - g) / (max - min);
+            double blue = (max - b) / (max - min);
+            if (r == max) {
+                tmpHue = blue - green;
+            } else if (g == max) {
+                tmpHue = 2.0f + red - blue;
+            } else {
+                tmpHue = 4.0f + green - red;
+            }
+            tmpHue = tmpHue / 6.0f * 360;
+            if (tmpHue < 0) {
+                tmpHue = tmpHue + 360.0f;
+            }
+        }
+
+        return new HSBType(new DecimalType(tmpHue), new PercentType(BigDecimal.valueOf(tmpSaturation)),
+                new PercentType(BigDecimal.valueOf(tmpBrightness)));
+    }
+
+    /**
+     * Fine precision version of xyToHsb().
+     *
+     * @param xy the CIE 1931 xy color, x,y between 0.0000 and 1.0000.
+     * @return the corresponding {@link HSBType}.
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
+     */
+    public static HSBType xyToHsbFine(double[] xy) throws IllegalArgumentException {
+        return xyToHsbFine(xy, DEFAULT_GAMUT);
+    }
+
+    /**
+     * Fine precision version of xyToHsb().
+     *
+     * @param xy the CIE 1931 xy color, x,y[,Y] between 0.0000 and 1.0000. <code>Y</code> value is optional.
+     * @param gamut the gamut supported by the light.
+     * @return the corresponding {@link HSBType}.
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
+     */
+    public static HSBType xyToHsbFine(double[] xy, Gamut gamut) throws IllegalArgumentException {
+        if (xy.length < 2 || xy.length > 3 || !inRange(xy[0]) || !inRange(xy[1])
+                || (xy.length == 3 && !inRange(xy[2]))) {
+            throw new IllegalArgumentException("xy array only allows two or three values between 0.0 and 1.0.");
+        }
+        Point p = gamut.closest(new Point(xy[0], xy[1]));
+        double x = p.x;
+        double y = p.y == 0.0 ? 0.000001 : p.y;
+        double z = 1.0 - x - y;
+        double Y = (xy.length == 3) ? xy[2] : 1.0;
+        double X = (Y / y) * x;
+        double Z = (Y / y) * z;
+        double r = X * 1.656492 + Y * -0.354851 + Z * -0.255038;
+        double g = X * -0.707196 + Y * 1.655397 + Z * 0.036152;
+        double b = X * 0.051713 + Y * -0.121364 + Z * 1.011530;
+
+        // Correction for negative values is missing from Philips' documentation.
+        double min = Math.min(r, Math.min(g, b));
+        if (min < 0.0) {
+            r -= min;
+            g -= min;
+            b -= min;
+        }
+
+        // rescale
+        double max = Math.max(r, Math.max(g, b));
+        if (max > 1.0) {
+            r /= max;
+            g /= max;
+            b /= max;
+        }
+
+        r = compand(r);
+        g = compand(g);
+        b = compand(b);
+
+        // rescale
+        max = Math.max(r, Math.max(g, b));
+        if (max > 1.0) {
+            r /= max;
+            g /= max;
+            b /= max;
+        }
+
+        HSBType hsb = rgbToHsbFine(new double[] { 255.0 * r, 255.0 * g, 255.0 * b });
+        LOGGER.trace("xy: {} - XYZ: {} {} {} - RGB: {} {} {} - HSB: {} ", xy, X, Y, Z, r, g, b, hsb);
+
+        return hsb;
+    }
+
+    /**
+     * Fine precision version of hsbToXY().
+     *
+     * @param hsbType a {@link HSBType} value
+     * @return double array with the closest matching CIE 1931 color, x, y between 0.0000 and 1.0000.
+     */
+    public static double[] hsbToXYFine(HSBType hsbType) {
+        return hsbToXYFine(hsbType, DEFAULT_GAMUT);
+    }
+
+    /**
+     * Fine precision version of hsbToXY().
+     *
+     * @param hsbType a {@link HSBType} value
+     * @return double array with the closest matching CIE 1931 color, x, y between 0.0000 and 1.0000.
+     */
+    public static double[] hsbToXYFine(HSBType hsbType, Gamut gamut) {
+        // defer to original method since it is already fine precision
+        return hsbToXY(hsbType, gamut);
+    }
+
+    /**
+     * Fine precision version of inByteRange().
+     */
+    private static boolean inByteRange(double val) {
+        return val >= 0 && val <= 255;
     }
 }

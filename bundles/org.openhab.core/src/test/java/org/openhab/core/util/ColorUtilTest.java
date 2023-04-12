@@ -13,9 +13,7 @@
 package org.openhab.core.util;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.stream.Stream;
@@ -32,6 +30,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.PercentType;
+import org.openhab.core.util.ColorUtil.Gamut;
 
 /**
  * The {@link ColorUtilTest} is a test class for the color conversion
@@ -111,6 +110,39 @@ public class ColorUtilTest {
 
         // compare in HSB space, threshold 1% difference
         assertTrue(hsbType.closeTo(new HSBType(expected), 0.01));
+    }
+
+    private void xyToXY(double[] xy, Gamut gamut) {
+        assertTrue(xy.length > 1);
+        HSBType hsb = ColorUtil.xyToHsbFine(xy, gamut);
+        double[] xy2 = ColorUtil.hsbToXYFine(hsb, gamut);
+        assertTrue(xy2.length > 1);
+        for (int i = 0; i < xy.length; i++) {
+            assertEquals(xy[i], xy2[i], 0.02);
+        }
+    }
+
+    /**
+     * Test XY -> RGB -> HSB - RGB - XY round trips.
+     * Use ColorUtil fine precision methods for conversions.
+     * Test on Hue standard Gamuts 'A', 'B', and 'C'.
+     */
+    @Test
+    public void testXyHsbRoundTrips() {
+        Gamut[] gamuts = new Gamut[] {
+                new Gamut(new double[] { 0.704, 0.296 }, new double[] { 0.2151, 0.7106 }, new double[] { 0.138, 0.08 }),
+                new Gamut(new double[] { 0.675, 0.322 }, new double[] { 0.409, 0.518 }, new double[] { 0.167, 0.04 }),
+                new Gamut(new double[] { 0.6915, 0.3038 }, new double[] { 0.17, 0.7 }, new double[] { 0.1532, 0.0475 }) //
+        };
+        for (Gamut g : gamuts) {
+            xyToXY(g.r(), g);
+            xyToXY(g.g(), g);
+            xyToXY(g.b(), g);
+            xyToXY(new double[] { (g.r()[0] + g.g()[0]) / 2f, (g.r()[1] + g.g()[1]) / 2f }, g);
+            xyToXY(new double[] { (g.g()[0] + g.b()[0]) / 2f, (g.g()[1] + g.b()[1]) / 2f }, g);
+            xyToXY(new double[] { (g.b()[0] + g.r()[0]) / 2f, (g.b()[1] + g.r()[1]) / 2f }, g);
+            xyToXY(new double[] { (g.r()[0] + g.g()[0] + g.b()[0]) / 3f, (g.r()[1] + g.g()[1] + g.b()[1]) / 3f }, g);
+        }
     }
 
     /* Providers for parameterized tests */
