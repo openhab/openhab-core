@@ -14,7 +14,9 @@ package org.openhab.core.automation.module.script.profile;
 
 import java.util.Collection;
 import java.util.Locale;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -28,48 +30,58 @@ import org.openhab.core.thing.profiles.ProfileTypeBuilder;
 import org.openhab.core.thing.profiles.ProfileTypeProvider;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.transform.TransformationService;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
  * The {@link ScriptProfileFactory} creates {@link ScriptProfile} instances
  *
  * @author Jan N. Klug - Initial contribution
  */
-@Component(service = { ScriptProfileFactory.class, ProfileFactory.class, ProfileTypeProvider.class })
 @NonNullByDefault
+@Component(service = { ProfileFactory.class, ProfileTypeProvider.class })
 public class ScriptProfileFactory implements ProfileFactory, ProfileTypeProvider {
+    public static final String PROFILE_CONFIG_URI_PREFIX = "profile:transform:";
 
-    public static final ProfileTypeUID SCRIPT_PROFILE_UID = new ProfileTypeUID(
-            TransformationService.TRANSFORM_PROFILE_SCOPE, "SCRIPT");
-
-    private static final ProfileType PROFILE_TYPE_SCRIPT = ProfileTypeBuilder.newState(SCRIPT_PROFILE_UID, "Script")
-            .build();
-
-    private final ScriptTransformationService transformationService;
-
-    @Activate
-    public ScriptProfileFactory(final @Reference ScriptTransformationService transformationService) {
-        this.transformationService = transformationService;
-    }
+    private final Map<String, ServiceRecord> services = new ConcurrentHashMap<>();
 
     @Override
     public @Nullable Profile createProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback,
             ProfileContext profileContext) {
-        if (SCRIPT_PROFILE_UID.equals(profileTypeUID)) {
-            return new ScriptProfile(callback, profileContext, transformationService);
-        }
-        return null;
+        String serviceId = profileTypeUID.getId();
+        ScriptTransformationService transformationService = services.get(serviceId).service();
+        return new ScriptProfile(profileTypeUID, callback, profileContext, transformationService);
     }
 
     @Override
     public Collection<ProfileTypeUID> getSupportedProfileTypeUIDs() {
-        return Set.of(SCRIPT_PROFILE_UID);
+        return services.keySet().stream()
+                .map(id -> new ProfileTypeUID(TransformationService.TRANSFORM_PROFILE_SCOPE, id)).toList();
     }
 
     @Override
     public Collection<ProfileType> getProfileTypes(@Nullable Locale locale) {
-        return Set.of(PROFILE_TYPE_SCRIPT);
+        return getSupportedProfileTypeUIDs().stream().map(uid -> {
+            String id = uid.getId();
+            String label = services.get(id).serviceLabel();
+            return ProfileTypeBuilder.newState(uid, label).build();
+        }).collect(Collectors.toList());
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    public void bindScriptTransformationService(ScriptTransformationService service, Map<String, Object> properties) {
+        String serviceId = (String) properties.get(TransformationService.SERVICE_PROPERTY_NAME);
+        String serviceLabel = (String) properties.get(TransformationService.SERVICE_PROPERTY_LABEL);
+        services.put(serviceId, new ServiceRecord(service, serviceLabel));
+    }
+
+    public void unbindScriptTransformationService(ScriptTransformationService service, Map<String, Object> properties) {
+        String serviceId = (String) properties.get(TransformationService.SERVICE_PROPERTY_NAME);
+        services.remove(serviceId);
+    }
+
+    private record ServiceRecord(ScriptTransformationService service, String serviceLabel) {
     }
 }

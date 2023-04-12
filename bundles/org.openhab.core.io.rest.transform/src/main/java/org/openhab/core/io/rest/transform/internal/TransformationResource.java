@@ -117,8 +117,9 @@ public class TransformationResource implements RESTResource {
         try {
             Collection<ServiceReference<TransformationService>> refs = bundleContext
                     .getServiceReferences(TransformationService.class, null);
-            Stream<String> services = refs.stream().map(ref -> (String) ref.getProperty("openhab.transform"))
-                    .filter(Objects::nonNull).map(Objects::requireNonNull);
+            Stream<String> services = refs.stream()
+                    .map(ref -> (String) ref.getProperty(TransformationService.SERVICE_PROPERTY_NAME))
+                    .filter(Objects::nonNull).map(Objects::requireNonNull).sorted();
             return Response.ok(new Stream2JSONInputStream(services)).build();
         } catch (InvalidSyntaxException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();

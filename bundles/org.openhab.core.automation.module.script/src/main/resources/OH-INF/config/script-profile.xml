@@ -5,10 +5,6 @@
 	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="profile:transform:SCRIPT">
-		<parameter name="scriptLanguage" type="text" required="true">
-			<label>Script Language</label>
-			<description>MIME-type ("application/vnd.openhab.dsl.rule") of the scripting language</description>
-		</parameter>
 		<parameter name="toItemScript" type="text">
 			<label>Thing To Item Transformation</label>
 			<description>The Script for transforming state updates and commands from the Thing handler to the item. The script
