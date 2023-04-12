@@ -12,8 +12,13 @@
  */
 package org.openhab.core.automation.module.script;
 
+import static org.openhab.core.automation.module.script.profile.ScriptProfileFactory.PROFILE_CONFIG_URI_PREFIX;
+
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,11 +39,15 @@ import javax.script.ScriptException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.module.script.internal.ScriptEngineFactoryHelper;
 import org.openhab.core.automation.module.script.profile.ScriptProfile;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
+import org.openhab.core.config.core.ConfigDescriptionProvider;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigOptionProvider;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationException;
@@ -48,8 +57,6 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,35 +66,50 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jan N. Klug - Initial contribution
  */
-@Component(service = { TransformationService.class, ScriptTransformationService.class,
-        ConfigOptionProvider.class }, property = { "openhab.transform=SCRIPT" })
 @NonNullByDefault
-public class ScriptTransformationService
-        implements TransformationService, RegistryChangeListener<Transformation>, ConfigOptionProvider {
+@Component(factory = "org.openhab.core.automation.module.script.transformation.factory", service = {
+        TransformationService.class, ScriptTransformationService.class, ConfigOptionProvider.class,
+        ConfigDescriptionProvider.class })
+public class ScriptTransformationService implements TransformationService, ConfigOptionProvider,
+        ConfigDescriptionProvider, RegistryChangeListener<Transformation> {
+    public static final String SCRIPT_TYPE_PROPERTY_NAME = "openhab.transform.script.scriptType";
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
-    private static final String PROFILE_CONFIG_URI = "profile:transform:SCRIPT";
-    public static final String SUPPORTED_CONFIGURATION_TYPE = "script";
 
-    private static final Pattern SCRIPT_CONFIG_PATTERN = Pattern
-            .compile("(?<scriptType>.*?):(?<scriptUid>.*?)(\\?(?<params>.*?))?");
+    private static final URI CONFIG_DESCRIPTION_TEMPLATE_URI = URI.create(PROFILE_CONFIG_URI_PREFIX + "SCRIPT");
+
+    private static final Pattern INLINE_SCRIPT_CONFIG_PATTERN = Pattern.compile("\\|(?<inlineScript>.+)");
+
+    private static final Pattern SCRIPT_CONFIG_PATTERN = Pattern.compile("(?<scriptUid>.+?)(\\?(?<params>.*?))?");
 
     private final Logger logger = LoggerFactory.getLogger(ScriptTransformationService.class);
 
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
+    private final String scriptType;
+    private final URI profileConfigUri;
+
     private final Map<String, ScriptRecord> scriptCache = new ConcurrentHashMap<>();
 
     private final TransformationRegistry transformationRegistry;
-    private final Map<String, String> supportedScriptTypes = new ConcurrentHashMap<>();
-
     private final ScriptEngineManager scriptEngineManager;
+    private final ConfigDescriptionRegistry configDescRegistry;
 
     @Activate
     public ScriptTransformationService(@Reference TransformationRegistry transformationRegistry,
-            @Reference ScriptEngineManager scriptEngineManager) {
+            @Reference ConfigDescriptionRegistry configDescRegistry, @Reference ScriptEngineManager scriptEngineManager,
+            Map<String, Object> config) {
+        String scriptType = ConfigParser.valueAs(config.get(SCRIPT_TYPE_PROPERTY_NAME), String.class);
+        if (scriptType == null) {
+            throw new IllegalStateException(
+                    "'" + SCRIPT_TYPE_PROPERTY_NAME + "' must not be null in service configuration");
+        }
+
         this.transformationRegistry = transformationRegistry;
+        this.configDescRegistry = configDescRegistry;
         this.scriptEngineManager = scriptEngineManager;
+        this.scriptType = scriptType;
+        this.profileConfigUri = URI.create(PROFILE_CONFIG_URI_PREFIX + scriptType.toUpperCase());
         transformationRegistry.addRegistryChangeListener(this);
     }
 
@@ -101,28 +123,34 @@ public class ScriptTransformationService
 
     @Override
     public @Nullable String transform(String function, String source) throws TransformationException {
-        Matcher configMatcher = SCRIPT_CONFIG_PATTERN.matcher(function);
-        if (!configMatcher.matches()) {
-            throw new TransformationException("Script Type must be prepended to transformation UID.");
+        String scriptUid;
+        String inlineScript = null;
+        String params = null;
+
+        Matcher configMatcher = INLINE_SCRIPT_CONFIG_PATTERN.matcher(function);
+        if (configMatcher.matches()) {
+            inlineScript = configMatcher.group("inlineScript");
+            // prefix with | to avoid clashing with a real filename
+            scriptUid = "|" + Integer.toString(inlineScript.hashCode());
+        } else {
+            configMatcher = SCRIPT_CONFIG_PATTERN.matcher(function);
+            if (!configMatcher.matches()) {
+                throw new TransformationException("Invalid syntax for the script transformation: '" + function + "'");
+            }
+            scriptUid = configMatcher.group("scriptUid");
+            params = configMatcher.group("params");
         }
-        String scriptType = configMatcher.group("scriptType");
-        String scriptUid = configMatcher.group("scriptUid");
 
         ScriptRecord scriptRecord = scriptCache.computeIfAbsent(scriptUid, k -> new ScriptRecord());
         scriptRecord.lock.lock();
         try {
             if (scriptRecord.script.isBlank()) {
-                if (scriptUid.startsWith("|")) {
-                    // inline script -> strip inline-identifier
-                    scriptRecord.script = scriptUid.substring(1);
+                if (inlineScript != null) {
+                    scriptRecord.script = inlineScript;
                 } else {
                     // get script from transformation registry
                     Transformation transformation = transformationRegistry.get(scriptUid);
                     if (transformation != null) {
-                        if (!SUPPORTED_CONFIGURATION_TYPE.equals(transformation.getType())) {
-                            throw new TransformationException("Configuration does not have correct type 'script' but '"
-                                    + transformation.getType() + "'.");
-                        }
                         scriptRecord.script = transformation.getConfiguration().getOrDefault(Transformation.FUNCTION,
                                 "");
                     }
@@ -160,7 +188,6 @@ public class ScriptTransformationService
                 ScriptContext executionContext = engine.getContext();
                 executionContext.setAttribute("input", source, ScriptContext.ENGINE_SCOPE);
 
-                String params = configMatcher.group("params");
                 if (params != null) {
                     for (String param : params.split("&")) {
                         String[] splitString = param.split("=");
@@ -169,7 +196,9 @@ public class ScriptTransformationService
                                     "Parameter '{}' does not consist of two parts for configuration UID {}, skipping.",
                                     param, scriptUid);
                         } else {
-                            executionContext.setAttribute(splitString[0], splitString[1], ScriptContext.ENGINE_SCOPE);
+                            param = URLDecoder.decode(splitString[0], StandardCharsets.UTF_8);
+                            String value = URLDecoder.decode(splitString[1], StandardCharsets.UTF_8);
+                            executionContext.setAttribute(param, value, ScriptContext.ENGINE_SCOPE);
                         }
                     }
                 }
@@ -208,6 +237,44 @@ public class ScriptTransformationService
         clearCache(element.getUID());
     }
 
+    @Override
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
+            @Nullable Locale locale) {
+        if (!uri.equals(profileConfigUri)) {
+            return null;
+        }
+
+        if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param) || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)) {
+            return transformationRegistry.getTransformations(List.of(scriptType.toLowerCase())).stream()
+                    .map(c -> new ParameterOption(c.getUID(), c.getLabel())).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public Collection<ConfigDescription> getConfigDescriptions(@Nullable Locale locale) {
+        ConfigDescription configDescription = getConfigDescription(profileConfigUri, locale);
+        if (configDescription != null) {
+            return List.of(configDescription);
+        }
+
+        return Collections.emptyList();
+    }
+
+    @Override
+    public @Nullable ConfigDescription getConfigDescription(URI uri, @Nullable Locale locale) {
+        if (!uri.equals(profileConfigUri)) {
+            return null;
+        }
+
+        ConfigDescription template = configDescRegistry.getConfigDescription(CONFIG_DESCRIPTION_TEMPLATE_URI, locale);
+        if (template == null) {
+            return null;
+        }
+        return ConfigDescriptionBuilder.create(uri).withParameters(template.getParameters())
+                .withParameterGroups(template.getParameterGroups()).build();
+    }
+
     private void clearCache(String uid) {
         ScriptRecord scriptRecord = scriptCache.remove(uid);
         if (scriptRecord != null) {
@@ -241,38 +308,6 @@ public class ScriptTransformationService
         } else {
             logger.trace("ScriptEngine does not support AutoCloseable interface");
         }
-    }
-
-    @Override
-    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
-            @Nullable Locale locale) {
-        if (PROFILE_CONFIG_URI.equals(uri.toString())) {
-            if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param)
-                    || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)) {
-                return transformationRegistry.getTransformations(List.of(SUPPORTED_CONFIGURATION_TYPE)).stream()
-                        .map(c -> new ParameterOption(c.getUID(), c.getLabel())).collect(Collectors.toList());
-            }
-            if (ScriptProfile.CONFIG_SCRIPT_LANGUAGE.equals(param)) {
-                return supportedScriptTypes.entrySet().stream().map(e -> new ParameterOption(e.getKey(), e.getValue()))
-                        .collect(Collectors.toList());
-            }
-        }
-        return null;
-    }
-
-    /**
-     * As {@link ScriptEngineFactory}s are added/removed, this method will cache all available script types
-     */
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    public void setScriptEngineFactory(ScriptEngineFactory engineFactory) {
-        Map.Entry<String, String> parameterOption = ScriptEngineFactoryHelper.getParameterOption(engineFactory);
-        if (parameterOption != null) {
-            supportedScriptTypes.put(parameterOption.getKey(), parameterOption.getValue());
-        }
-    }
-
-    public void unsetScriptEngineFactory(ScriptEngineFactory engineFactory) {
-        supportedScriptTypes.remove(ScriptEngineFactoryHelper.getPreferredMimeType(engineFactory));
     }
 
     private static class ScriptRecord {

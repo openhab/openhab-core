@@ -61,7 +61,7 @@ public class TransformationHelper {
     public static @Nullable TransformationService getTransformationService(@Nullable BundleContext context,
             String transformationType) {
         if (context != null) {
-            String filter = "(openhab.transform=" + transformationType + ")";
+            String filter = "(" + TransformationService.SERVICE_PROPERTY_NAME + "=" + transformationType + ")";
             try {
                 Collection<ServiceReference<TransformationService>> refs = context
                         .getServiceReferences(TransformationService.class, filter);
