@@ -953,9 +953,9 @@
 
     <!-- jollyday -->
     <dependency>
-      <groupId>de.jollyday</groupId>
-      <artifactId>jollyday</artifactId>
-      <version>0.5.10</version>
+      <groupId>de.focus-shift</groupId>
+      <artifactId>jollyday-jaxb</artifactId>
+      <version>0.14.0</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>

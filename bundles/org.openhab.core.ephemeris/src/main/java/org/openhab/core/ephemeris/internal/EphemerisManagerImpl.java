@@ -55,11 +55,11 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.jollyday.Holiday;
-import de.jollyday.HolidayManager;
-import de.jollyday.ManagerParameter;
-import de.jollyday.ManagerParameters;
-import de.jollyday.util.ResourceUtil;
+import de.focus_shift.Holiday;
+import de.focus_shift.HolidayManager;
+import de.focus_shift.ManagerParameter;
+import de.focus_shift.ManagerParameters;
+import de.focus_shift.util.ResourceUtil;
 
 /**
  * This service provides functionality around ephemeris services and is the central service to be used directly by

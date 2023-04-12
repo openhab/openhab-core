@@ -26,8 +26,8 @@ Fragment-Host: org.openhab.core.model.script
 	com.sun.xml.bind.jaxb-osgi;version='[2.3.3,2.3.4)',\
 	jakarta.xml.bind-api;version='[2.3.3,2.3.4)',\
 	org.apache.servicemix.specs.activation-api-1.2.1;version='[1.2.1,1.2.2)',\
-	jollyday;version='[0.5.10,0.5.11)',\
-	org.threeten.extra;version='[1.5.0,1.5.1)',\
+	jollyday;version='[0.14.0,0.14.1)',\
+	org.threeten.extra;version='[1.7.2,1.7.3)',\
 	org.eclipse.emf.common;version='[2.17.0,2.17.1)',\
 	org.eclipse.emf.ecore;version='[2.20.0,2.20.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.16.0,2.16.1)',\
