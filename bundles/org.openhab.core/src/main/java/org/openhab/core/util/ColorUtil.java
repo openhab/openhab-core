@@ -284,6 +284,9 @@ public class ColorUtil {
         return rgbToHsb(rgbParameters);
     }
 
+    /**
+     * Fine precision version of xyToHsb().
+     */
     public static HSBType xyToHsbFine(double[] xy, Gamut gamut) throws IllegalArgumentException {
         double[] rgb = xyToRgb(xy, gamut);
         PercentType[] rgbParameters = new PercentType[] { new PercentType(BigDecimal.valueOf(rgb[0] * 100.0)),
@@ -292,6 +295,9 @@ public class ColorUtil {
         return rgbToHsb(rgbParameters);
     }
 
+    /**
+     * Inner method to support both rounded and fine versions of xyToHsb().
+     */
     private static double[] xyToRgb(double[] xy, Gamut gamut) throws IllegalArgumentException {
         if (xy.length < 2 || xy.length > 3 || !inRange(xy[0]) || !inRange(xy[1])
                 || (xy.length == 3 && !inRange(xy[2]))) {
