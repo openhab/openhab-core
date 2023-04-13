@@ -13,12 +13,11 @@
 package org.openhab.core.thing.internal.profiles;
 
 import java.math.BigDecimal;
-
-import javax.measure.UnconvertibleException;
-import javax.measure.quantity.Temperature;
+import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.Units;
@@ -38,38 +37,58 @@ import org.slf4j.LoggerFactory;
  * Applies the given parameter "offset" to a {@link QuantityType} or {@link DecimalType} state.
  *
  * @author Stefan Triller - Initial contribution
+ * @author Jimmy Tanagra - Add mutiplier parameter
  */
 @NonNullByDefault
 public class SystemOffsetProfile implements StateProfile {
 
     static final String OFFSET_PARAM = "offset";
+    static final String MULTIPLIER_PARAM = "multiplier";
 
     private final Logger logger = LoggerFactory.getLogger(SystemOffsetProfile.class);
 
     private final ProfileCallback callback;
 
-    private QuantityType<?> offset = QuantityType.ONE;
+    private final QuantityType<?> offset;
+    private final BigDecimal multiplier;
 
     public SystemOffsetProfile(ProfileCallback callback, ProfileContext context) {
         this.callback = callback;
 
-        Object paramValue = context.getConfiguration().get(OFFSET_PARAM);
-        logger.debug("Configuring profile with {} parameter '{}'", OFFSET_PARAM, paramValue);
-        if (paramValue instanceof String string) {
-            try {
-                offset = new QuantityType<>(string);
-            } catch (IllegalArgumentException e) {
-                logger.error(
-                        "Cannot convert value '{}' of parameter '{}' into a valid offset of type QuantityType. Using offset 0 now.",
-                        paramValue, OFFSET_PARAM);
-            }
-        } else if (paramValue instanceof BigDecimal bd) {
-            offset = new QuantityType<>(bd.toString());
+        Object offsetParam = context.getConfiguration().get(OFFSET_PARAM);
+        if (offsetParam == null) {
+            this.offset = QuantityType.ZERO;
         } else {
-            logger.error(
-                    "Parameter '{}' is not of type String or BigDecimal. Please make sure it is one of both, e.g. 3, \"-1.4\" or \"3.2°C\".",
-                    OFFSET_PARAM);
+            this.offset = parseQuantity(offsetParam).orElseGet(() -> {
+                logger.warn("Parameter '{}' is not a QuantityType or a BigDecimal, e.g. '3', '-1.4' or '3.2 °C'.",
+                        OFFSET_PARAM);
+                return QuantityType.ZERO;
+            });
         }
+
+        Object multiplierParam = context.getConfiguration().get(MULTIPLIER_PARAM);
+        if (multiplierParam == null) {
+            this.multiplier = BigDecimal.ONE;
+        } else {
+            this.multiplier = ConfigParser.valueAsOrElse(multiplierParam, BigDecimal.class, BigDecimal.ONE);
+        }
+
+        if (offsetParam == null && multiplierParam == null) {
+            logger.warn("Neither an offset nor a multiplier was defined for this profile.");
+        }
+    }
+
+    private Optional<QuantityType<?>> parseQuantity(Object value) {
+        if (value instanceof String strValue) {
+            try {
+                return Optional.of(new QuantityType<>(strValue));
+            } catch (IllegalArgumentException e) {
+                // return an empty Optional below.
+            }
+        } else if (value instanceof BigDecimal offsetDecimal) {
+            return Optional.of(new QuantityType<>(offsetDecimal, Units.ONE));
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -83,71 +102,88 @@ public class SystemOffsetProfile implements StateProfile {
 
     @Override
     public void onCommandFromItem(Command command) {
-        callback.handleCommand((Command) applyOffset(command, false));
+        Type result = transformValue(command, false);
+        if (result instanceof Command commandResult) {
+            callback.handleCommand(commandResult);
+        }
     }
 
     @Override
     public void onCommandFromHandler(Command command) {
-        callback.sendCommand((Command) applyOffset(command, true));
+        Type result = transformValue(command, true);
+        if (result instanceof Command commandResult) {
+            callback.sendCommand(commandResult);
+        }
     }
 
     @Override
     public void onStateUpdateFromHandler(State state) {
-        callback.sendUpdate((State) applyOffset(state, true));
+        Type result = transformValue(state, true);
+        if (result instanceof State stateResult) {
+            callback.sendUpdate(stateResult);
+        }
+    }
+
+    private @Nullable Type transformValue(Type value, boolean towardsItem) {
+        if (towardsItem) {
+            return applyOffset(applyMultiplier(value, true), true);
+        } else {
+            return applyMultiplier(applyOffset(value, false), false);
+        }
+    }
+
+    private @Nullable Type applyMultiplier(@Nullable Type value, boolean towardsItem) {
+        if (multiplier.equals(BigDecimal.ONE)) {
+            return value;
+        }
+
+        if (value instanceof QuantityType<?> qtyValue) {
+            return towardsItem ? qtyValue.multiply(multiplier) : qtyValue.divide(multiplier);
+        } else if (value instanceof DecimalType decValue) {
+            BigDecimal bdValue = decValue.toBigDecimal();
+            bdValue = towardsItem ? bdValue.multiply(multiplier) : bdValue.divide(multiplier);
+            return new DecimalType(bdValue);
+        }
+
+        return value;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Type applyOffset(Type state, boolean towardsItem) {
-        if (state instanceof UnDefType) {
+    private @Nullable Type applyOffset(@Nullable Type state, boolean towardsItem) {
+        if (state instanceof UnDefType || state == null) {
             // we cannot adjust UNDEF or NULL values, thus we simply return them without reporting an error or warning
             return state;
         }
 
+        if (offset.equals(QuantityType.ZERO)) {
+            return state;
+        }
+
         QuantityType finalOffset = towardsItem ? offset : offset.negate();
-        Type result = UnDefType.UNDEF;
         if (state instanceof QuantityType qtState) {
-            try {
-                if (Units.ONE.equals(finalOffset.getUnit()) && !Units.ONE.equals(qtState.getUnit())) {
-                    // allow offsets without unit -> implicitly assume its the same as the one from the state, but warn
-                    // the user
-                    logger.warn(
-                            "Received a QuantityType state '{}' with unit, but the offset is defined as a plain number without unit ({}), please consider adding a unit to the profile offset.",
-                            state, offset);
-                    finalOffset = new QuantityType<>(finalOffset.toBigDecimal(), qtState.getUnit());
+            if (Units.ONE.equals(finalOffset.getUnit()) && !Units.ONE.equals(qtState.getUnit())) {
+                // allow offsets without unit -> implicitly assume it's the same as the one from the state, but warn
+                // the user
+                logger.warn(
+                        "Received a QuantityType state '{}' with unit, but the offset is defined as a plain number without unit ({}), please consider adding a unit to the profile offset.",
+                        state, offset);
+                finalOffset = new QuantityType<>(finalOffset.toBigDecimal(), qtState.getUnit());
+            } else {
+                finalOffset = finalOffset.toUnitRelative(qtState.getUnit());
+                if (finalOffset == null) {
+                    logger.warn("Cannot apply offset '{}' to state '{}' because types do not match.", finalOffset,
+                            qtState);
+                    return null;
                 }
-                // take care of temperatures because they start at offset -273°C = 0K
-                if (Units.KELVIN.equals(qtState.getUnit().getSystemUnit())) {
-                    QuantityType<Temperature> tmp = handleTemperature(qtState, finalOffset);
-                    if (tmp != null) {
-                        result = tmp;
-                    }
-                } else {
-                    result = qtState.add(finalOffset);
-                }
-            } catch (UnconvertibleException e) {
-                logger.warn("Cannot apply offset '{}' to state '{}' because types do not match.", finalOffset, qtState);
             }
+            return qtState.add(finalOffset);
         } else if (state instanceof DecimalType decState && Units.ONE.equals(finalOffset.getUnit())) {
-            result = new DecimalType(decState.toBigDecimal().add(finalOffset.toBigDecimal()));
-        } else {
-            logger.warn(
-                    "Offset '{}' cannot be applied to the incompatible state '{}' sent from the binding. Returning original state.",
-                    offset, state);
-            result = state;
-        }
-        return result;
-    }
-
-    @SuppressWarnings("null")
-    private @Nullable QuantityType<Temperature> handleTemperature(QuantityType<Temperature> qtState,
-            QuantityType<Temperature> offset) {
-        // do the math in Kelvin and afterwards convert it back to the unit of the state
-        final QuantityType<Temperature> kelvinState = qtState.toUnit(Units.KELVIN);
-        final QuantityType<Temperature> kelvinOffset = offset.toUnitRelative(Units.KELVIN);
-        if (kelvinState == null || kelvinOffset == null) {
-            return null;
+            return new DecimalType(decState.toBigDecimal().add(finalOffset.toBigDecimal()));
         }
 
-        return kelvinState.add(kelvinOffset).toUnit(qtState.getUnit());
+        logger.warn(
+                "Offset '{}' cannot be applied to the incompatible state '{}' sent from the binding. Returning original state.",
+                offset, state);
+        return state;
     }
 }
