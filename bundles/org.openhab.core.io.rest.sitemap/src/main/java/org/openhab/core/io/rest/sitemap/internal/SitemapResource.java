@@ -75,6 +75,7 @@ import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Frame;
 import org.openhab.core.model.sitemap.sitemap.Image;
+import org.openhab.core.model.sitemap.sitemap.Input;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Mapview;
@@ -557,6 +558,10 @@ public class SitemapResource
                 mappingBean.label = mapping.getLabel();
                 bean.mappings.add(mappingBean);
             }
+        }
+        if (widget instanceof Input) {
+            Input inputWidget = (Input) widget;
+            bean.inputHint = inputWidget.getInputHint();
         }
         if (widget instanceof Slider) {
             Slider sliderWidget = (Slider) widget;
