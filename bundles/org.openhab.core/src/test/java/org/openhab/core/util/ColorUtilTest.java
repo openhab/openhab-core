@@ -142,6 +142,7 @@ public class ColorUtilTest {
             xyToXY(new double[] { (g.g()[0] + g.b()[0]) / 2f, (g.g()[1] + g.b()[1]) / 2f }, g);
             xyToXY(new double[] { (g.b()[0] + g.r()[0]) / 2f, (g.b()[1] + g.r()[1]) / 2f }, g);
             xyToXY(new double[] { (g.r()[0] + g.g()[0] + g.b()[0]) / 3f, (g.r()[1] + g.g()[1] + g.b()[1]) / 3f }, g);
+            xyToXY(ColorUtil.hsbToXY(HSBType.WHITE), g);
         }
     }
 
