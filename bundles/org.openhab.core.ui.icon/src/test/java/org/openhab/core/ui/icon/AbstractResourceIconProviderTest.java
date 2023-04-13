@@ -57,6 +57,10 @@ public class AbstractResourceIconProviderTest {
                         return new ByteArrayInputStream("x-30.png".getBytes());
                     case "x-y z.png":
                         return new ByteArrayInputStream("x-y z.png".getBytes());
+                    case "a-bb-ccc-30.png":
+                        return new ByteArrayInputStream("a-bb-ccc-30.png".getBytes());
+                    case "a-bb-ccc-y z.png":
+                        return new ByteArrayInputStream("a-bb-ccc-y z.png".getBytes());
                     default:
                         return null;
                 }
@@ -96,9 +100,22 @@ public class AbstractResourceIconProviderTest {
     public void testScanningForState() throws IOException {
         try (InputStream is = provider.getIcon("x", "classic", "34", Format.PNG)) {
             assertNotNull(is);
+            assertThat(new String(is.readAllBytes(), StandardCharsets.UTF_8), is("x-30.png"));
         }
 
         try (InputStream is = provider.getIcon("x", "classic", "25", Format.PNG)) {
+            assertNull(is);
+        }
+    }
+
+    @Test
+    public void testScanningIconWithHyphensForState() throws IOException {
+        try (InputStream is = provider.getIcon("a-bb-ccc", "classic", "34", Format.PNG)) {
+            assertNotNull(is);
+            assertThat(new String(is.readAllBytes(), StandardCharsets.UTF_8), is("a-bb-ccc-30.png"));
+        }
+
+        try (InputStream is = provider.getIcon("a-bb-ccc", "classic", "25", Format.PNG)) {
             assertNull(is);
         }
     }
@@ -111,9 +128,23 @@ public class AbstractResourceIconProviderTest {
     }
 
     @Test
+    public void testIconWithHyphensWithQuantityTypeState() throws IOException {
+        try (InputStream is = provider.getIcon("a-bb-ccc", "classic", "34 °C", Format.PNG)) {
+            assertThat(new String(is.readAllBytes(), StandardCharsets.UTF_8), is("a-bb-ccc-30.png"));
+        }
+    }
+
+    @Test
     public void testWithStringTypeState() throws IOException {
         try (InputStream is = provider.getIcon("x", "classic", "y z", Format.PNG)) {
             assertThat(new String(is.readAllBytes(), StandardCharsets.UTF_8), is("x-y z.png"));
+        }
+    }
+
+    @Test
+    public void testIconWithHyphensWithStringTypeState() throws IOException {
+        try (InputStream is = provider.getIcon("a-bb-ccc", "classic", "y z", Format.PNG)) {
+            assertThat(new String(is.readAllBytes(), StandardCharsets.UTF_8), is("a-bb-ccc-y z.png"));
         }
     }
 }
