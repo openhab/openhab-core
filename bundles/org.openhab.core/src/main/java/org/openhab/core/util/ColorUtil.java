@@ -431,9 +431,7 @@ public class ColorUtil {
          * @param g double array with `xy` coordinates for green, x, y between 0.0000 and 1.0000.
          * @param b double array with `xy` coordinates for blue, x, y between 0.0000 and 1.0000.
          */
-        public Gamut
-
-        {
+        public Gamut {
         }
 
         /**
