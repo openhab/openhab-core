@@ -51,8 +51,10 @@ public class ColorUtilTest {
         deltaHue = deltaHue > 180.0 ? Math.abs(deltaHue - 360) : deltaHue;
         double deltaSat = Math.abs(hsb.getSaturation().doubleValue() - hsb2.getSaturation().doubleValue());
         double deltaBri = Math.abs(hsb.getBrightness().doubleValue() - hsb2.getBrightness().doubleValue());
-
-        assertThat(deltaHue, is(lessThan(5.0)));
+        // hue is meaningless when saturation is zero
+        if (hsb.getSaturation().doubleValue() > 0) {
+            assertThat(deltaHue, is(lessThan(5.0)));
+        }
         assertThat(deltaSat, is(lessThanOrEqualTo(1.0)));
         assertThat(deltaBri, is(lessThanOrEqualTo(1.0)));
     }
@@ -74,12 +76,12 @@ public class ColorUtilTest {
     // test RGB -> HSB -> RGB conversion for different values, including the ones known to cause rounding error
     @ParameterizedTest
     @ArgumentsSource(RgbValueProvider.class)
-    public void testConversionRgbToHsbToRgb(int[] rgb, int maxSquaredSum) {
+    public void testConversionRgbToHsbToRgb(int[] rgb) {
         HSBType hsb = ColorUtil.rgbToHsb(rgb);
         Assertions.assertNotNull(hsb);
 
         final int[] convertedRgb = ColorUtil.hsbToRgb(hsb);
-        assertRgbEquals(rgb, convertedRgb, maxSquaredSum);
+        assertRgbEquals(rgb, convertedRgb);
     }
 
     @ParameterizedTest
@@ -89,7 +91,7 @@ public class ColorUtilTest {
         final HSBType hsbType = new HSBType(hsbString);
 
         final int[] converted = ColorUtil.hsbToRgb(hsbType);
-        assertRgbEquals(rgb, converted, 0);
+        assertRgbEquals(rgb, converted);
     }
 
     @ParameterizedTest
@@ -98,7 +100,7 @@ public class ColorUtilTest {
         final HSBType hsbType = ColorUtil.rgbToHsb(rgb);
 
         final int[] rgbConverted = ColorUtil.hsbToRgb(hsbType);
-        assertRgbEquals(rgb, rgbConverted, 0);
+        assertRgbEquals(rgb, rgbConverted);
     }
 
     @ParameterizedTest
@@ -114,7 +116,7 @@ public class ColorUtilTest {
 
     private void xyToXY(double[] xy, Gamut gamut) {
         assertTrue(xy.length > 1);
-        HSBType hsb = ColorUtil.xyToHsbFine(xy, gamut);
+        HSBType hsb = ColorUtil.xyToHsb(xy, gamut);
         double[] xy2 = ColorUtil.hsbToXY(hsb, gamut);
         assertTrue(xy2.length > 1);
         for (int i = 0; i < xy.length; i++) {
@@ -149,8 +151,10 @@ public class ColorUtilTest {
     /* Providers for parameterized tests */
 
     private static Stream<Arguments> colors() {
-        return Stream.of(HSBType.BLACK, HSBType.BLUE, HSBType.GREEN, HSBType.RED, HSBType.WHITE,
-                ColorUtil.rgbToHsb(new int[] { 127, 94, 19 })).map(Arguments::of);
+        return Stream
+                .of(HSBType.BLACK, HSBType.BLUE, HSBType.GREEN, HSBType.RED, HSBType.WHITE,
+                        ColorUtil.rgbToHsb(new int[] { 127, 94, 19 }), new HSBType("0,0.1,0"), new HSBType("0,0.1,100"))
+                .map(Arguments::of);
     }
 
     private static Stream<Arguments> invalids() {
@@ -185,55 +189,42 @@ public class ColorUtilTest {
     }
 
     /*
-     * Return a stream RGB values together with allowed deviation (sum of squared differences).
-     * Differences in conversion are due to rounding errors as HSBType is created with integer numbers.
+     * Return a stream RGB values.
      */
-
     static class RgbValueProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(@Nullable ExtensionContext context) throws Exception {
-            return Stream.of(Arguments.of(new int[] { 0, 0, 0 }, 0), Arguments.of(new int[] { 255, 255, 255 }, 0),
-                    Arguments.of(new int[] { 255, 0, 0 }, 0), Arguments.of(new int[] { 0, 255, 0 }, 0),
-                    Arguments.of(new int[] { 0, 0, 255 }, 0), Arguments.of(new int[] { 255, 255, 0 }, 0),
-                    Arguments.of(new int[] { 255, 0, 255 }, 0), Arguments.of(new int[] { 0, 255, 255 }, 0),
-                    Arguments.of(new int[] { 191, 191, 191 }, 0), Arguments.of(new int[] { 128, 128, 128 }, 0),
-                    Arguments.of(new int[] { 128, 0, 0 }, 0), Arguments.of(new int[] { 128, 128, 0 }, 0),
-                    Arguments.of(new int[] { 0, 128, 0 }, 0), Arguments.of(new int[] { 128, 0, 128 }, 0),
-                    Arguments.of(new int[] { 0, 128, 128 }, 0), Arguments.of(new int[] { 0, 0, 128 }, 0),
-                    Arguments.of(new int[] { 0, 132, 255 }, 0), Arguments.of(new int[] { 1, 131, 254 }, 3),
-                    Arguments.of(new int[] { 2, 130, 253 }, 6), Arguments.of(new int[] { 3, 129, 252 }, 4),
-                    Arguments.of(new int[] { 4, 128, 251 }, 3), Arguments.of(new int[] { 5, 127, 250 }, 0));
+            return Stream.of(Arguments.of(new int[] { 0, 0, 0 }), Arguments.of(new int[] { 255, 255, 255 }),
+                    Arguments.of(new int[] { 255, 0, 0 }), Arguments.of(new int[] { 0, 255, 0 }),
+                    Arguments.of(new int[] { 0, 0, 255 }), Arguments.of(new int[] { 255, 255, 0 }),
+                    Arguments.of(new int[] { 255, 0, 255 }), Arguments.of(new int[] { 0, 255, 255 }),
+                    Arguments.of(new int[] { 191, 191, 191 }), Arguments.of(new int[] { 128, 128, 128 }),
+                    Arguments.of(new int[] { 128, 0, 0 }), Arguments.of(new int[] { 128, 128, 0 }),
+                    Arguments.of(new int[] { 0, 128, 0 }), Arguments.of(new int[] { 128, 0, 128 }),
+                    Arguments.of(new int[] { 0, 128, 128 }), Arguments.of(new int[] { 0, 0, 128 }),
+                    Arguments.of(new int[] { 0, 132, 255 }), Arguments.of(new int[] { 1, 131, 254 }),
+                    Arguments.of(new int[] { 2, 130, 253 }), Arguments.of(new int[] { 3, 129, 252 }),
+                    Arguments.of(new int[] { 4, 128, 251 }), Arguments.of(new int[] { 5, 127, 250 }));
         }
     }
 
     /* Helper functions */
 
     /**
-     * Helper method for checking if expected and actual RGB color parameters (int[3], 0..255) lie within a given
-     * percentage of each other. This method is required in order to eliminate integer rounding artifacts in JUnit tests
-     * when comparing RGB values. Asserts that the color parameters of expected and actual do not have a squared sum
-     * of differences which exceeds maxSquaredSum.
+     * Helper method for checking if expected and actual RGB color parameters (int[3], 0..255) match.
      *
      * When the test fails, both colors are printed.
      *
      * @param expected an HSBType containing the expected color.
      * @param actual an HSBType containing the actual color.
-     * @param maxSquaredSum the maximum allowed squared sum of differences.
      */
-    private void assertRgbEquals(final int[] expected, final int[] actual, int maxSquaredSum) {
-        int squaredSum = 0;
+    private void assertRgbEquals(final int[] expected, final int[] actual) {
         if (expected[0] != actual[0] || expected[1] != actual[1] || expected[2] != actual[2]) {
-            // only proceed if both RGB colors are not idential
-            for (int i = 0; i < 3; i++) {
-                int diff = expected[i] - actual[i];
-                squaredSum = squaredSum + diff * diff;
-            }
-            if (squaredSum > maxSquaredSum) {
-                // deviation too high, just prepare readable string compare and let it fail
-                final String expectedS = expected[0] + ", " + expected[1] + ", " + expected[2];
-                final String actualS = actual[0] + ", " + actual[1] + ", " + actual[2];
-                assertEquals(expectedS, actualS);
-            }
+            // only proceed if both RGB colors are not idential,
+            // just prepare readable string compare and let it fail
+            final String expectedS = expected[0] + ", " + expected[1] + ", " + expected[2];
+            final String actualS = actual[0] + ", " + actual[1] + ", " + actual[2];
+            assertEquals(expectedS, actualS);
         }
     }
 }

@@ -52,6 +52,9 @@ public class ColorUtil {
      * This function does rounding to integer valued components. It is the preferred way of doing HSB to RGB conversion.
      *
      * See also: {@link #hsbToRgbPercent(HSBType)}, {@link #hsbTosRgb(HSBType)}
+     *
+     * @param hsb an {@link HSBType} value.
+     * @return array of three int with the RGB values in the range 0 to 255.
      */
     public static int[] hsbToRgb(HSBType hsb) {
         final PercentType[] rgbPercent = hsbToRgbPercent(hsb);
@@ -63,10 +66,13 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to
      * <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a>.
      *
-     * This function does not round the components to integer values. Please consider using {@link #hsbToRgb(HSBType)}
-     * whenever integer values are required.
+     * This function does not round the components. For conversion to integer values in the range 0 to 255 use
+     * {@link #hsbToRgb(HSBType)}.
      *
      * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}
+     *
+     * @param hsb an {@link HSBType} value.
+     * @return array of three {@link PercentType} with the RGB values in the range 0 to 100 percent.
      */
     public static PercentType[] hsbToRgbPercent(HSBType hsb) {
         PercentType red = null;
@@ -80,6 +86,7 @@ public class ColorUtil {
         final BigDecimal f = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP)
                 .remainder(BigDecimal.ONE);
         final BigDecimal value = hsb.getBrightness().toBigDecimal();
+
         PercentType a = new PercentType(value.multiply(BigDecimal.ONE.subtract(s)));
         PercentType b = new PercentType(value.multiply(BigDecimal.ONE.subtract(s.multiply(f))));
         PercentType c = new PercentType(
@@ -131,7 +138,8 @@ public class ColorUtil {
      *
      * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbToRgbPercent(HSBType)}
      *
-     * @return the RGB value of the color in the default sRGB color model
+     * @param hsb an {@link HSBType} value.
+     * @return the RGB value of the color in the default sRGB color model.
      */
     public static int hsbTosRgb(HSBType hsb) {
         final int[] rgb = hsbToRgb(hsb);
@@ -146,12 +154,11 @@ public class ColorUtil {
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
      * developerportal</a>.
      *
-     * @param hsbType a {@link HSBType} value
-     * @return double array with the closest matching CIE 1931 color, x, y between 0.0000 and 1.0000.
-     * @return array of doubles with the closest matching CIE 1931 color, x, y, Y between 0.0000 and 1.0000.
+     * @param hsb an {@link HSBType} value.
+     * @return array of three double with the closest matching CIE 1931 x,y,Y in the range 0.0000 to 1.0000
      */
-    public static double[] hsbToXY(HSBType hsbType) {
-        return hsbToXY(hsbType, DEFAULT_GAMUT);
+    public static double[] hsbToXY(HSBType hsb) {
+        return hsbToXY(hsb, DEFAULT_GAMUT);
     }
 
     /**
@@ -162,12 +169,12 @@ public class ColorUtil {
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
      * developer portal</a>.
      *
-     * @param hsbType a {@link HSBType} value
-     * @param gamut the gamut supported by the light.
-     * @return array of doubles with the closest matching CIE 1931 color, x, y, Y between 0.0000 and 1.0000.
+     * @param hsb an {@link HSBType} value.
+     * @param gamut the color Gamut supported by the light.
+     * @return array of three double with the closest matching CIE 1931 x,y,Y in the range 0.0000 to 1.0000
      */
-    public static double[] hsbToXY(HSBType hsbType, Gamut gamut) {
-        PercentType[] rgb = hsbToRgbPercent(hsbType);
+    public static double[] hsbToXY(HSBType hsb, Gamut gamut) {
+        PercentType[] rgb = hsbToRgbPercent(hsb);
         double r = inverseCompand(rgb[0].doubleValue() / PercentType.HUNDRED.doubleValue());
         double g = inverseCompand(rgb[1].doubleValue() / PercentType.HUNDRED.doubleValue());
         double b = inverseCompand(rgb[2].doubleValue() / PercentType.HUNDRED.doubleValue());
@@ -183,7 +190,10 @@ public class ColorUtil {
         double[] xyY = new double[] { ((int) (q.x * 10000.0)) / 10000.0, ((int) (q.y * 10000.0)) / 10000.0,
                 ((int) (Y * 10000.0)) / 10000.0 };
 
-        LOGGER.trace("HSB: {} - XYZ: {} {} {} - xyY: {}", hsbType, X, Y, Z, xyY);
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("HSB: {} - RGB: {} - XYZ: {} {} {} - xyY: {}", hsb, ColorUtil.hsbToRgbPercent(hsb), X, Y, Z,
+                    xyY);
+        }
         return xyY;
     }
 
@@ -191,7 +201,7 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color format to
      * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
-     * @param rgb int array of length 3, all values are constrained to 0-255
+     * @param rgb array of three int with the RGB values in the range 0 to 255.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
@@ -207,7 +217,7 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color format to
      * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
-     * @param rgb PercentType[] array of length 3, comprising integer or real values, constrained to 0-100.
+     * @param rgb array of three {@link PercentType] with the RGB values in the range 0 to 100 percent.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
@@ -262,7 +272,7 @@ public class ColorUtil {
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
      * developer portal</a>.
      *
-     * @param xy the CIE 1931 xy color, x,y between 0.0000 and 1.0000.
+     * @param xy array of double with CIE 1931 x,y[,Y] in the range 0.0000 to 1.0000 <code>Y</code> value is optional.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
@@ -272,61 +282,18 @@ public class ColorUtil {
 
     /**
      * Transform <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> `xy` format to
-     * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}, with the RGB elements rounded
-     * to integer values.
+     * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
      * See <a href=
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
      * developer portal</a>.
      *
-     * @param xy the CIE 1931 xy color, x,y[,Y] between 0.0000 and 1.0000. <code>Y</code> value is optional.
-     * @param gamut the gamut supported by the light.
-     * @return the corresponding {@link HSBType} created by rounding the RGB values to integers.
+     * @param xy array of double with CIE 1931 x,y[,Y] in the range 0.0000 to 1.0000 <code>Y</code> value is optional.
+     * @param gamut the color Gamut supported by the light.
+     * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
      */
     public static HSBType xyToHsb(double[] xy, Gamut gamut) throws IllegalArgumentException {
-        double[] rgb = xyToRgb(xy, gamut);
-        int[] rgbParameters = new int[] { (int) Math.round(255.0 * rgb[0]), (int) Math.round(255.0 * rgb[1]),
-                (int) Math.round(255.0 * rgb[2]) };
-        return rgbToHsb(rgbParameters);
-    }
-
-    /**
-     * Transform <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> `xy` format to
-     * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}, with the RGB elements NOT
-     * rounded in order to produce an HSB with finer precision..
-     *
-     * See <a href=
-     * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
-     * developer portal</a>.
-     *
-     * @param xy the CIE 1931 xy color, x,y[,Y] between 0.0000 and 1.0000. <code>Y</code> value is optional.
-     * @param gamut the gamut supported by the light.
-     * @return the corresponding {@link HSBType} created from non rounded RGB values.
-     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
-     */
-    public static HSBType xyToHsbFine(double[] xy, Gamut gamut) throws IllegalArgumentException {
-        double[] rgb = xyToRgb(xy, gamut);
-        PercentType[] rgbParameters = new PercentType[] { new PercentType(BigDecimal.valueOf(rgb[0] * 100.0)),
-                new PercentType(BigDecimal.valueOf(rgb[1] * 100.0)),
-                new PercentType(BigDecimal.valueOf(rgb[2] * 100.0)) };
-        return rgbToHsb(rgbParameters);
-    }
-
-    /**
-     * Transform <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> `xy` format to
-     * <a href="https://en.wikipedia.org/wiki/RGB_color_model">HSV</a> as an RGB array of double values.
-     *
-     * See <a href=
-     * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
-     * developer portal</a>.
-     *
-     * @param xy the CIE 1931 xy color, x,y[,Y] between 0.0000 and 1.0000. <code>Y</code> value is optional.
-     * @param gamut the gamut supported by the light.
-     * @return an array of doubles containing the RGB elements.
-     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
-     */
-    public static double[] xyToRgb(double[] xy, Gamut gamut) throws IllegalArgumentException {
         if (xy.length < 2 || xy.length > 3 || !inRange(xy[0]) || !inRange(xy[1])
                 || (xy.length == 3 && !inRange(xy[2]))) {
             throw new IllegalArgumentException("xy array only allows two or three values between 0.0 and 1.0.");
@@ -371,7 +338,9 @@ public class ColorUtil {
         }
 
         LOGGER.trace("xy: {} - XYZ: {} {} {} - RGB: {} {} {}", xy, X, Y, Z, r, g, b);
-        return new double[] { r, g, b };
+
+        return rgbToHsb(new PercentType[] { convertDoubleToColorPercent(r), convertDoubleToColorPercent(g),
+                convertDoubleToColorPercent(b) });
     }
 
     /**
@@ -462,7 +431,9 @@ public class ColorUtil {
          * @param g double array with `xy` coordinates for green, x, y between 0.0000 and 1.0000.
          * @param b double array with `xy` coordinates for blue, x, y between 0.0000 and 1.0000.
          */
-        public Gamut {
+        public Gamut
+
+        {
         }
 
         /**
@@ -521,5 +492,9 @@ public class ColorUtil {
 
     private static PercentType convertByteToColorPercent(int b) {
         return new PercentType(new BigDecimal(b).divide(new BigDecimal("2.55"), MathContext.DECIMAL64));
+    }
+
+    private static PercentType convertDoubleToColorPercent(double d) {
+        return new PercentType(BigDecimal.valueOf(d * 100.0));
     }
 }
