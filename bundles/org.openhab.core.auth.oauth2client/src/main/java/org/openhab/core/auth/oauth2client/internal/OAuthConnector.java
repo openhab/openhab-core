@@ -15,7 +15,6 @@ package org.openhab.core.auth.oauth2client.internal;
 import static org.openhab.core.auth.oauth2client.internal.Keyword.*;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -67,29 +66,20 @@ public class OAuthConnector {
     private final Logger logger = LoggerFactory.getLogger(OAuthConnector.class);
     private final Gson gson;
 
-    public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable String deserializerClassName) {
+    public OAuthConnector(HttpClientFactory httpClientFactory) {
+        this(httpClientFactory, new GsonBuilder());
+    }
+
+    public OAuthConnector(HttpClientFactory httpClientFactory, GsonBuilder gsonBuilder) {
         this.httpClientFactory = httpClientFactory;
-        GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+        gson = gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, typeOfT, context) -> {
                     try {
                         return Instant.parse(json.getAsString());
                     } catch (DateTimeParseException e) {
                         return LocalDateTime.parse(json.getAsString()).atZone(ZoneId.systemDefault()).toInstant();
                     }
-                });
-
-        if (deserializerClassName != null) {
-            try {
-                Class<?> deserializerClass = Class.forName(deserializerClassName);
-                gsonBuilder = gsonBuilder.registerTypeAdapter(AccessTokenResponse.class,
-                        deserializerClass.getConstructor().newInstance());
-            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                    | InvocationTargetException | NoSuchMethodException | SecurityException
-                    | ClassNotFoundException e) {
-                logger.error("Unable to construct custom deserializer '{}'", deserializerClassName, e);
-            }
-        }
-        gson = gsonBuilder.create();
+                }).create();
     }
 
     /**
