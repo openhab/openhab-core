@@ -23,10 +23,14 @@ import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.semantics.model.equipment.CleaningRobot;
+import org.openhab.core.semantics.model.equipment.Equipments;
 import org.openhab.core.semantics.model.location.Bathroom;
 import org.openhab.core.semantics.model.location.Kitchen;
+import org.openhab.core.semantics.model.location.Locations;
 import org.openhab.core.semantics.model.location.Room;
 import org.openhab.core.semantics.model.point.Measurement;
+import org.openhab.core.semantics.model.point.Points;
+import org.openhab.core.semantics.model.property.Properties;
 import org.openhab.core.semantics.model.property.Temperature;
 
 /**
@@ -104,5 +108,120 @@ public class SemanticTagsTest {
     @Test
     public void testGetProperty() {
         assertEquals(Temperature.class, SemanticTags.getProperty(pointItem));
+    }
+
+    @Test
+    public void testAddLocation() {
+        String tagName = "CustomLocation";
+        Class customTag = SemanticTags.add(tagName, Location.class);
+        assertNotNull(customTag);
+        assertEquals(customTag, SemanticTags.getById(tagName));
+        assertEquals(customTag, SemanticTags.getByLabel("Custom Location", Locale.getDefault()));
+        assertTrue(Locations.stream().toList().contains(customTag));
+
+        GroupItem myItem = new GroupItem("MyLocation");
+        myItem.addTag(tagName);
+
+        assertEquals(customTag, SemanticTags.getLocation(myItem));
+    }
+
+    @Test
+    public void testAddLocationWithParentString() {
+        String tagName = "CustomLocationParentString";
+        Class customTag = SemanticTags.add(tagName, "Location");
+        assertNotNull(customTag);
+        assertTrue(Locations.stream().toList().contains(customTag));
+    }
+
+    @Test
+    public void testAddEquipment() {
+        String tagName = "CustomEquipment";
+        Class customTag = SemanticTags.add(tagName, Equipment.class);
+        assertNotNull(customTag);
+        assertEquals(customTag, SemanticTags.getById(tagName));
+        assertEquals(customTag, SemanticTags.getByLabel("Custom Equipment", Locale.getDefault()));
+        assertTrue(Equipments.stream().toList().contains(customTag));
+
+        GroupItem myItem = new GroupItem("MyEquipment");
+        myItem.addTag(tagName);
+
+        assertEquals(customTag, SemanticTags.getEquipment(myItem));
+    }
+
+    @Test
+    public void testAddEquipmentWithParentString() {
+        String tagName = "CustomEquipmentParentString";
+        Class customTag = SemanticTags.add(tagName, "Television");
+        assertNotNull(customTag);
+        assertTrue(Equipments.stream().toList().contains(customTag));
+    }
+
+    @Test
+    public void testAddPoint() {
+        String tagName = "CustomPoint";
+        Class customTag = SemanticTags.add(tagName, Point.class);
+        assertNotNull(customTag);
+        assertEquals(customTag, SemanticTags.getById(tagName));
+        assertEquals(customTag, SemanticTags.getByLabel("Custom Point", Locale.getDefault()));
+        assertTrue(Points.stream().toList().contains(customTag));
+
+        GroupItem myItem = new GroupItem("MyItem");
+        myItem.addTag(tagName);
+
+        assertEquals(customTag, SemanticTags.getPoint(myItem));
+    }
+
+    @Test
+    public void testAddPointParentString() {
+        String tagName = "CustomPointParentString";
+        Class customTag = SemanticTags.add(tagName, "Control");
+        assertNotNull(customTag);
+        assertTrue(Points.stream().toList().contains(customTag));
+    }
+
+    @Test
+    public void testAddProperty() {
+        String tagName = "CustomProperty";
+        Class customTag = SemanticTags.add(tagName, Property.class);
+        assertNotNull(customTag);
+        assertEquals(customTag, SemanticTags.getById(tagName));
+        assertEquals(customTag, SemanticTags.getByLabel("Custom Property", Locale.getDefault()));
+        assertTrue(Properties.stream().toList().contains(customTag));
+
+        GroupItem myItem = new GroupItem("MyItem");
+        myItem.addTag(tagName);
+
+        assertEquals(customTag, SemanticTags.getProperty(myItem));
+    }
+
+    @Test
+    public void testAddPropertyParentString() {
+        String tagName = "CustomPropertyParentString";
+        Class customTag = SemanticTags.add(tagName, "Property");
+        assertNotNull(customTag);
+        assertTrue(Properties.stream().toList().contains(customTag));
+    }
+
+    @Test
+    public void testAddingExistingTagShouldFail() {
+        assertNull(SemanticTags.add("Room", Location.class));
+
+        assertNotNull(SemanticTags.add("CustomLocation1", Location.class));
+        assertNull(SemanticTags.add("CustomLocation1", Location.class));
+    }
+
+    @Test
+    public void testAddWithCustomLabel() {
+        Class tag = SemanticTags.add("CustomProperty2", Property.class, " Custom Label ", null, null);
+        assertEquals(tag, SemanticTags.getByLabel("Custom Label", Locale.getDefault()));
+    }
+
+    @Test
+    public void testAddWithSynonyms() {
+        String synonyms = " Synonym1, Synonym2 , Synonym With Space ";
+        Class tag = SemanticTags.add("CustomProperty3", Property.class, null, synonyms, null);
+        assertEquals(tag, SemanticTags.getByLabelOrSynonym("Synonym1", Locale.getDefault()).get(0));
+        assertEquals(tag, SemanticTags.getByLabelOrSynonym("Synonym2", Locale.getDefault()).get(0));
+        assertEquals(tag, SemanticTags.getByLabelOrSynonym("Synonym With Space", Locale.getDefault()).get(0));
     }
 }

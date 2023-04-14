@@ -20,6 +20,12 @@
       <artifactId>org.openhab.core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+      <version>9.2</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <profiles>

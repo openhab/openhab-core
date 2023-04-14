@@ -54,6 +54,7 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.id/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.persistence/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.semantics/${project.version}</bundle>
+		<feature dependency="true">openhab.tp-asm</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.thing/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.audio/${project.version}</bundle>

@@ -89,4 +89,8 @@ public class Equipments {
     public static Stream<Class<? extends Equipment>> stream() {
         return EQUIPMENTS.stream();
     }
+
+    public static boolean add(Class<? extends Equipment> tag) {
+        return EQUIPMENTS.add(tag);
+    }
 }

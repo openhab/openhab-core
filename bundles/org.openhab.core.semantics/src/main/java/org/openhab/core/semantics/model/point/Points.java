@@ -47,4 +47,8 @@ public class Points {
     public static Stream<Class<? extends Point>> stream() {
         return POINTS.stream();
     }
+
+    public static boolean add(Class<? extends Point> tag) {
+        return POINTS.add(tag);
+    }
 }
