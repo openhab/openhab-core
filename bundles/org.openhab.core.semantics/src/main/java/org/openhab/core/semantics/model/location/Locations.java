@@ -72,4 +72,8 @@ public class Locations {
     public static Stream<Class<? extends Location>> stream() {
         return LOCATIONS.stream();
     }
+
+    public static boolean add(Class<? extends Location> tag) {
+        return LOCATIONS.add(tag);
+    }
 }

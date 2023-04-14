@@ -134,6 +134,10 @@ public class Locations {
     public static Stream<Class<? extends Location>> stream() {
         return LOCATIONS.stream();
     }
+
+    public static boolean add(Class<? extends Location> tag) {
+        return LOCATIONS.add(tag);
+    }
 }
 """)
     file.close()
@@ -171,6 +175,10 @@ public class Equipments {
 
     public static Stream<Class<? extends Equipment>> stream() {
         return EQUIPMENTS.stream();
+    }
+
+    public static boolean add(Class<? extends Equipment> tag) {
+        return EQUIPMENTS.add(tag);
     }
 }
 """)
@@ -210,6 +218,10 @@ public class Points {
     public static Stream<Class<? extends Point>> stream() {
         return POINTS.stream();
     }
+
+    public static boolean add(Class<? extends Point> tag) {
+        return POINTS.add(tag);
+    }
 }
 """)
     file.close()
@@ -247,6 +259,10 @@ public class Properties {
 
     public static Stream<Class<? extends Property>> stream() {
         return PROPERTIES.stream();
+    }
+
+    public static boolean add(Class<? extends Property> tag) {
+        return PROPERTIES.add(tag);
     }
 }
 """)
