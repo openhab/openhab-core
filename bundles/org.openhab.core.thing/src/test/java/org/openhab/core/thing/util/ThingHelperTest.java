@@ -16,6 +16,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -141,5 +142,22 @@ public class ThingHelperTest {
                         Stream.of(ChannelBuilder.create(new ChannelUID(thingUID, "channel2"), "").build(),
                                 ChannelBuilder.create(new ChannelUID(thingUID, "channel3"), "").build())
                                 .collect(toList())));
+    }
+
+    @Test
+    public void asserThatChannelsWithDifferentConfigurationAreDetectedAsDifferent() {
+        Thing thingA = ThingBuilder.create(THING_TYPE_UID, THING_UID)
+                .withChannels(ChannelBuilder.create(new ChannelUID("binding:type:thingId:channel1"), "itemType")
+                        .withConfiguration(new Configuration(Map.of("key", "v1"))).build())
+                .withConfiguration(new Configuration()).build();
+
+        assertTrue(ThingHelper.equals(thingA, thingA));
+
+        Thing thingB = ThingBuilder.create(THING_TYPE_UID, THING_UID)
+                .withChannels(ChannelBuilder.create(new ChannelUID("binding:type:thingId:channel1"), "itemType")
+                        .withConfiguration(new Configuration(Map.of("key", "v2"))).build())
+                .withConfiguration(new Configuration()).build();
+
+        assertFalse(ThingHelper.equals(thingA, thingB));
     }
 }
