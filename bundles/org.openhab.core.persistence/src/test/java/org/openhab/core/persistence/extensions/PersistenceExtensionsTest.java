@@ -18,6 +18,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -678,6 +679,15 @@ public class PersistenceExtensionsTest {
 
         average = PersistenceExtensions.averageSince(switchItem, now.plusHours(1), TestPersistenceService.ID);
         assertThat(average, is(nullValue()));
+    }
+
+    @Test
+    public void testAverageBetweenZeroDuration() {
+        ZonedDateTime now = ZonedDateTime.now();
+        assertDoesNotThrow(
+                () -> PersistenceExtensions.averageBetween(quantityItem, now, now, TestPersistenceService.ID));
+        assertThat(PersistenceExtensions.averageBetween(quantityItem, now, now, TestPersistenceService.ID),
+                is(nullValue()));
     }
 
     @Test
