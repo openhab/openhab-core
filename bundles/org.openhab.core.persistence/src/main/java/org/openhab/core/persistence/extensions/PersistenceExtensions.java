@@ -824,7 +824,8 @@ public class PersistenceExtensions {
 
         if (firstTimestamp != null) {
             BigDecimal totalDuration = BigDecimal.valueOf(Duration.between(firstTimestamp, endTime).toMillis());
-            return new DecimalType(sum.divide(totalDuration, MathContext.DECIMAL64));
+            return totalDuration.signum() == 0 ? null
+                    : new DecimalType(sum.divide(totalDuration, MathContext.DECIMAL64));
         }
 
         return null;
