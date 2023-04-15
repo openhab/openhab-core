@@ -322,7 +322,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                 }
             }
         }
-        logger.warn("No ProfileFactory found which supports profile '{}'", profileTypeUID);
+        logger.warn("No ProfileFactory found which supports profile '{}' for link '{}'", profileTypeUID, link);
         return null;
     }
 
