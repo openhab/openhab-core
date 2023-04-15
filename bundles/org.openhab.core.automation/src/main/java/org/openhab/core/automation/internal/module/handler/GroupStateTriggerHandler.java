@@ -29,7 +29,7 @@ import org.openhab.core.items.events.GroupItemStateChangedEvent;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemRemovedEvent;
 import org.openhab.core.items.events.ItemStateChangedEvent;
-import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.items.events.ItemStateUpdatedEvent;
 import org.openhab.core.types.State;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -72,7 +72,7 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
         this.state = (String) module.getConfiguration().get(CFG_STATE);
         this.previousState = (String) module.getConfiguration().get(CFG_PREVIOUS_STATE);
         if (UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            this.types = Set.of(ItemStateEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
+            this.types = Set.of(ItemStateUpdatedEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         } else {
             this.types = Set.of(ItemStateChangedEvent.TYPE, GroupItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE,
                     ItemRemovedEvent.TYPE);
@@ -113,8 +113,8 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
             TriggerHandlerCallback cb = (TriggerHandlerCallback) callback;
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
-            if (event instanceof ItemStateEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-                ItemStateEvent isEvent = (ItemStateEvent) event;
+            if (event instanceof ItemStateUpdatedEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
+                ItemStateUpdatedEvent isEvent = (ItemStateUpdatedEvent) event;
                 String itemName = isEvent.getItemName();
                 Item item = itemRegistry.get(itemName);
                 if (item != null && item.getGroupNames().contains(groupName)) {
