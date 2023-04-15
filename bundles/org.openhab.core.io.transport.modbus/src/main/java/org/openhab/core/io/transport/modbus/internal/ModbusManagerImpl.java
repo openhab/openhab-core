@@ -347,7 +347,7 @@ public class ModbusManagerImpl implements ModbusManager {
      * - https://community.openhab.org/t/connection-pooling-in-modbus-binding/5246/
      */
 
-    private volatile @Nullable KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> connectionPool;
+    private volatile @Nullable KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> connectionPool;
     private volatile @Nullable ModbusSlaveConnectionFactoryImpl connectionFactory;
     private volatile Map<PollTask, ScheduledFuture<?>> scheduledPollTasks = new ConcurrentHashMap<>();
     /**
@@ -360,7 +360,7 @@ public class ModbusManagerImpl implements ModbusManager {
     private void constructConnectionPool() {
         ModbusSlaveConnectionFactoryImpl connectionFactory = new ModbusSlaveConnectionFactoryImpl(
                 DEFAULT_POOL_CONFIGURATION);
-        GenericKeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> genericKeyedObjectPool = new ModbusConnectionPool(
+        GenericKeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> genericKeyedObjectPool = new ModbusConnectionPool(
                 connectionFactory);
         genericKeyedObjectPool.setSwallowedExceptionListener(new SwallowedExceptionListener() {
 
@@ -379,7 +379,7 @@ public class ModbusManagerImpl implements ModbusManager {
 
     private Optional<ModbusSlaveConnection> borrowConnection(ModbusSlaveEndpoint endpoint) {
         Optional<ModbusSlaveConnection> connection = Optional.empty();
-        KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> pool = connectionPool;
+        KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> pool = connectionPool;
         if (pool == null) {
             return connection;
         }
@@ -405,7 +405,7 @@ public class ModbusManagerImpl implements ModbusManager {
     }
 
     private void invalidate(ModbusSlaveEndpoint endpoint, Optional<ModbusSlaveConnection> connection) {
-        KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> pool = connectionPool;
+        KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> pool = connectionPool;
         if (pool == null) {
             return;
         }
@@ -423,7 +423,7 @@ public class ModbusManagerImpl implements ModbusManager {
     }
 
     private void returnConnection(ModbusSlaveEndpoint endpoint, Optional<ModbusSlaveConnection> connection) {
-        KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> pool = connectionPool;
+        KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> pool = connectionPool;
         if (pool == null) {
             return;
         }
@@ -454,7 +454,7 @@ public class ModbusManagerImpl implements ModbusManager {
      */
     private <R, C extends ModbusResultCallback, F extends ModbusFailureCallback<R>, T extends TaskWithEndpoint<R, C, F>> Optional<ModbusSlaveConnection> getConnection(
             AggregateStopWatch timer, boolean oneOffTask, @NonNull T task) throws PollTaskUnregistered {
-        KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> connectionPool = this.connectionPool;
+        KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> connectionPool = this.connectionPool;
         if (connectionPool == null) {
             return Optional.empty();
         }
@@ -983,7 +983,7 @@ public class ModbusManagerImpl implements ModbusManager {
     @Deactivate
     protected void deactivate() {
         synchronized (this) {
-            KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> connectionPool = this.connectionPool;
+            KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> connectionPool = this.connectionPool;
             if (connectionPool != null) {
                 for (ModbusCommunicationInterface commInterface : this.communicationInterfaces) {
                     try {
