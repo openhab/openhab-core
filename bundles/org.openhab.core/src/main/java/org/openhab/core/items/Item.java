@@ -161,7 +161,7 @@ public interface Item extends Identifiable<String> {
      *
      * @return the {@link CommandDescription} for the default locale (can be null).
      */
-    default public @Nullable CommandDescription getCommandDescription() {
+    public default @Nullable CommandDescription getCommandDescription() {
         return getCommandDescription(null);
     }
 

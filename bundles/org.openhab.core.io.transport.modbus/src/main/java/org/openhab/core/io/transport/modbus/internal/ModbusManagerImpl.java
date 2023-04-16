@@ -1025,8 +1025,7 @@ public class ModbusManagerImpl implements ModbusManager {
                         task.getRequest().getDataLength(), future.isDone(), future.isCancelled(),
                         future.getDelay(TimeUnit.MILLISECONDS), task);
             });
-            if (scheduledThreadPoolExecutor instanceof ThreadPoolExecutor poolExecutor) {
-                ThreadPoolExecutor executor = poolExecutor;
+            if (scheduledThreadPoolExecutor instanceof ThreadPoolExecutor executor) {
                 pollMonitorLogger.trace(
                         "POLL MONITOR: scheduledThreadPoolExecutor queue size: {}, remaining space {}. Active threads {}",
                         executor.getQueue().size(), executor.getQueue().remainingCapacity(), executor.getActiveCount());
