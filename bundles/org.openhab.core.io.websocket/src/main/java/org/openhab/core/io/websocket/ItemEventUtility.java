@@ -56,10 +56,10 @@ public class ItemEventUtility {
         Matcher matcher = getTopicMatcher(eventDTO.topic, "command");
         Item item = getItem(matcher.group("entity"));
         Type command = parseType(eventDTO.payload);
-        if (command instanceof Command) {
+        if (command instanceof Command command1) {
             List<Class<? extends Command>> acceptedItemCommandTypes = item.getAcceptedCommandTypes();
             if (acceptedItemCommandTypes.contains(command.getClass())) {
-                return ItemEventFactory.createCommandEvent(item.getName(), (Command) command, eventDTO.source);
+                return ItemEventFactory.createCommandEvent(item.getName(), command1, eventDTO.source);
             }
         }
         throw new EventProcessingException("Incompatible datatype, rejected.");
@@ -69,10 +69,10 @@ public class ItemEventUtility {
         Matcher matcher = getTopicMatcher(eventDTO.topic, "state");
         Item item = getItem(matcher.group("entity"));
         Type state = parseType(eventDTO.payload);
-        if (state instanceof State) {
+        if (state instanceof State state1) {
             List<Class<? extends State>> acceptedItemStateTypes = item.getAcceptedDataTypes();
             if (acceptedItemStateTypes.contains(state.getClass())) {
-                return ItemEventFactory.createStateEvent(item.getName(), (State) state, eventDTO.source);
+                return ItemEventFactory.createStateEvent(item.getName(), state1, eventDTO.source);
             }
         }
         throw new EventProcessingException("Incompatible datatype, rejected.");

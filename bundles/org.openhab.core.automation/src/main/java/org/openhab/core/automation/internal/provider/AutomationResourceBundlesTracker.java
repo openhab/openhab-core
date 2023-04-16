@@ -94,8 +94,8 @@ public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer
     @SuppressWarnings({ "rawtypes" })
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, target = "(provider.type=bundle)")
     protected void addProvider(Provider provider) {
-        if (provider instanceof AbstractResourceBundleProvider) {
-            addAbstractResourceBundleProvider((AbstractResourceBundleProvider) provider);
+        if (provider instanceof AbstractResourceBundleProvider bundleProvider) {
+            addAbstractResourceBundleProvider(bundleProvider);
         }
     }
 
@@ -110,8 +110,8 @@ public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer
 
     @SuppressWarnings({ "rawtypes" })
     protected void removeProvider(Provider provider) {
-        if (provider instanceof AbstractResourceBundleProvider) {
-            removeAbstractResourceBundleProvider((AbstractResourceBundleProvider) provider);
+        if (provider instanceof AbstractResourceBundleProvider bundleProvider) {
+            removeAbstractResourceBundleProvider(bundleProvider);
         }
     }
 

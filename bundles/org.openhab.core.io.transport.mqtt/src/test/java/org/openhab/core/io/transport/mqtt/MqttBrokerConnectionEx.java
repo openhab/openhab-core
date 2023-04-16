@@ -99,9 +99,7 @@ public class MqttBrokerConnectionEx extends MqttBrokerConnection {
             }
         }).when(mockedClient).unsubscribe(any());
         // state
-        doAnswer(i -> {
-            return MqttClientState.CONNECTED;
-        }).when(mockedClient).getState();
+        doAnswer(i -> MqttClientState.CONNECTED).when(mockedClient).getState();
         return mockedClient;
     }
 

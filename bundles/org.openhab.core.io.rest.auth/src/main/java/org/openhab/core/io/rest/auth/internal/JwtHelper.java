@@ -124,9 +124,8 @@ public class JwtHelper {
             jws.setKey(jwtWebKey.getPrivateKey());
             jws.setKeyIdHeaderValue(jwtWebKey.getKeyId());
             jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
-            String jwt = jws.getCompactSerialization();
 
-            return jwt;
+            return jws.getCompactSerialization();
         } catch (JoseException e) {
             throw new IllegalStateException("Error while writing JWT token", e);
         }

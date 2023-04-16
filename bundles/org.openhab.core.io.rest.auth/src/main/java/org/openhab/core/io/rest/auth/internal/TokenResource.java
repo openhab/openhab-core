@@ -277,7 +277,7 @@ public class TokenResource implements RESTResource {
             return (pendingToken != null && pendingToken.getAuthorizationCode().equals(code));
         }).findAny();
 
-        if (!user.isPresent()) {
+        if (user.isEmpty()) {
             logger.warn("Couldn't find a user with the provided authentication code pending");
             throw new TokenEndpointException(ErrorType.INVALID_GRANT);
         }
@@ -382,7 +382,7 @@ public class TokenResource implements RESTResource {
                 u -> ((ManagedUser) u).getSessions().stream().anyMatch(s -> refreshToken.equals(s.getRefreshToken())))
                 .findAny();
 
-        if (!refreshTokenUser.isPresent()) {
+        if (refreshTokenUser.isEmpty()) {
             logger.warn("Couldn't find a user with a session matching the provided refresh_token");
             throw new TokenEndpointException(ErrorType.INVALID_GRANT);
         }

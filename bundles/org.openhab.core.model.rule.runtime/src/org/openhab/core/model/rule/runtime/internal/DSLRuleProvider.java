@@ -138,8 +138,7 @@ public class DSLRuleProvider
             switch (type) {
                 case ADDED:
                     EObject model = modelRepository.getModel(modelFileName);
-                    if (model instanceof RuleModel) {
-                        RuleModel ruleModel = (RuleModel) model;
+                    if (model instanceof RuleModel ruleModel) {
                         int index = 1;
                         for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
                             addRule(toRule(ruleModelName, rule, index));
@@ -152,8 +151,7 @@ public class DSLRuleProvider
                 case MODIFIED:
                     removeRuleModel(ruleModelName);
                     EObject modifiedModel = modelRepository.getModel(modelFileName);
-                    if (modifiedModel instanceof RuleModel) {
-                        RuleModel ruleModel = (RuleModel) modifiedModel;
+                    if (modifiedModel instanceof RuleModel ruleModel) {
                         int index = 1;
                         for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
                             Rule newRule = toRule(ruleModelName, rule, index);
@@ -180,8 +178,8 @@ public class DSLRuleProvider
                     }
                 case ADDED:
                     EObject model = modelRepository.getModel(modelFileName);
-                    if (model instanceof Script) {
-                        addRule(toRule(modelFileName, ((Script) model)));
+                    if (model instanceof Script script) {
+                        addRule(toRule(modelFileName, script));
                     }
                     break;
                 case REMOVED:
@@ -330,8 +328,7 @@ public class DSLRuleProvider
             cfg.put("startlevel", 20);
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
                     .withTypeUID("core.SystemStartlevelTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof SystemStartlevelTrigger) {
-            SystemStartlevelTrigger slTrigger = (SystemStartlevelTrigger) t;
+        } else if (t instanceof SystemStartlevelTrigger slTrigger) {
             Configuration cfg = new Configuration();
             cfg.put("startlevel", slTrigger.getLevel());
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
@@ -339,8 +336,7 @@ public class DSLRuleProvider
         } else if (t instanceof SystemOnShutdownTrigger) {
             logger.warn("System shutdown rule triggers are no longer supported!");
             return null;
-        } else if (t instanceof CommandEventTrigger) {
-            CommandEventTrigger ceTrigger = (CommandEventTrigger) t;
+        } else if (t instanceof CommandEventTrigger ceTrigger) {
             Configuration cfg = new Configuration();
             cfg.put("itemName", ceTrigger.getItem());
             if (ceTrigger.getCommand() != null) {
@@ -348,8 +344,7 @@ public class DSLRuleProvider
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("core.ItemCommandTrigger")
                     .withConfiguration(cfg).build();
-        } else if (t instanceof GroupMemberCommandEventTrigger) {
-            GroupMemberCommandEventTrigger ceTrigger = (GroupMemberCommandEventTrigger) t;
+        } else if (t instanceof GroupMemberCommandEventTrigger ceTrigger) {
             Configuration cfg = new Configuration();
             cfg.put("groupName", ceTrigger.getGroup());
             if (ceTrigger.getCommand() != null) {
@@ -357,8 +352,7 @@ public class DSLRuleProvider
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("core.GroupCommandTrigger")
                     .withConfiguration(cfg).build();
-        } else if (t instanceof UpdateEventTrigger) {
-            UpdateEventTrigger ueTrigger = (UpdateEventTrigger) t;
+        } else if (t instanceof UpdateEventTrigger ueTrigger) {
             Configuration cfg = new Configuration();
             cfg.put("itemName", ueTrigger.getItem());
             if (ueTrigger.getState() != null) {
@@ -366,8 +360,7 @@ public class DSLRuleProvider
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
                     .withTypeUID("core.ItemStateUpdateTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof GroupMemberUpdateEventTrigger) {
-            GroupMemberUpdateEventTrigger ueTrigger = (GroupMemberUpdateEventTrigger) t;
+        } else if (t instanceof GroupMemberUpdateEventTrigger ueTrigger) {
             Configuration cfg = new Configuration();
             cfg.put("groupName", ueTrigger.getGroup());
             if (ueTrigger.getState() != null) {
@@ -375,8 +368,7 @@ public class DSLRuleProvider
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
                     .withTypeUID("core.GroupStateUpdateTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof ChangedEventTrigger) {
-            ChangedEventTrigger ceTrigger = (ChangedEventTrigger) t;
+        } else if (t instanceof ChangedEventTrigger ceTrigger) {
             Configuration cfg = new Configuration();
             cfg.put("itemName", ceTrigger.getItem());
             if (ceTrigger.getNewState() != null) {
@@ -387,8 +379,7 @@ public class DSLRuleProvider
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
                     .withTypeUID("core.ItemStateChangeTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof GroupMemberChangedEventTrigger) {
-            GroupMemberChangedEventTrigger ceTrigger = (GroupMemberChangedEventTrigger) t;
+        } else if (t instanceof GroupMemberChangedEventTrigger ceTrigger) {
             Configuration cfg = new Configuration();
             cfg.put("groupName", ceTrigger.getGroup());
             if (ceTrigger.getNewState() != null) {
@@ -399,8 +390,7 @@ public class DSLRuleProvider
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
                     .withTypeUID("core.GroupStateChangeTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof TimerTrigger) {
-            TimerTrigger tt = (TimerTrigger) t;
+        } else if (t instanceof TimerTrigger tt) {
             Configuration cfg = new Configuration();
             String id;
             if (tt.getCron() != null) {
@@ -419,15 +409,13 @@ public class DSLRuleProvider
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("timer.GenericCronTrigger")
                     .withConfiguration(cfg).build();
-        } else if (t instanceof DateTimeTrigger) {
-            DateTimeTrigger tt = (DateTimeTrigger) t;
+        } else if (t instanceof DateTimeTrigger tt) {
             Configuration cfg = new Configuration();
             cfg.put("itemName", tt.getItem());
             cfg.put("timeOnly", tt.isTimeOnly());
             return TriggerBuilder.create().withId(Integer.toString((triggerId++))).withTypeUID("timer.DateTimeTrigger")
                     .withConfiguration(cfg).build();
-        } else if (t instanceof EventEmittedTrigger) {
-            EventEmittedTrigger eeTrigger = (EventEmittedTrigger) t;
+        } else if (t instanceof EventEmittedTrigger eeTrigger) {
             Configuration cfg = new Configuration();
             cfg.put("channelUID", eeTrigger.getChannel());
             if (eeTrigger.getTrigger() != null) {
@@ -435,15 +423,13 @@ public class DSLRuleProvider
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("core.ChannelEventTrigger")
                     .withConfiguration(cfg).build();
-        } else if (t instanceof ThingStateUpdateEventTrigger) {
-            ThingStateUpdateEventTrigger tsuTrigger = (ThingStateUpdateEventTrigger) t;
+        } else if (t instanceof ThingStateUpdateEventTrigger tsuTrigger) {
             Configuration cfg = new Configuration();
             cfg.put("thingUID", tsuTrigger.getThing());
             cfg.put("status", tsuTrigger.getState());
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
                     .withTypeUID("core.ThingStatusUpdateTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof ThingStateChangedEventTrigger) {
-            ThingStateChangedEventTrigger tscTrigger = (ThingStateChangedEventTrigger) t;
+        } else if (t instanceof ThingStateChangedEventTrigger tscTrigger) {
             Configuration cfg = new Configuration();
             cfg.put("thingUID", tscTrigger.getThing());
             cfg.put("status", tscTrigger.getNewState());
@@ -461,8 +447,7 @@ public class DSLRuleProvider
         for (String ruleFileName : modelRepository.getAllModelNamesOfType("rules")) {
             EObject model = modelRepository.getModel(ruleFileName);
             String ruleModelName = ruleFileName.substring(0, ruleFileName.indexOf("."));
-            if (model instanceof RuleModel) {
-                RuleModel ruleModel = (RuleModel) model;
+            if (model instanceof RuleModel ruleModel) {
                 int index = 1;
                 for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
                     addRule(toRule(ruleModelName, rule, index));

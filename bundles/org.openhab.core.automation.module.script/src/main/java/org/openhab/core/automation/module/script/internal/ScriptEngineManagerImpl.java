@@ -182,8 +182,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             ScriptEngine engine = container.getScriptEngine();
             try {
                 engine.eval(scriptData);
-                if (engine instanceof Invocable) {
-                    Invocable inv = (Invocable) engine;
+                if (engine instanceof Invocable inv) {
                     try {
                         inv.invokeFunction("scriptLoaded", engineIdentifier);
                     } catch (NoSuchMethodException e) {
@@ -210,8 +209,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 tracker.removeTracking(engineIdentifier);
             }
             ScriptEngine scriptEngine = container.getScriptEngine();
-            if (scriptEngine instanceof Invocable) {
-                Invocable inv = (Invocable) scriptEngine;
+            if (scriptEngine instanceof Invocable inv) {
                 try {
                     inv.invokeFunction("scriptUnloaded");
                 } catch (NoSuchMethodException e) {
@@ -223,12 +221,11 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 logger.trace("ScriptEngine does not support Invocable interface");
             }
 
-            if (scriptEngine instanceof AutoCloseable) {
+            if (scriptEngine instanceof AutoCloseable closeable) {
                 // we cannot not use ScheduledExecutorService.execute here as it might execute the task in the calling
                 // thread (calling ScriptEngine.close in the same thread may result in a deadlock if the ScriptEngine
                 // tries to Thread.join)
                 scheduler.schedule(() -> {
-                    AutoCloseable closeable = (AutoCloseable) scriptEngine;
                     try {
                         closeable.close();
                     } catch (Exception e) {

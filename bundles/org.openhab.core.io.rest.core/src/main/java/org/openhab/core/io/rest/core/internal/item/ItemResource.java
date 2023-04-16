@@ -333,9 +333,9 @@ public class ItemResource implements RESTResource {
         // if it exists
         if (item != null) {
             State state = item.getState();
-            if (state instanceof RawType) {
-                String mimeType = ((RawType) state).getMimeType();
-                byte[] data = ((RawType) state).getBytes();
+            if (state instanceof RawType type) {
+                String mimeType = type.getMimeType();
+                byte[] data = type.getBytes();
                 if ((acceptedMediaTypes.contains("image/*") && mimeType.startsWith("image/"))
                         || acceptedMediaTypes.contains(mimeType)) {
                     return Response.ok(data).type(mimeType).build();
@@ -921,8 +921,8 @@ public class ItemResource implements RESTResource {
                 metadata.put(namespace, mdDto);
             }
         }
-        if (dto instanceof EnrichedGroupItemDTO) {
-            for (EnrichedItemDTO member : ((EnrichedGroupItemDTO) dto).members) {
+        if (dto instanceof EnrichedGroupItemDTO tO) {
+            for (EnrichedItemDTO member : tO.members) {
                 addMetadata(member, namespaces, filter);
             }
         }

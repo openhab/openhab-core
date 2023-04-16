@@ -103,48 +103,47 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
     protected synchronized @Nullable ModuleHandler internalCreate(final Module module, final String ruleUID) {
         logger.trace("create {} -> {} : {}", module.getId(), module.getTypeUID(), ruleUID);
         final String moduleTypeUID = module.getTypeUID();
-        if (module instanceof Trigger) {
+        if (module instanceof Trigger trigger) {
             // Handle triggers
             if (GenericEventTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new GenericEventTriggerHandler((Trigger) module, bundleContext);
+                return new GenericEventTriggerHandler(trigger, bundleContext);
             } else if (ChannelEventTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new ChannelEventTriggerHandler((Trigger) module, bundleContext);
+                return new ChannelEventTriggerHandler(trigger, bundleContext);
             } else if (ItemCommandTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new ItemCommandTriggerHandler((Trigger) module, ruleUID, bundleContext, itemRegistry);
+                return new ItemCommandTriggerHandler(trigger, ruleUID, bundleContext, itemRegistry);
             } else if (SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new SystemTriggerHandler((Trigger) module, bundleContext);
+                return new SystemTriggerHandler(trigger, bundleContext);
             } else if (ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
                     || ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new ThingStatusTriggerHandler((Trigger) module, bundleContext);
+                return new ThingStatusTriggerHandler(trigger, bundleContext);
             } else if (ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
                     || ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new ItemStateTriggerHandler((Trigger) module, ruleUID, bundleContext, itemRegistry);
+                return new ItemStateTriggerHandler(trigger, ruleUID, bundleContext, itemRegistry);
             } else if (GroupCommandTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new GroupCommandTriggerHandler((Trigger) module, ruleUID, bundleContext, itemRegistry);
+                return new GroupCommandTriggerHandler(trigger, ruleUID, bundleContext, itemRegistry);
             } else if (GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
                     || GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new GroupStateTriggerHandler((Trigger) module, ruleUID, bundleContext, itemRegistry);
+                return new GroupStateTriggerHandler(trigger, ruleUID, bundleContext, itemRegistry);
             }
-        } else if (module instanceof Condition) {
+        } else if (module instanceof Condition condition) {
             // Handle conditions
             if (ItemStateConditionHandler.ITEM_STATE_CONDITION.equals(moduleTypeUID)) {
-                return new ItemStateConditionHandler((Condition) module, ruleUID, bundleContext, itemRegistry,
-                        timeZoneProvider);
+                return new ItemStateConditionHandler(condition, ruleUID, bundleContext, itemRegistry, timeZoneProvider);
             } else if (GenericEventConditionHandler.MODULETYPE_ID.equals(moduleTypeUID)) {
-                return new GenericEventConditionHandler((Condition) module);
+                return new GenericEventConditionHandler(condition);
             } else if (CompareConditionHandler.MODULE_TYPE.equals(moduleTypeUID)) {
-                return new CompareConditionHandler((Condition) module);
+                return new CompareConditionHandler(condition);
             }
-        } else if (module instanceof Action) {
+        } else if (module instanceof Action action) {
             // Handle actions
             if (ItemCommandActionHandler.ITEM_COMMAND_ACTION.equals(moduleTypeUID)) {
-                return new ItemCommandActionHandler((Action) module, eventPublisher, itemRegistry);
+                return new ItemCommandActionHandler(action, eventPublisher, itemRegistry);
             } else if (ItemStateUpdateActionHandler.ITEM_STATE_UPDATE_ACTION.equals(moduleTypeUID)) {
-                return new ItemStateUpdateActionHandler((Action) module, eventPublisher, itemRegistry);
+                return new ItemStateUpdateActionHandler(action, eventPublisher, itemRegistry);
             } else if (RuleEnablementActionHandler.UID.equals(moduleTypeUID)) {
-                return new RuleEnablementActionHandler((Action) module);
+                return new RuleEnablementActionHandler(action);
             } else if (RunRuleActionHandler.UID.equals(moduleTypeUID)) {
-                return new RunRuleActionHandler((Action) module);
+                return new RunRuleActionHandler(action);
             }
         }
 

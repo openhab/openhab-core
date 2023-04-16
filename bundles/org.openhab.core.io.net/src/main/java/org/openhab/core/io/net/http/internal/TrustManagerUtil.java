@@ -36,8 +36,8 @@ class TrustManagerUtil {
             tmf.init(keyStore);
             // Get hold of the X509ExtendedTrustManager
             for (TrustManager tm : tmf.getTrustManagers()) {
-                if (tm instanceof X509ExtendedTrustManager) {
-                    return (X509ExtendedTrustManager) tm;
+                if (tm instanceof X509ExtendedTrustManager manager) {
+                    return manager;
                 }
             }
         } catch (NoSuchAlgorithmException e) {

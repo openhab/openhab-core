@@ -81,10 +81,10 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
                 public void handle(@NonNullByDefault({}) Callback[] callbacks)
                         throws IOException, UnsupportedCallbackException {
                     for (Callback callback : callbacks) {
-                        if (callback instanceof PasswordCallback) {
-                            ((PasswordCallback) callback).setPassword(password);
-                        } else if (callback instanceof NameCallback) {
-                            ((NameCallback) callback).setName(name);
+                        if (callback instanceof PasswordCallback passwordCallback) {
+                            passwordCallback.setPassword(password);
+                        } else if (callback instanceof NameCallback nameCallback) {
+                            nameCallback.setName(name);
                         } else {
                             throw new UnsupportedCallbackException(callback);
                         }
@@ -133,8 +133,8 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
 
         Object propertyValue = properties.get("realmName");
         if (propertyValue != null) {
-            if (propertyValue instanceof String) {
-                realmName = (String) propertyValue;
+            if (propertyValue instanceof String string) {
+                realmName = string;
             } else {
                 realmName = propertyValue.toString();
             }

@@ -13,7 +13,6 @@
 package org.openhab.core.voice.text;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -34,8 +33,7 @@ public final class ExpressionSequence extends Expression {
      */
     public ExpressionSequence(Expression... subExpressions) {
         super();
-        this.subExpressions = Collections
-                .unmodifiableList(Arrays.asList(Arrays.copyOf(subExpressions, subExpressions.length)));
+        this.subExpressions = List.of(Arrays.copyOf(subExpressions, subExpressions.length));
     }
 
     @Override

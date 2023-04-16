@@ -170,12 +170,10 @@ public class ModelRepositoryImpl implements ModelRepository {
             // Make a copy to avoid ConcurrentModificationException
             List<Resource> resourceListCopy = new ArrayList<>(resourceSet.getResources());
 
-            return resourceListCopy.stream().filter(input -> {
-                return input.getURI().lastSegment().contains(".") && input.isLoaded()
-                        && modelType.equalsIgnoreCase(input.getURI().fileExtension());
-            }).map(from -> {
-                return from.getURI().path();
-            }).collect(Collectors.toList());
+            return resourceListCopy.stream()
+                    .filter(input -> input.getURI().lastSegment().contains(".") && input.isLoaded()
+                            && modelType.equalsIgnoreCase(input.getURI().fileExtension()))
+                    .map(from -> from.getURI().path()).collect(Collectors.toList());
         }
     }
 

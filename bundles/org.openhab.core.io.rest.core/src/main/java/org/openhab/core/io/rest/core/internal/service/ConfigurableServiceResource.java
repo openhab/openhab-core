@@ -364,13 +364,11 @@ public class ConfigurableServiceResource implements RESTResource {
         }
 
         final String serviceId;
-        if (pid instanceof String) {
-            serviceId = (String) pid;
-        } else if (pid instanceof String[]) {
-            final String[] pids = (String[]) pid;
+        if (pid instanceof String string) {
+            serviceId = string;
+        } else if (pid instanceof String[] pids) {
             serviceId = getServicePID(cn, Arrays.asList(pids));
-        } else if (pid instanceof Collection) {
-            Collection<?> pids = (Collection<?>) pid;
+        } else if (pid instanceof Collection<?> pids) {
             serviceId = getServicePID(cn, pids.stream().map(entry -> entry.toString()).collect(Collectors.toList()));
         } else {
             logger.warn("The component \"{}\" is using an unhandled service PID type ({}). Use component name.", cn,
@@ -410,6 +408,6 @@ public class ConfigurableServiceResource implements RESTResource {
     }
 
     private String inferKey(String uri, String lastSegment) {
-        return "service." + uri.replaceAll(":", ".") + "." + lastSegment;
+        return "service." + uri.replace(":", ".") + "." + lastSegment;
     }
 }

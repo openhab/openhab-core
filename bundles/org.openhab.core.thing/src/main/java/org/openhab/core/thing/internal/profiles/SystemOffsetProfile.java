@@ -55,16 +55,15 @@ public class SystemOffsetProfile implements StateProfile {
 
         Object paramValue = context.getConfiguration().get(OFFSET_PARAM);
         logger.debug("Configuring profile with {} parameter '{}'", OFFSET_PARAM, paramValue);
-        if (paramValue instanceof String) {
+        if (paramValue instanceof String string) {
             try {
-                offset = new QuantityType<>((String) paramValue);
+                offset = new QuantityType<>(string);
             } catch (IllegalArgumentException e) {
                 logger.error(
                         "Cannot convert value '{}' of parameter '{}' into a valid offset of type QuantityType. Using offset 0 now.",
                         paramValue, OFFSET_PARAM);
             }
-        } else if (paramValue instanceof BigDecimal) {
-            BigDecimal bd = (BigDecimal) paramValue;
+        } else if (paramValue instanceof BigDecimal bd) {
             offset = new QuantityType<>(bd.toString());
         } else {
             logger.error(
@@ -106,8 +105,7 @@ public class SystemOffsetProfile implements StateProfile {
 
         QuantityType finalOffset = towardsItem ? offset : offset.negate();
         Type result = UnDefType.UNDEF;
-        if (state instanceof QuantityType) {
-            QuantityType qtState = (QuantityType) state;
+        if (state instanceof QuantityType qtState) {
             try {
                 if (Units.ONE.equals(finalOffset.getUnit()) && !Units.ONE.equals(qtState.getUnit())) {
                     // allow offsets without unit -> implicitly assume its the same as the one from the state, but warn
@@ -129,8 +127,7 @@ public class SystemOffsetProfile implements StateProfile {
             } catch (UnconvertibleException e) {
                 logger.warn("Cannot apply offset '{}' to state '{}' because types do not match.", finalOffset, qtState);
             }
-        } else if (state instanceof DecimalType && Units.ONE.equals(finalOffset.getUnit())) {
-            DecimalType decState = (DecimalType) state;
+        } else if (state instanceof DecimalType decState && Units.ONE.equals(finalOffset.getUnit())) {
             result = new DecimalType(decState.toBigDecimal().add(finalOffset.toBigDecimal()));
         } else {
             logger.warn(

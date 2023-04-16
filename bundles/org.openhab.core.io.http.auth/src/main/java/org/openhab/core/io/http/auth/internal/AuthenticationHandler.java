@@ -153,8 +153,8 @@ public class AuthenticationHandler implements Handler {
         }
 
         Object loginUri = properties.get(AUTHENTICATION_ENDPOINT);
-        if (loginUri instanceof String) {
-            this.loginUri = (String) loginUri;
+        if (loginUri instanceof String string) {
+            this.loginUri = string;
         }
     }
 

@@ -55,8 +55,8 @@ public class NodeValue implements NodeName {
 
     private @Nullable Object formatText(@Nullable Object object) {
         // fixes a formatting problem with line breaks in text
-        if (object instanceof String) {
-            return ((String) object).replaceAll("\\n\\s*", " ").trim();
+        if (object instanceof String string) {
+            return string.replaceAll("\\n\\s*", " ").trim();
         }
 
         return object;

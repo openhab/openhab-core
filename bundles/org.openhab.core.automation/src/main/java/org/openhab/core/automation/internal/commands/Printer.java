@@ -231,12 +231,12 @@ public class Printer {
         templateProperty.set(0, TAGS);
         templateProperty.set(1, getTagsRecord(template.getTags()));
         templateContent.add(Utils.getRow(columnWidths, templateProperty));
-        if (template instanceof RuleTemplate) {
+        if (template instanceof RuleTemplate ruleTemplate) {
             templateContent.addAll(collectRecords(columnWidths, CONFIGURATION_DESCRIPTIONS,
-                    getConfigurationDescriptionRecords(((RuleTemplate) template).getConfigurationDescriptions())));
-            templateContent.addAll(collectRecords(columnWidths, TRIGGERS, ((RuleTemplate) template).getTriggers()));
-            templateContent.addAll(collectRecords(columnWidths, CONDITIONS, ((RuleTemplate) template).getConditions()));
-            templateContent.addAll(collectRecords(columnWidths, ACTIONS, ((RuleTemplate) template).getActions()));
+                    getConfigurationDescriptionRecords(ruleTemplate.getConfigurationDescriptions())));
+            templateContent.addAll(collectRecords(columnWidths, TRIGGERS, ruleTemplate.getTriggers()));
+            templateContent.addAll(collectRecords(columnWidths, CONDITIONS, ruleTemplate.getConditions()));
+            templateContent.addAll(collectRecords(columnWidths, ACTIONS, ruleTemplate.getActions()));
         }
         return Utils.getTableContent(TABLE_WIDTH, columnWidths, templateContent, titleRow);
     }
@@ -278,27 +278,24 @@ public class Printer {
 
         moduleTypeContent.addAll(collectRecords(columnWidths, CONFIGURATION_DESCRIPTIONS,
                 getConfigurationDescriptionRecords(moduleType.getConfigurationDescriptions())));
-        if (moduleType instanceof TriggerType) {
-            moduleTypeContent.addAll(collectRecords(columnWidths, OUTPUTS, ((TriggerType) moduleType).getOutputs()));
+        if (moduleType instanceof TriggerType type) {
+            moduleTypeContent.addAll(collectRecords(columnWidths, OUTPUTS, type.getOutputs()));
         }
-        if (moduleType instanceof ConditionType) {
-            moduleTypeContent.addAll(collectRecords(columnWidths, INPUTS, ((ConditionType) moduleType).getInputs()));
+        if (moduleType instanceof ConditionType type) {
+            moduleTypeContent.addAll(collectRecords(columnWidths, INPUTS, type.getInputs()));
         }
-        if (moduleType instanceof ActionType) {
-            moduleTypeContent.addAll(collectRecords(columnWidths, INPUTS, ((ActionType) moduleType).getInputs()));
-            moduleTypeContent.addAll(collectRecords(columnWidths, OUTPUTS, ((ActionType) moduleType).getOutputs()));
+        if (moduleType instanceof ActionType type) {
+            moduleTypeContent.addAll(collectRecords(columnWidths, INPUTS, type.getInputs()));
+            moduleTypeContent.addAll(collectRecords(columnWidths, OUTPUTS, type.getOutputs()));
         }
-        if (moduleType instanceof CompositeTriggerType) {
-            moduleTypeContent
-                    .addAll(collectRecords(columnWidths, CHILDREN, ((CompositeTriggerType) moduleType).getChildren()));
+        if (moduleType instanceof CompositeTriggerType type) {
+            moduleTypeContent.addAll(collectRecords(columnWidths, CHILDREN, type.getChildren()));
         }
-        if (moduleType instanceof CompositeConditionType) {
-            moduleTypeContent.addAll(
-                    collectRecords(columnWidths, CHILDREN, ((CompositeConditionType) moduleType).getChildren()));
+        if (moduleType instanceof CompositeConditionType type) {
+            moduleTypeContent.addAll(collectRecords(columnWidths, CHILDREN, type.getChildren()));
         }
-        if (moduleType instanceof CompositeActionType) {
-            moduleTypeContent
-                    .addAll(collectRecords(columnWidths, CHILDREN, ((CompositeActionType) moduleType).getChildren()));
+        if (moduleType instanceof CompositeActionType type) {
+            moduleTypeContent.addAll(collectRecords(columnWidths, CHILDREN, type.getChildren()));
         }
         return Utils.getTableContent(TABLE_WIDTH, columnWidths, moduleTypeContent, titleRow);
     }
@@ -342,14 +339,14 @@ public class Printer {
         values.add("");
         if (list != null && !list.isEmpty()) {
             for (Object element : list) {
-                if (element instanceof String) {
-                    res.add(Utils.getColumn(columnWidths[0], values.get(0)) + (String) element);
+                if (element instanceof String string) {
+                    res.add(Utils.getColumn(columnWidths[0], values.get(0)) + string);
                     if (isFirst) {
                         isFirst = false;
                         values.set(0, "");
                     }
-                } else if (element instanceof Module) {
-                    List<String> moduleRecords = getModuleRecords((Module) element);
+                } else if (element instanceof Module module) {
+                    List<String> moduleRecords = getModuleRecords(module);
                     for (String elementRecord : moduleRecords) {
                         res.add(Utils.getColumn(columnWidths[0], values.get(0)) + elementRecord);
                         if (isFirst) {
@@ -365,14 +362,14 @@ public class Printer {
                         isFirst = false;
                     }
                     values.set(0, "");
-                    if (element instanceof FilterCriteria) {
-                        values.set(1, getFilterCriteriaRecord((FilterCriteria) element));
-                    } else if (element instanceof ParameterOption) {
-                        values.set(1, getParameterOptionRecord((ParameterOption) element));
-                    } else if (element instanceof Input) {
-                        values.set(1, getInputRecord((Input) element));
-                    } else if (element instanceof Output) {
-                        values.set(1, getOutputRecord((Output) element));
+                    if (element instanceof FilterCriteria criteria) {
+                        values.set(1, getFilterCriteriaRecord(criteria));
+                    } else if (element instanceof ParameterOption option) {
+                        values.set(1, getParameterOptionRecord(option));
+                    } else if (element instanceof Input input) {
+                        values.set(1, getInputRecord(input));
+                    } else if (element instanceof Output output) {
+                        values.set(1, getOutputRecord(output));
                     } else if (element instanceof Entry) {
                         values.set(1, "  " + ((Entry<String, ?>) element).getKey() + " = \""
                                 + ((Entry<String, ?>) element).getValue().toString() + "\"");
@@ -425,11 +422,11 @@ public class Printer {
         moduleContent.addAll(
                 collectRecords(columnWidths, CONFIGURATION, module.getConfiguration().getProperties().entrySet()));
         Map<String, String> inputs = null;
-        if (module instanceof Condition) {
-            inputs = ((Condition) module).getInputs();
+        if (module instanceof Condition condition) {
+            inputs = condition.getInputs();
         }
-        if (module instanceof Action) {
-            inputs = ((Action) module).getInputs();
+        if (module instanceof Action action) {
+            inputs = action.getInputs();
         }
         if (inputs != null && !inputs.isEmpty()) {
             moduleContent.addAll(collectRecords(columnWidths, INPUTS, new ArrayList<>(inputs.entrySet())));

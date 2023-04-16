@@ -79,16 +79,10 @@ public class I18nConfigOptionsProvider implements ConfigOptionProvider {
     }
 
     private Collection<ParameterOption> processTimeZoneParam() {
-        Comparator<TimeZone> byOffset = (t1, t2) -> {
-            return t1.getRawOffset() - t2.getRawOffset();
-        };
-        Comparator<TimeZone> byID = (t1, t2) -> {
-            return t1.getID().compareTo(t2.getID());
-        };
+        Comparator<TimeZone> byOffset = (t1, t2) -> t1.getRawOffset() - t2.getRawOffset();
+        Comparator<TimeZone> byID = (t1, t2) -> t1.getID().compareTo(t2.getID());
         return ZoneId.getAvailableZoneIds().stream().map(TimeZone::getTimeZone).sorted(byOffset.thenComparing(byID))
-                .map(tz -> {
-                    return new ParameterOption(tz.getID(), getTimeZoneRepresentation(tz));
-                }).collect(Collectors.toList());
+                .map(tz -> new ParameterOption(tz.getID(), getTimeZoneRepresentation(tz))).collect(Collectors.toList());
     }
 
     private static String getTimeZoneRepresentation(TimeZone tz) {

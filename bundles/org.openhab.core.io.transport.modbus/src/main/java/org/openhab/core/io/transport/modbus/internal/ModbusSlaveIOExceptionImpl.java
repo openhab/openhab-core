@@ -43,16 +43,14 @@ public class ModbusSlaveIOExceptionImpl extends ModbusSlaveIOException {
     @Override
     public @Nullable String getMessage() {
         return String.format("Modbus IO Error with cause=%s, EOF=%s, message='%s', cause2=%s",
-                error.getClass().getSimpleName(),
-                error instanceof ModbusIOException ? ((ModbusIOException) error).isEOF() : "?", error.getMessage(),
-                error.getCause());
+                error.getClass().getSimpleName(), error instanceof ModbusIOException mioe ? mioe.isEOF() : "?",
+                error.getMessage(), error.getCause());
     }
 
     @Override
     public String toString() {
         return String.format("ModbusSlaveIOException(cause=%s, EOF=%s, message='%s', cause2=%s)",
-                error.getClass().getSimpleName(),
-                error instanceof ModbusIOException ? ((ModbusIOException) error).isEOF() : "?", error.getMessage(),
-                error.getCause());
+                error.getClass().getSimpleName(), error instanceof ModbusIOException mioe ? mioe.isEOF() : "?",
+                error.getMessage(), error.getCause());
     }
 }

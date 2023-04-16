@@ -79,8 +79,8 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
         }
         logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(), event.getTopic(),
                 event.getType(), event.getPayload());
-        if (event instanceof StartlevelEvent && STARTLEVEL_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            Integer sl = ((StartlevelEvent) event).getStartlevel();
+        if (event instanceof StartlevelEvent startlevelEvent && STARTLEVEL_MODULE_TYPE_ID.equals(module.getTypeUID())) {
+            Integer sl = startlevelEvent.getStartlevel();
             if (startlevel <= sl && startlevel > StartLevelService.STARTLEVEL_RULEENGINE) {
                 // only execute rules if their start level is higher than the rule engine activation level, since
                 // otherwise the rule engine takes care of the execution already

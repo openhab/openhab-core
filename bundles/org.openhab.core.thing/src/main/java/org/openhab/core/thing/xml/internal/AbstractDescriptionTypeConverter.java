@@ -125,8 +125,8 @@ public abstract class AbstractDescriptionTypeConverter<T> extends GenericUnmarsh
         Object nextNode = nodeIterator.next();
 
         if (nextNode != null) {
-            if (nextNode instanceof ConfigDescription) {
-                return (ConfigDescription) nextNode;
+            if (nextNode instanceof ConfigDescription description) {
+                return description;
             }
 
             nodeIterator.revert();

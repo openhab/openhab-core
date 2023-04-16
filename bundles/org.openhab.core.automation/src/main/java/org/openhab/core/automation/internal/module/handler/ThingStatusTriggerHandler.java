@@ -104,14 +104,15 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
         logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(), event.getTopic(),
                 event.getType(), event.getPayload());
         Map<String, Object> values = new HashMap<>();
-        if (event instanceof ThingStatusInfoEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            ThingStatus status = ((ThingStatusInfoEvent) event).getStatusInfo().getStatus();
+        if (event instanceof ThingStatusInfoEvent infoEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
+            ThingStatus status = infoEvent.getStatusInfo().getStatus();
             if (statusMatches(this.status, status)) {
                 values.put(OUT_STATUS, status);
             }
-        } else if (event instanceof ThingStatusInfoChangedEvent && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            ThingStatus newStatus = ((ThingStatusInfoChangedEvent) event).getStatusInfo().getStatus();
-            ThingStatus oldStatus = ((ThingStatusInfoChangedEvent) event).getOldStatusInfo().getStatus();
+        } else if (event instanceof ThingStatusInfoChangedEvent changedEvent
+                && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
+            ThingStatus newStatus = changedEvent.getStatusInfo().getStatus();
+            ThingStatus oldStatus = changedEvent.getOldStatusInfo().getStatus();
             if (statusMatches(this.status, newStatus) && statusMatches(this.previousStatus, oldStatus)) {
                 values.put(OUT_NEW_STATUS, newStatus);
                 values.put(OUT_OLD_STATUS, oldStatus);

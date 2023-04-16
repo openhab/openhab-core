@@ -46,20 +46,18 @@ public abstract class AbstractScriptedModuleHandlerFactory extends BaseModuleHan
         ModuleHandler moduleHandler = null;
 
         if (scriptedHandler != null) {
-            if (scriptedHandler instanceof SimpleActionHandler) {
-                moduleHandler = new SimpleActionHandlerDelegate((Action) module, (SimpleActionHandler) scriptedHandler);
-            } else if (scriptedHandler instanceof SimpleConditionHandler) {
-                moduleHandler = new SimpleConditionHandlerDelegate((Condition) module,
-                        (SimpleConditionHandler) scriptedHandler);
-            } else if (scriptedHandler instanceof SimpleTriggerHandler) {
-                moduleHandler = new SimpleTriggerHandlerDelegate((Trigger) module,
-                        (SimpleTriggerHandler) scriptedHandler);
-            } else if (scriptedHandler instanceof ScriptedActionHandlerFactory) {
-                moduleHandler = ((ScriptedActionHandlerFactory) scriptedHandler).get((Action) module);
-            } else if (scriptedHandler instanceof ScriptedTriggerHandlerFactory) {
-                moduleHandler = ((ScriptedTriggerHandlerFactory) scriptedHandler).get((Trigger) module);
-            } else if (scriptedHandler instanceof ScriptedConditionHandlerFactory) {
-                moduleHandler = ((ScriptedConditionHandlerFactory) scriptedHandler).get((Condition) module);
+            if (scriptedHandler instanceof SimpleActionHandler handler) {
+                moduleHandler = new SimpleActionHandlerDelegate((Action) module, handler);
+            } else if (scriptedHandler instanceof SimpleConditionHandler handler) {
+                moduleHandler = new SimpleConditionHandlerDelegate((Condition) module, handler);
+            } else if (scriptedHandler instanceof SimpleTriggerHandler handler) {
+                moduleHandler = new SimpleTriggerHandlerDelegate((Trigger) module, handler);
+            } else if (scriptedHandler instanceof ScriptedActionHandlerFactory factory) {
+                moduleHandler = factory.get((Action) module);
+            } else if (scriptedHandler instanceof ScriptedTriggerHandlerFactory factory) {
+                moduleHandler = factory.get((Trigger) module);
+            } else if (scriptedHandler instanceof ScriptedConditionHandlerFactory factory) {
+                moduleHandler = factory.get((Condition) module);
             } else {
                 logger.error("Not supported moduleHandler: {}", module.getTypeUID());
             }

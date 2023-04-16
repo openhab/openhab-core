@@ -62,8 +62,7 @@ public class ItemChannelLink extends AbstractLink {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        if (obj instanceof ItemChannelLink) {
-            ItemChannelLink link = (ItemChannelLink) obj;
+        if (obj instanceof ItemChannelLink link) {
             return super.equals(obj) && configuration.equals(link.getConfiguration());
         }
         return false;

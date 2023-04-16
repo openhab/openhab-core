@@ -47,12 +47,12 @@ public class ThingDescriptionReaderTest {
         List<ChannelTypeXmlResult> channelTypeXmlResults = new ArrayList<>();
 
         for (Object type : types) {
-            if (type instanceof ThingTypeXmlResult) {
-                thingTypeXmlResults.add((ThingTypeXmlResult) type);
-            } else if (type instanceof ChannelGroupTypeXmlResult) {
-                channelGroupTypeXmlResults.add((ChannelGroupTypeXmlResult) type);
-            } else if (type instanceof ChannelTypeXmlResult) {
-                channelTypeXmlResults.add((ChannelTypeXmlResult) type);
+            if (type instanceof ThingTypeXmlResult result) {
+                thingTypeXmlResults.add(result);
+            } else if (type instanceof ChannelGroupTypeXmlResult result) {
+                channelGroupTypeXmlResults.add(result);
+            } else if (type instanceof ChannelTypeXmlResult result) {
+                channelTypeXmlResults.add(result);
             }
         }
 

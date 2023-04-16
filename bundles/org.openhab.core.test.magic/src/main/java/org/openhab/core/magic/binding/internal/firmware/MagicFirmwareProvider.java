@@ -73,8 +73,7 @@ public class MagicFirmwareProvider implements FirmwareProvider {
 
     private static Firmware createFirmware(final @Nullable String model, final String version,
             boolean modelRestricted) {
-        Firmware firmware = FirmwareBuilder.create(MagicBindingConstants.THING_TYPE_FIRMWARE_UPDATE, version)
-                .withModel(model).withModelRestricted(modelRestricted).build();
-        return firmware;
+        return FirmwareBuilder.create(MagicBindingConstants.THING_TYPE_FIRMWARE_UPDATE, version).withModel(model)
+                .withModelRestricted(modelRestricted).build();
     }
 }

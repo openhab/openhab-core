@@ -190,8 +190,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             target.put(item, list = new ArrayList<>());
         }
         list.add(nt);
-        if (item instanceof GroupItem) {
-            for (Item member : ((GroupItem) item).getMembers()) {
+        if (item instanceof GroupItem groupItem) {
+            for (Item member : groupItem.getMembers()) {
                 addItem(locale, target, nt, member);
             }
         }
@@ -308,10 +308,10 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 Object tag = cmdNode.getTag();
                 Object value = cmdNode.getValue();
                 Command command;
-                if (tag instanceof Command) {
-                    command = (Command) tag;
-                } else if (value instanceof Number) {
-                    command = new DecimalType(((Number) value).longValue());
+                if (tag instanceof Command command1) {
+                    command = command1;
+                } else if (value instanceof Number number) {
+                    command = new DecimalType(number.longValue());
                 } else {
                     command = new StringType(cmdNode.getValueAsString());
                 }
@@ -335,8 +335,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return resulting expression
      */
     protected @Nullable Expression exp(@Nullable Object obj) {
-        if (obj instanceof Expression) {
-            return (Expression) obj;
+        if (obj instanceof Expression expression) {
+            return expression;
         } else {
             return obj == null ? null : new ExpressionMatch(obj.toString());
         }
@@ -501,9 +501,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             throw new InterpretationException(language.getString(MULTIPLE_OBJECTS));
         } else {
             Item item = items.get(0);
-            if (command instanceof State) {
+            if (command instanceof State newState) {
                 try {
-                    State newState = (State) command;
                     State oldState = item.getStateAs(newState.getClass());
                     if (newState.equals(oldState)) {
                         String template = language.getString(STATE_ALREADY_SINGULAR);
@@ -669,8 +668,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         private int addExportedExpression(Expression exp) {
             shared.add(exp);
             exported.add(exp);
-            int id = addExpression(exp);
-            return id;
+            return addExpression(exp);
         }
 
         private Expression unwrapLet(Expression expression) {
@@ -717,16 +715,16 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
         private void emitExpression(Expression expression) {
             Expression unwrappedExpression = unwrapLet(expression);
-            if (unwrappedExpression instanceof ExpressionMatch) {
-                emitMatchExpression((ExpressionMatch) unwrappedExpression);
-            } else if (unwrappedExpression instanceof ExpressionSequence) {
-                emitSequenceExpression((ExpressionSequence) unwrappedExpression);
-            } else if (unwrappedExpression instanceof ExpressionAlternatives) {
-                emitAlternativesExpression((ExpressionAlternatives) unwrappedExpression);
-            } else if (unwrappedExpression instanceof ExpressionCardinality) {
-                emitCardinalExpression((ExpressionCardinality) unwrappedExpression);
-            } else if (unwrappedExpression instanceof ExpressionIdentifier) {
-                emitItemIdentifierExpression((ExpressionIdentifier) unwrappedExpression);
+            if (unwrappedExpression instanceof ExpressionMatch match) {
+                emitMatchExpression(match);
+            } else if (unwrappedExpression instanceof ExpressionSequence sequence) {
+                emitSequenceExpression(sequence);
+            } else if (unwrappedExpression instanceof ExpressionAlternatives alternatives) {
+                emitAlternativesExpression(alternatives);
+            } else if (unwrappedExpression instanceof ExpressionCardinality cardinality) {
+                emitCardinalExpression(cardinality);
+            } else if (unwrappedExpression instanceof ExpressionIdentifier identifier) {
+                emitItemIdentifierExpression(identifier);
             }
         }
 
@@ -816,8 +814,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 addExportedExpression(e);
             }
             for (Expression e : ids.keySet()) {
-                if (e instanceof ExpressionIdentifier) {
-                    Expression stopper = ((ExpressionIdentifier) e).getStopper();
+                if (e instanceof ExpressionIdentifier identifier) {
+                    Expression stopper = identifier.getStopper();
                     if (stopper != null) {
                         identifierExcludes.addAll(stopper.getFirsts(language));
                     }
