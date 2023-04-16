@@ -12,6 +12,8 @@
  */
 package org.openhab.core.semantics;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -343,6 +345,28 @@ public class SemanticTags {
             LOGGER.trace("'{}' semantic {} tag added.", className, type);
         }
         return newTag;
+    }
+
+    /**
+     * Returns the list of all semantic tags.
+     * 
+     * @return the list of all semantic tags.
+     */
+    public static Collection<Class<? extends Tag>> getTags() {
+        return new HashSet(TAGS.values());
+    }
+
+    public static Class<? extends Tag> getTagType(Class<? extends Tag> tag) {
+        if (Location.class.isAssignableFrom(tag)) {
+            return Location.class;
+        } else if (Equipment.class.isAssignableFrom(tag)) {
+            return Equipment.class;
+        } else if (Point.class.isAssignableFrom(tag)) {
+            return Point.class;
+        } else if (Property.class.isAssignableFrom(tag)) {
+            return Property.class;
+        }
+        throw new IllegalArgumentException("Unknown type of tag " + tag);
     }
 
     private static void addTagSet(Class<? extends Tag> tagSet) {
