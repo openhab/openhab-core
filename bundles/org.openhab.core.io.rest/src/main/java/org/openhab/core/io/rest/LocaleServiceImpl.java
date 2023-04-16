@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author Dennis Nobel - Initial contribution
  * @author Markus Rathgeb - Use locale provider
  * @author Martin Herbst - Support of different language definition variants
- * @authro Lyubomir Papazov - Add component annotation, rename the class to LocaleService and add method tryGetLocale
+ * @author Lyubomir Papazov - Add component annotation, rename the class to LocaleService and add method tryGetLocale
  */
 @Component
 @NonNullByDefault
@@ -81,7 +81,7 @@ public class LocaleServiceImpl implements LocaleService {
         if (provider != null) {
             return provider.getLocale();
         } else {
-            logger.error("There should ALWAYS be a local provider available, as it is provided by the core.");
+            logger.error("There should ALWAYS be a locale provider available, as it is provided by the core.");
             return Locale.US;
         }
     }
