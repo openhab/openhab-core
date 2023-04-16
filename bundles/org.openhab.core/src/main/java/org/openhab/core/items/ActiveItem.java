@@ -83,26 +83,26 @@ public interface ActiveItem extends Item {
      *
      * @param groupItemName name of the group (must not be null)
      */
-    abstract void removeGroupName(String groupItemName);
+    void removeGroupName(String groupItemName);
 
     /**
      * Assigns the according item to a group.
      *
      * @param groupItemName name of the group (must not be null)
      */
-    abstract void addGroupName(String groupItemName);
+    void addGroupName(String groupItemName);
 
     /**
      * Assigns the according item to the given groups.
      *
      * @param groupItemNames names of the groups (must not be null)
      */
-    abstract void addGroupNames(String... groupItemNames);
+    void addGroupNames(String... groupItemNames);
 
     /**
      * Assigns the according item to the given groups.
      *
      * @param groupItemNames names of the groups (must not be null)
      */
-    abstract void addGroupNames(List<String> groupItemNames);
+    void addGroupNames(List<String> groupItemNames);
 }
