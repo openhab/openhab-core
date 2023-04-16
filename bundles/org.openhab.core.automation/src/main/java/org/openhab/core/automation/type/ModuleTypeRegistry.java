@@ -40,7 +40,7 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      * @return the desired {@link ModuleType} instance or {@code null} if a module type with such UID does not exist or
      *         the passed UID is {@code null}.
      */
-    public <T extends ModuleType> @Nullable T get(String moduleTypeUID, @Nullable Locale locale);
+    <T extends ModuleType> @Nullable T get(String moduleTypeUID, @Nullable Locale locale);
 
     /**
      * Gets the {@link ModuleType}s filtered by tag.
@@ -50,7 +50,7 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      * @param <T> the type of the required object.
      * @return the {@link ModuleType}s, which correspond to the specified filter.
      */
-    public <T extends ModuleType> Collection<T> getByTag(@Nullable String moduleTypeTag);
+    <T extends ModuleType> Collection<T> getByTag(@Nullable String moduleTypeTag);
 
     /**
      * This method is used for getting the {@link ModuleType}s filtered by tag.
@@ -61,7 +61,7 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      * @param <T> the type of the required object.
      * @return the {@link ModuleType}s, which correspond to the specified filter.
      */
-    public <T extends ModuleType> Collection<T> getByTag(@Nullable String moduleTypeTag, @Nullable Locale locale);
+    <T extends ModuleType> Collection<T> getByTag(@Nullable String moduleTypeTag, @Nullable Locale locale);
 
     /**
      * This method is used for getting the {@link ModuleType}s filtered by tags.
@@ -71,7 +71,7 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      * @param <T> the type of the required object.
      * @return the {@link ModuleType}s, which correspond to the filter.
      */
-    public <T extends ModuleType> Collection<T> getByTags(String... tags);
+    <T extends ModuleType> Collection<T> getByTags(String... tags);
 
     /**
      * This method is used for getting the {@link ModuleType}s filtered by tags.
@@ -82,7 +82,7 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      * @param <T> the type of the required object.
      * @return the {@link ModuleType}s, which correspond to the filter.
      */
-    public <T extends ModuleType> Collection<T> getByTags(@Nullable Locale locale, String... tags);
+    <T extends ModuleType> Collection<T> getByTags(@Nullable Locale locale, String... tags);
 
     /**
      * This method is used for getting the {@link TriggerType}s. The returned {@link TriggerType}s are
@@ -92,7 +92,7 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      *            {@link TriggerType}s.
      * @return collection of all available {@link TriggerType}s, localized by default locale.
      */
-    public Collection<TriggerType> getTriggers(String... tags);
+    Collection<TriggerType> getTriggers(String... tags);
 
     /**
      * This method is used for getting the {@link TriggerType}s, localized depending on passed locale parameter.
@@ -105,7 +105,7 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      * @return a collection of all available {@link TriggerType}s, localized by default locale or the passed locale
      *         parameter.
      */
-    public Collection<TriggerType> getTriggers(@Nullable Locale locale, String... tags);
+    Collection<TriggerType> getTriggers(@Nullable Locale locale, String... tags);
 
     /**
      * This method is used for getting the {@link ConditionType}s. The returned {@link ConditionType}s are
@@ -115,7 +115,7 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      *            {@link ConditionType}s.
      * @return collection of all available {@link ConditionType}s, localized by default locale.
      */
-    public Collection<ConditionType> getConditions(String... tags);
+    Collection<ConditionType> getConditions(String... tags);
 
     /**
      * This method is used for getting the {@link ConditionType}s, localized depending on passed locale parameter.
@@ -128,7 +128,7 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      * @return a collection of all available {@link ConditionType}s, localized by default locale or the passed locale
      *         parameter.
      */
-    public Collection<ConditionType> getConditions(@Nullable Locale locale, String... tags);
+    Collection<ConditionType> getConditions(@Nullable Locale locale, String... tags);
 
     /**
      * This method is used for getting the {@link ActionType}s. The returned {@link ActionType}s are
@@ -138,7 +138,7 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      *            {@link ActionType}s.
      * @return collection of all available {@link ActionType}s, localized by default locale.
      */
-    public Collection<ActionType> getActions(String... tags);
+    Collection<ActionType> getActions(String... tags);
 
     /**
      * This method is used for getting the {@link ActionType}s, localized depending on passed locale parameter.
@@ -151,5 +151,5 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      * @return a collection of all available {@link ActionType}s, localized by default locale or the passed locale
      *         parameter.
      */
-    public Collection<ActionType> getActions(@Nullable Locale locale, String... tags);
+    Collection<ActionType> getActions(@Nullable Locale locale, String... tags);
 }

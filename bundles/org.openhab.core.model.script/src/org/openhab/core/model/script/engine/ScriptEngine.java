@@ -29,7 +29,7 @@ public interface ScriptEngine {
      * @return Script object, which can be executed
      * @throws ScriptParsingException
      */
-    public Script newScriptFromString(final String scriptAsString) throws ScriptParsingException;
+    Script newScriptFromString(final String scriptAsString) throws ScriptParsingException;
 
     /**
      * Executes a script that is passed as a string
@@ -39,7 +39,7 @@ public interface ScriptEngine {
      * @throws ScriptParsingException
      * @throws ScriptExecutionException
      */
-    public Object executeScript(final String scriptAsString) throws ScriptParsingException, ScriptExecutionException;
+    Object executeScript(final String scriptAsString) throws ScriptParsingException, ScriptExecutionException;
 
     /**
      * Wraps an Xbase XExpression in a Script instance
@@ -47,5 +47,5 @@ public interface ScriptEngine {
      * @param expression the XExpression
      * @return the Script instance containing the expression
      */
-    public Script newScriptFromXExpression(final XExpression expression);
+    Script newScriptFromXExpression(final XExpression expression);
 }

@@ -106,7 +106,7 @@ public interface ChartProvider {
      * Provides a list of image types
      *
      */
-    public enum ImageType {
+    enum ImageType {
         png,
         jpg,
         gif

@@ -32,5 +32,5 @@ public interface User extends Principal, Identifiable<String> {
      * @see Role
      * @return role attributed to the user
      */
-    public Set<String> getRoles();
+    Set<String> getRoles();
 }

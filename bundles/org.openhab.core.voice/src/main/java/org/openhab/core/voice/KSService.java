@@ -34,7 +34,7 @@ public interface KSService {
      *
      * @return an id that identifies this service
      */
-    public String getId();
+    String getId();
 
     /**
      * Returns a localized human readable label that can be used within UIs.
@@ -42,21 +42,21 @@ public interface KSService {
      * @param locale the locale to provide the label for
      * @return a localized string to be used in UIs
      */
-    public String getLabel(@Nullable Locale locale);
+    String getLabel(@Nullable Locale locale);
 
     /**
      * Obtain the Locales available from this KSService
      *
      * @return The Locales available from this service
      */
-    public Set<Locale> getSupportedLocales();
+    Set<Locale> getSupportedLocales();
 
     /**
      * Obtain the audio formats supported by this KSService
      *
      * @return The audio formats supported by this service
      */
-    public Set<AudioFormat> getSupportedFormats();
+    Set<AudioFormat> getSupportedFormats();
 
     /**
      * This method starts the process of keyword spotting
@@ -84,6 +84,6 @@ public interface KSService {
      * @return A {@link KSServiceHandle} used to abort keyword spotting
      * @throws A {@link KSException} if any parameter is invalid or a problem occurs
      */
-    public KSServiceHandle spot(KSListener ksListener, AudioStream audioStream, Locale locale, String keyword)
+    KSServiceHandle spot(KSListener ksListener, AudioStream audioStream, Locale locale, String keyword)
             throws KSException;
 }

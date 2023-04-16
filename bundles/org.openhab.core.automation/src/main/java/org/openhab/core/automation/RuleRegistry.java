@@ -68,7 +68,7 @@ public interface RuleRegistry extends Registry<Rule, String> {
      * @throws IllegalStateException when the RuleManagedProvider is unavailable.
      */
     @Override
-    public Rule add(Rule rule);
+    Rule add(Rule rule);
 
     /**
      * Gets a collection of {@link Rule}s which shares same tag.
@@ -76,7 +76,7 @@ public interface RuleRegistry extends Registry<Rule, String> {
      * @param tag specifies a tag that will filter the rules.
      * @return collection of {@link Rule}s having specified tag.
      */
-    public Collection<Rule> getByTag(@Nullable String tag);
+    Collection<Rule> getByTag(@Nullable String tag);
 
     /**
      * Gets a collection of {@link Rule}s which has specified tags.
@@ -84,5 +84,5 @@ public interface RuleRegistry extends Registry<Rule, String> {
      * @param tags specifies tags that will filter the rules.
      * @return collection of {@link Rule}s having specified tags.
      */
-    public Collection<Rule> getByTags(String... tags);
+    Collection<Rule> getByTags(String... tags);
 }

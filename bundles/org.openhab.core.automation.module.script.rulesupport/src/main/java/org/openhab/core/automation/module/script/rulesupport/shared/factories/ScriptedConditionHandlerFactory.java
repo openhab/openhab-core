@@ -24,5 +24,6 @@ import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedHand
  */
 @NonNullByDefault
 public interface ScriptedConditionHandlerFactory extends ScriptedHandler {
-    public @Nullable ConditionHandler get(Condition module);
+    @Nullable
+    ConditionHandler get(Condition module);
 }

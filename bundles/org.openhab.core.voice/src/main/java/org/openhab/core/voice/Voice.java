@@ -30,19 +30,19 @@ public interface Voice {
      *
      * @return A String uniquely identifying the voice.
      */
-    public String getUID();
+    String getUID();
 
     /**
      * The voice label, usually used for GUIs
      *
      * @return The voice label, may not be globally unique
      */
-    public String getLabel();
+    String getLabel();
 
     /**
      * Locale of the voice
      *
      * @return Locale of the voice
      */
-    public Locale getLocale();
+    Locale getLocale();
 }

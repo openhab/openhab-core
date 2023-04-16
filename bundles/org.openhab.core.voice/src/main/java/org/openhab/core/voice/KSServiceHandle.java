@@ -24,5 +24,5 @@ public interface KSServiceHandle {
     /**
      * Aborts keyword spotting in the associated {@link KSService}
      */
-    public void abort();
+    void abort();
 }
