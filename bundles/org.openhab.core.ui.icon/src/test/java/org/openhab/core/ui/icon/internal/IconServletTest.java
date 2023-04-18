@@ -90,23 +90,6 @@ public class IconServletTest {
     }
 
     @Test
-    public void testOldUrlStyle() throws ServletException, IOException {
-        when(requestMock.getRequestURI()).thenReturn("/icon/y-34.png");
-
-        when(responseMock.getOutputStream()).thenReturn(responseOutputStream);
-
-        when(provider1Mock.hasIcon("y", "classic", Format.PNG)).thenReturn(0);
-        when(provider1Mock.getIcon("y", "classic", "34", Format.PNG))
-                .thenReturn(new ByteArrayInputStream("provider 1 icon: y classic 34 png".getBytes()));
-
-        servlet.addIconProvider(provider1Mock);
-        servlet.doGet(requestMock, responseMock);
-
-        assertEquals("provider 1 icon: y classic 34 png", responseOutputStream.getOutput());
-        verify(responseMock, never()).sendError(anyInt());
-    }
-
-    @Test
     public void testPriority() throws ServletException, IOException {
         when(requestMock.getRequestURI()).thenReturn("/icon/x");
         when(requestMock.getParameter(PARAM_FORMAT)).thenReturn("svg");
