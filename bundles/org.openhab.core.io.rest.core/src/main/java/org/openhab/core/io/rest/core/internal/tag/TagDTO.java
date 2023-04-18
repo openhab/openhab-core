@@ -27,13 +27,11 @@ import org.openhab.core.semantics.Tag;
 @NonNullByDefault
 public class TagDTO {
     String name;
-    String type;
     String label;
     List<String> synonyms;
 
     public TagDTO(Class<? extends Tag> tag, Locale locale) {
         this.name = tag.getSimpleName();
-        this.type = SemanticTags.getTagType(tag).getSimpleName();
         this.label = SemanticTags.getLabel(tag, locale);
         this.synonyms = SemanticTags.getSynonyms(tag, locale);
     }

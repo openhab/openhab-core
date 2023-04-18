@@ -12,8 +12,9 @@
  */
 package org.openhab.core.io.rest.core.internal.tag;
 
+import java.util.List;
 import java.util.Locale;
-import java.util.stream.Stream;
+import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
@@ -24,16 +25,20 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
+import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
-import org.openhab.core.io.rest.Stream2JSONInputStream;
-import org.openhab.core.semantics.SemanticTags;
+import org.openhab.core.semantics.model.equipment.Equipments;
+import org.openhab.core.semantics.model.location.Locations;
+import org.openhab.core.semantics.model.point.Points;
+import org.openhab.core.semantics.model.property.Properties;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -86,8 +91,16 @@ public class TagResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TagDTO.class)))) })
     public Response getTags(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
+
         final Locale locale = localeService.getLocale(language);
-        Stream<TagDTO> tagStream = SemanticTags.getTags().stream().map(tag -> new TagDTO(tag, locale));
-        return Response.ok(new Stream2JSONInputStream(tagStream)).build();
+
+        Map<String, List<TagDTO>> tags = Map.of( //
+                Locations.class.getSimpleName(), Locations.stream().map(tag -> new TagDTO(tag, locale)).toList(), //
+                Equipments.class.getSimpleName(), Equipments.stream().map(tag -> new TagDTO(tag, locale)).toList(), //
+                Points.class.getSimpleName(), Points.stream().map(tag -> new TagDTO(tag, locale)).toList(), //
+                Properties.class.getSimpleName(), Properties.stream().map(tag -> new TagDTO(tag, locale)).toList() //
+        );
+
+        return JSONResponse.createResponse(Status.OK, tags, null);
     }
 }
