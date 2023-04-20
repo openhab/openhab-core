@@ -62,12 +62,12 @@ public interface NetworkAddressService {
      *
      * @param listener The listener
      */
-    public void addNetworkAddressChangeListener(NetworkAddressChangeListener listener);
+    void addNetworkAddressChangeListener(NetworkAddressChangeListener listener);
 
     /**
      * Removes a {@link NetworkAddressChangeListener} so that it is no longer notified about changes.
      *
      * @param listener The listener
      */
-    public void removeNetworkAddressChangeListener(NetworkAddressChangeListener listener);
+    void removeNetworkAddressChangeListener(NetworkAddressChangeListener listener);
 }

@@ -29,7 +29,7 @@ import org.openhab.core.thing.ThingRegistryChangeListener;
 @NonNullByDefault
 public interface ThingTracker {
 
-    public enum ThingTrackerEvent {
+    enum ThingTrackerEvent {
         THING_ADDED,
         THING_REMOVING,
         THING_REMOVED,

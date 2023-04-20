@@ -37,7 +37,7 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * @param roles the roles attributed to the new user
      * @return the new registered {@link User} instance
      */
-    public User register(String username, String password, Set<String> roles);
+    User register(String username, String password, Set<String> roles);
 
     /**
      * Change the password for a {@link User} in this registry. The implementation receives the new password and is
@@ -46,7 +46,7 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * @param username the username of the existing user
      * @param newPassword the new password
      */
-    public void changePassword(User user, String newPassword);
+    void changePassword(User user, String newPassword);
 
     /**
      * Adds a new session to the user profile
@@ -54,7 +54,7 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * @param user the user
      * @param session the session to add
      */
-    public void addUserSession(User user, UserSession session);
+    void addUserSession(User user, UserSession session);
 
     /**
      * Removes the specified session from the user profile
@@ -62,14 +62,14 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * @param user the user
      * @param session the session to remove
      */
-    public void removeUserSession(User user, UserSession session);
+    void removeUserSession(User user, UserSession session);
 
     /**
      * Clears all sessions from the user profile
      *
      * @param user the user
      */
-    public void clearSessions(User user);
+    void clearSessions(User user);
 
     /**
      * Adds a new API token to the user profile. The implementation is responsible for storing the token in a secure way
@@ -80,7 +80,7 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * @param scope the scope this API token will be valid for
      * @return the string that can be used as a Bearer token to match the new API token
      */
-    public String addUserApiToken(User user, String name, String scope);
+    String addUserApiToken(User user, String name, String scope);
 
     /**
      * Removes the specified API token from the user profile
@@ -88,5 +88,5 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * @param user the user
      * @param apiToken the API token
      */
-    public void removeUserApiToken(User user, UserApiToken apiToken);
+    void removeUserApiToken(User user, UserApiToken apiToken);
 }

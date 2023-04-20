@@ -35,14 +35,15 @@ public interface SerialPortProvider {
      * @throws UnsupportedCommOperationException
      * @throws PortInUseException
      */
-    public @Nullable SerialPortIdentifier getPortIdentifier(URI portName);
+    @Nullable
+    SerialPortIdentifier getPortIdentifier(URI portName);
 
     /**
      * Gets all protocol types which this provider is able to create.
      *
      * @return The protocol type.
      */
-    public Stream<ProtocolType> getAcceptedProtocols();
+    Stream<ProtocolType> getAcceptedProtocols();
 
     /**
      * Gets all the available {@link SerialPortIdentifier}s for this {@link SerialPortProvider}.
@@ -51,5 +52,5 @@ public interface SerialPortProvider {
      *
      * @return The available ports
      */
-    public Stream<SerialPortIdentifier> getSerialPortIdentifiers();
+    Stream<SerialPortIdentifier> getSerialPortIdentifiers();
 }

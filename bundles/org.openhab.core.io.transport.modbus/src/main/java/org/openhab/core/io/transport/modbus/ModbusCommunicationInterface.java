@@ -38,7 +38,7 @@ public interface ModbusCommunicationInterface extends AutoCloseable {
      *
      * @return modbus slave endpoint
      */
-    public ModbusSlaveEndpoint getEndpoint();
+    ModbusSlaveEndpoint getEndpoint();
 
     /**
      * Submit one-time poll task. The method returns immediately, and the execution of the poll task will happen in
@@ -50,7 +50,7 @@ public interface ModbusCommunicationInterface extends AutoCloseable {
      * @return future representing the polled task
      * @throws IllegalStateException when this communication has been closed already
      */
-    public Future<?> submitOneTimePoll(ModbusReadRequestBlueprint request, ModbusReadCallback resultCallback,
+    Future<?> submitOneTimePoll(ModbusReadRequestBlueprint request, ModbusReadCallback resultCallback,
             ModbusFailureCallback<ModbusReadRequestBlueprint> failureCallback);
 
     /**
@@ -67,9 +67,8 @@ public interface ModbusCommunicationInterface extends AutoCloseable {
      * @return poll task representing the regular poll
      * @throws IllegalStateException when this communication has been closed already
      */
-    public PollTask registerRegularPoll(ModbusReadRequestBlueprint request, long pollPeriodMillis,
-            long initialDelayMillis, ModbusReadCallback resultCallback,
-            ModbusFailureCallback<ModbusReadRequestBlueprint> failureCallback);
+    PollTask registerRegularPoll(ModbusReadRequestBlueprint request, long pollPeriodMillis, long initialDelayMillis,
+            ModbusReadCallback resultCallback, ModbusFailureCallback<ModbusReadRequestBlueprint> failureCallback);
 
     /**
      * Unregister regularly polled task
@@ -80,7 +79,7 @@ public interface ModbusCommunicationInterface extends AutoCloseable {
      * @return whether poll task was unregistered. Poll task is not unregistered in case of unexpected errors or
      *         in the case where the poll task is not registered in the first place
      */
-    public boolean unregisterRegularPoll(PollTask task);
+    boolean unregisterRegularPoll(PollTask task);
 
     /**
      * Submit one-time write task. The method returns immediately, and the execution of the task will happen in
@@ -92,7 +91,7 @@ public interface ModbusCommunicationInterface extends AutoCloseable {
      * @return future representing the task
      * @throws IllegalStateException when this communication has been closed already
      */
-    public Future<?> submitOneTimeWrite(ModbusWriteRequestBlueprint request, ModbusWriteCallback resultCallback,
+    Future<?> submitOneTimeWrite(ModbusWriteRequestBlueprint request, ModbusWriteCallback resultCallback,
             ModbusFailureCallback<ModbusWriteRequestBlueprint> failureCallback);
 
     /**
@@ -105,5 +104,5 @@ public interface ModbusCommunicationInterface extends AutoCloseable {
      *
      */
     @Override
-    public void close() throws Exception;
+    void close() throws Exception;
 }
