@@ -64,16 +64,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
  */
 @Component
 @JaxrsResource
-@JaxrsName(TagResource.PATH_ITEMS)
+@JaxrsName(TagResource.PATH_TAGS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path(TagResource.PATH_ITEMS)
-@io.swagger.v3.oas.annotations.tags.Tag(name = TagResource.PATH_ITEMS)
+@Path(TagResource.PATH_TAGS)
+@io.swagger.v3.oas.annotations.tags.Tag(name = TagResource.PATH_TAGS)
 @NonNullByDefault
 public class TagResource implements RESTResource {
 
     /** The URI path to this resource */
-    public static final String PATH_ITEMS = "tags";
+    public static final String PATH_TAGS = "tags";
 
     private final Logger logger = LoggerFactory.getLogger(TagResource.class);
 
