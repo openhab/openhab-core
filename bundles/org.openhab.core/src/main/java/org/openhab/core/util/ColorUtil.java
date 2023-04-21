@@ -13,6 +13,7 @@
 package org.openhab.core.util;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class ColorUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ColorUtil.class);
+    private static final MathContext COLOR_MATH_CONTEXT = new MathContext(5, RoundingMode.HALF_UP);
     protected static final BigDecimal BIG_DECIMAL_HUNDRED = BigDecimal.valueOf(100);
     public static final Gamut DEFAULT_GAMUT = new Gamut(new double[] { 0.9961, 0.0001 }, new double[] { 0, 0.9961 },
             new double[] { 0, 0.0001 });
@@ -50,7 +52,10 @@ public class ColorUtil {
      *
      * This function does rounding to integer valued components. It is the preferred way of doing HSB to RGB conversion.
      *
-     * See also: {@link hsbToRgbPercent(HSBType)}, {@link hsbTosRGB(HSBType)}
+     * See also: {@link #hsbToRgbPercent(HSBType)}, {@link #hsbTosRgb(HSBType)}
+     *
+     * @param hsb an {@link HSBType} value.
+     * @return array of three int with the RGB values in the range 0 to 255.
      */
     public static int[] hsbToRgb(HSBType hsb) {
         final PercentType[] rgbPercent = hsbToRgbPercent(hsb);
@@ -62,10 +67,13 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to
      * <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a>.
      *
-     * This function not round the components to integer values. Please consider consider
-     * using {@link hsbToRgb(HSBType)} whenever integer values are required.
+     * This function does not round the components. For conversion to integer values in the range 0 to 255 use
+     * {@link #hsbToRgb(HSBType)}.
      *
-     * See also: {@link hsbToRgb(HSBType)}, {@link hsbTosRgb(HSBType)}
+     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}
+     *
+     * @param hsb an {@link HSBType} value.
+     * @return array of three {@link PercentType} with the RGB values in the range 0 to 100 percent.
      */
     public static PercentType[] hsbToRgbPercent(HSBType hsb) {
         PercentType red = null;
@@ -79,6 +87,7 @@ public class ColorUtil {
         final BigDecimal f = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP)
                 .remainder(BigDecimal.ONE);
         final BigDecimal value = hsb.getBrightness().toBigDecimal();
+
         PercentType a = new PercentType(value.multiply(BigDecimal.ONE.subtract(s)));
         PercentType b = new PercentType(value.multiply(BigDecimal.ONE.subtract(s.multiply(f))));
         PercentType c = new PercentType(
@@ -128,9 +137,10 @@ public class ColorUtil {
      * <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color model.
      * (Bits 24-31 are alpha, 16-23 are red, 8-15 are green, 0-7 are blue).
      *
-     * See also: {@link hsbToRgb(HSBType)}, {@link hsbToRgbPercent(HSBType)}
+     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbToRgbPercent(HSBType)}
      *
-     * @return the RGB value of the color in the default sRGB color model
+     * @param hsb an {@link HSBType} value.
+     * @return the RGB value of the color in the default sRGB color model.
      */
     public static int hsbTosRgb(HSBType hsb) {
         final int[] rgb = hsbToRgb(hsb);
@@ -145,11 +155,11 @@ public class ColorUtil {
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
      * developerportal</a>.
      *
-     * @param hsbType a {@link HSBType} value
-     * @return double array with the closest matching CIE 1931 color, x, y between 0.0000 and 1.0000.
+     * @param hsb an {@link HSBType} value.
+     * @return array of three double with the closest matching CIE 1931 x,y,Y in the range 0.0000 to 1.0000
      */
-    public static double[] hsbToXY(HSBType hsbType) {
-        return hsbToXY(hsbType, DEFAULT_GAMUT);
+    public static double[] hsbToXY(HSBType hsb) {
+        return hsbToXY(hsb, DEFAULT_GAMUT);
     }
 
     /**
@@ -160,12 +170,12 @@ public class ColorUtil {
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
      * developer portal</a>.
      *
-     * @param hsbType a {@link HSBType} value
-     * @param gamut the gamut supported by the light.
-     * @return double array with the closest matching CIE 1931 color, x, y, Y between 0.0000 and 1.0000.
+     * @param hsb an {@link HSBType} value.
+     * @param gamut the color Gamut supported by the light.
+     * @return array of three double with the closest matching CIE 1931 x,y,Y in the range 0.0000 to 1.0000
      */
-    public static double[] hsbToXY(HSBType hsbType, Gamut gamut) {
-        PercentType[] rgb = hsbToRgbPercent(hsbType);
+    public static double[] hsbToXY(HSBType hsb, Gamut gamut) {
+        PercentType[] rgb = hsbToRgbPercent(hsb);
         double r = inverseCompand(rgb[0].doubleValue() / PercentType.HUNDRED.doubleValue());
         double g = inverseCompand(rgb[1].doubleValue() / PercentType.HUNDRED.doubleValue());
         double b = inverseCompand(rgb[2].doubleValue() / PercentType.HUNDRED.doubleValue());
@@ -181,8 +191,10 @@ public class ColorUtil {
         double[] xyY = new double[] { ((int) (q.x * 10000.0)) / 10000.0, ((int) (q.y * 10000.0)) / 10000.0,
                 ((int) (Y * 10000.0)) / 10000.0 };
 
-        LOGGER.trace("HSB: {} - RGB: {} - XYZ: {} {} {} - xyY: {}", hsbType, hsbType.toRGB(), X, Y, Z, xyY);
-
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("HSB: {} - RGB: {} - XYZ: {} {} {} - xyY: {}", hsb, ColorUtil.hsbToRgbPercent(hsb), X, Y, Z,
+                    xyY);
+        }
         return xyY;
     }
 
@@ -190,56 +202,67 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color format to
      * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
-     * Note: Conversion result is rounded and HSBType is created with integer valued components.
-     *
-     * @param rgb int array of length 3, all values are constrained to 0-255
+     * @param rgb array of three int with the RGB values in the range 0 to 255.
      * @return the corresponding {@link HSBType}.
-     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
     public static HSBType rgbToHsb(int[] rgb) throws IllegalArgumentException {
         if (rgb.length != 3 || !inByteRange(rgb[0]) || !inByteRange(rgb[1]) || !inByteRange(rgb[2])) {
             throw new IllegalArgumentException("RGB array only allows values between 0 and 255");
         }
-        final int r = rgb[0];
-        final int g = rgb[1];
-        final int b = rgb[2];
+        return rgbToHsb(new PercentType[] { convertByteToColorPercent(rgb[0]), convertByteToColorPercent(rgb[1]),
+                convertByteToColorPercent(rgb[2]) });
+    }
 
-        int max = (r > g) ? r : g;
-        if (b > max) {
-            max = b;
+    /**
+     * Transform <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color format to
+     * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
+     *
+     * @param rgb array of three {@link PercentType] with the RGB values in the range 0 to 100 percent.
+     * @return the corresponding {@link HSBType}.
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
+     */
+    public static HSBType rgbToHsb(PercentType[] rgb) throws IllegalArgumentException {
+        if (rgb.length != 3) {
+            throw new IllegalArgumentException("RGB array needs exactly three values!");
         }
-        int min = (r < g) ? r : g;
-        if (b < min) {
-            min = b;
+
+        BigDecimal r = rgb[0].toBigDecimal();
+        BigDecimal g = rgb[1].toBigDecimal();
+        BigDecimal b = rgb[2].toBigDecimal();
+
+        BigDecimal max = r.max(g).max(b);
+        BigDecimal min = r.min(g).min(b);
+        BigDecimal span = max.subtract(min);
+
+        if (max.compareTo(BigDecimal.ZERO) == 0) { // all values are 0, return black
+            return new HSBType();
+        } else if (span.compareTo(BigDecimal.ZERO) == 0) { // all values are equal, return dimmed white
+            return new HSBType(new DecimalType(), new PercentType(), new PercentType(max));
         }
-        float tmpHue;
-        final float tmpBrightness = max / 2.55f;
-        final float tmpSaturation = (max != 0 ? ((float) (max - min)) / ((float) max) : 0) * 100.0f;
-        // smallest possible saturation: 0 (max=0 or max-min=0), other value closest to 0 is 100/255 (max=255, min=254)
-        // -> avoid float comparision to 0
-        // if (tmpSaturation == 0) {
-        if (max == 0 || (max - min) == 0) {
-            tmpHue = 0;
+
+        PercentType saturation = new PercentType(span.divide(max, COLOR_MATH_CONTEXT).multiply(BIG_DECIMAL_HUNDRED));
+        PercentType brightness = new PercentType(max);
+
+        BigDecimal scale = span.divide(BigDecimal.valueOf(60), COLOR_MATH_CONTEXT);
+
+        BigDecimal redAngle = max.subtract(r).divide(scale, COLOR_MATH_CONTEXT);
+        BigDecimal greenAngle = max.subtract(g).divide(scale, COLOR_MATH_CONTEXT);
+        BigDecimal blueAngle = max.subtract(b).divide(scale, COLOR_MATH_CONTEXT);
+
+        BigDecimal hue;
+        if (r.compareTo(max) == 0) {
+            hue = blueAngle.subtract(greenAngle);
+        } else if (g.compareTo(max) == 0) {
+            hue = BigDecimal.valueOf(120).add(redAngle).subtract(blueAngle);
         } else {
-            float red = ((float) (max - r)) / ((float) (max - min));
-            float green = ((float) (max - g)) / ((float) (max - min));
-            float blue = ((float) (max - b)) / ((float) (max - min));
-            if (r == max) {
-                tmpHue = blue - green;
-            } else if (g == max) {
-                tmpHue = 2.0f + red - blue;
-            } else {
-                tmpHue = 4.0f + green - red;
-            }
-            tmpHue = tmpHue / 6.0f * 360;
-            if (tmpHue < 0) {
-                tmpHue = tmpHue + 360.0f;
-            }
+            hue = BigDecimal.valueOf(240).add(greenAngle).subtract(redAngle);
+        }
+        if (hue.compareTo(BigDecimal.ZERO) < 0) {
+            hue = hue.add(BigDecimal.valueOf(360));
         }
 
-        // adding 0.5 and casting to int approximates rounding
-        return new HSBType(new DecimalType((int) (tmpHue + .5f)), new PercentType((int) (tmpSaturation + .5f)),
-                new PercentType((int) (tmpBrightness + .5f)));
+        return new HSBType(new DecimalType(hue), saturation, brightness);
     }
 
     /**
@@ -250,9 +273,9 @@ public class ColorUtil {
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
      * developer portal</a>.
      *
-     * @param xy the CIE 1931 xy color, x,y between 0.0000 and 1.0000.
+     * @param xy array of double with CIE 1931 x,y[,Y] in the range 0.0000 to 1.0000 <code>Y</code> value is optional.
      * @return the corresponding {@link HSBType}.
-     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
     public static HSBType xyToHsb(double[] xy) throws IllegalArgumentException {
         return xyToHsb(xy, DEFAULT_GAMUT);
@@ -266,15 +289,15 @@ public class ColorUtil {
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
      * developer portal</a>.
      *
-     * @param xy the CIE 1931 xy color, x,y[,Y] between 0.0000 and 1.0000. <code>Y</code> value is optional.
-     * @param gamut the gamut supported by the light.
+     * @param xy array of double with CIE 1931 x,y[,Y] in the range 0.0000 to 1.0000 <code>Y</code> value is optional.
+     * @param gamut the color Gamut supported by the light.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
      */
     public static HSBType xyToHsb(double[] xy, Gamut gamut) throws IllegalArgumentException {
         if (xy.length < 2 || xy.length > 3 || !inRange(xy[0]) || !inRange(xy[1])
                 || (xy.length == 3 && !inRange(xy[2]))) {
-            throw new IllegalArgumentException("xy array only allowes two or three values between 0.0 and 1.0.");
+            throw new IllegalArgumentException("xy array only allows two or three values between 0.0 and 1.0.");
         }
         Point p = gamut.closest(new Point(xy[0], xy[1]));
         double x = p.x;
@@ -315,11 +338,10 @@ public class ColorUtil {
             b /= max;
         }
 
-        HSBType hsb = rgbToHsb(
-                new int[] { (int) Math.round(255.0 * r), (int) Math.round(255.0 * g), (int) Math.round(255.0 * b) });
-        LOGGER.trace("xy: {} - XYZ: {} {} {} - RGB: {} {} {} - HSB: {} ", xy, X, Y, Z, r, g, b, hsb);
+        LOGGER.trace("xy: {} - XYZ: {} {} {} - RGB: {} {} {}", xy, X, Y, Z, r, g, b);
 
-        return hsb;
+        return rgbToHsb(new PercentType[] { convertDoubleToColorPercent(r), convertDoubleToColorPercent(g),
+                convertDoubleToColorPercent(b) });
     }
 
     /**
@@ -465,5 +487,13 @@ public class ColorUtil {
     private static int convertColorPercentToByte(PercentType percent) {
         return percent.toBigDecimal().multiply(BigDecimal.valueOf(255))
                 .divide(BIG_DECIMAL_HUNDRED, 0, RoundingMode.HALF_UP).intValue();
+    }
+
+    private static PercentType convertByteToColorPercent(int b) {
+        return new PercentType(new BigDecimal(b).divide(new BigDecimal("2.55"), COLOR_MATH_CONTEXT));
+    }
+
+    private static PercentType convertDoubleToColorPercent(double d) {
+        return new PercentType(new BigDecimal(d).multiply(BIG_DECIMAL_HUNDRED, COLOR_MATH_CONTEXT));
     }
 }
