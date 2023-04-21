@@ -87,8 +87,8 @@ public class IconServlet extends HttpServlet {
     @Modified
     protected void modified(Map<String, Object> config) {
         Object iconSetId = config.get("default");
-        if (iconSetId instanceof String) {
-            defaultIconSetId = (String) iconSetId;
+        if (iconSetId instanceof String string) {
+            defaultIconSetId = string;
         }
     }
 
@@ -106,7 +106,7 @@ public class IconServlet extends HttpServlet {
             return;
         }
 
-        String state = getState(req);
+        String state = req.getParameter(PARAM_STATE);
         String iconSetId = getIconSetId(req);
 
         Format format = getFormat(req);
@@ -173,8 +173,7 @@ public class IconServlet extends HttpServlet {
 
     private String getCategory(HttpServletRequest req) {
         String category = substringAfterLast(req.getRequestURI(), "/");
-        category = substringBeforeLast(category, ".");
-        return substringBeforeLast(category, "-");
+        return substringBeforeLast(category, ".");
     }
 
     private Format getFormat(HttpServletRequest req) {
@@ -203,22 +202,6 @@ public class IconServlet extends HttpServlet {
             return defaultIconSetId;
         } else {
             return iconSetId;
-        }
-    }
-
-    private @Nullable String getState(HttpServletRequest req) {
-        String state = req.getParameter(PARAM_STATE);
-        if (state != null) {
-            return state;
-        } else {
-            String filename = substringAfterLast(req.getRequestURI(), "/");
-            state = substringAfterLast(filename, "-");
-            state = substringBeforeLast(state, ".");
-            if (!state.isEmpty()) {
-                return state;
-            } else {
-                return null;
-            }
         }
     }
 

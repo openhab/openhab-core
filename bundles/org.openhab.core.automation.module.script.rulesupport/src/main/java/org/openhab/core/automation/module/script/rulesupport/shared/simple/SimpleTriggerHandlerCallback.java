@@ -23,5 +23,5 @@ import org.openhab.core.automation.handler.TriggerHandlerCallback;
  */
 @NonNullByDefault
 public interface SimpleTriggerHandlerCallback extends TriggerHandlerCallback {
-    public void triggered(Map<String, ?> context);
+    void triggered(Map<String, ?> context);
 }

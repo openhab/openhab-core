@@ -127,8 +127,8 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
         Collection<ModuleType> moduleTypes = getByTags(locale, tags);
         Collection<TriggerType> triggerTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
-            if (mt instanceof TriggerType) {
-                triggerTypes.add((TriggerType) mt);
+            if (mt instanceof TriggerType type) {
+                triggerTypes.add(type);
             }
         }
         return triggerTypes;
@@ -139,8 +139,8 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
         Collection<ModuleType> moduleTypes = getByTags(tags);
         Collection<TriggerType> triggerTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
-            if (mt instanceof TriggerType) {
-                triggerTypes.add((TriggerType) mt);
+            if (mt instanceof TriggerType type) {
+                triggerTypes.add(type);
             }
         }
         return triggerTypes;
@@ -151,8 +151,8 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
         Collection<ModuleType> moduleTypes = getByTags(tags);
         Collection<ConditionType> conditionTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
-            if (mt instanceof ConditionType) {
-                conditionTypes.add((ConditionType) mt);
+            if (mt instanceof ConditionType type) {
+                conditionTypes.add(type);
             }
         }
         return conditionTypes;
@@ -163,8 +163,8 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
         Collection<ModuleType> moduleTypes = getByTags(locale, tags);
         Collection<ConditionType> conditionTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
-            if (mt instanceof ConditionType) {
-                conditionTypes.add((ConditionType) mt);
+            if (mt instanceof ConditionType type) {
+                conditionTypes.add(type);
             }
         }
         return conditionTypes;
@@ -175,8 +175,8 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
         Collection<ModuleType> moduleTypes = getByTags(tags);
         Collection<ActionType> actionTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
-            if (mt instanceof ActionType) {
-                actionTypes.add((ActionType) mt);
+            if (mt instanceof ActionType type) {
+                actionTypes.add(type);
             }
         }
         return actionTypes;
@@ -187,8 +187,8 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
         Collection<ModuleType> moduleTypes = getByTags(locale, tags);
         Collection<ActionType> actionTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
-            if (mt instanceof ActionType) {
-                actionTypes.add((ActionType) mt);
+            if (mt instanceof ActionType type) {
+                actionTypes.add(type);
             }
         }
         return actionTypes;
@@ -199,36 +199,30 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
             return null;
         }
         ModuleType result;
-        if (mType instanceof CompositeTriggerType) {
-            CompositeTriggerType m = (CompositeTriggerType) mType;
+        if (mType instanceof CompositeTriggerType m) {
             result = new CompositeTriggerType(mType.getUID(), mType.getConfigurationDescriptions(), mType.getLabel(),
                     mType.getDescription(), mType.getTags(), mType.getVisibility(), m.getOutputs(),
                     new ArrayList<>(m.getChildren()));
 
-        } else if (mType instanceof TriggerType) {
-            TriggerType m = (TriggerType) mType;
+        } else if (mType instanceof TriggerType m) {
             result = new TriggerType(mType.getUID(), mType.getConfigurationDescriptions(), mType.getLabel(),
                     mType.getDescription(), mType.getTags(), mType.getVisibility(), m.getOutputs());
 
-        } else if (mType instanceof CompositeConditionType) {
-            CompositeConditionType m = (CompositeConditionType) mType;
+        } else if (mType instanceof CompositeConditionType m) {
             result = new CompositeConditionType(mType.getUID(), mType.getConfigurationDescriptions(), mType.getLabel(),
                     mType.getDescription(), mType.getTags(), mType.getVisibility(), m.getInputs(),
                     new ArrayList<>(m.getChildren()));
 
-        } else if (mType instanceof ConditionType) {
-            ConditionType m = (ConditionType) mType;
+        } else if (mType instanceof ConditionType m) {
             result = new ConditionType(mType.getUID(), mType.getConfigurationDescriptions(), mType.getLabel(),
                     mType.getDescription(), mType.getTags(), mType.getVisibility(), m.getInputs());
 
-        } else if (mType instanceof CompositeActionType) {
-            CompositeActionType m = (CompositeActionType) mType;
+        } else if (mType instanceof CompositeActionType m) {
             result = new CompositeActionType(mType.getUID(), mType.getConfigurationDescriptions(), mType.getLabel(),
                     mType.getDescription(), mType.getTags(), mType.getVisibility(), m.getInputs(), m.getOutputs(),
                     new ArrayList<>(m.getChildren()));
 
-        } else if (mType instanceof ActionType) {
-            ActionType m = (ActionType) mType;
+        } else if (mType instanceof ActionType m) {
             result = new ActionType(mType.getUID(), mType.getConfigurationDescriptions(), mType.getLabel(),
                     mType.getDescription(), mType.getTags(), mType.getVisibility(), m.getInputs(), m.getOutputs());
         } else {

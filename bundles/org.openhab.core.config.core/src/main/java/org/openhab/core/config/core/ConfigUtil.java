@@ -184,8 +184,8 @@ public class ConfigUtil {
             return value;
         } else if (value instanceof Number) {
             return new BigDecimal(value.toString());
-        } else if (value instanceof Collection) {
-            return normalizeCollection((Collection<?>) value);
+        } else if (value instanceof Collection collection) {
+            return normalizeCollection(collection);
         }
         throw new IllegalArgumentException(
                 "Invalid type '{" + value.getClass().getCanonicalName() + "}' of configuration value!");

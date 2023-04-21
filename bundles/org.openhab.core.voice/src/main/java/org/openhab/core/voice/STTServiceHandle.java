@@ -24,5 +24,5 @@ public interface STTServiceHandle {
     /**
      * Aborts recognition in the associated {@link STTService}
      */
-    public void abort();
+    void abort();
 }

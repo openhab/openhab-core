@@ -294,9 +294,8 @@ public class DialogProcessor implements KSListener, STTListener {
                 } catch (IllegalStateException e) {
                     logger.warn("{}", e.getMessage());
                 }
-            } else if (ksEvent instanceof KSErrorEvent) {
+            } else if (ksEvent instanceof KSErrorEvent kse) {
                 logger.debug("KSErrorEvent event received");
-                KSErrorEvent kse = (KSErrorEvent) ksEvent;
                 String text = i18nProvider.getText(bundle, "error.ks-error", null, dialogContext.locale());
                 say(text == null ? kse.getMessage() : text.replace("{0}", kse.getMessage()));
             }
@@ -305,10 +304,9 @@ public class DialogProcessor implements KSListener, STTListener {
 
     @Override
     public synchronized void sttEventReceived(STTEvent sttEvent) {
-        if (sttEvent instanceof SpeechRecognitionEvent) {
+        if (sttEvent instanceof SpeechRecognitionEvent sre) {
             logger.debug("SpeechRecognitionEvent event received");
             if (!isSTTServerAborting) {
-                SpeechRecognitionEvent sre = (SpeechRecognitionEvent) sttEvent;
                 String question = sre.getTranscript();
                 logger.debug("Text recognized: {}", question);
                 toggleProcessing(false);
@@ -335,12 +333,11 @@ public class DialogProcessor implements KSListener, STTListener {
         } else if (sttEvent instanceof RecognitionStopEvent) {
             logger.debug("RecognitionStopEvent event received");
             toggleProcessing(false);
-        } else if (sttEvent instanceof SpeechRecognitionErrorEvent) {
+        } else if (sttEvent instanceof SpeechRecognitionErrorEvent sre) {
             logger.debug("SpeechRecognitionErrorEvent event received");
             if (!isSTTServerAborting) {
                 abortSTT();
                 toggleProcessing(false);
-                SpeechRecognitionErrorEvent sre = (SpeechRecognitionErrorEvent) sttEvent;
                 String text = i18nProvider.getText(bundle, "error.stt-error", null, dialogContext.locale());
                 say(text == null ? sre.getMessage() : text.replace("{0}", sre.getMessage()));
             }

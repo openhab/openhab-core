@@ -138,8 +138,7 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
                 case SUBCMD_ADDTAG:
                     if (args.length > 2) {
                         Item item = itemRegistry.get(args[1]);
-                        if (item instanceof GenericItem) {
-                            GenericItem gItem = (GenericItem) item;
+                        if (item instanceof GenericItem gItem) {
                             handleTags(gItem::addTag, args[2], gItem, console);
                         }
                     } else {
@@ -150,8 +149,7 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
                 case SUBCMD_RMTAG:
                     if (args.length > 2) {
                         Item item = itemRegistry.get(args[1]);
-                        if (item instanceof GenericItem) {
-                            GenericItem gItem = (GenericItem) item;
+                        if (item instanceof GenericItem gItem) {
                             handleTags(gItem::removeTag, args[2], gItem, console);
                         }
                     } else {

@@ -105,10 +105,10 @@ public class BitUtilitiesExtractIndividualMethodsTest {
         String testExplanation = String.format("bytes=%s, byteIndex=%d, type=%s", Arrays.toString(bytes), byteIndex,
                 type);
         final Object expectedNumber;
-        if (expectedResult instanceof Class && Exception.class.isAssignableFrom((Class<?>) expectedResult)) {
+        if (expectedResult instanceof Class class1 && Exception.class.isAssignableFrom(class1)) {
             assertThrows((Class<? extends Throwable>) expectedResult, () -> methodUnderTest.get());
-        } else if (expectedResult instanceof Optional<?>) {
-            assertTrue(!((Optional<?>) expectedResult).isPresent());
+        } else if (expectedResult instanceof Optional<?> optional) {
+            assertTrue(optional.isEmpty());
             if (defaultWhenEmptyOptional == null) {
                 fail("Should provide defaultWhenEmptyOptional");
             }

@@ -243,10 +243,10 @@ public class ProxyServletService extends HttpServlet {
             }
 
             String uriString = null;
-            if (widget instanceof Image) {
-                uriString = ((Image) widget).getUrl();
-            } else if (widget instanceof Video) {
-                uriString = ((Video) widget).getUrl();
+            if (widget instanceof Image image) {
+                uriString = image.getUrl();
+            } else if (widget instanceof Video video) {
+                uriString = video.getUrl();
             } else {
                 throw new ProxyServletException(HttpServletResponse.SC_FORBIDDEN,
                         String.format("Widget type '%s' is not supported!", widget.getClass().getName()));

@@ -31,7 +31,7 @@ public interface HumanLanguageInterpreter {
      *
      * @return an id that identifies this service
      */
-    public String getId();
+    String getId();
 
     /**
      * Returns a localized human readable label that can be used within UIs.
@@ -39,7 +39,7 @@ public interface HumanLanguageInterpreter {
      * @param locale the locale to provide the label for
      * @return a localized string to be used in UIs
      */
-    public String getLabel(@Nullable Locale locale);
+    String getLabel(@Nullable Locale locale);
 
     /**
      * Interprets a human language text fragment of a given {@link Locale}

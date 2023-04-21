@@ -65,7 +65,7 @@ import org.openhab.core.thing.firmware.FirmwareUpdateService;
 public interface Firmware extends Comparable<Firmware> {
 
     /** The key for the requires a factory reset property. */
-    public static final String PROPERTY_REQUIRES_FACTORY_RESET = "requiresFactoryReset";
+    static final String PROPERTY_REQUIRES_FACTORY_RESET = "requiresFactoryReset";
 
     /**
      * Returns the thing type UID, that this firmware is associated with.

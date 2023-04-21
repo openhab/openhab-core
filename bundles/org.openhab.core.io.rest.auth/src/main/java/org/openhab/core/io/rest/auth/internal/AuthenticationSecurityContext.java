@@ -27,5 +27,5 @@ public interface AuthenticationSecurityContext extends SecurityContext {
      *
      * @return the authentication instance
      */
-    public Authentication getAuthentication();
+    Authentication getAuthentication();
 }

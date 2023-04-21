@@ -28,7 +28,7 @@ public interface ModuleHandler {
     /**
      * The method is called by RuleManager to free resources when {@link ModuleHandler} is released.
      */
-    public void dispose();
+    void dispose();
 
     /**
      * The callback is injected to the handler through this method.

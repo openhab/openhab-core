@@ -84,14 +84,13 @@ public class SystemHysteresisStateProfile implements StateProfile {
     private @Nullable QuantityType<?> getParam(ProfileContext context, String param) {
         final Object paramValue = context.getConfiguration().get(param);
         logger.debug("Configuring profile with {} parameter '{}'", param, paramValue);
-        if (paramValue instanceof String) {
+        if (paramValue instanceof String string) {
             try {
-                return new QuantityType<>((String) paramValue);
+                return new QuantityType<>(string);
             } catch (IllegalArgumentException e) {
                 logger.error("Cannot convert value '{}' of parameter {} into a valid QuantityType.", paramValue, param);
             }
-        } else if (paramValue instanceof BigDecimal) {
-            final BigDecimal value = (BigDecimal) paramValue;
+        } else if (paramValue instanceof BigDecimal value) {
             return QuantityType.valueOf(value.doubleValue(), AbstractUnit.ONE);
         }
         return null;
@@ -111,8 +110,8 @@ public class SystemHysteresisStateProfile implements StateProfile {
     public void onCommandFromHandler(Command command) {
         final Type mappedCommand = mapValue(command);
         logger.trace("Mapped command from '{}' to command '{}'.", command, mappedCommand);
-        if (mappedCommand instanceof Command) {
-            callback.sendCommand((Command) mappedCommand);
+        if (mappedCommand instanceof Command command1) {
+            callback.sendCommand(command1);
         }
     }
 
@@ -125,14 +124,13 @@ public class SystemHysteresisStateProfile implements StateProfile {
     public void onStateUpdateFromHandler(State state) {
         final Type mappedState = mapValue(state);
         logger.trace("Mapped state from '{}' to state '{}'.", state, mappedState);
-        if (mappedState instanceof State) {
-            callback.sendUpdate((State) mappedState);
+        if (mappedState instanceof State state1) {
+            callback.sendUpdate(state1);
         }
     }
 
     private Type mapValue(Type value) {
-        if (value instanceof QuantityType) {
-            final QuantityType<?> qtState = (QuantityType<?>) value;
+        if (value instanceof QuantityType qtState) {
             final QuantityType<?> finalLower;
             final QuantityType<?> finalUpper;
             if (Units.ONE.equals(lower.getUnit()) && Units.ONE.equals(upper.getUnit())) {
@@ -156,9 +154,8 @@ public class SystemHysteresisStateProfile implements StateProfile {
                 }
             }
             return previousType = mapValue(finalLower.doubleValue(), finalUpper.doubleValue(), qtState.doubleValue());
-        } else if (value instanceof DecimalType) {
-            return previousType = mapValue(lower.doubleValue(), upper.doubleValue(),
-                    ((DecimalType) value).doubleValue());
+        } else if (value instanceof DecimalType type) {
+            return previousType = mapValue(lower.doubleValue(), upper.doubleValue(), type.doubleValue());
         }
         return previousType;
     }

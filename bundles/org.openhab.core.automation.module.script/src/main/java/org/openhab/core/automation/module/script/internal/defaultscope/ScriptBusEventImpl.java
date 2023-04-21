@@ -158,8 +158,7 @@ public class ScriptBusEventImpl implements ScriptBusEvent {
         Map<Item, State> statesMap = new HashMap<>();
         if (items != null) {
             for (Item item : items) {
-                if (item instanceof GroupItem) {
-                    GroupItem groupItem = (GroupItem) item;
+                if (item instanceof GroupItem groupItem) {
                     for (Item member : groupItem.getAllMembers()) {
                         statesMap.put(member, member.getState());
                     }

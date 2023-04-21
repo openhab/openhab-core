@@ -97,7 +97,7 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
                     }
                     break;
                 case SUBCMD_ORPHAN:
-                    if (args.length == 2 && (args[1].equals("list") || args[1].equals("purge"))) {
+                    if (args.length == 2 && ("list".equals(args[1]) || "purge".equals(args[1]))) {
                         orphan(console, args[1], metadataRegistry.getAll(), itemRegistry.getAll());
                     } else {
                         console.println("Specify action 'list' or 'purge' to be executed: orphan <list|purge>");

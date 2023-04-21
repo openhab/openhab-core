@@ -38,9 +38,9 @@ public class ConfigurationSerializer implements JsonSerializer<Configuration> {
         JsonObject result = new JsonObject();
         src.keySet().stream().sorted().forEachOrdered((String propName) -> {
             Object value = src.get(propName);
-            if (value instanceof List) {
+            if (value instanceof List list) {
                 JsonArray array = new JsonArray();
-                for (Object element : (List<Object>) value) {
+                for (Object element : list) {
                     array.add(serializePrimitive(element));
                 }
                 result.add(propName, array);
@@ -52,12 +52,12 @@ public class ConfigurationSerializer implements JsonSerializer<Configuration> {
     }
 
     private JsonPrimitive serializePrimitive(Object primitive) {
-        if (primitive instanceof String) {
-            return new JsonPrimitive((String) primitive);
-        } else if (primitive instanceof Number) {
-            return new JsonPrimitive((Number) primitive);
-        } else if (primitive instanceof Boolean) {
-            return new JsonPrimitive((Boolean) primitive);
+        if (primitive instanceof String string) {
+            return new JsonPrimitive(string);
+        } else if (primitive instanceof Number number) {
+            return new JsonPrimitive(number);
+        } else if (primitive instanceof Boolean boolean1) {
+            return new JsonPrimitive(boolean1);
         }
         return null;
     }

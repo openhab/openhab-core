@@ -166,12 +166,11 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
 
             String authorizationCode = UUID.randomUUID().toString().replace("-", "");
 
-            if (user instanceof ManagedUser) {
+            if (user instanceof ManagedUser managedUser) {
                 String codeChallenge = params.containsKey("code_challenge") ? params.get("code_challenge")[0] : null;
                 String codeChallengeMethod = params.containsKey("code_challenge_method")
                         ? params.get("code_challenge_method")[0]
                         : null;
-                ManagedUser managedUser = (ManagedUser) user;
                 PendingToken pendingToken = new PendingToken(authorizationCode, clientId, baseRedirectUri, scope,
                         codeChallenge, codeChallengeMethod);
                 managedUser.setPendingToken(pendingToken);

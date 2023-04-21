@@ -33,7 +33,7 @@ public interface STTService {
      *
      * @return an id that identifies this service
      */
-    public String getId();
+    String getId();
 
     /**
      * Returns a localized human readable label that can be used within UIs.
@@ -41,21 +41,21 @@ public interface STTService {
      * @param locale the locale to provide the label for
      * @return a localized string to be used in UIs
      */
-    public String getLabel(@Nullable Locale locale);
+    String getLabel(@Nullable Locale locale);
 
     /**
      * Obtain the Locales available from this STTService
      *
      * @return The Locales available from this service
      */
-    public Set<Locale> getSupportedLocales();
+    Set<Locale> getSupportedLocales();
 
     /**
      * Obtain the audio formats supported by this STTService
      *
      * @return The audio formats supported by this service
      */
-    public Set<AudioFormat> getSupportedFormats();
+    Set<AudioFormat> getSupportedFormats();
 
     /**
      * This method starts the process of speech recognition.
@@ -85,6 +85,6 @@ public interface STTService {
      * @return A {@link STTServiceHandle} used to abort recognition
      * @throws A {@link SSTException} if any parameter is invalid or a STT problem occurs
      */
-    public STTServiceHandle recognize(STTListener sttListener, AudioStream audioStream, Locale locale,
-            Set<String> grammars) throws STTException;
+    STTServiceHandle recognize(STTListener sttListener, AudioStream audioStream, Locale locale, Set<String> grammars)
+            throws STTException;
 }

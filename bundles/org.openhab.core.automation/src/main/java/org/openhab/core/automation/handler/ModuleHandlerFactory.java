@@ -44,7 +44,7 @@ public interface ModuleHandlerFactory {
      *
      * @return collection of module type UIDs supported by this factory.
      */
-    public Collection<String> getTypes();
+    Collection<String> getTypes();
 
     /**
      * Creates a {@link ModuleHandler} instance needed for the operation of the {@link Module}s
@@ -55,7 +55,8 @@ public interface ModuleHandlerFactory {
      * @return a new {@link ModuleHandler} instance, or {@code null} if the type of the
      *         {@code module} parameter is not supported by this factory.
      */
-    public @Nullable ModuleHandler getHandler(Module module, String ruleUID);
+    @Nullable
+    ModuleHandler getHandler(Module module, String ruleUID);
 
     /**
      * Releases the {@link ModuleHandler} instance when it is not needed anymore
@@ -66,5 +67,5 @@ public interface ModuleHandlerFactory {
      * @param ruleUID the identifier of the {@link Rule} that the given module belongs to.
      * @param handler the {@link ModuleHandler} instance that is no longer needed.
      */
-    public void ungetHandler(Module module, String ruleUID, ModuleHandler handler);
+    void ungetHandler(Module module, String ruleUID, ModuleHandler handler);
 }

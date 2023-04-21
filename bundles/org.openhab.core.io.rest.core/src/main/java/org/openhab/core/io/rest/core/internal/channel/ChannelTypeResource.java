@@ -173,8 +173,8 @@ public class ChannelTypeResource implements RESTResource {
 
         Set<String> result = new HashSet<>();
         for (ProfileType profileType : profileTypeRegistry.getProfileTypes()) {
-            if (profileType instanceof TriggerProfileType) {
-                if (((TriggerProfileType) profileType).getSupportedChannelTypeUIDs().contains(ctUID)) {
+            if (profileType instanceof TriggerProfileType type) {
+                if (type.getSupportedChannelTypeUIDs().contains(ctUID)) {
                     for (String itemType : profileType.getSupportedItemTypes()) {
                         result.add(itemType);
                     }

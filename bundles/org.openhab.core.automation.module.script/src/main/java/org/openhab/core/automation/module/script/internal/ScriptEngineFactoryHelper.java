@@ -59,9 +59,14 @@ public class ScriptEngineFactoryHelper {
     }
 
     public static String getPreferredMimeType(ScriptEngineFactory factory) {
-        List<String> mimeTypes = new ArrayList<>(factory.getScriptTypes());
+        List<String> scriptTypes = factory.getScriptTypes();
+        if (scriptTypes.isEmpty()) {
+            throw new IllegalStateException(
+                    factory.getClass().getName() + " does not support any scriptTypes. Please report it as a bug.");
+        }
+        List<String> mimeTypes = new ArrayList<>(scriptTypes);
         mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || "application/python".equals(mimeType));
-        return mimeTypes.isEmpty() ? factory.getScriptTypes().get(0) : mimeTypes.get(0);
+        return mimeTypes.isEmpty() ? scriptTypes.get(0) : mimeTypes.get(0);
     }
 
     public static String getLanguageName(javax.script.ScriptEngineFactory factory) {

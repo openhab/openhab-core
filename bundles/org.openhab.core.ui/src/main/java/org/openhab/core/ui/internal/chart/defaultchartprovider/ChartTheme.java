@@ -30,21 +30,21 @@ public interface ChartTheme {
      *
      * @return theme name
      */
-    public String getThemeName();
+    String getThemeName();
 
     /**
      * Background color, plot area.
      *
      * @return background color, plot area
      */
-    public Color getPlotBackgroundColor();
+    Color getPlotBackgroundColor();
 
     /**
      * Color for the grid lines.
      *
      * @return color for the grid lines
      */
-    public Color getPlotGridLinesColor();
+    Color getPlotGridLinesColor();
 
     /**
      * Return the width of the grid lines.
@@ -52,7 +52,7 @@ public interface ChartTheme {
      * @param dpi DPI dots per inch to calculate the width
      * @return width of the grid lines
      */
-    public double getPlotGridLinesWidth(int dpi);
+    double getPlotGridLinesWidth(int dpi);
 
     /**
      * Return the dash spacing for the grid lines.
@@ -60,28 +60,28 @@ public interface ChartTheme {
      * @param dpi DPI dots per inch to calculate the width
      * @return dash spacing for the grid lines
      */
-    public double getPlotGridLinesDash(int dpi);
+    double getPlotGridLinesDash(int dpi);
 
     /**
      * Background color, legend area.
      *
      * @return background color, legend area
      */
-    public Color getLegendBackgroundColor();
+    Color getLegendBackgroundColor();
 
     /**
      * Background color, whole chart
      *
      * @return background color, whole chart
      */
-    public Color getChartBackgroundColor();
+    Color getChartBackgroundColor();
 
     /**
      * Font color, legend and general use.
      *
      * @return
      */
-    public Color getChartFontColor();
+    Color getChartFontColor();
 
     /**
      * Return a color for the given series number.
@@ -89,7 +89,7 @@ public interface ChartTheme {
      * @param series series number
      * @return color for the given series numer
      */
-    public Color getLineColor(int series);
+    Color getLineColor(int series);
 
     /**
      * Return the width of the series lines.
@@ -97,14 +97,14 @@ public interface ChartTheme {
      * @param dpi DPI dots per inch to calculate the width
      * @return width of the series lines
      */
-    public double getLineWidth(int dpi);
+    double getLineWidth(int dpi);
 
     /**
      * Color for the axis labels.
      *
      * @return
      */
-    public Color getAxisTickLabelsColor();
+    Color getAxisTickLabelsColor();
 
     /**
      * Font for the axis labels.
@@ -113,7 +113,7 @@ public interface ChartTheme {
      * @param dpi the DPI to calculate the font size
      * @return {@link Font} for the axis labels.
      */
-    public Font getAxisTickLabelsFont(int dpi);
+    Font getAxisTickLabelsFont(int dpi);
 
     /**
      * Font for the legend text.
@@ -122,7 +122,7 @@ public interface ChartTheme {
      * @param dpi the DPI to calculate the font size
      * @return {@link Font} for the legend text
      */
-    public Font getLegendFont(int dpi);
+    Font getLegendFont(int dpi);
 
     /**
      * Padding of the chart.
@@ -130,7 +130,7 @@ public interface ChartTheme {
      * @param dpi the DPI to calculate the padding
      * @return padding of the chart
      */
-    public int getChartPadding(int dpi);
+    int getChartPadding(int dpi);
 
     /**
      * Length of the line markers in the legend, in px.
@@ -138,5 +138,5 @@ public interface ChartTheme {
      * @param dpi the DPI to calculate the line length
      * @return length of the line markers in the legend, in px
      */
-    public int getLegendSeriesLineLength(int dpi);
+    int getLegendSeriesLineLength(int dpi);
 }

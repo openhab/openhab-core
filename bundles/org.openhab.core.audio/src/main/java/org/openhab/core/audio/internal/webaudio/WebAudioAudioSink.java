@@ -72,14 +72,13 @@ public class WebAudioAudioSink implements AudioSink {
         }
         try (AudioStream stream = audioStream) {
             logger.debug("Received audio stream of format {}", audioStream.getFormat());
-            if (audioStream instanceof URLAudioStream) {
+            if (audioStream instanceof URLAudioStream urlAudioStream) {
                 // it is an external URL, so we can directly pass this on.
-                URLAudioStream urlAudioStream = (URLAudioStream) audioStream;
                 sendEvent(urlAudioStream.getURL());
-            } else if (audioStream instanceof FixedLengthAudioStream) {
+            } else if (audioStream instanceof FixedLengthAudioStream lengthAudioStream) {
                 // we need to serve it for a while and make it available to multiple clients, hence only
                 // FixedLengthAudioStreams are supported.
-                sendEvent(audioHTTPServer.serve((FixedLengthAudioStream) audioStream, 10).toString());
+                sendEvent(audioHTTPServer.serve(lengthAudioStream, 10));
             } else {
                 throw new UnsupportedAudioStreamException(
                         "Web audio sink can only handle FixedLengthAudioStreams and URLAudioStreams.",

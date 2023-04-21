@@ -153,8 +153,8 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
                         } else {
                             logger.warn("Erroneous day set definition {} : {}", e.getKey(), entry);
                         }
-                    } else if (entry instanceof Iterable) {
-                        addDayset(setName, (Iterable<?>) entry);
+                    } else if (entry instanceof Iterable iterable) {
+                        addDayset(setName, iterable);
                     }
                 } else {
                     logger.warn("Erroneous day set definition {}", e.getKey());

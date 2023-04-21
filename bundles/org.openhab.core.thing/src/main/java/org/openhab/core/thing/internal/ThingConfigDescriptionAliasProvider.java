@@ -88,10 +88,8 @@ public class ThingConfigDescriptionAliasProvider implements ConfigDescriptionAli
         if (thingType == null) {
             return null;
         }
-
         // Get the config description URI for this thing type
-        URI configURI = thingType.getConfigDescriptionURI();
-        return configURI;
+        return thingType.getConfigDescriptionURI();
     }
 
     private @Nullable URI getChannelConfigDescriptionURI(URI uri) {
@@ -117,9 +115,7 @@ public class ThingConfigDescriptionAliasProvider implements ConfigDescriptionAli
         if (channelType == null) {
             return null;
         }
-
         // Get the config description URI for this channel type
-        URI configURI = channelType.getConfigDescriptionURI();
-        return configURI;
+        return channelType.getConfigDescriptionURI();
     }
 }

@@ -59,14 +59,14 @@ import net.wimpi.modbus.net.UDPMasterConnection;
  */
 @NonNullByDefault
 public class ModbusSlaveConnectionFactoryImpl
-        extends BaseKeyedPooledObjectFactory<ModbusSlaveEndpoint, ModbusSlaveConnection> {
+        extends BaseKeyedPooledObjectFactory<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> {
 
-    class PooledConnection extends DefaultPooledObject<ModbusSlaveConnection> {
+    class PooledConnection extends DefaultPooledObject<@Nullable ModbusSlaveConnection> {
 
         private volatile long lastConnected;
         private volatile @Nullable ModbusSlaveEndpoint endpoint;
 
-        public PooledConnection(ModbusSlaveConnection object) {
+        public PooledConnection(@Nullable ModbusSlaveConnection object) {
             super(object);
         }
 
@@ -97,6 +97,9 @@ public class ModbusSlaveConnectionFactoryImpl
             long localLastConnected = lastConnected;
 
             ModbusSlaveConnection connection = getObject();
+            if (connection == null) {
+                return false;
+            }
 
             EndpointPoolConfiguration configuration = getEndpointPoolConfiguration(localEndpoint);
             long reconnectAfterMillis = configuration.getReconnectAfterMillis();
@@ -147,8 +150,8 @@ public class ModbusSlaveConnectionFactoryImpl
     }
 
     @Override
-    public ModbusSlaveConnection create(ModbusSlaveEndpoint endpoint) throws Exception {
-        return endpoint.accept(new ModbusSlaveEndpointVisitor<ModbusSlaveConnection>() {
+    public @Nullable ModbusSlaveConnection create(ModbusSlaveEndpoint endpoint) throws Exception {
+        return endpoint.accept(new ModbusSlaveEndpointVisitor<@Nullable ModbusSlaveConnection>() {
             @Override
             public @Nullable ModbusSlaveConnection visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
                 SerialConnection connection = new SerialConnection(modbusSerialSlavePoolingKey.getSerialParameters());
@@ -183,27 +186,34 @@ public class ModbusSlaveConnectionFactoryImpl
     }
 
     @Override
-    public PooledObject<ModbusSlaveConnection> wrap(ModbusSlaveConnection connection) {
+    public PooledObject<@Nullable ModbusSlaveConnection> wrap(@Nullable ModbusSlaveConnection connection) {
         return new PooledConnection(connection);
     }
 
     @Override
-    public void destroyObject(ModbusSlaveEndpoint endpoint, @Nullable PooledObject<ModbusSlaveConnection> obj) {
-        if (obj == null) {
-            return;
-        }
-        logger.trace("destroyObject for connection {} and endpoint {} -> closing the connection", obj.getObject(),
-                endpoint);
-        obj.getObject().resetConnection();
-    }
-
-    @Override
-    public void activateObject(ModbusSlaveEndpoint endpoint, @Nullable PooledObject<ModbusSlaveConnection> obj)
-            throws Exception {
+    public void destroyObject(ModbusSlaveEndpoint endpoint,
+            @Nullable PooledObject<@Nullable ModbusSlaveConnection> obj) {
         if (obj == null) {
             return;
         }
         ModbusSlaveConnection connection = obj.getObject();
+        if (connection == null) {
+            return;
+        }
+        logger.trace("destroyObject for connection {} and endpoint {} -> closing the connection", connection, endpoint);
+        connection.resetConnection();
+    }
+
+    @Override
+    public void activateObject(ModbusSlaveEndpoint endpoint,
+            @Nullable PooledObject<@Nullable ModbusSlaveConnection> obj) throws Exception {
+        if (obj == null) {
+            return;
+        }
+        ModbusSlaveConnection connection = obj.getObject();
+        if (connection == null) {
+            return;
+        }
         try {
             EndpointPoolConfiguration config = getEndpointPoolConfiguration(endpoint);
             if (!connection.isConnected()) {
@@ -226,7 +236,8 @@ public class ModbusSlaveConnectionFactoryImpl
     }
 
     @Override
-    public void passivateObject(ModbusSlaveEndpoint endpoint, @Nullable PooledObject<ModbusSlaveConnection> obj) {
+    public void passivateObject(ModbusSlaveEndpoint endpoint,
+            @Nullable PooledObject<@Nullable ModbusSlaveConnection> obj) {
         if (obj == null) {
             return;
         }
@@ -238,8 +249,9 @@ public class ModbusSlaveConnectionFactoryImpl
     }
 
     @Override
-    public boolean validateObject(ModbusSlaveEndpoint key, @Nullable PooledObject<ModbusSlaveConnection> p) {
-        boolean valid = p != null && p.getObject().isConnected();
+    public boolean validateObject(ModbusSlaveEndpoint key, @Nullable PooledObject<@Nullable ModbusSlaveConnection> p) {
+        @SuppressWarnings("null") // p.getObject() cannot be null due to short-circuiting boolean condition
+        boolean valid = p != null && p.getObject() != null && p.getObject().isConnected();
         ModbusSlaveConnection slaveConnection = p != null ? p.getObject() : null;
         logger.trace("Validating endpoint {} connection {} -> {}", key, slaveConnection, valid);
         return valid;
@@ -272,7 +284,7 @@ public class ModbusSlaveConnectionFactoryImpl
                 .orElseGet(() -> defaultPoolConfigurationFactory.apply(endpoint));
     }
 
-    private void tryConnect(ModbusSlaveEndpoint endpoint, PooledObject<ModbusSlaveConnection> obj,
+    private void tryConnect(ModbusSlaveEndpoint endpoint, PooledObject<@Nullable ModbusSlaveConnection> obj,
             ModbusSlaveConnection connection, EndpointPoolConfiguration config) throws Exception {
         if (connection.isConnected()) {
             return;

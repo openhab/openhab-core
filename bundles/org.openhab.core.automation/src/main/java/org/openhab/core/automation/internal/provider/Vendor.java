@@ -120,8 +120,7 @@ public class Vendor {
      */
     @Override
     public boolean equals(@Nullable Object obj) {
-        if (obj instanceof Vendor) {
-            Vendor other = (Vendor) obj;
+        if (obj instanceof Vendor other) {
             return vendorSymbolicName.equals(other.vendorSymbolicName) && vendorVersion.equals(other.vendorVersion);
         }
         return false;

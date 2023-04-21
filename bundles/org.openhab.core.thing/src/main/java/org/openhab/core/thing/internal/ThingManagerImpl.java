@@ -725,7 +725,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
             return null;
         }
         Thing bridge = thingRegistry.get(bridgeUID);
-        return bridge instanceof Bridge ? (Bridge) bridge : null;
+        return bridge instanceof Bridge b ? b : null;
     }
 
     private void unregisterHandler(Thing thing, ThingHandlerFactory thingHandlerFactory) {

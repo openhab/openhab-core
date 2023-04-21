@@ -35,7 +35,7 @@ public class Log {
      * 
      * @see Logger
      */
-    static public void logDebug(String loggerName, String format, Object... args) {
+    public static void logDebug(String loggerName, String format, Object... args) {
         LoggerFactory.getLogger(LOGGER_NAME_PREFIX.concat(loggerName)).debug(format, args);
     }
 
@@ -49,7 +49,7 @@ public class Log {
      * 
      * @see Logger
      */
-    static public void logInfo(String loggerName, String format, Object... args) {
+    public static void logInfo(String loggerName, String format, Object... args) {
         LoggerFactory.getLogger(LOGGER_NAME_PREFIX.concat(loggerName)).info(format, args);
     }
 
@@ -63,7 +63,7 @@ public class Log {
      * 
      * @see Logger
      */
-    static public void logWarn(String loggerName, String format, Object... args) {
+    public static void logWarn(String loggerName, String format, Object... args) {
         LoggerFactory.getLogger(LOGGER_NAME_PREFIX.concat(loggerName)).warn(format, args);
     }
 
@@ -77,7 +77,7 @@ public class Log {
      * 
      * @see Logger
      */
-    static public void logError(String loggerName, String format, Object... args) {
+    public static void logError(String loggerName, String format, Object... args) {
         LoggerFactory.getLogger(LOGGER_NAME_PREFIX.concat(loggerName)).error(format, args);
     }
 }

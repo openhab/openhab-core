@@ -824,7 +824,8 @@ public class PersistenceExtensions {
 
         if (firstTimestamp != null) {
             BigDecimal totalDuration = BigDecimal.valueOf(Duration.between(firstTimestamp, endTime).toMillis());
-            return new DecimalType(sum.divide(totalDuration, MathContext.DECIMAL64));
+            return totalDuration.signum() == 0 ? null
+                    : new DecimalType(sum.divide(totalDuration, MathContext.DECIMAL64));
         }
 
         return null;
@@ -1131,8 +1132,8 @@ public class PersistenceExtensions {
      */
     public static long countBetween(Item item, ZonedDateTime begin, @Nullable ZonedDateTime end, String serviceId) {
         Iterable<HistoricItem> historicItems = getAllStatesBetween(item, begin, end, serviceId);
-        if (historicItems instanceof Collection<?>) {
-            return ((Collection<?>) historicItems).size();
+        if (historicItems instanceof Collection<?> collection) {
+            return collection.size();
         } else {
             return StreamSupport.stream(historicItems.spliterator(), false).count();
         }
@@ -1239,8 +1240,7 @@ public class PersistenceExtensions {
     private static Iterable<HistoricItem> getAllStatesBetween(Item item, ZonedDateTime begin,
             @Nullable ZonedDateTime end, String serviceId) {
         PersistenceService service = getService(serviceId);
-        if (service instanceof QueryablePersistenceService) {
-            QueryablePersistenceService qService = (QueryablePersistenceService) service;
+        if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             filter.setBeginDate(begin);
             if (end != null) {

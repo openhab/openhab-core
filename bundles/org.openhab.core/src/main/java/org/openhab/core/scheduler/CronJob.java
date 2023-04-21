@@ -34,5 +34,5 @@ public interface CronJob {
      * @param data The data for the job
      * @throws Exception Exception thrown
      */
-    public void run(Map<String, Object> data) throws Exception;
+    void run(Map<String, Object> data) throws Exception;
 }

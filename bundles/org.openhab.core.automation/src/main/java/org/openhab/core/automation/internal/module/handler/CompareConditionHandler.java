@@ -51,12 +51,11 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
     @Override
     public boolean isSatisfied(Map<String, @Nullable Object> context) {
         Object operatorObj = this.module.getConfiguration().get(OPERATOR);
-        String operator = (operatorObj != null && operatorObj instanceof String) ? (String) operatorObj : null;
+        String operator = (operatorObj != null && operatorObj instanceof String s) ? s : null;
         Object rightObj = this.module.getConfiguration().get(RIGHT_OP);
-        String rightOperandString = (rightObj != null && rightObj instanceof String) ? (String) rightObj : null;
+        String rightOperandString = (rightObj != null && rightObj instanceof String s) ? s : null;
         Object leftObjFieldNameObj = this.module.getConfiguration().get(INPUT_LEFT_FIELD);
-        String leftObjectFieldName = (leftObjFieldNameObj != null && leftObjFieldNameObj instanceof String)
-                ? (String) leftObjFieldNameObj
+        String leftObjectFieldName = (leftObjFieldNameObj != null && leftObjFieldNameObj instanceof String s) ? s
                 : null;
         if (rightOperandString == null || operator == null) {
             return false;
@@ -125,8 +124,8 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
                         }
                     case "matches":
                         // Matcher...
-                        if (toCompare instanceof String && rightValue instanceof String) {
-                            return ((String) toCompare).matches((String) rightValue);
+                        if (toCompare instanceof String string1 && rightValue instanceof String string2) {
+                            return string1.matches(string2);
                         }
                     default:
                         break;
@@ -157,8 +156,8 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
         if ("null".equals(rightOperandString2)) {
             return rightOperandString2;
         }
-        if (toCompare instanceof State) {
-            return TypeParser.parseState(List.of(((State) toCompare).getClass()), rightOperandString2);
+        if (toCompare instanceof State state) {
+            return TypeParser.parseState(List.of(state.getClass()), rightOperandString2);
         } else if (toCompare instanceof Integer) {
             return Integer.parseInt(rightOperandString2);
         } else if (toCompare instanceof String) {

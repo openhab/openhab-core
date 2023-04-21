@@ -34,7 +34,7 @@ public interface ModbusManager {
      * @throws IllegalArgumentException if there is already open communication interface with same endpoint but
      *             differing configuration
      */
-    public ModbusCommunicationInterface newModbusCommunicationInterface(ModbusSlaveEndpoint endpoint,
+    ModbusCommunicationInterface newModbusCommunicationInterface(ModbusSlaveEndpoint endpoint,
             @Nullable EndpointPoolConfiguration configuration) throws IllegalArgumentException;
 
     /**
@@ -45,5 +45,5 @@ public interface ModbusManager {
      * @param endpoint endpoint to query
      * @return general connection settings of the given endpoint
      */
-    public EndpointPoolConfiguration getEndpointPoolConfiguration(ModbusSlaveEndpoint endpoint);
+    EndpointPoolConfiguration getEndpointPoolConfiguration(ModbusSlaveEndpoint endpoint);
 }

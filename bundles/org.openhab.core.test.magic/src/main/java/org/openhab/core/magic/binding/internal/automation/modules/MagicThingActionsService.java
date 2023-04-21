@@ -59,8 +59,8 @@ public class MagicThingActionsService implements ThingActions {
 
     @Override
     public void setThingHandler(ThingHandler handler) {
-        if (handler instanceof MagicActionModuleThingHandler) {
-            this.handler = (MagicActionModuleThingHandler) handler;
+        if (handler instanceof MagicActionModuleThingHandler thingHandler) {
+            this.handler = thingHandler;
         }
     }
 

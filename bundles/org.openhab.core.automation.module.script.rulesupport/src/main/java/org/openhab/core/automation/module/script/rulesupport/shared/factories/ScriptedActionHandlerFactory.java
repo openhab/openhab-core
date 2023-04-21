@@ -24,5 +24,6 @@ import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedHand
  */
 @NonNullByDefault
 public interface ScriptedActionHandlerFactory extends ScriptedHandler {
-    public @Nullable ActionHandler get(Action action);
+    @Nullable
+    ActionHandler get(Action action);
 }

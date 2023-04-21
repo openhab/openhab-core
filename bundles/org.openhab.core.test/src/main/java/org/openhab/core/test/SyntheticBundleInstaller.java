@@ -232,10 +232,7 @@ public class SyntheticBundleInstaller {
         String bundlePath = BUNDLE_POOL_PATH + "/" + testBundleName + "/";
         byte[] syntheticBundleBytes = createSyntheticBundle(bundleContext.getBundle(), bundlePath, testBundleName,
                 extensionsToInclude);
-
-        Bundle syntheticBundle = bundleContext.installBundle(testBundleName,
-                new ByteArrayInputStream(syntheticBundleBytes));
-        return syntheticBundle;
+        return bundleContext.installBundle(testBundleName, new ByteArrayInputStream(syntheticBundleBytes));
     }
 
     private static boolean isBundleAvailable(BundleContext context, String bsn) {
@@ -396,8 +393,7 @@ public class SyntheticBundleInstaller {
     private static String convertToFileEntry(URI baseURI, URL entryURL) throws URISyntaxException {
         URI entryURI = entryURL.toURI();
         URI relativeURI = baseURI.relativize(entryURI);
-        String fileEntry = relativeURI.toString();
-        return fileEntry;
+        return relativeURI.toString();
     }
 
     private static Manifest getManifest(Bundle bundle, String bundlePath) throws IOException {

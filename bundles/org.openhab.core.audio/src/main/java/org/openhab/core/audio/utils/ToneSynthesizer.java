@@ -82,7 +82,7 @@ public class ToneSynthesizer {
                 case 1:
                     var note = noteTextParts[0];
                     int octaves = (int) note.chars().filter(ch -> ch == '\'').count();
-                    note = note.replaceAll("'", "");
+                    note = note.replace("'", "");
                     var noteObj = Note.fromString(note);
                     if (noteObj.isPresent()) {
                         melodySounds.add(noteTone(noteObj.get(), soundMillis, octaves));

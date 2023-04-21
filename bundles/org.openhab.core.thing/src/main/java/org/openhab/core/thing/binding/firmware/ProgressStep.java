@@ -43,5 +43,5 @@ public enum ProgressStep {
     UPDATING,
 
     /** The {@link FirmwareUpdateHandler} is going to reboot the device. */
-    REBOOTING;
+    REBOOTING
 }

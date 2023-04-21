@@ -269,8 +269,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__ICON);
             setWidgetPropertyFromComponentConfig(widget, component, "item", SitemapPackage.WIDGET__ITEM);
 
-            if (widget instanceof LinkableWidget) {
-                LinkableWidget linkableWidget = (LinkableWidget) widget;
+            if (widget instanceof LinkableWidget linkableWidget) {
                 if (component.getSlots() != null && component.getSlots().containsKey("widgets")) {
                     for (UIComponent childComponent : component.getSlot("widgets")) {
                         Widget childWidget = buildWidget(childComponent);
@@ -303,7 +302,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             WidgetImpl widgetImpl = (WidgetImpl) widget;
             Object normalizedValue = ConfigUtil.normalizeType(value);
             if (widgetImpl.eGet(feature, false, false) instanceof Integer) {
-                normalizedValue = (normalizedValue instanceof BigDecimal) ? ((BigDecimal) normalizedValue).intValue()
+                normalizedValue = (normalizedValue instanceof BigDecimal bd) ? bd.intValue()
                         : Integer.valueOf(normalizedValue.toString());
             } else if (widgetImpl.eGet(feature, false, false) instanceof Boolean
                     && !(normalizedValue instanceof Boolean)) {

@@ -223,8 +223,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
     private @Nullable Item createItemFromModelItem(ModelItem modelItem) {
         Item item;
-        if (modelItem instanceof ModelGroupItem) {
-            ModelGroupItem modelGroupItem = (ModelGroupItem) modelItem;
+        if (modelItem instanceof ModelGroupItem modelGroupItem) {
             Item baseItem;
             try {
                 baseItem = createItemOfType(modelGroupItem.getType(), modelGroupItem.getName());

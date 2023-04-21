@@ -55,12 +55,10 @@ public class AddonEventFactory extends AbstractEventFactory {
             throws Exception {
         if (topic.endsWith(ADDON_FAILURE_EVENT_TOPIC_POSTFIX)) {
             String[] properties = deserializePayload(payload, String[].class);
-            Event event = new AddonEvent(topic, payload, properties[0], properties[1]);
-            return event;
+            return new AddonEvent(topic, payload, properties[0], properties[1]);
         } else {
             String id = deserializePayload(payload, String.class);
-            Event event = new AddonEvent(topic, payload, id);
-            return event;
+            return new AddonEvent(topic, payload, id);
         }
     }
 

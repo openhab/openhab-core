@@ -322,8 +322,8 @@ public class FeatureInstaller implements ConfigurationListener {
                     return false;
                 }
                 Object repos = properties.get(PROPERTY_MVN_REPOS);
-                if (repos instanceof String) {
-                    return List.of(((String) repos).split(",")).contains(onlineRepoUrl);
+                if (repos instanceof String string) {
+                    return List.of(string.split(",")).contains(onlineRepoUrl);
                 }
             } catch (IOException e) {
                 logger.error("Failed getting the add-on management online/offline mode: {}", e.getMessage(),
@@ -350,8 +350,8 @@ public class FeatureInstaller implements ConfigurationListener {
                         new Hashtable<>());
                 List<String> repoCfg = new ArrayList<>();
                 Object repos = properties.get(PROPERTY_MVN_REPOS);
-                if (repos instanceof String) {
-                    repoCfg.addAll(Arrays.asList(((String) repos).split(",")));
+                if (repos instanceof String string) {
+                    repoCfg.addAll(Arrays.asList(string.split(",")));
                     repoCfg.remove("");
                 }
                 if (enabled && !repoCfg.contains(onlineRepoUrl)) {

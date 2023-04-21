@@ -60,10 +60,12 @@ public class TestAddonService extends AbstractRemoteAddonService {
         return new BundleVersion("3.2.0");
     }
 
+    @Override
     public void addAddonHandler(MarketplaceAddonHandler handler) {
         this.addonHandlers.add(handler);
     }
 
+    @Override
     public void removeAddonHandler(MarketplaceAddonHandler handler) {
         this.addonHandlers.remove(handler);
     }

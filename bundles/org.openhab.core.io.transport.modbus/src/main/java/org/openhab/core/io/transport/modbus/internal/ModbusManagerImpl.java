@@ -298,39 +298,38 @@ public class ModbusManagerImpl implements ModbusManager {
      */
     private static final long WARN_QUEUE_SIZE = 500;
     private static final long MONITOR_QUEUE_INTERVAL_MILLIS = 10000;
-    private static final Function<ModbusSlaveEndpoint, EndpointPoolConfiguration> DEFAULT_POOL_CONFIGURATION = endpoint -> {
-        return endpoint.accept(new ModbusSlaveEndpointVisitor<EndpointPoolConfiguration>() {
+    private static final Function<ModbusSlaveEndpoint, EndpointPoolConfiguration> DEFAULT_POOL_CONFIGURATION = endpoint -> endpoint
+            .accept(new ModbusSlaveEndpointVisitor<EndpointPoolConfiguration>() {
 
-            @Override
-            public @NonNull EndpointPoolConfiguration visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
-                EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
-                endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
-                endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
-                endpointPoolConfig.setConnectTimeoutMillis(DEFAULT_CONNECT_TIMEOUT_MILLIS);
-                return endpointPoolConfig;
-            }
+                @Override
+                public @NonNull EndpointPoolConfiguration visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
+                    EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
+                    endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
+                    endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
+                    endpointPoolConfig.setConnectTimeoutMillis(DEFAULT_CONNECT_TIMEOUT_MILLIS);
+                    return endpointPoolConfig;
+                }
 
-            @Override
-            public @NonNull EndpointPoolConfiguration visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
-                EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
-                // never "disconnect" (close/open serial port) serial connection between borrows
-                endpointPoolConfig.setReconnectAfterMillis(-1);
-                endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_SERIAL_INTER_TRANSACTION_DELAY_MILLIS);
-                endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
-                endpointPoolConfig.setConnectTimeoutMillis(DEFAULT_CONNECT_TIMEOUT_MILLIS);
-                return endpointPoolConfig;
-            }
+                @Override
+                public @NonNull EndpointPoolConfiguration visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
+                    EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
+                    // never "disconnect" (close/open serial port) serial connection between borrows
+                    endpointPoolConfig.setReconnectAfterMillis(-1);
+                    endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_SERIAL_INTER_TRANSACTION_DELAY_MILLIS);
+                    endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
+                    endpointPoolConfig.setConnectTimeoutMillis(DEFAULT_CONNECT_TIMEOUT_MILLIS);
+                    return endpointPoolConfig;
+                }
 
-            @Override
-            public @NonNull EndpointPoolConfiguration visit(ModbusUDPSlaveEndpoint modbusUDPSlavePoolingKey) {
-                EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
-                endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
-                endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
-                endpointPoolConfig.setConnectTimeoutMillis(DEFAULT_CONNECT_TIMEOUT_MILLIS);
-                return endpointPoolConfig;
-            }
-        });
-    };
+                @Override
+                public @NonNull EndpointPoolConfiguration visit(ModbusUDPSlaveEndpoint modbusUDPSlavePoolingKey) {
+                    EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
+                    endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
+                    endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
+                    endpointPoolConfig.setConnectTimeoutMillis(DEFAULT_CONNECT_TIMEOUT_MILLIS);
+                    return endpointPoolConfig;
+                }
+            });
 
     private final PollOperation pollOperation = new PollOperation();
     private final WriteOperation writeOperation = new WriteOperation();
@@ -347,7 +346,7 @@ public class ModbusManagerImpl implements ModbusManager {
      * - https://community.openhab.org/t/connection-pooling-in-modbus-binding/5246/
      */
 
-    private volatile @Nullable KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> connectionPool;
+    private volatile @Nullable KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> connectionPool;
     private volatile @Nullable ModbusSlaveConnectionFactoryImpl connectionFactory;
     private volatile Map<PollTask, ScheduledFuture<?>> scheduledPollTasks = new ConcurrentHashMap<>();
     /**
@@ -360,7 +359,7 @@ public class ModbusManagerImpl implements ModbusManager {
     private void constructConnectionPool() {
         ModbusSlaveConnectionFactoryImpl connectionFactory = new ModbusSlaveConnectionFactoryImpl(
                 DEFAULT_POOL_CONFIGURATION);
-        GenericKeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> genericKeyedObjectPool = new ModbusConnectionPool(
+        GenericKeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> genericKeyedObjectPool = new ModbusConnectionPool(
                 connectionFactory);
         genericKeyedObjectPool.setSwallowedExceptionListener(new SwallowedExceptionListener() {
 
@@ -379,7 +378,7 @@ public class ModbusManagerImpl implements ModbusManager {
 
     private Optional<ModbusSlaveConnection> borrowConnection(ModbusSlaveEndpoint endpoint) {
         Optional<ModbusSlaveConnection> connection = Optional.empty();
-        KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> pool = connectionPool;
+        KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> pool = connectionPool;
         if (pool == null) {
             return connection;
         }
@@ -405,7 +404,7 @@ public class ModbusManagerImpl implements ModbusManager {
     }
 
     private void invalidate(ModbusSlaveEndpoint endpoint, Optional<ModbusSlaveConnection> connection) {
-        KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> pool = connectionPool;
+        KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> pool = connectionPool;
         if (pool == null) {
             return;
         }
@@ -423,7 +422,7 @@ public class ModbusManagerImpl implements ModbusManager {
     }
 
     private void returnConnection(ModbusSlaveEndpoint endpoint, Optional<ModbusSlaveConnection> connection) {
-        KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> pool = connectionPool;
+        KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> pool = connectionPool;
         if (pool == null) {
             return;
         }
@@ -454,7 +453,7 @@ public class ModbusManagerImpl implements ModbusManager {
      */
     private <R, C extends ModbusResultCallback, F extends ModbusFailureCallback<R>, T extends TaskWithEndpoint<R, C, F>> Optional<ModbusSlaveConnection> getConnection(
             AggregateStopWatch timer, boolean oneOffTask, @NonNull T task) throws PollTaskUnregistered {
-        KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> connectionPool = this.connectionPool;
+        KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> connectionPool = this.connectionPool;
         if (connectionPool == null) {
             return Optional.empty();
         }
@@ -476,7 +475,7 @@ public class ModbusManagerImpl implements ModbusManager {
             timer.connection.timeRunnable(() -> invalidate(endpoint, connection));
             return Optional.empty();
         }
-        if (!connection.isPresent()) {
+        if (connection.isEmpty()) {
             logger.warn("Could not connect to endpoint {} -- aborting request {} [operation ID {}]", endpoint, request,
                     operationId);
             timer.callback.timeRunnable(
@@ -562,7 +561,7 @@ public class ModbusManagerImpl implements ModbusManager {
             connection = getConnection(timer, oneOffTask, task);
             logger.trace("Operation with task {}. Got a connection {} [operation ID {}]", task,
                     connection.isPresent() ? "successfully" : "which was unconnected (connection issue)", operationId);
-            if (!connection.isPresent()) {
+            if (connection.isEmpty()) {
                 // Could not acquire connection, time to abort
                 // Error logged already, error callback called as well
                 logger.trace("Initial connection was not successful, aborting. [operation ID {}]", operationId);
@@ -585,7 +584,7 @@ public class ModbusManagerImpl implements ModbusManager {
             Long lastTryMillis = null;
             while (tryIndex < maxTries) {
                 logger.trace("Try {} out of {} [operation ID {}]", tryIndex + 1, maxTries, operationId);
-                if (!connection.isPresent()) {
+                if (connection.isEmpty()) {
                     // Connection was likely reseted with previous try, and connection was not successfully
                     // re-established. Error has been logged, time to abort.
                     logger.trace("Try {} out of {}. Connection was not successful, aborting. [operation ID {}]",
@@ -597,8 +596,8 @@ public class ModbusManagerImpl implements ModbusManager {
                     return;
                 }
                 // Check poll task is still registered (this is all asynchronous)
-                if (!oneOffTask && task instanceof PollTask) {
-                    verifyTaskIsRegistered((PollTask) task);
+                if (!oneOffTask && task instanceof PollTask pollTask) {
+                    verifyTaskIsRegistered(pollTask);
                 }
                 // Let's ensure that enough time is between the retries
                 logger.trace(
@@ -716,7 +715,7 @@ public class ModbusManagerImpl implements ModbusManager {
                     lastTryMillis = System.currentTimeMillis();
                     // Connection was reseted in error handling and needs to be reconnected.
                     // Try to re-establish connection.
-                    if (willRetry && !connection.isPresent()) {
+                    if (willRetry && connection.isEmpty()) {
                         connection = getConnection(timer, oneOffTask, task);
                     }
                 }
@@ -778,13 +777,12 @@ public class ModbusManagerImpl implements ModbusManager {
             long scheduleTime = System.currentTimeMillis();
             BasicPollTask task = new BasicPollTask(endpoint, request, resultCallback, failureCallback);
             logger.debug("Scheduling one-off poll task {}", task);
-            Future<?> future = executor.submit(() -> {
+            return executor.submit(() -> {
                 long millisInThreadPoolWaiting = System.currentTimeMillis() - scheduleTime;
                 logger.debug("Will now execute one-off poll task {}, waited in thread pool for {}", task,
                         millisInThreadPoolWaiting);
                 executeOperation(task, true, pollOperation);
             });
-            return future;
         }
 
         @Override
@@ -871,13 +869,12 @@ public class ModbusManagerImpl implements ModbusManager {
             WriteTask task = new BasicWriteTask(endpoint, request, resultCallback, failureCallback);
             long scheduleTime = System.currentTimeMillis();
             logger.debug("Scheduling one-off write task {}", task);
-            Future<?> future = localScheduledThreadPoolExecutor.submit(() -> {
+            return localScheduledThreadPoolExecutor.submit(() -> {
                 long millisInThreadPoolWaiting = System.currentTimeMillis() - scheduleTime;
                 logger.debug("Will now execute one-off write task {}, waited in thread pool for {}", task,
                         millisInThreadPoolWaiting);
                 executeOperation(task, true, writeOperation);
             });
-            return future;
         }
 
         @Override
@@ -983,7 +980,7 @@ public class ModbusManagerImpl implements ModbusManager {
     @Deactivate
     protected void deactivate() {
         synchronized (this) {
-            KeyedObjectPool<ModbusSlaveEndpoint, ModbusSlaveConnection> connectionPool = this.connectionPool;
+            KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> connectionPool = this.connectionPool;
             if (connectionPool != null) {
                 for (ModbusCommunicationInterface commInterface : this.communicationInterfaces) {
                     try {
@@ -1028,8 +1025,7 @@ public class ModbusManagerImpl implements ModbusManager {
                         task.getRequest().getDataLength(), future.isDone(), future.isCancelled(),
                         future.getDelay(TimeUnit.MILLISECONDS), task);
             });
-            if (scheduledThreadPoolExecutor instanceof ThreadPoolExecutor) {
-                ThreadPoolExecutor executor = ((ThreadPoolExecutor) scheduledThreadPoolExecutor);
+            if (scheduledThreadPoolExecutor instanceof ThreadPoolExecutor executor) {
                 pollMonitorLogger.trace(
                         "POLL MONITOR: scheduledThreadPoolExecutor queue size: {}, remaining space {}. Active threads {}",
                         executor.getQueue().size(), executor.getQueue().remainingCapacity(), executor.getActiveCount());

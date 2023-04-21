@@ -46,9 +46,9 @@ public class AddonInfo implements Identifiable<String> {
     private final String serviceId;
     private @Nullable String sourceBundle;
 
-    private AddonInfo(String id, String type, String name, String description, @Nullable String author,
-            @Nullable String connection, List<String> countries, @Nullable String configDescriptionURI,
-            @Nullable String serviceId, @Nullable String sourceBundle) throws IllegalArgumentException {
+    private AddonInfo(String id, String type, String name, String description, @Nullable String connection,
+            List<String> countries, @Nullable String configDescriptionURI, @Nullable String serviceId,
+            @Nullable String sourceBundle) throws IllegalArgumentException {
         // mandatory fields
         if (id.isBlank()) {
             throw new IllegalArgumentException("The ID must neither be null nor empty!");
@@ -153,7 +153,6 @@ public class AddonInfo implements Identifiable<String> {
         private final String type;
         private String name = "";
         private String description = "";
-        private @Nullable String author;
         private @Nullable String connection;
         private List<String> countries = List.of();
         private @Nullable String configDescriptionURI = "";
@@ -184,11 +183,6 @@ public class AddonInfo implements Identifiable<String> {
 
         public Builder withDescription(String description) {
             this.description = description;
-            return this;
-        }
-
-        public Builder withAuthor(@Nullable String author) {
-            this.author = author;
             return this;
         }
 
@@ -229,8 +223,8 @@ public class AddonInfo implements Identifiable<String> {
          * @throws IllegalArgumentException if any of the information in this builder is invalid
          */
         public AddonInfo build() throws IllegalArgumentException {
-            return new AddonInfo(id, type, name, description, author, connection, countries, configDescriptionURI,
-                    serviceId, sourceBundle);
+            return new AddonInfo(id, type, name, description, connection, countries, configDescriptionURI, serviceId,
+                    sourceBundle);
         }
     }
 }

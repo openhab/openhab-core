@@ -90,13 +90,13 @@ public class SemanticTags {
     public static List<String> getLabelAndSynonyms(Class<? extends Tag> tag, Locale locale) {
         ResourceBundle rb = ResourceBundle.getBundle(TAGS_BUNDLE_NAME, locale,
                 Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
+        TagInfo tagInfo = tag.getAnnotation(TagInfo.class);
         try {
-            String entry = rb.getString(tag.getAnnotation(TagInfo.class).id());
+            String entry = rb.getString(tagInfo.id());
             return List.of(entry.toLowerCase(locale).split(","));
         } catch (MissingResourceException e) {
-            TagInfo tagInfo = tag.getAnnotation(TagInfo.class);
             Stream<String> label = Stream.of(tagInfo.label());
-            Stream<String> synonyms = Stream.of(tagInfo.synonyms().split(","));
+            Stream<String> synonyms = Stream.of(tagInfo.synonyms().split(",")).map(String::trim);
             return Stream.concat(label, synonyms).map(s -> s.toLowerCase(locale)).distinct().toList();
         }
     }
@@ -104,16 +104,38 @@ public class SemanticTags {
     public static String getLabel(Class<? extends Tag> tag, Locale locale) {
         ResourceBundle rb = ResourceBundle.getBundle(TAGS_BUNDLE_NAME, locale,
                 Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
+        TagInfo tagInfo = tag.getAnnotation(TagInfo.class);
         try {
-            String entry = rb.getString(tag.getAnnotation(TagInfo.class).id());
+            String entry = rb.getString(tagInfo.id());
             if (entry.contains(",")) {
                 return entry.substring(0, entry.indexOf(","));
             } else {
                 return entry;
             }
         } catch (MissingResourceException e) {
-            return tag.getAnnotation(TagInfo.class).label();
+            return tagInfo.label();
         }
+    }
+
+    public static List<String> getSynonyms(Class<? extends Tag> tag, Locale locale) {
+        ResourceBundle rb = ResourceBundle.getBundle(TAGS_BUNDLE_NAME, locale,
+                Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
+        String synonyms = "";
+        TagInfo tagInfo = tag.getAnnotation(TagInfo.class);
+        try {
+            String entry = rb.getString(tagInfo.id());
+            int start = entry.indexOf(",") + 1;
+            if (start > 0 && entry.length() > start) {
+                synonyms = entry.substring(start);
+            }
+        } catch (MissingResourceException e) {
+            synonyms = tagInfo.synonyms();
+        }
+        return Stream.of(synonyms.split(",")).map(String::trim).toList();
+    }
+
+    public static String getDescription(Class<? extends Tag> tag, Locale locale) {
+        return tag.getAnnotation(TagInfo.class).description();
     }
 
     /**

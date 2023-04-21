@@ -31,5 +31,5 @@ public interface KSListener {
      *
      * @param ksEvent The {@link KSEvent} fired by the {@link KSService}
      */
-    public void ksEventReceived(KSEvent ksEvent);
+    void ksEventReceived(KSEvent ksEvent);
 }

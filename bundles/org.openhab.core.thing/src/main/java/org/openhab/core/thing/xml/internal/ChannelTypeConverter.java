@@ -123,8 +123,8 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         Object nextNode = nodeIterator.next();
 
         if (nextNode != null) {
-            if (nextNode instanceof StateDescription) {
-                return (StateDescription) nextNode;
+            if (nextNode instanceof StateDescription description) {
+                return description;
             }
 
             nodeIterator.revert();
@@ -137,8 +137,8 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         Object nextNode = nodeIterator.next();
 
         if (nextNode != null) {
-            if (nextNode instanceof EventDescription) {
-                return (EventDescription) nextNode;
+            if (nextNode instanceof EventDescription description) {
+                return description;
             }
 
             nodeIterator.revert();
@@ -151,8 +151,8 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         Object nextNode = nodeIterator.next();
 
         if (nextNode != null) {
-            if (nextNode instanceof CommandDescription) {
-                return (CommandDescription) nextNode;
+            if (nextNode instanceof CommandDescription description) {
+                return description;
             }
 
             nodeIterator.revert();

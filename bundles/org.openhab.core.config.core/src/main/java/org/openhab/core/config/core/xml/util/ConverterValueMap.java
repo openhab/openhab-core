@@ -154,9 +154,9 @@ public class ConverterValueMap {
     public @Nullable String getString(String nodeName, @Nullable String defaultValue) {
         Object value = this.valueMap.get(nodeName);
 
-        if (value instanceof String) {
+        if (value instanceof String string) {
             // fixes a formatting problem with line breaks in text
-            return ((String) value).replaceAll("\\n\\s*", " ").trim();
+            return string.replaceAll("\\n\\s*", " ").trim();
         }
 
         return defaultValue;

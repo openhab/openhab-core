@@ -102,9 +102,9 @@ public class ConfigDescriptionResource implements RESTResource {
             @QueryParam("scheme") @Parameter(description = "scheme filter") @Nullable String scheme) {
         Locale locale = localeService.getLocale(language);
         Collection<ConfigDescription> configDescriptions = configDescriptionRegistry.getConfigDescriptions(locale);
-        return Response.ok(new Stream2JSONInputStream(configDescriptions.stream().filter(configDescription -> {
-            return scheme == null || scheme.equals(configDescription.getUID().getScheme());
-        }).map(EnrichedConfigDescriptionDTOMapper::map))).build();
+        return Response.ok(new Stream2JSONInputStream(configDescriptions.stream()
+                .filter(configDescription -> scheme == null || scheme.equals(configDescription.getUID().getScheme()))
+                .map(EnrichedConfigDescriptionDTOMapper::map))).build();
     }
 
     @GET

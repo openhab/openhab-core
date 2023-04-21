@@ -64,7 +64,7 @@ public class ExecUtilTest {
 
     private boolean isWindowsSystem() {
         String osName = System.getProperty("os.name").toLowerCase();
-        return osName.indexOf("windows") >= 0;
+        return osName.contains("windows");
     }
 
     @Test

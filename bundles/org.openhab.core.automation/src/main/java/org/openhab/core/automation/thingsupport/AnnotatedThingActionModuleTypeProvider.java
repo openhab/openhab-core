@@ -126,9 +126,7 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
 
             Bundle bundle = FrameworkUtil.getBundle(mi.getActionProvider().getClass());
             ModuleType mt = helper.buildModuleType(uid, moduleInformation);
-
-            ModuleType localizedModuleType = moduleTypeI18nService.getModuleTypePerLocale(mt, locale, bundle);
-            return localizedModuleType;
+            return moduleTypeI18nService.getModuleTypePerLocale(mt, locale, bundle);
         }
         return null;
     }
@@ -228,8 +226,7 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
 
     @Override
     protected @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
-        if (module instanceof Action) {
-            Action actionModule = (Action) module;
+        if (module instanceof Action actionModule) {
             if (moduleInformation.containsKey(actionModule.getTypeUID())) {
                 ModuleInformation finalMI = helper.getModuleInformationForIdentifier(actionModule, moduleInformation,
                         true);

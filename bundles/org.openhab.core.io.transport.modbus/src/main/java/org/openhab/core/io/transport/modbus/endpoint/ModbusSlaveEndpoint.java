@@ -27,5 +27,5 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public interface ModbusSlaveEndpoint {
-    public <R> R accept(ModbusSlaveEndpointVisitor<R> visitor);
+    <R> R accept(ModbusSlaveEndpointVisitor<R> visitor);
 }

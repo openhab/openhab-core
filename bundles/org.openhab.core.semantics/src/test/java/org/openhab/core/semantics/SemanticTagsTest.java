@@ -12,6 +12,8 @@
  */
 package org.openhab.core.semantics;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Locale;
@@ -30,7 +32,9 @@ import org.openhab.core.semantics.model.location.Locations;
 import org.openhab.core.semantics.model.location.Room;
 import org.openhab.core.semantics.model.point.Measurement;
 import org.openhab.core.semantics.model.point.Points;
+import org.openhab.core.semantics.model.property.Light;
 import org.openhab.core.semantics.model.property.Properties;
+import org.openhab.core.semantics.model.property.SoundVolume;
 import org.openhab.core.semantics.model.property.Temperature;
 
 /**
@@ -81,6 +85,23 @@ public class SemanticTagsTest {
         assertEquals(Kitchen.class, SemanticTags.getByLabelOrSynonym("Kitchen", Locale.ENGLISH).iterator().next());
         assertEquals(Kitchen.class, SemanticTags.getByLabelOrSynonym("Küche", Locale.GERMAN).iterator().next());
         assertEquals(Bathroom.class, SemanticTags.getByLabelOrSynonym("Badezimmer", Locale.GERMAN).iterator().next());
+    }
+
+    @Test
+    public void testGetLabel() {
+        assertEquals("Kitchen", SemanticTags.getLabel(Kitchen.class, Locale.ENGLISH));
+        assertEquals("Sound Volume", SemanticTags.getLabel(SoundVolume.class, Locale.ENGLISH));
+    }
+
+    @Test
+    public void testGetSynonyms() {
+        assertThat(SemanticTags.getSynonyms(Light.class, Locale.ENGLISH), hasItems("Lights", "Lighting"));
+    }
+
+    @Test
+    public void testGetDescription() {
+        Class<? extends Tag> tag = SemanticTags.add("TestDesc", Light.class, null, null, "Test Description");
+        assertEquals("Test Description", SemanticTags.getDescription(tag, Locale.ENGLISH));
     }
 
     @Test

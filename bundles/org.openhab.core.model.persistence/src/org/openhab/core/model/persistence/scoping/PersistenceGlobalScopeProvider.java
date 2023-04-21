@@ -31,7 +31,7 @@ import com.google.common.base.Predicate;
 
 public class PersistenceGlobalScopeProvider extends AbstractGlobalScopeProvider {
 
-    static protected Resource res = new ResourceImpl();
+    protected static Resource res = new ResourceImpl();
 
     static {
         res.setURI(URI.createURI("virtual://openhab.org/persistence/strategy.global"));
@@ -46,8 +46,7 @@ public class PersistenceGlobalScopeProvider extends AbstractGlobalScopeProvider 
         IScope parentScope = super.getScope(resource, ignoreCase, type, predicate);
         List<IEObjectDescription> descs = new ArrayList<>();
         for (EObject eObj : res.getContents()) {
-            if (eObj instanceof Strategy) {
-                Strategy strategy = (Strategy) eObj;
+            if (eObj instanceof Strategy strategy) {
                 descs.add(EObjectDescription.create(strategy.getName(), strategy));
             }
         }

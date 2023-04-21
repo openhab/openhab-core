@@ -78,16 +78,18 @@ public class TimerModuleHandlerFactory extends BaseModuleHandlerFactory {
     protected @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
         logger.trace("create {} -> {}", module.getId(), module.getTypeUID());
         String moduleTypeUID = module.getTypeUID();
-        if (GenericCronTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Trigger) {
-            return new GenericCronTriggerHandler((Trigger) module, scheduler);
-        } else if (TimeOfDayTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Trigger) {
-            return new TimeOfDayTriggerHandler((Trigger) module, scheduler);
-        } else if (DateTimeTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Trigger) {
-            return new DateTimeTriggerHandler((Trigger) module, scheduler, itemRegistry, bundleContext);
-        } else if (TimeOfDayConditionHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Condition) {
-            return new TimeOfDayConditionHandler((Condition) module);
-        } else if (DayOfWeekConditionHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Condition) {
-            return new DayOfWeekConditionHandler((Condition) module);
+        if (GenericCronTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Trigger trigger) {
+            return new GenericCronTriggerHandler(trigger, scheduler);
+        } else if (TimeOfDayTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Trigger trigger) {
+            return new TimeOfDayTriggerHandler(trigger, scheduler);
+        } else if (DateTimeTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Trigger trigger) {
+            return new DateTimeTriggerHandler(trigger, scheduler, itemRegistry, bundleContext);
+        } else if (TimeOfDayConditionHandler.MODULE_TYPE_ID.equals(moduleTypeUID)
+                && module instanceof Condition condition) {
+            return new TimeOfDayConditionHandler(condition);
+        } else if (DayOfWeekConditionHandler.MODULE_TYPE_ID.equals(moduleTypeUID)
+                && module instanceof Condition condition) {
+            return new DayOfWeekConditionHandler(condition);
         } else {
             logger.error("The module handler type '{}' is not supported.", moduleTypeUID);
         }

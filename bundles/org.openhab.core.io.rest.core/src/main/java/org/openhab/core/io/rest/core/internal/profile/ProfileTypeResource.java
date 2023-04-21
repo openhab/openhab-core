@@ -152,8 +152,7 @@ public class ProfileTypeResource implements RESTResource {
     }
 
     private boolean triggerProfileMatchesProfileType(ProfileType profileType, ChannelType channelType) {
-        if (profileType instanceof TriggerProfileType) {
-            TriggerProfileType triggerProfileType = (TriggerProfileType) profileType;
+        if (profileType instanceof TriggerProfileType triggerProfileType) {
 
             if (triggerProfileType.getSupportedChannelTypeUIDs().isEmpty()) {
                 return true;
@@ -167,8 +166,7 @@ public class ProfileTypeResource implements RESTResource {
     }
 
     private boolean stateProfileMatchesProfileType(ProfileType profileType, ChannelType channelType) {
-        if (profileType instanceof StateProfileType) {
-            StateProfileType stateProfileType = (StateProfileType) profileType;
+        if (profileType instanceof StateProfileType stateProfileType) {
 
             if (stateProfileType.getSupportedItemTypesOfChannel().isEmpty()) {
                 return true;
