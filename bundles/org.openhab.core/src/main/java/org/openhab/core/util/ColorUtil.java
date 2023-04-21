@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class ColorUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ColorUtil.class);
+    private static final MathContext COLOR_MATH_CONTEXT = new MathContext(5, RoundingMode.HALF_UP);
     protected static final BigDecimal BIG_DECIMAL_HUNDRED = BigDecimal.valueOf(100);
     public static final Gamut DEFAULT_GAMUT = new Gamut(new double[] { 0.9961, 0.0001 }, new double[] { 0, 0.9961 },
             new double[] { 0, 0.0001 });
@@ -240,14 +241,14 @@ public class ColorUtil {
             return new HSBType(new DecimalType(), new PercentType(), new PercentType(max));
         }
 
-        PercentType saturation = new PercentType(span.divide(max, MathContext.DECIMAL64).multiply(BIG_DECIMAL_HUNDRED));
+        PercentType saturation = new PercentType(span.divide(max, COLOR_MATH_CONTEXT).multiply(BIG_DECIMAL_HUNDRED));
         PercentType brightness = new PercentType(max);
 
-        BigDecimal scale = span.divide(BigDecimal.valueOf(60), MathContext.DECIMAL64);
+        BigDecimal scale = span.divide(BigDecimal.valueOf(60), COLOR_MATH_CONTEXT);
 
-        BigDecimal redAngle = max.subtract(r).divide(scale, MathContext.DECIMAL64);
-        BigDecimal greenAngle = max.subtract(g).divide(scale, MathContext.DECIMAL64);
-        BigDecimal blueAngle = max.subtract(b).divide(scale, MathContext.DECIMAL64);
+        BigDecimal redAngle = max.subtract(r).divide(scale, COLOR_MATH_CONTEXT);
+        BigDecimal greenAngle = max.subtract(g).divide(scale, COLOR_MATH_CONTEXT);
+        BigDecimal blueAngle = max.subtract(b).divide(scale, COLOR_MATH_CONTEXT);
 
         BigDecimal hue;
         if (r.compareTo(max) == 0) {
@@ -489,10 +490,10 @@ public class ColorUtil {
     }
 
     private static PercentType convertByteToColorPercent(int b) {
-        return new PercentType(new BigDecimal(b).divide(new BigDecimal("2.55"), MathContext.DECIMAL64));
+        return new PercentType(new BigDecimal(b).divide(new BigDecimal("2.55"), COLOR_MATH_CONTEXT));
     }
 
     private static PercentType convertDoubleToColorPercent(double d) {
-        return new PercentType(BigDecimal.valueOf(d * 100.0));
+        return new PercentType(new BigDecimal(d).multiply(BIG_DECIMAL_HUNDRED, COLOR_MATH_CONTEXT));
     }
 }
