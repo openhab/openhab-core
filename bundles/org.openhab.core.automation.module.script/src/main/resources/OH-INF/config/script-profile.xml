@@ -15,6 +15,14 @@
 			<description>The Script for transforming commands from the item to the Thing handler. The script may return null to
 				discard the commands and not pass them through.</description>
 		</parameter>
+		<parameter name="function" type="text">
+			<label>JavaScript Filename or Inline Script</label>
+			<description>Filename of the JavaScript in the transform folder or inline script starting with "|" character. The
+				state will be available in the variable "input". DEPRECATED! Use this ONLY to maintain backwards compatibility for
+				older installations. This parameter will be removed in future versions of openHAB.</description>
+			<limitToOptions>false</limitToOptions>
+			<advanced>true</advanced>
+		</parameter>
 	</config-description>
 
 </config-description:config-descriptions>

@@ -44,6 +44,11 @@ public class ScriptProfile implements StateProfile {
     public static final String CONFIG_TO_ITEM_SCRIPT = "toItemScript";
     public static final String CONFIG_TO_HANDLER_SCRIPT = "toHandlerScript";
 
+    /**
+     * @deprecated Use `toItemScript` instead.
+     */
+    public static final String CONFIG_FUNCTION = "function";
+
     private final Logger logger = LoggerFactory.getLogger(ScriptProfile.class);
 
     private final ProfileCallback callback;
@@ -68,6 +73,20 @@ public class ScriptProfile implements StateProfile {
         this.acceptedCommandTypes = profileContext.getAcceptedCommandTypes();
         this.acceptedDataTypes = profileContext.getAcceptedDataTypes();
         this.handlerAcceptedCommandTypes = profileContext.getHandlerAcceptedCommandTypes();
+
+        // @deprecated - To maintain compatibility with JavaScript Transformation Addon from openHAB 3
+        String function = ConfigParser.valueAs(profileContext.getConfiguration().get(CONFIG_FUNCTION), String.class);
+        if (function != null) {
+            this.toItemScript = function;
+            this.toHandlerScript = "|input";
+            if (profileContext.getConfiguration().get(CONFIG_TO_ITEM_SCRIPT) != null
+                    || profileContext.getConfiguration().get(CONFIG_TO_HANDLER_SCRIPT) != null) {
+                logger.warn("The '{}' and '{}' parameters are ignored when using the '{}' parameter.",
+                        CONFIG_TO_ITEM_SCRIPT, CONFIG_TO_HANDLER_SCRIPT, CONFIG_FUNCTION);
+            }
+            isConfigured = true;
+            return;
+        }
 
         this.toItemScript = ConfigParser.valueAsOrElse(profileContext.getConfiguration().get(CONFIG_TO_ITEM_SCRIPT),
                 String.class, "");
