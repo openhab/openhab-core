@@ -436,9 +436,9 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.orbit.bundles</groupId>
-      <artifactId>net.i2p.crypto.eddsa</artifactId>
-      <version>0.3.0.v20220506-1020</version>
+      <groupId>net.i2p.crypto</groupId>
+      <artifactId>eddsa</artifactId>
+      <version>0.3.0</version>
     </dependency>
 
     <!-- Gson -->
@@ -794,15 +794,15 @@
 
     <!-- EMF, Xtext -->
     <dependency>
-      <groupId>org.eclipse.orbit.bundles</groupId>
-      <artifactId>com.google.inject</artifactId>
-      <version>5.0.1.v20210324-2015</version>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>5.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.orbit.bundles</groupId>
-      <artifactId>io.github.classgraph</artifactId>
-      <version>4.8.149.v20220915-0556</version>
+      <groupId>io.github.classgraph</groupId>
+      <artifactId>classgraph</artifactId>
+      <version>4.8.149</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
