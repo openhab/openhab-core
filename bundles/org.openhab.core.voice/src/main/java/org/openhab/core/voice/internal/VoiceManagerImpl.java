@@ -531,62 +531,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    @Deprecated
-    public void startDialog() throws IllegalStateException {
-        startDialog(null, null, null, null, List.of(), null, null, null, this.keyword, this.listeningItem);
-    }
-
-    @Override
-    @Deprecated
-    public void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
-            @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
-            throws IllegalStateException {
-        startDialog(ks, stt, tts, null, hli == null ? List.of() : List.of(hli), source, sink, locale, keyword,
-                listeningItem);
-    }
-
-    @Override
-    @Deprecated
-    public void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source,
-            @Nullable AudioSink sink, @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
-            throws IllegalStateException {
-        var builder = getDialogContextBuilder();
-        if (ks != null) {
-            builder.withKS(ks);
-        }
-        if (keyword != null) {
-            builder.withKeyword(keyword);
-        }
-        if (stt != null) {
-            builder.withSTT(stt);
-        }
-        if (tts != null) {
-            builder.withTTS(tts);
-        }
-        if (voice != null) {
-            builder.withVoice(voice);
-        }
-        if (!hlis.isEmpty()) {
-            builder.withHLIs(hlis);
-        }
-        if (source != null) {
-            builder.withSource(source);
-        }
-        if (sink != null) {
-            builder.withSink(sink);
-        }
-        if (locale != null) {
-            builder.withLocale(locale);
-        }
-        if (listeningItem != null) {
-            builder.withListeningItem(listeningItem);
-        }
-        startDialog(builder.build());
-    }
-
-    @Override
     public void startDialog(DialogContext context) throws IllegalStateException {
         var ksService = context.ks();
         var ksKeyword = context.keyword();
@@ -643,42 +587,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Override
     public void stopDialog(DialogContext context) throws IllegalStateException {
         stopDialog(context.source());
-    }
-
-    @Override
-    @Deprecated
-    public void listenAndAnswer() throws IllegalStateException {
-        listenAndAnswer(null, null, null, List.of(), null, null, null, null);
-    }
-
-    @Override
-    @Deprecated
-    public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, @Nullable Voice voice,
-            List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
-            @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException {
-        var builder = getDialogContextBuilder();
-        if (stt != null) {
-            builder.withSTT(stt);
-        }
-        if (tts != null) {
-            builder.withTTS(tts);
-        }
-        if (!hlis.isEmpty()) {
-            builder.withHLIs(hlis);
-        }
-        if (source != null) {
-            builder.withSource(source);
-        }
-        if (sink != null) {
-            builder.withSink(sink);
-        }
-        if (locale != null) {
-            builder.withLocale(locale);
-        }
-        if (listeningItem != null) {
-            builder.withListeningItem(listeningItem);
-        }
-        listenAndAnswer(builder.build());
     }
 
     @Override
