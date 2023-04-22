@@ -40,6 +40,8 @@ import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
@@ -70,6 +72,9 @@ public class ScriptProfileTest extends JavaTest {
     public void testScriptNotExecutedAndNoValueForwardedToCallbackIfNoScriptDefined() throws TransformationException {
         ProfileContext profileContext = ProfileContextBuilder.create().build();
 
+        ItemChannelLink link = new ItemChannelLink("DummyItem", new ChannelUID("foo:bar:baz:qux"));
+        when(profileCallback.getItemChannelLink()).thenReturn(link);
+
         setupInterceptedLogger(ScriptProfile.class, LogLevel.ERROR);
 
         ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
@@ -85,7 +90,8 @@ public class ScriptProfileTest extends JavaTest {
         verify(profileCallback, never()).sendCommand(any());
 
         assertLogMessage(ScriptProfile.class, LogLevel.ERROR,
-                "Neither 'toItem' nor 'toHandler' script defined. Profile will discard all states and commands.");
+                "Neither 'toItemScript' nor 'toHandlerScript' defined in link '" + link.toString()
+                        + "'. Profile will discard all states and commands.");
     }
 
     @Test

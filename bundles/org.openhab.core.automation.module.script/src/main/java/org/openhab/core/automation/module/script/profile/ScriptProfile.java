@@ -76,7 +76,8 @@ public class ScriptProfile implements StateProfile {
 
         if (toItemScript.isBlank() && toHandlerScript.isBlank()) {
             logger.error(
-                    "Neither 'toItem' nor 'toHandler' script defined. Profile will discard all states and commands.");
+                    "Neither 'toItemScript' nor 'toHandlerScript' defined in link '{}'. Profile will discard all states and commands.",
+                    callback.getItemChannelLink());
             isConfigured = false;
             return;
         }
