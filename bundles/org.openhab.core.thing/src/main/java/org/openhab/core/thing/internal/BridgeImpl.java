@@ -82,8 +82,8 @@ public class BridgeImpl extends ThingImpl implements Bridge {
     public @Nullable BridgeHandler getHandler() {
         BridgeHandler bridgeHandler = null;
         ThingHandler thingHandler = super.getHandler();
-        if (thingHandler instanceof BridgeHandler) {
-            bridgeHandler = (BridgeHandler) thingHandler;
+        if (thingHandler instanceof BridgeHandler handler) {
+            bridgeHandler = handler;
         } else if (thingHandler != null) {
             logger.warn("Handler of bridge '{}' must implement BridgeHandler interface.", getUID());
         }

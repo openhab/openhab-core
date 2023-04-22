@@ -79,8 +79,8 @@ public class GsonMessageBodyWriter<T> implements MessageBodyWriter<T> {
         }
 
         try {
-            if (object instanceof InputStream && object instanceof JSONInputStream) {
-                ((InputStream) object).transferTo(entityStream);
+            if (object instanceof InputStream stream && object instanceof JSONInputStream) {
+                stream.transferTo(entityStream);
             } else {
                 entityStream.write(gson.toJson(object).getBytes(StandardCharsets.UTF_8));
             }

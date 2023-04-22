@@ -45,6 +45,6 @@ public enum FirmwareStatus {
     UPDATE_AVAILABLE,
 
     /** There is a newer firmware of the thing available and the firmware update for the thing can be executed. */
-    UPDATE_EXECUTABLE;
+    UPDATE_EXECUTABLE
 
 }

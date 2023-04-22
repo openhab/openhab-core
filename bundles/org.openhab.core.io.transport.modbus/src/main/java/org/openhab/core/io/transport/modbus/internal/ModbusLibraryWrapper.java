@@ -213,12 +213,12 @@ public class ModbusLibraryWrapper {
         // We disable modbus library retries and handle in the Manager implementation
         transaction.setRetries(0);
         transaction.setRetryDelayMillis(0);
-        if (transaction instanceof ModbusSerialTransaction) {
-            ((ModbusSerialTransaction) transaction).setSerialConnection((SerialConnection) connection);
-        } else if (transaction instanceof ModbusUDPTransaction) {
-            ((ModbusUDPTransaction) transaction).setTerminal(((UDPMasterConnection) connection).getTerminal());
-        } else if (transaction instanceof ModbusTCPTransaction) {
-            ((ModbusTCPTransaction) transaction).setConnection((TCPMasterConnection) connection);
+        if (transaction instanceof ModbusSerialTransaction serialTransaction) {
+            serialTransaction.setSerialConnection((SerialConnection) connection);
+        } else if (transaction instanceof ModbusUDPTransaction pTransaction) {
+            pTransaction.setTerminal(((UDPMasterConnection) connection).getTerminal());
+        } else if (transaction instanceof ModbusTCPTransaction pTransaction) {
+            pTransaction.setConnection((TCPMasterConnection) connection);
         } else {
             throw new IllegalStateException();
         }

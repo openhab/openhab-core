@@ -25,5 +25,5 @@ public interface ModelRepositoryChangeListener {
      * Performs dispatch of all binding configs and
      * fires all {@link ItemsChangeListener}s if {@code modelName} ends with "items".
      */
-    public void modelChanged(String modelName, EventType type);
+    void modelChanged(String modelName, EventType type);
 }

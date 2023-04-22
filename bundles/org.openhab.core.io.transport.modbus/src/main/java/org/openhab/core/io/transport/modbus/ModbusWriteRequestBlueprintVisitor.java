@@ -29,12 +29,12 @@ public interface ModbusWriteRequestBlueprintVisitor {
      *
      * @param blueprint
      */
-    public void visit(ModbusWriteCoilRequestBlueprint blueprint);
+    void visit(ModbusWriteCoilRequestBlueprint blueprint);
 
     /**
      * Visit request writing register data
      *
      * @param blueprint
      */
-    public void visit(ModbusWriteRegisterRequestBlueprint blueprint);
+    void visit(ModbusWriteRegisterRequestBlueprint blueprint);
 }

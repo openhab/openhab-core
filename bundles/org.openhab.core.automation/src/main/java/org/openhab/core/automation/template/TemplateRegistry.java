@@ -41,7 +41,8 @@ public interface TemplateRegistry<E extends Template> extends Registry<E, String
      * @return the desired template instance or {@code null} if a template with such UID does not exist or the passed
      *         UID is {@code null}.
      */
-    public @Nullable E get(String uid, @Nullable Locale locale);
+    @Nullable
+    E get(String uid, @Nullable Locale locale);
 
     /**
      * Gets the templates filtered by tag.
@@ -50,7 +51,7 @@ public interface TemplateRegistry<E extends Template> extends Registry<E, String
      *            {@code null} then the result will contain all available templates.
      * @return a collection of templates, which correspond to the specified tag.
      */
-    public Collection<E> getByTag(@Nullable String tag);
+    Collection<E> getByTag(@Nullable String tag);
 
     /**
      * Gets the templates filtered by tag.
@@ -62,7 +63,7 @@ public interface TemplateRegistry<E extends Template> extends Registry<E, String
      *            elements are returned with the default localization.
      * @return a collection of localized templates, which correspond to the specified tag.
      */
-    public Collection<E> getByTag(@Nullable String tag, @Nullable Locale locale);
+    Collection<E> getByTag(@Nullable String tag, @Nullable Locale locale);
 
     /**
      * Gets the templates filtered by tags.
@@ -71,7 +72,7 @@ public interface TemplateRegistry<E extends Template> extends Registry<E, String
      *            is {@code null} then the result will contain all templates.
      * @return a collection of templates, which correspond to the specified set of tags.
      */
-    public Collection<E> getByTags(String... tags);
+    Collection<E> getByTags(String... tags);
 
     /**
      * Gets the templates filtered by tags.
@@ -83,7 +84,7 @@ public interface TemplateRegistry<E extends Template> extends Registry<E, String
      *            it is {@code null} then the result will contain all templates.
      * @return the templates, which correspond to the specified set of tags.
      */
-    public Collection<E> getByTags(@Nullable Locale locale, String... tags);
+    Collection<E> getByTags(@Nullable Locale locale, String... tags);
 
     /**
      * Gets all available templates, localized by specified locale.
@@ -93,5 +94,5 @@ public interface TemplateRegistry<E extends Template> extends Registry<E, String
      *            elements are returned with the default localization.
      * @return a collection of localized templates, corresponding to the parameterized type.
      */
-    public Collection<E> getAll(@Nullable Locale locale);
+    Collection<E> getAll(@Nullable Locale locale);
 }

@@ -20,18 +20,18 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
-import org.openhab.core.model.persistence.persistence.Strategy;
 import org.eclipse.xtext.resource.EObjectDescription;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeProvider;
 import org.eclipse.xtext.scoping.impl.SimpleScope;
+import org.openhab.core.model.persistence.persistence.Strategy;
 
 import com.google.common.base.Predicate;
 
 public class PersistenceGlobalScopeProvider extends AbstractGlobalScopeProvider {
 
-    static protected Resource res = new ResourceImpl();
+    protected static Resource res = new ResourceImpl();
 
     static {
         res.setURI(URI.createURI("virtual://openhab.org/persistence/strategy.global"));
@@ -46,12 +46,10 @@ public class PersistenceGlobalScopeProvider extends AbstractGlobalScopeProvider 
         IScope parentScope = super.getScope(resource, ignoreCase, type, predicate);
         List<IEObjectDescription> descs = new ArrayList<>();
         for (EObject eObj : res.getContents()) {
-            if (eObj instanceof Strategy) {
-                Strategy strategy = (Strategy) eObj;
+            if (eObj instanceof Strategy strategy) {
                 descs.add(EObjectDescription.create(strategy.getName(), strategy));
             }
         }
         return new SimpleScope(parentScope, descs);
     }
-
 }

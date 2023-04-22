@@ -45,6 +45,7 @@ import org.openhab.core.model.sitemap.sitemap.impl.DefaultImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.FrameImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.GroupImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ImageImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.InputImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.MappingImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.MapviewImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.SelectionImpl;
@@ -235,6 +236,11 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 addWidgetMappings(selectionWidget.getMappings(), component);
                 widget = selectionWidget;
                 break;
+            case "Input":
+                InputImpl inputWidget = (InputImpl) SitemapFactory.eINSTANCE.createInput();
+                widget = inputWidget;
+                setWidgetPropertyFromComponentConfig(widget, component, "inputHint", SitemapPackage.INPUT__INPUT_HINT);
+                break;
             case "Setpoint":
                 SetpointImpl setpointWidget = (SetpointImpl) SitemapFactory.eINSTANCE.createSetpoint();
                 widget = setpointWidget;
@@ -263,8 +269,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__ICON);
             setWidgetPropertyFromComponentConfig(widget, component, "item", SitemapPackage.WIDGET__ITEM);
 
-            if (widget instanceof LinkableWidget) {
-                LinkableWidget linkableWidget = (LinkableWidget) widget;
+            if (widget instanceof LinkableWidget linkableWidget) {
                 if (component.getSlots() != null && component.getSlots().containsKey("widgets")) {
                     for (UIComponent childComponent : component.getSlot("widgets")) {
                         Widget childWidget = buildWidget(childComponent);
@@ -297,7 +302,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             WidgetImpl widgetImpl = (WidgetImpl) widget;
             Object normalizedValue = ConfigUtil.normalizeType(value);
             if (widgetImpl.eGet(feature, false, false) instanceof Integer) {
-                normalizedValue = (normalizedValue instanceof BigDecimal) ? ((BigDecimal) normalizedValue).intValue()
+                normalizedValue = (normalizedValue instanceof BigDecimal bd) ? bd.intValue()
                         : Integer.valueOf(normalizedValue.toString());
             } else if (widgetImpl.eGet(feature, false, false) instanceof Boolean
                     && !(normalizedValue instanceof Boolean)) {

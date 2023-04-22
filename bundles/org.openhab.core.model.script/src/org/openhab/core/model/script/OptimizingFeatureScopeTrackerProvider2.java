@@ -31,5 +31,4 @@ public class OptimizingFeatureScopeTrackerProvider2 extends OptimizingFeatureSco
         return new FeatureScopeTracker() {
         };
     }
-
 }

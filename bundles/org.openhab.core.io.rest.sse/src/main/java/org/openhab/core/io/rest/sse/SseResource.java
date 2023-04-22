@@ -150,8 +150,8 @@ public class SseResource implements RESTResource, SsePublisher {
 
         executorService.execute(() -> {
             handleEventBroadcastTopic(event);
-            if (event instanceof ItemStateChangedEvent) {
-                handleEventBroadcastItemState((ItemStateChangedEvent) event);
+            if (event instanceof ItemStateChangedEvent changedEvent) {
+                handleEventBroadcastItemState(changedEvent);
             }
         });
     }
@@ -236,7 +236,7 @@ public class SseResource implements RESTResource, SsePublisher {
         }
         Optional<SseSinkItemInfo> itemStateInfo = itemStatesBroadcaster.getInfoIf(hasConnectionId(connectionId))
                 .findFirst();
-        if (!itemStateInfo.isPresent()) {
+        if (itemStateInfo.isEmpty()) {
             return Response.status(Status.NOT_FOUND).build();
         }
 

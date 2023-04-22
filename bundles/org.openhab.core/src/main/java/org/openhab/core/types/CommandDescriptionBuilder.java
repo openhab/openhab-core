@@ -48,7 +48,7 @@ public class CommandDescriptionBuilder {
      */
     public CommandDescription build() {
         CommandDescriptionImpl commandDescription = new CommandDescriptionImpl();
-        commandOptions.forEach(co -> commandDescription.addCommandOption(co));
+        commandOptions.forEach(commandDescription::addCommandOption);
         return commandDescription;
     }
 

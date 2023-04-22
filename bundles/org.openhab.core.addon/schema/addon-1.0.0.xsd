@@ -51,9 +51,26 @@
 
     <xs:simpleType name="connectionType">
         <xs:restriction base="xs:string">
-            <xs:enumeration value="local"/>
-            <xs:enumeration value="cloud"/>
-            <xs:enumeration value="cloudDiscovery"/>
+            <xs:enumeration value="none">
+                <xs:annotation>
+                    <xs:documentation>No interaction with external systems at all</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="local">
+                <xs:annotation>
+                    <xs:documentation>Interaction with external systems, without internet access</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="hybrid">
+                <xs:annotation>
+                    <xs:documentation>Interaction with external systems, internet access required only for extended functionality (such as discovery)</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="cloud">
+                <xs:annotation>
+                    <xs:documentation>Interaction with external systems, internet access required for normal operation</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
         </xs:restriction>
     </xs:simpleType>
 

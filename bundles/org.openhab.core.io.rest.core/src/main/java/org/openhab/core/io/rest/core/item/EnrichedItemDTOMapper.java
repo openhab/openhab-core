@@ -93,8 +93,7 @@ public class EnrichedItemDTOMapper {
 
         EnrichedItemDTO enrichedItemDTO;
 
-        if (item instanceof GroupItem) {
-            GroupItem groupItem = (GroupItem) item;
+        if (item instanceof GroupItem groupItem) {
             EnrichedItemDTO[] memberDTOs;
             if (drillDown) {
                 Collection<EnrichedItemDTO> members = new LinkedHashSet<>();

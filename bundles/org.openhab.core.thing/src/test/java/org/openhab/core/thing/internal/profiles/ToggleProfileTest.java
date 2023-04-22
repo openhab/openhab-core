@@ -153,7 +153,7 @@ public class ToggleProfileTest extends JavaTest {
 
     private void initializeContextMock(@Nullable String triggerEvent) {
         Map<String, Object> params = triggerEvent == null ? Collections.emptyMap()
-                : Collections.singletonMap(ToggleProfile.EVENT_PARAM, triggerEvent);
+                : Map.of(ToggleProfile.EVENT_PARAM, triggerEvent);
         when(contextMock.getConfiguration()).thenReturn(new Configuration(params));
     }
 

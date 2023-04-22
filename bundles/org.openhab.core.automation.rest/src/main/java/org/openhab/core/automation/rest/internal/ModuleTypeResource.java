@@ -136,21 +136,21 @@ public class ModuleTypeResource implements RESTResource {
     }
 
     private ModuleTypeDTO getModuleTypeDTO(final ModuleType moduleType) {
-        if (moduleType instanceof ActionType) {
-            if (moduleType instanceof CompositeActionType) {
-                return ActionTypeDTOMapper.map((CompositeActionType) moduleType);
+        if (moduleType instanceof ActionType actionType) {
+            if (moduleType instanceof CompositeActionType compositeActionType) {
+                return ActionTypeDTOMapper.map(compositeActionType);
             }
-            return ActionTypeDTOMapper.map((ActionType) moduleType);
-        } else if (moduleType instanceof ConditionType) {
-            if (moduleType instanceof CompositeConditionType) {
-                return ConditionTypeDTOMapper.map((CompositeConditionType) moduleType);
+            return ActionTypeDTOMapper.map(actionType);
+        } else if (moduleType instanceof ConditionType conditionType) {
+            if (moduleType instanceof CompositeConditionType compositeConditionType) {
+                return ConditionTypeDTOMapper.map(compositeConditionType);
             }
-            return ConditionTypeDTOMapper.map((ConditionType) moduleType);
-        } else if (moduleType instanceof TriggerType) {
-            if (moduleType instanceof CompositeTriggerType) {
-                return TriggerTypeDTOMapper.map((CompositeTriggerType) moduleType);
+            return ConditionTypeDTOMapper.map(conditionType);
+        } else if (moduleType instanceof TriggerType triggerType) {
+            if (moduleType instanceof CompositeTriggerType compositeTriggerType) {
+                return TriggerTypeDTOMapper.map(compositeTriggerType);
             }
-            return TriggerTypeDTOMapper.map((TriggerType) moduleType);
+            return TriggerTypeDTOMapper.map(triggerType);
         } else {
             throw new IllegalArgumentException(
                     String.format("Cannot handle given module type class (%s)", moduleType.getClass()));

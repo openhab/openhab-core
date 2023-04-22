@@ -56,8 +56,7 @@ public abstract class AbstractLink implements Identifiable<String> {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        if (obj instanceof AbstractLink) {
-            AbstractLink link = (AbstractLink) obj;
+        if (obj instanceof AbstractLink link) {
             return getUID().equals(link.getUID());
         }
         return false;

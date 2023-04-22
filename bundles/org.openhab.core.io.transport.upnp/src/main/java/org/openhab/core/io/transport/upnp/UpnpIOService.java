@@ -32,7 +32,7 @@ public interface UpnpIOService {
      * @param actionID the Action to invoke
      * @param inputs a map of {variable,values} to parameterize the Action that will be invoked
      */
-    public Map<String, String> invokeAction(UpnpIOParticipant participant, String serviceID, String actionID,
+    Map<String, String> invokeAction(UpnpIOParticipant participant, String serviceID, String actionID,
             Map<String, String> inputs);
 
     /**
@@ -42,7 +42,7 @@ public interface UpnpIOService {
      * @param serviceID the UPNP service we want to subscribe to
      * @param duration the duration of the subscription
      */
-    public void addSubscription(UpnpIOParticipant participant, String serviceID, int duration);
+    void addSubscription(UpnpIOParticipant participant, String serviceID, int duration);
 
     /**
      * Unsubscribe from a GENA subscription
@@ -50,7 +50,7 @@ public interface UpnpIOService {
      * @param participant the participant of the subscription
      * @param serviceID the UPNP service we want to unsubscribe from
      */
-    public void removeSubscription(UpnpIOParticipant participant, String serviceID);
+    void removeSubscription(UpnpIOParticipant participant, String serviceID);
 
     /**
      * Verify if the a participant is registered
@@ -58,21 +58,21 @@ public interface UpnpIOService {
      * @param participant the participant whom's participation we want to verify
      * @return true of the participant is registered with the UpnpIOService
      */
-    public boolean isRegistered(UpnpIOParticipant participant);
+    boolean isRegistered(UpnpIOParticipant participant);
 
     /**
      * Register a participant with the UPNP IO Service
      * 
      * @param participant the participant whose participation we want to register
      */
-    public void registerParticipant(UpnpIOParticipant participant);
+    void registerParticipant(UpnpIOParticipant participant);
 
     /**
      * Unregister a participant with the UPNP IO Service
      * 
      * @param participant the participant whose participation we want to unregister
      */
-    public void unregisterParticipant(UpnpIOParticipant participant);
+    void unregisterParticipant(UpnpIOParticipant participant);
 
     /**
      * Retrieves the descriptor url for the participant
@@ -80,7 +80,7 @@ public interface UpnpIOService {
      * @param participant the participant whom's descriptor url is requested
      * @return the url of the descriptor as provided by the upnp device
      */
-    public URL getDescriptorURL(UpnpIOParticipant participant);
+    URL getDescriptorURL(UpnpIOParticipant participant);
 
     /**
      * Establish a polling mechanism to check the status of a specific UDN device. The polling mechanism
@@ -92,12 +92,12 @@ public interface UpnpIOService {
      * @param actionID the action to call
      * @param interval the interval in seconds
      */
-    public void addStatusListener(UpnpIOParticipant participant, String serviceID, String actionID, int interval);
+    void addStatusListener(UpnpIOParticipant participant, String serviceID, String actionID, int interval);
 
     /**
      * Stops the polling mechanism to check the status of a specific UDN device.
      * 
      * @param participant the participant for whom we want to remove the polling
      */
-    public void removeStatusListener(UpnpIOParticipant participant);
+    void removeStatusListener(UpnpIOParticipant participant);
 }

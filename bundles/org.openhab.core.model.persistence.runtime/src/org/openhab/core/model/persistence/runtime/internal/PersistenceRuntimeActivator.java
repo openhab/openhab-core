@@ -38,5 +38,4 @@ public class PersistenceRuntimeActivator implements ModelParser {
     public String getExtension() {
         return "persist";
     }
-
 }

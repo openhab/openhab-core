@@ -16,17 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
-import org.openhab.core.persistence.PersistenceManager;
-import org.openhab.core.persistence.PersistenceService;
-import org.openhab.core.persistence.PersistenceServiceConfiguration;
-import org.openhab.core.persistence.PersistenceFilter;
-import org.openhab.core.persistence.PersistenceItemConfiguration;
-import org.openhab.core.persistence.config.PersistenceAllConfig;
-import org.openhab.core.persistence.config.PersistenceConfig;
-import org.openhab.core.persistence.config.PersistenceGroupConfig;
-import org.openhab.core.persistence.config.PersistenceItemConfig;
-import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
-import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
@@ -38,6 +27,17 @@ import org.openhab.core.model.persistence.persistence.ItemConfig;
 import org.openhab.core.model.persistence.persistence.PersistenceConfiguration;
 import org.openhab.core.model.persistence.persistence.PersistenceModel;
 import org.openhab.core.model.persistence.persistence.Strategy;
+import org.openhab.core.persistence.PersistenceFilter;
+import org.openhab.core.persistence.PersistenceItemConfiguration;
+import org.openhab.core.persistence.PersistenceManager;
+import org.openhab.core.persistence.PersistenceService;
+import org.openhab.core.persistence.PersistenceServiceConfiguration;
+import org.openhab.core.persistence.config.PersistenceAllConfig;
+import org.openhab.core.persistence.config.PersistenceConfig;
+import org.openhab.core.persistence.config.PersistenceGroupConfig;
+import org.openhab.core.persistence.config.PersistenceItemConfig;
+import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -133,10 +133,10 @@ public class PersistenceModelManager implements ModelRepositoryChangeListener {
         for (final EObject item : config.getItems()) {
             if (item instanceof AllConfig) {
                 items.add(new PersistenceAllConfig());
-            } else if (item instanceof GroupConfig) {
-                items.add(new PersistenceGroupConfig(((GroupConfig) item).getGroup()));
-            } else if (item instanceof ItemConfig) {
-                items.add(new PersistenceItemConfig(((ItemConfig) item).getItem()));
+            } else if (item instanceof GroupConfig groupConfig) {
+                items.add(new PersistenceGroupConfig(groupConfig.getGroup()));
+            } else if (item instanceof ItemConfig itemConfig) {
+                items.add(new PersistenceItemConfig(itemConfig.getItem()));
             }
         }
         return new PersistenceItemConfiguration(items, config.getAlias(), mapStrategies(config.getStrategies()),
@@ -152,8 +152,8 @@ public class PersistenceModelManager implements ModelRepositoryChangeListener {
     }
 
     private PersistenceStrategy mapStrategy(Strategy strategy) {
-        if (strategy instanceof CronStrategy) {
-            return new PersistenceCronStrategy(strategy.getName(), ((CronStrategy) strategy).getCronExpression());
+        if (strategy instanceof CronStrategy cronStrategy) {
+            return new PersistenceCronStrategy(strategy.getName(), cronStrategy.getCronExpression());
         } else {
             return new PersistenceStrategy(strategy.getName());
         }
@@ -170,5 +170,4 @@ public class PersistenceModelManager implements ModelRepositoryChangeListener {
     private PersistenceFilter mapFilter(Filter filter) {
         return new PersistenceFilter();
     }
-
 }

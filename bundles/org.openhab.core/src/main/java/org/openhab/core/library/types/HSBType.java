@@ -26,6 +26,7 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.ComplexType;
 import org.openhab.core.types.PrimitiveType;
 import org.openhab.core.types.State;
+import org.openhab.core.util.ColorUtil;
 
 /**
  * The HSBType is a complex type with constituents for hue, saturation and
@@ -33,6 +34,7 @@ import org.openhab.core.types.State;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Added fromRGB
+ * @author Andrew Fiddian-Green - closeTo (copied from binding)
  */
 @NonNullByDefault
 public class HSBType extends PercentType implements ComplexType, State, Command {
@@ -50,14 +52,6 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     public static final HSBType RED = new HSBType("0,100,100");
     public static final HSBType GREEN = new HSBType("120,100,100");
     public static final HSBType BLUE = new HSBType("240,100,100");
-
-    // 1931 CIE XYZ to sRGB (D65 reference white)
-    private static final float XY2RGB[][] = { { 3.2406f, -1.5372f, -0.4986f }, { -0.9689f, 1.8758f, 0.0415f },
-            { 0.0557f, -0.2040f, 1.0570f } };
-
-    // sRGB to 1931 CIE XYZ (D65 reference white)
-    private static final float RGB2XY[][] = { { 0.4124f, 0.3576f, 0.1805f }, { 0.2126f, 0.7152f, 0.0722f },
-            { 0.0193f, 0.1192f, 0.9505f } };
 
     private static final String UNIT_HSB = "%hsb%";
     private static final String UNIT_RGB = "%rgb%";
@@ -92,7 +86,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
      * @param value a stringified HSBType value in the format "hue,saturation,brightness"
      */
     public HSBType(String value) {
-        List<String> constituents = Arrays.stream(value.split(",")).map(in -> in.trim()).collect(Collectors.toList());
+        List<String> constituents = Arrays.stream(value.split(",")).map(String::trim).collect(Collectors.toList());
         if (constituents.size() == 3) {
             this.hue = new BigDecimal(constituents.get(0));
             this.saturation = new BigDecimal(constituents.get(1));
@@ -120,74 +114,34 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     }
 
     /**
-     * Create HSB from RGB
+     * Create HSB from RGB.
+     *
+     * See also {@link ColorUtil#rgbToHsb(int[])}.
      *
      * @param r red 0-255
      * @param g green 0-255
      * @param b blue 0-255
+     * @throws IllegalArgumentException when color values exceed allowed range
      */
-    public static HSBType fromRGB(int r, int g, int b) {
-        float tmpHue, tmpSaturation, tmpBrightness;
-        int max = (r > g) ? r : g;
-        if (b > max) {
-            max = b;
-        }
-        int min = (r < g) ? r : g;
-        if (b < min) {
-            min = b;
-        }
-        tmpBrightness = max / 2.55f;
-        tmpSaturation = (max != 0 ? ((float) (max - min)) / ((float) max) : 0) * 100;
-        if (tmpSaturation == 0) {
-            tmpHue = 0;
-        } else {
-            float red = ((float) (max - r)) / ((float) (max - min));
-            float green = ((float) (max - g)) / ((float) (max - min));
-            float blue = ((float) (max - b)) / ((float) (max - min));
-            if (r == max) {
-                tmpHue = blue - green;
-            } else if (g == max) {
-                tmpHue = 2.0f + red - blue;
-            } else {
-                tmpHue = 4.0f + green - red;
-            }
-            tmpHue = tmpHue / 6.0f * 360;
-            if (tmpHue < 0) {
-                tmpHue = tmpHue + 360.0f;
-            }
-        }
-
-        return new HSBType(new DecimalType((int) tmpHue), new PercentType((int) tmpSaturation),
-                new PercentType((int) tmpBrightness));
+    public static HSBType fromRGB(int r, int g, int b) throws IllegalArgumentException {
+        return ColorUtil.rgbToHsb(new int[] { r, g, b });
     }
 
     /**
-     * Returns a HSBType object representing the provided xy color values in CIE XY color model.
-     * Conversion from CIE XY color model to sRGB using D65 reference white
-     * Returned color is set to full brightness
+     * @deprecated Use {@link ColorUtil#xyToHsb(double[])} or {@link ColorUtil#xyToHsb(double[], ColorUtil.Gamut)}
+     *             instead.
+     *
+     *             Returns a HSBType object representing the provided xy color values in CIE XY color model.
+     *             Conversion from CIE XY color model to sRGB using D65 reference white
+     *             Returned color is set to full brightness
      *
      * @param x, y color information 0.0 - 1.0
      * @return new HSBType object representing the given CIE XY color, full brightness
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
      */
-    public static HSBType fromXY(float x, float y) {
-        float tmpY = 1.0f;
-        float tmpX = (tmpY / y) * x;
-        float tmpZ = (tmpY / y) * (1.0f - x - y);
-
-        float r = tmpX * XY2RGB[0][0] + tmpY * XY2RGB[0][1] + tmpZ * XY2RGB[0][2];
-        float g = tmpX * XY2RGB[1][0] + tmpY * XY2RGB[1][1] + tmpZ * XY2RGB[1][2];
-        float b = tmpX * XY2RGB[2][0] + tmpY * XY2RGB[2][1] + tmpZ * XY2RGB[2][2];
-
-        float max = r > g ? r : g;
-        if (b > max) {
-            max = b;
-        }
-
-        r = gammaCompress(r / max);
-        g = gammaCompress(g / max);
-        b = gammaCompress(b / max);
-
-        return HSBType.fromRGB((int) (r * 255.0f + 0.5f), (int) (g * 255.0f + 0.5f), (int) (b * 255.0f + 0.5f));
+    @Deprecated
+    public static HSBType fromXY(float x, float y) throws IllegalArgumentException {
+        return ColorUtil.xyToHsb(new double[] { x, y });
     }
 
     @Override
@@ -211,29 +165,36 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
         return new PercentType(value);
     }
 
+    /** @deprecated Use {@link ColorUtil#hsbToRgb(HSBType)} instead */
+    @Deprecated
     public PercentType getRed() {
         return toRGB()[0];
     }
 
+    /** @deprecated Use {@link ColorUtil#hsbToRgb(HSBType)} instead */
+    @Deprecated
     public PercentType getGreen() {
         return toRGB()[1];
     }
 
+    /** @deprecated Use {@link ColorUtil#hsbToRgb(HSBType)} instead */
+    @Deprecated
     public PercentType getBlue() {
         return toRGB()[2];
     }
 
     /**
-     * Returns the RGB value representing the color in the default sRGB
-     * color model.
-     * (Bits 24-31 are alpha, 16-23 are red, 8-15 are green, 0-7 are blue).
+     * @deprecated Use {@link ColorUtil#hsbTosRgb(HSBType)} instead.
+     *
+     *             Returns the RGB value representing the color in the default sRGB
+     *             color model.
+     *             (Bits 24-31 are alpha, 16-23 are red, 8-15 are green, 0-7 are blue).
      *
      * @return the RGB value of the color in the default sRGB color model
      */
+    @Deprecated
     public int getRGB() {
-        PercentType[] rgb = toRGB();
-        return ((0xFF) << 24) | ((convertPercentToByte(rgb[0]) & 0xFF) << 16)
-                | ((convertPercentToByte(rgb[1]) & 0xFF) << 8) | ((convertPercentToByte(rgb[2]) & 0xFF) << 0);
+        return ColorUtil.hsbTosRgb(this);
     }
 
     @Override
@@ -281,87 +242,14 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
             return false;
         }
         HSBType other = (HSBType) obj;
-        if (!getHue().equals(other.getHue()) || !getSaturation().equals(other.getSaturation())
-                || !getBrightness().equals(other.getBrightness())) {
-            return false;
-        }
-        return true;
+        return getHue().equals(other.getHue()) && getSaturation().equals(other.getSaturation())
+                && getBrightness().equals(other.getBrightness());
     }
 
+    /* @deprecated Use {@link ColorUtil#hsbToRgb(HSBType)} instead */
+    @Deprecated
     public PercentType[] toRGB() {
-        PercentType red = null;
-        PercentType green = null;
-        PercentType blue = null;
-
-        BigDecimal h = hue.divide(BIG_DECIMAL_HUNDRED, 10, RoundingMode.HALF_UP);
-        BigDecimal s = saturation.divide(BIG_DECIMAL_HUNDRED);
-
-        int hInt = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP).intValue();
-        BigDecimal f = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP)
-                .remainder(BigDecimal.ONE);
-        PercentType a = new PercentType(value.multiply(BigDecimal.ONE.subtract(s)));
-        PercentType b = new PercentType(value.multiply(BigDecimal.ONE.subtract(s.multiply(f))));
-        PercentType c = new PercentType(
-                value.multiply(BigDecimal.ONE.subtract((BigDecimal.ONE.subtract(f)).multiply(s))));
-
-        switch (hInt) {
-            case 0:
-            case 6:
-                red = getBrightness();
-                green = c;
-                blue = a;
-                break;
-            case 1:
-                red = b;
-                green = getBrightness();
-                blue = a;
-                break;
-            case 2:
-                red = a;
-                green = getBrightness();
-                blue = c;
-                break;
-            case 3:
-                red = a;
-                green = b;
-                blue = getBrightness();
-                break;
-            case 4:
-                red = c;
-                green = a;
-                blue = getBrightness();
-                break;
-            case 5:
-                red = getBrightness();
-                green = a;
-                blue = b;
-                break;
-            default:
-                throw new IllegalArgumentException("Could not convert to RGB.");
-        }
-        return new PercentType[] { red, green, blue };
-    }
-
-    // Gamma compression (sRGB) for a single component, in the 0.0 - 1.0 range
-    private static float gammaCompress(float c) {
-        if (c < 0.0f) {
-            c = 0.0f;
-        } else if (c > 1.0f) {
-            c = 1.0f;
-        }
-
-        return c <= 0.0031308f ? 12.92f * c : (1.0f + 0.055f) * (float) Math.pow(c, 1.0f / 2.4f) - 0.055f;
-    }
-
-    // Gamma decompression (sRGB) for a single component, in the 0.0 - 1.0 range
-    private static float gammaDecompress(float c) {
-        if (c < 0.0f) {
-            c = 0.0f;
-        } else if (c > 1.0f) {
-            c = 1.0f;
-        }
-
-        return c <= 0.04045f ? c / 12.92f : (float) Math.pow((c + 0.055f) / (1.0f + 0.055f), 2.4f);
+        return ColorUtil.hsbToRgbPercent(this);
     }
 
     /**
@@ -370,31 +258,15 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
      * xy pair contains color information
      * Y represents relative luminance
      *
-     * @param HSBType color object
      * @return PercentType[x, y, Y] values in the CIE XY color model
      */
     public PercentType[] toXY() {
-        // This makes sure we keep color information even if brightness is zero
-        PercentType sRGB[] = new HSBType(getHue(), getSaturation(), PercentType.HUNDRED).toRGB();
-
-        float r = gammaDecompress(sRGB[0].floatValue() / 100.0f);
-        float g = gammaDecompress(sRGB[1].floatValue() / 100.0f);
-        float b = gammaDecompress(sRGB[2].floatValue() / 100.0f);
-
-        float tmpX = r * RGB2XY[0][0] + g * RGB2XY[0][1] + b * RGB2XY[0][2];
-        float tmpY = r * RGB2XY[1][0] + g * RGB2XY[1][1] + b * RGB2XY[1][2];
-        float tmpZ = r * RGB2XY[2][0] + g * RGB2XY[2][1] + b * RGB2XY[2][2];
-
-        float x = tmpX / (tmpX + tmpY + tmpZ);
-        float y = tmpY / (tmpX + tmpY + tmpZ);
-
-        return new PercentType[] { new PercentType(Float.valueOf(x * 100.0f).toString()),
-                new PercentType(Float.valueOf(y * 100.0f).toString()),
-                new PercentType(Float.valueOf(tmpY * getBrightness().floatValue()).toString()) };
+        return Arrays.stream(ColorUtil.hsbToXY(this)).mapToObj(d -> new PercentType(new BigDecimal(d * 100.0)))
+                .toArray(PercentType[]::new);
     }
 
     private int convertPercentToByte(PercentType percent) {
-        return percent.value.multiply(BigDecimal.valueOf(255)).divide(BIG_DECIMAL_HUNDRED, 2, RoundingMode.HALF_UP)
+        return percent.value.multiply(BigDecimal.valueOf(255)).divide(BIG_DECIMAL_HUNDRED, 0, RoundingMode.HALF_UP)
                 .intValue();
     }
 
@@ -411,5 +283,22 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
         } else {
             return defaultConversion(target);
         }
+    }
+
+    /**
+     * Helper method for checking if two HSBType colors are close to each other. A maximum deviation is specifid in
+     * percent.
+     *
+     * @param other an HSBType containing the other color.
+     * @param maxPercentage the maximum allowed difference in percent (range 0.0..1.0).
+     * @throws IllegalArgumentException if percentage is out of range.
+     */
+    public boolean closeTo(HSBType other, double maxPercentage) throws IllegalArgumentException {
+        if (maxPercentage <= 0.0 || maxPercentage > 1.0) {
+            throw new IllegalArgumentException("'maxPercentage' out of bounds, allowed range 0..1");
+        }
+        double[] exp = ColorUtil.hsbToXY(this);
+        double[] act = ColorUtil.hsbToXY(other);
+        return ((Math.abs(exp[0] - act[0]) < maxPercentage) && (Math.abs(exp[1] - act[1]) < maxPercentage));
     }
 }

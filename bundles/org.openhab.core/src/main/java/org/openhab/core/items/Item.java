@@ -46,7 +46,7 @@ public interface Item extends Identifiable<String> {
      *
      * @return the current state
      */
-    public State getState();
+    State getState();
 
     /**
      * returns the current state of the item as a specific type
@@ -54,21 +54,21 @@ public interface Item extends Identifiable<String> {
      * @return the current state in the requested type or
      *         null, if state cannot be provided as the requested type
      */
-    public <T extends State> @Nullable T getStateAs(Class<T> typeClass);
+    <T extends State> @Nullable T getStateAs(Class<T> typeClass);
 
     /**
      * returns the name of the item
      *
      * @return the name of the item
      */
-    public String getName();
+    String getName();
 
     /**
      * returns the item type as defined by {@link ItemFactory}s
      *
      * @return the item type
      */
-    public String getType();
+    String getType();
 
     /**
      * <p>
@@ -86,7 +86,7 @@ public interface Item extends Identifiable<String> {
      *
      * @return a list of data types that can be used to update the item state
      */
-    public List<Class<? extends State>> getAcceptedDataTypes();
+    List<Class<? extends State>> getAcceptedDataTypes();
 
     /**
      * <p>
@@ -99,28 +99,29 @@ public interface Item extends Identifiable<String> {
      *
      * @return a list of all command types that can be used for this item
      */
-    public List<Class<? extends Command>> getAcceptedCommandTypes();
+    List<Class<? extends Command>> getAcceptedCommandTypes();
 
     /**
      * Returns a list of the names of the groups this item belongs to.
      *
      * @return list of item group names
      */
-    public List<String> getGroupNames();
+    List<String> getGroupNames();
 
     /**
      * Returns a set of tags. If the item is not tagged, an empty set is returned.
      *
      * @return set of tags.
      */
-    public Set<String> getTags();
+    Set<String> getTags();
 
     /**
      * Returns the label of the item or null if no label is set.
      *
      * @return item label or null
      */
-    public @Nullable String getLabel();
+    @Nullable
+    String getLabel();
 
     /**
      * Returns true if the item's tags contains the specific tag, otherwise false.
@@ -128,14 +129,15 @@ public interface Item extends Identifiable<String> {
      * @param tag a tag whose presence in the item's tags is to be tested.
      * @return true if the item's tags contains the specific tag, otherwise false.
      */
-    public boolean hasTag(String tag);
+    boolean hasTag(String tag);
 
     /**
      * Returns the category of the item or null if no category is set.
      *
      * @return category or null
      */
-    public @Nullable String getCategory();
+    @Nullable
+    String getCategory();
 
     /**
      * Returns the first provided state description (uses the default locale).
@@ -143,7 +145,8 @@ public interface Item extends Identifiable<String> {
      *
      * @return state description (can be null)
      */
-    public @Nullable StateDescription getStateDescription();
+    @Nullable
+    StateDescription getStateDescription();
 
     /**
      * Returns the first provided state description for a given locale.
@@ -152,7 +155,8 @@ public interface Item extends Identifiable<String> {
      * @param locale locale (can be null)
      * @return state description (can be null)
      */
-    public @Nullable StateDescription getStateDescription(@Nullable Locale locale);
+    @Nullable
+    StateDescription getStateDescription(@Nullable Locale locale);
 
     /**
      * Returns the {@link CommandDescription} for this item. In case no dedicated {@link CommandDescription} is
@@ -161,7 +165,7 @@ public interface Item extends Identifiable<String> {
      *
      * @return the {@link CommandDescription} for the default locale (can be null).
      */
-    public default @Nullable CommandDescription getCommandDescription() {
+    default @Nullable CommandDescription getCommandDescription() {
         return getCommandDescription(null);
     }
 
@@ -173,5 +177,6 @@ public interface Item extends Identifiable<String> {
      * @param locale locale (can be null)
      * @return command description (can be null)
      */
-    public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale);
+    @Nullable
+    CommandDescription getCommandDescription(@Nullable Locale locale);
 }

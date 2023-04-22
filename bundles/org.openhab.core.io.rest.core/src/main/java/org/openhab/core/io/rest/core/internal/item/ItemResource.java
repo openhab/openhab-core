@@ -210,7 +210,7 @@ public class ItemResource implements RESTResource {
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("type") @Parameter(description = "item type filter") @Nullable String type,
             @QueryParam("tags") @Parameter(description = "item tag filter") @Nullable String tags,
-            @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (suppressed if no value given)") @Nullable String namespaceSelector,
+            @DefaultValue(".*") @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (returns all if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("false") @QueryParam("recursive") @Parameter(description = "get member items recursively") boolean recursive,
             @QueryParam("fields") @Parameter(description = "limit output to the given fields (comma separated)") @Nullable String fields) {
         final Locale locale = localeService.getLocale(language);
@@ -259,7 +259,7 @@ public class ItemResource implements RESTResource {
             @ApiResponse(responseCode = "404", description = "Item not found") })
     public Response getItemData(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (suppressed if no value given)") @Nullable String namespaceSelector,
+            @DefaultValue(".*") @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (returns all if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("true") @QueryParam("recursive") @Parameter(description = "get member items if the item is a group item") boolean recursive,
             @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         final Locale locale = localeService.getLocale(language);
@@ -333,9 +333,9 @@ public class ItemResource implements RESTResource {
         // if it exists
         if (item != null) {
             State state = item.getState();
-            if (state instanceof RawType) {
-                String mimeType = ((RawType) state).getMimeType();
-                byte[] data = ((RawType) state).getBytes();
+            if (state instanceof RawType type) {
+                String mimeType = type.getMimeType();
+                byte[] data = type.getBytes();
                 if ((acceptedMediaTypes.contains("image/*") && mimeType.startsWith("image/"))
                         || acceptedMediaTypes.contains(mimeType)) {
                     return Response.ok(data).type(mimeType).build();
@@ -921,8 +921,8 @@ public class ItemResource implements RESTResource {
                 metadata.put(namespace, mdDto);
             }
         }
-        if (dto instanceof EnrichedGroupItemDTO) {
-            for (EnrichedItemDTO member : ((EnrichedGroupItemDTO) dto).members) {
+        if (dto instanceof EnrichedGroupItemDTO tO) {
+            for (EnrichedItemDTO member : tO.members) {
                 addMetadata(member, namespaces, filter);
             }
         }

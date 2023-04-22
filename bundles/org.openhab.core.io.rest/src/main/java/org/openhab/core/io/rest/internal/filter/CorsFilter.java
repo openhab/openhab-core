@@ -159,7 +159,7 @@ public class CorsFilter implements ContainerResponseFilter {
         if (values == null || values.isEmpty()) {
             return null;
         }
-        return values.get(0).toString();
+        return values.get(0);
     }
 
     /**

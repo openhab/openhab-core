@@ -60,8 +60,8 @@ public class TriggerTypeDTOMapper extends ModuleTypeDTOMapper {
         }
         final List<TriggerTypeDTO> dtos = new ArrayList<>(types.size());
         for (final TriggerType type : types) {
-            if (type instanceof CompositeTriggerType) {
-                dtos.add(map((CompositeTriggerType) type));
+            if (type instanceof CompositeTriggerType triggerType) {
+                dtos.add(map(triggerType));
             } else {
                 dtos.add(map(type));
             }

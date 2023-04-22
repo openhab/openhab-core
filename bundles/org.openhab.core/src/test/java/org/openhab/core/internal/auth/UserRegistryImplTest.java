@@ -118,11 +118,11 @@ public class UserRegistryImplTest {
         registry.authenticate(new UserApiTokenCredentials(token2));
         registry.authenticate(new UserApiTokenCredentials(token3));
         registry.removeUserApiToken(user,
-                user.getApiTokens().stream().filter(t -> t.getName().equals("token1")).findAny().get());
+                user.getApiTokens().stream().filter(t -> "token1".equals(t.getName())).findAny().get());
         registry.removeUserApiToken(user,
-                user.getApiTokens().stream().filter(t -> t.getName().equals("token2")).findAny().get());
+                user.getApiTokens().stream().filter(t -> "token2".equals(t.getName())).findAny().get());
         registry.removeUserApiToken(user,
-                user.getApiTokens().stream().filter(t -> t.getName().equals("token3")).findAny().get());
+                user.getApiTokens().stream().filter(t -> "token3".equals(t.getName())).findAny().get());
         assertEquals(user.getApiTokens().size(), 0);
     }
 }

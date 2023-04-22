@@ -167,9 +167,8 @@ public class ScriptedAutomationManager {
         List<Action> actions = new ArrayList<>();
         actions.addAll(element.getActions());
 
-        if (element instanceof SimpleRuleActionHandler) {
-            String privId = addPrivateActionHandler(
-                    new SimpleRuleActionHandlerDelegate((SimpleRuleActionHandler) element));
+        if (element instanceof SimpleRuleActionHandler handler) {
+            String privId = addPrivateActionHandler(new SimpleRuleActionHandlerDelegate(handler));
 
             Action scriptedAction = ActionBuilder.create().withId(Integer.toString(moduleIndex++))
                     .withTypeUID("jsr223.ScriptedAction").withConfiguration(new Configuration()).build();
@@ -180,9 +179,7 @@ public class ScriptedAutomationManager {
         builder.withConfiguration(element.getConfiguration());
         builder.withActions(actions);
 
-        Rule rule = builder.build();
-
-        return rule;
+        return builder.build();
     }
 
     public void addConditionType(ConditionType conditionType) {

@@ -41,8 +41,9 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemStateConverter;
 import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.events.AbstractItemRegistryEvent;
+import org.openhab.core.items.events.GroupStateUpdatedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
-import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.items.events.ItemStateUpdatedEvent;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
@@ -114,8 +115,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     // the timeout to use for any item event processing
     public static final long THINGHANDLER_EVENT_TIMEOUT = TimeUnit.SECONDS.toMillis(30);
 
-    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE,
-            ChannelTriggeredEvent.TYPE);
+    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Set.of(ItemStateUpdatedEvent.TYPE, ItemCommandEvent.TYPE,
+            GroupStateUpdatedEvent.TYPE, ChannelTriggeredEvent.TYPE);
 
     private final Logger logger = LoggerFactory.getLogger(CommunicationManager.class);
 
@@ -179,20 +180,20 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ItemStateEvent) {
-            receiveUpdate((ItemStateEvent) event);
-        } else if (event instanceof ItemCommandEvent) {
-            receiveCommand((ItemCommandEvent) event);
-        } else if (event instanceof ChannelTriggeredEvent) {
-            receiveTrigger((ChannelTriggeredEvent) event);
-        } else if (event instanceof AbstractItemRegistryEvent) {
-            String itemName = ((AbstractItemRegistryEvent) event).getItem().name;
+        if (event instanceof ItemStateUpdatedEvent updatedEvent) {
+            receiveUpdate(updatedEvent);
+        } else if (event instanceof ItemCommandEvent commandEvent) {
+            receiveCommand(commandEvent);
+        } else if (event instanceof ChannelTriggeredEvent triggeredEvent) {
+            receiveTrigger(triggeredEvent);
+        } else if (event instanceof AbstractItemRegistryEvent registryEvent) {
+            String itemName = registryEvent.getItem().name;
             profiles.entrySet().removeIf(entry -> {
                 ItemChannelLink link = itemChannelLinkRegistry.get(entry.getKey());
                 return link != null && itemName.equals(link.getItemName());
             });
-        } else if (event instanceof AbstractThingRegistryEvent) {
-            ThingUID thingUid = new ThingUID(((AbstractThingRegistryEvent) event).getThing().UID);
+        } else if (event instanceof AbstractThingRegistryEvent registryEvent) {
+            ThingUID thingUid = new ThingUID(registryEvent.getThing().UID);
             profiles.entrySet().removeIf(entry -> {
                 ItemChannelLink link = itemChannelLinkRegistry.get(entry.getKey());
                 return link != null && thingUid.equals(link.getLinkedUID().getThingUID());
@@ -321,7 +322,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                 }
             }
         }
-        logger.warn("No ProfileFactory found which supports profile '{}'", profileTypeUID);
+        logger.warn("No ProfileFactory found which supports profile '{}' for link '{}'", profileTypeUID, link);
         return null;
     }
 
@@ -340,17 +341,16 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
         handleEvent(itemName, command, commandEvent.getSource(), s -> acceptedCommandTypeMap.get(s),
                 (profile, thing, convertedCommand) -> {
-                    if (profile instanceof StateProfile) {
+                    if (profile instanceof StateProfile stateProfile) {
                         int key = Objects.hash("COMMAND", profile, thing);
-                        Profile p = profileSafeCallCache.putIfAbsentAndGet(key, () -> {
-                            return safeCaller.create(((StateProfile) profile), StateProfile.class) //
-                                    .withAsync() //
-                                    .withIdentifier(thing) //
-                                    .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
-                                    .build();
-                        });
-                        if (p instanceof StateProfile) {
-                            ((StateProfile) p).onCommandFromItem(convertedCommand);
+                        Profile p = profileSafeCallCache.putIfAbsentAndGet(key,
+                                () -> safeCaller.create(stateProfile, StateProfile.class) //
+                                        .withAsync() //
+                                        .withIdentifier(thing) //
+                                        .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
+                                        .build());
+                        if (p instanceof StateProfile profileP) {
+                            profileP.onCommandFromItem(convertedCommand);
                         } else {
                             throw new IllegalStateException("ExpiringCache didn't provide a StateProfile instance!");
                         }
@@ -358,19 +358,18 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                 });
     }
 
-    private void receiveUpdate(ItemStateEvent updateEvent) {
+    private void receiveUpdate(ItemStateUpdatedEvent updateEvent) {
         final String itemName = updateEvent.getItemName();
         final State newState = updateEvent.getItemState();
         handleEvent(itemName, newState, updateEvent.getSource(), s -> acceptedStateTypeMap.get(s),
                 (profile, thing, convertedState) -> {
                     int key = Objects.hash("UPDATE", profile, thing);
-                    Profile p = profileSafeCallCache.putIfAbsentAndGet(key, () -> {
-                        return safeCaller.create(profile, Profile.class) //
-                                .withAsync() //
-                                .withIdentifier(thing) //
-                                .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
-                                .build();
-                    });
+                    Profile p = profileSafeCallCache.putIfAbsentAndGet(key,
+                            () -> safeCaller.create(profile, Profile.class) //
+                                    .withAsync() //
+                                    .withIdentifier(thing) //
+                                    .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
+                                    .build());
                     if (p != null) {
                         p.onStateUpdateFromItem(convertedState);
                     } else {
@@ -431,9 +430,9 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         String acceptedItemType = channel.getAcceptedItemType();
 
         // DecimalType command sent to a NumberItem with dimension defined:
-        if (originalType instanceof DecimalType && hasDimension(item, acceptedItemType)) {
+        if (originalType instanceof DecimalType type && hasDimension(item, acceptedItemType)) {
             @Nullable
-            QuantityType<?> quantityType = convertToQuantityType((DecimalType) originalType, item, acceptedItemType);
+            QuantityType<?> quantityType = convertToQuantityType(type, item, acceptedItemType);
             if (quantityType != null) {
                 return (T) quantityType;
             }
@@ -445,14 +444,13 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         // the ChannelType provides.
         // This can be removed once a suitable solution for https://github.com/eclipse/smarthome/issues/2555 (Thing
         // migration) is found.
-        if (originalType instanceof DecimalType && !hasDimension(item, acceptedItemType)
+        if (originalType instanceof DecimalType type && !hasDimension(item, acceptedItemType)
                 && channelTypeDefinesDimension(channel.getChannelTypeUID())) {
             ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
 
             String acceptedItemTypeFromChannelType = channelType != null ? channelType.getItemType() : null;
             @Nullable
-            QuantityType<?> quantityType = convertToQuantityType((DecimalType) originalType, item,
-                    acceptedItemTypeFromChannelType);
+            QuantityType<?> quantityType = convertToQuantityType(type, item, acceptedItemTypeFromChannelType);
             if (quantityType != null) {
                 return (T) quantityType;
             }
@@ -473,8 +471,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             // Look for class hierarchy and convert appropriately
             for (Class<? extends T> typeClass : acceptedTypes) {
                 if (!typeClass.isEnum() && typeClass.isAssignableFrom(originalType.getClass()) //
-                        && State.class.isAssignableFrom(typeClass) && originalType instanceof State) {
-                    T ret = (T) ((State) originalType).as((Class<? extends State>) typeClass);
+                        && State.class.isAssignableFrom(typeClass) && originalType instanceof State state) {
+                    T ret = (T) state.as((Class<? extends State>) typeClass);
                     if (logger.isDebugEnabled()) {
                         logger.debug("Converted '{}' ({}) to accepted type '{}' ({}) for channel '{}' ", originalType,
                                 originalType.getClass().getSimpleName(), ret, ret.getClass().getName(),
@@ -499,8 +497,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     }
 
     private boolean hasDimension(Item item, @Nullable String acceptedItemType) {
-        return (item instanceof NumberItem && ((NumberItem) item).getDimension() != null)
-                || getDimension(acceptedItemType) != null;
+        return (item instanceof NumberItem ni && ni.getDimension() != null) || getDimension(acceptedItemType) != null;
     }
 
     private @Nullable QuantityType<?> convertToQuantityType(DecimalType originalType, Item item,
@@ -554,8 +551,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         final Thing thing = getThing(channelUID.getThingUID());
 
         handleCallFromHandler(channelUID, thing, profile -> {
-            if (profile instanceof TriggerProfile) {
-                ((TriggerProfile) profile).onTriggerFromHandler(event);
+            if (profile instanceof TriggerProfile triggerProfile) {
+                triggerProfile.onTriggerFromHandler(event);
             }
         });
     }
@@ -564,8 +561,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         final Thing thing = getThing(channelUID.getThingUID());
 
         handleCallFromHandler(channelUID, thing, profile -> {
-            if (profile instanceof StateProfile) {
-                ((StateProfile) profile).onStateUpdateFromHandler(state);
+            if (profile instanceof StateProfile stateProfile) {
+                stateProfile.onStateUpdateFromHandler(state);
             }
         });
     }
@@ -574,8 +571,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         final Thing thing = getThing(channelUID.getThingUID());
 
         handleCallFromHandler(channelUID, thing, profile -> {
-            if (profile instanceof StateProfile) {
-                ((StateProfile) profile).onCommandFromHandler(command);
+            if (profile instanceof StateProfile stateProfile) {
+                stateProfile.onCommandFromHandler(command);
             }
         });
     }

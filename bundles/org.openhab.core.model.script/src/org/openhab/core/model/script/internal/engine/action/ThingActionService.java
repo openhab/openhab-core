@@ -80,8 +80,7 @@ public class ThingActionService implements ActionService {
         if (thing != null) {
             ThingHandler handler = thing.getHandler();
             if (handler != null) {
-                ThingActions thingActions = THING_ACTIONS_MAP.get(getKey(scope, thingUid));
-                return thingActions;
+                return THING_ACTIONS_MAP.get(getKey(scope, thingUid));
             }
         }
         return null;
@@ -116,5 +115,4 @@ public class ThingActionService implements ActionService {
         ThingActionsScope scopeAnnotation = actions.getClass().getAnnotation(ThingActionsScope.class);
         return scopeAnnotation.name();
     }
-
 }

@@ -97,14 +97,14 @@ public class MetadataCommandDescriptionProviderTest {
     public void testOptions() throws Exception {
         MetadataKey metadataKey = new MetadataKey("commandDescription", ITEM_NAME);
         Map<String, Object> metadataConfig = new HashMap<>();
-        metadataConfig.put("options", "OPTION1,OPTION2 , 3 =Option 3  ");
+        metadataConfig.put("options", "OPTION1,OPTION2 , 3 =Option 3  , \" 4=4 \"=\"Option 4 \"");
         Metadata metadata = new Metadata(metadataKey, "N/A", metadataConfig);
 
         metadataRegistryMock.added(managedProviderMock, metadata);
         CommandDescription commandDescription = commandDescriptionProvider.getCommandDescription(ITEM_NAME, null);
         assertNotNull(commandDescription);
         assertNotNull(commandDescription.getCommandOptions());
-        assertEquals(3, commandDescription.getCommandOptions().size());
+        assertEquals(4, commandDescription.getCommandOptions().size());
 
         Iterator<CommandOption> it = commandDescription.getCommandOptions().iterator();
         CommandOption commandOption = it.next();
@@ -116,5 +116,8 @@ public class MetadataCommandDescriptionProviderTest {
         commandOption = it.next();
         assertEquals("3", commandOption.getCommand());
         assertEquals("Option 3", commandOption.getLabel());
+        commandOption = it.next();
+        assertEquals("4=4", commandOption.getCommand());
+        assertEquals("Option 4", commandOption.getLabel());
     }
 }

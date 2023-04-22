@@ -53,7 +53,7 @@ public class JsonStorageTest extends JavaTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        tmpFile = File.createTempFile("storage-debug", ".json");
+        tmpFile = Files.createTempFile("storage-debug", ".json").toFile();
         tmpFile.deleteOnExit();
         objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0, List.of());
     }
@@ -209,7 +209,7 @@ public class JsonStorageTest extends JavaTest {
                         orderedMap.getAsJsonObject("DummyObject").getAsJsonObject("value")
                                 .getAsJsonObject("innerMapWithComparableKeys"),
                         TypeToken.getParameterized(LinkedHashMap.class, Integer.class, Object.class).getType()))
-                                .keySet().toArray());
+                        .keySet().toArray());
     }
 
     private static class DummyObject {

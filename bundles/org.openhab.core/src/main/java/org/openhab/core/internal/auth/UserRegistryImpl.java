@@ -133,8 +133,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
     @Override
     public Authentication authenticate(Credentials credentials) throws AuthenticationException {
-        if (credentials instanceof UsernamePasswordCredentials) {
-            UsernamePasswordCredentials usernamePasswordCreds = (UsernamePasswordCredentials) credentials;
+        if (credentials instanceof UsernamePasswordCredentials usernamePasswordCreds) {
             User user = get(usernamePasswordCreds.getUsername());
             if (user == null) {
                 throw new AuthenticationException("User not found: " + usernamePasswordCreds.getUsername());
@@ -148,8 +147,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
             }
 
             return new Authentication(managedUser.getName(), managedUser.getRoles().stream().toArray(String[]::new));
-        } else if (credentials instanceof UserApiTokenCredentials) {
-            UserApiTokenCredentials apiTokenCreds = (UserApiTokenCredentials) credentials;
+        } else if (credentials instanceof UserApiTokenCredentials apiTokenCreds) {
             String[] apiTokenParts = apiTokenCreds.getApiToken().split("\\.");
             if (apiTokenParts.length != 3 || !APITOKEN_PREFIX.equals(apiTokenParts[0])) {
                 throw new AuthenticationException("Invalid API token format");

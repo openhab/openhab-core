@@ -77,8 +77,9 @@
     <sat.version>0.13.0</sat.version>
     <slf4j.version>1.7.32</slf4j.version>
     <xtext.version>2.29.0</xtext.version>
-    <spotless.version>2.28.0</spotless.version>
-    <spotless.eclipse.version>4.21.0</spotless.eclipse.version>
+    <spotless.version>2.35.0</spotless.version>
+    <spotless.eclipse.version>4.26</spotless.eclipse.version>
+    <spotless.eclipse.wtp.version>4.21.0</spotless.eclipse.wtp.version>
   </properties>
 
   <dependencyManagement>
@@ -388,7 +389,7 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.0.0-M7</version>
+          <version>3.0.0</version>
           <configuration>
             <argLine>
               --add-opens java.base/java.net=ALL-UNNAMED
@@ -561,7 +562,7 @@ Import-Package: \\
                   <files>
                     <file>openhab_wst_xml_files.prefs</file>
                   </files>
-                  <version>${spotless.eclipse.version}</version>
+                  <version>${spotless.eclipse.wtp.version}</version>
                 </eclipseWtp>
                 <trimTrailingWhitespace/>
                 <endWithNewline/>
@@ -576,7 +577,7 @@ Import-Package: \\
                   <files>
                     <file>openhab_wst_feature_file.prefs</file>
                   </files>
-                  <version>${spotless.eclipse.version}</version>
+                  <version>${spotless.eclipse.wtp.version}</version>
                 </eclipseWtp>
                 <trimTrailingWhitespace/>
                 <endWithNewline/>
@@ -591,7 +592,7 @@ Import-Package: \\
                   <files>
                     <file>openhab_wst_pom_file.prefs</file>
                   </files>
-                  <version>${spotless.eclipse.version}</version>
+                  <version>${spotless.eclipse.wtp.version}</version>
                 </eclipseWtp>
                 <trimTrailingWhitespace/>
                 <endWithNewline/>

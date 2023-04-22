@@ -122,9 +122,7 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
 
             Bundle bundle = FrameworkUtil.getBundle(mi.getActionProvider().getClass());
             ModuleType mt = helper.buildModuleType(uid, moduleInformation);
-
-            ModuleType localizedModuleType = moduleTypeI18nService.getModuleTypePerLocale(mt, locale, bundle);
-            return localizedModuleType;
+            return moduleTypeI18nService.getModuleTypePerLocale(mt, locale, bundle);
         }
         return null;
     }
@@ -198,8 +196,8 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
     private @Nullable String getConfigNameFromService(Map<String, Object> properties) {
         Object o = properties.get(OpenHAB.SERVICE_CONTEXT);
         String configName = null;
-        if (o instanceof String) {
-            configName = (String) o;
+        if (o instanceof String string) {
+            configName = string;
         }
         return configName;
     }
@@ -211,8 +209,7 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
 
     @Override
     protected @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
-        if (module instanceof Action) {
-            Action actionModule = (Action) module;
+        if (module instanceof Action actionModule) {
             if (moduleInformation.containsKey(actionModule.getTypeUID())) {
                 ModuleInformation finalMI = helper.getModuleInformationForIdentifier(actionModule, moduleInformation,
                         false);

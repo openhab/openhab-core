@@ -17,7 +17,8 @@ import org.openhab.core.types.State;
 
 /**
  * {@link GroupItemStateChangedEvent}s can be used to deliver group item state changes through the openHAB event bus. In
- * contrast to the {@link GroupItemStateEvent} the {@link GroupItemStateChangedEvent} is only sent if the state changed.
+ * contrast to the {@link GroupStateUpdatedEvent} the {@link GroupItemStateChangedEvent} is only sent if the state
+ * changed.
  * State events must be created with the {@link ItemEventFactory}.
  *
  * @author Christoph Knauf - Initial contribution

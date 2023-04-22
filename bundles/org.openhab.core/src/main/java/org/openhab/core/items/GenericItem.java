@@ -231,14 +231,23 @@ public abstract class GenericItem implements ActiveItem {
         State oldState = this.state;
         this.state = state;
         notifyListeners(oldState, state);
+        sendStateUpdatedEvent(state);
         if (!oldState.equals(state)) {
             sendStateChangedEvent(state, oldState);
         }
     }
 
+    private void sendStateUpdatedEvent(State newState) {
+        EventPublisher eventPublisher1 = this.eventPublisher;
+        if (eventPublisher1 != null) {
+            eventPublisher1.post(ItemEventFactory.createStateUpdatedEvent(this.name, newState, null));
+        }
+    }
+
     private void sendStateChangedEvent(State newState, State oldState) {
-        if (eventPublisher != null) {
-            eventPublisher.post(ItemEventFactory.createStateChangedEvent(this.name, newState, oldState));
+        EventPublisher eventPublisher1 = this.eventPublisher;
+        if (eventPublisher1 != null) {
+            eventPublisher1.post(ItemEventFactory.createStateChangedEvent(this.name, newState, oldState));
         }
     }
 

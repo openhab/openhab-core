@@ -192,18 +192,15 @@ public class PersistenceManagerImpl
             if (itemCfg instanceof PersistenceAllConfig) {
                 return true;
             }
-            if (itemCfg instanceof PersistenceItemConfig) {
-                PersistenceItemConfig singleItemConfig = (PersistenceItemConfig) itemCfg;
+            if (itemCfg instanceof PersistenceItemConfig singleItemConfig) {
                 if (item.getName().equals(singleItemConfig.getItem())) {
                     return true;
                 }
             }
-            if (itemCfg instanceof PersistenceGroupConfig) {
-                PersistenceGroupConfig groupItemConfig = (PersistenceGroupConfig) itemCfg;
+            if (itemCfg instanceof PersistenceGroupConfig groupItemConfig) {
                 try {
                     Item gItem = itemRegistry.getItem(groupItemConfig.getGroup());
-                    if (gItem instanceof GroupItem) {
-                        GroupItem groupItem = (GroupItem) gItem;
+                    if (gItem instanceof GroupItem groupItem) {
                         if (groupItem.getAllMembers().contains(item)) {
                             return true;
                         }
@@ -233,8 +230,7 @@ public class PersistenceManagerImpl
         // otherwise, go through the detailed definitions
         Set<Item> items = new HashSet<>();
         for (Object itemCfg : config.getItems()) {
-            if (itemCfg instanceof PersistenceItemConfig) {
-                PersistenceItemConfig singleItemConfig = (PersistenceItemConfig) itemCfg;
+            if (itemCfg instanceof PersistenceItemConfig singleItemConfig) {
                 String itemName = singleItemConfig.getItem();
                 try {
                     items.add(itemRegistry.getItem(itemName));
@@ -242,13 +238,11 @@ public class PersistenceManagerImpl
                     logger.debug("Item '{}' does not exist.", itemName);
                 }
             }
-            if (itemCfg instanceof PersistenceGroupConfig) {
-                PersistenceGroupConfig groupItemConfig = (PersistenceGroupConfig) itemCfg;
+            if (itemCfg instanceof PersistenceGroupConfig groupItemConfig) {
                 String groupName = groupItemConfig.getGroup();
                 try {
                     Item gItem = itemRegistry.getItem(groupName);
-                    if (gItem instanceof GroupItem) {
-                        GroupItem groupItem = (GroupItem) gItem;
+                    if (gItem instanceof GroupItem groupItem) {
                         items.addAll(groupItem.getAllMembers());
                     }
                 } catch (ItemNotFoundException e) {
@@ -270,7 +264,7 @@ public class PersistenceManagerImpl
     @SuppressWarnings("null")
     private void initialize(Item item) {
         // get the last persisted state from the persistence service if no state is yet set
-        if (UnDefType.NULL.equals(item.getState()) && item instanceof GenericItem) {
+        if (UnDefType.NULL.equals(item.getState()) && item instanceof GenericItem genericItem) {
             for (Entry<String, @Nullable PersistenceServiceConfiguration> entry : persistenceServiceConfigs
                     .entrySet()) {
                 final String serviceName = entry.getKey();
@@ -280,8 +274,7 @@ public class PersistenceManagerImpl
                         if (hasStrategy(config, itemConfig, PersistenceStrategy.Globals.RESTORE)) {
                             if (appliesToItem(itemConfig, item)) {
                                 PersistenceService service = persistenceServices.get(serviceName);
-                                if (service instanceof QueryablePersistenceService) {
-                                    QueryablePersistenceService queryService = (QueryablePersistenceService) service;
+                                if (service instanceof QueryablePersistenceService queryService) {
                                     FilterCriteria filter = new FilterCriteria().setItemName(item.getName())
                                             .setPageSize(1);
                                     Iterable<HistoricItem> result = safeCaller
@@ -297,7 +290,6 @@ public class PersistenceManagerImpl
                                         Iterator<HistoricItem> it = result.iterator();
                                         if (it.hasNext()) {
                                             HistoricItem historicItem = it.next();
-                                            GenericItem genericItem = (GenericItem) item;
                                             genericItem.removeStateChangeListener(this);
                                             genericItem.setState(historicItem.getState());
                                             genericItem.addStateChangeListener(this);
@@ -325,8 +317,8 @@ public class PersistenceManagerImpl
 
     private void removeItemStateChangeListeners() {
         for (Item item : itemRegistry.getAll()) {
-            if (item instanceof GenericItem) {
-                ((GenericItem) item).removeStateChangeListener(this);
+            if (item instanceof GenericItem genericItem) {
+                genericItem.removeStateChangeListener(this);
             }
         }
     }
@@ -340,8 +332,7 @@ public class PersistenceManagerImpl
      */
     private void createTimers(final String dbId, List<PersistenceStrategy> strategies) {
         for (PersistenceStrategy strategy : strategies) {
-            if (strategy instanceof PersistenceCronStrategy) {
-                PersistenceCronStrategy cronStrategy = (PersistenceCronStrategy) strategy;
+            if (strategy instanceof PersistenceCronStrategy cronStrategy) {
                 String cronExpression = cronStrategy.getCronExpression();
 
                 final PersistItemsJob job = new PersistItemsJob(this, dbId, cronStrategy.getName());
@@ -448,16 +439,14 @@ public class PersistenceManagerImpl
     @Override
     public void added(Item item) {
         initialize(item);
-        if (item instanceof GenericItem) {
-            GenericItem genericItem = (GenericItem) item;
+        if (item instanceof GenericItem genericItem) {
             genericItem.addStateChangeListener(this);
         }
     }
 
     @Override
     public void removed(Item item) {
-        if (item instanceof GenericItem) {
-            GenericItem genericItem = (GenericItem) item;
+        if (item instanceof GenericItem genericItem) {
             genericItem.removeStateChangeListener(this);
         }
     }

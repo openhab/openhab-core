@@ -79,8 +79,8 @@ public class PageChangeListener implements StateChangeListener {
             // cleanup statechange listeners in case widgets were removed
             items = getAllItems(this.widgets);
             for (Item item : items) {
-                if (item instanceof GenericItem) {
-                    ((GenericItem) item).removeStateChangeListener(this);
+                if (item instanceof GenericItem genericItem) {
+                    genericItem.removeStateChangeListener(this);
                 }
             }
         }
@@ -88,8 +88,8 @@ public class PageChangeListener implements StateChangeListener {
         this.widgets = widgets;
         items = getAllItems(widgets);
         for (Item item : items) {
-            if (item instanceof GenericItem) {
-                ((GenericItem) item).addStateChangeListener(this);
+            if (item instanceof GenericItem genericItem) {
+                genericItem.addStateChangeListener(this);
             }
         }
     }
@@ -118,10 +118,10 @@ public class PageChangeListener implements StateChangeListener {
      */
     public void dispose() {
         for (Item item : items) {
-            if (item instanceof GenericItem) {
-                ((GenericItem) item).removeStateChangeListener(this);
-            } else if (item instanceof GroupItem) {
-                ((GroupItem) item).removeStateChangeListener(this);
+            if (item instanceof GenericItem genericItem) {
+                genericItem.removeStateChangeListener(this);
+            } else if (item instanceof GroupItem groupItem) {
+                groupItem.removeStateChangeListener(this);
             }
         }
     }
@@ -138,8 +138,8 @@ public class PageChangeListener implements StateChangeListener {
         if (itemUIRegistry != null) {
             for (Widget widget : widgets) {
                 addItemWithName(items, widget.getItem());
-                if (widget instanceof Frame) {
-                    items.addAll(getAllItems(((Frame) widget).getChildren()));
+                if (widget instanceof Frame frame) {
+                    items.addAll(getAllItems(frame.getChildren()));
                 }
                 // now scan visibility rules
                 for (VisibilityRule rule : widget.getVisibility()) {
@@ -215,15 +215,14 @@ public class PageChangeListener implements StateChangeListener {
     private Set<SitemapEvent> constructSitemapEvents(Item item, State state, List<Widget> widgets) {
         Set<SitemapEvent> events = new HashSet<>();
         for (Widget w : widgets) {
-            if (w instanceof Frame) {
-                events.addAll(constructSitemapEvents(item, state, itemUIRegistry.getChildren((Frame) w)));
+            if (w instanceof Frame frame) {
+                events.addAll(constructSitemapEvents(item, state, itemUIRegistry.getChildren(frame)));
             }
 
             boolean itemBelongsToWidget = w.getItem() != null && w.getItem().equals(item.getName());
             boolean skipWidget = !itemBelongsToWidget;
             // We skip the chart widgets having a refresh argument
-            if (!skipWidget && w instanceof Chart) {
-                Chart chartWidget = (Chart) w;
+            if (!skipWidget && w instanceof Chart chartWidget) {
                 skipWidget = chartWidget.getRefresh() > 0;
             }
             if (!skipWidget || definesVisibilityOrColor(w, item.getName())) {
@@ -239,9 +238,6 @@ public class PageChangeListener implements StateChangeListener {
         event.sitemapName = sitemapName;
         event.pageId = pageId;
         event.label = itemUIRegistry.getLabel(widget);
-        event.labelcolor = itemUIRegistry.getLabelColor(widget);
-        event.valuecolor = itemUIRegistry.getValueColor(widget);
-        event.iconcolor = itemUIRegistry.getIconColor(widget);
         event.widgetId = itemUIRegistry.getWidgetId(widget);
         event.visibility = itemUIRegistry.getVisiblity(widget);
         event.descriptionChanged = false;
@@ -249,6 +245,7 @@ public class PageChangeListener implements StateChangeListener {
         // the widget including its state (in event.item.state)
         boolean itemBelongsToWidget = widget.getItem() != null && widget.getItem().equals(item.getName());
         final Item itemToBeSent = itemBelongsToWidget ? item : getItemForWidget(widget);
+        State stateToBeSent = null;
         if (itemToBeSent != null) {
             String widgetTypeName = widget.eClass().getInstanceTypeName()
                     .substring(widget.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
@@ -257,13 +254,16 @@ public class PageChangeListener implements StateChangeListener {
             event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null);
 
             // event.state is an adjustment of the item state to the widget type.
-            final State stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();
+            stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();
             event.state = itemUIRegistry.convertState(widget, itemToBeSent, stateToBeSent).toFullString();
             // In case this state is identical to the item state, its value is set to null.
             if (event.state != null && event.state.equals(event.item.state)) {
                 event.state = null;
             }
         }
+        event.labelcolor = SitemapResource.convertItemValueColor(itemUIRegistry.getLabelColor(widget), stateToBeSent);
+        event.valuecolor = SitemapResource.convertItemValueColor(itemUIRegistry.getValueColor(widget), stateToBeSent);
+        event.iconcolor = SitemapResource.convertItemValueColor(itemUIRegistry.getIconColor(widget), stateToBeSent);
         return event;
     }
 
@@ -325,8 +325,8 @@ public class PageChangeListener implements StateChangeListener {
     private Set<SitemapEvent> constructSitemapEventsForUpdatedDescr(Item item, List<Widget> widgets) {
         Set<SitemapEvent> events = new HashSet<>();
         for (Widget w : widgets) {
-            if (w instanceof Frame) {
-                events.addAll(constructSitemapEventsForUpdatedDescr(item, itemUIRegistry.getChildren((Frame) w)));
+            if (w instanceof Frame frame) {
+                events.addAll(constructSitemapEventsForUpdatedDescr(item, itemUIRegistry.getChildren(frame)));
             }
 
             boolean itemBelongsToWidget = w.getItem() != null && w.getItem().equals(item.getName());

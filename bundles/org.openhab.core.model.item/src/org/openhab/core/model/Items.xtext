@@ -16,7 +16,7 @@ ItemModel:
 ModelItem:
 	(ModelNormalItem | ModelGroupItem) name=ID
 	(label=STRING)?
-	('<' icon=(ID|STRING) '>')?
+	('<' icon=Icon '>')?
 	('(' groups+=ID (',' groups+=ID)* ')')? 
 	('[' tags+=(ID|STRING) (',' tags+=(ID|STRING))* ']')?
 	('{' bindings+=ModelBinding (',' bindings+=ModelBinding)* '}')? 
@@ -62,6 +62,10 @@ BOOLEAN returns ecore::EBoolean:
 
 NUMBER returns ecore::EBigDecimal:
     ('-')? ID ('.' ID )?
+;
+
+Icon:
+	(ID ':' (ID ':')?)? ID
 ;
 
 terminal ID: '^'?('a'..'z'|'A'..'Z'|'_'|'0'..'9') ('a'..'z'|'A'..'Z'|'_'|'-'|'0'..'9')*;

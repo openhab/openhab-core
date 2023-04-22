@@ -35,7 +35,7 @@ import org.openhab.core.io.net.http.HttpClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.JsonDeserializer;
+import com.google.gson.GsonBuilder;
 
 /**
  * Implementation of OAuthClientService.
@@ -68,16 +68,19 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     private final String handle;
     private final int tokenExpiresInSeconds;
     private final HttpClientFactory httpClientFactory;
+    private final @Nullable GsonBuilder gsonBuilder;
     private final List<AccessTokenRefreshListener> accessTokenRefreshListeners = new ArrayList<>();
 
     private PersistedParams persistedParams = new PersistedParams();
 
     private volatile boolean closed = false;
 
-    private OAuthClientServiceImpl(String handle, int tokenExpiresInSeconds, HttpClientFactory httpClientFactory) {
+    private OAuthClientServiceImpl(String handle, int tokenExpiresInSeconds, HttpClientFactory httpClientFactory,
+            @Nullable GsonBuilder gsonBuilder) {
         this.handle = handle;
         this.tokenExpiresInSeconds = tokenExpiresInSeconds;
         this.httpClientFactory = httpClientFactory;
+        this.gsonBuilder = gsonBuilder;
     }
 
     /**
@@ -103,7 +106,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             return null;
         }
         OAuthClientServiceImpl clientService = new OAuthClientServiceImpl(handle, tokenExpiresInSeconds,
-                httpClientFactory);
+                httpClientFactory, null);
         clientService.storeHandler = storeHandler;
         clientService.persistedParams = persistedParamsFromStore;
 
@@ -118,13 +121,13 @@ public class OAuthClientServiceImpl implements OAuthClientService {
      *            {@link org.openhab.core.auth.client.oauth2.OAuthFactory#createOAuthClientService}*
      * @param storeHandler Storage handler
      * @param httpClientFactory Http client factory
-     * @param persistedParams These parameters are static with respect to the oauth provider and thus can be persisted.
+     * @param persistedParams These parameters are static with respect to the OAuth provider and thus can be persisted.
      * @return OAuthClientServiceImpl an instance
      */
     static OAuthClientServiceImpl createInstance(String handle, OAuthStoreHandler storeHandler,
             HttpClientFactory httpClientFactory, PersistedParams params) {
         OAuthClientServiceImpl clientService = new OAuthClientServiceImpl(handle, params.tokenExpiresInSeconds,
-                httpClientFactory);
+                httpClientFactory, null);
 
         clientService.storeHandler = storeHandler;
         clientService.persistedParams = params;
@@ -153,7 +156,9 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing client ID");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClassName);
+        GsonBuilder gsonBuilder = this.gsonBuilder;
+        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory)
+                : new OAuthConnector(httpClientFactory, gsonBuilder);
         return connector.getAuthorizationUrl(authorizationUrl, clientId, redirectURI, persistedParams.state,
                 scopeToUse);
     }
@@ -207,7 +212,9 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing client ID");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClassName);
+        GsonBuilder gsonBuilder = this.gsonBuilder;
+        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory)
+                : new OAuthConnector(httpClientFactory, gsonBuilder);
         AccessTokenResponse accessTokenResponse = connector.grantTypeAuthorizationCode(tokenUrl, authorizationCode,
                 clientId, persistedParams.clientSecret, redirectURI,
                 Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -239,7 +246,9 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing token url");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClassName);
+        GsonBuilder gsonBuilder = this.gsonBuilder;
+        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory)
+                : new OAuthConnector(httpClientFactory, gsonBuilder);
         AccessTokenResponse accessTokenResponse = connector.grantTypePassword(tokenUrl, username, password,
                 persistedParams.clientId, persistedParams.clientSecret, scope,
                 Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -264,7 +273,9 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("Missing client ID");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClassName);
+        GsonBuilder gsonBuilder = this.gsonBuilder;
+        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory)
+                : new OAuthConnector(httpClientFactory, gsonBuilder);
         // depending on usage, cannot guarantee every parameter is not null at the beginning
         AccessTokenResponse accessTokenResponse = connector.grantTypeClientCredentials(tokenUrl, clientId,
                 persistedParams.clientSecret, scope, Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -298,7 +309,9 @@ public class OAuthClientServiceImpl implements OAuthClientService {
             throw new OAuthException("tokenUrl is required but null");
         }
 
-        OAuthConnector connector = new OAuthConnector(httpClientFactory, persistedParams.deserializerClassName);
+        GsonBuilder gsonBuilder = this.gsonBuilder;
+        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory)
+                : new OAuthConnector(httpClientFactory, gsonBuilder);
         AccessTokenResponse accessTokenResponse = connector.grantTypeRefreshToken(tokenUrl,
                 lastAccessToken.getRefreshToken(), persistedParams.clientId, persistedParams.clientSecret,
                 persistedParams.scope, Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -400,10 +413,9 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     }
 
     @Override
-    public <T extends JsonDeserializer<?>> OAuthClientService withDeserializer(Class<T> deserializerClass) {
+    public OAuthClientService withGsonBuilder(GsonBuilder gsonBuilder) {
         OAuthClientServiceImpl clientService = new OAuthClientServiceImpl(handle, persistedParams.tokenExpiresInSeconds,
-                httpClientFactory);
-        persistedParams.deserializerClassName = deserializerClass.getName();
+                httpClientFactory, gsonBuilder);
         clientService.persistedParams = persistedParams;
         clientService.storeHandler = storeHandler;
 

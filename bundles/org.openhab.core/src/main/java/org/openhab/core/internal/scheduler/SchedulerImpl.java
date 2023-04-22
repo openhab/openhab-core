@@ -176,9 +176,7 @@ public class SchedulerImpl implements Scheduler {
                 ZonedDateTime.from(newTime));
 
         deferred.thenAccept(v -> {
-            if (temporalAdjuster instanceof SchedulerTemporalAdjuster) {
-                final SchedulerTemporalAdjuster schedulerTemporalAdjuster = (SchedulerTemporalAdjuster) temporalAdjuster;
-
+            if (temporalAdjuster instanceof SchedulerTemporalAdjuster schedulerTemporalAdjuster) {
                 if (!schedulerTemporalAdjuster.isDone(newTime)) {
                     schedule(recurringSchedule, runnable, identifier, temporalAdjuster);
                     return;

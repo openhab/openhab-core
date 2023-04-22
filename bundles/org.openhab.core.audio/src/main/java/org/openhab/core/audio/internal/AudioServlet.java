@@ -120,8 +120,8 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         }
 
         // try to set the content-length, if possible
-        if (stream instanceof FixedLengthAudioStream) {
-            final long size = ((FixedLengthAudioStream) stream).length();
+        if (stream instanceof FixedLengthAudioStream audioStream) {
+            final long size = audioStream.length();
             resp.setContentLength((int) size);
         }
 

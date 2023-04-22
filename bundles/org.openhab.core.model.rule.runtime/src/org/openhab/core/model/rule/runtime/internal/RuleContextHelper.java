@@ -50,8 +50,8 @@ public class RuleContextHelper {
 
         // check if a context already exists on the resource
         for (Adapter adapter : ruleModel.eAdapters()) {
-            if (adapter instanceof RuleContextAdapter) {
-                return ((RuleContextAdapter) adapter).getContext();
+            if (adapter instanceof RuleContextAdapter contextAdapter) {
+                return contextAdapter.getContext();
             }
         }
         Provider<@NonNull IEvaluationContext> contextProvider = injector.getProvider(IEvaluationContext.class);
@@ -94,7 +94,5 @@ public class RuleContextHelper {
         public IEvaluationContext getContext() {
             return context;
         }
-
     }
-
 }

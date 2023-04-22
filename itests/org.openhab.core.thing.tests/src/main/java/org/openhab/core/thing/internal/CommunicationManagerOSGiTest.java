@@ -351,7 +351,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testItemStateEventSingleLink() {
-        manager.receive(ItemEventFactory.createStateEvent(ITEM_NAME_2, OnOffType.ON));
+        manager.receive(ItemEventFactory.createStateUpdatedEvent(ITEM_NAME_2, OnOffType.ON));
         waitForAssert(() -> {
             verify(stateProfileMock).onStateUpdateFromItem(eq(OnOffType.ON));
             verify(triggerProfileMock).onStateUpdateFromItem(eq(OnOffType.ON));
@@ -362,7 +362,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testItemStateEventMultiLink() {
-        manager.receive(ItemEventFactory.createStateEvent(ITEM_NAME_1, OnOffType.ON));
+        manager.receive(ItemEventFactory.createStateUpdatedEvent(ITEM_NAME_1, OnOffType.ON));
         waitForAssert(() -> {
             verify(stateProfileMock, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));
             verify(triggerProfileMock, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));
@@ -374,7 +374,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     @Test
     public void testItemStateEventNotToSource() {
         manager.receive(
-                ItemEventFactory.createStateEvent(ITEM_NAME_1, OnOffType.ON, STATE_CHANNEL_UID_2.getAsString()));
+                ItemEventFactory.createStateUpdatedEvent(ITEM_NAME_1, OnOffType.ON, STATE_CHANNEL_UID_2.getAsString()));
         waitForAssert(() -> {
             verify(stateProfileMock).onStateUpdateFromItem(eq(OnOffType.ON));
             verify(triggerProfileMock, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));
@@ -596,7 +596,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         thing.setHandler(thingHandlerMock);
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
 
-        manager.receive(ItemEventFactory.createStateEvent(ITEM_NAME_2, HSBType.fromRGB(128, 128, 128)));
+        manager.receive(ItemEventFactory.createStateUpdatedEvent(ITEM_NAME_2, HSBType.fromRGB(128, 128, 128)));
         waitForAssert(() -> {
             ArgumentCaptor<State> stateCaptor = ArgumentCaptor.forClass(State.class);
             verify(stateProfileMock).onStateUpdateFromItem(stateCaptor.capture());

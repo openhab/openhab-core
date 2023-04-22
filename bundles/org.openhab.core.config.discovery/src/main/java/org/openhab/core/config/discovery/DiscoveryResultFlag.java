@@ -35,6 +35,6 @@ public enum DiscoveryResultFlag {
      * The flag {@code IGNORED} to signal that the result object should be regarded
      * as <i>known</i> by the system so that a further processing should be skipped.
      */
-    IGNORED;
+    IGNORED
 
 }

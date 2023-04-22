@@ -125,7 +125,7 @@ public class CertificateGenerator implements BundleActivator {
                 throw new KeyStoreException("Failed to create the keystore " + keystoreFile.getAbsolutePath(), e);
             }
         } else {
-            try (InputStream keystoreStream = new FileInputStream(keystoreFile);) {
+            try (InputStream keystoreStream = new FileInputStream(keystoreFile)) {
                 logger.debug("Keystore found. Trying to load {}", keystoreFile.getAbsolutePath());
                 keyStore.load(keystoreStream, KEYSTORE_PASSWORD.toCharArray());
             } catch (NoSuchAlgorithmException | CertificateException | IOException e) {

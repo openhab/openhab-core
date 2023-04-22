@@ -71,9 +71,9 @@ public class ItemStateUpdateActionHandler extends BaseActionModuleHandler {
                 } else {
                     final Object st = inputs.get(STATE);
 
-                    if (st instanceof State) {
+                    if (st instanceof State state1) {
                         if (item.getAcceptedDataTypes().contains(st.getClass())) {
-                            stateObj = (State) st;
+                            stateObj = state1;
                         }
                     }
                 }

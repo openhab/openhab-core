@@ -13,12 +13,8 @@
 package org.openhab.core.internal.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -26,19 +22,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.JavaTest;
-import org.openhab.core.OpenHAB;
-import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
 import org.osgi.framework.BundleContext;
@@ -53,46 +48,37 @@ import org.osgi.framework.BundleContext;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class WatchServiceImplTest extends JavaTest {
     private static final String SUB_DIR_PATH_NAME = "subDir";
-    private static final String TEST_FILE_NANE = "testFile";
+    private static final String TEST_FILE_NAME = "testFile";
 
-    private @NonNullByDefault({}) String systemConfDirProperty;
-
-    private @NonNullByDefault({}) WatchServiceImpl.WatchServiceConfiguration configurationMock;
+    public @Mock @NonNullByDefault({}) WatchServiceImpl.WatchServiceConfiguration configurationMock;
+    public @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
 
     private @NonNullByDefault({}) WatchServiceImpl watchService;
-    private @NonNullByDefault({}) Path rootPath;
-    private @NonNullByDefault({}) Path subDirPath;
+    private @NonNullByDefault({}) @TempDir Path rootPath;
     private @NonNullByDefault({}) TestWatchEventListener listener;
 
     @BeforeEach
     public void setup() throws IOException {
-        // store property so we can restore later
-        systemConfDirProperty = System.getProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT);
-
-        rootPath = Files.createDirectories(Path.of("target", "test-watcher"));
-        subDirPath = Files.createDirectories(rootPath.resolve(SUB_DIR_PATH_NAME));
-        ExecutorService ex = ThreadPoolManager.getScheduledPool("file-processing");
-        System.setProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT, rootPath.toString());
-
         when(configurationMock.name()).thenReturn("unnamed");
-        when(configurationMock.path()).thenReturn("");
+        when(configurationMock.path()).thenReturn(rootPath.toString());
 
-        watchService = new WatchServiceImpl(configurationMock, mock(BundleContext.class));
+        watchService = new WatchServiceImpl(configurationMock, bundleContextMock);
         listener = new TestWatchEventListener();
+
+        verify(bundleContextMock, timeout(5000)).registerService(eq(WatchService.class), eq(watchService), any());
     }
 
     @AfterEach
     public void tearDown() throws IOException {
         watchService.deactivate();
-        System.setProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT, systemConfDirProperty);
     }
 
     @Test
-    private void testFileInWatchedDir() throws IOException, InterruptedException {
-        watchService.registerListener(listener, Path.of(""), false);
+    public void testFileInWatchedDir() throws IOException, InterruptedException {
+        watchService.registerListener(listener, rootPath, false);
 
-        Path testFile = rootPath.resolve(TEST_FILE_NANE);
-        Path relativeTestFilePath = Path.of(TEST_FILE_NANE);
+        Path testFile = rootPath.resolve(TEST_FILE_NAME);
+        Path relativeTestFilePath = Path.of(TEST_FILE_NAME);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
         assertEvent(relativeTestFilePath, Kind.CREATE);
@@ -108,12 +94,14 @@ public class WatchServiceImplTest extends JavaTest {
     }
 
     @Test
-    private void testFileInWatchedSubDir() throws IOException, InterruptedException {
+    public void testFileInWatchedSubDir() throws IOException, InterruptedException {
+        Files.createDirectories(rootPath.resolve(SUB_DIR_PATH_NAME));
+
         // listener is listening to root and sub-dir
-        watchService.registerListener(listener, Path.of(""), false);
+        watchService.registerListener(listener, rootPath, true);
 
-        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NANE);
-        Path relativeTestFilePath = Path.of(SUB_DIR_PATH_NAME, TEST_FILE_NANE);
+        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NAME);
+        Path relativeTestFilePath = Path.of(SUB_DIR_PATH_NAME, TEST_FILE_NAME);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
         assertEvent(relativeTestFilePath, Kind.CREATE);
@@ -129,12 +117,14 @@ public class WatchServiceImplTest extends JavaTest {
     }
 
     @Test
-    private void testFileInWatchedSubDir2() throws IOException, InterruptedException {
+    public void testFileInWatchedSubDir2() throws IOException, InterruptedException {
+        Files.createDirectories(rootPath.resolve(SUB_DIR_PATH_NAME));
+
         // listener is only listening to sub-dir of root
         watchService.registerListener(listener, Path.of(SUB_DIR_PATH_NAME), false);
 
-        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NANE);
-        Path relativeTestFilePath = Path.of(TEST_FILE_NANE);
+        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NAME);
+        Path relativeTestFilePath = Path.of(TEST_FILE_NAME);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
         assertEvent(relativeTestFilePath, Kind.CREATE);
@@ -150,10 +140,12 @@ public class WatchServiceImplTest extends JavaTest {
     }
 
     @Test
-    private void testFileInUnwatchedSubDir() throws IOException, InterruptedException {
-        watchService.registerListener(listener, Path.of(""), false);
+    public void testFileInUnwatchedSubDir() throws IOException, InterruptedException {
+        Files.createDirectories(rootPath.resolve(SUB_DIR_PATH_NAME));
 
-        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NANE);
+        watchService.registerListener(listener, rootPath, false);
+
+        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NAME);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
         assertNoEvent();
@@ -169,14 +161,14 @@ public class WatchServiceImplTest extends JavaTest {
     }
 
     @Test
-    private void testNewSubDirAlsoWatched() throws IOException, InterruptedException {
-        watchService.registerListener(listener, Path.of(""), false);
+    public void testNewSubDirAlsoWatched() throws IOException, InterruptedException {
+        watchService.registerListener(listener, rootPath, true);
 
         Path subDirSubDir = Files.createDirectories(rootPath.resolve(SUB_DIR_PATH_NAME).resolve(SUB_DIR_PATH_NAME));
         assertNoEvent();
 
-        Path testFile = subDirSubDir.resolve(TEST_FILE_NANE);
-        Path relativeTestFilePath = testFile.relativize(rootPath);
+        Path testFile = subDirSubDir.resolve(TEST_FILE_NAME);
+        Path relativeTestFilePath = rootPath.relativize(testFile);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
         assertEvent(relativeTestFilePath, Kind.CREATE);
@@ -209,7 +201,7 @@ public class WatchServiceImplTest extends JavaTest {
         listener.events.clear();
     }
 
-    private class TestWatchEventListener implements WatchService.WatchEventListener {
+    private static class TestWatchEventListener implements WatchService.WatchEventListener {
         List<Event> events = new CopyOnWriteArrayList<>();
 
         @Override

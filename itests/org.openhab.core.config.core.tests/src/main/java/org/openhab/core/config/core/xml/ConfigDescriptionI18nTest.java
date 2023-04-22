@@ -70,15 +70,15 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
                 Objects.requireNonNull(config);
 
                 String expected = "location.label = Ort\n" + //
-                "location.description = Ort der Wetterinformation.\n" + //
-                "unit.label = Einheit\n" + //
-                "unit.description = Spezifiziert die Einheit der Daten. Valide Werte sind 'us' und 'metric'\n" + //
-                "refresh.label = Aktualisierungsintervall\n" + //
-                "refresh.description = Spezifiziert das Aktualisierungsintervall in Sekunden\n" + //
-                "question.pattern = Wie ist das Wetter in [\\w]*?\n" + //
-                "question.options = München, Köln\n" + //
-                "group.label = Group 1 German Label\n" + //
-                "group.description = Group 1 German Description";
+                        "location.description = Ort der Wetterinformation.\n" + //
+                        "unit.label = Einheit\n" + //
+                        "unit.description = Spezifiziert die Einheit der Daten. Valide Werte sind 'us' und 'metric'\n" + //
+                        "refresh.label = Aktualisierungsintervall\n" + //
+                        "refresh.description = Spezifiziert das Aktualisierungsintervall in Sekunden\n" + //
+                        "question.pattern = Wie ist das Wetter in [\\w]*?\n" + //
+                        "question.options = München, Köln\n" + //
+                        "group.label = Group 1 German Label\n" + //
+                        "group.description = Group 1 German Description";
 
                 assertEquals(expected, asString(config));
             });

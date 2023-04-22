@@ -28,5 +28,5 @@ public interface MqttMessageSubscriber {
      * @param topic The mqtt topic on which the message was received.
      * @param payload content of the message.
      */
-    public void processMessage(String topic, byte[] payload);
+    void processMessage(String topic, byte[] payload);
 }

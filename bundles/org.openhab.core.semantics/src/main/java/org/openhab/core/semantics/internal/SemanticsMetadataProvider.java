@@ -125,8 +125,8 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
             }
         }
 
-        if (item instanceof GroupItem) {
-            for (Item memberItem : ((GroupItem) item).getMembers()) {
+        if (item instanceof GroupItem groupItem) {
+            for (Item memberItem : groupItem.getMembers()) {
                 processItem(memberItem);
             }
         }
@@ -169,8 +169,7 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
                     processParent(type, parentItem, configuration);
                 }
             }
-            if (item instanceof GroupItem) {
-                GroupItem gItem = (GroupItem) item;
+            if (item instanceof GroupItem gItem) {
                 for (Item memberItem : gItem.getMembers()) {
                     processMember(type, memberItem, configuration);
                 }
@@ -258,8 +257,8 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         if (removedMd != null) {
             notifyListenersAboutRemovedElement(removedMd);
 
-            if (item instanceof GroupItem) {
-                for (Item memberItem : ((GroupItem) item).getMembers()) {
+            if (item instanceof GroupItem groupItem) {
+                for (Item memberItem : groupItem.getMembers()) {
                     processItem(memberItem);
                 }
             }

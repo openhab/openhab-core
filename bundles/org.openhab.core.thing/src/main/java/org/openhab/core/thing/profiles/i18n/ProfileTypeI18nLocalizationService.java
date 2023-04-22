@@ -49,16 +49,14 @@ public class ProfileTypeI18nLocalizationService {
         String defaultLabel = profileType.getLabel();
         String label = profileI18nUtil.getProfileLabel(bundle, profileTypeUID, defaultLabel, locale);
 
-        if (profileType instanceof StateProfileType) {
+        if (profileType instanceof StateProfileType type) {
             return ProfileTypeBuilder.newState(profileTypeUID, label != null ? label : defaultLabel)
                     .withSupportedItemTypes(profileType.getSupportedItemTypes())
-                    .withSupportedItemTypesOfChannel(((StateProfileType) profileType).getSupportedItemTypesOfChannel())
-                    .build();
-        } else if (profileType instanceof TriggerProfileType) {
+                    .withSupportedItemTypesOfChannel(type.getSupportedItemTypesOfChannel()).build();
+        } else if (profileType instanceof TriggerProfileType type) {
             return ProfileTypeBuilder.newTrigger(profileTypeUID, label != null ? label : defaultLabel)
                     .withSupportedItemTypes(profileType.getSupportedItemTypes())
-                    .withSupportedChannelTypeUIDs(((TriggerProfileType) profileType).getSupportedChannelTypeUIDs())
-                    .build();
+                    .withSupportedChannelTypeUIDs(type.getSupportedChannelTypeUIDs()).build();
         } else {
             return profileType;
         }

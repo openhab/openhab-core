@@ -146,8 +146,7 @@ public class LazyStandaloneSetup extends AbstractWorkflowComponent2 {
 
         URI uri = URI.createURI(path);
         if (uri.isRelative()) {
-            URI resolvedURI = URI.createFileURI(new File(path).getAbsolutePath());
-            return resolvedURI;
+            return URI.createFileURI(new File(path).getAbsolutePath());
         }
         return uri;
     }

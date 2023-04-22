@@ -59,7 +59,8 @@ public interface Registry<@NonNull E extends Identifiable<K>, @NonNull K> {
      * @param key key of the element
      * @return element or null if no element was found
      */
-    public @Nullable E get(K key);
+    @Nullable
+    E get(K key);
 
     /**
      * Removes a {@link RegistryChangeListener} from the registry.
@@ -75,7 +76,7 @@ public interface Registry<@NonNull E extends Identifiable<K>, @NonNull K> {
      * @return the added element or newly created object of the same type
      * @throws IllegalStateException if no ManagedProvider is available
      */
-    public E add(E element);
+    E add(E element);
 
     /**
      * Updates the given element at the according {@link ManagedProvider}.
@@ -85,7 +86,8 @@ public interface Registry<@NonNull E extends Identifiable<K>, @NonNull K> {
      *         exists
      * @throws IllegalStateException if no ManagedProvider is available
      */
-    public @Nullable E update(E element);
+    @Nullable
+    E update(E element);
 
     /**
      * Removes the given element from the according {@link ManagedProvider}.
@@ -95,5 +97,6 @@ public interface Registry<@NonNull E extends Identifiable<K>, @NonNull K> {
      *         key exists
      * @throws IllegalStateException if no ManagedProvider is available
      */
-    public @Nullable E remove(K key);
+    @Nullable
+    E remove(K key);
 }

@@ -83,15 +83,12 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
     @Override
     public synchronized void addingObject(List<?> types) {
         for (Object type : types) {
-            if (type instanceof ThingTypeXmlResult) {
-                ThingTypeXmlResult typeResult = (ThingTypeXmlResult) type;
+            if (type instanceof ThingTypeXmlResult typeResult) {
                 addConfigDescription(typeResult.getConfigDescription());
                 thingTypeRefs.add(typeResult);
-            } else if (type instanceof ChannelGroupTypeXmlResult) {
-                ChannelGroupTypeXmlResult typeResult = (ChannelGroupTypeXmlResult) type;
+            } else if (type instanceof ChannelGroupTypeXmlResult typeResult) {
                 channelGroupTypeRefs.add(typeResult);
-            } else if (type instanceof ChannelTypeXmlResult) {
-                ChannelTypeXmlResult typeResult = (ChannelTypeXmlResult) type;
+            } else if (type instanceof ChannelTypeXmlResult typeResult) {
                 channelTypeRefs.add(typeResult);
                 addConfigDescription(typeResult.getConfigDescription());
             } else {

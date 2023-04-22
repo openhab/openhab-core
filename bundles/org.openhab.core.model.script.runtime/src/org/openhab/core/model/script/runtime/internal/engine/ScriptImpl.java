@@ -54,8 +54,8 @@ public class ScriptImpl implements Script {
         if (xExpression != null) {
             Resource resource = xExpression.eResource();
             IEvaluationContext evaluationContext = null;
-            if (resource instanceof XtextResource) {
-                IResourceServiceProvider provider = ((XtextResource) resource).getResourceServiceProvider();
+            if (resource instanceof XtextResource xtextResource) {
+                IResourceServiceProvider provider = xtextResource.getResourceServiceProvider();
                 evaluationContext = provider.get(IEvaluationContext.class);
             }
             return execute(evaluationContext);
@@ -69,8 +69,8 @@ public class ScriptImpl implements Script {
         if (xExpression != null) {
             Resource resource = xExpression.eResource();
             IExpressionInterpreter interpreter = null;
-            if (resource instanceof XtextResource) {
-                IResourceServiceProvider provider = ((XtextResource) resource).getResourceServiceProvider();
+            if (resource instanceof XtextResource xtextResource) {
+                IResourceServiceProvider provider = xtextResource.getResourceServiceProvider();
                 interpreter = provider.get(IExpressionInterpreter.class);
             }
             if (interpreter == null) {
@@ -89,8 +89,8 @@ public class ScriptImpl implements Script {
                 }
                 return result.getResult();
             } catch (Throwable e) {
-                if (e instanceof ScriptExecutionException) {
-                    throw (ScriptExecutionException) e;
+                if (e instanceof ScriptExecutionException exception) {
+                    throw exception;
                 } else {
                     throw new ScriptExecutionException(
                             "An error occurred during the script execution: " + e.getMessage(), e);

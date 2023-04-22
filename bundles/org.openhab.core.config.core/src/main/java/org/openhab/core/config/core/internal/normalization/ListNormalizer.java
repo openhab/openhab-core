@@ -45,16 +45,16 @@ final class ListNormalizer extends AbstractNormalizer {
             }
             return ret;
         }
-        if (value instanceof List) {
-            List ret = new ArrayList(((List) value).size());
-            for (Object object : (List) value) {
+        if (value instanceof List list) {
+            List ret = new ArrayList(list.size());
+            for (Object object : list) {
                 ret.add(delegate.normalize(object));
             }
             return ret;
         }
-        if (value instanceof Iterable) {
+        if (value instanceof Iterable iterable) {
             List ret = new ArrayList();
-            for (Object object : (Iterable) value) {
+            for (Object object : iterable) {
                 ret.add(delegate.normalize(object));
             }
             return ret;

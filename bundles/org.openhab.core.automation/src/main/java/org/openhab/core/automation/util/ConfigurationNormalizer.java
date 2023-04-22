@@ -83,7 +83,7 @@ public class ConfigurationNormalizer {
             if (parameter != null) {
                 String parameterName = entry.getKey();
                 final Object value = configuration.get(parameterName);
-                if (value instanceof String && ((String) value).contains("${")) {
+                if (value instanceof String string && string.contains("${")) {
                     continue; // It is a reference
                 }
                 if (value == null) {
