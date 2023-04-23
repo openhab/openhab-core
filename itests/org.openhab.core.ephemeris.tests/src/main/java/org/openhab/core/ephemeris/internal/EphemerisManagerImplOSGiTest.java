@@ -47,6 +47,7 @@ import org.openhab.core.test.java.JavaOSGiTest;
 public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
     private static final String INTERNAL_DAYSET = "internal";
     private static final URI CONFIG_URI = URI.create("system:ephemeris");
+    private static final String COUNTRY_DENMARK_KEY = "dk";
     private static final String COUNTRY_AUSTRALIA_KEY = "au";
     private static final String COUNTRY_AUSTRALIA_NAME = "Australia";
     private static final String REGION_BAVARIA_KEY = "by";
@@ -261,6 +262,20 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
 
         vacation = ephemerisManager.isBankHoliday(secondday);
         assertFalse(vacation);
+    }
+
+    @Test
+    public void testIsBankHolidayWhenGeneralPrayerDay2023() {
+        ZonedDateTime generalPrayerDay = ZonedDateTime.of(2023, 05, 05, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
+        ephemerisManager.modified(Map.of(CONFIG_COUNTRY, COUNTRY_DENMARK_KEY));
+        assertTrue(ephemerisManager.isBankHoliday(generalPrayerDay));
+    }
+
+    @Test
+    public void testIsBankHolidayWhenGeneralPrayerDay2024() {
+        ZonedDateTime generalPrayerDay = ZonedDateTime.of(2024, 04, 26, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
+        ephemerisManager.modified(Map.of(CONFIG_COUNTRY, COUNTRY_DENMARK_KEY));
+        assertFalse(ephemerisManager.isBankHoliday(generalPrayerDay));
     }
 
     @Test

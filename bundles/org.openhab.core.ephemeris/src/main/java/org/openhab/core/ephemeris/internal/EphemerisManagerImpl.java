@@ -59,6 +59,7 @@ import de.jollyday.Holiday;
 import de.jollyday.HolidayManager;
 import de.jollyday.ManagerParameter;
 import de.jollyday.ManagerParameters;
+import de.jollyday.parameter.CalendarPartManagerParameter;
 import de.jollyday.util.ResourceUtil;
 
 /**
@@ -82,7 +83,9 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     public static final String CONFIG_REGION = "region";
     public static final String CONFIG_CITY = "city";
 
-    private static final String JOLLYDAY_COUNTRY_DESCRIPTIONS = "jollyday/descriptions/country_descriptions.properties";
+    private static final String RESOURCES_ROOT = "jollyday/";
+    private static final String JOLLYDAY_COUNTRY_DESCRIPTIONS = RESOURCES_ROOT
+            + "descriptions/country_descriptions.properties";
     private static final String PROPERTY_COUNTRY_DESCRIPTION_PREFIX = "country.description.";
     private static final String PROPERTY_COUNTRY_DESCRIPTION_DELIMITER = "\\.";
 
@@ -99,6 +102,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private final ResourceUtil resourceUtil = new ResourceUtil();
 
     private final LocaleProvider localeProvider;
+    private final Bundle bundle = FrameworkUtil.getBundle(getClass());
 
     private @NonNullByDefault({}) String country;
     private @Nullable String region;
@@ -107,7 +111,6 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     public EphemerisManagerImpl(final @Reference LocaleProvider localeProvider) {
         this.localeProvider = localeProvider;
 
-        final Bundle bundle = FrameworkUtil.getBundle(getClass());
         try (InputStream stream = bundle.getResource(JOLLYDAY_COUNTRY_DESCRIPTIONS).openStream()) {
             final Properties properties = new Properties();
             properties.load(stream);
@@ -231,9 +234,15 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private HolidayManager getHolidayManager(Object managerKey) {
         HolidayManager holidayManager = holidayManagers.get(managerKey);
         if (holidayManager == null) {
-            final ManagerParameter parameters = managerKey.getClass() == String.class
-                    ? ManagerParameters.create((String) managerKey)
-                    : ManagerParameters.create((URL) managerKey);
+            final ManagerParameter parameters;
+            if (managerKey.getClass() == String.class) {
+                URL urlOverride = bundle.getResource(
+                        RESOURCES_ROOT + CalendarPartManagerParameter.getConfigurationFileName((String) managerKey));
+                parameters = urlOverride != null ? ManagerParameters.create(urlOverride)
+                        : ManagerParameters.create((String) managerKey);
+            } else {
+                parameters = ManagerParameters.create((URL) managerKey);
+            }
             holidayManager = HolidayManager.getInstance(parameters);
             holidayManagers.put(managerKey, holidayManager);
         }
