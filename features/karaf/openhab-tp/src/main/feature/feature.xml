@@ -272,7 +272,7 @@
 		<bundle dependency="true">mvn:org.ops4j.pax.logging/pax-logging-api/2.2.2</bundle>
 		<bundle dependency="true">mvn:org.ops4j.pax.logging/pax-logging-log4j2/2.2.2</bundle>
 
-		<bundle dependency="true">mvn:org.openhab.osgiify/org.eclipse.equinox.common/3.16.0</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.eclipse.equinox.common/3.17.100</bundle>
 
 	</feature>
 
