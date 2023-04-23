@@ -142,8 +142,9 @@ public class UpgradeTool {
                 String function = (String) configuration.get("function");
                 if (function != null) {
                     configuration.put("toItemScript", function);
-                    configuration.put("toHandlerScript", function);
+                    configuration.put("toHandlerScript", "|input");
                     configuration.remove("function");
+                    configuration.remove("sourceFormat");
 
                     linkStorage.put(linkUid, link);
                     LOGGER.info("{}: rewrote JS profile link to new format", linkUid);
