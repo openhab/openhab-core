@@ -164,9 +164,6 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         SystemProfileFactory profileFactory = getService(ProfileTypeProvider.class, SystemProfileFactory.class);
 
         assertNotNull(profileFactory);
-        if (profileFactory == null) {
-            throw new IllegalStateException("thing is null");
-        }
 
         manager = new CommunicationManager(autoUpdateManagerMock, channelTypeRegistryMock, profileFactory, iclRegistry,
                 itemRegistryMock, itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock);

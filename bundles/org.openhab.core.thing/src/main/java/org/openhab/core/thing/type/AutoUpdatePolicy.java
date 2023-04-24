@@ -46,12 +46,12 @@ public enum AutoUpdatePolicy {
      * Parses the input string into an {@link AutoUpdatePolicy}.
      *
      * @param input the input string
-     * @return the parsed AutoUpdatePolicy
+     * @return the parsed AutoUpdatePolicy or null if the input was null
      * @throws IllegalArgumentException if the input couldn't be parsed.
      */
-    public static AutoUpdatePolicy parse(@Nullable String input) {
+    public static @Nullable AutoUpdatePolicy parse(@Nullable String input) {
         if (input == null) {
-            return DEFAULT;
+            return null;
         }
 
         for (AutoUpdatePolicy value : values()) {

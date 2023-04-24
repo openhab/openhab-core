@@ -32,22 +32,22 @@ import org.openhab.core.thing.dto.ThingDTOMapper;
 @NonNullByDefault
 public class ThingChannelsTest extends JavaOSGiTest {
 
+    private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("bindingId", "thingTypeId");
+    private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "thingLabel");
+
     private static final List<String> CHANNEL_IDS = List.of("polarBear", "alligator", "hippopotamus", "aardvark",
             "whiteRabbit", "redHerring", "orangutan", "kangaroo", "rubberDuck", "timorousBeastie");
 
     @Test
     public void testThingChannelOrder() {
-        ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingTypeId");
-        ThingUID thingUID = new ThingUID(thingTypeUID, "thingLabel");
-
         // create and fill the list of origin channels
         List<Channel> originChannels = new ArrayList<>();
         CHANNEL_IDS.forEach(channelId -> originChannels
-                .add(ChannelBuilder.create(new ChannelUID(thingUID, channelId), null).build()));
+                .add(ChannelBuilder.create(new ChannelUID(THING_UID, channelId), null).build()));
         assertEquals(CHANNEL_IDS.size(), originChannels.size());
 
         // build a thing with the origin channels
-        Thing thing = ThingBuilder.create(thingTypeUID, thingUID).withChannels(originChannels).build();
+        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(originChannels).build();
 
         List<Channel> resultChannels;
 
@@ -64,5 +64,11 @@ public class ThingChannelsTest extends JavaOSGiTest {
         for (int i = 0; i < CHANNEL_IDS.size(); i++) {
             assertTrue(CHANNEL_IDS.get(i).equals(resultChannels.get(i).getUID().getId()));
         }
+    }
+
+    @Test
+    public void testAutoUpdatePolicyNotSetOnNewChannels() {
+        Channel channel = ChannelBuilder.create(new ChannelUID(THING_UID, CHANNEL_IDS.get(0)), null).build();
+        assertNull(channel.getAutoUpdatePolicy());
     }
 }
