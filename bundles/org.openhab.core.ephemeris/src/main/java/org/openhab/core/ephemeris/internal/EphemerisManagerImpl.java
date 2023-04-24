@@ -167,23 +167,26 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
             }
         });
 
-        if (config.containsKey(CONFIG_COUNTRY)) {
-            country = config.get(CONFIG_COUNTRY).toString().toLowerCase();
+        Object configValue = config.get(CONFIG_COUNTRY);
+        if (configValue != null) {
+            country = configValue.toString().toLowerCase();
         } else {
             country = localeProvider.getLocale().getCountry().toLowerCase();
             logger.debug("Using system default country '{}' ", country);
         }
 
-        if (config.containsKey(CONFIG_REGION)) {
-            String region = config.get(CONFIG_REGION).toString().toLowerCase();
+        configValue = config.get(CONFIG_REGION);
+        if (configValue != null) {
+            String region = configValue.toString().toLowerCase();
             countryParameters.add(region);
             this.region = region;
         } else {
             this.region = null;
         }
 
-        if (config.containsKey(CONFIG_CITY)) {
-            countryParameters.add(config.get(CONFIG_CITY).toString());
+        configValue = config.get(CONFIG_CITY);
+        if (configValue != null) {
+            countryParameters.add(configValue.toString());
         }
     }
 
@@ -307,9 +310,10 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
 
     @Override
     public boolean isInDayset(String daysetName, ZonedDateTime date) {
-        if (daysets.containsKey(daysetName)) {
+        Set<DayOfWeek> dayset = daysets.get(daysetName);
+        if (dayset != null) {
             DayOfWeek dow = date.getDayOfWeek();
-            return daysets.get(daysetName).contains(dow);
+            return dayset.contains(dow);
         } else {
             logger.warn("This dayset is not configured : {}", daysetName);
             return false;
@@ -391,8 +395,9 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
             case 2:
                 part = getValidPart(parts[0]);
                 option = new ParameterOption(getValidPart(parts[1]), name);
-                if (regions.containsKey(part)) {
-                    regions.get(part).add(option);
+                List<ParameterOption> regionsPart = regions.get(part);
+                if (regionsPart != null) {
+                    regionsPart.add(option);
                 } else {
                     final List<ParameterOption> options = new ArrayList<>();
                     options.add(option);
@@ -402,8 +407,9 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
             case 3:
                 part = getValidPart(parts[1]);
                 option = new ParameterOption(getValidPart(parts[2]), name);
-                if (cities.containsKey(part)) {
-                    cities.get(part).add(option);
+                List<ParameterOption> citiesPart = cities.get(part);
+                if (citiesPart != null) {
+                    citiesPart.add(option);
                 } else {
                     final List<ParameterOption> options = new ArrayList<>();
                     options.add(option);
