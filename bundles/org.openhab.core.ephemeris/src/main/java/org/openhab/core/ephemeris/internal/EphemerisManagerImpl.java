@@ -235,11 +235,12 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         HolidayManager holidayManager = holidayManagers.get(managerKey);
         if (holidayManager == null) {
             final ManagerParameter parameters;
-            if (managerKey.getClass() == String.class) {
-                URL urlOverride = bundle.getResource(
-                        RESOURCES_ROOT + CalendarPartManagerParameter.getConfigurationFileName((String) managerKey));
-                parameters = urlOverride != null ? ManagerParameters.create(urlOverride)
-                        : ManagerParameters.create((String) managerKey);
+            if (managerKey instanceof String stringKey) {
+                URL urlOverride = bundle
+                        .getResource(RESOURCES_ROOT + CalendarPartManagerParameter.getConfigurationFileName(stringKey));
+                parameters = urlOverride != null //
+                        ? ManagerParameters.create(urlOverride)
+                        : ManagerParameters.create(stringKey);
             } else {
                 parameters = ManagerParameters.create((URL) managerKey);
             }
