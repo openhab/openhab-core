@@ -41,6 +41,7 @@ import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
 import org.openhab.core.thing.internal.ThingTracker.ThingTrackerEvent;
+import org.openhab.core.thing.internal.update.ThingUpdateInstructionReader;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.type.ChannelGroupTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
@@ -72,6 +73,7 @@ public class ThingManagerImplTest extends JavaTest {
     private @Mock @NonNullByDefault({}) Thing thingMock;
     private @Mock @NonNullByDefault({}) ThingRegistryImpl thingRegistryMock;
     private @Mock @NonNullByDefault({}) BundleResolver bundleResolverMock;
+    private @Mock @NonNullByDefault({}) ThingUpdateInstructionReader thingUpdateInstructionReaderMock;
     private @Mock @NonNullByDefault({}) TranslationProvider translationProviderMock;
     private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
     private @Mock @NonNullByDefault({}) ThingType thingTypeMock;
@@ -92,8 +94,8 @@ public class ThingManagerImplTest extends JavaTest {
         return new ThingManagerImpl(channelGroupTypeRegistryMock, channelTypeRegistryMock, communicationManagerMock,
                 configDescriptionRegistryMock, configDescriptionValidatorMock, eventPublisherMock,
                 itemChannelLinkRegistryMock, readyServiceMock, safeCallerMock, storageServiceMock, thingRegistryMock,
-                thingStatusInfoI18nLocalizationService, thingTypeRegistryMock, bundleResolverMock,
-                translationProviderMock, bundleContextMock);
+                thingStatusInfoI18nLocalizationService, thingTypeRegistryMock, thingUpdateInstructionReaderMock,
+                bundleResolverMock, translationProviderMock, bundleContextMock);
     }
 
     @Test

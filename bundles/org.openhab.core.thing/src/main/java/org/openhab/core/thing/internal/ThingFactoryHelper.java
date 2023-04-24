@@ -144,7 +144,7 @@ public class ThingFactoryHelper {
         return channelBuilder.withProperties(channelDefinition.getProperties()).build();
     }
 
-    static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelType channelType,
+    public static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelType channelType,
             ConfigDescriptionRegistry configDescriptionRegistry) {
         final ChannelBuilder channelBuilder = ChannelBuilder.create(channelUID, channelType.getItemType()) //
                 .withType(channelType.getUID()) //
@@ -168,7 +168,7 @@ public class ThingFactoryHelper {
         return channelBuilder;
     }
 
-    static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelDefinition channelDefinition,
+    public static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelDefinition channelDefinition,
             ConfigDescriptionRegistry configDescriptionRegistry) {
         ChannelType channelType = withChannelTypeRegistry(channelTypeRegistry -> (channelTypeRegistry != null)
                 ? channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID())

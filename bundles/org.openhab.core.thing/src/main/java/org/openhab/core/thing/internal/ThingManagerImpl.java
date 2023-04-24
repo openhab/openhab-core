@@ -186,8 +186,10 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
             final @Reference StorageService storageService, //
             final @Reference ThingRegistry thingRegistry,
             final @Reference ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService,
-            final @Reference ThingTypeRegistry thingTypeRegistry, final @Reference BundleResolver bundleResolver,
-            final @Reference TranslationProvider translationProvider, final BundleContext bundleContext) {
+            final @Reference ThingTypeRegistry thingTypeRegistry,
+            final @Reference ThingUpdateInstructionReader thingUpdateInstructionReader,
+            final @Reference BundleResolver bundleResolver, final @Reference TranslationProvider translationProvider,
+            final BundleContext bundleContext) {
         this.channelGroupTypeRegistry = channelGroupTypeRegistry;
         this.channelTypeRegistry = channelTypeRegistry;
         this.communicationManager = communicationManager;
@@ -198,7 +200,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         this.readyService = readyService;
         this.safeCaller = safeCaller;
         this.thingRegistry = (ThingRegistryImpl) thingRegistry;
-        this.thingUpdateInstructionReader = new ThingUpdateInstructionReader(bundleResolver);
+        this.thingUpdateInstructionReader = thingUpdateInstructionReader;
         this.thingStatusInfoI18nLocalizationService = thingStatusInfoI18nLocalizationService;
         this.thingTypeRegistry = thingTypeRegistry;
         this.translationProvider = translationProvider;
@@ -410,7 +412,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         try {
             normalizeThingConfiguration(newThing);
         } catch (ConfigValidationException e) {
-            logger.warn("Failed to normalize configuration´for thing '{}': {}", newThing.getUID(),
+            logger.warn("Failed to normalize configuration for thing '{}': {}", newThing.getUID(),
                     e.getValidationMessages(null));
         }
         if (thingUpdatedLock.contains(thingUID)) {
