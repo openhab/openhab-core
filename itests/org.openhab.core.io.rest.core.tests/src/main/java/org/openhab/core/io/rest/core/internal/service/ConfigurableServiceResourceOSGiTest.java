@@ -81,7 +81,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
     public void assertGetConfigurableServicesWorks() {
         int num = configurableServiceResource.getAll("en").size();
 
-        Hashtable<String, Object> properties = new Hashtable<>();
+        Map<String, Object> properties = new Hashtable<>();
         properties.put("service.pid", "pid");
         properties.put("service.config.description.uri", "someuri");
         properties.put("service.config.label", "label");
@@ -109,7 +109,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
     public void assertComponentNameFallbackWorks() {
         int num = configurableServiceResource.getAll("en").size();
 
-        Hashtable<String, Object> properties = new Hashtable<>();
+        Map<String, Object> properties = new Hashtable<>();
         properties.put("component.name", "component.name");
         properties.put("service.config.description.uri", "someuri");
 

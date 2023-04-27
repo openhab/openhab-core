@@ -271,7 +271,7 @@ public class GenericThingProviderTest extends JavaOSGiTest {
         assertThat(actualThings.size(), is(2));
 
         Thing thing = actualThings.stream().filter(t -> !(t instanceof Bridge)).findFirst().get();
-        Bridge bridge = (Bridge) actualThings.stream().filter(t -> t instanceof Bridge).findFirst().get();
+        Bridge bridge = (Bridge) actualThings.stream().filter(Bridge.class::isInstance).findFirst().get();
 
         assertThat(thing.getBridgeUID().toString(), is("hue:bridge:bridge1"));
         assertThat(bridge.getThings().contains(thing), is(true));
@@ -302,22 +302,22 @@ public class GenericThingProviderTest extends JavaOSGiTest {
 
         assertThat(actualThings.size(), is(4));
 
-        actualThings.stream().filter(t -> "bulb_default".equals(t.getUID().getId().toString())).findFirst().get();
+        actualThings.stream().filter(t -> "bulb_default".equals(t.getUID().getId())).findFirst().get();
 
-        Thing thingDefault = actualThings.stream().filter(t -> "bulb_default".equals(t.getUID().getId().toString()))
-                .findFirst().get();
+        Thing thingDefault = actualThings.stream().filter(t -> "bulb_default".equals(t.getUID().getId())).findFirst()
+                .get();
         assertThat(thingDefault.getChannels().size(), is(2));
 
-        Thing thingCustom = actualThings.stream().filter(t -> "bulb_custom".equals(t.getUID().getId().toString()))
-                .findFirst().get();
+        Thing thingCustom = actualThings.stream().filter(t -> "bulb_custom".equals(t.getUID().getId())).findFirst()
+                .get();
         assertThat(thingCustom.getChannels().size(), is(4));
         assertThat(thingCustom.getChannel("manual").getChannelTypeUID(),
                 is(equalTo(new ChannelTypeUID("hue", "color"))));
         assertThat(thingCustom.getChannel("manual").getLabel(), is("colorLabel")); // default from thing type
         assertThat(thingCustom.getChannel("manualWithLabel").getLabel(), is("With Label")); // manual overrides default
 
-        Thing thingBroken = actualThings.stream().filter(t -> "bulb_broken".equals(t.getUID().getId().toString()))
-                .findFirst().get();
+        Thing thingBroken = actualThings.stream().filter(t -> "bulb_broken".equals(t.getUID().getId())).findFirst()
+                .get();
         assertThat(thingBroken.getChannels().size(), is(4));
         assertThat(thingBroken.getChannel("manual").getChannelTypeUID(),
                 is(equalTo(new ChannelTypeUID("hue", "broken"))));
@@ -343,8 +343,8 @@ public class GenericThingProviderTest extends JavaOSGiTest {
 
         assertThat(actualThings.size(), is(1));
 
-        Thing thingDefault = actualThings.stream().filter(t -> "sensor_custom".equals(t.getUID().getId().toString()))
-                .findFirst().get();
+        Thing thingDefault = actualThings.stream().filter(t -> "sensor_custom".equals(t.getUID().getId())).findFirst()
+                .get();
         assertThat(thingDefault.getChannels().size(), is(2));
 
         assertThat(thingDefault.getChannel("sensor1").getAcceptedItemType(), is("Number:Temperature"));
@@ -363,8 +363,8 @@ public class GenericThingProviderTest extends JavaOSGiTest {
 
         assertThat(actualThings.size(), is(1));
 
-        Thing thingDefault = actualThings.stream().filter(t -> "sensor_custom".equals(t.getUID().getId().toString()))
-                .findFirst().get();
+        Thing thingDefault = actualThings.stream().filter(t -> "sensor_custom".equals(t.getUID().getId())).findFirst()
+                .get();
 
         @SuppressWarnings("unchecked")
         Collection<String> valueCollection = (Collection<String>) thingDefault.getConfiguration().get("config");

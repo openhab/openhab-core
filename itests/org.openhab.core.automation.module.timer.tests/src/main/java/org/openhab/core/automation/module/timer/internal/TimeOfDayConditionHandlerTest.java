@@ -74,23 +74,20 @@ public class TimeOfDayConditionHandlerTest extends BasicConditionHandlerTest {
     }
 
     private TimeOfDayConditionHandler getTimeOfDayConditionHandler(String startTime, String endTime) {
-        TimeOfDayConditionHandler handler = new TimeOfDayConditionHandler(getTimeCondition(startTime, endTime));
-        return handler;
+        return new TimeOfDayConditionHandler(getTimeCondition(startTime, endTime));
     }
 
     private Condition getTimeCondition(String startTime, String endTime) {
         Configuration timeConfig = getTimeConfiguration(startTime, endTime);
-        Condition condition = ModuleBuilder.createCondition().withId("testTimeOfDayCondition")
+        return ModuleBuilder.createCondition().withId("testTimeOfDayCondition")
                 .withTypeUID(TimeOfDayConditionHandler.MODULE_TYPE_ID).withConfiguration(timeConfig).build();
-        return condition;
     }
 
     private Configuration getTimeConfiguration(String startTime, String endTime) {
         Map<String, Object> timeMap = new HashMap<>();
         timeMap.put("startTime", startTime);
         timeMap.put("endTime", endTime);
-        Configuration timeConfig = new Configuration(timeMap);
-        return timeConfig;
+        return new Configuration(timeMap);
     }
 
     @Override

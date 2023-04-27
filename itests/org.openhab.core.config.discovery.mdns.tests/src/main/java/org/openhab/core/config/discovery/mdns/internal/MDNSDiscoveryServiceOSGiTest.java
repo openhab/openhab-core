@@ -19,6 +19,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -113,7 +114,7 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
 
         @SuppressWarnings("null")
         Configuration configuration = configAdmin.getConfiguration("discovery.mdns");
-        Hashtable<String, Object> properties = new Hashtable<>();
+        Map<String, Object> properties = new Hashtable<>();
         properties.put(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY, Boolean.valueOf(status));
         configuration.update(properties);
     }

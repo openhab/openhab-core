@@ -108,7 +108,7 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
     }
 
     private ThingHandlerFactory createThingHandlerFactory() {
-        ThingHandlerFactory thingHandlerFactory = new BaseThingHandlerFactory() {
+        return new BaseThingHandlerFactory() {
 
             @Override
             public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -121,7 +121,6 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
                 return thingHandler;
             }
         };
-        return thingHandlerFactory;
     }
 
     @Test

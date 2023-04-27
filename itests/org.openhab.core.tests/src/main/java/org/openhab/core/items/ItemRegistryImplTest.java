@@ -132,7 +132,7 @@ public class ItemRegistryImplTest extends JavaTest {
         List<Item> items = new ArrayList<>(itemRegistry.getItemsByTag(CAMERA_TAG));
         assertThat(items, hasSize(4));
 
-        List<String> itemNames = items.stream().map(i -> i.getName()).collect(toList());
+        List<String> itemNames = items.stream().map(Item::getName).collect(toList());
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME1));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME2));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME3));
@@ -144,7 +144,7 @@ public class ItemRegistryImplTest extends JavaTest {
         List<Item> items = new ArrayList<>(itemRegistry.getItemsByTag(CAMERA_TAG_UPPERCASE));
         assertThat(items, hasSize(4));
 
-        List<String> itemNames = items.stream().map(i -> i.getName()).collect(toList());
+        List<String> itemNames = items.stream().map(Item::getName).collect(toList());
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME1));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME2));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME3));
@@ -156,7 +156,7 @@ public class ItemRegistryImplTest extends JavaTest {
         List<Item> items = new ArrayList<>(itemRegistry.getItemsByTagAndType("Switch", CAMERA_TAG));
         assertThat(items, hasSize(2));
 
-        List<String> itemNames = items.stream().map(i -> i.getName()).collect(toList());
+        List<String> itemNames = items.stream().map(Item::getName).collect(toList());
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME1));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME2));
     }
@@ -178,7 +178,7 @@ public class ItemRegistryImplTest extends JavaTest {
         List<SwitchItem> items = new ArrayList<>(itemRegistry.getItemsByTag(SwitchItem.class, CAMERA_TAG));
         assertThat(items, hasSize(2));
 
-        List<String> itemNames = items.stream().map(i -> i.getName()).collect(toList());
+        List<String> itemNames = items.stream().map(GenericItem::getName).collect(toList());
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME1));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME2));
     }

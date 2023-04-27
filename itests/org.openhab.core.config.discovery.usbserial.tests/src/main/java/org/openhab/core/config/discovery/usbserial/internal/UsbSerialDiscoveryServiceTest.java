@@ -209,7 +209,7 @@ public class UsbSerialDiscoveryServiceTest extends JavaOSGiTest {
     private void setBackgroundDiscovery(boolean status) throws IOException, InterruptedException {
         ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
         Configuration configuration = configAdmin.getConfiguration("discovery.usbserial");
-        Hashtable<String, Object> properties = new Hashtable<>();
+        Map<String, Object> properties = new Hashtable<>();
         properties.put(CONFIG_PROPERTY_BACKGROUND_DISCOVERY, Boolean.valueOf(status));
         configuration.update(properties);
 
