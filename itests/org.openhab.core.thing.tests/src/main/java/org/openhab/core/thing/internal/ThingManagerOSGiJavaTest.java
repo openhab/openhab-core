@@ -434,7 +434,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
             @Override
             public void childHandlerInitialized(ThingHandler childHandler, Thing childThing) {
-                assertDoesNotThrow(childHandlerInitializedSemaphore::acquire);
+                assertDoesNotThrow(() -> childHandlerInitializedSemaphore.acquire());
             };
         });
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
@@ -453,7 +453,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void thingUpdated(Thing thing) {
                 this.thing = thing;
-                assertDoesNotThrow(thingUpdatedSemapthore::acquire);
+                assertDoesNotThrow(() -> thingUpdatedSemapthore.acquire());
             };
         });
 
@@ -502,7 +502,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
             @Override
             public void childHandlerInitialized(ThingHandler childHandler, Thing childThing) {
-                assertDoesNotThrow(childHandlerInitializedSemaphore::acquire);
+                assertDoesNotThrow(() -> childHandlerInitializedSemaphore.acquire());
             };
         });
 
@@ -522,7 +522,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void thingUpdated(Thing thing) {
                 this.thing = thing;
-                assertDoesNotThrow(thingUpdatedSemapthore::acquire);
+                assertDoesNotThrow(() -> thingUpdatedSemapthore.acquire());
             };
         });
 
@@ -571,7 +571,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
             @Override
             public void childHandlerInitialized(ThingHandler childHandler, Thing childThing) {
-                assertDoesNotThrow(childHandlerInitializedSemaphore::acquire);
+                assertDoesNotThrow(() -> childHandlerInitializedSemaphore.acquire());
             };
         });
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
@@ -587,7 +587,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void thingUpdated(Thing thing) {
                 this.thing = thing;
-                assertDoesNotThrow(thingUpdatedSemapthore::acquire);
+                assertDoesNotThrow(() -> thingUpdatedSemapthore.acquire());
             };
         });
 

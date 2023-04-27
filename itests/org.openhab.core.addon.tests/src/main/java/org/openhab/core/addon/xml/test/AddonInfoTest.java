@@ -29,6 +29,8 @@ import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.FilterCriteria;
+import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.test.java.JavaOSGiTest;
 
 /**

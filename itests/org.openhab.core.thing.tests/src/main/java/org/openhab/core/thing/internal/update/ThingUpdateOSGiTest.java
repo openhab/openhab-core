@@ -104,7 +104,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() throws Exception {
-        Map<String, Object> properties = new Hashtable<>();
+        Hashtable<String, Object> properties = new Hashtable<>();
         properties.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
         bundleResolver = new BundleResolverImpl();
         registerService(bundleResolver, BundleResolver.class.getName(), properties);
