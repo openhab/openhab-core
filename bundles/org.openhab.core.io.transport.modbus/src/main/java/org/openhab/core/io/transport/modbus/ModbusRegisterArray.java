@@ -94,8 +94,7 @@ public class ModbusRegisterArray {
         if (bytes.length == 0) {
             return "ModbusRegisterArray(<empty>)";
         }
-        return new StringBuilder(bytes.length).append("ModbusRegisterArray(").append(toHexString()).append(')')
-                .toString();
+        return "ModbusRegisterArray(" + toHexString() + ')';
     }
 
     /**

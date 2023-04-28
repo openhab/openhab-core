@@ -38,11 +38,9 @@ public class ScriptParsingException extends ScriptException {
 
     public ScriptParsingException addDiagnosticErrors(List<Diagnostic> errors) {
         for (Diagnostic emfDiagnosticError : errors) {
-            if (emfDiagnosticError instanceof AbstractDiagnostic) {
-                AbstractDiagnostic e = (AbstractDiagnostic) emfDiagnosticError;
+            if (emfDiagnosticError instanceof AbstractDiagnostic e) {
                 this.getErrors().add(new ScriptError(e.getMessage(), e.getLine(), e.getOffset(), e.getLength()));
-            } else if (emfDiagnosticError instanceof ExceptionDiagnostic) {
-                ExceptionDiagnostic e = (ExceptionDiagnostic) emfDiagnosticError;
+            } else if (emfDiagnosticError instanceof ExceptionDiagnostic e) {
                 this.getErrors().add(new ScriptError(e.getMessage(), e.getLine(), e.getOffset(), e.getLength()));
             } else {
                 this.getErrors().add(new ScriptError(emfDiagnosticError.getMessage(), -1, -1, -1));

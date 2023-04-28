@@ -71,7 +71,7 @@ public class AutomationCommandList extends AutomationCommand {
      */
     @Override
     public String execute() {
-        if (parsingResult != SUCCESS) {
+        if (!parsingResult.equals(SUCCESS)) {
             return parsingResult;
         }
         if (providerType == AutomationCommands.MODULE_TYPE_PROVIDER) {

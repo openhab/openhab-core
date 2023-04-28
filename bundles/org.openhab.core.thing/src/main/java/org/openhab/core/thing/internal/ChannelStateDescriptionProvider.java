@@ -136,7 +136,7 @@ public class ChannelStateDescriptionProvider implements StateDescriptionFragment
                     locale);
             if (dynamicStateDescription != null) {
                 // Compare by reference to make sure a new state description is returned
-                if (dynamicStateDescription == originalStateDescription) {
+                if (dynamicStateDescription.equals(originalStateDescription)) {
                     logger.error(
                             "Dynamic state description matches original state description. DynamicStateDescriptionProvider implementations must never return the original state description. {} has to be fixed.",
                             provider.getClass());

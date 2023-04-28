@@ -27,6 +27,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class ThingDescriptionList extends ArrayList {
 
+    private static final long serialVersionUID = -1579556977347296301L;
+
     @SuppressWarnings("unchecked")
     public ThingDescriptionList(Collection list) {
         super(list);
