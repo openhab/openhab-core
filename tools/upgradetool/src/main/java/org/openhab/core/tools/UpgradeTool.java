@@ -12,13 +12,6 @@
  */
 package org.openhab.core.tools;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Objects;
-
-import javax.measure.Unit;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -27,16 +20,7 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.config.core.Configuration;
-import org.openhab.core.items.ManagedItemProvider.PersistedItem;
-import org.openhab.core.items.Metadata;
-import org.openhab.core.items.MetadataKey;
-import org.openhab.core.storage.json.internal.JsonStorage;
-import org.openhab.core.thing.internal.link.ItemChannelLinkConfigDescriptionProvider;
-import org.openhab.core.thing.link.ItemChannelLink;
-import org.openhab.core.types.util.UnitUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openhab.core.tools.internal.Upgrader;
 
 /**
  * The {@link UpgradeTool} is a tool for upgrading openHAB to mitigate breaking changes
@@ -45,8 +29,6 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class UpgradeTool {
-    private static final Logger LOGGER = LoggerFactory.getLogger("UpgradeTool");
-
     private static final String CMD_OPT_ITEM = "item";
     private static final String CMD_OPT_LINK = "link";
     private static final String CMD_OPT_DIR = "dir";
@@ -70,103 +52,19 @@ public class UpgradeTool {
         return options;
     }
 
-    private static void itemCopyUnitToMetadata(String baseDir) {
-        Path itemJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.items.Item.json");
-        Path metadataJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.items.Metadata.json");
-        LOGGER.info("Copying item unit from state description to metadata in database '{}'", itemJsonDatabasePath);
-
-        if (!Files.isReadable(itemJsonDatabasePath)) {
-            LOGGER.error("Cannot access item database '{}', check path and access rights.", itemJsonDatabasePath);
-            return;
-        }
-        if (!Files.isWritable(metadataJsonDatabasePath)) {
-            LOGGER.error("Cannot access metadata database '{}', check path and access rights.",
-                    metadataJsonDatabasePath);
-            return;
-        }
-
-        JsonStorage<PersistedItem> itemStorage = new JsonStorage<>(itemJsonDatabasePath.toFile(), null, 5, 0, 0,
-                List.of());
-        JsonStorage<Metadata> metadataStorage = new JsonStorage<>(metadataJsonDatabasePath.toFile(), null, 5, 0, 0,
-                List.of());
-
-        itemStorage.getKeys().forEach(itemName -> {
-            PersistedItem item = itemStorage.get(itemName);
-            if (item != null && item.itemType.startsWith("Number:")) {
-                if (metadataStorage.containsKey("unit:" + itemName)) {
-                    LOGGER.info("{}: already contains a 'unit' metadata, skipping it", itemName);
-                } else {
-                    Metadata metadata = metadataStorage.get("stateDescription:" + itemName);
-                    if (metadata == null) {
-                        LOGGER.info("{}: Nothing to do, no state description found.", itemName);
-                    } else {
-                        String pattern = (String) metadata.getConfiguration().get("pattern");
-                        if (pattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
-                            LOGGER.info(
-                                    "{}: State description contains unit place-holder '%unit%', check if 'unit' metadata is needed!",
-                                    itemName);
-                        } else {
-                            Unit<?> stateDescriptionUnit = UnitUtils.parseUnit(pattern);
-                            if (stateDescriptionUnit != null) {
-                                String unit = stateDescriptionUnit.toString();
-                                MetadataKey defaultUnitMetadataKey = new MetadataKey("unit", itemName);
-                                Metadata defaultUnitMetadata = new Metadata(defaultUnitMetadataKey, unit, null);
-                                metadataStorage.put(defaultUnitMetadataKey.toString(), defaultUnitMetadata);
-                                LOGGER.info("{}: Wrote 'unit={}' to metadata.", itemName, unit);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        metadataStorage.flush();
-    }
-
-    private static void upgradeJsProfile(String baseDir) {
-        Path linkJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.thing.link.ItemChannelLink.json");
-        LOGGER.info("Upgrading JS profile configuration in database '{}'", linkJsonDatabasePath);
-
-        if (!Files.isWritable(linkJsonDatabasePath)) {
-            LOGGER.error("Cannot access link database '{}', check path and access rights.", linkJsonDatabasePath);
-            return;
-        }
-        JsonStorage<ItemChannelLink> linkStorage = new JsonStorage<>(linkJsonDatabasePath.toFile(), null, 5, 0, 0,
-                List.of());
-
-        List.copyOf(linkStorage.getKeys()).forEach(linkUid -> {
-            ItemChannelLink link = Objects.requireNonNull(linkStorage.get(linkUid));
-            Configuration configuration = link.getConfiguration();
-            String profileName = (String) configuration.get(ItemChannelLinkConfigDescriptionProvider.PARAM_PROFILE);
-            if ("transform:JS".equals(profileName)) {
-                String function = (String) configuration.get("function");
-                if (function != null) {
-                    configuration.put("toItemScript", function);
-                    configuration.put("toHandlerScript", "|input");
-                    configuration.remove("function");
-                    configuration.remove("sourceFormat");
-
-                    linkStorage.put(linkUid, link);
-                    LOGGER.info("{}: rewrote JS profile link to new format", linkUid);
-                } else {
-                    LOGGER.info("{}: link already has correct configuration", linkUid);
-                }
-            }
-        });
-        linkStorage.flush();
-    }
-
     public static void main(String[] args) {
         Options options = getOptions();
-
         try {
             CommandLine commandLine = new DefaultParser().parse(options, args);
+            System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
+
             String baseDir = commandLine.hasOption(CMD_OPT_DIR) ? commandLine.getOptionValue(CMD_OPT_DIR) : "";
+            Upgrader upgrader = new Upgrader();
             if (commandLine.hasOption(CMD_OPT_ITEM)) {
                 String operation = commandLine.getOptionValue(CMD_OPT_ITEM);
                 switch (operation) {
                     case "copyUnitToMetadata":
-                        itemCopyUnitToMetadata(baseDir);
+                        upgrader.itemCopyUnitToMetadata(baseDir);
                         break;
                     default:
                         System.out.println("Available tasks for operation 'item': copyUnitToMetadata");
@@ -175,7 +73,7 @@ public class UpgradeTool {
                 String operation = commandLine.getOptionValue(CMD_OPT_LINK);
                 switch (operation) {
                     case "upgradeJsProfile":
-                        upgradeJsProfile(baseDir);
+                        upgrader.upgradeJsProfile(baseDir);
                         break;
                     default:
                         System.out.println("Available tasks for operation 'link': upgradeJsProfile");
