@@ -678,7 +678,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
             Configuration configuration) throws ConfigValidationException {
         if (prototype == null) {
             ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
-                    "Type description for '{0}' not found although we checked the presence before.",
+                    "Type description for {0} not found although we checked the presence before.",
                     "type_description_missing", targetUID.toString());
             throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
@@ -693,7 +693,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
         if (configDescription == null) {
             ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
-                    "Config description for '{0}' not found also we checked the presence before.",
+                    "Config description for {0} not found also we checked the presence before.",
                     "config_description_missing", targetUID);
             throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
