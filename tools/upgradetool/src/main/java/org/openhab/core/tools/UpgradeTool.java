@@ -12,6 +12,8 @@
  */
 package org.openhab.core.tools;
 
+import java.util.Set;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -29,15 +31,19 @@ import org.openhab.core.tools.internal.Upgrader;
  */
 @NonNullByDefault
 public class UpgradeTool {
+    private static final Set<String> LOG_LEVELS = Set.of("TRACE", "DEBUG", "INFO", "WARN", "ERROR");
     private static final String CMD_OPT_ITEM = "item";
     private static final String CMD_OPT_LINK = "link";
     private static final String CMD_OPT_DIR = "dir";
+    private static final String CMD_OPT_LOG = "log";
 
     private static Options getOptions() {
         Options options = new Options();
 
         options.addOption(
                 Option.builder().longOpt(CMD_OPT_DIR).desc("directory to process").numberOfArgs(1).required().build());
+
+        options.addOption(Option.builder().longOpt(CMD_OPT_LOG).numberOfArgs(1).desc("log verbosity").build());
 
         // add the group for available options
         OptionGroup operation = new OptionGroup();
@@ -46,7 +52,6 @@ public class UpgradeTool {
                 .desc("perform the given operation on the item database").build());
         operation.addOption(Option.builder().longOpt(CMD_OPT_LINK).numberOfArgs(1)
                 .desc("perform the given operation on the link database").build());
-
         options.addOptionGroup(operation);
 
         return options;
@@ -56,7 +61,15 @@ public class UpgradeTool {
         Options options = getOptions();
         try {
             CommandLine commandLine = new DefaultParser().parse(options, args);
-            System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
+
+            String loglevel = commandLine.hasOption(CMD_OPT_LOG) ? commandLine.getOptionValue(CMD_OPT_LOG).toUpperCase()
+                    : "INFO";
+            if (!LOG_LEVELS.contains(loglevel)) {
+                System.out.println("Allowed log-levels are " + LOG_LEVELS);
+                System.exit(0);
+            }
+
+            System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, loglevel);
 
             String baseDir = commandLine.hasOption(CMD_OPT_DIR) ? commandLine.getOptionValue(CMD_OPT_DIR) : "";
             Upgrader upgrader = new Upgrader();
