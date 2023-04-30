@@ -60,7 +60,6 @@ public class OSGiEventPublisher implements EventPublisher {
                 properties.put("source", source);
             }
             eventAdmin.postEvent(new org.osgi.service.event.Event("openhab", properties));
-
         } catch (Exception e) {
             throw new IllegalStateException("Cannot post the event via the event bus. Error message: " + e.getMessage(),
                     e);
