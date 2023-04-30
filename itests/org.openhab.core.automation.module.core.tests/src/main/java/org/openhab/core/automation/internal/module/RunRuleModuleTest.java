@@ -99,7 +99,7 @@ public class RunRuleModuleTest extends JavaOSGiTest {
         final Configuration sceneRuleAction3Config = new Configuration(
                 Map.ofEntries(entry("itemName", "switch3"), entry("command", "ON")));
 
-        final Rule sceneRule = RuleBuilder.create("exampleSceneRule").withActions(
+        return RuleBuilder.create("exampleSceneRule").withActions(
                 ModuleBuilder.createAction().withId("sceneItemPostCommandAction1").withTypeUID("core.ItemCommandAction")
                         .withConfiguration(sceneRuleAction1Config).build(),
                 ModuleBuilder.createAction().withId("sceneItemPostCommandAction2").withTypeUID("core.ItemCommandAction")
@@ -107,8 +107,6 @@ public class RunRuleModuleTest extends JavaOSGiTest {
                 ModuleBuilder.createAction().withId("sceneItemPostCommandAction3").withTypeUID("core.ItemCommandAction")
                         .withConfiguration(sceneRuleAction3Config).build())
                 .withName("Example Scene").build();
-
-        return sceneRule;
     }
 
     private Rule createOuterRule() {
@@ -120,14 +118,12 @@ public class RunRuleModuleTest extends JavaOSGiTest {
 
         final Configuration outerRuleActionConfig = new Configuration(Map.of("ruleUIDs", ruleUIDs));
 
-        final Rule outerRule = RuleBuilder.create("sceneActivationRule")
+        return RuleBuilder.create("sceneActivationRule")
                 .withTriggers(ModuleBuilder.createTrigger().withId("ItemStateChangeTrigger2")
                         .withTypeUID("core.GenericEventTrigger").withConfiguration(outerRuleTriggerConfig).build())
                 .withActions(ModuleBuilder.createAction().withId("RunRuleAction1").withTypeUID("core.RunRuleAction")
                         .withConfiguration(outerRuleActionConfig).build())
                 .withName("scene activator").build();
-
-        return outerRule;
     }
 
     @Test

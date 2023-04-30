@@ -73,7 +73,7 @@ public class TTSServiceStub implements TTSService {
         try {
             Collection<ServiceReference<Voice>> refs = bundleContext.getServiceReferences(Voice.class, null);
             return refs.stream() //
-                    .map(ref -> bundleContext.getService(ref)) //
+                    .map(bundleContext::getService) //
                     .filter(service -> service.getUID().startsWith(getId())) //
                     .collect(Collectors.toSet());
         } catch (InvalidSyntaxException e) {

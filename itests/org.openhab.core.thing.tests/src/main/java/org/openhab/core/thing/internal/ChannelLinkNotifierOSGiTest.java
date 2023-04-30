@@ -218,14 +218,14 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
             @Override
             public void receive(Event event) {
                 logger.debug("Received event: {}", event);
-                if (event instanceof AbstractItemChannelLinkRegistryEvent) {
-                    ItemChannelLinkDTO link = ((AbstractItemChannelLinkRegistryEvent) event).getLink();
+                if (event instanceof AbstractItemChannelLinkRegistryEvent registryEvent) {
+                    ItemChannelLinkDTO link = registryEvent.getLink();
                     removedItemChannelLinkUIDs
                             .add(AbstractLink.getIDFor(link.itemName, new ChannelUID(link.channelUID)));
-                } else if (event instanceof AbstractItemRegistryEvent) {
-                    removedItemNames.add(((AbstractItemRegistryEvent) event).getItem().name);
-                } else if (event instanceof AbstractThingRegistryEvent) {
-                    removedThingUIDs.add(((AbstractThingRegistryEvent) event).getThing().UID);
+                } else if (event instanceof AbstractItemRegistryEvent registryEvent) {
+                    removedItemNames.add(registryEvent.getItem().name);
+                } else if (event instanceof AbstractThingRegistryEvent registryEvent) {
+                    removedThingUIDs.add(registryEvent.getThing().UID);
                 }
             }
 
@@ -295,7 +295,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
     }
 
     private void forEachThingChannelUID(Thing thing, Consumer<ChannelUID> consumer) {
-        thing.getChannels().stream().map(Channel::getUID).forEach(channelUID -> consumer.accept(channelUID));
+        thing.getChannels().stream().map(Channel::getUID).forEach(consumer::accept);
     }
 
     private void addItemsAndLinks(Thing thing, String itemSuffix) {

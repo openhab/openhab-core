@@ -116,20 +116,17 @@ public class BundleInfoReader {
                     return;
                 }
                 for (Object type : types) {
-                    if (type instanceof ThingTypeXmlResult) {
-                        ThingTypeXmlResult result = (ThingTypeXmlResult) type;
+                    if (type instanceof ThingTypeXmlResult result) {
                         bundleInfo.getThingTypesXml().add(result);
                         if (bundleInfo.getAddonId().isBlank()) {
                             bundleInfo.setAddonId(result.getUID().getBindingId());
                         }
-                    } else if (type instanceof ChannelGroupTypeXmlResult) {
-                        ChannelGroupTypeXmlResult result = (ChannelGroupTypeXmlResult) type;
+                    } else if (type instanceof ChannelGroupTypeXmlResult result) {
                         bundleInfo.getChannelGroupTypesXml().add(result);
                         if (bundleInfo.getAddonId().isBlank()) {
                             bundleInfo.setAddonId(result.getUID().getBindingId());
                         }
-                    } else if (type instanceof ChannelTypeXmlResult) {
-                        ChannelTypeXmlResult result = (ChannelTypeXmlResult) type;
+                    } else if (type instanceof ChannelTypeXmlResult result) {
                         bundleInfo.getChannelTypesXml().add(result);
                         if (bundleInfo.getAddonId().isBlank()) {
                             bundleInfo.setAddonId(result.toChannelType().getUID().getBindingId());

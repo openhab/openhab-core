@@ -105,8 +105,6 @@ public class RuntimeRuleTest extends JavaOSGiTest {
          */
         logger.info("Create rule");
         String testExpression = "* * * * * ?";
-
-        ;
         Configuration triggerConfig = new Configuration(Map.of("cronExpression", testExpression));
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId("MyTimerTrigger")
                 .withTypeUID(GenericCronTriggerHandler.MODULE_TYPE_ID).withConfiguration(triggerConfig).build());
@@ -136,8 +134,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
                 final RuleStatusInfo ruleStatus = ruleEngine.getStatusInfo(rule.getUID());
                 logger.info("Rule status (should be IDLE or RUNNING): {}", ruleStatus);
                 boolean allFine;
-                if (RuleStatus.IDLE.equals(ruleStatus.getStatus())
-                        || RuleStatus.RUNNING.equals(ruleStatus.getStatus())) {
+                if (RuleStatus.IDLE == ruleStatus.getStatus() || RuleStatus.RUNNING == ruleStatus.getStatus()) {
                     allFine = true;
                 } else {
                     allFine = false;

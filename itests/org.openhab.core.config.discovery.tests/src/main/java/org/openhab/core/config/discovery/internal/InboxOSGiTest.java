@@ -219,8 +219,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
         EventSubscriber inboxEventSubscriber = new EventSubscriber() {
             @Override
             public void receive(Event event) {
-                if (event instanceof InboxRemovedEvent) {
-                    removedInboxThingUIDs.add(((InboxRemovedEvent) event).getDiscoveryResult().thingUID);
+                if (event instanceof InboxRemovedEvent removedEvent) {
+                    removedInboxThingUIDs.add(removedEvent.getDiscoveryResult().thingUID);
                 }
             }
 
@@ -235,7 +235,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         registry.remove(BRIDGE_THING_UID);
         managedThingProvider.getAll().forEach(thing -> managedThingProvider.remove(thing.getUID()));
 
-        inboxListeners.forEach(listener -> inbox.removeInboxListener(listener));
+        inboxListeners.forEach(inbox::removeInboxListener);
         inbox.getAll().stream().forEach(discoveryResult -> inbox.remove(discoveryResult.getThingUID()));
 
         discoveryResults.clear();
@@ -1053,7 +1053,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
         CompletableFuture<Boolean> future = inbox.add(discoveryResult);
 
-        waitForAssert(() -> future.isDone(), 30, 5);
+        waitForAssert(future::isDone, 30, 5);
 
         assertThat(future.get(), is(false));
     }
@@ -1071,7 +1071,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
         dummyThingTypeProvider.add(thingTypeUID, ThingTypeBuilder.instance(thingTypeUID, "label").build());
 
-        waitForAssert(() -> future.isDone(), 30, 5);
+        waitForAssert(future::isDone, 30, 5);
 
         assertThat(future.get(), is(true));
     }

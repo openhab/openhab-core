@@ -29,6 +29,8 @@ import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.FilterCriteria;
+import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.test.java.JavaOSGiTest;
 
 /**
@@ -82,14 +84,16 @@ public class AddonInfoTest extends JavaOSGiTest {
             ConfigDescriptionParameter listParameter = parameters.stream().filter(p -> "list".equals(p.getName()))
                     .findFirst().get();
             assertThat(listParameter, is(notNullValue()));
-            assertThat(listParameter.getOptions().stream().map(p -> p.toString()).collect(Collectors.joining(", ")), is(
-                    "ParameterOption [value=\"key1\", label=\"label1\"], ParameterOption [value=\"key2\", label=\"label2\"]"));
+            assertThat(
+                    listParameter.getOptions().stream().map(ParameterOption::toString)
+                            .collect(Collectors.joining(", ")),
+                    is("ParameterOption [value=\"key1\", label=\"label1\"], ParameterOption [value=\"key2\", label=\"label2\"]"));
 
             ConfigDescriptionParameter lightParameter = parameters.stream()
                     .filter(p -> "color-alarming-light".equals(p.getName())).findFirst().get();
             assertThat(lightParameter, is(notNullValue()));
             assertThat(
-                    lightParameter.getFilterCriteria().stream().map(p -> p.toString())
+                    lightParameter.getFilterCriteria().stream().map(FilterCriteria::toString)
                             .collect(Collectors.joining(", ")),
                     is("FilterCriteria [name=\"tags\", value=\"alarm, light\"], FilterCriteria [name=\"type\", value=\"color\"], FilterCriteria [name=\"binding-id\", value=\"hue\"]"));
         });

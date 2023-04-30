@@ -359,7 +359,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         discoveryServiceRegistry.addDiscoveryListener(discoveryListenerMock);
         discoveryServiceRegistry.startScan(new ThingTypeUID(ANY_BINDING_ID_1, ANY_THING_TYPE_1), mockScanListener1);
 
-        waitForAssert(() -> mockScanListener1.onFinished());
+        waitForAssert(mockScanListener1::onFinished);
         verify(discoveryListenerMock, times(2)).thingDiscovered(any(), any());
     }
 
