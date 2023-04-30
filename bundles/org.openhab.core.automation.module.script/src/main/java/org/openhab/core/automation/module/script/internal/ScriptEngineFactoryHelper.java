@@ -76,7 +76,6 @@ public class ScriptEngineFactoryHelper {
     }
 
     public static Optional<String> getPreferredExtension(ScriptEngineFactory factory) {
-        // return an Optional because GenericScriptEngineFactory has no scriptTypes
         return factory.getScriptTypes().stream().filter(type -> !type.contains("/"))
                 .min(Comparator.comparing(String::length));
     }
