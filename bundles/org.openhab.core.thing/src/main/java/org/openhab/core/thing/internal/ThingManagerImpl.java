@@ -663,23 +663,23 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                     thing.getUID());
             return;
         }
-        normalizeConfiguration(thingType, thing.getUID(), thing.getConfiguration());
+        normalizeConfiguration(thingType, thing.getThingTypeUID(), thing.getUID(), thing.getConfiguration());
 
         for (Channel channel : thing.getChannels()) {
             ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
             if (channelTypeUID != null) {
                 ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID);
-                normalizeConfiguration(channelType, channel.getUID(), channel.getConfiguration());
+                normalizeConfiguration(channelType, channelTypeUID, channel.getUID(), channel.getConfiguration());
             }
         }
     }
 
-    private void normalizeConfiguration(@Nullable AbstractDescriptionType prototype, UID targetUID,
+    private void normalizeConfiguration(@Nullable AbstractDescriptionType prototype, UID prototypeUID, UID targetUID,
             Configuration configuration) throws ConfigValidationException {
         if (prototype == null) {
             ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
-                    "Type description for {0} not found although we checked the presence before.",
-                    "type_description_missing", targetUID.toString());
+                    "Type description {0} for {1} not found although we checked the presence before.",
+                    "type_description_missing", prototypeUID.toString(), targetUID.toString());
             throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
 
@@ -693,8 +693,8 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
         if (configDescription == null) {
             ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
-                    "Config description for {0} not found also we checked the presence before.",
-                    "config_description_missing", targetUID);
+                    "Config description {0} for {1} not found also we checked the presence before.",
+                    "config_description_missing", configDescriptionURI.toString(), targetUID.toString());
             throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
 
