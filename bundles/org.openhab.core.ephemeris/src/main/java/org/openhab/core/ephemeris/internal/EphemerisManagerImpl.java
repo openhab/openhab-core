@@ -46,8 +46,8 @@ import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.ephemeris.EphemerisManager;
 import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -102,14 +102,15 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private final ResourceUtil resourceUtil = new ResourceUtil();
 
     private final LocaleProvider localeProvider;
-    private final Bundle bundle = FrameworkUtil.getBundle(getClass());
+    private final Bundle bundle;
 
     private @NonNullByDefault({}) String country;
     private @Nullable String region;
 
     @Activate
-    public EphemerisManagerImpl(final @Reference LocaleProvider localeProvider) {
+    public EphemerisManagerImpl(final @Reference LocaleProvider localeProvider, final BundleContext bundleContext) {
         this.localeProvider = localeProvider;
+        bundle = bundleContext.getBundle();
 
         try (InputStream stream = bundle.getResource(JOLLYDAY_COUNTRY_DESCRIPTIONS).openStream()) {
             final Properties properties = new Properties();
