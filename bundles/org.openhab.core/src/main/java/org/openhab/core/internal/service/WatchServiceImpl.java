@@ -231,7 +231,6 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             future = scheduler.schedule(() -> notifyListeners(path), PROCESSING_TIME, TimeUnit.MILLISECONDS);
             scheduledEventKinds.computeIfAbsent(path, k -> new CopyOnWriteArrayList<>()).add(directoryChangeEvent);
             scheduledEvents.put(path, future);
-
         }
     }
 

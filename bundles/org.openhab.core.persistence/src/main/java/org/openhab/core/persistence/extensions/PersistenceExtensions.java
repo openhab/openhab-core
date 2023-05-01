@@ -52,8 +52,6 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 public class PersistenceExtensions {
 
-    private static final BigDecimal BIG_DECIMAL_TWO = BigDecimal.valueOf(2);
-
     private static PersistenceServiceRegistry registry;
 
     @Activate
