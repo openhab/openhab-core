@@ -406,13 +406,13 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         try {
             normalizeThingConfiguration(oldThing);
         } catch (ConfigValidationException e) {
-            logger.warn("Failed to normalize configuration for thing '{}': {}", oldThing.getUID(),
+            logger.debug("Failed to normalize configuration for old thing during update '{}': {}", oldThing.getUID(),
                     e.getValidationMessages(null));
         }
         try {
             normalizeThingConfiguration(newThing);
         } catch (ConfigValidationException e) {
-            logger.warn("Failed to normalize configuration for thing '{}': {}", newThing.getUID(),
+            logger.warn("Failed to normalize configuration for new thing during update '{}': {}", newThing.getUID(),
                     e.getValidationMessages(null));
         }
         if (thingUpdatedLock.contains(thingUID)) {
@@ -678,7 +678,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
             Configuration configuration) throws ConfigValidationException {
         if (prototype == null) {
             ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
-                    "Type description {0} for {1} not found although we checked the presence before.",
+                    "Type description {0} for {1} not found, although we checked the presence before.",
                     "type_description_missing", prototypeUID.toString(), targetUID.toString());
             throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
@@ -693,7 +693,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
         if (configDescription == null) {
             ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
-                    "Config description {0} for {1} not found also we checked the presence before.",
+                    "Config description {0} for {1} not found, although we checked the presence before.",
                     "config_description_missing", configDescriptionURI.toString(), targetUID.toString());
             throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
