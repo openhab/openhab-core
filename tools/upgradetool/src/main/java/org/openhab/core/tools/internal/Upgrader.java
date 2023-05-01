@@ -14,6 +14,7 @@ package org.openhab.core.tools.internal;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,9 +39,36 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class Upgrader {
-    private final Logger logger = LoggerFactory.getLogger(Upgrader.class);
+    public static final String ITEM_COPY_UNIT_TO_METADATA = "itemCopyUnitToMetadata";
+    public static final String LINK_UPGRADE_JS_PROFILE = "linkUpgradeJsProfile";
 
-    public void itemCopyUnitToMetadata(String baseDir) {
+    private final Logger logger = LoggerFactory.getLogger(Upgrader.class);
+    private final String baseDir;
+    private final boolean force;
+    private final JsonStorage<UpgradeRecord> upgradeRecords;
+
+    public Upgrader(String baseDir, boolean force) {
+        this.baseDir = baseDir;
+        this.force = force;
+
+        Path upgradeJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.tools.UpgradeTool");
+        upgradeRecords = new JsonStorage<>(upgradeJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
+    }
+
+    private boolean checkUpgradeRecord(String key) {
+        UpgradeRecord upgradeRecord = upgradeRecords.get(key);
+        if (upgradeRecord != null && !force) {
+            logger.info("Already executed '{}' on {}. Use '--force'  to execute it again.", key,
+                    upgradeRecord.executionDate);
+            return false;
+        }
+        return true;
+    }
+
+    public void itemCopyUnitToMetadata() {
+        if (checkUpgradeRecord(ITEM_COPY_UNIT_TO_METADATA)) {
+            return;
+        }
         Path itemJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.items.Item.json");
         Path metadataJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.items.Metadata.json");
         logger.info("Copying item unit from state description to metadata in database '{}'", itemJsonDatabasePath);
@@ -91,9 +119,14 @@ public class Upgrader {
         });
 
         metadataStorage.flush();
+        upgradeRecords.put(ITEM_COPY_UNIT_TO_METADATA, new UpgradeRecord(ZonedDateTime.now()));
     }
 
-    public void upgradeJsProfile(String baseDir) {
+    public void linkUpgradeJsProfile() {
+        if (checkUpgradeRecord(LINK_UPGRADE_JS_PROFILE)) {
+            return;
+        }
+
         Path linkJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.thing.link.ItemChannelLink.json");
         logger.info("Upgrading JS profile configuration in database '{}'", linkJsonDatabasePath);
 
@@ -125,5 +158,14 @@ public class Upgrader {
         });
 
         linkStorage.flush();
+        upgradeRecords.put(LINK_UPGRADE_JS_PROFILE, new UpgradeRecord(ZonedDateTime.now()));
+    }
+
+    private static class UpgradeRecord {
+        public final ZonedDateTime executionDate;
+
+        public UpgradeRecord(ZonedDateTime executionDate) {
+            this.executionDate = executionDate;
+        }
     }
 }
