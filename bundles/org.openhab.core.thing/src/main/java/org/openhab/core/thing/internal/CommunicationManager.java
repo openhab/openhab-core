@@ -469,6 +469,9 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
         if (acceptedTypes.contains(originalType.getClass())) {
             return originalType;
+        } else if (acceptedTypes.contains(PercentType.class) && originalType instanceof State state
+                && PercentType.class.isAssignableFrom(originalType.getClass())) {
+            return (@Nullable T) state.as(PercentType.class);
         } else if (acceptedTypes.contains(OnOffType.class) && originalType instanceof State state
                 && PercentType.class.isAssignableFrom(originalType.getClass())) {
             return (@Nullable T) state.as(OnOffType.class);
