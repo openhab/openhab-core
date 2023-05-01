@@ -404,7 +404,7 @@ public class I18nProviderImpl
         addDefaultUnit(Frequency.class, Units.HERTZ);
         addDefaultUnit(Illuminance.class, Units.LUX);
         addDefaultUnit(Intensity.class, Units.IRRADIANCE);
-        addDefaultUnit(Length.class, SIUnits.METRE, ImperialUnits.FOOT);
+        addDefaultUnit(Length.class, SIUnits.METRE, ImperialUnits.INCH);
         addDefaultUnit(LuminousFlux.class, Units.LUMEN);
         addDefaultUnit(LuminousIntensity.class, Units.CANDELA);
         addDefaultUnit(MagneticFlux.class, Units.WEBER);
