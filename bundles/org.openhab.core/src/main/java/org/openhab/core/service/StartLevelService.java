@@ -117,9 +117,7 @@ public class StartLevelService {
 
             if (openHABStartLevel >= 10) {
                 for (Integer level : new TreeSet<>(startlevels.keySet())) {
-                    if (openHABStartLevel >= level) {
-                        continue;
-                    } else {
+                    if (openHABStartLevel < level) {
                         boolean reached = isStartLevelReached(startlevels.get(level));
                         if (reached) {
                             setStartLevel(level);

@@ -249,7 +249,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
                 return null;
             }
         }
-        if (item instanceof ActiveItem) {
+        if (item instanceof ActiveItem activeItem) {
             String label = modelItem.getLabel();
             String format = extractFormat(label);
             if (format != null) {
@@ -257,9 +257,9 @@ public class GenericItemProvider extends AbstractProvider<Item>
                 stateDescriptionFragments.put(modelItem.getName(),
                         StateDescriptionFragmentBuilder.create().withPattern(format).build());
             }
-            ((ActiveItem) item).setLabel(label);
-            ((ActiveItem) item).setCategory(modelItem.getIcon());
-            assignTags(modelItem, (ActiveItem) item);
+            activeItem.setLabel(label);
+            activeItem.setCategory(modelItem.getIcon());
+            assignTags(modelItem, activeItem);
             return item;
         } else {
             return null;
@@ -444,11 +444,11 @@ public class GenericItemProvider extends AbstractProvider<Item>
         GroupItem gItem1 = null;
         GroupItem gItem2 = null;
 
-        if (item1 instanceof GroupItem) {
-            gItem1 = (GroupItem) item1;
+        if (item1 instanceof GroupItem item) {
+            gItem1 = item;
         }
-        if (item2 instanceof GroupItem) {
-            gItem2 = (GroupItem) item2;
+        if (item2 instanceof GroupItem item) {
+            gItem2 = item;
         }
 
         if (gItem1 == null && gItem2 == null) {
