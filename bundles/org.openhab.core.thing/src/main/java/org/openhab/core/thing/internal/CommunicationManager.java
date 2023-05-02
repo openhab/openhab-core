@@ -46,6 +46,8 @@ import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemStateUpdatedEvent;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
@@ -467,6 +469,12 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
         if (acceptedTypes.contains(originalType.getClass())) {
             return originalType;
+        } else if (acceptedTypes.contains(PercentType.class) && originalType instanceof State state
+                && PercentType.class.isAssignableFrom(originalType.getClass())) {
+            return (@Nullable T) state.as(PercentType.class);
+        } else if (acceptedTypes.contains(OnOffType.class) && originalType instanceof State state
+                && PercentType.class.isAssignableFrom(originalType.getClass())) {
+            return (@Nullable T) state.as(OnOffType.class);
         } else {
             // Look for class hierarchy and convert appropriately
             for (Class<? extends T> typeClass : acceptedTypes) {
