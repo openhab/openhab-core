@@ -1264,7 +1264,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                 timesChecked++;
                 if (timesChecked > MAX_CHECK_PREREQUISITE_TIME / CHECK_INTERVAL) {
                     logger.warn(
-                            "Channel types or config descriptions for thing '{}' are missing in the respective registry for more than {}s. This should be fixed in the binding.",
+                            "Channel types or config descriptions for thing '{}' are missing in the respective registry for more than {}s. In case it does not happen immediately after an upgrade, it should be fixed in the binding.",
                             thingUID, MAX_CHECK_PREREQUISITE_TIME);
                     channelTypeUIDs.clear();
                     configDescriptionUris.clear();
