@@ -41,8 +41,7 @@ public class UpgradeTool {
     private static Options getOptions() {
         Options options = new Options();
 
-        options.addOption(
-                Option.builder().longOpt(OPT_DIR).desc("directory to process").numberOfArgs(1).required().build());
+        options.addOption(Option.builder().longOpt(OPT_DIR).desc("directory to process").numberOfArgs(1).build());
         options.addOption(Option.builder().longOpt(OPT_COMMAND).numberOfArgs(1).desc("command to execute").build());
         options.addOption(Option.builder().longOpt(OPT_LOG).numberOfArgs(1).desc("log verbosity").build());
         options.addOption(Option.builder().longOpt(OPT_FORCE).desc("force execution (even if already done)").build());
@@ -64,14 +63,21 @@ public class UpgradeTool {
 
             System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, loglevel);
 
-            String baseDir = commandLine.hasOption(OPT_DIR) ? commandLine.getOptionValue(OPT_DIR) : "";
-            boolean force = commandLine.hasOption(OPT_FORCE) ? true : false;
+            String baseDir = commandLine.hasOption(OPT_DIR) ? commandLine.getOptionValue(OPT_DIR)
+                    : System.getenv("OPENHAB_USERDATA");
+            if (baseDir == null || baseDir.isBlank()) {
+                System.out.println(
+                        "Please either set the environment variable ${OPENHAB_USERDATA} or provide a directory through the --dir option.");
+                System.exit(0);
+            } else {
+                boolean force = commandLine.hasOption(OPT_FORCE) ? true : false;
 
-            Upgrader upgrader = new Upgrader(baseDir, force);
-            if (commandLine.hasOption(ITEM_COPY_UNIT_TO_METADATA)) {
-                upgrader.itemCopyUnitToMetadata();
-            } else if (commandLine.hasOption(LINK_UPGRADE_JS_PROFILE)) {
-                upgrader.linkUpgradeJsProfile();
+                Upgrader upgrader = new Upgrader(baseDir, force);
+                if (commandLine.hasOption(ITEM_COPY_UNIT_TO_METADATA)) {
+                    upgrader.itemCopyUnitToMetadata();
+                } else if (commandLine.hasOption(LINK_UPGRADE_JS_PROFILE)) {
+                    upgrader.linkUpgradeJsProfile();
+                }
             }
         } catch (ParseException e) {
             HelpFormatter formatter = new HelpFormatter();
