@@ -97,8 +97,8 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         } catch (JsonSyntaxException e) {
             List.copyOf(installedAddonStorage.getKeys()).forEach(installedAddonStorage::remove);
             logger.error(
-                    "Failed to read JSON database, trying to purge it. You might need to re-install the bindings from the '{}' service.",
-                    getId());
+                    "Failed to read JSON database, trying to purge it. You might need to re-install {} from the '{}' service.",
+                    installedAddonStorage.getKeys(), getId());
             refreshSource();
         }
 
