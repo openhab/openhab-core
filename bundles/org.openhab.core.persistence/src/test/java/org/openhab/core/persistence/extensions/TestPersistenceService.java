@@ -133,7 +133,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
 
                     @Override
                     public State getState() {
-                        Item item = itemRegistry.get(filter.getItemName());
+                        Item item = itemRegistry.get(Objects.requireNonNull(filter.getItemName()));
                         Unit<?> unit = item instanceof NumberItem ni ? ni.getUnit() : null;
                         return unit == null ? new DecimalType(year) : QuantityType.valueOf(year, unit);
                     }
