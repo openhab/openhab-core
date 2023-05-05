@@ -1183,8 +1183,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                         updateContext(ruleUID, action.getId(), outputs);
                     }
                 } catch (Throwable t) {
-                    String errMessage = "Fail to execute action: " + action.getId();
+                    String errMessage = "Failed to execute action: " + action.getId() + "(" + t.getMessage() + ")";
                     if (stopOnFirstFail) {
+                        logger.debug("Action {}-{} threw an exception: ", ruleUID, action.getId(), t);
                         throw new RuntimeException(errMessage, t);
                     } else {
                         logger.warn(errMessage, t);
