@@ -21,6 +21,7 @@ import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.UnDefType;
 
 /**
@@ -67,6 +68,15 @@ public class DateTimeItem extends GenericItem {
             }
         } else {
             logSetTypeError(state);
+        }
+    }
+
+    @Override
+    public void setTimeSeries(TimeSeries timeSeries) {
+        if (timeSeries.getStates().allMatch(s -> s.state() instanceof DateTimeType)) {
+            applyTimeSeries(timeSeries);
+        } else {
+            logSetTypeError(timeSeries);
         }
     }
 }

@@ -72,12 +72,13 @@ import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileFactory;
 import org.openhab.core.thing.profiles.ProfileTypeProvider;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
-import org.openhab.core.thing.profiles.StateProfile;
+import org.openhab.core.thing.profiles.TimeSeriesProfile;
 import org.openhab.core.thing.profiles.TriggerProfile;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
+import org.openhab.core.types.TimeSeries;
 
 /**
  *
@@ -148,7 +149,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private @Mock @NonNullByDefault({}) ItemStateConverter itemStateConverterMock;
     private @Mock @NonNullByDefault({}) ProfileAdvisor profileAdvisorMock;
     private @Mock @NonNullByDefault({}) ProfileFactory profileFactoryMock;
-    private @Mock @NonNullByDefault({}) StateProfile stateProfileMock;
+    private @Mock @NonNullByDefault({}) TimeSeriesProfile stateProfileMock;
     private @Mock @NonNullByDefault({}) ThingHandler thingHandlerMock;
     private @Mock @NonNullByDefault({}) ThingRegistry thingRegistryMock;
     private @Mock @NonNullByDefault({}) TriggerProfile triggerProfileMock;
@@ -267,6 +268,32 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         manager.postCommand(STATE_CHANNEL_UID_2, OnOffType.ON);
         waitForAssert(() -> {
             verify(stateProfileMock, times(2)).onCommandFromHandler(eq(OnOffType.ON));
+        });
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
+    }
+
+    @Test
+    public void testTimeSeriesSingleLink() {
+        TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.REPLACE);
+
+        manager.sendTimeSeries(STATE_CHANNEL_UID_1, timeSeries);
+
+        waitForAssert(() -> {
+            verify(stateProfileMock).onTimeSeriesFromHandler(eq(timeSeries));
+        });
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
+    }
+
+    @Test
+    public void testTimeSeriesMultiLink() {
+        TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.REPLACE);
+
+        manager.sendTimeSeries(STATE_CHANNEL_UID_2, timeSeries);
+
+        waitForAssert(() -> {
+            verify(stateProfileMock, times(2)).onTimeSeriesFromHandler(eq(timeSeries));
         });
         verifyNoMoreInteractions(stateProfileMock);
         verifyNoMoreInteractions(triggerProfileMock);

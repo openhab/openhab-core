@@ -15,6 +15,7 @@ package org.openhab.core.persistence;
 import java.time.ZonedDateTime;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.types.State;
 
@@ -45,6 +46,25 @@ public interface ModifiablePersistenceService extends QueryablePersistenceServic
      * @param state the state to be recorded
      */
     void store(Item item, ZonedDateTime date, State state);
+
+    /**
+     * <p>
+     * Stores the historic item value under a specified alias. This allows the item, time and value to be specified.
+     *
+     * <p>
+     * Adding data with the same time as an existing record should update the current record value rather than adding a
+     * new record.
+     *
+     * <p>
+     * Implementors should keep in mind that all registered {@link PersistenceService}s are called synchronously. Hence
+     * long running operations should be processed asynchronously. E.g. <code>store</code> adds things to a queue which
+     * is processed by some asynchronous workers (Quartz Job, Thread, etc.).
+     *
+     * @param item the data to be stored
+     * @param date the date of the record
+     * @param state the state to be recorded
+     */
+    void store(Item item, ZonedDateTime date, State state, @Nullable String alias);
 
     /**
      * Removes data associated with an item from a persistence service.

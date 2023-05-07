@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.thing.profiles.ProfileCallback;
+import org.openhab.core.types.TimeSeries;
 
 /**
  *
@@ -58,6 +59,17 @@ public class SystemDefaultProfileTest {
         profile.onCommandFromHandler(OnOffType.ON);
 
         verify(callbackMock).sendCommand(eq(OnOffType.ON));
+        verifyNoMoreInteractions(callbackMock);
+    }
+
+    @Test
+    public void testSendTimeSeries() {
+        TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.ADD);
+
+        SystemDefaultProfile profile = new SystemDefaultProfile(callbackMock);
+        profile.onTimeSeriesFromHandler(timeSeries);
+
+        verify(callbackMock).sendTimeSeries(timeSeries);
         verifyNoMoreInteractions(callbackMock);
     }
 }
