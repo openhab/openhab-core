@@ -69,7 +69,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Tests for {@link ThingUpdateInstructionReader} and {@link ThingUpdateInstruction} implementations.
+ * Tests for {@link ThingUpdateInstructionReaderImpl} and {@link ThingUpdateInstruction} implementations.
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -149,14 +149,14 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         assertThat(updatedThing.getChannels(), hasSize(3));
 
         Channel channel1 = updatedThing.getChannel("testChannel1");
-        assertChannel(channel1, channelTypeUID, null, null);
+        assertChannel(channel1, channelTypeUID, "Switch", "typeLabel", null);
 
         Channel channel2 = updatedThing.getChannel("testChannel2");
-        assertChannel(channel2, channelTypeUID, "Test Label", null);
+        assertChannel(channel2, channelTypeUID, "Switch", "Test Label", null);
         assertThat(channel2.getDefaultTags(), containsInAnyOrder(ADDED_TAGS));
 
         Channel channel3 = updatedThing.getChannel("testChannel3");
-        assertChannel(channel3, channelTypeUID, "Test Label", "Test Description");
+        assertChannel(channel3, channelTypeUID, "Switch", "Test Label", "Test Description");
     }
 
     @Test
@@ -186,11 +186,11 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         assertThat(updatedThing.getChannels(), hasSize(2));
 
         Channel channel1 = updatedThing.getChannel(channelUID1);
-        assertChannel(channel1, channelTypeNewUID, "New Test Label", null);
+        assertChannel(channel1, channelTypeNewUID, "Number", "New Test Label", null);
         assertThat(channel1.getConfiguration(), is(channelConfig));
 
         Channel channel2 = updatedThing.getChannel(channelUID2);
-        assertChannel(channel2, channelTypeNewUID, null, null);
+        assertChannel(channel2, channelTypeNewUID, "Number", "typeLabel", null);
         assertThat(channel2.getConfiguration().getProperties(), is(anEmptyMap()));
     }
 
@@ -235,10 +235,10 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         assertThat(updatedThing.getChannels(), hasSize(2));
 
         Channel channel1 = updatedThing.getChannel("testChannel1");
-        assertChannel(channel1, channelTypeNewUID, "Test Label", null);
+        assertChannel(channel1, channelTypeNewUID, "Number", "Test Label", null);
 
         Channel channel2 = updatedThing.getChannel("testChannel2");
-        assertChannel(channel2, channelTypeOldUID, "TestLabel", null);
+        assertChannel(channel2, channelTypeOldUID, "Switch", "TestLabel", null);
     }
 
     @Test
@@ -253,8 +253,10 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         ChannelUID channelUID1 = new ChannelUID(thingUID, "testChannel1");
 
         Thing thing = ThingBuilder.create(MULTIPLE_CHANNEL_THING_TYPE_UID, thingUID)
-                .withChannel(ChannelBuilder.create(channelUID0).withType(channelTypeOldUID).build())
-                .withChannel(ChannelBuilder.create(channelUID1).withType(channelTypeOldUID).build())
+                .withChannel(ChannelBuilder.create(channelUID0).withType(channelTypeOldUID)
+                        .withAcceptedItemType("Switch").build())
+                .withChannel(ChannelBuilder.create(channelUID1).withType(channelTypeOldUID)
+                        .withAcceptedItemType("Switch").build())
                 .withProperty(PROPERTY_THING_TYPE_VERSION, "2").build();
 
         managedThingProvider.add(thing);
@@ -263,7 +265,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         assertThat(updatedThing.getChannels(), hasSize(1));
 
         Channel channel1 = updatedThing.getChannel("testChannel1");
-        assertChannel(channel1, channelTypeOldUID, null, null);
+        assertChannel(channel1, channelTypeOldUID, "Switch", null, null);
     }
 
     @Test
@@ -283,11 +285,11 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
 
         List<Channel> channels1 = updatedThing.getChannelsOfGroup("group1");
         assertThat(channels1, hasSize(1));
-        assertChannel(channels1.get(0), channelTypeUID, null, null);
+        assertChannel(channels1.get(0), channelTypeUID, "Switch", "typeLabel", null);
 
         List<Channel> channels2 = updatedThing.getChannelsOfGroup("group2");
         assertThat(channels2, hasSize(1));
-        assertChannel(channels2.get(0), channelTypeUID, null, null);
+        assertChannel(channels2.get(0), channelTypeUID, "Switch", "typeLabel", null);
     }
 
     @Test
@@ -328,10 +330,11 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         return updatedThing;
     }
 
-    private void assertChannel(@Nullable Channel channel, ChannelTypeUID channelTypeUID, @Nullable String label,
-            @Nullable String description) {
+    private void assertChannel(@Nullable Channel channel, ChannelTypeUID channelTypeUID, String expectedItemType,
+            @Nullable String label, @Nullable String description) {
         assertThat(channel, is(notNullValue()));
         assertThat(channel.getChannelTypeUID(), is(channelTypeUID));
+        assertThat(channel.getAcceptedItemType(), is(expectedItemType));
         if (label != null) {
             assertThat(channel.getLabel(), is(label));
         } else {
@@ -361,7 +364,8 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         ChannelTypeRegistry channelTypeRegistry = mock(ChannelTypeRegistry.class);
 
         for (ChannelTypeUID channelTypeUID : channelTypeUIDs) {
-            ChannelType channelType = ChannelTypeBuilder.state(channelTypeUID, "label", "Number").build();
+            String itemType = channelTypeUID.getId().contains("New") ? "Number" : "Switch";
+            ChannelType channelType = ChannelTypeBuilder.state(channelTypeUID, "typeLabel", itemType).build();
             when(channelTypeProvider.getChannelType(eq(channelTypeUID), nullable(Locale.class)))
                     .thenReturn(channelType);
             when(channelTypeRegistry.getChannelType(eq(channelTypeUID))).thenReturn(channelType);
