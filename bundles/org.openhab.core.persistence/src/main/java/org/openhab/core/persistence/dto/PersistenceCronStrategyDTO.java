@@ -15,7 +15,7 @@ package org.openhab.core.persistence.dto;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link org.openhab.core.persistence.dto.PersistenceCronStrategyDTO} is used for transferring persistence cron
+ * The {@link PersistenceCronStrategyDTO} is used for transferring persistence cron
  * strategies
  *
  * @author Jan N. Klug - Initial contribution

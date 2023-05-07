@@ -15,7 +15,7 @@ package org.openhab.core.persistence.dto;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link PersistenceStrategyDTO} is a
+ * The {@link PersistenceStrategyDTO} is used for transferring persistence strategies.
  *
  * @author Jan N. Klug - Initial contribution
  */

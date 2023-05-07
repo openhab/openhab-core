@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 
 /**
- *
+ * The {@link PersistenceFilter} is the base class for implementing persistence filters.
  *
  * @author Markus Rathgeb - Initial contribution
  */

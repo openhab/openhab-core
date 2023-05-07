@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The {@link PersistenceThresholdFilter} is a filter to prevent persistence based on a threshold.
  *
- * The filter returns {@code false if the new value deviates by less than {@link #value}. If {@link #isPercent} is
+ * The filter returns {@code false} if the new value deviates by less than {@link #value}. If unit is "%" is
  * {@code true}, the filter returns {@code false} if the relative deviation is less than {@link #value}.
  *
  * @author Jan N. Klug - Initial contribution

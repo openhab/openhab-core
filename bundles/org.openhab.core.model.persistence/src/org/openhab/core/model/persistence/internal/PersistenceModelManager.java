@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.persistence.internal;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,10 +98,24 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
                     PersistenceServiceConfiguration oldConfiguration = configurations.put(serviceName,
                             newConfiguration);
                     if (oldConfiguration == null) {
+                        if (type != EventType.ADDED) {
+                            logger.warn(
+                                    "Model {} is inconsistent: An updated event was sent, but there is no old configuration. Adding it now.",
+                                    modelName);
+                        }
                         notifyListenersAboutAddedElement(newConfiguration);
                     } else {
+                        if (type != EventType.MODIFIED) {
+                            logger.warn(
+                                    "Model {} is inconsistent: An added event was sent, but there is an old configuration. Replacing it now.",
+                                    modelName);
+                        }
                         notifyListenersAboutUpdatedElement(oldConfiguration, newConfiguration);
                     }
+                } else {
+                    logger.error(
+                            "The model repository reported a {} event for model '{}' but the model could not be found in the repository. ",
+                            type, modelName);
                 }
             }
         }
@@ -173,6 +186,6 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
 
     @Override
     public Collection<PersistenceServiceConfiguration> getAll() {
-        return new ArrayList<>(configurations.values());
+        return List.copyOf(configurations.values());
     }
 }
