@@ -39,8 +39,7 @@ import org.openhab.core.thing.type.ThingTypeBuilder;
 
 /**
  * The {@link AbstractStorageBasedTypeProviderOSGiTest} contains tests for storing and providing {@link ChannelType}s
- * and
- * {@link ThingType}s
+ * and {@link ThingType}s
  *
  * @author Jan N. Klug - Initial contribution
  */
