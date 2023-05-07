@@ -12,10 +12,15 @@
  */
 package org.openhab.core.model.persistence.internal;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
@@ -27,18 +32,24 @@ import org.openhab.core.model.persistence.persistence.ItemConfig;
 import org.openhab.core.model.persistence.persistence.PersistenceConfiguration;
 import org.openhab.core.model.persistence.persistence.PersistenceModel;
 import org.openhab.core.model.persistence.persistence.Strategy;
-import org.openhab.core.persistence.PersistenceFilter;
+import org.openhab.core.model.persistence.persistence.ThresholdFilter;
+import org.openhab.core.model.persistence.persistence.TimeFilter;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
-import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
-import org.openhab.core.persistence.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.config.PersistenceConfig;
 import org.openhab.core.persistence.config.PersistenceGroupConfig;
 import org.openhab.core.persistence.config.PersistenceItemConfig;
+import org.openhab.core.persistence.filter.PersistenceFilter;
+import org.openhab.core.persistence.filter.PersistenceThresholdFilter;
+import org.openhab.core.persistence.filter.PersistenceTimeFilter;
+import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
+import org.openhab.core.persistence.registry.PersistenceServiceConfigurationProvider;
 import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
@@ -47,73 +58,69 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Move non-model logic to core.persistence
+ * @author Jan N. Klug - Refactored to {@link PersistenceServiceConfigurationProvider}
  */
-@Component(immediate = true)
-public class PersistenceModelManager implements ModelRepositoryChangeListener {
+@Component(immediate = true, service = PersistenceServiceConfigurationProvider.class)
+@NonNullByDefault
+public class PersistenceModelManager extends AbstractProvider<PersistenceServiceConfiguration>
+        implements ModelRepositoryChangeListener, PersistenceServiceConfigurationProvider {
+    private final Map<String, PersistenceServiceConfiguration> configurations = new ConcurrentHashMap<>();
+    private final ModelRepository modelRepository;
 
-    private ModelRepository modelRepository;
+    @Activate
+    public PersistenceModelManager(@Reference ModelRepository modelRepository) {
+        this.modelRepository = modelRepository;
 
-    private PersistenceManager manager;
-
-    public PersistenceModelManager() {
-    }
-
-    protected void activate() {
         modelRepository.addModelRepositoryChangeListener(this);
-        for (String modelName : modelRepository.getAllModelNamesOfType("persist")) {
-            addModel(modelName);
-        }
+        modelRepository.getAllModelNamesOfType("persist")
+                .forEach(modelName -> modelChanged(modelName, EventType.ADDED));
     }
 
+    @Deactivate
     protected void deactivate() {
         modelRepository.removeModelRepositoryChangeListener(this);
-        for (String modelName : modelRepository.getAllModelNamesOfType("persist")) {
-            removeModel(modelName);
-        }
-    }
-
-    @Reference
-    protected void setModelRepository(ModelRepository modelRepository) {
-        this.modelRepository = modelRepository;
-    }
-
-    protected void unsetModelRepository(ModelRepository modelRepository) {
-        this.modelRepository = null;
-    }
-
-    @Reference
-    protected void setPersistenceManager(final PersistenceManager manager) {
-        this.manager = manager;
-    }
-
-    protected void unsetPersistenceManager(final PersistenceManager manager) {
-        this.manager = null;
+        modelRepository.getAllModelNamesOfType("persist")
+                .forEach(modelName -> modelChanged(modelName, EventType.REMOVED));
     }
 
     @Override
     public void modelChanged(String modelName, EventType type) {
         if (modelName.endsWith(".persist")) {
-            if (type == EventType.REMOVED || type == EventType.MODIFIED) {
-                removeModel(modelName);
-            }
-            if (type == EventType.ADDED || type == EventType.MODIFIED) {
-                addModel(modelName);
-            }
-        }
-    }
-
-    private void addModel(String modelName) {
-        final PersistenceModel model = (PersistenceModel) modelRepository.getModel(modelName);
-        if (model != null) {
             String serviceName = serviceName(modelName);
-            manager.addConfig(serviceName, new PersistenceServiceConfiguration(mapConfigs(model.getConfigs()),
-                    mapStrategies(model.getDefaults()), mapStrategies(model.getStrategies())));
-        }
-    }
+            if (type == EventType.REMOVED) {
+                PersistenceServiceConfiguration removed = configurations.remove(serviceName);
+                notifyListenersAboutRemovedElement(removed);
+            } else {
+                final PersistenceModel model = (PersistenceModel) modelRepository.getModel(modelName);
 
-    private void removeModel(String modelName) {
-        String serviceName = serviceName(modelName);
-        manager.removeConfig(serviceName);
+                if (model != null) {
+                    PersistenceServiceConfiguration newConfiguration = new PersistenceServiceConfiguration(serviceName,
+                            mapConfigs(model.getConfigs()), mapStrategies(model.getDefaults()),
+                            mapStrategies(model.getStrategies()), mapFilters(model.getFilters()));
+                    PersistenceServiceConfiguration oldConfiguration = configurations.put(serviceName,
+                            newConfiguration);
+                    if (oldConfiguration == null) {
+                        if (type != EventType.ADDED) {
+                            logger.warn(
+                                    "Model {} is inconsistent: An updated event was sent, but there is no old configuration. Adding it now.",
+                                    modelName);
+                        }
+                        notifyListenersAboutAddedElement(newConfiguration);
+                    } else {
+                        if (type != EventType.MODIFIED) {
+                            logger.warn(
+                                    "Model {} is inconsistent: An added event was sent, but there is an old configuration. Replacing it now.",
+                                    modelName);
+                        }
+                        notifyListenersAboutUpdatedElement(oldConfiguration, newConfiguration);
+                    }
+                } else {
+                    logger.error(
+                            "The model repository reported a {} event for model '{}' but the model could not be found in the repository. ",
+                            type, modelName);
+                }
+            }
+        }
     }
 
     private String serviceName(String modelName) {
@@ -168,6 +175,19 @@ public class PersistenceModelManager implements ModelRepositoryChangeListener {
     }
 
     private PersistenceFilter mapFilter(Filter filter) {
-        return new PersistenceFilter();
+        if (filter.getDefinition() instanceof TimeFilter) {
+            TimeFilter timeFilter = (TimeFilter) filter.getDefinition();
+            return new PersistenceTimeFilter(filter.getName(), timeFilter.getValue(), timeFilter.getUnit());
+        } else if (filter.getDefinition() instanceof ThresholdFilter) {
+            ThresholdFilter thresholdFilter = (ThresholdFilter) filter.getDefinition();
+            return new PersistenceThresholdFilter(filter.getName(), thresholdFilter.getValue(),
+                    thresholdFilter.getUnit());
+        }
+        throw new IllegalArgumentException("Unknown filter type " + filter.getClass());
+    }
+
+    @Override
+    public Collection<PersistenceServiceConfiguration> getAll() {
+        return List.copyOf(configurations.values());
     }
 }

@@ -31,7 +31,7 @@ FilterDetails:
 ;
 
 ThresholdFilter:
-	'>' value=DECIMAL percent?='%'
+	'>' value=DECIMAL unit=STRING
 ;
 
 TimeFilter:
