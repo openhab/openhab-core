@@ -143,7 +143,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
             if (dimension == null) {
                 // QuantityType update to a NumberItem without unit, strip unit
                 DecimalType plainState = new DecimalType(quantityType.toBigDecimal());
-                super.setState(plainState);
+                super.applyState(plainState);
             } else {
                 // QuantityType update to a NumberItem with unit, convert to item unit (if possible)
                 Unit<?> stateUnit = quantityType.getUnit();
@@ -151,7 +151,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
                         ? quantityType.toInvertibleUnit(unit)
                         : null;
                 if (convertedState != null) {
-                    super.setState(convertedState);
+                    super.applyState(convertedState);
                 } else {
                     logger.warn("Failed to update item '{}' because '{}' could not be converted to the item unit '{}'",
                             name, state, unit);
@@ -160,13 +160,13 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
         } else if (state instanceof DecimalType decimalType) {
             if (dimension == null) {
                 // DecimalType update to NumberItem with unit
-                super.setState(decimalType);
+                super.applyState(decimalType);
             } else {
                 // DecimalType update for a NumberItem with dimension, convert to QuantityType
-                super.setState(new QuantityType<>(decimalType.doubleValue(), unit));
+                super.applyState(new QuantityType<>(decimalType.doubleValue(), unit));
             }
         } else if (state instanceof UnDefType) {
-            super.setState(state);
+            super.applyState(state);
         } else {
             logSetTypeError(state);
         }
