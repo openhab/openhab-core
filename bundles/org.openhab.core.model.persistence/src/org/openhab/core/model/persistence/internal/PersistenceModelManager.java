@@ -79,6 +79,8 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
     @Deactivate
     protected void deactivate() {
         modelRepository.removeModelRepositoryChangeListener(this);
+        modelRepository.getAllModelNamesOfType("persist")
+                .forEach(modelName -> modelChanged(modelName, EventType.REMOVED));
     }
 
     @Override
