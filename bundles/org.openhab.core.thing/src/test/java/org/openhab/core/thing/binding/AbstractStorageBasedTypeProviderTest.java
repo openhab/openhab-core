@@ -84,7 +84,7 @@ public class AbstractStorageBasedTypeProviderTest {
 
         ChannelDefinition channelDefinition = new ChannelDefinitionBuilder("channelName",
                 new ChannelTypeUID("system:color")).withLabel("label").withDescription("description")
-                        .withProperties(Map.of("key", "value")).withAutoUpdatePolicy(AutoUpdatePolicy.VETO).build();
+                .withProperties(Map.of("key", "value")).withAutoUpdatePolicy(AutoUpdatePolicy.VETO).build();
         ChannelGroupType expected = ChannelGroupTypeBuilder.instance(groupTypeUID, "testLabel")
                 .withDescription("testDescription").withCategory("testCategory")
                 .withChannelDefinitions(List.of(channelDefinition)).build();
@@ -114,7 +114,7 @@ public class AbstractStorageBasedTypeProviderTest {
 
         ChannelDefinition channelDefinition = new ChannelDefinitionBuilder("channelName",
                 new ChannelTypeUID("system:color")).withLabel("label").withDescription("description")
-                        .withProperties(Map.of("key", "value")).withAutoUpdatePolicy(AutoUpdatePolicy.VETO).build();
+                .withProperties(Map.of("key", "value")).withAutoUpdatePolicy(AutoUpdatePolicy.VETO).build();
         ChannelGroupDefinition channelGroupDefinition = new ChannelGroupDefinition("groupName",
                 new ChannelGroupTypeUID("testBinding:channelGroupType"), "label", "description");
         ThingType expected = ThingTypeBuilder.instance(thingTypeUID, "testLabel").withDescription("description")
