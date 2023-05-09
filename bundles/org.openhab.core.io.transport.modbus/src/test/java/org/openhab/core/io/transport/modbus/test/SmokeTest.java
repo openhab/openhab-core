@@ -824,7 +824,6 @@ public class SmokeTest extends IntegrationTestSupport {
 
         // Reset config
         try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(getEndpoint(), null)) {
-            // Sets configuration for the endpoint implicitly
         }
         // Should match the default
         assertThat(modbusManager.getEndpointPoolConfiguration(getEndpoint()), is(equalTo(defaultConfig)));

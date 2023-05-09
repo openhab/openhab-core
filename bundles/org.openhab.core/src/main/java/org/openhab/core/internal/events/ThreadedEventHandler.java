@@ -62,7 +62,6 @@ public class ThreadedEventHandler implements Closeable {
                         if (event == null) {
                             logger.debug("Hey, you have really very few events.");
                         } else if (event.equals(notifyEvent)) {
-                            // received an internal notification
                         } else {
                             worker.handleEvent(event);
                         }
