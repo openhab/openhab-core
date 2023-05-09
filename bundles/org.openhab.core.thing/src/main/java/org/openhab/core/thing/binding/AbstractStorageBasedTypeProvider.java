@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.binding;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -49,6 +50,7 @@ import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.types.StateOption;
 
 /**
  * The {@link AbstractStorageBasedTypeProvider} is the base class for the implementation of a {@link Storage} based
@@ -241,8 +243,12 @@ public abstract class AbstractStorageBasedTypeProvider
         entity.tags = channelType.getTags();
         entity.category = channelType.getCategory();
         StateDescription stateDescription = channelType.getState();
-        entity.stateDescriptionFragment = stateDescription == null ? null
-                : StateDescriptionFragmentBuilder.create(stateDescription).build();
+        if (stateDescription != null) {
+            StateDescriptionFragment fragment = StateDescriptionFragmentBuilder.create(stateDescription).build();
+            entity.stateDescriptionFragment = mapToEntity(fragment);
+        } else {
+            entity.stateDescriptionFragment = null;
+        }
         entity.commandDescription = channelType.getCommandDescription();
         entity.event = channelType.getEvent();
         entity.autoUpdatePolicy = channelType.getAutoUpdatePolicy();
@@ -257,6 +263,17 @@ public abstract class AbstractStorageBasedTypeProvider
         entity.category = channelGroupType.getCategory();
         entity.channelDefinitions = channelGroupType.getChannelDefinitions().stream()
                 .map(AbstractStorageBasedTypeProvider::mapToEntity).toList();
+        return entity;
+    }
+
+    static StateDescriptionFragmentEntity mapToEntity(StateDescriptionFragment fragment) {
+        StateDescriptionFragmentEntity entity = new StateDescriptionFragmentEntity();
+        entity.maximum = fragment.getMaximum();
+        entity.minimum = fragment.getMinimum();
+        entity.step = fragment.getStep();
+        entity.options = fragment.getOptions();
+        entity.pattern = fragment.getPattern();
+        entity.isReadOnly = fragment.isReadOnly();
         return entity;
     }
 
@@ -309,7 +326,8 @@ public abstract class AbstractStorageBasedTypeProvider
         }
         if (builder instanceof StateChannelTypeBuilder stateBuilder) {
             if (entity.stateDescriptionFragment != null) {
-                stateBuilder.withStateDescriptionFragment(Objects.requireNonNull(entity.stateDescriptionFragment));
+                stateBuilder.withStateDescriptionFragment(
+                        mapFromEntity(Objects.requireNonNull(entity.stateDescriptionFragment)));
             }
             if (entity.commandDescription != null) {
                 stateBuilder.withCommandDescription(Objects.requireNonNull(entity.commandDescription));
@@ -336,6 +354,27 @@ public abstract class AbstractStorageBasedTypeProvider
         if (entity.category != null) {
             builder.withCategory(Objects.requireNonNull(entity.category));
         }
+        return builder.build();
+    }
+
+    static StateDescriptionFragment mapFromEntity(StateDescriptionFragmentEntity entity) {
+        StateDescriptionFragmentBuilder builder = StateDescriptionFragmentBuilder.create();
+        if (entity.maximum != null) {
+            builder.withMaximum(Objects.requireNonNull(entity.maximum));
+        }
+        if (entity.minimum != null) {
+            builder.withMinimum(Objects.requireNonNull(entity.minimum));
+        }
+        if (entity.step != null) {
+            builder.withStep(Objects.requireNonNull(entity.step));
+        }
+        if (entity.options != null) {
+            builder.withOptions(Objects.requireNonNull(entity.options));
+        }
+        if (entity.pattern != null) {
+            builder.withPattern(Objects.requireNonNull(entity.pattern));
+        }
+        builder.withReadOnly(entity.isReadOnly);
         return builder.build();
     }
 
@@ -382,7 +421,7 @@ public abstract class AbstractStorageBasedTypeProvider
         public @NonNullByDefault({}) ChannelKind kind;
         public Set<String> tags = Set.of();
         public @Nullable String category;
-        public @Nullable StateDescriptionFragment stateDescriptionFragment;
+        public @Nullable StateDescriptionFragmentEntity stateDescriptionFragment;
         public @Nullable CommandDescription commandDescription;
         public @Nullable EventDescription event;
         public @Nullable AutoUpdatePolicy autoUpdatePolicy;
@@ -395,5 +434,14 @@ public abstract class AbstractStorageBasedTypeProvider
 
         public List<ChannelDefinitionEntity> channelDefinitions = List.of();
         private @Nullable String category;
+    }
+
+    static class StateDescriptionFragmentEntity {
+        public @Nullable BigDecimal maximum;
+        public @Nullable BigDecimal minimum;
+        public @Nullable BigDecimal step;
+        public @Nullable List<StateOption> options;
+        public @Nullable String pattern;
+        public boolean isReadOnly = false;
     }
 }
