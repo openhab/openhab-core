@@ -29,7 +29,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.service.CommandDescriptionService;
 import org.openhab.core.service.StateDescriptionService;
@@ -82,8 +81,6 @@ public abstract class GenericItem implements ActiveItem {
     private @Nullable StateDescriptionService stateDescriptionService;
 
     private @Nullable CommandDescriptionService commandDescriptionService;
-
-    protected @Nullable UnitProvider unitProvider;
 
     protected @Nullable ItemStateConverter itemStateConverter;
 
@@ -176,7 +173,6 @@ public abstract class GenericItem implements ActiveItem {
         this.eventPublisher = null;
         this.stateDescriptionService = null;
         this.commandDescriptionService = null;
-        this.unitProvider = null;
         this.itemStateConverter = null;
     }
 
@@ -190,10 +186,6 @@ public abstract class GenericItem implements ActiveItem {
 
     public void setCommandDescriptionService(@Nullable CommandDescriptionService commandDescriptionService) {
         this.commandDescriptionService = commandDescriptionService;
-    }
-
-    public void setUnitProvider(@Nullable UnitProvider unitProvider) {
-        this.unitProvider = unitProvider;
     }
 
     public void setItemStateConverter(@Nullable ItemStateConverter itemStateConverter) {

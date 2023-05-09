@@ -30,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.internal.items.ExpireManager.ExpireConfig;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -46,6 +47,8 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.UnDefType;
+
+import tech.units.indriya.unit.Units;
 
 /**
  * The {@link ExpireManagerTest} tests the {@link ExpireManager}.
@@ -341,7 +344,9 @@ class ExpireManagerTest {
             // expected as state is invalid
         }
 
-        testItem = new NumberItem("Number:Temperature", ITEMNAME);
+        UnitProvider unitProviderMock = mock(UnitProvider.class);
+        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(Units.CELSIUS);
+        testItem = new NumberItem("Number:Temperature", ITEMNAME, unitProviderMock);
         cfg = new ExpireManager.ExpireConfig(testItem, "1h,15 °C", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(new QuantityType<Temperature>("15 °C"), cfg.expireState);

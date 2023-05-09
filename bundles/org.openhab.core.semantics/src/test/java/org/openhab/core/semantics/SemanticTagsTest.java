@@ -15,12 +15,14 @@ package org.openhab.core.semantics;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
@@ -49,7 +51,7 @@ public class SemanticTagsTest {
 
     @BeforeEach
     public void setup() {
-        CoreItemFactory itemFactory = new CoreItemFactory();
+        CoreItemFactory itemFactory = new CoreItemFactory(mock(UnitProvider.class));
 
         locationItem = new GroupItem("TestBathRoom");
         locationItem.addTag("Bathroom");

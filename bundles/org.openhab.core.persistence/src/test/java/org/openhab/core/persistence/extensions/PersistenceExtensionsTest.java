@@ -82,11 +82,10 @@ public class PersistenceExtensionsTest {
     public void setUp() {
         when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
 
-        CoreItemFactory itemFactory = new CoreItemFactory();
+        CoreItemFactory itemFactory = new CoreItemFactory(unitProviderMock);
         numberItem = itemFactory.createItem(CoreItemFactory.NUMBER, TEST_NUMBER);
         quantityItem = itemFactory.createItem(CoreItemFactory.NUMBER + ItemUtil.EXTENSION_SEPARATOR + "Temperature",
                 TEST_QUANTITY_NUMBER);
-        quantityItem.setUnitProvider(unitProviderMock);
         switchItem = itemFactory.createItem(CoreItemFactory.SWITCH, TEST_SWITCH);
 
         when(itemRegistryMock.get(TEST_NUMBER)).thenReturn(numberItem);

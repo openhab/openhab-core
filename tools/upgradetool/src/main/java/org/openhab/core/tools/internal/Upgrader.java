@@ -25,6 +25,7 @@ import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.ManagedItemProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
+import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.storage.json.internal.JsonStorage;
 import org.openhab.core.thing.internal.link.ItemChannelLinkConfigDescriptionProvider;
 import org.openhab.core.thing.link.ItemChannelLink;
@@ -91,7 +92,7 @@ public class Upgrader {
         itemStorage.getKeys().forEach(itemName -> {
             ManagedItemProvider.PersistedItem item = itemStorage.get(itemName);
             if (item != null && item.itemType.startsWith("Number:")) {
-                if (metadataStorage.containsKey("unit" + ":" + itemName)) {
+                if (metadataStorage.containsKey(NumberItem.UNIT_METADATA_NAMESPACE + ":" + itemName)) {
                     logger.debug("{}: already contains a 'unit' metadata, skipping it", itemName);
                 } else {
                     Metadata metadata = metadataStorage.get("stateDescription:" + itemName);
@@ -107,7 +108,8 @@ public class Upgrader {
                             Unit<?> stateDescriptionUnit = UnitUtils.parseUnit(pattern);
                             if (stateDescriptionUnit != null) {
                                 String unit = stateDescriptionUnit.toString();
-                                MetadataKey defaultUnitMetadataKey = new MetadataKey("unit", itemName);
+                                MetadataKey defaultUnitMetadataKey = new MetadataKey(NumberItem.UNIT_METADATA_NAMESPACE,
+                                        itemName);
                                 Metadata defaultUnitMetadata = new Metadata(defaultUnitMetadataKey, unit, null);
                                 metadataStorage.put(defaultUnitMetadataKey.toString(), defaultUnitMetadata);
                                 logger.info("{}: Wrote 'unit={}' to metadata.", itemName, unit);

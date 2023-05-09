@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.service.CommandDescriptionService;
 import org.openhab.core.service.StateDescriptionService;
@@ -40,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-public class GroupItem extends GenericItem implements StateChangeListener {
+public class GroupItem extends GenericItem implements StateChangeListener, MetadataAwareItem {
 
     public static final String TYPE = "Group";
 
@@ -405,14 +404,6 @@ public class GroupItem extends GenericItem implements StateChangeListener {
         }
     }
 
-    @Override
-    public void setUnitProvider(@Nullable UnitProvider unitProvider) {
-        super.setUnitProvider(unitProvider);
-        if (baseItem instanceof GenericItem item) {
-            item.setUnitProvider(unitProvider);
-        }
-    }
-
     private void sendGroupStateUpdatedEvent(String memberName, State state) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
@@ -456,5 +447,26 @@ public class GroupItem extends GenericItem implements StateChangeListener {
 
     private boolean hasOwnState(GroupItem item) {
         return item.getFunction() != null && item.getBaseItem() != null;
+    }
+
+    @Override
+    public void addedMetadata(Metadata metadata) {
+        if (baseItem instanceof MetadataAwareItem metadataAwareItem) {
+            metadataAwareItem.addedMetadata(metadata);
+        }
+    }
+
+    @Override
+    public void updatedMetadata(Metadata oldMetadata, Metadata newMetadata) {
+        if (baseItem instanceof MetadataAwareItem metadataAwareItem) {
+            metadataAwareItem.updatedMetadata(oldMetadata, newMetadata);
+        }
+    }
+
+    @Override
+    public void removedMetadata(Metadata metadata) {
+        if (baseItem instanceof MetadataAwareItem metadataAwareItem) {
+            metadataAwareItem.removedMetadata(metadata);
+        }
     }
 }

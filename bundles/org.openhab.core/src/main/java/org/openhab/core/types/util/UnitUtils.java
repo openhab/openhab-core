@@ -76,8 +76,8 @@ public class UnitUtils {
      * @return the {@link Class} instance of the interface or {@code null} if the given dimension is blank.
      * @throws IllegalArgumentException in case no class instance could be parsed from the given dimension.
      */
-    public static @Nullable Class<? extends Quantity<?>> parseDimension(String dimension) {
-        if (dimension.isBlank()) {
+    public static @Nullable Class<? extends Quantity<?>> parseDimension(@Nullable String dimension) {
+        if (dimension == null || dimension.isBlank()) {
             return null;
         }
 
@@ -149,7 +149,7 @@ public class UnitUtils {
      * label). In the latter case, the unit is expected to be the last part of the pattern separated by " " (e.g. "%.2f
      * °C" for °C).
      *
-     * @param stringWithUnit the string to extract the unit symbol from
+     * @param pattern the string to extract the unit symbol from
      * @return the unit symbol extracted from the string or {@code null} if no unit could be parsed
      *
      */
@@ -173,7 +173,7 @@ public class UnitUtils {
                 return quantity.getUnit();
             } catch (IllegalArgumentException | MeasurementParseException e) {
                 // we expect this exception in case the extracted string does not match any known unit
-                LOGGER.debug("Unknown unit from pattern: {}", unitSymbol);
+                LOGGER.error("Unknown unit from pattern: {}", unitSymbol);
             }
         }
 
