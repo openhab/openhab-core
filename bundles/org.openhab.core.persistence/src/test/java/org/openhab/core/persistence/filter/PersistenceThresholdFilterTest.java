@@ -14,30 +14,59 @@ package org.openhab.core.persistence.filter;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.stream.Stream;
 
+import javax.measure.quantity.ElectricCurrent;
+import javax.measure.quantity.ElectricPotential;
+import javax.measure.quantity.Length;
+import javax.measure.quantity.Pressure;
+import javax.measure.quantity.Temperature;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.types.State;
 import org.openhab.core.types.util.UnitUtils;
+
+import tech.units.indriya.unit.Units;
 
 /**
  * The {@link PersistenceThresholdFilterTest} contains tests for {@link PersistenceThresholdFilter}
  *
  * @author Jan N. Klug - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class PersistenceThresholdFilterTest {
     private static final String ITEM_NAME_1 = "itemName1";
     private static final String ITEM_NAME_2 = "itemName2";
+    private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
+
+    @BeforeEach
+    public void setup() {
+        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+        when(unitProviderMock.getUnit(Pressure.class)).thenReturn(SIUnits.PASCAL);
+        when(unitProviderMock.getUnit(Length.class)).thenReturn(SIUnits.METRE);
+        when(unitProviderMock.getUnit(ElectricCurrent.class)).thenReturn(Units.AMPERE);
+        when(unitProviderMock.getUnit(ElectricPotential.class)).thenReturn(Units.VOLT);
+    }
 
     @Test
     public void differentItemSameValue() {
@@ -82,8 +111,8 @@ public class PersistenceThresholdFilterTest {
             itemType += ":" + UnitUtils.getDimensionName(q.getUnit());
         }
 
-        NumberItem item1 = new NumberItem(itemType, PersistenceThresholdFilterTest.ITEM_NAME_1);
-        NumberItem item2 = new NumberItem(itemType, item2name);
+        NumberItem item1 = new NumberItem(itemType, PersistenceThresholdFilterTest.ITEM_NAME_1, unitProviderMock);
+        NumberItem item2 = new NumberItem(itemType, item2name, unitProviderMock);
 
         item1.setState(state1);
         item2.setState(state2);
