@@ -163,7 +163,7 @@ public final class Units extends CustomUnits {
     public static final Unit<Radioactivity> MILLI_CURIE = addUnit(MetricPrefix.MILLI(CURIE));
     public static final Unit<Radioactivity> MICRO_CURIE = addUnit(MetricPrefix.MICRO(CURIE));
     public static final Unit<Radioactivity> NANO_CURIE = addUnit(MetricPrefix.NANO(CURIE));
-
+    public static final Unit<Radioactivity> PICO_CURIE = addUnit(MetricPrefix.PICO(CURIE));
     public static final Unit<RadiationSpecificActivity> BECQUEREL_PER_CUBIC_METRE = addUnit(new ProductUnit<>(
             tech.units.indriya.unit.Units.BECQUEREL.divide(tech.units.indriya.unit.Units.CUBIC_METRE)));
 
@@ -243,6 +243,7 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(MILLI_CURIE, "mCi");
         SimpleUnitFormat.getInstance().label(MICRO_CURIE, "µCi");
         SimpleUnitFormat.getInstance().label(NANO_CURIE, "nCi");
+        SimpleUnitFormat.getInstance().label(PICO_CURIE, "pCi");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_DAY, "m³/d");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_HOUR, "m³/h");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_MINUTE, "m³/min");
