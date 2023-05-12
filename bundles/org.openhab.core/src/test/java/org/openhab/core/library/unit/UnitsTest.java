@@ -387,6 +387,13 @@ public class UnitsTest {
         assertThat(converted.toString(), anyOf(is("10000 \u00B5S/cm"), is("10000 \u03BCS/cm")));
     }
 
+    @Test
+    public void testSpecificActivity() {
+        QuantityType<?> radon = QuantityType.valueOf("37 kBq/m³");
+        QuantityType<?> converted = radon.toUnit("nCi/l");
+        assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
+    }
+
     private static class QuantityEquals extends IsEqual<Quantity<?>> {
         private Quantity<?> quantity;
 
