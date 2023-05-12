@@ -42,7 +42,8 @@ public class UpgradeTool {
         Options options = new Options();
 
         options.addOption(Option.builder().longOpt(OPT_DIR).desc("directory to process").numberOfArgs(1).build());
-        options.addOption(Option.builder().longOpt(OPT_COMMAND).numberOfArgs(1).desc("command to execute").build());
+        options.addOption(Option.builder().longOpt(OPT_COMMAND).numberOfArgs(1)
+                .desc("command to execute (executes all if omitted)").build());
         options.addOption(Option.builder().longOpt(OPT_LOG).numberOfArgs(1).desc("log verbosity").build());
         options.addOption(Option.builder().longOpt(OPT_FORCE).desc("force execution (even if already done)").build());
 
@@ -73,9 +74,12 @@ public class UpgradeTool {
                 boolean force = commandLine.hasOption(OPT_FORCE) ? true : false;
 
                 Upgrader upgrader = new Upgrader(baseDir, force);
-                if (commandLine.hasOption(ITEM_COPY_UNIT_TO_METADATA)) {
+                if (!commandLine.hasOption(OPT_COMMAND)
+                        || ITEM_COPY_UNIT_TO_METADATA.equals(commandLine.getOptionValue(OPT_COMMAND))) {
                     upgrader.itemCopyUnitToMetadata();
-                } else if (commandLine.hasOption(LINK_UPGRADE_JS_PROFILE)) {
+                }
+                if (!commandLine.hasOption(OPT_COMMAND)
+                        || LINK_UPGRADE_JS_PROFILE.equals(commandLine.getOptionValue(OPT_COMMAND))) {
                     upgrader.linkUpgradeJsProfile();
                 }
             }

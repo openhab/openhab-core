@@ -67,7 +67,7 @@ public class Upgrader {
     }
 
     public void itemCopyUnitToMetadata() {
-        if (checkUpgradeRecord(ITEM_COPY_UNIT_TO_METADATA)) {
+        if (!checkUpgradeRecord(ITEM_COPY_UNIT_TO_METADATA)) {
             return;
         }
         Path itemJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.items.Item.json");
@@ -125,7 +125,7 @@ public class Upgrader {
     }
 
     public void linkUpgradeJsProfile() {
-        if (checkUpgradeRecord(LINK_UPGRADE_JS_PROFILE)) {
+        if (!checkUpgradeRecord(LINK_UPGRADE_JS_PROFILE)) {
             return;
         }
 
