@@ -17,11 +17,13 @@ import static org.openhab.core.library.unit.MetricPrefix.HECTO;
 import java.text.MessageFormat;
 import java.time.DateTimeException;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
