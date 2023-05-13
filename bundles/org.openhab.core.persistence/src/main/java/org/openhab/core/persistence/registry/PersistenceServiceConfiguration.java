@@ -10,32 +10,43 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.persistence;
+package org.openhab.core.persistence.registry;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.common.registry.Identifiable;
+import org.openhab.core.persistence.PersistenceItemConfiguration;
+import org.openhab.core.persistence.filter.PersistenceFilter;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 
 /**
- * This class represents the configuration for a persistence service.
+ * The {@link PersistenceServiceConfiguration} represents the configuration for a persistence service.
  *
- * @author Markus Rathgeb - Initial contribution
+ * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class PersistenceServiceConfiguration {
+public class PersistenceServiceConfiguration implements Identifiable<String> {
+    private final String serviceId;
     private final List<PersistenceItemConfiguration> configs;
     private final List<PersistenceStrategy> defaults;
     private final List<PersistenceStrategy> strategies;
+    private final List<PersistenceFilter> filters;
 
-    public PersistenceServiceConfiguration(final Collection<PersistenceItemConfiguration> configs,
-            final Collection<PersistenceStrategy> defaults, final Collection<PersistenceStrategy> strategies) {
-        this.configs = Collections.unmodifiableList(new LinkedList<>(configs));
-        this.defaults = Collections.unmodifiableList(new LinkedList<>(defaults));
-        this.strategies = Collections.unmodifiableList(new LinkedList<>(strategies));
+    public PersistenceServiceConfiguration(String serviceId, Collection<PersistenceItemConfiguration> configs,
+            Collection<PersistenceStrategy> defaults, Collection<PersistenceStrategy> strategies,
+            Collection<PersistenceFilter> filters) {
+        this.serviceId = serviceId;
+        this.configs = List.copyOf(configs);
+        this.defaults = List.copyOf(defaults);
+        this.strategies = List.copyOf(strategies);
+        this.filters = List.copyOf(filters);
+    }
+
+    @Override
+    public String getUID() {
+        return serviceId;
     }
 
     /**
@@ -63,5 +74,14 @@ public class PersistenceServiceConfiguration {
      */
     public List<PersistenceStrategy> getStrategies() {
         return strategies;
+    }
+
+    /**
+     * Get all defined filters.
+     *
+     * @return an unmodifiable list of the defined filters
+     */
+    public List<PersistenceFilter> getFilters() {
+        return filters;
     }
 }

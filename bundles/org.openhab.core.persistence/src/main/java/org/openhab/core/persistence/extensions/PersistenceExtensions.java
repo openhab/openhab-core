@@ -52,8 +52,6 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 public class PersistenceExtensions {
 
-    private static final BigDecimal BIG_DECIMAL_TWO = BigDecimal.valueOf(2);
-
     private static PersistenceServiceRegistry registry;
 
     @Activate
@@ -1210,15 +1208,10 @@ public class PersistenceExtensions {
     }
 
     private static @Nullable PersistenceService getService(String serviceId) {
-        PersistenceService service = null;
         if (registry != null) {
-            if (serviceId != null) {
-                service = registry.get(serviceId);
-            } else {
-                service = registry.getDefault();
-            }
+            return serviceId != null ? registry.get(serviceId) : registry.getDefault();
         }
-        return service;
+        return null;
     }
 
     private static @Nullable String getDefaultServiceId() {

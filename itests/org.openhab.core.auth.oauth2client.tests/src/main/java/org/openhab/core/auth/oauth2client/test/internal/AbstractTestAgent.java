@@ -65,11 +65,10 @@ public abstract class AbstractTestAgent implements TestAgent {
         if (obj == null) {
             return "";
         }
-        if (obj instanceof String) {
-            return (String) obj;
+        if (obj instanceof String string) {
+            return string;
         }
-        if (obj instanceof String[]) {
-            String[] strArr = (String[]) obj;
+        if (obj instanceof String[] strArr) {
             if (strArr.length >= 1) {
                 return strArr[0];
             } else {
@@ -141,22 +140,19 @@ public abstract class AbstractTestAgent implements TestAgent {
     @Override
     public AccessTokenResponse testGetCachedAccessToken() throws OAuthException, IOException, OAuthResponseException {
         logger.debug("test getCachedAccessToken");
-        AccessTokenResponse oldRefreshedToken = oauthClientService.getAccessTokenResponse();
-        return oldRefreshedToken;
+        return oauthClientService.getAccessTokenResponse();
     }
 
     @Override
     public AccessTokenResponse testRefreshToken() throws OAuthException, IOException, OAuthResponseException {
         logger.debug("test RefreshToken");
-        AccessTokenResponse newRefreshedToken = oauthClientService.refreshToken();
-        return newRefreshedToken;
+        return oauthClientService.refreshToken();
     }
 
     @Override
     public String testGetAuthorizationUrl(String state) throws OAuthException {
         logger.debug("test getAuthorizationUrl {}", state);
-        String authorizationURL = oauthClientService.getAuthorizationUrl(redirectUri, scope, state);
-        return authorizationURL;
+        return oauthClientService.getAuthorizationUrl(redirectUri, scope, state);
     }
 
     @Override

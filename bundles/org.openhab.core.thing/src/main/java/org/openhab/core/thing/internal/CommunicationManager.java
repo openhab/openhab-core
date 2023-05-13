@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.measure.Quantity;
+import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -35,6 +35,7 @@ import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemRegistry;
@@ -44,8 +45,12 @@ import org.openhab.core.items.events.AbstractItemRegistryEvent;
 import org.openhab.core.items.events.GroupStateUpdatedEvent;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemStateUpdatedEvent;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
@@ -68,13 +73,10 @@ import org.openhab.core.thing.profiles.ProfileFactory;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.StateProfile;
 import org.openhab.core.thing.profiles.TriggerProfile;
-import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
-import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
-import org.openhab.core.types.util.UnitUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -129,6 +131,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     private final EventPublisher eventPublisher;
     private final SafeCaller safeCaller;
     private final ThingRegistry thingRegistry;
+    private final UnitProvider unitProvider;
 
     private final ExpiringCacheMap<Integer, Profile> profileSafeCallCache = new ExpiringCacheMap<>(CACHE_EXPIRATION);
 
@@ -141,7 +144,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             final @Reference ItemStateConverter itemStateConverter, //
             final @Reference EventPublisher eventPublisher, //
             final @Reference SafeCaller safeCaller, //
-            final @Reference ThingRegistry thingRegistry) {
+            final @Reference ThingRegistry thingRegistry, final @Reference UnitProvider unitProvider) {
         this.autoUpdateManager = autoUpdateManager;
         this.channelTypeRegistry = channelTypeRegistry;
         this.defaultProfileFactory = defaultProfileFactory;
@@ -151,6 +154,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         this.eventPublisher = eventPublisher;
         this.safeCaller = safeCaller;
         this.thingRegistry = thingRegistry;
+        this.unitProvider = unitProvider;
 
         itemChannelLinkRegistry.addRegistryChangeListener(this);
     }
@@ -201,10 +205,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         }
     }
 
-    private @Nullable Thing getThing(ThingUID thingUID) {
-        return thingRegistry.get(thingUID);
-    }
-
     private Profile getProfile(ItemChannelLink link, Item item, @Nullable Thing thing) {
         synchronized (profiles) {
             Profile profile = profiles.get(link.getUID());
@@ -226,8 +226,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     }
 
     private ProfileCallback createCallback(ItemChannelLink link) {
-        return new ProfileCallbackImpl(eventPublisher, safeCaller, itemStateConverter, link,
-                thingUID -> getThing(thingUID), itemName -> getItem(itemName));
+        return new ProfileCallbackImpl(eventPublisher, safeCaller, itemStateConverter, link, thingRegistry::get,
+                this::getItem);
     }
 
     private @Nullable ProfileTypeUID determineProfileTypeUID(ItemChannelLink link, Item item, @Nullable Thing thing) {
@@ -270,17 +270,12 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         String profileName = (String) link.getConfiguration()
                 .get(ItemChannelLinkConfigDescriptionProvider.PARAM_PROFILE);
         if (profileName != null && !profileName.trim().isEmpty()) {
-            profileName = normalizeProfileName(profileName);
+            if (!profileName.contains(AbstractUID.SEPARATOR)) {
+                profileName = ProfileTypeUID.SYSTEM_SCOPE + AbstractUID.SEPARATOR + profileName;
+            }
             return new ProfileTypeUID(profileName);
         }
         return null;
-    }
-
-    private String normalizeProfileName(String profileName) {
-        if (!profileName.contains(AbstractUID.SEPARATOR)) {
-            return ProfileTypeUID.SYSTEM_SCOPE + AbstractUID.SEPARATOR + profileName;
-        }
-        return profileName;
     }
 
     private @Nullable Profile getProfileFromFactories(ProfileTypeUID profileTypeUID, ItemChannelLink link,
@@ -288,7 +283,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         ProfileContext context = null;
 
         Item item = getItem(link.getItemName());
-        Thing thing = getThing(link.getLinkedUID().getThingUID());
+        ThingUID thingUID = link.getLinkedUID().getThingUID();
+        Thing thing = thingRegistry.get(thingUID);
         if (item != null && thing != null) {
             Channel channel = thing.getChannel(link.getLinkedUID());
             if (channel != null) {
@@ -339,48 +335,51 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             autoUpdateManager.receiveCommand(commandEvent, item);
         }
 
-        handleEvent(itemName, command, commandEvent.getSource(), s -> acceptedCommandTypeMap.get(s),
-                (profile, thing, convertedCommand) -> {
-                    if (profile instanceof StateProfile stateProfile) {
-                        int key = Objects.hash("COMMAND", profile, thing);
-                        Profile p = profileSafeCallCache.putIfAbsentAndGet(key,
-                                () -> safeCaller.create(stateProfile, StateProfile.class) //
-                                        .withAsync() //
-                                        .withIdentifier(thing) //
-                                        .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
-                                        .build());
-                        if (p instanceof StateProfile profileP) {
-                            profileP.onCommandFromItem(convertedCommand);
-                        } else {
-                            throw new IllegalStateException("ExpiringCache didn't provide a StateProfile instance!");
-                        }
-                    }
-                });
+        handleEvent(itemName, command, commandEvent.getSource(), acceptedCommandTypeMap::get,
+                this::applyProfileForCommand);
     }
 
     private void receiveUpdate(ItemStateUpdatedEvent updateEvent) {
         final String itemName = updateEvent.getItemName();
         final State newState = updateEvent.getItemState();
-        handleEvent(itemName, newState, updateEvent.getSource(), s -> acceptedStateTypeMap.get(s),
-                (profile, thing, convertedState) -> {
-                    int key = Objects.hash("UPDATE", profile, thing);
-                    Profile p = profileSafeCallCache.putIfAbsentAndGet(key,
-                            () -> safeCaller.create(profile, Profile.class) //
-                                    .withAsync() //
-                                    .withIdentifier(thing) //
-                                    .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
-                                    .build());
-                    if (p != null) {
-                        p.onStateUpdateFromItem(convertedState);
-                    } else {
-                        throw new IllegalStateException("ExpiringCache didn't provide a Profile instance!");
-                    }
-                });
+        handleEvent(itemName, newState, updateEvent.getSource(), acceptedStateTypeMap::get,
+                this::applyProfileForUpdate);
     }
 
     @FunctionalInterface
-    private static interface ProfileAction<T extends Type> {
-        void handle(Profile profile, Thing thing, T type);
+    private interface ProfileAction<T extends Type> {
+        void applyProfile(Profile profile, Thing thing, T type);
+    }
+
+    private void applyProfileForUpdate(Profile profile, Thing thing, State convertedState) {
+        int key = Objects.hash("UPDATE", profile, thing);
+        Profile p = profileSafeCallCache.putIfAbsentAndGet(key, () -> safeCaller.create(profile, Profile.class) //
+                .withAsync() //
+                .withIdentifier(thing) //
+                .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
+                .build());
+        if (p != null) {
+            p.onStateUpdateFromItem(convertedState);
+        } else {
+            throw new IllegalStateException("ExpiringCache didn't provide a Profile instance!");
+        }
+    }
+
+    private void applyProfileForCommand(Profile profile, Thing thing, Command convertedCommand) {
+        if (profile instanceof StateProfile stateProfile) {
+            int key = Objects.hash("COMMAND", profile, thing);
+            Profile p = profileSafeCallCache.putIfAbsentAndGet(key,
+                    () -> safeCaller.create(stateProfile, StateProfile.class) //
+                            .withAsync() //
+                            .withIdentifier(thing) //
+                            .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
+                            .build());
+            if (p instanceof StateProfile profileP) {
+                profileP.onCommandFromItem(convertedCommand);
+            } else {
+                throw new IllegalStateException("ExpiringCache didn't provide a StateProfile instance!");
+            }
+        }
     }
 
     private <T extends Type> void handleEvent(String itemName, T type, @Nullable String source,
@@ -397,7 +396,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             return !link.getLinkedUID().toString().equals(source);
         }).forEach(link -> {
             ChannelUID channelUID = link.getLinkedUID();
-            Thing thing = getThing(channelUID.getThingUID());
+            ThingUID thingUID = channelUID.getThingUID();
+            Thing thing = thingRegistry.get(thingUID);
             if (thing != null) {
                 Channel channel = thing.getChannel(channelUID.getId());
                 if (channel != null) {
@@ -406,7 +406,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                     if (convertedType != null) {
                         if (thing.getHandler() != null) {
                             Profile profile = getProfile(link, item, thing);
-                            action.handle(profile, thing, convertedType);
+                            action.applyProfile(profile, thing, convertedType);
                         }
                     } else {
                         logger.debug(
@@ -427,118 +427,49 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     @SuppressWarnings("unchecked")
     private <T extends Type> @Nullable T toAcceptedType(T originalType, Channel channel,
             Function<@Nullable String, @Nullable List<Class<? extends T>>> acceptedTypesFunction, Item item) {
-        String acceptedItemType = channel.getAcceptedItemType();
+        String channelAcceptedItemType = channel.getAcceptedItemType();
 
-        // DecimalType command sent to a NumberItem with dimension defined:
-        if (originalType instanceof DecimalType type && hasDimension(item, acceptedItemType)) {
-            @Nullable
-            QuantityType<?> quantityType = convertToQuantityType(type, item, acceptedItemType);
-            if (quantityType != null) {
-                return (T) quantityType;
-            }
-        }
-
-        // The command is sent to an item w/o dimension defined and the channel is legacy (created from a ThingType
-        // definition before UoM was introduced to the binding). The dimension information might now be defined on the
-        // current ThingType. The binding might expect us to provide a QuantityType so try to convert to the dimension
-        // the ChannelType provides.
-        // This can be removed once a suitable solution for https://github.com/eclipse/smarthome/issues/2555 (Thing
-        // migration) is found.
-        if (originalType instanceof DecimalType type && !hasDimension(item, acceptedItemType)
-                && channelTypeDefinesDimension(channel.getChannelTypeUID())) {
-            ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
-
-            String acceptedItemTypeFromChannelType = channelType != null ? channelType.getItemType() : null;
-            @Nullable
-            QuantityType<?> quantityType = convertToQuantityType(type, item, acceptedItemTypeFromChannelType);
-            if (quantityType != null) {
-                return (T) quantityType;
-            }
-        }
-
-        if (acceptedItemType == null) {
+        if (channelAcceptedItemType == null) {
             return originalType;
         }
 
-        List<Class<? extends T>> acceptedTypes = acceptedTypesFunction.apply(acceptedItemType);
-        if (acceptedTypes == null) {
-            return originalType;
+        // handle Number-Channels for backward compatibility
+        if (CoreItemFactory.NUMBER.equals(channelAcceptedItemType)
+                && originalType instanceof QuantityType<?> quantityType) {
+            // strip unit from QuantityType for channels that accept plain number
+            return (T) new DecimalType(quantityType.toBigDecimal());
         }
 
-        if (acceptedTypes.contains(originalType.getClass())) {
+        String itemDimension = ItemUtil.getItemTypeExtension(item.getType());
+        String channelDimension = ItemUtil.getItemTypeExtension(channelAcceptedItemType);
+
+        if (originalType instanceof DecimalType decimalType && channelDimension != null
+                && channelDimension.equals(itemDimension)) {
+            // Add unit from item to DecimalType when dimensions are equal
+            Unit<?> unit = Objects.requireNonNull(((NumberItem) item).getUnit());
+            return (T) new QuantityType<>(decimalType.toBigDecimal(), unit);
+        }
+
+        // handle HSBType/PercentType
+        if (CoreItemFactory.DIMMER.equals(channelAcceptedItemType) && originalType instanceof HSBType hsb) {
+            return (T) (hsb.as(PercentType.class));
+        }
+
+        // check for other cases if the type is acceptable
+        List<Class<? extends T>> acceptedTypes = acceptedTypesFunction.apply(channelAcceptedItemType);
+        if (acceptedTypes == null || acceptedTypes.contains(originalType.getClass())) {
             return originalType;
+        } else if (acceptedTypes.contains(PercentType.class) && originalType instanceof State state
+                && PercentType.class.isAssignableFrom(originalType.getClass())) {
+            return (@Nullable T) state.as(PercentType.class);
+        } else if (acceptedTypes.contains(OnOffType.class) && originalType instanceof State state
+                && PercentType.class.isAssignableFrom(originalType.getClass())) {
+            return (@Nullable T) state.as(OnOffType.class);
         } else {
-            // Look for class hierarchy and convert appropriately
-            for (Class<? extends T> typeClass : acceptedTypes) {
-                if (!typeClass.isEnum() && typeClass.isAssignableFrom(originalType.getClass()) //
-                        && State.class.isAssignableFrom(typeClass) && originalType instanceof State state) {
-                    T ret = (T) state.as((Class<? extends State>) typeClass);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Converted '{}' ({}) to accepted type '{}' ({}) for channel '{}' ", originalType,
-                                originalType.getClass().getSimpleName(), ret, ret.getClass().getName(),
-                                channel.getUID());
-                    }
-                    return ret;
-                }
-            }
-        }
-        logger.debug("Received not accepted type '{}' for channel '{}'", originalType.getClass().getSimpleName(),
-                channel.getUID());
-        return null;
-    }
-
-    private boolean channelTypeDefinesDimension(@Nullable ChannelTypeUID channelTypeUID) {
-        if (channelTypeUID == null) {
-            return false;
-        }
-
-        ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID);
-        return channelType != null && getDimension(channelType.getItemType()) != null;
-    }
-
-    private boolean hasDimension(Item item, @Nullable String acceptedItemType) {
-        return (item instanceof NumberItem ni && ni.getDimension() != null) || getDimension(acceptedItemType) != null;
-    }
-
-    private @Nullable QuantityType<?> convertToQuantityType(DecimalType originalType, Item item,
-            @Nullable String acceptedItemType) {
-        if (!(item instanceof NumberItem)) {
-            // PercentType command sent via DimmerItem to a channel that's dimensioned
-            // (such as Number:Dimensionless, expecting a %).
-            // We can't know the proper units to add, so just pass it through and assume
-            // The binding can deal with it.
+            logger.debug("Received not accepted type '{}' for channel '{}'", originalType.getClass().getSimpleName(),
+                    channel.getUID());
             return null;
         }
-
-        NumberItem numberItem = (NumberItem) item;
-
-        // DecimalType command sent via a NumberItem with dimension:
-        Class<? extends Quantity<?>> dimension = numberItem.getDimension();
-
-        if (dimension == null) {
-            // DecimalType command sent via a plain NumberItem w/o dimension.
-            // We try to guess the correct unit from the channel-type's expected item dimension
-            // or from the item's state description.
-            dimension = getDimension(acceptedItemType);
-        }
-
-        if (dimension != null) {
-            return numberItem.toQuantityType(originalType, dimension);
-        }
-
-        return null;
-    }
-
-    private @Nullable Class<? extends Quantity<?>> getDimension(@Nullable String acceptedItemType) {
-        if (acceptedItemType == null || acceptedItemType.isEmpty()) {
-            return null;
-        }
-        String itemTypeExtension = ItemUtil.getItemTypeExtension(acceptedItemType);
-        if (itemTypeExtension == null) {
-            return null;
-        }
-
-        return UnitUtils.parseDimension(itemTypeExtension);
     }
 
     private @Nullable Item getItem(final String itemName) {
@@ -548,7 +479,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     private void receiveTrigger(ChannelTriggeredEvent channelTriggeredEvent) {
         final ChannelUID channelUID = channelTriggeredEvent.getChannel();
         final String event = channelTriggeredEvent.getEvent();
-        final Thing thing = getThing(channelUID.getThingUID());
+        ThingUID thingUID = channelUID.getThingUID();
+        final Thing thing = thingRegistry.get(thingUID);
 
         handleCallFromHandler(channelUID, thing, profile -> {
             if (profile instanceof TriggerProfile triggerProfile) {
@@ -558,7 +490,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     }
 
     public void stateUpdated(ChannelUID channelUID, State state) {
-        final Thing thing = getThing(channelUID.getThingUID());
+        ThingUID thingUID = channelUID.getThingUID();
+        final Thing thing = thingRegistry.get(thingUID);
 
         handleCallFromHandler(channelUID, thing, profile -> {
             if (profile instanceof StateProfile stateProfile) {
@@ -568,7 +501,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     }
 
     public void postCommand(ChannelUID channelUID, Command command) {
-        final Thing thing = getThing(channelUID.getThingUID());
+        ThingUID thingUID = channelUID.getThingUID();
+        final Thing thing = thingRegistry.get(thingUID);
 
         handleCallFromHandler(channelUID, thing, profile -> {
             if (profile instanceof StateProfile stateProfile) {
@@ -577,7 +511,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         });
     }
 
-    void handleCallFromHandler(ChannelUID channelUID, @Nullable Thing thing, Consumer<Profile> action) {
+    private void handleCallFromHandler(ChannelUID channelUID, @Nullable Thing thing, Consumer<Profile> action) {
         itemChannelLinkRegistry.getLinks(channelUID).forEach(link -> {
             final Item item = getItem(link.getItemName());
             if (item != null) {
@@ -622,9 +556,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     protected void removeProfileFactory(ProfileFactory profileFactory) {
         Set<String> links = profileFactories.remove(profileFactory);
         synchronized (profiles) {
-            links.forEach(link -> {
-                profiles.remove(link);
-            });
+            links.forEach(profiles::remove);
         }
     }
 

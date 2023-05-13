@@ -319,7 +319,7 @@ public class HttpUtil {
                 if (host.contains("*")) {
                     // the nonProxyHots-pattern allows wildcards '*' which must
                     // be masked to be used with regular expressions
-                    String hostRegexp = host.replaceAll("\\.", "\\\\.");
+                    String hostRegexp = host.replace(".", "\\.");
                     hostRegexp = hostRegexp.replaceAll("\\*", ".*");
                     if (givenHost.matches(hostRegexp)) {
                         return false;

@@ -15,6 +15,7 @@ package org.openhab.core.model.script.engine;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,8 +27,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemProvider;
 import org.openhab.core.items.ItemRegistry;
@@ -48,6 +55,8 @@ import org.openhab.core.types.State;
  * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class ScriptEngineOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM_NAME = "Switch1";
@@ -58,9 +67,13 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ItemProvider itemProvider;
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
     private @NonNullByDefault({}) ScriptEngine scriptEngine;
+    private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
 
     @BeforeEach
     public void setup() {
+        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+        when(unitProviderMock.getUnit(Length.class)).thenReturn(SIUnits.METRE);
+
         registerVolatileStorageService();
 
         EventPublisher eventPublisher = event -> {
@@ -351,7 +364,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
     }
 
     private Item createNumberItem(String numberItemName, Class<?> dimension) {
-        return new NumberItem("Number:" + dimension.getSimpleName(), numberItemName);
+        return new NumberItem("Number:" + dimension.getSimpleName(), numberItemName, unitProviderMock);
     }
 
     @SuppressWarnings("unchecked")

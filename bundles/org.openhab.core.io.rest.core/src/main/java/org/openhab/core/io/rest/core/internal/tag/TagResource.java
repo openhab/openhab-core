@@ -47,8 +47,6 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -75,8 +73,6 @@ public class TagResource implements RESTResource {
     /** The URI path to this resource */
     public static final String PATH_TAGS = "tags";
 
-    private final Logger logger = LoggerFactory.getLogger(TagResource.class);
-
     private final LocaleService localeService;
 
     @Activate
@@ -91,7 +87,6 @@ public class TagResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TagDTO.class)))) })
     public Response getTags(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
-
         final Locale locale = localeService.getLocale(language);
 
         Map<String, List<TagDTO>> tags = Map.of( //

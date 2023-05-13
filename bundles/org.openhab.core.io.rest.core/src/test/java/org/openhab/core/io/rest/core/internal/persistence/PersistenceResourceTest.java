@@ -39,6 +39,8 @@ import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
+import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurationProvider;
+import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.types.State;
 
 /**
@@ -58,11 +60,14 @@ public class PersistenceResourceTest {
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
     private @Mock @NonNullByDefault({}) PersistenceServiceRegistry persistenceServiceRegistryMock;
+    private @Mock @NonNullByDefault({}) PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistryMock;
+    private @Mock @NonNullByDefault({}) ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProviderMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
 
     @BeforeEach
     public void beforeEach() {
         pResource = new PersistenceResource(itemRegistryMock, localeServiceMock, persistenceServiceRegistryMock,
+                persistenceServiceConfigurationRegistryMock, managedPersistenceServiceConfigurationProviderMock,
                 timeZoneProviderMock);
 
         int startValue = 2016;

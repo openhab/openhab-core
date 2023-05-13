@@ -10,16 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.persistence;
+package org.openhab.core.persistence.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
+ * The {@link PersistenceCronStrategyDTO} is used for transferring persistence cron
+ * strategies
  *
- *
- * @author Markus Rathgeb - Initial contribution
+ * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class PersistenceFilter {
-
+public class PersistenceCronStrategyDTO {
+    public String name = "";
+    public String cronExpression = "";
 }

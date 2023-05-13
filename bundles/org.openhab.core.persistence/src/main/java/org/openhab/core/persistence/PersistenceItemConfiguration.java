@@ -18,6 +18,7 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.persistence.config.PersistenceConfig;
+import org.openhab.core.persistence.filter.PersistenceFilter;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 
 /**
@@ -26,12 +27,8 @@ import org.openhab.core.persistence.strategy.PersistenceStrategy;
  * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
-public class PersistenceItemConfiguration {
-
-    private final List<PersistenceConfig> items;
-    private final @Nullable String alias;
-    private final List<PersistenceStrategy> strategies;
-    private final List<PersistenceFilter> filters;
+public record PersistenceItemConfiguration(List<PersistenceConfig> items, @Nullable String alias,
+        List<PersistenceStrategy> strategies, List<PersistenceFilter> filters) {
 
     public PersistenceItemConfiguration(final List<PersistenceConfig> items, @Nullable final String alias,
             @Nullable final List<PersistenceStrategy> strategies, @Nullable final List<PersistenceFilter> filters) {
@@ -39,27 +36,5 @@ public class PersistenceItemConfiguration {
         this.alias = alias;
         this.strategies = Objects.requireNonNullElse(strategies, List.of());
         this.filters = Objects.requireNonNullElse(filters, List.of());
-    }
-
-    public List<PersistenceConfig> getItems() {
-        return items;
-    }
-
-    public @Nullable String getAlias() {
-        return alias;
-    }
-
-    public List<PersistenceStrategy> getStrategies() {
-        return strategies;
-    }
-
-    public List<PersistenceFilter> getFilters() {
-        return filters;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s [items=%s, alias=%s, strategies=%s, filters=%s]", getClass().getSimpleName(), items,
-                alias, strategies, filters);
     }
 }

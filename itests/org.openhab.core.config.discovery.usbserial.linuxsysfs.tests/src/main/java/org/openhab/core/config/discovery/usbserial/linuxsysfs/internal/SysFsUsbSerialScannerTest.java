@@ -88,7 +88,7 @@ public class SysFsUsbSerialScannerTest {
     @Test
     public void testIOExceptionIfSysfsTtyDoesNotExist() throws IOException {
         delete(sysfsTtyPath);
-        assertThrows(IOException.class, () -> scanner.scan());
+        assertThrows(IOException.class, scanner::scan);
     }
 
     @Test
@@ -246,6 +246,6 @@ public class SysFsUsbSerialScannerTest {
         NO_VENDOR_ID,
         NO_PRODUCT_ID,
         NO_INTERFACE_NUMBER,
-        NON_USB_DEVICE;
+        NON_USB_DEVICE
     }
 }

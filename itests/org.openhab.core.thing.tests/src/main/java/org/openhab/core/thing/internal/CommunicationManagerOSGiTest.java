@@ -40,6 +40,8 @@ import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemStateConverter;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.CoreItemFactory;
@@ -50,8 +52,8 @@ import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
-import org.openhab.core.service.StateDescriptionService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
@@ -81,7 +83,6 @@ import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
-import org.openhab.core.types.StateDescriptionFragmentBuilder;
 
 /**
  *
@@ -103,21 +104,27 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         }
     }
 
+    private static final UnitProvider unitProviderMock = mock(UnitProvider.class);
+
     private static final String EVENT = "event";
     private static final String ITEM_NAME_1 = "testItem1";
     private static final String ITEM_NAME_2 = "testItem2";
     private static final String ITEM_NAME_3 = "testItem3";
     private static final String ITEM_NAME_4 = "testItem4";
+    private static final String ITEM_NAME_5 = "testItem5";
     private static final SwitchItem ITEM_1 = new SwitchItem(ITEM_NAME_1);
     private static final SwitchItem ITEM_2 = new SwitchItem(ITEM_NAME_2);
     private static final NumberItem ITEM_3 = new NumberItem(ITEM_NAME_3);
     private static final NumberItem ITEM_4 = new NumberItem(ITEM_NAME_4);
+    private static NumberItem ITEM_5 = new NumberItem(ITEM_NAME_5); // will be replaced later by dimension item
+
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("test", "type");
     private static final ThingUID THING_UID = new ThingUID("test", "thing");
     private static final ChannelUID STATE_CHANNEL_UID_1 = new ChannelUID(THING_UID, "state-channel1");
     private static final ChannelUID STATE_CHANNEL_UID_2 = new ChannelUID(THING_UID, "state-channel2");
     private static final ChannelUID STATE_CHANNEL_UID_3 = new ChannelUID(THING_UID, "state-channel3");
     private static final ChannelUID STATE_CHANNEL_UID_4 = new ChannelUID(THING_UID, "state-channel4");
+    private static final ChannelUID STATE_CHANNEL_UID_5 = new ChannelUID(THING_UID, "state-channel5");
     private static final ChannelTypeUID CHANNEL_TYPE_UID_4 = new ChannelTypeUID("test", "channeltype");
     private static final ChannelUID TRIGGER_CHANNEL_UID_1 = new ChannelUID(THING_UID, "trigger-channel1");
     private static final ChannelUID TRIGGER_CHANNEL_UID_2 = new ChannelUID(THING_UID, "trigger-channel2");
@@ -126,6 +133,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private static final ItemChannelLink LINK_2_S2 = new ItemChannelLink(ITEM_NAME_2, STATE_CHANNEL_UID_2);
     private static final ItemChannelLink LINK_3_S3 = new ItemChannelLink(ITEM_NAME_3, STATE_CHANNEL_UID_3);
     private static final ItemChannelLink LINK_4_S4 = new ItemChannelLink(ITEM_NAME_4, STATE_CHANNEL_UID_4);
+    private static final ItemChannelLink LINK_5_S5 = new ItemChannelLink(ITEM_NAME_5, STATE_CHANNEL_UID_5);
     private static final ItemChannelLink LINK_1_T1 = new ItemChannelLink(ITEM_NAME_1, TRIGGER_CHANNEL_UID_1);
     private static final ItemChannelLink LINK_1_T2 = new ItemChannelLink(ITEM_NAME_1, TRIGGER_CHANNEL_UID_2);
     private static final ItemChannelLink LINK_2_T2 = new ItemChannelLink(ITEM_NAME_2, TRIGGER_CHANNEL_UID_2);
@@ -135,6 +143,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
             ChannelBuilder.create(STATE_CHANNEL_UID_3, "Number:Temperature").withKind(ChannelKind.STATE).build(),
             ChannelBuilder.create(STATE_CHANNEL_UID_4, CoreItemFactory.NUMBER).withKind(ChannelKind.STATE)
                     .withType(CHANNEL_TYPE_UID_4).build(),
+            ChannelBuilder.create(STATE_CHANNEL_UID_5, "Number:Temperature").withKind(ChannelKind.STATE).build(),
             ChannelBuilder.create(TRIGGER_CHANNEL_UID_1).withKind(ChannelKind.TRIGGER).build(),
             ChannelBuilder.create(TRIGGER_CHANNEL_UID_2).withKind(ChannelKind.TRIGGER).build()).build();
 
@@ -158,6 +167,9 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() {
+        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+        ITEM_5 = new NumberItem("Number:Temperature", ITEM_NAME_5, unitProviderMock);
+
         safeCaller = getService(SafeCaller.class);
         assertNotNull(safeCaller);
 
@@ -166,7 +178,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         assertNotNull(profileFactory);
 
         manager = new CommunicationManager(autoUpdateManagerMock, channelTypeRegistryMock, profileFactory, iclRegistry,
-                itemRegistryMock, itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock);
+                itemRegistryMock, itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock,
+                unitProviderMock);
 
         doAnswer(invocation -> {
             switch (((Channel) invocation.getArguments()[0]).getKind()) {
@@ -205,7 +218,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
             @Override
             public Collection<ItemChannelLink> getAll() {
-                return List.of(LINK_1_S1, LINK_1_S2, LINK_2_S2, LINK_1_T1, LINK_1_T2, LINK_2_T2, LINK_3_S3, LINK_4_S4);
+                return List.of(LINK_1_S1, LINK_1_S2, LINK_2_S2, LINK_1_T1, LINK_1_T2, LINK_2_T2, LINK_3_S3, LINK_4_S4,
+                        LINK_5_S5);
             }
         });
 
@@ -213,6 +227,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         when(itemRegistryMock.get(eq(ITEM_NAME_2))).thenReturn(ITEM_2);
         when(itemRegistryMock.get(eq(ITEM_NAME_3))).thenReturn(ITEM_3);
         when(itemRegistryMock.get(eq(ITEM_NAME_4))).thenReturn(ITEM_4);
+        when(itemRegistryMock.get(eq(ITEM_NAME_5))).thenReturn(ITEM_5);
 
         ChannelType channelType4 = mock(ChannelType.class);
         when(channelType4.getItemType()).thenReturn("Number:Temperature");
@@ -222,12 +237,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         THING.setHandler(thingHandlerMock);
 
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(THING);
-        manager.addItemFactory(new CoreItemFactory());
 
-        UnitProvider unitProvider = mock(UnitProvider.class);
-        when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
-        ITEM_3.setUnitProvider(unitProvider);
-        ITEM_4.setUnitProvider(unitProvider);
+        manager.addItemFactory(new CoreItemFactory(unitProviderMock));
     }
 
     @Test
@@ -284,7 +295,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     @Test
     public void testItemCommandEventDecimal2Quantity() {
         // Take unit from accepted item type (see channel built from STATE_CHANNEL_UID_3)
-        manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_3, DecimalType.valueOf("20")));
+        manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_5, DecimalType.valueOf("20")));
         waitForAssert(() -> {
             verify(stateProfileMock).onCommandFromItem(eq(QuantityType.valueOf("20 °C")));
         });
@@ -294,30 +305,13 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testItemCommandEventDecimal2Quantity2() {
-        // Take unit from state description
-        StateDescriptionService stateDescriptionService = mock(StateDescriptionService.class);
-        when(stateDescriptionService.getStateDescription(ITEM_NAME_3, null)).thenReturn(
-                StateDescriptionFragmentBuilder.create().withPattern("%.1f °F").build().toStateDescription());
-        ITEM_3.setStateDescriptionService(stateDescriptionService);
+        MetadataKey key = new MetadataKey(NumberItem.UNIT_METADATA_NAMESPACE, ITEM_NAME_5);
+        Metadata metadata = new Metadata(key, ImperialUnits.FAHRENHEIT.toString(), null);
+        ITEM_5.addedMetadata(metadata);
 
-        manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_3, DecimalType.valueOf("20")));
+        manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_5, DecimalType.valueOf("20")));
         waitForAssert(() -> {
             verify(stateProfileMock).onCommandFromItem(eq(QuantityType.valueOf("20 °F")));
-        });
-        verifyNoMoreInteractions(stateProfileMock);
-        verifyNoMoreInteractions(triggerProfileMock);
-
-        ITEM_3.setStateDescriptionService(null);
-    }
-
-    @Test
-    public void testItemCommandEventDecimal2QuantityChannelType() {
-        // The command is sent to an item w/o dimension defined and the channel is legacy (created from a ThingType
-        // definition before UoM was introduced to the binding). The dimension information might now be defined on the
-        // current ThingType.
-        manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_4, DecimalType.valueOf("20")));
-        waitForAssert(() -> {
-            verify(stateProfileMock).onCommandFromItem(eq(QuantityType.valueOf("20 °C")));
         });
         verifyNoMoreInteractions(stateProfileMock);
         verifyNoMoreInteractions(triggerProfileMock);

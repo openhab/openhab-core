@@ -92,7 +92,7 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
     @SuppressWarnings({ "unchecked" })
     @Override
     public void ungetHandler(Module module, String childModulePrefix, ModuleHandler handler) {
-        ModuleHandler handlerOfModule = getHandlers().get(childModulePrefix + module.getId());
+        ModuleHandler handlerOfModule = getHandlers().get(getModuleIdentifier(childModulePrefix, module.getId()));
         if (handlerOfModule instanceof AbstractCompositeModuleHandler) {
             AbstractCompositeModuleHandler<ModuleImpl, ?, ?> h = (AbstractCompositeModuleHandler<ModuleImpl, ?, ?>) handlerOfModule;
             Set<ModuleImpl> modules = h.moduleHandlerMap.keySet();

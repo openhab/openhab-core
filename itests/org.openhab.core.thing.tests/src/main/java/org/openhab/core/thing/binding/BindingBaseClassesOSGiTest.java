@@ -146,7 +146,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
         @Override
         protected @Nullable ThingHandler createHandler(Thing thing) {
-            ThingHandler handler = (thing instanceof Bridge) ? new SimpleBridgeHandler((Bridge) thing)
+            ThingHandler handler = (thing instanceof Bridge b) ? new SimpleBridgeHandler(b)
                     : new SimpleThingHandler(thing);
             handlers.add(handler);
             return handler;

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -43,6 +44,7 @@ public class SemanticsServiceImplTest {
 
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) MetadataRegistry metadataRegistryMock;
+    private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
 
     private @NonNullByDefault({}) GroupItem locationItem;
     private @NonNullByDefault({}) GroupItem equipmentItem;
@@ -52,7 +54,7 @@ public class SemanticsServiceImplTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        CoreItemFactory itemFactory = new CoreItemFactory();
+        CoreItemFactory itemFactory = new CoreItemFactory(unitProviderMock);
         locationItem = new GroupItem("TestBathRoom");
         locationItem.addTag("Bathroom");
         locationItem.setLabel("Joe's Room");

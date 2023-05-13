@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import static org.openhab.core.library.unit.Units.ONE;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -64,6 +65,7 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
@@ -84,7 +86,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
     private final List<Event> events = new LinkedList<>();
     private final GroupFunctionHelper groupFunctionHelper = new GroupFunctionHelper();
-    private final EventPublisher publisher = event -> events.add(event);
+    private final EventPublisher publisher = events::add;
 
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
     private @NonNullByDefault({}) ItemStateConverter itemStateConverter;
@@ -135,7 +137,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         itemRegistry.update(updatedItem);
         waitForAssert(() -> assertThat(events.size(), is(1)));
 
-        List<Event> stateChanges = events.stream().filter(it -> it instanceof ItemUpdatedEvent)
+        List<Event> stateChanges = events.stream().filter(ItemUpdatedEvent.class::isInstance)
                 .collect(Collectors.toList());
         assertThat(stateChanges.size(), is(1));
 
@@ -281,7 +283,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         subGroup.addMember(member1);
         rootGroupItem.addMember(subGroup);
 
-        Set<Item> members = rootGroupItem.getMembers(i -> i instanceof GroupItem);
+        Set<Item> members = rootGroupItem.getMembers(GroupItem.class::isInstance);
         assertThat(members.size(), is(1));
 
         members = rootGroupItem.getMembers(i -> "mem1".equals(i.getLabel()));
@@ -440,7 +442,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         waitForAssert(() -> assertThat(events.size(), is(2)));
 
-        List<Event> updates = events.stream().filter(it -> it instanceof GroupStateUpdatedEvent)
+        List<Event> updates = events.stream().filter(GroupStateUpdatedEvent.class::isInstance)
                 .collect(Collectors.toList());
         assertThat(updates.size(), is(1));
 
@@ -451,7 +453,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
                 .replace("{itemName}", groupItem.getName())));
         assertThat(update.getItemState(), is(groupItem.getState()));
 
-        List<Event> changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
+        List<Event> changes = events.stream().filter(GroupItemStateChangedEvent.class::isInstance)
                 .collect(Collectors.toList());
         assertThat(changes.size(), is(1));
 
@@ -490,7 +492,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         waitForAssert(() -> assertThat(events, hasSize(2)));
 
-        List<Event> groupItemStateChangedEvents = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
+        List<Event> groupItemStateChangedEvents = events.stream().filter(GroupItemStateChangedEvent.class::isInstance)
                 .collect(Collectors.toList());
         assertThat(groupItemStateChangedEvents, hasSize(1));
 
@@ -533,11 +535,11 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         waitForAssert(() -> assertThat(events, hasSize(2)));
 
-        List<Event> itemCommandEvents = events.stream().filter(it -> it instanceof ItemCommandEvent)
+        List<Event> itemCommandEvents = events.stream().filter(ItemCommandEvent.class::isInstance)
                 .collect(Collectors.toList());
         assertThat(itemCommandEvents, hasSize(2));
 
-        List<Event> groupItemStateChangedEvents = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
+        List<Event> groupItemStateChangedEvents = events.stream().filter(GroupItemStateChangedEvent.class::isInstance)
                 .collect(Collectors.toList());
         assertThat(groupItemStateChangedEvents, hasSize(0));
 
@@ -563,11 +565,11 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         waitForAssert(() -> assertThat(events, hasSize(2)));
 
-        List<Event> changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
+        List<Event> changes = events.stream().filter(GroupItemStateChangedEvent.class::isInstance)
                 .collect(Collectors.toList());
         assertThat(changes, hasSize(1));
 
-        List<Event> updates = events.stream().filter(it -> it instanceof GroupStateUpdatedEvent)
+        List<Event> updates = events.stream().filter(GroupStateUpdatedEvent.class::isInstance)
                 .collect(Collectors.toList());
         assertThat(updates, hasSize(1));
 
@@ -592,10 +594,10 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         assertThat(events, hasSize(2));
 
-        changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent).collect(Collectors.toList());
+        changes = events.stream().filter(GroupItemStateChangedEvent.class::isInstance).collect(Collectors.toList());
         assertThat(changes, hasSize(0));
 
-        updates = events.stream().filter(it -> it instanceof GroupStateUpdatedEvent).collect(Collectors.toList());
+        updates = events.stream().filter(GroupStateUpdatedEvent.class::isInstance).collect(Collectors.toList());
         assertThat(updates, hasSize(2));
 
         assertThat(groupItem.getState(), is(OnOffType.ON));
@@ -620,7 +622,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         waitForAssert(() -> assertThat(events, hasSize(2)));
 
-        List<Event> changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
+        List<Event> changes = events.stream().filter(GroupItemStateChangedEvent.class::isInstance)
                 .collect(Collectors.toList());
         assertThat(changes, hasSize(1));
 
@@ -640,7 +642,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         waitForAssert(() -> assertThat(events, hasSize(2)));
 
-        changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent).collect(Collectors.toList());
+        changes = events.stream().filter(GroupItemStateChangedEvent.class::isInstance).collect(Collectors.toList());
         assertThat(changes, hasSize(1));
 
         change = (GroupItemStateChangedEvent) changes.get(0);
@@ -754,7 +756,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         waitForAssert(() -> assertThat(events.size(), is(2)));
 
-        List<Event> changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
+        List<Event> changes = events.stream().filter(GroupItemStateChangedEvent.class::isInstance)
                 .collect(Collectors.toList());
         GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
         assertThat(change.getItemName(), is(groupItem.getName()));
@@ -773,7 +775,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         waitForAssert(() -> assertThat(events.size(), is(2)));
 
-        changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent).collect(Collectors.toList());
+        changes = events.stream().filter(GroupItemStateChangedEvent.class::isInstance).collect(Collectors.toList());
         assertThat(changes.size(), is(1));
 
         change = (GroupItemStateChangedEvent) changes.get(0);
@@ -796,7 +798,6 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         gfDTO.name = "sum";
         GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, baseItem);
         GroupItem groupItem = new GroupItem("number", baseItem, function);
-        groupItem.setUnitProvider(unitProviderMock);
 
         NumberItem celsius = createNumberItem("C", Temperature.class, new QuantityType<>("23 °C"));
         groupItem.addMember(celsius);
@@ -820,12 +821,14 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertThatNumberGroupItemWithDifferentDimensionsCalculatesCorrectState() {
+        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+        when(unitProviderMock.getUnit(Pressure.class)).thenReturn(SIUnits.PASCAL);
+        when(unitProviderMock.getUnit(Dimensionless.class)).thenReturn(ONE);
         NumberItem baseItem = createNumberItem("baseItem", Temperature.class, UnDefType.NULL);
         GroupFunctionDTO gfDTO = new GroupFunctionDTO();
         gfDTO.name = "sum";
         GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, baseItem);
         GroupItem groupItem = new GroupItem("number", baseItem, function);
-        groupItem.setUnitProvider(unitProviderMock);
         groupItem.setItemStateConverter(itemStateConverter);
 
         NumberItem celsius = createNumberItem("C", Temperature.class, new QuantityType<>("23 °C"));
@@ -844,8 +847,8 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     }
 
     private NumberItem createNumberItem(String name, Class<? extends Quantity<?>> dimension, State state) {
-        NumberItem item = new NumberItem(CoreItemFactory.NUMBER + ":" + dimension.getSimpleName(), name);
-        item.setUnitProvider(unitProviderMock);
+        NumberItem item = new NumberItem(CoreItemFactory.NUMBER + ":" + dimension.getSimpleName(), name,
+                unitProviderMock);
         item.setState(state);
 
         return item;

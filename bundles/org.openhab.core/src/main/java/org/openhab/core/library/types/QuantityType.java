@@ -298,7 +298,9 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of an erro.
      */
     public @Nullable QuantityType<?> toInvertibleUnit(Unit<?> targetUnit) {
-        if (!targetUnit.equals(getUnit()) && getUnit().inverse().isCompatible(targetUnit)) {
+        // only invert if unit is not equal and inverse is compatible and targetUnit is not ONE
+        if (!targetUnit.equals(getUnit()) && !targetUnit.isCompatible(AbstractUnit.ONE)
+                && getUnit().inverse().isCompatible(targetUnit)) {
             return inverse().toUnit(targetUnit);
         }
         return toUnit(targetUnit);
