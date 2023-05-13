@@ -378,6 +378,11 @@ public class I18nProviderImpl
         return SIUnits.getInstance();
     }
 
+    @Override
+    public Collection<Class<? extends Quantity<?>>> getAllDimensions() {
+        return Set.copyOf(getDimensionMap().keySet());
+    }
+
     public static Map<Class<? extends Quantity<?>>, Map<SystemOfUnits, Unit<? extends Quantity<?>>>> getDimensionMap() {
         Map<Class<? extends Quantity<?>>, Map<SystemOfUnits, Unit<? extends Quantity<?>>>> dimensionMap = new HashMap<>();
 
