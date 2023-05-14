@@ -78,7 +78,8 @@ public class Upgrader {
             logger.error("Cannot access item database '{}', check path and access rights.", itemJsonDatabasePath);
             return;
         }
-        if (!Files.isWritable(metadataJsonDatabasePath)) {
+        // missing metadata database is also fine, we create one in that case
+        if (!Files.isWritable(metadataJsonDatabasePath) && Files.exists(metadataJsonDatabasePath)) {
             logger.error("Cannot access metadata database '{}', check path and access rights.",
                     metadataJsonDatabasePath);
             return;
@@ -164,10 +165,10 @@ public class Upgrader {
     }
 
     private static class UpgradeRecord {
-        public final ZonedDateTime executionDate;
+        public final String executionDate;
 
         public UpgradeRecord(ZonedDateTime executionDate) {
-            this.executionDate = executionDate;
+            this.executionDate = executionDate.toString();
         }
     }
 }
