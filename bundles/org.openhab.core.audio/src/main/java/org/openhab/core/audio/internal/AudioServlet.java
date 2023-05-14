@@ -105,7 +105,6 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     private InputStream prepareInputStream(final StreamServed servedStream, final HttpServletResponse resp,
             List<String> acceptedMimeTypes) throws AudioException {
-
         logger.debug("Stream to serve is {}", servedStream.id);
 
         // try to set the content-type, if possible
@@ -151,7 +150,6 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
         String requestURI = req.getRequestURI();
         if (requestURI == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "requestURI is null");
@@ -267,7 +265,6 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     @Override
     public String serve(AudioStream stream, int seconds, @Nullable Runnable callBack) throws IOException {
-
         String streamId = UUID.randomUUID().toString();
         ClonableAudioStream clonableAudioStream = null;
         if (stream instanceof ClonableAudioStream clonableAudioStreamDetected) {

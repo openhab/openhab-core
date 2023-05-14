@@ -42,7 +42,6 @@ public abstract class AudioSinkAsync implements AudioSink {
     @Override
     public void process(@Nullable AudioStream audioStream, @Nullable Runnable whenFinished)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
-
         try {
             if (audioStream != null && whenFinished != null) {
                 runnableByAudioStream.put(audioStream, whenFinished);

@@ -37,7 +37,6 @@ public abstract class AudioSinkSync implements AudioSink {
     @Override
     public void process(@Nullable AudioStream audioStream, @Nullable Runnable whenFinished)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
-
         try {
             process(audioStream);
         } finally {
