@@ -139,6 +139,8 @@ public final class Units extends CustomUnits {
             new ProductUnit<>(VOLT_AMPERE.multiply(tech.units.indriya.unit.Units.HOUR)), Energy.class);
     public static final Unit<Force> NEWTON = addUnit(tech.units.indriya.unit.Units.NEWTON);
     public static final Unit<Frequency> HERTZ = addUnit(tech.units.indriya.unit.Units.HERTZ);
+    public static final Unit<Frequency> RPM = addUnit(
+            new ProductUnit<>(AbstractUnit.ONE.divide(tech.units.indriya.unit.Units.MINUTE)));
     public static final Unit<Intensity> IRRADIANCE = addUnit(
             new ProductUnit<>(tech.units.indriya.unit.Units.WATT.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
     public static final Unit<Intensity> MICROWATT_PER_SQUARE_CENTIMETRE = addUnit(
@@ -276,6 +278,7 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(PEBIBYTE, "PiB");
         SimpleUnitFormat.getInstance().alias(PEBIBYTE, "Pio");
         SimpleUnitFormat.getInstance().label(PETABIT, "Pbit");
+        SimpleUnitFormat.getInstance().label(RPM, "rpm");
         SimpleUnitFormat.getInstance().label(STANDARD_GRAVITY, "gₙ");
         SimpleUnitFormat.getInstance().label(SIEMENS_PER_METRE, "S/m");
         SimpleUnitFormat.getInstance().label(TERABYTE, "TB");
