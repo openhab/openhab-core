@@ -123,6 +123,7 @@ public class Upgrader {
 
         metadataStorage.flush();
         upgradeRecords.put(ITEM_COPY_UNIT_TO_METADATA, new UpgradeRecord(ZonedDateTime.now()));
+        upgradeRecords.flush();
     }
 
     public void linkUpgradeJsProfile() {
@@ -162,6 +163,7 @@ public class Upgrader {
 
         linkStorage.flush();
         upgradeRecords.put(LINK_UPGRADE_JS_PROFILE, new UpgradeRecord(ZonedDateTime.now()));
+        upgradeRecords.flush();
     }
 
     private static class UpgradeRecord {
