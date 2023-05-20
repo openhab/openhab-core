@@ -73,6 +73,7 @@ import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 import org.openhab.core.library.types.PointType;
 import org.openhab.core.library.unit.ImperialUnits;
@@ -416,6 +417,7 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, RadiationDoseEffective.class, Units.SIEVERT);
         addDefaultUnit(dimensionMap, Radioactivity.class, Units.BECQUEREL);
         addDefaultUnit(dimensionMap, SolidAngle.class, Units.STERADIAN);
+        addDefaultUnit(dimensionMap, RadiationSpecificActivity.class, Units.BECQUEREL_PER_CUBIC_METRE);
         addDefaultUnit(dimensionMap, Speed.class, SIUnits.KILOMETRE_PER_HOUR, ImperialUnits.MILES_PER_HOUR);
         addDefaultUnit(dimensionMap, Temperature.class, SIUnits.CELSIUS, ImperialUnits.FAHRENHEIT);
         addDefaultUnit(dimensionMap, Time.class, Units.SECOND);
