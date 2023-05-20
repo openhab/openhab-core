@@ -189,8 +189,8 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
             } else if (itemCfg instanceof PersistenceGroupConfig) {
                 try {
                     Item gItem = itemRegistry.getItem(((PersistenceGroupConfig) itemCfg).getGroup());
-                    if (gItem instanceof GroupItem) {
-                        return ((GroupItem) gItem).getAllMembers().contains(item);
+                    if (gItem instanceof GroupItem gItem2 && gItem2.getAllMembers().contains(item)) {
+                        return true;
                     }
                 } catch (ItemNotFoundException e) {
                     // do nothing

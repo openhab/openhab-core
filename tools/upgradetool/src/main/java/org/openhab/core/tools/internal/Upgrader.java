@@ -67,7 +67,7 @@ public class Upgrader {
     }
 
     public void itemCopyUnitToMetadata() {
-        if (checkUpgradeRecord(ITEM_COPY_UNIT_TO_METADATA)) {
+        if (!checkUpgradeRecord(ITEM_COPY_UNIT_TO_METADATA)) {
             return;
         }
         Path itemJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.items.Item.json");
@@ -78,7 +78,8 @@ public class Upgrader {
             logger.error("Cannot access item database '{}', check path and access rights.", itemJsonDatabasePath);
             return;
         }
-        if (!Files.isWritable(metadataJsonDatabasePath)) {
+        // missing metadata database is also fine, we create one in that case
+        if (!Files.isWritable(metadataJsonDatabasePath) && Files.exists(metadataJsonDatabasePath)) {
             logger.error("Cannot access metadata database '{}', check path and access rights.",
                     metadataJsonDatabasePath);
             return;
@@ -122,10 +123,11 @@ public class Upgrader {
 
         metadataStorage.flush();
         upgradeRecords.put(ITEM_COPY_UNIT_TO_METADATA, new UpgradeRecord(ZonedDateTime.now()));
+        upgradeRecords.flush();
     }
 
     public void linkUpgradeJsProfile() {
-        if (checkUpgradeRecord(LINK_UPGRADE_JS_PROFILE)) {
+        if (!checkUpgradeRecord(LINK_UPGRADE_JS_PROFILE)) {
             return;
         }
 
@@ -161,13 +163,14 @@ public class Upgrader {
 
         linkStorage.flush();
         upgradeRecords.put(LINK_UPGRADE_JS_PROFILE, new UpgradeRecord(ZonedDateTime.now()));
+        upgradeRecords.flush();
     }
 
     private static class UpgradeRecord {
-        public final ZonedDateTime executionDate;
+        public final String executionDate;
 
         public UpgradeRecord(ZonedDateTime executionDate) {
-            this.executionDate = executionDate;
+            this.executionDate = executionDate.toString();
         }
     }
 }

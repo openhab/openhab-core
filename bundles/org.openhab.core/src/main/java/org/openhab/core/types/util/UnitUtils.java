@@ -173,7 +173,7 @@ public class UnitUtils {
                 return quantity.getUnit();
             } catch (IllegalArgumentException | MeasurementParseException e) {
                 // we expect this exception in case the extracted string does not match any known unit
-                LOGGER.error("Unknown unit from pattern: {}", unitSymbol);
+                LOGGER.debug("Unknown unit from pattern: {}", unitSymbol);
             }
         }
 

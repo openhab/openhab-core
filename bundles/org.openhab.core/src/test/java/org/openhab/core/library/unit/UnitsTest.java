@@ -394,6 +394,13 @@ public class UnitsTest {
         assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
     }
 
+    @Test
+    public void testRpm() {
+        QuantityType<?> oneHertz = QuantityType.valueOf("60 rpm");
+        QuantityType<?> converted = oneHertz.toUnit("Hz");
+        assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
+    }
+
     private static class QuantityEquals extends IsEqual<Quantity<?>> {
         private Quantity<?> quantity;
 

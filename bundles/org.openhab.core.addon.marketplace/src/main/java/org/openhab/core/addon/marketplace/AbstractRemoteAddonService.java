@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * The {@link AbstractRemoteAddonService} implements basic functionality of a remote add-on-service
@@ -90,8 +91,16 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             return;
         }
         List<Addon> addons = new ArrayList<>();
-        installedAddonStorage.stream().map(e -> Objects.requireNonNull(gson.fromJson(e.getValue(), Addon.class)))
-                .forEach(addons::add);
+        try {
+            installedAddonStorage.stream().map(e -> Objects.requireNonNull(gson.fromJson(e.getValue(), Addon.class)))
+                    .forEach(addons::add);
+        } catch (JsonSyntaxException e) {
+            List.copyOf(installedAddonStorage.getKeys()).forEach(installedAddonStorage::remove);
+            logger.error(
+                    "Failed to read JSON database, trying to purge it. You might need to re-install {} from the '{}' service.",
+                    installedAddonStorage.getKeys(), getId());
+            refreshSource();
+        }
 
         // create lookup list to make sure installed addons take precedence
         List<String> installedAddons = addons.stream().map(Addon::getUid).collect(Collectors.toList());
