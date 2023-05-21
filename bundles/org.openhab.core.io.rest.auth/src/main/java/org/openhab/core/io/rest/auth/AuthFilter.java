@@ -78,7 +78,8 @@ import org.slf4j.LoggerFactory;
  * @author Miguel Álvarez - Add trusted networks for implicit user role
  */
 @PreMatching
-@Component(configurationPid = "org.openhab.restauth", property = Constants.SERVICE_PID + "=org.openhab.restauth")
+@Component(configurationPid = "org.openhab.restauth", property = Constants.SERVICE_PID
+        + "=org.openhab.restauth", service = AuthFilter.class)
 @ConfigurableService(category = "system", label = "API Security", description_uri = AuthFilter.CONFIG_URI)
 @JaxrsExtension
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
