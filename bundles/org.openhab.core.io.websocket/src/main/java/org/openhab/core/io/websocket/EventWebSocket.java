@@ -52,7 +52,7 @@ public class EventWebSocket {
 
     private final Logger logger = LoggerFactory.getLogger(EventWebSocket.class);
 
-    private final EventWebSocketServlet servlet;
+    private final EventWebSocketHandler wsHandler;
     private final Gson gson;
     private final EventPublisher eventPublisher;
     private final ItemEventUtility itemEventUtility;
@@ -64,9 +64,9 @@ public class EventWebSocket {
     private List<String> typeFilter = List.of();
     private List<String> sourceFilter = List.of();
 
-    public EventWebSocket(Gson gson, EventWebSocketServlet servlet, ItemEventUtility itemEventUtility,
+    public EventWebSocket(Gson gson, EventWebSocketHandler wsHandler, ItemEventUtility itemEventUtility,
             EventPublisher eventPublisher) {
-        this.servlet = servlet;
+        this.wsHandler = wsHandler;
         this.gson = gson;
         this.itemEventUtility = itemEventUtility;
         this.eventPublisher = eventPublisher;
@@ -74,7 +74,7 @@ public class EventWebSocket {
 
     @OnWebSocketClose
     public void onClose(int statusCode, String reason) {
-        this.servlet.unregisterListener(this);
+        this.wsHandler.unregisterListener(this);
         remoteIdentifier = "<unknown>";
         this.session = null;
         this.remoteEndpoint = null;
@@ -86,7 +86,7 @@ public class EventWebSocket {
         RemoteEndpoint remoteEndpoint = session.getRemote();
         this.remoteEndpoint = remoteEndpoint;
         this.remoteIdentifier = remoteEndpoint.getInetSocketAddress().toString();
-        this.servlet.registerListener(this);
+        this.wsHandler.registerListener(this);
     }
 
     @OnWebSocketMessage

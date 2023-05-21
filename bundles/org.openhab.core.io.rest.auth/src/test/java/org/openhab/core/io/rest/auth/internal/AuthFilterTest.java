@@ -79,7 +79,7 @@ public class AuthFilterTest {
     public void trustedNetworkAllowsAccessIfForwardedHeaderMatches() throws IOException {
         authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
                 "192.168.1.0/24"));
-        when(containerRequestContext.getHeaderString("x-forwarded-for")).thenReturn("192.168.1.100");
+        when(servletRequest.getHeader("x-forwarded-for")).thenReturn("192.168.1.100");
         authFilter.filter(containerRequestContext);
 
         verify(containerRequestContext).setSecurityContext(any());
@@ -89,7 +89,7 @@ public class AuthFilterTest {
     public void trustedNetworkDeniesAccessIfForwardedHeaderDoesNotMatch() throws IOException {
         authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
                 "192.168.1.0/24"));
-        when(containerRequestContext.getHeaderString("x-forwarded-for")).thenReturn("192.168.2.100");
+        when(servletRequest.getHeader("x-forwarded-for")).thenReturn("192.168.2.100");
         authFilter.filter(containerRequestContext);
 
         verify(containerRequestContext, never()).setSecurityContext(any());

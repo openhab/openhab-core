@@ -181,7 +181,7 @@ public class AuthFilter implements ContainerRequestFilter {
         }
     }
 
-    private SecurityContext authenticateBearerToken(String token) throws AuthenticationException {
+    public SecurityContext authenticateBearerToken(String token) throws AuthenticationException {
         if (token.startsWith(API_TOKEN_PREFIX)) {
             UserApiTokenCredentials credentials = new UserApiTokenCredentials(token);
             Authentication auth = userRegistry.authenticate(credentials);
@@ -196,7 +196,7 @@ public class AuthFilter implements ContainerRequestFilter {
         }
     }
 
-    private SecurityContext authenticateBasicAuth(String credentialString) throws AuthenticationException {
+    public SecurityContext authenticateBasicAuth(String credentialString) throws AuthenticationException {
         final String cacheKey = getCacheKey(credentialString);
         if (cacheKey != null) {
             final UserSecurityContext cachedValue = authCache.get(cacheKey);
@@ -266,27 +266,31 @@ public class AuthFilter implements ContainerRequestFilter {
                             }
                         }
                     }
-                } else if (isImplicitUserRole(requestContext)) {
+                } else if (isImplicitUserRole(servletRequest)) {
                     requestContext.setSecurityContext(new AnonymousUserSecurityContext());
                 }
             } catch (AuthenticationException e) {
-                logger.warn("Unauthorized API request from {}: {}", getClientIp(requestContext), e.getMessage());
+                logger.warn("Unauthorized API request from {}: {}", getClientIp(servletRequest), e.getMessage());
                 requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
             }
         }
     }
 
-    private boolean isImplicitUserRole(ContainerRequestContext requestContext) {
+    public boolean isImplicitUserRole(HttpServletRequest request) {
         if (implicitUserRole) {
             return true;
         }
         try {
-            byte[] clientAddress = InetAddress.getByName(getClientIp(requestContext)).getAddress();
+            byte[] clientAddress = InetAddress.getByName(getClientIp(request)).getAddress();
             return trustedNetworks.stream().anyMatch(networkCIDR -> networkCIDR.isInRange(clientAddress));
         } catch (IOException e) {
             logger.debug("Error validating trusted networks: {}", e.getMessage());
             return false;
         }
+    }
+
+    public boolean isBasicAuthAllowed() {
+        return allowBasicAuth;
     }
 
     private List<CIDR> parseTrustedNetworks(String value) {
@@ -303,8 +307,8 @@ public class AuthFilter implements ContainerRequestFilter {
         return cidrList;
     }
 
-    private String getClientIp(ContainerRequestContext requestContext) throws UnknownHostException {
-        String ipForwarded = Objects.requireNonNullElse(requestContext.getHeaderString("x-forwarded-for"), "");
+    private String getClientIp(HttpServletRequest request) throws UnknownHostException {
+        String ipForwarded = Objects.requireNonNullElse(request.getHeader("x-forwarded-for"), "");
         String clientIp = ipForwarded.split(",")[0];
         return clientIp.isBlank() ? servletRequest.getRemoteAddr() : clientIp;
     }
