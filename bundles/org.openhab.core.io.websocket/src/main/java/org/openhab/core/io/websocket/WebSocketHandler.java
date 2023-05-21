@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.websocket;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
@@ -23,6 +24,7 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
+@NonNullByDefault
 public interface WebSocketHandler {
     /**
      * The handler id.

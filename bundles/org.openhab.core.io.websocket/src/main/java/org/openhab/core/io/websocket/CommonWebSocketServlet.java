@@ -127,8 +127,7 @@ public class CommonWebSocketServlet extends WebSocketServlet {
             Map<String, List<String>> parameterMap = servletUpgradeRequest.getParameterMap();
             List<String> accessToken = parameterMap.getOrDefault("accessToken", List.of());
             SecurityContext securityContext = null;
-            if (accessToken.size() == 0
-                    && authFilter.isImplicitUserRole(servletUpgradeRequest.getHttpServletRequest())) {
+            if (accessToken.isEmpty() && authFilter.isImplicitUserRole(servletUpgradeRequest.getHttpServletRequest())) {
                 securityContext = new AnonymousUserSecurityContext();
             } else if (accessToken.size() == 1) {
                 String token = accessToken.get(0);

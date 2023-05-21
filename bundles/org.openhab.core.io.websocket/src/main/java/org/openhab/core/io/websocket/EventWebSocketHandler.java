@@ -37,7 +37,7 @@ import com.google.gson.Gson;
 @NonNullByDefault
 @Component(immediate = true, service = { EventSubscriber.class, WebSocketHandler.class })
 public class EventWebSocketHandler implements EventSubscriber, WebSocketHandler {
-    public static String HANDLER_ID = "event-subscriber";
+    public static final String HANDLER_ID = "event-subscriber";
     private final Gson gson = new Gson();
     private final EventPublisher eventPublisher;
 
