@@ -37,7 +37,7 @@ public class ExpiringUserSecurityContextCache {
 
     private int calls = 0;
 
-    ExpiringUserSecurityContextCache(long expirationTime) {
+    public ExpiringUserSecurityContextCache(long expirationTime) {
         this.keepPeriod = expirationTime;
         entryMap = new LinkedHashMap<>() {
             private static final long serialVersionUID = -1220310861591070462L;
@@ -48,7 +48,7 @@ public class ExpiringUserSecurityContextCache {
         };
     }
 
-    synchronized @Nullable UserSecurityContext get(String key) {
+    public synchronized @Nullable UserSecurityContext get(String key) {
         calls++;
         if (calls >= CLEANUP_FREQUENCY) {
             new HashSet<>(entryMap.keySet()).forEach(k -> getEntry(k));
@@ -61,11 +61,11 @@ public class ExpiringUserSecurityContextCache {
         return null;
     }
 
-    synchronized void put(String key, UserSecurityContext value) {
+    public synchronized void put(String key, UserSecurityContext value) {
         entryMap.put(key, new Entry(System.currentTimeMillis(), value));
     }
 
-    synchronized void clear() {
+    public synchronized void clear() {
         entryMap.clear();
     }
 

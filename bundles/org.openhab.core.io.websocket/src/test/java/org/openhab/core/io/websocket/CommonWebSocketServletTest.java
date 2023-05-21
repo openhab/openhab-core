@@ -38,7 +38,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.openhab.core.io.rest.auth.internal.AuthFilter;
+import org.openhab.core.io.rest.auth.AuthFilter;
 import org.osgi.service.http.NamespaceException;
 
 /**
