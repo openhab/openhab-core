@@ -38,7 +38,17 @@ import org.slf4j.LoggerFactory;
 public class ColorUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ColorUtil.class);
     private static final MathContext COLOR_MATH_CONTEXT = new MathContext(5, RoundingMode.HALF_UP);
-    protected static final BigDecimal BIG_DECIMAL_HUNDRED = BigDecimal.valueOf(100);
+
+    protected static final BigDecimal BIG_DECIMAL_360 = BigDecimal.valueOf(360);
+    protected static final BigDecimal BIG_DECIMAL_255 = BigDecimal.valueOf(255);
+    protected static final BigDecimal BIG_DECIMAL_240 = BigDecimal.valueOf(240);
+    protected static final BigDecimal BIG_DECIMAL_120 = BigDecimal.valueOf(120);
+    protected static final BigDecimal BIG_DECIMAL_100 = BigDecimal.valueOf(100);
+    protected static final BigDecimal BIG_DECIMAL_60 = BigDecimal.valueOf(60);
+    protected static final BigDecimal BIG_DECIMAL_5 = BigDecimal.valueOf(5);
+    protected static final BigDecimal BIG_DECIMAL_3 = BigDecimal.valueOf(3);
+    protected static final BigDecimal BIG_DECIMAL_2_POINT_55 = new BigDecimal("2.55");
+
     public static final Gamut DEFAULT_GAMUT = new Gamut(new double[] { 0.9961, 0.0001 }, new double[] { 0, 0.9961 },
             new double[] { 0, 0.0001 });
 
@@ -80,11 +90,11 @@ public class ColorUtil {
         PercentType green = null;
         PercentType blue = null;
 
-        final BigDecimal h = hsb.getHue().toBigDecimal().divide(BIG_DECIMAL_HUNDRED, 10, RoundingMode.HALF_UP);
-        final BigDecimal s = hsb.getSaturation().toBigDecimal().divide(BIG_DECIMAL_HUNDRED);
+        final BigDecimal h = hsb.getHue().toBigDecimal().divide(BIG_DECIMAL_100, 10, RoundingMode.HALF_UP);
+        final BigDecimal s = hsb.getSaturation().toBigDecimal().divide(BIG_DECIMAL_100);
 
-        int hInt = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 0, RoundingMode.DOWN).intValue();
-        final BigDecimal f = h.multiply(BigDecimal.valueOf(5)).divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP)
+        int hInt = h.multiply(BIG_DECIMAL_5).divide(BIG_DECIMAL_3, 0, RoundingMode.DOWN).intValue();
+        final BigDecimal f = h.multiply(BIG_DECIMAL_5).divide(BIG_DECIMAL_3, 10, RoundingMode.HALF_UP)
                 .remainder(BigDecimal.ONE);
         final BigDecimal value = hsb.getBrightness().toBigDecimal();
 
@@ -241,10 +251,10 @@ public class ColorUtil {
             return new HSBType(new DecimalType(), new PercentType(), new PercentType(max));
         }
 
-        PercentType saturation = new PercentType(span.divide(max, COLOR_MATH_CONTEXT).multiply(BIG_DECIMAL_HUNDRED));
+        PercentType saturation = new PercentType(span.divide(max, COLOR_MATH_CONTEXT).multiply(BIG_DECIMAL_100));
         PercentType brightness = new PercentType(max);
 
-        BigDecimal scale = span.divide(BigDecimal.valueOf(60), COLOR_MATH_CONTEXT);
+        BigDecimal scale = span.divide(BIG_DECIMAL_60, COLOR_MATH_CONTEXT);
 
         BigDecimal redAngle = max.subtract(r).divide(scale, COLOR_MATH_CONTEXT);
         BigDecimal greenAngle = max.subtract(g).divide(scale, COLOR_MATH_CONTEXT);
@@ -254,12 +264,14 @@ public class ColorUtil {
         if (r.compareTo(max) == 0) {
             hue = blueAngle.subtract(greenAngle);
         } else if (g.compareTo(max) == 0) {
-            hue = BigDecimal.valueOf(120).add(redAngle).subtract(blueAngle);
+            hue = BIG_DECIMAL_120.add(redAngle).subtract(blueAngle);
         } else {
-            hue = BigDecimal.valueOf(240).add(greenAngle).subtract(redAngle);
+            hue = BIG_DECIMAL_240.add(greenAngle).subtract(redAngle);
         }
         if (hue.compareTo(BigDecimal.ZERO) < 0) {
-            hue = hue.add(BigDecimal.valueOf(360));
+            hue = hue.add(BIG_DECIMAL_360);
+        } else if (hue.compareTo(BIG_DECIMAL_360) > 0) {
+            hue = hue.subtract(BIG_DECIMAL_360);
         }
 
         return new HSBType(new DecimalType(hue), saturation, brightness);
@@ -485,15 +497,15 @@ public class ColorUtil {
     }
 
     private static int convertColorPercentToByte(PercentType percent) {
-        return percent.toBigDecimal().multiply(BigDecimal.valueOf(255))
-                .divide(BIG_DECIMAL_HUNDRED, 0, RoundingMode.HALF_UP).intValue();
+        return percent.toBigDecimal().multiply(BIG_DECIMAL_255).divide(BIG_DECIMAL_100, 0, RoundingMode.HALF_UP)
+                .intValue();
     }
 
     private static PercentType convertByteToColorPercent(int b) {
-        return new PercentType(new BigDecimal(b).divide(new BigDecimal("2.55"), COLOR_MATH_CONTEXT));
+        return new PercentType(new BigDecimal(b).divide(BIG_DECIMAL_2_POINT_55, COLOR_MATH_CONTEXT));
     }
 
     private static PercentType convertDoubleToColorPercent(double d) {
-        return new PercentType(new BigDecimal(d).multiply(BIG_DECIMAL_HUNDRED, COLOR_MATH_CONTEXT));
+        return new PercentType(new BigDecimal(d).multiply(BIG_DECIMAL_100, COLOR_MATH_CONTEXT));
     }
 }
