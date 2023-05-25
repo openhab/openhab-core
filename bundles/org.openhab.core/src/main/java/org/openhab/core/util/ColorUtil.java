@@ -38,16 +38,15 @@ import org.slf4j.LoggerFactory;
 public class ColorUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ColorUtil.class);
     private static final MathContext COLOR_MATH_CONTEXT = new MathContext(5, RoundingMode.HALF_UP);
-
-    protected static final BigDecimal BIG_DECIMAL_360 = BigDecimal.valueOf(360);
-    protected static final BigDecimal BIG_DECIMAL_255 = BigDecimal.valueOf(255);
-    protected static final BigDecimal BIG_DECIMAL_240 = BigDecimal.valueOf(240);
-    protected static final BigDecimal BIG_DECIMAL_120 = BigDecimal.valueOf(120);
-    protected static final BigDecimal BIG_DECIMAL_100 = BigDecimal.valueOf(100);
-    protected static final BigDecimal BIG_DECIMAL_60 = BigDecimal.valueOf(60);
-    protected static final BigDecimal BIG_DECIMAL_5 = BigDecimal.valueOf(5);
-    protected static final BigDecimal BIG_DECIMAL_3 = BigDecimal.valueOf(3);
-    protected static final BigDecimal BIG_DECIMAL_2_POINT_55 = new BigDecimal("2.55");
+    private static final BigDecimal BIG_DECIMAL_360 = BigDecimal.valueOf(360);
+    private static final BigDecimal BIG_DECIMAL_255 = BigDecimal.valueOf(255);
+    private static final BigDecimal BIG_DECIMAL_240 = BigDecimal.valueOf(240);
+    private static final BigDecimal BIG_DECIMAL_120 = BigDecimal.valueOf(120);
+    private static final BigDecimal BIG_DECIMAL_100 = BigDecimal.valueOf(100);
+    private static final BigDecimal BIG_DECIMAL_60 = BigDecimal.valueOf(60);
+    private static final BigDecimal BIG_DECIMAL_5 = BigDecimal.valueOf(5);
+    private static final BigDecimal BIG_DECIMAL_3 = BigDecimal.valueOf(3);
+    private static final BigDecimal BIG_DECIMAL_2_POINT_55 = new BigDecimal("2.55");
 
     public static final Gamut DEFAULT_GAMUT = new Gamut(new double[] { 0.9961, 0.0001 }, new double[] { 0, 0.9961 },
             new double[] { 0, 0.0001 });
