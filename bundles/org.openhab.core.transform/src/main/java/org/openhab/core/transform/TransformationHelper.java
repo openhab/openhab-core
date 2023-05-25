@@ -125,6 +125,8 @@ public class TransformationHelper {
             return service.transform(function, value);
         } catch (IllegalFormatException e) {
             throw new TransformationException("Cannot format state '" + state + "' to format '" + format + "'", e);
+        } catch (RuntimeException e) {
+            throw new TransformationException("Transformation service threw an exception: " + e.getMessage(), e);
         }
     }
 }
