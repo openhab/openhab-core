@@ -370,20 +370,20 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     @Override
     protected void notifyListenersAboutAddedElement(Item element) {
-        super.notifyListenersAboutAddedElement(element);
         postEvent(ItemEventFactory.createAddedEvent(element));
+        super.notifyListenersAboutAddedElement(element);
     }
 
     @Override
     protected void notifyListenersAboutRemovedElement(Item element) {
-        super.notifyListenersAboutRemovedElement(element);
         postEvent(ItemEventFactory.createRemovedEvent(element));
+        super.notifyListenersAboutRemovedElement(element);
     }
 
     @Override
     protected void notifyListenersAboutUpdatedElement(Item oldElement, Item element) {
-        super.notifyListenersAboutUpdatedElement(oldElement, element);
         postEvent(ItemEventFactory.createUpdateEvent(element, oldElement));
+        super.notifyListenersAboutUpdatedElement(oldElement, element);
     }
 
     @Override
