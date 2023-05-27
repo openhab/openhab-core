@@ -42,6 +42,8 @@ import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.thing.events.ChannelDescriptionChangedEvent;
 import org.openhab.core.ui.items.ItemUIRegistry;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -72,6 +74,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     private static final int DEFAULT_MAX_SUBSCRIPTIONS = 50;
 
     private final Logger logger = LoggerFactory.getLogger(SitemapSubscriptionService.class);
+    private final BundleContext bundleContext;
 
     public interface SitemapSubscriptionCallback {
 
@@ -94,15 +97,17 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     private final Map<String, Instant> creationInstants = new ConcurrentHashMap<>();
 
     /* sitemap+page -> listener */
-    private final Map<String, PageChangeListener> pageChangeListeners = new ConcurrentHashMap<>();
+    private final Map<String, ListenerRecord> pageChangeListeners = new ConcurrentHashMap<>();
 
     /* Max number of subscriptions at the same time */
     private int maxSubscriptions = DEFAULT_MAX_SUBSCRIPTIONS;
 
     @Activate
-    public SitemapSubscriptionService(Map<String, Object> config, final @Reference ItemUIRegistry itemUIRegistry) {
-        applyConfig(config);
+    public SitemapSubscriptionService(Map<String, Object> config, final @Reference ItemUIRegistry itemUIRegistry,
+            BundleContext bundleContext) {
         this.itemUIRegistry = itemUIRegistry;
+        this.bundleContext = bundleContext;
+        applyConfig(config);
     }
 
     @Deactivate
@@ -110,9 +115,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
         pageOfSubscription.clear();
         callbacks.clear();
         creationInstants.clear();
-        for (PageChangeListener listener : pageChangeListeners.values()) {
-            listener.dispose();
-        }
+        pageChangeListeners.values().forEach(l -> l.serviceRegistration.unregister());
         pageChangeListeners.clear();
     }
 
@@ -150,7 +153,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
      * Creates a new subscription with the given id.
      *
      * @param callback an instance that should receive the events
-     * @returns a unique id that identifies the subscription or null if the limit of subscriptions is already reached
+     * @return a unique id that identifies the subscription or null if the limit of subscriptions is already reached
      */
     public @Nullable String createSubscription(SitemapSubscriptionCallback callback) {
         if (maxSubscriptions >= 0 && callbacks.size() >= maxSubscriptions) {
@@ -176,9 +179,9 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
         String sitemapPage = pageOfSubscription.remove(subscriptionId);
         if (sitemapPage != null && !pageOfSubscription.values().contains(sitemapPage)) {
             // this was the only subscription listening on this page, so we can dispose the listener
-            PageChangeListener listener = pageChangeListeners.remove(sitemapPage);
+            ListenerRecord listener = pageChangeListeners.remove(sitemapPage);
             if (listener != null) {
-                listener.dispose();
+                listener.serviceRegistration().unregister();
             }
         }
         logger.debug("Removed subscription with id {} ({} active subscriptions)", subscriptionId, callbacks.size());
@@ -249,13 +252,14 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     }
 
     private void addCallbackToListener(String sitemapName, String pageId, SitemapSubscriptionCallback callback) {
-        PageChangeListener listener = pageChangeListeners.get(getValue(sitemapName, pageId));
-        if (listener == null) {
-            // there is no listener for this page yet, so let's try to create one
-            listener = new PageChangeListener(sitemapName, pageId, itemUIRegistry, collectWidgets(sitemapName, pageId));
-            pageChangeListeners.put(getValue(sitemapName, pageId), listener);
-        }
-        listener.addCallback(callback);
+        ListenerRecord listener = pageChangeListeners.computeIfAbsent(getValue(sitemapName, pageId), v -> {
+            PageChangeListener newListener = new PageChangeListener(sitemapName, pageId, itemUIRegistry,
+                    collectWidgets(sitemapName, pageId));
+            ServiceRegistration<?> registration = bundleContext.registerService(EventSubscriber.class.getName(),
+                    newListener, null);
+            return new ListenerRecord(newListener, registration);
+        });
+        listener.pageChangeListener().addCallback(callback);
     }
 
     private EList<Widget> collectWidgets(String sitemapName, String pageId) {
@@ -278,12 +282,12 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     }
 
     private void removeCallbackFromListener(String sitemapPage, SitemapSubscriptionCallback callback) {
-        PageChangeListener oldListener = pageChangeListeners.get(sitemapPage);
+        ListenerRecord oldListener = pageChangeListeners.get(sitemapPage);
         if (oldListener != null) {
-            oldListener.removeCallback(callback);
-            if (!pageOfSubscription.values().contains(sitemapPage)) {
+            oldListener.pageChangeListener().removeCallback(callback);
+            if (!pageOfSubscription.containsValue(sitemapPage)) {
                 // no other callbacks are left here, so we can safely dispose the listener
-                oldListener.dispose();
+                oldListener.serviceRegistration().unregister();
                 pageChangeListeners.remove(sitemapPage);
             }
         }
@@ -311,14 +315,14 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
 
         String changedSitemapName = modelName.substring(0, modelName.length() - SITEMAP_SUFFIX.length());
 
-        for (Entry<String, PageChangeListener> listenerEntry : pageChangeListeners.entrySet()) {
+        for (Entry<String, ListenerRecord> listenerEntry : pageChangeListeners.entrySet()) {
             String sitemapWithPage = listenerEntry.getKey();
             String sitemapName = extractSitemapName(sitemapWithPage);
             String pageId = extractPageId(sitemapWithPage);
 
             if (sitemapName.equals(changedSitemapName)) {
                 EList<Widget> widgets = collectWidgets(sitemapName, pageId);
-                listenerEntry.getValue().sitemapContentChanged(widgets);
+                listenerEntry.getValue().pageChangeListener().sitemapContentChanged(widgets);
             }
         }
     }
@@ -336,9 +340,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
             }
         }
         // Send an ALIVE event to all subscribers to trigger an exception for dead subscribers
-        for (Entry<String, PageChangeListener> listenerEntry : pageChangeListeners.entrySet()) {
-            listenerEntry.getValue().sendAliveEvent();
-        }
+        pageChangeListeners.values().forEach(l -> l.pageChangeListener().sendAliveEvent());
     }
 
     @Override
@@ -355,19 +357,22 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
                 // members and predictions aren't really possible in that case (or at least would be highly complex).
                 return;
             }
-            for (PageChangeListener pageChangeListener : pageChangeListeners.values()) {
+            for (ListenerRecord listener : pageChangeListeners.values()) {
                 if (prediction.isConfirmation()) {
-                    pageChangeListener.keepCurrentState(item);
+                    listener.pageChangeListener().keepCurrentState(item);
                 } else {
-                    pageChangeListener.changeStateTo(item, prediction.getPredictedState());
+                    listener.pageChangeListener().changeStateTo(item, prediction.getPredictedState());
                 }
             }
         } else if (event instanceof ChannelDescriptionChangedEvent channelDescriptionChangedEvent) {
             channelDescriptionChangedEvent.getLinkedItemNames().forEach(itemName -> {
-                for (PageChangeListener pageChangeListener : pageChangeListeners.values()) {
-                    pageChangeListener.descriptionChanged(itemName);
+                for (ListenerRecord listener : pageChangeListeners.values()) {
+                    listener.pageChangeListener().descriptionChanged(itemName);
                 }
             });
         }
+    }
+
+    private record ListenerRecord(PageChangeListener pageChangeListener, ServiceRegistration<?> serviceRegistration) {
     }
 }
