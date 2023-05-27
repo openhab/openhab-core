@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.websocket;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -73,7 +74,7 @@ public class CommonWebSocketServletTest {
         verify(factory).setCreator(webSocketCreatorAC.capture());
         var params = new HashMap<String, List<String>>();
         when(request.getParameterMap()).thenReturn(params);
-        when(authFilter.getSecurityContext(any(), any())).thenReturn(new AnonymousUserSecurityContext());
+        when(authFilter.getSecurityContext(any(), anyBoolean())).thenReturn(new AnonymousUserSecurityContext());
         when(testDefaultWsHandler.getId()).thenReturn(CommonWebSocketServlet.DEFAULT_HANDLER_ID);
         when(testWsHandler.getId()).thenReturn(testHandlerId);
         servlet.addWebSocketHandler(testDefaultWsHandler);
