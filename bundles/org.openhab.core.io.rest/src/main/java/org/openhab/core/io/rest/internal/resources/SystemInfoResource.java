@@ -23,9 +23,11 @@ import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.Role;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.internal.resources.beans.SystemInfoBean;
+import org.openhab.core.io.rest.internal.resources.beans.UoMInfoBean;
 import org.openhab.core.service.StartLevelService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -64,10 +66,12 @@ public class SystemInfoResource implements RESTResource {
     public static final String PATH_SYSTEMINFO = "systeminfo";
 
     private final StartLevelService startLevelService;
+    private final UnitProvider unitProvider;
 
     @Activate
-    public SystemInfoResource(@Reference StartLevelService startLevelService) {
+    public SystemInfoResource(@Reference StartLevelService startLevelService, @Reference UnitProvider unitProvider) {
         this.startLevelService = startLevelService;
+        this.unitProvider = unitProvider;
     }
 
     @GET
@@ -77,6 +81,16 @@ public class SystemInfoResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SystemInfoBean.class))) })
     public Response getSystemInfo(@Context UriInfo uriInfo) {
         final SystemInfoBean bean = new SystemInfoBean(startLevelService.getStartLevel());
+        return Response.ok(bean).build();
+    }
+
+    @GET
+    @Path("/uom")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getUoMInformation", summary = "Get all supported dimensions and their system units.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UoMInfoBean.class))) })
+    public Response getUoMInfo(@Context UriInfo uriInfo) {
+        final UoMInfoBean bean = new UoMInfoBean(unitProvider);
         return Response.ok(bean).build();
     }
 }

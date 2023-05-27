@@ -17,11 +17,13 @@ import static org.openhab.core.library.unit.MetricPrefix.HECTO;
 import java.text.MessageFormat;
 import java.time.DateTimeException;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -377,6 +379,11 @@ public class I18nProviderImpl
             return ImperialUnits.getInstance();
         }
         return SIUnits.getInstance();
+    }
+
+    @Override
+    public Collection<Class<? extends Quantity<?>>> getAllDimensions() {
+        return Set.copyOf(getDimensionMap().keySet());
     }
 
     public static Map<Class<? extends Quantity<?>>, Map<SystemOfUnits, Unit<? extends Quantity<?>>>> getDimensionMap() {
