@@ -118,7 +118,6 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
     public void run() {
         ModuleHandlerCallback callback = this.callback;
         if (callback instanceof TriggerHandlerCallback triggerHandlerCallback) {
-            triggerHandlerCallback.triggered(module);
             TimerEvent event = AutomationEventFactory.createTimerEvent(module.getTypeUID(),
                     Objects.requireNonNullElse(module.getLabel(), module.getId()), Map.of(CONFIG_ITEM_NAME, itemName));
             triggerHandlerCallback.triggered(module, Map.of("event", event));

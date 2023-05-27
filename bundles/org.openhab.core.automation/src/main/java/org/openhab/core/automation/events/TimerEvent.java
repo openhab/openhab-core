@@ -27,7 +27,7 @@ public class TimerEvent extends AbstractEvent {
     public static final String TYPE = TimerEvent.class.getSimpleName();
 
     /**
-     * constructs a new rule added event
+     * Constructs a new timer event
      *
      * @param topic the topic of the event
      * @param payload the payload of the event (contains trigger configuration)
