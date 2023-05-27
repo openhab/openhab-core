@@ -13,6 +13,7 @@
 package org.openhab.core.audio;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -23,9 +24,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Definition of an audio output like headphones, a speaker or for writing to
  * a file / clip.
- * This version is synchronous: when the process() method returns,
+ * Helper class for synchronous sink : when the process() method returns,
  * the source is considered played, and could be disposed.
- * Any delayed tasks can then be performed, such as volume restoration
+ * Any delayed tasks can then be performed, such as volume restoration.
  *
  * @author Gwendal Roulleau - Initial contribution
  */
@@ -35,17 +36,12 @@ public abstract class AudioSinkSync implements AudioSink {
     private final Logger logger = LoggerFactory.getLogger(AudioSinkSync.class);
 
     @Override
-    public void process(@Nullable AudioStream audioStream, @Nullable Runnable whenFinished)
+    public CompletableFuture<@Nullable Void> processAndComplete(@Nullable AudioStream audioStream)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
         try {
-            process(audioStream);
+            processSynchronously(audioStream);
         } finally {
-            if (whenFinished != null) {
-                whenFinished.run();
-            }
-
-            // if the stream is not needed anymore, then we should call back the AudioStream to let it a chance
-            // to auto dispose:
+            // as the stream is not needed anymore, we should dispose of it
             if (audioStream instanceof Disposable disposableAudioStream) {
                 try {
                     disposableAudioStream.dispose();
@@ -59,5 +55,30 @@ public abstract class AudioSinkSync implements AudioSink {
                 }
             }
         }
+        return CompletableFuture.completedFuture(null);
     }
+
+    @Override
+    public void process(@Nullable AudioStream audioStream)
+            throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
+        processSynchronously(audioStream);
+    }
+
+    /**
+     * Processes the passed {@link AudioStream} and returns only when the playback is ended.
+     *
+     * If the passed {@link AudioStream} is not supported by this instance, an {@link UnsupportedAudioStreamException}
+     * is thrown.
+     *
+     * If the passed {@link AudioStream} has an {@link AudioFormat} not supported by this instance,
+     * an {@link UnsupportedAudioFormatException} is thrown.
+     *
+     * In case the audioStream is null, this should be interpreted as a request to end any currently playing stream.
+     *
+     * @param audioStream the audio stream to play or null to keep quiet
+     * @throws UnsupportedAudioFormatException If audioStream format is not supported
+     * @throws UnsupportedAudioStreamException If audioStream is not supported
+     */
+    protected abstract void processSynchronously(@Nullable AudioStream audioStream)
+            throws UnsupportedAudioFormatException, UnsupportedAudioStreamException;
 }

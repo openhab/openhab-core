@@ -80,7 +80,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
     }
 
     @Override
-    public synchronized void process(final @Nullable AudioStream audioStream)
+    public synchronized void processAsynchronously(final @Nullable AudioStream audioStream)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
         if (audioStream != null && !AudioFormat.CODEC_MP3.equals(audioStream.getFormat().getCodec())) {
             AudioPlayer audioPlayer = new AudioPlayer(audioStream);
@@ -104,8 +104,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
                 } else {
                     try {
                         // we start a new continuous stream and store its handle
-                        streamPlayer = new Player(audioStream);
-                        playInThread(streamPlayer, () -> runDelayed(audioStream));
+                        playInThread(audioStream, true);
                     } catch (JavaLayerException e) {
                         LOGGER.error("An exception occurred while playing url audio stream : '{}'", e.getMessage());
                     }
@@ -114,7 +113,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
             } else {
                 // we are playing some normal file (no url stream)
                 try {
-                    playInThread(new Player(audioStream), () -> runDelayed(audioStream));
+                    playInThread(audioStream, false);
                 } catch (JavaLayerException e) {
                     LOGGER.error("An exception occurred while playing audio : '{}'", e.getMessage());
                 }
@@ -122,18 +121,20 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
         }
     }
 
-    private void playInThread(final @Nullable Player player, Runnable toRunAfter) {
+    private void playInThread(final AudioStream audioStream, boolean store) throws JavaLayerException {
         // run in new thread
+        Player streamPlayerFinal = new Player(audioStream);
+        if (store) { // we store its handle in case we want to interrupt it.
+            streamPlayer = streamPlayerFinal;
+        }
         threadFactory.newThread(() -> {
-            if (player != null) {
-                try {
-                    player.play();
-                } catch (Exception e) {
-                    LOGGER.error("An exception occurred while playing audio : '{}'", e.getMessage());
-                } finally {
-                    player.close();
-                    toRunAfter.run();
-                }
+            try {
+                streamPlayerFinal.play();
+            } catch (Exception e) {
+                LOGGER.error("An exception occurred while playing audio : '{}'", e.getMessage());
+            } finally {
+                streamPlayerFinal.close();
+                playbackFinished(audioStream);
             }
         }).start();
     }

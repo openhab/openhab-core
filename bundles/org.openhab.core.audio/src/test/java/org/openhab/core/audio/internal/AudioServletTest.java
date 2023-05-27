@@ -30,7 +30,7 @@ import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
 import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.FixedLengthAudioStream;
-import org.openhab.core.audio.internal.AudioServlet.StreamServed;
+import org.openhab.core.audio.StreamServed;
 import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
 
 /**

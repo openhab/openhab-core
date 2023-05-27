@@ -13,12 +13,12 @@
 package org.openhab.core.audio.utils;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.audio.AudioSink;
-import org.openhab.core.library.types.PercentType;
-import org.slf4j.Logger;
+import org.openhab.core.audio.AudioFormat;
 
 /**
  * Some utility methods for sink
@@ -27,57 +27,17 @@ import org.slf4j.Logger;
  *
  */
 @NonNullByDefault
-public class AudioSinkUtils {
+public interface AudioSinkUtils {
 
     /**
-     * Handle a volume command change and returns a Runnable to restore it.
+     * Transfers data from an input stream to an output stream and computes on the fly its duration
      *
-     * @param volume The volume to set
-     * @param sink The sink to set the volume to
-     * @param logger to log error to
-     * @return A runnable to restore the volume to its previous value, or null if no change is required
+     * @param in the input stream giving audio data ta play
+     * @param out the output stream receiving data to play
+     * @return the timestamp (from System.nanoTime) when the sound should be fully played. Returns null if computing
+     *         time fails.
+     * @throws IOException if reading from the stream or writing to the stream failed
      */
-    public static @Nullable Runnable handleVolumeCommand(@Nullable PercentType volume, AudioSink sink, Logger logger) {
-        boolean volumeChanged = false;
-        PercentType oldVolume = null;
-
-        if (volume == null) {
-            return null;
-        }
-
-        // set notification sound volume
-        try {
-            // get current volume
-            oldVolume = sink.getVolume();
-        } catch (IOException | UnsupportedOperationException e) {
-            logger.debug("An exception occurred while getting the volume of sink '{}' : {}", sink.getId(),
-                    e.getMessage(), e);
-        }
-
-        if (!volume.equals(oldVolume) || oldVolume == null) {
-            try {
-                sink.setVolume(volume);
-                volumeChanged = true;
-            } catch (IOException | UnsupportedOperationException e) {
-                logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
-                        e.getMessage(), e);
-            }
-        }
-
-        final PercentType oldVolumeFinal = oldVolume;
-        Runnable toRunWhenProcessFinished = null;
-        // restore volume only if it was set before
-        if (volumeChanged && oldVolumeFinal != null) {
-            toRunWhenProcessFinished = () -> {
-                try {
-                    sink.setVolume(oldVolumeFinal);
-                } catch (IOException | UnsupportedOperationException e) {
-                    logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
-                            e.getMessage(), e);
-                }
-            };
-        }
-
-        return toRunWhenProcessFinished;
-    }
+    @Nullable
+    Long transferAndAnalyzeLength(InputStream in, OutputStream out, AudioFormat audioFormat) throws IOException;
 }

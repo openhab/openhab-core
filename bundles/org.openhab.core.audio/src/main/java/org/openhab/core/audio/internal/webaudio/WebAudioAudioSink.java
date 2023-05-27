@@ -23,6 +23,7 @@ import org.openhab.core.audio.AudioHTTPServer;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSinkAsync;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.StreamServed;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
@@ -61,7 +62,7 @@ public class WebAudioAudioSink extends AudioSinkAsync {
     }
 
     @Override
-    public void process(@Nullable AudioStream audioStream)
+    public void processAsynchronously(@Nullable AudioStream audioStream)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
         if (audioStream == null) {
             // in case the audioStream is null, this should be interpreted as a request to end any currently playing
@@ -80,11 +81,12 @@ public class WebAudioAudioSink extends AudioSinkAsync {
                 logger.debug("Error while closing the audio stream: {}", e.getMessage(), e);
             }
         } else {
-            // we will let the HTTP servlet run the delayed task when finished with the stream
-            Runnable delayedTask = () -> this.runDelayed(audioStream);
             // we need to serve it for a while and make it available to multiple clients
             try {
-                sendEvent(audioHTTPServer.serve(audioStream, 10, delayedTask).toString());
+                StreamServed servedStream = audioHTTPServer.serve(audioStream, 10, true);
+                // we will let the HTTP servlet run the delayed task when finished with the stream
+                servedStream.playEnd().thenRun(() -> this.playbackFinished(audioStream));
+                sendEvent(servedStream.url());
             } catch (IOException e) {
                 logger.warn("Cannot precache the audio stream to serve it", e);
             }

@@ -40,7 +40,6 @@ import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
-import org.openhab.core.audio.utils.AudioSinkUtils;
 import org.openhab.core.audio.utils.ToneSynthesizer;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
@@ -123,10 +122,12 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     public void play(@Nullable AudioStream audioStream, @Nullable String sinkId, @Nullable PercentType volume) {
         AudioSink sink = getSink(sinkId);
         if (sink != null) {
-            Runnable volumeRestoration = AudioSinkUtils.handleVolumeCommand(volume, sink, logger);
+            Runnable volumeRestauration = null;
             try {
-                sink.process(audioStream, volumeRestoration);
+                volumeRestauration = handleVolumeCommand(volume, sink);
+                sink.processAndComplete(audioStream).thenRun(volumeRestauration);
             } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
+                volumeRestauration.run();
                 logger.warn("Error playing '{}': {}", audioStream, e.getMessage(), e);
             }
         } else {
@@ -323,6 +324,53 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
             }
         }
         return null;
+    }
+
+    @Override
+    public Runnable handleVolumeCommand(@Nullable PercentType volume, AudioSink sink) {
+        boolean volumeChanged = false;
+        PercentType oldVolume = null;
+
+        Runnable toRunWhenProcessFinished = () -> {
+        };
+
+        if (volume == null) {
+            return toRunWhenProcessFinished;
+        }
+
+        // set notification sound volume
+        try {
+            // get current volume
+            oldVolume = sink.getVolume();
+        } catch (IOException | UnsupportedOperationException e) {
+            logger.debug("An exception occurred while getting the volume of sink '{}' : {}", sink.getId(),
+                    e.getMessage(), e);
+        }
+
+        if (!volume.equals(oldVolume) || oldVolume == null) {
+            try {
+                sink.setVolume(volume);
+                volumeChanged = true;
+            } catch (IOException | UnsupportedOperationException e) {
+                logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
+                        e.getMessage(), e);
+            }
+        }
+
+        final PercentType oldVolumeFinal = oldVolume;
+        // restore volume only if it was set before
+        if (volumeChanged && oldVolumeFinal != null) {
+            toRunWhenProcessFinished = () -> {
+                try {
+                    sink.setVolume(oldVolumeFinal);
+                } catch (IOException | UnsupportedOperationException e) {
+                    logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
+                            e.getMessage(), e);
+                }
+            };
+        }
+
+        return toRunWhenProcessFinished;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
