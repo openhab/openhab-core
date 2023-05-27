@@ -65,7 +65,7 @@ public class EventWebSocket {
     private List<String> sourceFilter = List.of();
 
     public EventWebSocket(Gson gson, EventWebSocketAdapterHandler wsHandler, ItemEventUtility itemEventUtility,
-                          EventPublisher eventPublisher) {
+            EventPublisher eventPublisher) {
         this.wsHandler = wsHandler;
         this.gson = gson;
         this.itemEventUtility = itemEventUtility;

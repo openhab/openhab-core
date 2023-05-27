@@ -123,7 +123,8 @@ public class CommonWebSocketServlet extends WebSocketServlet {
 
         private boolean isAuthorizedRequest(ServletUpgradeRequest servletUpgradeRequest) {
             try {
-                var securityContext = authFilter.getSecurityContext(servletUpgradeRequest.getHttpServletRequest(), true);
+                var securityContext = authFilter.getSecurityContext(servletUpgradeRequest.getHttpServletRequest(),
+                        true);
                 return securityContext != null
                         && (securityContext.isUserInRole(Role.USER) || securityContext.isUserInRole(Role.ADMIN));
             } catch (AuthenticationException | IOException e) {

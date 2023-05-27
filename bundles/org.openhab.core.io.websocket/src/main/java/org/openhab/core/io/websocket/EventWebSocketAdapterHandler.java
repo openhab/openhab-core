@@ -45,7 +45,8 @@ public class EventWebSocketAdapterHandler implements EventSubscriber, WebSocketH
     private final Set<EventWebSocket> webSockets = new CopyOnWriteArraySet<>();
 
     @Activate
-    public EventWebSocketAdapterHandler(@Reference EventPublisher eventPublisher, @Reference ItemRegistry itemRegistry) {
+    public EventWebSocketAdapterHandler(@Reference EventPublisher eventPublisher,
+            @Reference ItemRegistry itemRegistry) {
         this.eventPublisher = eventPublisher;
         itemEventUtility = new ItemEventUtility(gson, itemRegistry);
     }
