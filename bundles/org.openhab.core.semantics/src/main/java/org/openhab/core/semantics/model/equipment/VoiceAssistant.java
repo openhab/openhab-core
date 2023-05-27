@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_VoiceAssistant", label = "Voice Assistant", synonyms = "Voice Assistants", description = "")
+@TagInfo(id = "Equipment_VoiceAssistant")
 public interface VoiceAssistant extends Equipment {
 }

@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Location_Outdoor_Driveway", label = "Driveway", synonyms = "Driveways", description = "")
+@TagInfo(id = "Location_Outdoor_Driveway")
 public interface Driveway extends Outdoor {
 }

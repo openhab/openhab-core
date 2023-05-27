@@ -54,6 +54,7 @@ createLocationsFile(locations)
 createEquipmentsFile(equipments)
 createPointsFile(points)
 createPropertiesFile(properties)
+createDefaultProviderFile(tagSets)
 
 println "\n\nTagSets:"
 for (String tagSet : tagSets) {
@@ -86,7 +87,7 @@ def createTagSetClass(def line, String tagSet) {
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "${tagSet}", label = "${label}", synonyms = "${synonyms}", description = "${desc}")
+@TagInfo(id = "${tagSet}")
 public interface ${tag} extends ${parentClass} {
 }
 """)
@@ -106,8 +107,8 @@ def createLocationsFile(Set<String> locations) {
     file.write(header)
     file.write("""package org.openhab.core.semantics.model.location;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -121,7 +122,7 @@ import org.openhab.core.semantics.Location;
 @NonNullByDefault
 public class Locations {
 
-    static final Set<Class<? extends Location>> LOCATIONS = new HashSet<>();
+    static final Set<Class<? extends Location>> LOCATIONS = ConcurrentHashMap.newKeySet();
 
     static {
         LOCATIONS.add(Location.class);
@@ -138,6 +139,10 @@ public class Locations {
     public static boolean add(Class<? extends Location> tag) {
         return LOCATIONS.add(tag);
     }
+
+    public static boolean remove(Class<? extends Location> tag) {
+        return LOCATIONS.remove(tag);
+    }
 }
 """)
     file.close()
@@ -148,8 +153,8 @@ def createEquipmentsFile(Set<String> equipments) {
     file.write(header)
     file.write("""package org.openhab.core.semantics.model.equipment;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -163,7 +168,7 @@ import org.openhab.core.semantics.Equipment;
 @NonNullByDefault
 public class Equipments {
 
-    static final Set<Class<? extends Equipment>> EQUIPMENTS = new HashSet<>();
+    static final Set<Class<? extends Equipment>> EQUIPMENTS = ConcurrentHashMap.newKeySet();
 
     static {
         EQUIPMENTS.add(Equipment.class);
@@ -180,6 +185,10 @@ public class Equipments {
     public static boolean add(Class<? extends Equipment> tag) {
         return EQUIPMENTS.add(tag);
     }
+
+    public static boolean remove(Class<? extends Equipment> tag) {
+        return EQUIPMENTS.remove(tag);
+    }
 }
 """)
     file.close()
@@ -190,8 +199,8 @@ def createPointsFile(Set<String> points) {
     file.write(header)
     file.write("""package org.openhab.core.semantics.model.point;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -205,7 +214,7 @@ import org.openhab.core.semantics.Point;
 @NonNullByDefault
 public class Points {
 
-    static final Set<Class<? extends Point>> POINTS = new HashSet<>();
+    static final Set<Class<? extends Point>> POINTS = ConcurrentHashMap.newKeySet();
 
     static {
         POINTS.add(Point.class);
@@ -222,6 +231,10 @@ public class Points {
     public static boolean add(Class<? extends Point> tag) {
         return POINTS.add(tag);
     }
+
+    public static boolean remove(Class<? extends Point> tag) {
+        return POINTS.remove(tag);
+    }
 }
 """)
     file.close()
@@ -232,8 +245,8 @@ def createPropertiesFile(Set<String> properties) {
     file.write(header)
     file.write("""package org.openhab.core.semantics.model.property;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -247,7 +260,7 @@ import org.openhab.core.semantics.Property;
 @NonNullByDefault
 public class Properties {
 
-    static final Set<Class<? extends Property>> PROPERTIES = new HashSet<>();
+    static final Set<Class<? extends Property>> PROPERTIES = ConcurrentHashMap.newKeySet();
 
     static {
         PROPERTIES.add(Property.class);
@@ -263,6 +276,69 @@ public class Properties {
 
     public static boolean add(Class<? extends Property> tag) {
         return PROPERTIES.add(tag);
+    }
+
+    public static boolean remove(Class<? extends Property> tag) {
+        return PROPERTIES.remove(tag);
+    }
+}
+""")
+    file.close()
+}
+
+def createDefaultProviderFile(def tagSets) {
+    def file = new FileWriter("${baseDir}/src/main/java/org/openhab/core/semantics/model/DefaultSemanticTagProvider.java")
+    file.write(header)
+    file.write("""package org.openhab.core.semantics.model;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.semantics.SemanticTag;
+import org.openhab.core.semantics.SemanticTagImpl;
+import org.openhab.core.semantics.SemanticTagProvider;
+import org.osgi.service.component.annotations.Component;
+
+/**
+ * This class defines a provider of all default semantic tags.
+ *
+ * @author Generated from generateTagClasses.groovy - Initial contribution
+ */
+@NonNullByDefault
+@Component(immediate = true, service = { SemanticTagProvider.class, DefaultSemanticTagProvider.class })
+public class DefaultSemanticTagProvider implements SemanticTagProvider {
+
+    private List<SemanticTag> defaultTags;
+
+    public DefaultSemanticTagProvider() {
+        this.defaultTags = new ArrayList<>();
+        defaultTags.add(new SemanticTagImpl("Equipment", "", "", ""));
+        defaultTags.add(new SemanticTagImpl("Location", "", "", ""));
+        defaultTags.add(new SemanticTagImpl("Point", "", "", ""));
+        defaultTags.add(new SemanticTagImpl("Property", "", "", ""));
+""")    
+    for (line in parseCsv(new FileReader("${baseDir}/model/SemanticTags.csv"), separator: ',')) {
+        def tagId = (line.Parent ? tagSets.get(line.Parent) : line.Type) + "_" + line.Tag
+        file.write("""        defaultTags.add(new SemanticTagImpl("${tagId}", //
+                "${line.Label}", "${line.Description}", "${line.Synonyms}"));
+""")
+    }
+    file.write("""    }
+
+    @Override
+    public Collection<SemanticTag> getAll() {
+        return defaultTags;
+    }
+
+    @Override
+    public void addProviderChangeListener(ProviderChangeListener<SemanticTag> listener) {
+    }
+
+    @Override
+    public void removeProviderChangeListener(ProviderChangeListener<SemanticTag> listener) {
     }
 }
 """)

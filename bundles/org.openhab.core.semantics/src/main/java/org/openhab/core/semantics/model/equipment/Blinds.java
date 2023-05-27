@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Blinds", label = "Blinds", synonyms = "Rollershutter, Rollershutters, Roller shutter, Roller shutters, Shutter, Shutters", description = "")
+@TagInfo(id = "Equipment_Blinds")
 public interface Blinds extends Equipment {
 }

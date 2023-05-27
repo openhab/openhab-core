@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Screen_Television", label = "Television", synonyms = "Televisions, TV, TVs", description = "")
+@TagInfo(id = "Equipment_Screen_Television")
 public interface Television extends Screen {
 }

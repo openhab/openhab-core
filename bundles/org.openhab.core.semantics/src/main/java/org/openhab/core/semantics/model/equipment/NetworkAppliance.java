@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_NetworkAppliance", label = "Network Appliance", synonyms = "Network Appliances", description = "")
+@TagInfo(id = "Equipment_NetworkAppliance")
 public interface NetworkAppliance extends Equipment {
 }

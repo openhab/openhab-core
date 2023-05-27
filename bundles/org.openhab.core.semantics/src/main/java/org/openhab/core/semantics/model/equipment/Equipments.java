@@ -12,8 +12,8 @@
  */
 package org.openhab.core.semantics.model.equipment;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -27,7 +27,7 @@ import org.openhab.core.semantics.Equipment;
 @NonNullByDefault
 public class Equipments {
 
-    static final Set<Class<? extends Equipment>> EQUIPMENTS = new HashSet<>();
+    static final Set<Class<? extends Equipment>> EQUIPMENTS = ConcurrentHashMap.newKeySet();
 
     static {
         EQUIPMENTS.add(Equipment.class);
@@ -92,5 +92,9 @@ public class Equipments {
 
     public static boolean add(Class<? extends Equipment> tag) {
         return EQUIPMENTS.add(tag);
+    }
+
+    public static boolean remove(Class<? extends Equipment> tag) {
+        return EQUIPMENTS.remove(tag);
     }
 }

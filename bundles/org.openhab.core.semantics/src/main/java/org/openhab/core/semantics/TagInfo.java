@@ -22,16 +22,11 @@ import java.lang.annotation.Target;
  * This is an annotation to be used on semantic tag classes for providing their ids, labels and descriptions.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - methods label, description and synonyms removed
  */
 @Retention(RUNTIME)
 @Target(TYPE)
 public @interface TagInfo {
 
     String id();
-
-    String label() default "";
-
-    String synonyms() default "";
-
-    String description() default "";
 }

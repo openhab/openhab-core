@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Property_Frequency", label = "Frequency", synonyms = "", description = "")
+@TagInfo(id = "Property_Frequency")
 public interface Frequency extends Property {
 }

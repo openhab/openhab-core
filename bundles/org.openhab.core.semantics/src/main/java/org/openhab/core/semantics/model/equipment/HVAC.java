@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_HVAC", label = "HVAC", synonyms = "Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC", description = "")
+@TagInfo(id = "Equipment_HVAC")
 public interface HVAC extends Equipment {
 }

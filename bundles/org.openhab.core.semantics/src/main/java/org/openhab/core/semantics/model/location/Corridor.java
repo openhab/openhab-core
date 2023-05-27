@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Location_Indoor_Corridor", label = "Corridor", synonyms = "Corridors, Hallway, Hallways", description = "")
+@TagInfo(id = "Location_Indoor_Corridor")
 public interface Corridor extends Indoor {
 }

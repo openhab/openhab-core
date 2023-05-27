@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Inverter", label = "Inverter", synonyms = "Inverters", description = "")
+@TagInfo(id = "Equipment_Inverter")
 public interface Inverter extends Equipment {
 }

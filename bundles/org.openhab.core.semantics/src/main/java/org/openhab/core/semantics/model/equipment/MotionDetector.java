@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Sensor_MotionDetector", label = "Motion Detector", synonyms = "Motion Detectors, Motion sensor, Motion sensors", description = "")
+@TagInfo(id = "Equipment_Sensor_MotionDetector")
 public interface MotionDetector extends Sensor {
 }

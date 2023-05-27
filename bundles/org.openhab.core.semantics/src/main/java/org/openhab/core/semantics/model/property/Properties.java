@@ -12,8 +12,8 @@
  */
 package org.openhab.core.semantics.model.property;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -27,7 +27,7 @@ import org.openhab.core.semantics.Property;
 @NonNullByDefault
 public class Properties {
 
-    static final Set<Class<? extends Property>> PROPERTIES = new HashSet<>();
+    static final Set<Class<? extends Property>> PROPERTIES = ConcurrentHashMap.newKeySet();
 
     static {
         PROPERTIES.add(Property.class);
@@ -66,5 +66,9 @@ public class Properties {
 
     public static boolean add(Class<? extends Property> tag) {
         return PROPERTIES.add(tag);
+    }
+
+    public static boolean remove(Class<? extends Property> tag) {
+        return PROPERTIES.remove(tag);
     }
 }

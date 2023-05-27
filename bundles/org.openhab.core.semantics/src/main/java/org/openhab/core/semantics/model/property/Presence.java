@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Property_Presence", label = "Presence", synonyms = "", description = "")
+@TagInfo(id = "Property_Presence")
 public interface Presence extends Property {
 }

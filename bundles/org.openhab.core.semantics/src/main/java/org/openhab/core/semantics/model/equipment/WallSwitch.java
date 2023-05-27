@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_WallSwitch", label = "Wall Switch", synonyms = "Wall Switches", description = "")
+@TagInfo(id = "Equipment_WallSwitch")
 public interface WallSwitch extends Equipment {
 }

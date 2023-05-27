@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_WhiteGood_WashingMachine", label = "Washing Machine", synonyms = "Washing Machines", description = "")
+@TagInfo(id = "Equipment_WhiteGood_WashingMachine")
 public interface WashingMachine extends WhiteGood {
 }

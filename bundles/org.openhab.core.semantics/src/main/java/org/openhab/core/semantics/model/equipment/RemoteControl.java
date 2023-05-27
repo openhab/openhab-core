@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_RemoteControl", label = "Remote Control", synonyms = "Remote Controls", description = "")
+@TagInfo(id = "Equipment_RemoteControl")
 public interface RemoteControl extends Equipment {
 }

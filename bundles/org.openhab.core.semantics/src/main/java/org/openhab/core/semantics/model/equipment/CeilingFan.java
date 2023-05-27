@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Fan_CeilingFan", label = "Ceiling Fan", synonyms = "Ceiling Fans", description = "")
+@TagInfo(id = "Equipment_Fan_CeilingFan")
 public interface CeilingFan extends Fan {
 }

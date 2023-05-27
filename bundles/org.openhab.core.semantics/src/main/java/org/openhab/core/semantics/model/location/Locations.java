@@ -12,8 +12,8 @@
  */
 package org.openhab.core.semantics.model.location;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -27,7 +27,7 @@ import org.openhab.core.semantics.Location;
 @NonNullByDefault
 public class Locations {
 
-    static final Set<Class<? extends Location>> LOCATIONS = new HashSet<>();
+    static final Set<Class<? extends Location>> LOCATIONS = ConcurrentHashMap.newKeySet();
 
     static {
         LOCATIONS.add(Location.class);
@@ -75,5 +75,9 @@ public class Locations {
 
     public static boolean add(Class<? extends Location> tag) {
         return LOCATIONS.add(tag);
+    }
+
+    public static boolean remove(Class<? extends Location> tag) {
+        return LOCATIONS.remove(tag);
     }
 }

@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Point_Status_OpenState", label = "OpenState", synonyms = "", description = "")
+@TagInfo(id = "Point_Status_OpenState")
 public interface OpenState extends Status {
 }

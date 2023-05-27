@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Point_Setpoint", label = "Setpoint", synonyms = "", description = "")
+@TagInfo(id = "Point_Setpoint")
 public interface Setpoint extends Point {
 }

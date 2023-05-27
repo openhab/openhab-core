@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Point_Status_Tilt", label = "Tilt", synonyms = "", description = "")
+@TagInfo(id = "Point_Status_Tilt")
 public interface Tilt extends Status {
 }

@@ -12,8 +12,8 @@
  */
 package org.openhab.core.semantics.model.point;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -27,7 +27,7 @@ import org.openhab.core.semantics.Point;
 @NonNullByDefault
 public class Points {
 
-    static final Set<Class<? extends Point>> POINTS = new HashSet<>();
+    static final Set<Class<? extends Point>> POINTS = ConcurrentHashMap.newKeySet();
 
     static {
         POINTS.add(Point.class);
@@ -50,5 +50,9 @@ public class Points {
 
     public static boolean add(Class<? extends Point> tag) {
         return POINTS.add(tag);
+    }
+
+    public static boolean remove(Class<? extends Point> tag) {
+        return POINTS.remove(tag);
     }
 }

@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_PowerOutlet", label = "Power Outlet", synonyms = "Power Outlets, Outlet, Outlets", description = "")
+@TagInfo(id = "Equipment_PowerOutlet")
 public interface PowerOutlet extends Equipment {
 }

@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Location_Indoor_Floor_ThirdFloor", label = "Third Floor", synonyms = "Third Floors", description = "")
+@TagInfo(id = "Location_Indoor_Floor_ThirdFloor")
 public interface ThirdFloor extends Floor {
 }

@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_CleaningRobot", label = "Cleaning Robot", synonyms = "Cleaning Robots, Vacuum robot, Vacuum robots", description = "")
+@TagInfo(id = "Equipment_CleaningRobot")
 public interface CleaningRobot extends Equipment {
 }

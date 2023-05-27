@@ -12,10 +12,12 @@
  */
 package org.openhab.core.semantics;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 
 /**
@@ -45,4 +47,61 @@ public interface SemanticsService {
      * @return as set of items that are located in the given location(s)
      */
     Set<Item> getItemsInLocation(String labelOrSynonym, Locale locale);
+
+    /**
+     * Retrieves the first semantic tag having label matching the given parameter.
+     * Case is ignored.
+     *
+     * @param tagLabel the searched label
+     * @param locale the locale to be considered
+     * @return the tag class of the first matching semantic tag or null if no matching found
+     */
+    @Nullable
+    Class<? extends Tag> getByLabel(String tagLabel, Locale locale);
+
+    /**
+     * Retrieves all semantic tags having label or a synonym matching the given parameter.
+     * Case is ignored.
+     *
+     * @param tagLabelOrSynonym the searched label or synonym
+     * @param locale the locale to be considered
+     * @return the List of tag classes of all matching semantic tags
+     */
+    List<Class<? extends Tag>> getByLabelOrSynonym(String tagLabelOrSynonym, Locale locale);
+
+    /**
+     * Gets the label and all synonyms of a semantic tag using the given locale.
+     *
+     * @param tagClass the tag class
+     * @param locale the locale to be considered
+     * @return the list containing the label and all synonyms of a semantic tag
+     */
+    List<String> getLabelAndSynonyms(Class<? extends Tag> tagClass, Locale locale);
+
+    /**
+     * Gets the label of a semantic tag using the given locale.
+     *
+     * @param tagClass the tag class
+     * @param locale the locale to be considered
+     * @return the label of a semantic tag
+     */
+    String getLabel(Class<? extends Tag> tagClass, Locale locale);
+
+    /**
+     * Gets all synonyms of a semantic tag using the given locale.
+     *
+     * @param tagClass the tag class
+     * @param locale the locale to be considered
+     * @return the list of all synonyms of a semantic tag
+     */
+    List<String> getSynonyms(Class<? extends Tag> tagClass, Locale locale);
+
+    /**
+     * Gets the description of a semantic tag using the given locale.
+     *
+     * @param tagClass the tag class
+     * @param locale the locale to be considered
+     * @return the description of a semantic tag
+     */
+    String getDescription(Class<? extends Tag> tagClass, Locale locale);
 }

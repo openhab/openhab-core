@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Lightbulb", label = "Lightbulb", synonyms = "Lightbulbs, Bulb, Bulbs, Lamp, Lamps, Lights, Lighting", description = "")
+@TagInfo(id = "Equipment_Lightbulb")
 public interface Lightbulb extends Equipment {
 }

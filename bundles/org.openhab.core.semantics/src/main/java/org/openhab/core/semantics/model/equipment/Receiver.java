@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Receiver", label = "Receiver", synonyms = "Receivers, Audio Receiver, Audio Receivers, AV Receiver, AV Receivers", description = "")
+@TagInfo(id = "Equipment_Receiver")
 public interface Receiver extends Equipment {
 }

@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Location_Indoor_Room_LivingRoom", label = "Living Room", synonyms = "Living Rooms", description = "")
+@TagInfo(id = "Location_Indoor_Room_LivingRoom")
 public interface LivingRoom extends Room {
 }

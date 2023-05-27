@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Siren", label = "Siren", synonyms = "Sirens", description = "")
+@TagInfo(id = "Equipment_Siren")
 public interface Siren extends Equipment {
 }

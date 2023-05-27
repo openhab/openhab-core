@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Property_Rain", label = "Rain", synonyms = "", description = "")
+@TagInfo(id = "Property_Rain")
 public interface Rain extends Property {
 }

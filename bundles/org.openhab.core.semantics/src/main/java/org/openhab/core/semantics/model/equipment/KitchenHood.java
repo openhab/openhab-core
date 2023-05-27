@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Fan_KitchenHood", label = "Kitchen Hood", synonyms = "Kitchen Hoods", description = "")
+@TagInfo(id = "Equipment_Fan_KitchenHood")
 public interface KitchenHood extends Fan {
 }

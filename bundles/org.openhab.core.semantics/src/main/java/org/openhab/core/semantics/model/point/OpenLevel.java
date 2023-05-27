@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Point_Status_OpenLevel", label = "OpenLevel", synonyms = "", description = "")
+@TagInfo(id = "Point_Status_OpenLevel")
 public interface OpenLevel extends Status {
 }

@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Door_Gate", label = "Gate", synonyms = "Gates", description = "")
+@TagInfo(id = "Equipment_Door_Gate")
 public interface Gate extends Door {
 }

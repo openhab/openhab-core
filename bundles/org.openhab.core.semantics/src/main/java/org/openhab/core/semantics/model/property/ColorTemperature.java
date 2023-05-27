@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Property_ColorTemperature", label = "Color Temperature", synonyms = "", description = "")
+@TagInfo(id = "Property_ColorTemperature")
 public interface ColorTemperature extends Property {
 }

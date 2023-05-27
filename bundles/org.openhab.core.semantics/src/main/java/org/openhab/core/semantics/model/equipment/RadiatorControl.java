@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_RadiatorControl", label = "Radiator Control", synonyms = "Radiator Controls, Radiator, Radiators", description = "")
+@TagInfo(id = "Equipment_RadiatorControl")
 public interface RadiatorControl extends Equipment {
 }

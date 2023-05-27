@@ -21,6 +21,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Location_Indoor_Building_SummerHouse", label = "Summer House", synonyms = "Summer Houses, Second Home, Second Homes", description = "")
+@TagInfo(id = "Location_Indoor_Building_SummerHouse")
 public interface SummerHouse extends Building {
 }

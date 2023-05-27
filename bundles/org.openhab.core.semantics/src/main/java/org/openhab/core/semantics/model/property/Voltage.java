@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Property_Voltage", label = "Voltage", synonyms = "", description = "")
+@TagInfo(id = "Property_Voltage")
 public interface Voltage extends Property {
 }

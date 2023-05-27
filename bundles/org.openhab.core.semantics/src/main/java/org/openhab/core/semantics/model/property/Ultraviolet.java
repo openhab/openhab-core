@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Property_Ultraviolet", label = "Ultraviolet", synonyms = "UV", description = "")
+@TagInfo(id = "Property_Ultraviolet")
 public interface Ultraviolet extends Property {
 }

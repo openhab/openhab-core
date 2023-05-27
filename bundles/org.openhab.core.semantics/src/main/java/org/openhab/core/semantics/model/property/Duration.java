@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Property_Duration", label = "Duration", synonyms = "", description = "")
+@TagInfo(id = "Property_Duration")
 public interface Duration extends Property {
 }

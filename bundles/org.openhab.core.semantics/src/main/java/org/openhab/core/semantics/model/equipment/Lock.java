@@ -22,6 +22,6 @@ import org.openhab.core.semantics.TagInfo;
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment_Lock", label = "Lock", synonyms = "Locks", description = "")
+@TagInfo(id = "Equipment_Lock")
 public interface Lock extends Equipment {
 }
