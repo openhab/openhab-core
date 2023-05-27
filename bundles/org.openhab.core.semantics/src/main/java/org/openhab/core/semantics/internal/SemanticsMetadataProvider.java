@@ -33,9 +33,9 @@ import org.openhab.core.semantics.Equipment;
 import org.openhab.core.semantics.Location;
 import org.openhab.core.semantics.Point;
 import org.openhab.core.semantics.Property;
+import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticTags;
 import org.openhab.core.semantics.Tag;
-import org.openhab.core.semantics.TagInfo;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -73,10 +73,13 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     });
 
     private final ItemRegistry itemRegistry;
+    private final SemanticTagRegistry semanticTagRegistry;
 
     @Activate
-    public SemanticsMetadataProvider(final @Reference ItemRegistry itemRegistry) {
+    public SemanticsMetadataProvider(final @Reference ItemRegistry itemRegistry,
+            final @Reference SemanticTagRegistry semanticTagRegistry) {
         this.itemRegistry = itemRegistry;
+        this.semanticTagRegistry = semanticTagRegistry;
     }
 
     @Activate
@@ -111,7 +114,7 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         if (type != null) {
             processProperties(item, configuration);
             processHierarchy(item, configuration);
-            Metadata md = new Metadata(key, type.getAnnotation(TagInfo.class).id(), configuration);
+            Metadata md = new Metadata(key, semanticTagRegistry.buildId(type), configuration);
             Metadata oldMd = semantics.put(item.getName(), md);
             if (oldMd == null) {
                 notifyListenersAboutAddedElement(md);
@@ -148,7 +151,7 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
             if (entityClass.isAssignableFrom(type)) {
                 Class<? extends Property> p = SemanticTags.getProperty(item);
                 if (p != null) {
-                    configuration.put(relation.getValue(), p.getAnnotation(TagInfo.class).id());
+                    configuration.put(relation.getValue(), semanticTagRegistry.buildId(p));
                 }
             }
         }

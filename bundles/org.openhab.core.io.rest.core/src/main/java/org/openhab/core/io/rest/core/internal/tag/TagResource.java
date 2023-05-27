@@ -14,12 +14,17 @@ package org.openhab.core.io.rest.core.internal.tag;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -35,10 +40,10 @@ import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
-import org.openhab.core.semantics.model.equipment.Equipments;
-import org.openhab.core.semantics.model.location.Locations;
-import org.openhab.core.semantics.model.point.Points;
-import org.openhab.core.semantics.model.property.Properties;
+import org.openhab.core.semantics.ManagedSemanticTagProvider;
+import org.openhab.core.semantics.SemanticTag;
+import org.openhab.core.semantics.SemanticTagImpl;
+import org.openhab.core.semantics.SemanticTagRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -54,11 +59,13 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 /**
  * This class acts as a REST resource for retrieving a list of tags.
  *
  * @author Jimmy Tanagra - Initial contribution
+ * @author Laurent Garnier - Extend REST API to allow adding/updating/removing user tags
  */
 @Component
 @JaxrsResource
@@ -74,28 +81,177 @@ public class TagResource implements RESTResource {
     public static final String PATH_TAGS = "tags";
 
     private final LocaleService localeService;
+    private final SemanticTagRegistry semanticTagRegistry;
+    private final ManagedSemanticTagProvider managedSemanticTagProvider;
+
+    // TODO pattern in @Path
 
     @Activate
-    public TagResource(final @Reference LocaleService localeService) {
+    public TagResource(final @Reference LocaleService localeService,
+            final @Reference SemanticTagRegistry semanticTagRegistry,
+            final @Reference ManagedSemanticTagProvider managedSemanticTagProvider) {
         this.localeService = localeService;
+        this.semanticTagRegistry = semanticTagRegistry;
+        this.managedSemanticTagProvider = managedSemanticTagProvider;
     }
 
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getTags", summary = "Get all available tags.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TagDTO.class)))) })
+    @Operation(operationId = "getSemanticTags", summary = "Get all available semantic tags.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedSemanticTagDTO.class)))) })
     public Response getTags(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
 
-        Map<String, List<TagDTO>> tags = Map.of( //
-                Locations.class.getSimpleName(), Locations.stream().map(tag -> new TagDTO(tag, locale)).toList(), //
-                Equipments.class.getSimpleName(), Equipments.stream().map(tag -> new TagDTO(tag, locale)).toList(), //
-                Points.class.getSimpleName(), Points.stream().map(tag -> new TagDTO(tag, locale)).toList(), //
-                Properties.class.getSimpleName(), Properties.stream().map(tag -> new TagDTO(tag, locale)).toList() //
-        );
+        List<EnrichedSemanticTagDTO> tagsDTO = semanticTagRegistry.getAll().stream()
+                .sorted((element1, element2) -> element1.getUID().compareTo(element2.getUID()))
+                .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), isEditable(t))).collect(Collectors.toList());
+        return JSONResponse.createResponse(Status.OK, tagsDTO, null);
+    }
 
-        return JSONResponse.createResponse(Status.OK, tags, null);
+    @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
+    @Path("/{tagId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getSemanticTagAndSubTags", summary = "Gets a semantic tag and its sub tags.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedSemanticTagDTO.class)))),
+            @ApiResponse(responseCode = "404", description = "Tag not found.") })
+    public Response getTagAndSubTags(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("tagId") @Parameter(description = "tag id") String tagId) {
+        final Locale locale = localeService.getLocale(language);
+        String uid = tagId.trim();
+
+        SemanticTag tag = semanticTagRegistry.get(uid);
+        if (tag != null) {
+            List<EnrichedSemanticTagDTO> tagsDTO = semanticTagRegistry.getSubTree(tag).stream()
+                    .sorted((element1, element2) -> element1.getUID().compareTo(element2.getUID()))
+                    .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), isEditable(t)))
+                    .collect(Collectors.toList());
+            return JSONResponse.createResponse(Status.OK, tagsDTO, null);
+        } else {
+            return getTagResponse(Status.NOT_FOUND, null, locale, "Tag " + uid + " does not exist!");
+        }
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "createSemanticTag", summary = "Creates a new semantic tag and adds it to the registry.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "201", description = "Created", content = @Content(schema = @Schema(implementation = EnrichedSemanticTagDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "The tag identifier is invalid."),
+                    @ApiResponse(responseCode = "409", description = "A tag with the same identifier already exists.") })
+    public Response create(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @Parameter(description = "tag data", required = true) EnrichedSemanticTagDTO data) {
+        final Locale locale = localeService.getLocale(language);
+
+        if (data.uid == null) {
+            return getTagResponse(Status.BAD_REQUEST, null, locale, "Tag identifier is required!");
+        }
+
+        String uid = data.uid.trim();
+
+        // check if a tag with this UID already exists
+        SemanticTag tag = semanticTagRegistry.get(uid);
+        if (tag != null) {
+            // report a conflict
+            return getTagResponse(Status.CONFLICT, tag, locale, "Tag " + uid + " already exists!");
+        }
+
+        // Check that the provided uid is a valid new tag id
+        if (!semanticTagRegistry.isNewIdValid(uid)) {
+            return getTagResponse(Status.BAD_REQUEST, null, locale, "Invalid tag identifier " + uid);
+        }
+
+        tag = new SemanticTagImpl(uid, data.label, data.description, data.synonyms);
+        managedSemanticTagProvider.add(tag);
+
+        return getTagResponse(Status.CREATED, tag, locale, null);
+    }
+
+    @DELETE
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{tagId}")
+    @Operation(operationId = "removeSemanticTag", summary = "Removes a semantic tag and its sub tags from the registry.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK, was deleted."),
+                    @ApiResponse(responseCode = "404", description = "Custom tag not found."),
+                    @ApiResponse(responseCode = "405", description = "Custom tag not editable.") })
+    public Response remove(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("tagId") @Parameter(description = "tag id") String tagId) {
+        final Locale locale = localeService.getLocale(language);
+
+        String uid = tagId.trim();
+
+        // check whether tag exists and throw 404 if not
+        SemanticTag tag = semanticTagRegistry.get(uid);
+        if (tag == null) {
+            return getTagResponse(Status.NOT_FOUND, null, locale, "Tag " + uid + " does not exist!");
+        }
+
+        // Get tags in reverse order
+        List<String> uids = semanticTagRegistry.getSubTree(tag).stream().map(t -> t.getUID())
+                .sorted((element1, element2) -> element2.compareTo(element1)).collect(Collectors.toList());
+        for (String id : uids) {
+            // ask whether the tag exists as a managed tag, so it can get updated, 405 otherwise
+            if (managedSemanticTagProvider.get(id) == null) {
+                return getTagResponse(Status.METHOD_NOT_ALLOWED, null, locale, "Tag " + id + " is not editable.");
+            }
+        }
+
+        uids.forEach(id -> managedSemanticTagProvider.remove(id));
+
+        return Response.ok(null, MediaType.TEXT_PLAIN).build();
+    }
+
+    @PUT
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{tagId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "updateSemanticTag", summary = "Updates a semantic tag.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedSemanticTagDTO.class))),
+                    @ApiResponse(responseCode = "404", description = "Custom tag not found."),
+                    @ApiResponse(responseCode = "405", description = "Custom tag not editable.") })
+    public Response update(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("tagId") @Parameter(description = "tag id") String tagId,
+            @Parameter(description = "tag data", required = true) EnrichedSemanticTagDTO data) {
+        final Locale locale = localeService.getLocale(language);
+
+        String uid = tagId.trim();
+
+        // check whether tag exists and throw 404 if not
+        SemanticTag tag = semanticTagRegistry.get(uid);
+        if (tag == null) {
+            return getTagResponse(Status.NOT_FOUND, null, locale, "Tag " + uid + " does not exist!");
+        }
+
+        // ask whether the tag exists as a managed tag, so it can get updated, 405 otherwise
+        if (managedSemanticTagProvider.get(uid) == null) {
+            return getTagResponse(Status.METHOD_NOT_ALLOWED, null, locale, "Tag " + uid + " is not editable.");
+        }
+
+        tag = new SemanticTagImpl(uid, data.label != null ? data.label : tag.getLabel(),
+                data.description != null ? data.description : tag.getDescription(),
+                data.synonyms != null ? data.synonyms : tag.getSynonyms());
+        managedSemanticTagProvider.update(tag);
+
+        return getTagResponse(Status.OK, tag, locale, null);
+    }
+
+    private Response getTagResponse(Status status, @Nullable SemanticTag tag, Locale locale,
+            @Nullable String errorMsg) {
+        EnrichedSemanticTagDTO tagDTO = tag != null ? new EnrichedSemanticTagDTO(tag.localized(locale), isEditable(tag))
+                : null;
+        return JSONResponse.createResponse(status, tagDTO, errorMsg);
+    }
+
+    private boolean isEditable(SemanticTag tag) {
+        return managedSemanticTagProvider.get(tag.getUID()) != null;
     }
 }

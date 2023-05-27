@@ -10,15 +10,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.semantics;
+package org.openhab.core.semantics.dto;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
+import java.util.List;
 
 /**
- * This is the super interface for all property tags.
+ * This is a data transfer object that is used to serialize semantic tags.
  *
- * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - Initial contribution
  */
-@NonNullByDefault
-public interface Property extends Tag {
+public class SemanticTagDTO {
+
+    public String uid;
+    public String label;
+    public String description;
+    public List<String> synonyms;
+
+    public SemanticTagDTO() {
+    }
 }
