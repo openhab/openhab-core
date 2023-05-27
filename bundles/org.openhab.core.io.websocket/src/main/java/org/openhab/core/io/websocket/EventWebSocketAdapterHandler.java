@@ -30,13 +30,13 @@ import org.osgi.service.component.annotations.Reference;
 import com.google.gson.Gson;
 
 /**
- * The {@link EventWebSocketHandler} allows subscription to oh events over WebSocket
+ * The {@link EventWebSocketAdapterHandler} allows subscription to oh events over WebSocket
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = { EventSubscriber.class, WebSocketHandler.class })
-public class EventWebSocketHandler implements EventSubscriber, WebSocketHandler {
+public class EventWebSocketAdapterHandler implements EventSubscriber, WebSocketHandler {
     public static final String HANDLER_ID = "event-subscriber";
     private final Gson gson = new Gson();
     private final EventPublisher eventPublisher;
@@ -45,7 +45,7 @@ public class EventWebSocketHandler implements EventSubscriber, WebSocketHandler 
     private final Set<EventWebSocket> webSockets = new CopyOnWriteArraySet<>();
 
     @Activate
-    public EventWebSocketHandler(@Reference EventPublisher eventPublisher, @Reference ItemRegistry itemRegistry) {
+    public EventWebSocketAdapterHandler(@Reference EventPublisher eventPublisher, @Reference ItemRegistry itemRegistry) {
         this.eventPublisher = eventPublisher;
         itemEventUtility = new ItemEventUtility(gson, itemRegistry);
     }
@@ -76,6 +76,6 @@ public class EventWebSocketHandler implements EventSubscriber, WebSocketHandler 
     @Override
     public Object createWebSocket(@Nullable ServletUpgradeRequest servletUpgradeRequest,
             @Nullable ServletUpgradeResponse servletUpgradeResponse) {
-        return new EventWebSocket(gson, EventWebSocketHandler.this, itemEventUtility, eventPublisher);
+        return new EventWebSocket(gson, EventWebSocketAdapterHandler.this, itemEventUtility, eventPublisher);
     }
 }

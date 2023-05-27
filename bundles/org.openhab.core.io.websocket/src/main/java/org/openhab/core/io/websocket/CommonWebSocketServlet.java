@@ -12,13 +12,12 @@
  */
 package org.openhab.core.io.websocket;
 
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import javax.ws.rs.core.SecurityContext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -30,7 +29,6 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.Role;
-import org.openhab.core.io.rest.auth.AnonymousUserSecurityContext;
 import org.openhab.core.io.rest.auth.AuthFilter;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -58,7 +56,7 @@ public class CommonWebSocketServlet extends WebSocketServlet {
 
     public static final String SERVLET_PATH = "/ws";
 
-    public static final String DEFAULT_HANDLER_ID = EventWebSocketHandler.HANDLER_ID;
+    public static final String DEFAULT_HANDLER_ID = EventWebSocketAdapterHandler.HANDLER_ID;
 
     private final Map<String, WebSocketHandler> connectionHandlers = new HashMap<>();
     private final AuthFilter authFilter;
@@ -124,26 +122,14 @@ public class CommonWebSocketServlet extends WebSocketServlet {
         }
 
         private boolean isAuthorizedRequest(ServletUpgradeRequest servletUpgradeRequest) {
-            Map<String, List<String>> parameterMap = servletUpgradeRequest.getParameterMap();
-            List<String> accessToken = parameterMap.getOrDefault("accessToken", List.of());
-            SecurityContext securityContext = null;
-            if (accessToken.isEmpty() && authFilter.isImplicitUserRole(servletUpgradeRequest.getHttpServletRequest())) {
-                securityContext = new AnonymousUserSecurityContext();
-            } else if (accessToken.size() == 1) {
-                String token = accessToken.get(0);
-                try {
-                    securityContext = authFilter.authenticateBearerToken(token);
-                } catch (AuthenticationException ignored) {
-                }
-                if (securityContext == null && authFilter.isBasicAuthAllowed()) {
-                    try {
-                        securityContext = authFilter.authenticateBasicAuth(token);
-                    } catch (AuthenticationException ignored) {
-                    }
-                }
+            try {
+                var securityContext = authFilter.getSecurityContext(servletUpgradeRequest.getHttpServletRequest(), true);
+                return securityContext != null
+                        && (securityContext.isUserInRole(Role.USER) || securityContext.isUserInRole(Role.ADMIN));
+            } catch (AuthenticationException | IOException e) {
+                logger.warn("Error handling WebSocket authorization", e);
+                return false;
             }
-            return securityContext != null
-                    && (securityContext.isUserInRole(Role.USER) || securityContext.isUserInRole(Role.ADMIN));
         }
     }
 }

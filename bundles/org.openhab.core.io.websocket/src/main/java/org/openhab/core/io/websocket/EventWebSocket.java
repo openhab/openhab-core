@@ -52,7 +52,7 @@ public class EventWebSocket {
 
     private final Logger logger = LoggerFactory.getLogger(EventWebSocket.class);
 
-    private final EventWebSocketHandler wsHandler;
+    private final EventWebSocketAdapterHandler wsHandler;
     private final Gson gson;
     private final EventPublisher eventPublisher;
     private final ItemEventUtility itemEventUtility;
@@ -64,8 +64,8 @@ public class EventWebSocket {
     private List<String> typeFilter = List.of();
     private List<String> sourceFilter = List.of();
 
-    public EventWebSocket(Gson gson, EventWebSocketHandler wsHandler, ItemEventUtility itemEventUtility,
-            EventPublisher eventPublisher) {
+    public EventWebSocket(Gson gson, EventWebSocketAdapterHandler wsHandler, ItemEventUtility itemEventUtility,
+                          EventPublisher eventPublisher) {
         this.wsHandler = wsHandler;
         this.gson = gson;
         this.itemEventUtility = itemEventUtility;

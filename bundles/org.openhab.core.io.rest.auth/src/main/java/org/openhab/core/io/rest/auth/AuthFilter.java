@@ -183,7 +183,7 @@ public class AuthFilter implements ContainerRequestFilter {
         }
     }
 
-    public SecurityContext authenticateBearerToken(String token) throws AuthenticationException {
+    private SecurityContext authenticateBearerToken(String token) throws AuthenticationException {
         if (token.startsWith(API_TOKEN_PREFIX)) {
             UserApiTokenCredentials credentials = new UserApiTokenCredentials(token);
             Authentication auth = userRegistry.authenticate(credentials);
@@ -198,7 +198,7 @@ public class AuthFilter implements ContainerRequestFilter {
         }
     }
 
-    public SecurityContext authenticateBasicAuth(String credentialString) throws AuthenticationException {
+    private SecurityContext authenticateBasicAuth(String credentialString) throws AuthenticationException {
         final String cacheKey = getCacheKey(credentialString);
         if (cacheKey != null) {
             final UserSecurityContext cachedValue = authCache.get(cacheKey);
@@ -234,42 +234,9 @@ public class AuthFilter implements ContainerRequestFilter {
     public void filter(@Nullable ContainerRequestContext requestContext) throws IOException {
         if (requestContext != null) {
             try {
-                String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
-                if (altTokenHeader != null) {
-                    requestContext.setSecurityContext(authenticateBearerToken(altTokenHeader));
-                    return;
-                }
-
-                String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
-                if (authHeader != null) {
-                    String[] authParts = authHeader.split(" ");
-                    if (authParts.length == 2) {
-                        String authType = authParts[0];
-                        String authValue = authParts[1];
-                        if ("Bearer".equalsIgnoreCase(authType)) {
-                            requestContext.setSecurityContext(authenticateBearerToken(authValue));
-                            return;
-                        } else if ("Basic".equalsIgnoreCase(authType)) {
-                            String[] decodedCredentials = new String(Base64.getDecoder().decode(authValue), "UTF-8")
-                                    .split(":");
-                            if (decodedCredentials.length > 2) {
-                                throw new AuthenticationException("Invalid Basic authentication credential format");
-                            }
-                            switch (decodedCredentials.length) {
-                                case 1:
-                                    requestContext.setSecurityContext(authenticateBearerToken(decodedCredentials[0]));
-                                    break;
-                                case 2:
-                                    if (!allowBasicAuth) {
-                                        throw new AuthenticationException(
-                                                "Basic authentication with username/password is not allowed");
-                                    }
-                                    requestContext.setSecurityContext(authenticateBasicAuth(authValue));
-                            }
-                        }
-                    }
-                } else if (isImplicitUserRole(servletRequest)) {
-                    requestContext.setSecurityContext(new AnonymousUserSecurityContext());
+                SecurityContext sc = getSecurityContext(servletRequest, false);
+                if (sc != null) {
+                    requestContext.setSecurityContext(sc);
                 }
             } catch (AuthenticationException e) {
                 logger.warn("Unauthorized API request from {}: {}", getClientIp(servletRequest), e.getMessage());
@@ -278,7 +245,64 @@ public class AuthFilter implements ContainerRequestFilter {
         }
     }
 
-    public boolean isImplicitUserRole(HttpServletRequest request) {
+    public @Nullable SecurityContext getSecurityContext(HttpServletRequest request, boolean allowQueryToken)
+            throws AuthenticationException, IOException {
+        String altTokenHeader = request.getHeader(ALT_AUTH_HEADER);
+        if (altTokenHeader != null) {
+            return authenticateBearerToken(altTokenHeader);
+        }
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String authType = null;
+        String authValue = null;
+        boolean authFromQuery = false;
+        if (authHeader != null) {
+            String[] authParts = authHeader.split(" ");
+            if (authParts.length == 2) {
+                authType = authParts[0];
+                authValue = authParts[1];
+            }
+        } else if (allowQueryToken) {
+            Map<String, String[]> parameterMap = request.getParameterMap();
+            String[] accessToken = parameterMap.get("accessToken");
+            if (accessToken != null && accessToken.length > 0) {
+                authValue = accessToken[0];
+                authFromQuery = true;
+            }
+        }
+        if (authValue != null) {
+            if (authFromQuery) {
+                try {
+                    return authenticateBearerToken(authValue);
+                } catch (AuthenticationException e) {
+                    if (allowBasicAuth) {
+                        return authenticateBasicAuth(authValue);
+                    }
+                }
+            } else if ("Bearer".equalsIgnoreCase(authType)) {
+                return authenticateBearerToken(authValue);
+            } else if ("Basic".equalsIgnoreCase(authType)) {
+                String[] decodedCredentials = new String(Base64.getDecoder().decode(authValue), "UTF-8").split(":");
+                if (decodedCredentials.length > 2) {
+                    throw new AuthenticationException("Invalid Basic authentication credential format");
+                }
+                switch (decodedCredentials.length) {
+                    case 1:
+                        return authenticateBearerToken(decodedCredentials[0]);
+                    case 2:
+                        if (!allowBasicAuth) {
+                            throw new AuthenticationException(
+                                    "Basic authentication with username/password is not allowed");
+                        }
+                        return authenticateBasicAuth(authValue);
+                }
+            }
+        } else if (isImplicitUserRole(servletRequest)) {
+            return new AnonymousUserSecurityContext();
+        }
+        return null;
+    }
+
+    private boolean isImplicitUserRole(HttpServletRequest request) {
         if (implicitUserRole) {
             return true;
         }
@@ -289,10 +313,6 @@ public class AuthFilter implements ContainerRequestFilter {
             logger.debug("Error validating trusted networks: {}", e.getMessage());
             return false;
         }
-    }
-
-    public boolean isBasicAuthAllowed() {
-        return allowBasicAuth;
     }
 
     private List<CIDR> parseTrustedNetworks(String value) {

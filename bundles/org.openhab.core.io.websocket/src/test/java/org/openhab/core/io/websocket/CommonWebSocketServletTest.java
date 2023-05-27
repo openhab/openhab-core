@@ -17,6 +17,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -38,6 +39,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.auth.AuthenticationException;
+import org.openhab.core.io.rest.auth.AnonymousUserSecurityContext;
 import org.openhab.core.io.rest.auth.AuthFilter;
 import org.osgi.service.http.NamespaceException;
 
@@ -63,14 +66,14 @@ public class CommonWebSocketServletTest {
     private @Captor @NonNullByDefault({}) ArgumentCaptor<WebSocketCreator> webSocketCreatorAC;
 
     @BeforeEach
-    public void setup() throws ServletException, NamespaceException {
+    public void setup() throws ServletException, NamespaceException, AuthenticationException, IOException {
         servlet = new CommonWebSocketServlet(authFilter);
         when(factory.getPolicy()).thenReturn(wsPolicy);
         servlet.configure(factory);
         verify(factory).setCreator(webSocketCreatorAC.capture());
         var params = new HashMap<String, List<String>>();
         when(request.getParameterMap()).thenReturn(params);
-        when(authFilter.isImplicitUserRole(any())).thenReturn(true);
+        when(authFilter.getSecurityContext(any(), any())).thenReturn(new AnonymousUserSecurityContext());
         when(testDefaultWsHandler.getId()).thenReturn(CommonWebSocketServlet.DEFAULT_HANDLER_ID);
         when(testWsHandler.getId()).thenReturn(testHandlerId);
         servlet.addWebSocketHandler(testDefaultWsHandler);
