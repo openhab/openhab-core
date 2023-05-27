@@ -13,7 +13,6 @@
 package org.openhab.core.io.websocket;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 
@@ -41,6 +40,5 @@ public interface WebSocketHandler {
      * 
      * @return a websocket instance.
      */
-    Object createWebSocket(@Nullable ServletUpgradeRequest servletUpgradeRequest,
-            @Nullable ServletUpgradeResponse servletUpgradeResponse);
+    Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest, ServletUpgradeResponse servletUpgradeResponse);
 }

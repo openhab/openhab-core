@@ -90,7 +90,7 @@ public class CommonWebSocketServlet extends WebSocketServlet {
         @Override
         public @Nullable Object createWebSocket(@Nullable ServletUpgradeRequest servletUpgradeRequest,
                 @Nullable ServletUpgradeResponse servletUpgradeResponse) {
-            if (servletUpgradeRequest == null) {
+            if (servletUpgradeRequest == null || servletUpgradeResponse == null) {
                 return null;
             }
             if (isAuthorizedRequest(servletUpgradeRequest)) {

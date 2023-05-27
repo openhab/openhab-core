@@ -29,6 +29,7 @@ import javax.servlet.ServletException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,6 +65,7 @@ public class CommonWebSocketServletTest {
 
     private @Mock @NonNullByDefault({}) WebSocketPolicy wsPolicy;
     private @Mock @NonNullByDefault({}) ServletUpgradeRequest request;
+    private @Mock @NonNullByDefault({}) ServletUpgradeResponse response;
     private @Captor @NonNullByDefault({}) ArgumentCaptor<WebSocketCreator> webSocketCreatorAC;
 
     @BeforeEach
@@ -84,14 +86,14 @@ public class CommonWebSocketServletTest {
     @Test
     public void createWebsocketUsingDefaultHandler() throws URISyntaxException {
         when(request.getRequestURI()).thenReturn(new URI("http://127.0.0.1:8080/ws"));
-        webSocketCreatorAC.getValue().createWebSocket(request, null);
-        verify(testDefaultWsHandler, times(1)).createWebSocket(request, null);
+        webSocketCreatorAC.getValue().createWebSocket(request, response);
+        verify(testDefaultWsHandler, times(1)).createWebSocket(request, response);
     }
 
     @Test
     public void createWebsocketUsingHandlerPath() throws URISyntaxException {
         when(request.getRequestURI()).thenReturn(new URI("http://127.0.0.1:8080/ws/"+testHandlerId));
-        webSocketCreatorAC.getValue().createWebSocket(request, null);
-        verify(testWsHandler, times(1)).createWebSocket(request, null);
+        webSocketCreatorAC.getValue().createWebSocket(request, response);
+        verify(testWsHandler, times(1)).createWebSocket(request, response);
     }
 }

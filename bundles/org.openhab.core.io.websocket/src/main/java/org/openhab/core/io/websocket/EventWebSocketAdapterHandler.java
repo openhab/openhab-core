@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.openhab.core.events.Event;
@@ -75,8 +74,8 @@ public class EventWebSocketAdapterHandler implements EventSubscriber, WebSocketH
     }
 
     @Override
-    public Object createWebSocket(@Nullable ServletUpgradeRequest servletUpgradeRequest,
-            @Nullable ServletUpgradeResponse servletUpgradeResponse) {
+    public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
+            ServletUpgradeResponse servletUpgradeResponse) {
         return new EventWebSocket(gson, EventWebSocketAdapterHandler.this, itemEventUtility, eventPublisher);
     }
 }
