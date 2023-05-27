@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * 10 - OSGi application start level has been reached, i.e. bundles are activated.
  * 20 - Model entities (items, things, links, persist config) have been loaded, both from db as well as files.
  * 30 - Item states have been restored from persistence service, where applicable.
- * 40 - Rules from db, dsl and script files are loaded and parsed, , script engine factories are available.
+ * 40 - Rules from db, dsl and script files are loaded and parsed, script engine factories are available.
  * 50 - Rule engine has executed all "system started" rules and is active.
  * 70 - User interface is up and running.
  * 80 - All things have been initialized.
