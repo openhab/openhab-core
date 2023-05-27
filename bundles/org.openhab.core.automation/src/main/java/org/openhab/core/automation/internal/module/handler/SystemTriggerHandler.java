@@ -64,7 +64,7 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
             throw new IllegalArgumentException(module.getTypeUID() + " is no valid module type.");
         }
         eventSubscriberRegistration = bundleContext.registerService(EventSubscriber.class.getName(), this, null);
-      }
+    }
 
     @Override
     public void setCallback(ModuleHandlerCallback callback) {
