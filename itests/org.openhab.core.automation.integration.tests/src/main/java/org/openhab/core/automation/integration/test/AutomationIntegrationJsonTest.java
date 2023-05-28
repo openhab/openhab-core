@@ -15,6 +15,7 @@ package org.openhab.core.automation.integration.test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -36,6 +37,7 @@ import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.events.RuleStatusInfoEvent;
 import org.openhab.core.automation.internal.RuleEngineImpl;
+import org.openhab.core.automation.internal.module.factory.CoreModuleHandlerFactory;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
@@ -46,6 +48,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemProvider;
@@ -55,6 +58,7 @@ import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.test.storage.VolatileStorageService;
@@ -90,7 +94,12 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
     public void before() {
         logger.info("@Before.begin");
 
-        getService(ItemRegistry.class);
+        eventPublisher = getService(EventPublisher.class);
+        itemRegistry = getService(ItemRegistry.class);
+        CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
+                eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
+        mock(CoreModuleHandlerFactory.class);
+        registerService(coreModuleHandlerFactory);
 
         ItemProvider itemProvider = new ItemProvider() {
 
@@ -136,8 +145,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
         StorageService storageService = getService(StorageService.class);
         managedRuleProvider = getService(ManagedRuleProvider.class);
-        eventPublisher = getService(EventPublisher.class);
-        itemRegistry = getService(ItemRegistry.class);
         ruleRegistry = getService(RuleRegistry.class);
         ruleManager = getService(RuleManager.class);
         moduleTypeRegistry = getService(ModuleTypeRegistry.class);

@@ -14,6 +14,7 @@ package org.openhab.core.automation.module.timer.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
@@ -24,12 +25,18 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Condition;
+import org.openhab.core.automation.internal.module.factory.CoreModuleHandlerFactory;
 import org.openhab.core.automation.internal.module.handler.DayOfWeekConditionHandler;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.service.StartLevelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +55,16 @@ public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
 
     public DayOfWeekConditionHandlerTest() {
         logger.info("Today is {}", dayOfWeek);
+    }
+
+    @BeforeEach
+    public void before() {
+        EventPublisher eventPublisher = getService(EventPublisher.class);
+        ItemRegistry itemRegistry = getService(ItemRegistry.class);
+        CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
+                eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
+        mock(CoreModuleHandlerFactory.class);
+        registerService(coreModuleHandlerFactory);
     }
 
     @Test
