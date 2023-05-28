@@ -12,10 +12,15 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
+import java.util.Map;
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
+import org.openhab.core.automation.events.AutomationEventFactory;
+import org.openhab.core.automation.events.TimerEvent;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TimeBasedTriggerHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
@@ -80,7 +85,10 @@ public class GenericCronTriggerHandler extends BaseTriggerModuleHandler
     @Override
     public void run() {
         if (callback != null) {
-            ((TriggerHandlerCallback) callback).triggered(module);
+            TimerEvent event = AutomationEventFactory.createTimerEvent(module.getTypeUID(),
+                    Objects.requireNonNullElse(module.getLabel(), module.getId()),
+                    Map.of(CFG_CRON_EXPRESSION, expression));
+            ((TriggerHandlerCallback) callback).triggered(module, Map.of("event", event));
         } else {
             logger.debug("Tried to trigger, but callback isn't available!");
         }
