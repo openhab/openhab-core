@@ -19,6 +19,7 @@
   <properties>
     <californium.version>2.7.4</californium.version>
     <jetty.version>9.4.50.v20221201</jetty.version>
+    <bouncycastle.version>1.70</bouncycastle.version>
     <pax.web.version>8.0.15</pax.web.version>
     <swagger.version>2.1.9</swagger.version>
   </properties>
@@ -187,6 +188,26 @@
       <groupId>org.eclipse.jetty.http2</groupId>
       <artifactId>http2-server</artifactId>
       <version>${jetty.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- bouncycastle -->
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+      <version>${bouncycastle.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk15on</artifactId>
+      <version>${bouncycastle.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcutil-jdk15on</artifactId>
+      <version>${bouncycastle.version}</version>
       <scope>compile</scope>
     </dependency>
 
@@ -436,6 +457,7 @@
       <version>5.12.1</version>
       <scope>compile</scope>
     </dependency>
+
   </dependencies>
 
 </project>

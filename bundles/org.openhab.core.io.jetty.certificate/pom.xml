@@ -13,14 +13,6 @@
 
   <name>openHAB Core :: Bundles :: SSL Certificate Generator</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
-      <version>1.52</version>
-    </dependency>
-  </dependencies>
-
   <build>
     <plugins>
       <plugin>
