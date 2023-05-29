@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -81,7 +80,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
 
     private final Collection<RegistryChangeListener<E>> listeners = new CopyOnWriteArraySet<>();
 
-    private ManagedProvider<E, K> managedProvider;
+    protected final ManagedProvider<E, K> managedProvider;
 
     private @Nullable EventPublisher eventPublisher;
     private @Nullable ReadyService readyService;
@@ -554,10 +553,6 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
         } finally {
             elementReadLock.unlock();
         }
-    }
-
-    protected Optional<ManagedProvider<E, K>> getManagedProvider() {
-        return Optional.of(managedProvider);
     }
 
     /**

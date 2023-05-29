@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
@@ -129,9 +128,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return the number of removed links
      */
     public int removeLinksForThing(final ThingUID thingUID) {
-        ManagedItemChannelLinkProvider managedProvider = (ManagedItemChannelLinkProvider) getManagedProvider()
-                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
-        return managedProvider.removeLinksForThing(thingUID);
+        return ((ManagedItemChannelLinkProvider) managedProvider).removeLinksForThing(thingUID);
     }
 
     /**
@@ -141,9 +138,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return the number of removed links
      */
     public int removeLinksForItem(final String itemName) {
-        ManagedItemChannelLinkProvider managedProvider = (ManagedItemChannelLinkProvider) getManagedProvider()
-                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
-        return managedProvider.removeLinksForItem(itemName);
+        return ((ManagedItemChannelLinkProvider) managedProvider).removeLinksForItem(itemName);
     }
 
     /**
@@ -152,9 +147,6 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return the number of removed links
      */
     public int purge() {
-        ManagedProvider<ItemChannelLink, String> managedProvider = getManagedProvider()
-                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
-
         Set<String> allItems = itemRegistry.stream().map(Item::getName).collect(Collectors.toSet());
         Set<ChannelUID> allChannels = thingRegistry.stream().map(Thing::getChannels).flatMap(List::stream)
                 .map(Channel::getUID).collect(Collectors.toSet());
