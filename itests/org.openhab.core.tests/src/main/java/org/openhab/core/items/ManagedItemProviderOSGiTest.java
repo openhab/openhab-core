@@ -240,9 +240,8 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
         StrangeItemFactory factory = new StrangeItemFactory();
         registerService(factory);
         try {
-            // managed provider is always there, so we need a total of 2
-            waitForAssert(() -> assertThat(itemProvider.getAll().size(), is(2)));
-            assertThat(itemRegistry.getItems().size(), is(1));
+            waitForAssert(() -> assertThat(itemProvider.getAll().size(), is(1)));
+            waitForAssert(() -> assertThat(itemRegistry.getItems().size(), is(1)));
             assertThat(itemProvider.get("SomeStrangeItem"), is(notNullValue()));
             assertThat(itemRegistry.getItem("SomeStrangeItem"), is(notNullValue()));
         } finally {
