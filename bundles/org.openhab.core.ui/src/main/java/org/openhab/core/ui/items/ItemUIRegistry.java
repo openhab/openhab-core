@@ -34,6 +34,7 @@ import org.openhab.core.types.State;
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Initial contribution
  * @author Laurent Garnier - new method getIconColor
+ * @author Mark Herwege - new method getFormatPattern
  */
 @NonNullByDefault
 public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
@@ -129,6 +130,15 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      */
     @Nullable
     EObject getParent(Widget w);
+
+    /**
+     * Gets the format pattern for the widget value, retrieved from widget label, item label or item state description
+     *
+     * @param w Widget
+     * @return String with the format pattern
+     */
+    @Nullable
+    String getFormatPattern(Widget w);
 
     /**
      * Gets the label color for the widget. Checks conditional statements to

@@ -19,6 +19,7 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - New field iconcolor
+ * @author Mark Herwege - New field pattern
  */
 public class SitemapWidgetEvent extends SitemapEvent {
 
@@ -26,6 +27,7 @@ public class SitemapWidgetEvent extends SitemapEvent {
 
     public String label;
     public String icon;
+    public String pattern;
     public String labelcolor;
     public String valuecolor;
     public String iconcolor;
