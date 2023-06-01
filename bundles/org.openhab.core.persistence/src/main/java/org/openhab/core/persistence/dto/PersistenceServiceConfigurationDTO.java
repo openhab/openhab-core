@@ -30,6 +30,8 @@ public class PersistenceServiceConfigurationDTO {
     public Collection<PersistenceCronStrategyDTO> cronStrategies = List.of();
     public Collection<PersistenceFilterDTO> thresholdFilters = List.of();
     public Collection<PersistenceFilterDTO> timeFilters = List.of();
+    public Collection<PersistenceFilterDTO> equalsFilters = List.of();
+    public Collection<PersistenceFilterDTO> notEqualsFilters = List.of();
 
     public boolean editable = false;
 }

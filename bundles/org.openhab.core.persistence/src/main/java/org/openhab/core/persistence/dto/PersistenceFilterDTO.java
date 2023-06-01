@@ -13,6 +13,7 @@
 package org.openhab.core.persistence.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * The {@link org.openhab.core.persistence.dto.PersistenceFilterDTO} is used for transferring persistence filter
@@ -24,4 +25,6 @@ public class PersistenceFilterDTO {
     public String name = "";
     public BigDecimal value = BigDecimal.ZERO;
     public String unit = "";
+    public boolean relative = true;
+    public List<String> values = List.of();
 }

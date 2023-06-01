@@ -308,7 +308,7 @@ public class PersistenceManagerTest {
                 new PersistenceCronStrategy("withoutFilter", "0 0 * * * ?"), null);
         addConfiguration(TEST_QUERYABLE_PERSISTENCE_SERVICE_ID, new PersistenceItemConfig(TEST_ITEM3_NAME),
                 new PersistenceCronStrategy("withFilter", "0 * * * * ?"),
-                new PersistenceThresholdFilter("test", BigDecimal.TEN, ""));
+                new PersistenceThresholdFilter("test", BigDecimal.TEN, "", false));
 
         manager.onReadyMarkerAdded(new ReadyMarker("", ""));
 
@@ -352,7 +352,7 @@ public class PersistenceManagerTest {
     @Test
     public void filterAppliesOnStateUpdate() {
         addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceAllConfig(), PersistenceStrategy.Globals.UPDATE,
-                new PersistenceThresholdFilter("test", BigDecimal.TEN, ""));
+                new PersistenceThresholdFilter("test", BigDecimal.TEN, "", false));
 
         manager.stateUpdated(TEST_ITEM3, DecimalType.ZERO);
         manager.stateUpdated(TEST_ITEM3, DecimalType.ZERO);

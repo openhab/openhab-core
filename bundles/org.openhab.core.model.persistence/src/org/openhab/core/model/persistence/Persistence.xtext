@@ -27,15 +27,23 @@ Filter:
 ;
 
 FilterDetails:
-	ThresholdFilter | TimeFilter
+	ThresholdFilter | TimeFilter | EqualsFilter | NotEqualsFilter
 ;
 
 ThresholdFilter:
-	'>' value=DECIMAL unit=STRING
+	'>' relative?='%' value=DECIMAL unit=STRING?
 ;
 
 TimeFilter:
-	value=INT unit=('s' | 'm' | 'h' | 'd') 
+	'T' value=INT unit=('s' | 'm' | 'h' | 'd')
+;
+
+EqualsFilter:
+   '=' values+=STRING (',' values+=STRING)*
+;
+
+NotEqualsFilter:
+   '!' values+=STRING (',' values+=STRING)*
 ;
 
 PersistenceConfiguration:
