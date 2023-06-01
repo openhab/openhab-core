@@ -125,7 +125,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
  * @author Laurent Garnier - Added support for icon color
- * @author Mark Herwege - Added pattern field
+ * @author Mark Herwege - Added pattern and unit fields
  */
 @Component(service = RESTResource.class)
 @JaxrsResource
@@ -522,6 +522,7 @@ public class SitemapResource
         bean.iconcolor = convertItemValueColor(itemUIRegistry.getIconColor(widget), itemState);
         bean.label = itemUIRegistry.getLabel(widget);
         bean.pattern = itemUIRegistry.getFormatPattern(widget);
+        bean.unit = itemUIRegistry.getUnitForWidget(widget);
         bean.type = widget.eClass().getName();
         bean.visibility = itemUIRegistry.getVisiblity(widget);
         if (widget instanceof LinkableWidget linkableWidget) {

@@ -44,7 +44,6 @@ import org.openhab.core.ui.items.ItemUIRegistry;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Added support for icon color
- * @author Mark Herwege - Added format pattern field
  */
 public class PageChangeListener implements StateChangeListener {
 
@@ -239,7 +238,6 @@ public class PageChangeListener implements StateChangeListener {
         event.sitemapName = sitemapName;
         event.pageId = pageId;
         event.label = itemUIRegistry.getLabel(widget);
-        event.pattern = itemUIRegistry.getFormatPattern(widget);
         event.widgetId = itemUIRegistry.getWidgetId(widget);
         event.visibility = itemUIRegistry.getVisiblity(widget);
         event.descriptionChanged = false;

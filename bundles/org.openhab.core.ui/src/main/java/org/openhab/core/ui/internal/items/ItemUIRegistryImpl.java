@@ -480,8 +480,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         String pattern = getFormatPattern(label);
         String itemName = w.getItem();
         try {
-            Item item = getItem(itemName);
-            if (pattern == null) {
+            Item item = null;
+            if (itemName != null && !itemName.isBlank()) {
+                item = getItem(itemName);
+            }
+            if (item != null && pattern == null) {
                 StateDescription stateDescription = item.getStateDescription();
                 if (stateDescription != null) {
                     pattern = stateDescription.getPattern();
@@ -678,8 +681,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         State returnState = null;
 
         State itemState = i.getState();
-        if (itemState instanceof QuantityType type) {
-            itemState = convertStateToWidgetUnit(type, w);
+        if (itemState instanceof QuantityType<?> quantityTypeState) {
+            itemState = convertStateToWidgetUnit(quantityTypeState, w);
         }
 
         if (w instanceof Switch && i instanceof RollershutterItem) {
@@ -688,7 +691,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         } else if (w instanceof Slider) {
             if (i.getAcceptedDataTypes().contains(PercentType.class)) {
                 returnState = itemState.as(PercentType.class);
-            } else {
+            } else if (!(itemState instanceof QuantityType<?>)) {
                 returnState = itemState.as(DecimalType.class);
             }
         } else if (w instanceof Switch sw) {
