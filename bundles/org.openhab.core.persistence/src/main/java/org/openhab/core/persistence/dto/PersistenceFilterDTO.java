@@ -23,8 +23,13 @@ import java.util.List;
  */
 public class PersistenceFilterDTO {
     public String name = "";
+
+    // threshold and time
     public BigDecimal value = BigDecimal.ZERO;
     public String unit = "";
     public boolean relative = true;
+
+    // equals/not equals
     public List<String> values = List.of();
+    public boolean inverted = false;
 }

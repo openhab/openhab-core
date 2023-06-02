@@ -34,7 +34,6 @@ import org.openhab.core.persistence.dto.PersistenceItemConfigurationDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceConfigurationDTO;
 import org.openhab.core.persistence.filter.PersistenceEqualsFilter;
 import org.openhab.core.persistence.filter.PersistenceFilter;
-import org.openhab.core.persistence.filter.PersistenceNotEqualsFilter;
 import org.openhab.core.persistence.filter.PersistenceThresholdFilter;
 import org.openhab.core.persistence.filter.PersistenceTimeFilter;
 import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
@@ -69,9 +68,8 @@ public class PersistenceServiceConfigurationDTOMapper {
                 PersistenceServiceConfigurationDTOMapper::mapPersistenceTimeFilter);
         dto.equalsFilters = filterList(persistenceServiceConfiguration.getFilters(), PersistenceEqualsFilter.class,
                 PersistenceServiceConfigurationDTOMapper::mapPersistenceEqualsFilter);
-        dto.notEqualsFilters = filterList(persistenceServiceConfiguration.getFilters(),
-                PersistenceNotEqualsFilter.class,
-                PersistenceServiceConfigurationDTOMapper::mapPersistenceNotEqualsFilter);
+        dto.notEqualsFilters = filterList(persistenceServiceConfiguration.getFilters(), PersistenceEqualsFilter.class,
+                PersistenceServiceConfigurationDTOMapper::mapPersistenceEqualsFilter);
 
         return dto;
     }
@@ -84,8 +82,8 @@ public class PersistenceServiceConfigurationDTOMapper {
                 dto.thresholdFilters.stream()
                         .map(f -> new PersistenceThresholdFilter(f.name, f.value, f.unit, f.relative)),
                 dto.timeFilters.stream().map(f -> new PersistenceTimeFilter(f.name, f.value.intValue(), f.unit)),
-                dto.equalsFilters.stream().map(f -> new PersistenceEqualsFilter(f.name, f.values)),
-                dto.notEqualsFilters.stream().map(f -> new PersistenceNotEqualsFilter(f.name, f.values)))
+                dto.equalsFilters.stream().map(f -> new PersistenceEqualsFilter(f.name, f.values, false)),
+                dto.notEqualsFilters.stream().map(f -> new PersistenceEqualsFilter(f.name, f.values, true)))
                 .flatMap(Function.identity()).collect(Collectors.toMap(PersistenceFilter::getName, e -> e));
 
         List<PersistenceStrategy> defaults = dto.defaults.stream()
@@ -178,14 +176,7 @@ public class PersistenceServiceConfigurationDTOMapper {
         PersistenceFilterDTO filterDTO = new PersistenceFilterDTO();
         filterDTO.name = persistenceEqualsFilter.getName();
         filterDTO.values = persistenceEqualsFilter.getValues().stream().toList();
-        return filterDTO;
-    }
-
-    private static PersistenceFilterDTO mapPersistenceNotEqualsFilter(
-            PersistenceNotEqualsFilter persistenceNotEqualsFilter) {
-        PersistenceFilterDTO filterDTO = new PersistenceFilterDTO();
-        filterDTO.name = persistenceNotEqualsFilter.getName();
-        filterDTO.values = persistenceNotEqualsFilter.getValues().stream().toList();
+        filterDTO.inverted = persistenceEqualsFilter.getInverted();
         return filterDTO;
     }
 }

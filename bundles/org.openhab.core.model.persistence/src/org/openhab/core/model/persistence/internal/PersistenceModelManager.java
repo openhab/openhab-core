@@ -44,7 +44,6 @@ import org.openhab.core.persistence.config.PersistenceGroupConfig;
 import org.openhab.core.persistence.config.PersistenceItemConfig;
 import org.openhab.core.persistence.filter.PersistenceEqualsFilter;
 import org.openhab.core.persistence.filter.PersistenceFilter;
-import org.openhab.core.persistence.filter.PersistenceNotEqualsFilter;
 import org.openhab.core.persistence.filter.PersistenceThresholdFilter;
 import org.openhab.core.persistence.filter.PersistenceTimeFilter;
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
@@ -185,9 +184,9 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
             return new PersistenceThresholdFilter(filter.getName(), thresholdFilter.getValue(),
                     thresholdFilter.getUnit(), thresholdFilter.isRelative());
         } else if (filter.getDefinition() instanceof EqualsFilter equalsFilter) {
-            return new PersistenceEqualsFilter(filter.getName(), equalsFilter.getValues());
+            return new PersistenceEqualsFilter(filter.getName(), equalsFilter.getValues(), false);
         } else if (filter.getDefinition() instanceof NotEqualsFilter notEqualsFilter) {
-            return new PersistenceNotEqualsFilter(filter.getName(), notEqualsFilter.getValues());
+            return new PersistenceEqualsFilter(filter.getName(), notEqualsFilter.getValues(), true);
         }
         throw new IllegalArgumentException("Unknown filter type " + filter.getClass());
     }

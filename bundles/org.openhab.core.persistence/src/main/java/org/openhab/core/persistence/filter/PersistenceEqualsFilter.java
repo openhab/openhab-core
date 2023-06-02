@@ -27,19 +27,25 @@ import org.openhab.core.items.Item;
 @NonNullByDefault
 public class PersistenceEqualsFilter extends PersistenceFilter {
     private final Collection<String> values;
+    private final boolean inverted;
 
-    public PersistenceEqualsFilter(String name, Collection<String> values) {
+    public PersistenceEqualsFilter(String name, Collection<String> values, boolean inverted) {
         super(name);
         this.values = values;
+        this.inverted = inverted;
     }
 
     public Collection<String> getValues() {
         return values;
     }
 
+    public boolean getInverted() {
+        return inverted;
+    }
+
     @Override
     public boolean apply(Item item) {
-        return values.contains(item.getState().toFullString());
+        return values.contains(item.getState().toFullString()) != inverted;
     }
 
     @Override
