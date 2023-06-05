@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.Provider;
 import org.openhab.core.semantics.ManagedSemanticTagProvider;
 import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.semantics.SemanticTagProvider;
@@ -28,7 +29,6 @@ import org.openhab.core.semantics.TagInfo;
 import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,25 +47,27 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
 
     private final Logger logger = LoggerFactory.getLogger(SemanticTagRegistryImpl.class);
 
-    private final ManagedSemanticTagProvider managedProvider;
+    private final DefaultSemanticTagProvider defaultSemanticTagProvider;
 
     @Activate
     public SemanticTagRegistryImpl(@Reference DefaultSemanticTagProvider defaultSemanticTagProvider,
             @Reference ManagedSemanticTagProvider managedProvider) {
         super(SemanticTagProvider.class);
-        // The default semantic tag provider is added immediately without waiting for provider tracker
-        // to be sure that it will be added first (that is before the managed provider). It leads to
-        // a warning log when this provider is added later through the provider tracker.
-        addProvider(defaultSemanticTagProvider);
-        this.managedProvider = managedProvider;
+        this.defaultSemanticTagProvider = defaultSemanticTagProvider;
+        // Add the default semantic tags provider first, before all others
+        super.addProvider(defaultSemanticTagProvider);
         setManagedProvider(managedProvider);
     }
 
     @Override
-    @Deactivate
-    protected void deactivate() {
-        unsetManagedProvider(managedProvider);
-        super.deactivate();
+    protected void addProvider(Provider<SemanticTag> provider) {
+        // Ignore the default semantic tags provider (it is added first in the constructor)
+        if (!provider.equals(defaultSemanticTagProvider)) {
+            logger.trace("addProvider {} => calling super.addProvider", provider.getClass().getSimpleName());
+            super.addProvider(provider);
+        } else {
+            logger.trace("addProvider {} => ignoring it", provider.getClass().getSimpleName());
+        }
     }
 
     @Override
