@@ -497,7 +497,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
             // remove last part of pattern, after unit, if it exists, as this is not valid and creates problems with
             // updates
-            if (item instanceof NumberItem && (((NumberItem) item).getDimension() != null)) {
+            if (item instanceof NumberItem numberItem && numberItem.getDimension() != null) {
                 Matcher m = FORMAT_PATTERN.matcher(pattern);
                 int matcherEnd = 0;
                 while (m.find() && m.group(1) == null) {
