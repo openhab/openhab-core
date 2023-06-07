@@ -68,8 +68,6 @@ public class PersistenceServiceConfigurationDTOMapper {
                 PersistenceServiceConfigurationDTOMapper::mapPersistenceTimeFilter);
         dto.equalsFilters = filterList(persistenceServiceConfiguration.getFilters(), PersistenceEqualsFilter.class,
                 PersistenceServiceConfigurationDTOMapper::mapPersistenceEqualsFilter);
-        dto.notEqualsFilters = filterList(persistenceServiceConfiguration.getFilters(), PersistenceEqualsFilter.class,
-                PersistenceServiceConfigurationDTOMapper::mapPersistenceEqualsFilter);
 
         return dto;
     }
@@ -82,8 +80,7 @@ public class PersistenceServiceConfigurationDTOMapper {
                 dto.thresholdFilters.stream()
                         .map(f -> new PersistenceThresholdFilter(f.name, f.value, f.unit, f.relative)),
                 dto.timeFilters.stream().map(f -> new PersistenceTimeFilter(f.name, f.value.intValue(), f.unit)),
-                dto.equalsFilters.stream().map(f -> new PersistenceEqualsFilter(f.name, f.values, false)),
-                dto.notEqualsFilters.stream().map(f -> new PersistenceEqualsFilter(f.name, f.values, true)))
+                dto.equalsFilters.stream().map(f -> new PersistenceEqualsFilter(f.name, f.values, f.inverted)))
                 .flatMap(Function.identity()).collect(Collectors.toMap(PersistenceFilter::getName, e -> e));
 
         List<PersistenceStrategy> defaults = dto.defaults.stream()

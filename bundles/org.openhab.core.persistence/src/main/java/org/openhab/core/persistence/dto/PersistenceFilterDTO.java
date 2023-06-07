@@ -22,14 +22,14 @@ import java.util.List;
  * @author Jan N. Klug - Initial contribution
  */
 public class PersistenceFilterDTO {
-    public String name = "";
+    public String name;
 
     // threshold and time
-    public BigDecimal value = BigDecimal.ZERO;
-    public String unit = "";
-    public boolean relative = true;
+    public BigDecimal value;
+    public String unit;
+    public Boolean relative;
 
     // equals/not equals
-    public List<String> values = List.of();
-    public boolean inverted = false;
+    public List<String> values;
+    public Boolean inverted;
 }
