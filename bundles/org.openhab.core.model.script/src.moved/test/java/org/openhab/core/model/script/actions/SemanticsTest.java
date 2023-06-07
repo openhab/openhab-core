@@ -12,8 +12,7 @@
  */
 package org.openhab.core.model.script.actions;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
@@ -33,10 +32,12 @@ import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.script.internal.engine.action.SemanticsActionService;
-import org.openhab.core.semantics.model.equipment.Battery;
-import org.openhab.core.semantics.model.equipment.CleaningRobot;
-import org.openhab.core.semantics.model.location.Bathroom;
-import org.openhab.core.semantics.model.location.Indoor;
+import org.openhab.core.semantics.Equipment;
+import org.openhab.core.semantics.Location;
+import org.openhab.core.semantics.Point;
+import org.openhab.core.semantics.Property;
+import org.openhab.core.semantics.SemanticTags;
+import org.openhab.core.semantics.Tag;
 
 /**
  * This are tests for {@link Semantics} actions.
@@ -57,6 +58,11 @@ public class SemanticsTest {
     private @NonNullByDefault({}) GenericItem temperaturePointItem;
     private @NonNullByDefault({}) GenericItem humidityPointItem;
     private @NonNullByDefault({}) GenericItem subEquipmentItem;
+
+    private @NonNullByDefault({}) Class<? extends Tag> indoorTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> bathroomTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> cleaningRobotTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> batteryTagClass;
 
     @BeforeEach
     public void setup() throws ItemNotFoundException {
@@ -98,6 +104,21 @@ public class SemanticsTest {
         equipmentItem.addMember(subEquipmentItem);
         subEquipmentItem.addGroupName(equipmentItem.getName());
 
+        SemanticTags.add("Indoor", Location.class);
+        SemanticTags.add("Room", "Location_Indoor");
+        SemanticTags.add("Bathroom", "Location_Indoor_Room");
+        SemanticTags.add("CleaningRobot", Equipment.class);
+        SemanticTags.add("Battery", Equipment.class);
+        SemanticTags.add("Control", Point.class);
+        SemanticTags.add("Measurement", Point.class);
+        SemanticTags.add("Temperature", Property.class);
+        SemanticTags.add("Humidity", Property.class);
+
+        indoorTagClass = SemanticTags.getById("Location_Indoor");
+        bathroomTagClass = SemanticTags.getById("Location_Indoor_Room_Bathroom");
+        cleaningRobotTagClass = SemanticTags.getById("Equipment_CleaningRobot");
+        batteryTagClass = SemanticTags.getById("Equipment_Battery");
+
         when(itemRegistryMock.getItem("TestHouse")).thenReturn(indoorLocationItem);
         when(itemRegistryMock.getItem("TestBathRoom")).thenReturn(bathroomLocationItem);
         when(itemRegistryMock.getItem("Test08")).thenReturn(equipmentItem);
@@ -122,9 +143,9 @@ public class SemanticsTest {
 
     @Test
     public void testGetLocationType() {
-        assertThat(Semantics.getLocationType(indoorLocationItem), is(Indoor.class));
+        assertThat(Semantics.getLocationType(indoorLocationItem), is(indoorTagClass));
 
-        assertThat(Semantics.getLocationType(bathroomLocationItem), is(Bathroom.class));
+        assertThat(Semantics.getLocationType(bathroomLocationItem), is(bathroomTagClass));
 
         assertNull(Semantics.getLocationType(humidityPointItem));
     }
@@ -142,11 +163,11 @@ public class SemanticsTest {
 
     @Test
     public void testGetEquipmentType() {
-        assertThat(Semantics.getEquipmentType(equipmentItem), is(CleaningRobot.class));
+        assertThat(Semantics.getEquipmentType(equipmentItem), is(cleaningRobotTagClass));
 
-        assertThat(Semantics.getEquipmentType(temperaturePointItem), is(CleaningRobot.class));
+        assertThat(Semantics.getEquipmentType(temperaturePointItem), is(cleaningRobotTagClass));
 
-        assertThat(Semantics.getEquipmentType(subEquipmentItem), is(Battery.class));
+        assertThat(Semantics.getEquipmentType(subEquipmentItem), is(batteryTagClass));
 
         assertNull(Semantics.getEquipmentType(humidityPointItem));
     }

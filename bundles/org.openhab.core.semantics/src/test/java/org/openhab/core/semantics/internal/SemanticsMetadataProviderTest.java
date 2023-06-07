@@ -36,6 +36,9 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.semantics.Equipment;
+import org.openhab.core.semantics.Location;
+import org.openhab.core.semantics.SemanticTags;
 
 /**
  * @author Simon Lamon - Initial contribution
@@ -56,6 +59,11 @@ public class SemanticsMetadataProviderTest {
 
     @BeforeEach
     public void beforeEach() throws Exception {
+        SemanticTags.add("Indoor", Location.class);
+        SemanticTags.add("Room", "Location_Indoor");
+        SemanticTags.add("LivingRoom", "Location_Indoor_Room");
+        SemanticTags.add("Door", Equipment.class);
+
         semanticsMetadataProvider = new SemanticsMetadataProvider(itemRegistry) {
             {
                 addProviderChangeListener(changeListener);

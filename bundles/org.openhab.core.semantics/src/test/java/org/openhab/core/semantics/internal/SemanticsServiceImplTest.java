@@ -34,16 +34,14 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.semantics.Equipment;
 import org.openhab.core.semantics.Location;
+import org.openhab.core.semantics.Property;
 import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.semantics.SemanticTagImpl;
 import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticTags;
 import org.openhab.core.semantics.Tag;
-import org.openhab.core.semantics.model.equipment.CleaningRobot;
-import org.openhab.core.semantics.model.location.Bathroom;
-import org.openhab.core.semantics.model.location.LivingRoom;
-import org.openhab.core.semantics.model.location.Room;
 
 /**
  * @author Kai Kreuzer - Initial contribution
@@ -66,7 +64,12 @@ public class SemanticsServiceImplTest {
     private @NonNullByDefault({}) SemanticTag bathroomTag;
     private @NonNullByDefault({}) SemanticTag cleaningRobotTag;
     private @NonNullByDefault({}) SemanticTag userLocationTag;
+
+    private @NonNullByDefault({}) Class<? extends Tag> roomTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> bathroomTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> LivingRoomTagClass;
     private @NonNullByDefault({}) Class<? extends Tag> userLocationTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> cleaningRobotTagClass;
 
     private @NonNullByDefault({}) SemanticsServiceImpl service;
 
@@ -93,8 +96,20 @@ public class SemanticsServiceImplTest {
         userLocationTag = new SemanticTagImpl("Location_UserLocation", "Custom label", "Custom description",
                 " Synonym1, Synonym2 , Synonym With Space ");
 
+        SemanticTags.add("Indoor", Location.class);
+        SemanticTags.add("Room", "Location_Indoor");
+        SemanticTags.add("Bathroom", "Location_Indoor_Room");
+        SemanticTags.add("LivingRoom", "Location_Indoor_Room");
         SemanticTags.add("UserLocation", Location.class);
+        SemanticTags.add("CleaningRobot", Equipment.class);
+        SemanticTags.add("Sensor", Equipment.class);
+        SemanticTags.add("Temperature", Property.class);
+
+        roomTagClass = SemanticTags.getById("Location_Indoor_Room");
+        bathroomTagClass = SemanticTags.getById("Location_Indoor_Room_Bathroom");
+        LivingRoomTagClass = SemanticTags.getById("Location_Indoor_Room_LivingRoom");
         userLocationTagClass = SemanticTags.getById("Location_UserLocation");
+        cleaningRobotTagClass = SemanticTags.getById("Equipment_CleaningRobot");
 
         service = new SemanticsServiceImpl(itemRegistryMock, metadataRegistryMock, semanticTagRegistryMock);
     }
@@ -105,15 +120,15 @@ public class SemanticsServiceImplTest {
                 .thenReturn(Stream.of(locationItem, equipmentItem, pointItem))
                 .thenReturn(Stream.of(locationItem, equipmentItem, pointItem));
 
-        Set<Item> items = service.getItemsInLocation(Bathroom.class);
+        Set<Item> items = service.getItemsInLocation((Class<? extends Location>) bathroomTagClass);
         assertEquals(1, items.size());
         assertTrue(items.contains(pointItem));
 
-        items = service.getItemsInLocation(Room.class);
+        items = service.getItemsInLocation((Class<? extends Location>) roomTagClass);
         assertEquals(1, items.size());
         assertTrue(items.contains(pointItem));
 
-        items = service.getItemsInLocation(LivingRoom.class);
+        items = service.getItemsInLocation((Class<? extends Location>) LivingRoomTagClass);
         assertTrue(items.isEmpty());
     }
 
@@ -163,8 +178,8 @@ public class SemanticsServiceImplTest {
         when(semanticTagRegistryMock.get("Equipment_CleaningRobot")).thenReturn(cleaningRobotTag);
         when(semanticTagRegistryMock.get("Location_UserLocation")).thenReturn(userLocationTag);
 
-        assertEquals("Bathroom", service.getLabel(Bathroom.class, Locale.ENGLISH));
-        assertEquals("Robot de nettoyage", service.getLabel(CleaningRobot.class, Locale.FRENCH));
+        assertEquals("Bathroom", service.getLabel(bathroomTagClass, Locale.ENGLISH));
+        assertEquals("Robot de nettoyage", service.getLabel(cleaningRobotTagClass, Locale.FRENCH));
         assertEquals("Custom label", service.getLabel(userLocationTagClass, Locale.ENGLISH));
     }
 
@@ -174,8 +189,8 @@ public class SemanticsServiceImplTest {
         when(semanticTagRegistryMock.get("Equipment_CleaningRobot")).thenReturn(cleaningRobotTag);
         when(semanticTagRegistryMock.get("Location_UserLocation")).thenReturn(userLocationTag);
 
-        assertEquals("A bathroom", service.getDescription(Bathroom.class, Locale.ENGLISH));
-        assertEquals("A cleaning robot", service.getDescription(CleaningRobot.class, Locale.FRENCH));
+        assertEquals("A bathroom", service.getDescription(bathroomTagClass, Locale.ENGLISH));
+        assertEquals("A cleaning robot", service.getDescription(cleaningRobotTagClass, Locale.FRENCH));
         assertEquals("Custom description", service.getDescription(userLocationTagClass, Locale.ENGLISH));
     }
 
@@ -185,7 +200,7 @@ public class SemanticsServiceImplTest {
         when(semanticTagRegistryMock.get("Equipment_CleaningRobot")).thenReturn(cleaningRobotTag);
         when(semanticTagRegistryMock.get("Location_UserLocation")).thenReturn(userLocationTag);
 
-        List<String> result = service.getSynonyms(Bathroom.class, Locale.ENGLISH);
+        List<String> result = service.getSynonyms(bathroomTagClass, Locale.ENGLISH);
         assertEquals(5, result.size());
         assertEquals("Bathrooms", result.get(0));
         assertEquals("Bath", result.get(1));
@@ -193,7 +208,7 @@ public class SemanticsServiceImplTest {
         assertEquals("Powder Room", result.get(3));
         assertEquals("Powder Rooms", result.get(4));
 
-        result = service.getSynonyms(CleaningRobot.class, Locale.FRENCH);
+        result = service.getSynonyms(cleaningRobotTagClass, Locale.FRENCH);
         assertEquals(3, result.size());
         assertEquals("Robos de nettoyage", result.get(0));
         assertEquals("Robot aspirateur", result.get(1));
@@ -212,7 +227,7 @@ public class SemanticsServiceImplTest {
         when(semanticTagRegistryMock.get("Equipment_CleaningRobot")).thenReturn(cleaningRobotTag);
         when(semanticTagRegistryMock.get("Location_UserLocation")).thenReturn(userLocationTag);
 
-        List<String> result = service.getLabelAndSynonyms(Bathroom.class, Locale.ENGLISH);
+        List<String> result = service.getLabelAndSynonyms(bathroomTagClass, Locale.ENGLISH);
         assertEquals(6, result.size());
         assertEquals("bathroom", result.get(0));
         assertEquals("bathrooms", result.get(1));
@@ -221,7 +236,7 @@ public class SemanticsServiceImplTest {
         assertEquals("powder room", result.get(4));
         assertEquals("powder rooms", result.get(5));
 
-        result = service.getLabelAndSynonyms(CleaningRobot.class, Locale.FRENCH);
+        result = service.getLabelAndSynonyms(cleaningRobotTagClass, Locale.FRENCH);
         assertEquals(4, result.size());
         assertEquals("robot de nettoyage", result.get(0));
         assertEquals("robos de nettoyage", result.get(1));
@@ -242,12 +257,12 @@ public class SemanticsServiceImplTest {
                 .thenReturn(List.of(roomTag, bathroomTag, userLocationTag, cleaningRobotTag));
 
         Class<? extends Tag> tag = service.getByLabel("BATHROOM", Locale.ENGLISH);
-        assertEquals(Bathroom.class, tag);
+        assertEquals(bathroomTagClass, tag);
         tag = service.getByLabel("Bath", Locale.ENGLISH);
         assertNull(tag);
 
         tag = service.getByLabel("ROBOT de nettoyage", Locale.FRENCH);
-        assertEquals(CleaningRobot.class, tag);
+        assertEquals(cleaningRobotTagClass, tag);
         tag = service.getByLabel("Robot aspirateur", Locale.FRENCH);
         assertNull(tag);
 
@@ -264,19 +279,19 @@ public class SemanticsServiceImplTest {
 
         List<Class<? extends Tag>> tags = service.getByLabelOrSynonym("BATHROOM", Locale.ENGLISH);
         assertEquals(1, tags.size());
-        assertEquals(Bathroom.class, tags.get(0));
+        assertEquals(bathroomTagClass, tags.get(0));
         tags = service.getByLabelOrSynonym("POWDER Rooms", Locale.ENGLISH);
         assertEquals(1, tags.size());
-        assertEquals(Bathroom.class, tags.get(0));
+        assertEquals(bathroomTagClass, tags.get(0));
         tags = service.getByLabelOrSynonym("other bath", Locale.ENGLISH);
         assertTrue(tags.isEmpty());
 
         tags = service.getByLabelOrSynonym("ROBOT de nettoyage", Locale.FRENCH);
         assertEquals(1, tags.size());
-        assertEquals(CleaningRobot.class, tags.get(0));
+        assertEquals(cleaningRobotTagClass, tags.get(0));
         tags = service.getByLabelOrSynonym("ROBOTS aspirateur", Locale.FRENCH);
         assertEquals(1, tags.size());
-        assertEquals(CleaningRobot.class, tags.get(0));
+        assertEquals(cleaningRobotTagClass, tags.get(0));
         tags = service.getByLabelOrSynonym("Robot cuiseur", Locale.FRENCH);
         assertTrue(tags.isEmpty());
 

@@ -10,19 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.semantics.model.point;
+package org.openhab.core.semantics;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.semantics.Point;
 
 /**
  * This class provides a stream of all defined points.
  *
- * @author Generated from generateTagClasses.groovy - Initial contribution
+ * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
 public class Points {
@@ -31,17 +30,6 @@ public class Points {
 
     static {
         POINTS.add(Point.class);
-        POINTS.add(Alarm.class);
-        POINTS.add(Control.class);
-        POINTS.add(LowBattery.class);
-        POINTS.add(Measurement.class);
-        POINTS.add(OpenLevel.class);
-        POINTS.add(OpenState.class);
-        POINTS.add(Setpoint.class);
-        POINTS.add(Status.class);
-        POINTS.add(Switch.class);
-        POINTS.add(Tampered.class);
-        POINTS.add(Tilt.class);
     }
 
     public static Stream<Class<? extends Point>> stream() {

@@ -22,15 +22,6 @@ import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
-import org.openhab.core.semantics.model.equipment.CleaningRobot;
-import org.openhab.core.semantics.model.equipment.Equipments;
-import org.openhab.core.semantics.model.location.Bathroom;
-import org.openhab.core.semantics.model.location.Locations;
-import org.openhab.core.semantics.model.location.Room;
-import org.openhab.core.semantics.model.point.Measurement;
-import org.openhab.core.semantics.model.point.Points;
-import org.openhab.core.semantics.model.property.Properties;
-import org.openhab.core.semantics.model.property.Temperature;
 
 /**
  * @author Kai Kreuzer - Initial contribution
@@ -41,6 +32,13 @@ public class SemanticTagsTest {
     private @NonNullByDefault({}) GroupItem locationItem;
     private @NonNullByDefault({}) GroupItem equipmentItem;
     private @NonNullByDefault({}) GenericItem pointItem;
+
+    private @NonNullByDefault({}) Class<? extends Tag> roomTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> bathroomTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> cleaningRobotTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> televisionTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> measurementTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> temperatureTagClass;
 
     @BeforeEach
     public void setup() {
@@ -55,44 +53,71 @@ public class SemanticTagsTest {
         pointItem = itemFactory.createItem(CoreItemFactory.NUMBER, "TestTemperature");
         pointItem.addTag("Measurement");
         pointItem.addTag("Temperature");
+
+        SemanticTags.add("Indoor", Location.class);
+        SemanticTags.add("Room", "Location_Indoor");
+        SemanticTags.add("Bathroom", "Location_Indoor_Room");
+        SemanticTags.add("CleaningRobot", Equipment.class);
+        SemanticTags.add("Screen", Equipment.class);
+        SemanticTags.add("Television", "Equipment_Screen");
+        SemanticTags.add("Measurement", Point.class);
+        SemanticTags.add("Control", Point.class);
+        SemanticTags.add("Temperature", Property.class);
+
+        roomTagClass = SemanticTags.getById("Location_Indoor_Room");
+        bathroomTagClass = SemanticTags.getById("Location_Indoor_Room_Bathroom");
+        cleaningRobotTagClass = SemanticTags.getById("Equipment_CleaningRobot");
+        televisionTagClass = SemanticTags.getById("Equipment_Screen_Television");
+        measurementTagClass = SemanticTags.getById("Point_Measurement");
+        temperatureTagClass = SemanticTags.getById("Property_Temperature");
+    }
+
+    @Test
+    public void testTagClasses() {
+        assertNotNull(roomTagClass);
+        assertNotNull(bathroomTagClass);
+        assertNotNull(cleaningRobotTagClass);
+        assertNotNull(televisionTagClass);
+        assertNotNull(measurementTagClass);
+        assertNotNull(temperatureTagClass);
     }
 
     @Test
     public void testByTagId() {
         assertEquals(Location.class, SemanticTags.getById("Location"));
-        assertEquals(Room.class, SemanticTags.getById("Room"));
-        assertEquals(Room.class, SemanticTags.getById("Location_Indoor_Room"));
-        assertEquals(Bathroom.class, SemanticTags.getById("Bathroom"));
-        assertEquals(Bathroom.class, SemanticTags.getById("Room_Bathroom"));
-        assertEquals(Bathroom.class, SemanticTags.getById("Indoor_Room_Bathroom"));
-        assertEquals(Bathroom.class, SemanticTags.getById("Location_Indoor_Room_Bathroom"));
+        assertEquals(roomTagClass, SemanticTags.getById("Room"));
+        assertEquals(roomTagClass, SemanticTags.getById("Location_Indoor_Room"));
+        assertEquals(bathroomTagClass, SemanticTags.getById("Bathroom"));
+        assertEquals(bathroomTagClass, SemanticTags.getById("Room_Bathroom"));
+        assertEquals(bathroomTagClass, SemanticTags.getById("Indoor_Room_Bathroom"));
+        assertEquals(bathroomTagClass, SemanticTags.getById("Location_Indoor_Room_Bathroom"));
     }
 
     @Test
     public void testGetSemanticType() {
-        assertEquals(Bathroom.class, SemanticTags.getSemanticType(locationItem));
-        assertEquals(CleaningRobot.class, SemanticTags.getSemanticType(equipmentItem));
-        assertEquals(Measurement.class, SemanticTags.getSemanticType(pointItem));
+        assertEquals(bathroomTagClass, SemanticTags.getSemanticType(locationItem));
+        assertEquals(cleaningRobotTagClass, SemanticTags.getSemanticType(equipmentItem));
+        assertEquals(measurementTagClass, SemanticTags.getSemanticType(pointItem));
     }
 
     @Test
     public void testGetLocation() {
-        assertEquals(Bathroom.class, SemanticTags.getLocation(locationItem));
+        assertEquals(bathroomTagClass, SemanticTags.getLocation(locationItem));
     }
 
     @Test
     public void testGetEquipment() {
-        assertEquals(CleaningRobot.class, SemanticTags.getEquipment(equipmentItem));
+        assertEquals(cleaningRobotTagClass, SemanticTags.getEquipment(equipmentItem));
     }
 
     @Test
     public void testGetPoint() {
-        assertEquals(Measurement.class, SemanticTags.getPoint(pointItem));
+        assertEquals(measurementTagClass, SemanticTags.getPoint(pointItem));
     }
 
     @Test
     public void testGetProperty() {
-        assertEquals(Temperature.class, SemanticTags.getProperty(pointItem));
+        assertEquals(temperatureTagClass, SemanticTags.getProperty(pointItem));
     }
 
     @Test

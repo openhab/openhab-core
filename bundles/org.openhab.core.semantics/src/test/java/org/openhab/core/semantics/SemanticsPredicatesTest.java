@@ -15,6 +15,8 @@ package org.openhab.core.semantics;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +24,6 @@ import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
-import org.openhab.core.semantics.model.property.Humidity;
-import org.openhab.core.semantics.model.property.Temperature;
 
 /**
  * These are tests for {@link SemanticsPredicates}.
@@ -50,6 +50,14 @@ public class SemanticsPredicatesTest {
         pointItem = itemFactory.createItem(CoreItemFactory.NUMBER, "TestTemperature");
         pointItem.addTag("Measurement");
         pointItem.addTag("Temperature");
+
+        SemanticTags.add("Indoor", Location.class);
+        SemanticTags.add("Room", "Location_Indoor");
+        SemanticTags.add("Bathroom", "Location_Indoor_Room");
+        SemanticTags.add("CleaningRobot", Equipment.class);
+        SemanticTags.add("Measurement", Point.class);
+        SemanticTags.add("Temperature", Property.class);
+        SemanticTags.add("Humidity", Property.class);
     }
 
     @Test
@@ -75,9 +83,13 @@ public class SemanticsPredicatesTest {
 
     @Test
     public void testRelatesTo() {
-        assertFalse(SemanticsPredicates.relatesTo(Temperature.class).test(locationItem));
-        assertFalse(SemanticsPredicates.relatesTo(Temperature.class).test(equipmentItem));
-        assertTrue(SemanticsPredicates.relatesTo(Temperature.class).test(pointItem));
-        assertFalse(SemanticsPredicates.relatesTo(Humidity.class).test(equipmentItem));
+        Class<? extends Property> temperatureTagClass = (Class<? extends Property>) Objects
+                .requireNonNull(SemanticTags.getById("Property_Temperature"));
+        Class<? extends Property> humidityTagClass = (Class<? extends Property>) Objects
+                .requireNonNull(SemanticTags.getById("Property_Humidity"));
+        assertFalse(SemanticsPredicates.relatesTo(temperatureTagClass).test(locationItem));
+        assertFalse(SemanticsPredicates.relatesTo(temperatureTagClass).test(equipmentItem));
+        assertTrue(SemanticsPredicates.relatesTo(temperatureTagClass).test(pointItem));
+        assertFalse(SemanticsPredicates.relatesTo(humidityTagClass).test(equipmentItem));
     }
 }

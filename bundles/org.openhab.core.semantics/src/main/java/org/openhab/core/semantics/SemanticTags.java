@@ -23,11 +23,6 @@ import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.openhab.core.items.Item;
-import org.openhab.core.semantics.model.equipment.Equipments;
-import org.openhab.core.semantics.model.location.Locations;
-import org.openhab.core.semantics.model.point.Measurement;
-import org.openhab.core.semantics.model.point.Points;
-import org.openhab.core.semantics.model.property.Properties;
 import org.openhab.core.types.StateDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,9 +81,9 @@ public class SemanticTags {
         if (getProperty(item) != null) {
             StateDescription stateDescription = item.getStateDescription();
             if (stateDescription != null && stateDescription.isReadOnly()) {
-                return Measurement.class;
+                return getById("Point_Measurement");
             } else {
-                return org.openhab.core.semantics.model.point.Control.class;
+                return getById("Point_Control");
             }
         } else {
             return null;
