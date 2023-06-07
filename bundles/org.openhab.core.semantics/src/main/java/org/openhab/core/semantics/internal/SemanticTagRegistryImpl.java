@@ -48,21 +48,24 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
     private final Logger logger = LoggerFactory.getLogger(SemanticTagRegistryImpl.class);
 
     private final DefaultSemanticTagProvider defaultSemanticTagProvider;
+    private final ManagedSemanticTagProvider managedProvider;
 
     @Activate
     public SemanticTagRegistryImpl(@Reference DefaultSemanticTagProvider defaultSemanticTagProvider,
             @Reference ManagedSemanticTagProvider managedProvider) {
         super(SemanticTagProvider.class);
         this.defaultSemanticTagProvider = defaultSemanticTagProvider;
+        this.managedProvider = managedProvider;
         // Add the default semantic tags provider first, before all others
         super.addProvider(defaultSemanticTagProvider);
+        super.addProvider(managedProvider);
         setManagedProvider(managedProvider);
     }
 
     @Override
     protected void addProvider(Provider<SemanticTag> provider) {
-        // Ignore the default semantic tags provider (it is added first in the constructor)
-        if (!provider.equals(defaultSemanticTagProvider)) {
+        // Ignore the default semantic tags provider and the managed provider (they are added in the constructor)
+        if (!provider.equals(defaultSemanticTagProvider) && !provider.equals(managedProvider)) {
             logger.trace("addProvider {} => calling super.addProvider", provider.getClass().getSimpleName());
             super.addProvider(provider);
         } else {
