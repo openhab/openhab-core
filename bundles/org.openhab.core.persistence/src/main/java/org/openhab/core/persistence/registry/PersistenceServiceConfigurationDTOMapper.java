@@ -91,6 +91,8 @@ public class PersistenceServiceConfigurationDTOMapper {
                     .map(PersistenceServiceConfigurationDTOMapper::stringToPersistenceConfig).toList();
             List<PersistenceStrategy> strategies = config.strategies.stream()
                     .map(str -> stringToPersistenceStrategy(str, strategyMap, dto.serviceId)).toList();
+            List<PersistenceFilter> filters = config.filters.stream()
+                    .map(str -> stringToPersistenceFilter(str, filterMap, dto.serviceId)).toList();
             return new PersistenceItemConfiguration(items, config.alias, strategies, List.of());
         }).toList();
 
@@ -125,6 +127,16 @@ public class PersistenceServiceConfigurationDTOMapper {
         throw new IllegalArgumentException("Strategy '" + string + "' unknown for service '" + serviceId + "'");
     }
 
+    private static PersistenceFilter stringToPersistenceFilter(String string, Map<String, PersistenceFilter> filterMap,
+            String serviceId) {
+        PersistenceFilter filter = filterMap.get(string);
+        if (filter != null) {
+            return filter;
+        }
+
+        throw new IllegalArgumentException("Filter '" + string + "' unknown for service '" + serviceId + "'");
+    }
+
     private static String persistenceConfigToString(PersistenceConfig config) {
         if (config instanceof PersistenceAllConfig) {
             return "*";
@@ -141,6 +153,7 @@ public class PersistenceServiceConfigurationDTOMapper {
         itemDto.items = config.items().stream().map(PersistenceServiceConfigurationDTOMapper::persistenceConfigToString)
                 .toList();
         itemDto.strategies = config.strategies().stream().map(PersistenceStrategy::getName).toList();
+        itemDto.filters = config.filters().stream().map(PersistenceFilter::getName).toList();
         itemDto.alias = config.alias();
         return itemDto;
     }
