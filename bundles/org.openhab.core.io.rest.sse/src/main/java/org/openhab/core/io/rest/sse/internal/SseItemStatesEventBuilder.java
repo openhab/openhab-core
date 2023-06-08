@@ -170,6 +170,7 @@ public class SseItemStatesEventBuilder {
         return displayState;
     }
 
+    // Taken from org.openhab.core.items.events.ItemEventFactory
     private static String getStateType(State state) {
         String stateClassName = state.getClass().getSimpleName();
         return stateClassName.substring(0, stateClassName.length() - "Type".length());
