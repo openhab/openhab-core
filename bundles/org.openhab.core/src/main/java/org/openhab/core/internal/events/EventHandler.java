@@ -51,7 +51,7 @@ public class EventHandler implements AutoCloseable {
     private final Map<String, Set<EventSubscriber>> typedEventSubscribers;
     private final Map<String, EventFactory> typedEventFactories;
 
-    private final Map<EventSubscriber, ExecutorRecord> executors = new HashMap<>();
+    private final Map<Class<? extends EventSubscriber>, ExecutorRecord> executors = new HashMap<>();
 
     /**
      * Create a new event handler.
@@ -65,7 +65,7 @@ public class EventHandler implements AutoCloseable {
         this.typedEventFactories = typedEventFactories;
     }
 
-    private synchronized ExecutorRecord createExecutorRecord(EventSubscriber subscriber) {
+    private synchronized ExecutorRecord createExecutorRecord(Class<? extends EventSubscriber> subscriber) {
         return new ExecutorRecord(
                 Executors.newSingleThreadExecutor(new NamedThreadFactory("eventexecutor-" + executors.size())),
                 Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("eventwatcher-" + executors.size())),
@@ -152,7 +152,7 @@ public class EventHandler implements AutoCloseable {
             if (filter == null || filter.apply(event)) {
                 logger.trace("Delegate event to subscriber ({}).", eventSubscriber.getClass());
                 ExecutorRecord executorRecord = Objects
-                        .requireNonNull(executors.computeIfAbsent(eventSubscriber, this::createExecutorRecord));
+                        .requireNonNull(executors.computeIfAbsent(eventSubscriber.getClass(), this::createExecutorRecord));
                 int queueSize = executorRecord.count().incrementAndGet();
                 if (queueSize > 1000) {
                     logger.warn(
