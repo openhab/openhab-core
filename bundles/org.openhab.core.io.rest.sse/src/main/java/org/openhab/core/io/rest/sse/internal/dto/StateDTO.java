@@ -21,6 +21,8 @@ public class StateDTO {
     public String state;
     public String displayState;
 
+    public String type;
+
     public StateDTO() {
     }
 }
