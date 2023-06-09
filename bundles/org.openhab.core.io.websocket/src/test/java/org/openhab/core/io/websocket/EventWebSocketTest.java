@@ -63,7 +63,7 @@ public class EventWebSocketTest {
 
     private Gson gson = new Gson();
 
-    private @Mock @NonNullByDefault({}) EventWebSocketAdapterHandler servlet;
+    private @Mock @NonNullByDefault({}) EventWebSocketAdapter servlet;
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistry;
     private @Mock @NonNullByDefault({}) EventPublisher eventPublisher;
     private @Mock @NonNullByDefault({}) Session session;

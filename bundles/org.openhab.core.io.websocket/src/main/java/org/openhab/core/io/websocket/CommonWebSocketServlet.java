@@ -56,7 +56,7 @@ public class CommonWebSocketServlet extends WebSocketServlet {
 
     public static final String SERVLET_PATH = "/ws";
 
-    public static final String DEFAULT_HANDLER_ID = EventWebSocketAdapterHandler.HANDLER_ID;
+    public static final String DEFAULT_HANDLER_ID = EventWebSocketAdapter.HANDLER_ID;
 
     private final Map<String, WebSocketHandler> connectionHandlers = new HashMap<>();
     private final AuthFilter authFilter;
