@@ -34,9 +34,9 @@ import com.google.gson.Gson;
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = { EventSubscriber.class, WebSocketHandler.class })
-public class EventWebSocketAdapter implements EventSubscriber, WebSocketHandler {
-    public static final String HANDLER_ID = "event-subscriber";
+@Component(immediate = true, service = { EventSubscriber.class, WebSocketAdapter.class })
+public class EventWebSocketAdapter implements EventSubscriber, WebSocketAdapter {
+    public static final String ADAPTER_ID = "event-subscriber";
     private final Gson gson = new Gson();
     private final EventPublisher eventPublisher;
 
@@ -69,7 +69,7 @@ public class EventWebSocketAdapter implements EventSubscriber, WebSocketHandler 
 
     @Override
     public String getId() {
-        return HANDLER_ID;
+        return ADAPTER_ID;
     }
 
     @Override

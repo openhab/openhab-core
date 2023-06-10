@@ -55,13 +55,13 @@ import org.osgi.service.http.NamespaceException;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class CommonWebSocketServletTest {
-    private final String testHandlerId = "test-handler-id";
+    private final String testAdapterId = "test-adapter-id";
 
     private @NonNullByDefault({}) CommonWebSocketServlet servlet;
     private @Mock @NonNullByDefault({}) AuthFilter authFilter;
     private @Mock @NonNullByDefault({}) WebSocketServletFactory factory;
-    private @Mock @NonNullByDefault({}) WebSocketHandler testDefaultWsHandler;
-    private @Mock @NonNullByDefault({}) WebSocketHandler testWsHandler;
+    private @Mock @NonNullByDefault({}) WebSocketAdapter testDefaultWsAdapter;
+    private @Mock @NonNullByDefault({}) WebSocketAdapter testWsAdapter;
 
     private @Mock @NonNullByDefault({}) WebSocketPolicy wsPolicy;
     private @Mock @NonNullByDefault({}) ServletUpgradeRequest request;
@@ -77,23 +77,23 @@ public class CommonWebSocketServletTest {
         var params = new HashMap<String, List<String>>();
         when(request.getParameterMap()).thenReturn(params);
         when(authFilter.getSecurityContext(any(), anyBoolean())).thenReturn(new AnonymousUserSecurityContext());
-        when(testDefaultWsHandler.getId()).thenReturn(CommonWebSocketServlet.DEFAULT_HANDLER_ID);
-        when(testWsHandler.getId()).thenReturn(testHandlerId);
-        servlet.addWebSocketHandler(testDefaultWsHandler);
-        servlet.addWebSocketHandler(testWsHandler);
+        when(testDefaultWsAdapter.getId()).thenReturn(CommonWebSocketServlet.DEFAULT_ADAPTER_ID);
+        when(testWsAdapter.getId()).thenReturn(testAdapterId);
+        servlet.addWebSocketAdapter(testDefaultWsAdapter);
+        servlet.addWebSocketAdapter(testWsAdapter);
     }
 
     @Test
-    public void createWebsocketUsingDefaultHandler() throws URISyntaxException {
+    public void createWebsocketUsingDefaultAdapterPath() throws URISyntaxException {
         when(request.getRequestURI()).thenReturn(new URI("http://127.0.0.1:8080/ws"));
         webSocketCreatorAC.getValue().createWebSocket(request, response);
-        verify(testDefaultWsHandler, times(1)).createWebSocket(request, response);
+        verify(testDefaultWsAdapter, times(1)).createWebSocket(request, response);
     }
 
     @Test
-    public void createWebsocketUsingHandlerPath() throws URISyntaxException {
-        when(request.getRequestURI()).thenReturn(new URI("http://127.0.0.1:8080/ws/"+testHandlerId));
+    public void createWebsocketUsingAdapterPath() throws URISyntaxException {
+        when(request.getRequestURI()).thenReturn(new URI("http://127.0.0.1:8080/ws/"+ testAdapterId));
         webSocketCreatorAC.getValue().createWebSocket(request, response);
-        verify(testWsHandler, times(1)).createWebSocket(request, response);
+        verify(testWsAdapter, times(1)).createWebSocket(request, response);
     }
 }

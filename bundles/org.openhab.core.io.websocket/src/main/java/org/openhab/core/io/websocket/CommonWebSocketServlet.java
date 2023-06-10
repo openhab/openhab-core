@@ -56,9 +56,9 @@ public class CommonWebSocketServlet extends WebSocketServlet {
 
     public static final String SERVLET_PATH = "/ws";
 
-    public static final String DEFAULT_HANDLER_ID = EventWebSocketAdapter.HANDLER_ID;
+    public static final String DEFAULT_ADAPTER_ID = EventWebSocketAdapter.ADAPTER_ID;
 
-    private final Map<String, WebSocketHandler> connectionHandlers = new HashMap<>();
+    private final Map<String, WebSocketAdapter> connectionHandlers = new HashMap<>();
     private final AuthFilter authFilter;
 
     @SuppressWarnings("unused")
@@ -76,12 +76,12 @@ public class CommonWebSocketServlet extends WebSocketServlet {
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addWebSocketHandler(WebSocketHandler wsConnectionHandler) {
-        this.connectionHandlers.put(wsConnectionHandler.getId(), wsConnectionHandler);
+    protected void addWebSocketAdapter(WebSocketAdapter wsAdapter) {
+        this.connectionHandlers.put(wsAdapter.getId(), wsAdapter);
     }
 
-    protected void removeWebSocketHandler(WebSocketHandler wsConnectionHandler) {
-        this.connectionHandlers.remove(wsConnectionHandler.getId());
+    protected void removeWebSocketAdapter(WebSocketAdapter wsAdapter) {
+        this.connectionHandlers.remove(wsAdapter.getId());
     }
 
     private class CommonWebSocketCreator implements WebSocketCreator {
@@ -95,25 +95,25 @@ public class CommonWebSocketServlet extends WebSocketServlet {
             }
             if (isAuthorizedRequest(servletUpgradeRequest)) {
                 String requestPath = servletUpgradeRequest.getRequestURI().getPath();
-                String handlerPrefix = SERVLET_PATH + "/";
-                boolean useDefaultHandler = requestPath.equals(handlerPrefix) || !requestPath.startsWith(handlerPrefix);
-                WebSocketHandler wsHandler;
-                if (!useDefaultHandler) {
-                    String handlerId = requestPath.substring(handlerPrefix.length());
-                    wsHandler = connectionHandlers.get(handlerId);
-                    if (wsHandler == null) {
-                        logger.warn("Missing WebSocket handler for path {}", handlerId);
+                String pathPrefix = SERVLET_PATH + "/";
+                boolean useDefaultAdapter = requestPath.equals(pathPrefix) || !requestPath.startsWith(pathPrefix);
+                WebSocketAdapter wsAdapter;
+                if (!useDefaultAdapter) {
+                    String adapterId = requestPath.substring(pathPrefix.length());
+                    wsAdapter = connectionHandlers.get(adapterId);
+                    if (wsAdapter == null) {
+                        logger.warn("Missing WebSocket adapter for path {}", adapterId);
                         return null;
                     }
                 } else {
-                    wsHandler = connectionHandlers.get(DEFAULT_HANDLER_ID);
-                    if (wsHandler == null) {
-                        logger.warn("Default WebSocket handler is missing");
+                    wsAdapter = connectionHandlers.get(DEFAULT_ADAPTER_ID);
+                    if (wsAdapter == null) {
+                        logger.warn("Default WebSocket adapter is missing");
                         return null;
                     }
                 }
-                logger.debug("New connection handled by {}", wsHandler.getId());
-                return wsHandler.createWebSocket(servletUpgradeRequest, servletUpgradeResponse);
+                logger.debug("New connection handled by {}", wsAdapter.getId());
+                return wsAdapter.createWebSocket(servletUpgradeRequest, servletUpgradeResponse);
             } else {
                 logger.warn("Unauthenticated request to create a websocket from {}.",
                         servletUpgradeRequest.getRemoteAddress());

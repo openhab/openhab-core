@@ -17,24 +17,24 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 
 /**
- * The {@link WebSocketHandler} can be implemented to register a handler for a websocket connection.
- * It will be accessible on the path /ws/HANDLER_ID of your server.
+ * The {@link WebSocketAdapter} can be implemented to register an adapter for a websocket connection.
+ * It will be accessible on the path /ws/ADAPTER_ID of your server.
  * Security is handled by the {@link CommonWebSocketServlet}.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public interface WebSocketHandler {
+public interface WebSocketAdapter {
     /**
-     * The handler id.
-     * In combination with the base path {@link CommonWebSocketServlet#SERVLET_PATH} defines the handler path.
+     * The adapter id.
+     * In combination with the base path {@link CommonWebSocketServlet#SERVLET_PATH} defines the adapter path.
      * 
-     * @return the handler id.
+     * @return the adapter id.
      */
     String getId();
 
     /**
-     * Creates a websocket connection handler.
+     * Creates a websocket instance.
      * It should use the {@link org.eclipse.jetty.websocket.api.annotations} or implement
      * {@link org.eclipse.jetty.websocket.api.WebSocketListener}.
      * 
