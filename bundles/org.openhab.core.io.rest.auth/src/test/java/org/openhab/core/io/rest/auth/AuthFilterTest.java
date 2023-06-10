@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.auth.internal;
+package org.openhab.core.io.rest.auth;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -32,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.auth.UserRegistry;
+import org.openhab.core.io.rest.auth.internal.JwtHelper;
 
 /**
  * The {@link AuthFilterTest} is a
@@ -79,7 +80,7 @@ public class AuthFilterTest {
     public void trustedNetworkAllowsAccessIfForwardedHeaderMatches() throws IOException {
         authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
                 "192.168.1.0/24"));
-        when(containerRequestContext.getHeaderString("x-forwarded-for")).thenReturn("192.168.1.100");
+        when(servletRequest.getHeader("x-forwarded-for")).thenReturn("192.168.1.100");
         authFilter.filter(containerRequestContext);
 
         verify(containerRequestContext).setSecurityContext(any());
@@ -89,7 +90,7 @@ public class AuthFilterTest {
     public void trustedNetworkDeniesAccessIfForwardedHeaderDoesNotMatch() throws IOException {
         authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
                 "192.168.1.0/24"));
-        when(containerRequestContext.getHeaderString("x-forwarded-for")).thenReturn("192.168.2.100");
+        when(servletRequest.getHeader("x-forwarded-for")).thenReturn("192.168.2.100");
         authFilter.filter(containerRequestContext);
 
         verify(containerRequestContext, never()).setSecurityContext(any());
